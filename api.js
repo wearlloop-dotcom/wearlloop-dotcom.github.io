@@ -332,11 +332,11 @@ window.API = (function () {
     const { data } = await client().rpc('customer_kyc', { p_customer: customer.id });
     return data || { verified: false };
   }
-  // ส่งบัตร+โซเชียลยืนยันตัวตน
+  // ส่งบัตร+โซเชียลยืนยันตัวตน → {ok, status:'verified'|'pending'}
   async function submitKyc(customer, idUrl, social) {
-    if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true };
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true, status: 'verified' };
     const { data, error } = await client().rpc('submit_kyc', { p_customer: customer.id, p_id_url: idUrl || '', p_social: social || '' });
-    return { ok: !error && data === 'ok', data, error };
+    return { ok: !error && (data === 'verified' || data === 'pending'), status: data, error };
   }
   // อัปโหลดบัตร ปชช ไป Storage (private-ish bucket 'uploads') → url
   async function uploadIdCard(file) {

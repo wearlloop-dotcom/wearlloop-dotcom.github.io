@@ -527,7 +527,7 @@ function openKyc(id) {
       <input type="file" id="kycId" accept="image/*">
       <label class="klabel">${TH ? 'ลิงก์ IG หรือ Facebook (สาธารณะ)' : 'IG / Facebook link (public)'}</label>
       <input type="url" id="kycSocial" placeholder="https://instagram.com/..." class="kinput">
-      <button class="ksubmit" onclick="submitKycForm('${id}')">${TH ? 'ส่งยืนยันตัวตน' : 'Submit'}</button>
+      <button class="ksubmit" onclick="submitKycForm('${id || ''}')">${TH ? 'ส่งยืนยันตัวตน' : 'Submit'}</button>
       <div class="knote">${TH ? 'หรือไม่ต้องยืนยันก็ได้ — เพียงวางมัดจำเพิ่มตามที่แจ้งในสรุปยอด' : 'Or skip and keep the higher deposit shown in the summary'}</div>
     </div>`;
   $('#kycOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
@@ -544,11 +544,15 @@ async function submitKycForm(id) {
   try { if (fileEl && fileEl.files && fileEl.files.length) idUrl = await window.API.uploadIdCard(fileEl.files[0]); } catch (e) { /**/ }
   const res = await window.API.submitKyc(CUSTOMER, idUrl, social);
   if (res.ok) {
-    CUSTOMER.kyc_verified = true;
     closeKyc();
-    toast(TH ? 'ยืนยันตัวตนเรียบร้อย ขอบคุณค่ะ' : 'Verified — thank you');
-    const date = $('#useDate') && $('#useDate').value;
-    if (date) renderQuote(id, date);   // มัดจำลดลงทันที
+    if (res.status === 'pending') {
+      toast(TH ? 'ส่งยืนยันตัวตนแล้ว รอร้านอนุมัติสักครู่นะคะ' : 'Submitted — pending approval');
+    } else {
+      CUSTOMER.kyc_verified = true;
+      toast(TH ? 'ยืนยันตัวตนเรียบร้อย ขอบคุณค่ะ' : 'Verified — thank you');
+      const date = id && $('#useDate') && $('#useDate').value;
+      if (date) renderQuote(id, date);   // มัดจำลดลงทันที
+    }
   } else {
     if (btn) { btn.disabled = false; btn.textContent = TH ? 'ส่งยืนยันตัวตน' : 'Submit'; }
     toast(TH ? 'ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะคะ' : 'Failed — try again');
@@ -1205,6 +1209,8 @@ function routeDeepLink() {
       else if (go === 'membership') openMembership();
       else if (go === 'impact') openImpact();
       else if (go === 'profile') openProfile();
+      else if (go === 'cart') openCart();
+      else if (go === 'verify' || go === 'kyc') openKyc('');
       else if (go === 'stylist') { const el = $('#venueInput'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); } }
     }, 80);
   } catch (_e) { /**/ }
