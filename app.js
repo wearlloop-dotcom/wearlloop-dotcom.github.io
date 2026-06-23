@@ -906,6 +906,9 @@ function renderMembership(sub, plans) {
     const billNote = longTerm
       ? `${en ? 'billed' : 'เก็บ'} ฿${cyclePrice.toLocaleString()} ${en ? 'every' : 'ทุก'} ${perWord(p.period)}${p.save_pct ? ` · ${en ? 'save' : 'ประหยัด'} ${p.save_pct}%` : ''}`
       : (en ? 'billed monthly' : 'เก็บรายเดือน');
+    const instLine = (p.installment_per_month && p.installment_months)
+      ? `<div style="font-size:12px;color:var(--sage);font-weight:600;margin-top:6px">${en ? 'or pay' : 'หรือผ่อน'} ฿${Number(p.installment_per_month).toLocaleString()}/${en ? 'mo' : 'เดือน'} × ${p.installment_months} ${en ? '' : 'งวด'}</div>`
+      : '';
     return `<div style="position:relative;background:#fff;border:${current ? '2px solid var(--sage)' : (popular ? '2px solid var(--ink)' : '1px solid var(--line)')};border-radius:10px;padding:16px;margin-bottom:12px">
       ${popular ? `<div style="position:absolute;top:-9px;left:16px;background:var(--ink);color:#fff;font-size:10px;letter-spacing:1px;padding:2px 10px;border-radius:20px">${en ? 'POPULAR' : 'แนะนำ'}</div>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
@@ -919,6 +922,7 @@ function renderMembership(sub, plans) {
         </div>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:10px;padding:7px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">${billNote}</div>
+      ${instLine}
       <div style="margin-top:8px">${perks}</div>
       ${current
         ? `<div style="text-align:center;font-size:12px;letter-spacing:1px;color:var(--sage);margin-top:12px;text-transform:uppercase">${en ? 'Current plan' : 'แพ็กเกจปัจจุบัน'}</div>`

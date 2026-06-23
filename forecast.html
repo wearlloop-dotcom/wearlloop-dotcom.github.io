@@ -111,6 +111,7 @@
           <div class="f"><label>ค่าใช้จ่ายคงที่ (เช่า+จิปาถะ)</label><input type="number" id="i_fixed" value="8000"></div>
           <div class="f"><label>งบการตลาด / แอด (คงที่)</label><input type="number" id="i_ads" value="30000"></div>
           <div class="f"><label>หรือ งบแอด = % ของยอดขาย (0=ใช้ค่าคงที่)</label><input type="number" step="0.5" id="i_adspct" value="0"></div>
+          <div class="f"><label>ค่าส่งที่ร้านออก/การเช่า (สมาชิกส่งฟรี)</label><input type="number" id="i_ship" value="40"></div>
           <div class="f"><label>ทุน / ชุด (เหมา ~266, ทีละตัว ~520)</label><input type="number" id="i_stock" value="266"></div>
         </div>
       </div>
@@ -121,6 +122,13 @@
         <div class="bar" id="planBar"></div>
         <div class="leg" id="planLeg"></div>
         <div class="note" id="planNote"></div>
+      </div>
+
+      <div class="card">
+        <h2>มาร์จิ้นแพ็กสมาชิก (รวมค่าส่งที่ร้านออก)</h2>
+        <div id="planMargin" style="font-size:13px;color:var(--muted)">กำลังโหลด…</div>
+        <div class="note">คิดแบบใช้เต็มโควต้า + ชั้นชุดสูงสุดที่แพ็กครอบคลุม + ค่าส่งทุกครั้ง (มาร์จิ้นขั้นต่ำ) · ปรับ "ค่าส่งที่ร้านออก" ด้านบนแล้วกดรีเฟรช</div>
+        <button class="applybtn" style="margin-top:8px" onclick="loadPlanMargin()">รีเฟรชด้วยค่าส่งล่าสุด</button>
       </div>
     </div>
 
@@ -166,12 +174,13 @@ function calc(inp, revenue){
   const ops = Math.max(1, Math.ceil(customers / Math.max(1, inp.cap)));
   const contribution = rentals * inp.contrib;
   const variable = Math.max(0, rev - contribution);
+  const shipWe = rentals * (inp.ship || 0);            // ค่าส่งที่ร้านออกเอง (subscription/ส่งฟรี)
   const team = ops*inp.ops + inp.support;
   const ads = inp.adspct > 0 ? rev*inp.adspct/100 : inp.ads;
   const fixed = inp.fixed + ads;
-  const net = contribution - fixed - team - inp.owner;
+  const net = contribution - shipWe - fixed - team - inp.owner;
   const stock = dresses * inp.stock;
-  return { revenue:rev, rentals, customers, dresses, ops, contribution, variable, team, ads, fixed, net, stock, perDay: rentals/26 };
+  return { revenue:rev, rentals, customers, dresses, ops, contribution, variable, shipWe, team, ads, fixed, net, stock, perDay: rentals/26 };
 }
 // หายอดขายที่ทำให้กำไรสุทธิ = เป้า (ทีม/แอดสเกลตามขนาด)
 function solveForNet(inp, targetNet){
@@ -185,7 +194,7 @@ function solveForNet(inp, targetNet){
 function planInputs(){
   return { type:gTargetType, target:num('i_target'), rpr:num('i_rpr'), freq:num('i_freq'), contrib:num('i_contrib'),
     util:num('i_util'), cap:num('i_cap'), ops:num('i_ops'), support:num('i_support'),
-    owner:num('i_owner'), fixed:num('i_fixed'), ads:num('i_ads'), adspct:num('i_adspct'), stock:num('i_stock') };
+    owner:num('i_owner'), fixed:num('i_fixed'), ads:num('i_ads'), adspct:num('i_adspct'), ship:num('i_ship'), stock:num('i_stock') };
 }
 function statHTML(l,v,h,cls){ return `<div class="stat ${cls||''}"><div class="l">${l}</div><div class="v">${v}</div><div class="h">${h||''}</div></div>`; }
 
@@ -241,9 +250,10 @@ function renderPlan(){
   + statHTML('งบแอด/เดือน', baht(r.ads), inp.adspct>0?inp.adspct+'% ของยอดขาย':'คงที่')
   + statHTML(inp.type==='net'?'กำไรสุทธิ/เดือน':'เหลือสุทธิ/เดือน', baht(r.net), 'หลังจ่ายทุกคน+เจ้าของ', r.net>=0?'good':'bad');
 
-  // build allocation (variable, fixed, team, owner, net>=0)
+  // build allocation (variable, shipping, fixed, team, owner, net>=0)
   const parts = [
     ['ต้นทุนผันแปร', r.variable, '#9AA4B0'],
+    ['ค่าส่งที่ร้านออก', r.shipWe, '#C99A5B'],
     ['คงที่ + แอด', r.fixed, '#E8B24A'],
     ['เงินเดือนทีม', r.team, '#3DC5B7'],
     ['เงินเดือนเจ้าของ', num('i_owner'), '#0D2F4F'],
@@ -254,6 +264,31 @@ function renderPlan(){
   document.getElementById('planLeg').innerHTML = parts.map(p=>`<span><span class="d" style="background:${p[2]}"></span>${p[0]}<b>${baht(p[1])}</b></span>`).join('');
   document.getElementById('planNote').textContent =
     `กำไรขั้นต้น (contribution) ฿${NF.format(Math.round(r.contribution))} = รายได้ลบต้นทุนผันแปร · คอขวดคือคนจับชุด (~${Math.round(r.perDay)} ชุด/วัน). ดันสมาชิกรายเดือนเพื่อใช้ลูกค้าใหม่น้อยลง.`;
+}
+
+// ---------- มาร์จิ้นแพ็กสมาชิก (รวมค่าส่งที่ร้านออก) ----------
+let _planEcon = null;
+async function loadPlanMargin(){
+  const el = document.getElementById('planMargin'); if(!el) return;
+  if(!_planEcon){ try { const { data } = await client().rpc('plan_economics'); _planEcon = data || []; } catch(e){ _planEcon = []; } }
+  const plans = _planEcon;
+  if(!plans.length){ el.textContent = 'ยังไม่มีแพ็กเกจ'; return; }
+  const ship = num('i_ship');
+  el.innerHTML = plans.map(p => {
+    const months = Math.max(1, Math.round(p.price / (p.price_per_month || p.price)));
+    const marginCycle = p.price - p.rentals_per_cycle * ((p.max_tier_var || 116) + ship);
+    const marginMo = Math.round(marginCycle / months);
+    const pct = Math.round(marginCycle / Math.max(1,p.price) * 100);
+    const color = pct < 15 ? '#B4543A' : (pct < 25 ? '#C99A5B' : '#0F7B5A');
+    const inst = p.installment_per_month ? `฿${NF.format(p.installment_per_month)}/ด ×${p.installment_months}` : '—';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)">
+      <div style="flex:1"><div style="color:var(--ink);font-weight:500">${p.name}</div>
+        <div style="font-size:11px">฿${NF.format(p.price_per_month)}/เดือน · ${p.rentals_per_cycle} ชุด/รอบ · ค่าส่ง ฿${NF.format(Math.round(p.rentals_per_cycle*ship))}</div></div>
+      <div style="text-align:right;min-width:96px"><div style="color:${color};font-weight:600">฿${NF.format(marginMo)}/ด</div>
+        <div style="font-size:11px;color:${color}">มาร์จิ้น ${pct}%</div></div>
+      <div style="text-align:right;min-width:84px;font-size:11px;color:var(--muted)">ผ่อน<br>${inst}</div>
+    </div>`;
+  }).join('');
 }
 
 // ---------- actuals ----------
@@ -323,7 +358,7 @@ async function loadActuals(uid){
 function showMain(){
   document.getElementById('lock').classList.add('hidden');
   document.getElementById('main').classList.remove('hidden');
-  renderPlan(); bindInputs(); refreshRealChips();
+  renderPlan(); bindInputs(); refreshRealChips(); loadPlanMargin();
   if(ACT) renderReal();
 }
 function showLock(msg, askUid){
