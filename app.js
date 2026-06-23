@@ -29,6 +29,7 @@ function applyStatic() {
   const set = (id, k, html) => { const e = document.getElementById(id); if (e) e[html?'innerHTML':'textContent'] = t(k); };
   set('promo','promo'); set('creditLabel','creditLabel');
   set('heroKicker','heroKicker'); set('heroTitle','heroTitle', true); set('heroSub','heroSub'); set('heroCta','heroCta');
+  set('loginLabel','login');
   set('stylistLabel','stylistLabel'); set('stylistBtn','stylistBtn');
   set('collTitle','collTitle'); set('collSub','collSub');
   set('introHouse','introHouse'); set('introTag','introTag'); set('introSub','introSub'); set('introEnter','introEnter');
@@ -847,6 +848,11 @@ async function boot() {
   VENUES = window.MOCK.VENUES;
   // มีโปรไฟล์ (ไซซ์/โทนสี/สไตล์จากพาร์ทเนอร์) เปิด"แนะนำสำหรับคุณ"เป็นค่าเริ่มต้น
   fForYou =!!(CUSTOMER.bust_in!= null || CUSTOMER.my_color_season || (CUSTOMER.style_profile && Object.keys(CUSTOMER.style_profile).length));
+  // สถานะล็อกอิน: มี lineUid = ล็อกอินผ่าน LINE แล้ว → โชว์เครดิตจริง; ไม่มี = guest → โชว์ปุ่มเข้าสู่ระบบ
+  const loggedIn =!!s.lineUid;
+  const loginBtn = $('#loginBtn'); const creditEl = document.querySelector('.credit');
+  if (loginBtn) loginBtn.hidden = loggedIn;
+  if (creditEl) creditEl.hidden =!loggedIn;
   $('#credit').textContent ='฿'+ (CUSTOMER.credit_balance || 0);
   try { CUSTOMER._impact = await window.API.myImpact?.(CUSTOMER); } catch (e) { /**/ }
   // โหลดรายการที่หมายตา (wishlist) — guard กรณีไม่ได้ล็อกอิน

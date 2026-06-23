@@ -21,5 +21,18 @@ window.LiffAuth = (function () {
       return null;
     }
   }
-  return { login };
+  // ผู้ใช้กดปุ่ม "เข้าสู่ระบบด้วย LINE" เอง → redirect ไป LINE login (ตั้งใจ ไม่ใช่ auto-loop)
+  async function signIn() {
+    try {
+      if (!window.liff || !CONFIG.LIFF_ID) { alert('ยังไม่ได้ตั้งค่า LINE Login'); return; }
+      await liff.init({ liffId: CONFIG.LIFF_ID });
+      sessionStorage.removeItem('liffLoginTried');
+      if (!liff.isLoggedIn()) liff.login();
+      else location.reload();
+    } catch (e) {
+      console.warn('signIn failed:', e);
+      alert('เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้ง');
+    }
+  }
+  return { login, signIn };
 })();

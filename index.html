@@ -56,6 +56,11 @@
   .lang button.on{color:var(--ink);font-weight:600}
   .credit{font-size:11px;color:var(--muted);white-space:nowrap}
   .credit b{color:var(--ink)}
+  .loginbtn{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:#fff;border:none;
+    font-size:12px;font-weight:600;letter-spacing:.02em;padding:7px 14px;border-radius:2px;cursor:pointer;white-space:nowrap}
+  .loginbtn:hover{opacity:.88}
+  .loginbtn .lico{width:13px;height:13px;display:inline-block}
+  .loginbtn[hidden]{display:none}
   .catnav{border-bottom:1px solid var(--line);background:#fff}
   .catnav .row{display:flex;gap:26px;justify-content:center;align-items:center;height:42px;overflow-x:auto;scrollbar-width:none}
   .catnav .row::-webkit-scrollbar{display:none}
@@ -360,6 +365,7 @@
       <div class="lang"><button id="langTH" class="on" onclick="setLang('th')">TH</button><span>/</span><button id="langEN" onclick="setLang('en')">EN</button></div>
       <svg class="icon" viewBox="0 0 24 24" onclick="document.getElementById('venueInput').focus()"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
       <svg class="icon" viewBox="0 0 24 24" onclick="openProfile()"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      <button id="loginBtn" class="loginbtn" onclick="LiffAuth.signIn()" hidden><svg class="lico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.9-5a8.38 8.38 0 0 1-.9-4 8.5 8.5 0 0 1 8.5-8.5 8.38 8.38 0 0 1 8.5 8.5z"/></svg><span id="loginLabel">เข้าสู่ระบบ</span></button>
       <span class="credit"><span id="creditLabel">เครดิต</span> <b id="credit">฿160</b></span>
     </div>
   </div>
@@ -398,6 +404,7 @@
 <div class="overlay" id="pOverlay"><div class="sheet" id="pSheet"></div></div>
 <div class="overlay" id="impactOverlay"><div class="sheet" id="impactSheet"></div></div>
 <div class="overlay" id="ordersOverlay"><div class="sheet" id="ordersSheet"></div></div>
+<div class="overlay" id="memberOverlay"><div class="sheet" id="memberSheet"></div></div>
 <div class="overlay" id="reviewOverlay"><div class="sheet" id="reviewSheet"></div></div>
 <div class="termsoverlay" id="termsOverlay">
   <div class="termsbox">
@@ -413,12 +420,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=23"></script>
-<script src="pixel.js?v=23"></script>
-<script src="i18n.js?v=23"></script>
-<script src="data.js?v=23"></script>
-<script src="liffAuth.js?v=23"></script>
-<script src="api.js?v=23"></script>
-<script src="app.js?v=23"></script>
+<script src="config.js?v=24"></script>
+<script src="pixel.js?v=24"></script>
+<script src="i18n.js?v=24"></script>
+<script src="data.js?v=24"></script>
+<script src="liffAuth.js?v=24"></script>
+<script src="api.js?v=24"></script>
+<script src="app.js?v=24"></script>
 </body>
 </html>

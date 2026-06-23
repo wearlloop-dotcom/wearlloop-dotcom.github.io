@@ -2,6 +2,7 @@
 window.I18N = {
   th: {
     promo:'love + loop · จัดส่งฟรี · ชาว Loopers รับลุคใหม่หมุนเวียนทุกเดือน',
+    login:'เข้าสู่ระบบ',
     creditLabel:'เครดิตสไตลิ่ง',
     heroKicker:'new season · 2026',
     heroTitle:'หมุนเวียนลุคใหม่<br>ทุกโอกาส',
@@ -36,6 +37,7 @@ window.I18N = {
   },
   en: {
     promo:'love + loop · free delivery · Loopers get a fresh look every month',
+    login:'Sign in',
     creditLabel:'Styling credit',
     heroKicker:'new season · 2026',
     heroTitle:'A fresh look<br>for every occasion',
