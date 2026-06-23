@@ -20,6 +20,10 @@
   .tabs{display:flex;gap:8px;margin:16px 0 18px}
   .tabs button{flex:1;font-family:var(--sans);font-size:14px;font-weight:600;padding:11px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:10px;cursor:pointer}
   .tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .tt{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+  .ttl{font-size:12px;color:var(--muted)}
+  .tt button{font-family:var(--sans);font-size:13px;font-weight:600;padding:7px 16px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:20px;cursor:pointer}
+  .tt button.on{background:var(--teal);color:#06342F;border-color:var(--teal)}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin-bottom:14px}
   .card h2{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
@@ -85,8 +89,13 @@
     <div id="planMode">
       <div class="card">
         <h2>ตั้งเป้า &amp; สมมติฐาน (แก้ได้)</h2>
+        <div class="tt">
+          <span class="ttl">ตั้งเป้าจาก</span>
+          <button id="ttRev" class="on" onclick="setTarget('rev')">ยอดขาย</button>
+          <button id="ttNet" onclick="setTarget('net')">กำไรสุทธิ</button>
+        </div>
         <div class="grid">
-          <div class="f"><label>เป้ายอดขาย / เดือน (บาท)</label><input type="number" id="i_target" value="300000"></div>
+          <div class="f"><label id="lb_target">เป้ายอดขาย / เดือน (บาท)</label><input type="number" id="i_target" value="300000"></div>
           <div class="f"><label>รายได้เฉลี่ย / การเช่า</label><input type="number" id="i_rpr" value="286"></div>
           <div class="f"><label>เช่า / ลูกค้า / เดือน</label><input type="number" id="i_freq" value="2"></div>
           <div class="f"><label>กำไรขั้นต้น / การเช่า</label><input type="number" id="i_contrib" value="174"></div>
@@ -96,7 +105,8 @@
           <div class="f"><label>เงินเดือนทีมเสริม (สไตลิสต์+คอนเทนต์)</label><input type="number" id="i_support" value="18000"></div>
           <div class="f"><label>เงินเดือนเจ้าของ</label><input type="number" id="i_owner" value="30000"></div>
           <div class="f"><label>ค่าใช้จ่ายคงที่ (เช่า+จิปาถะ)</label><input type="number" id="i_fixed" value="8000"></div>
-          <div class="f"><label>งบการตลาด / แอด</label><input type="number" id="i_ads" value="30000"></div>
+          <div class="f"><label>งบการตลาด / แอด (คงที่)</label><input type="number" id="i_ads" value="30000"></div>
+          <div class="f"><label>หรือ งบแอด = % ของยอดขาย (0=ใช้ค่าคงที่)</label><input type="number" step="0.5" id="i_adspct" value="0"></div>
           <div class="f"><label>ทุน / ชุด (เหมา ~266, ทีละตัว ~520)</label><input type="number" id="i_stock" value="266"></div>
         </div>
       </div>
@@ -143,35 +153,65 @@ function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFI
 function num(id){ return Number(document.getElementById(id).value) || 0; }
 
 // ---------- core math ----------
-function calc(inp){
-  const rentals = inp.target / Math.max(1, inp.rpr);
+let gTargetType = 'rev';   // 'rev' = เป้ายอดขาย · 'net' = เป้ากำไรสุทธิ
+function calc(inp, revenue){
+  const rev = revenue;
+  const rentals = rev / Math.max(1, inp.rpr);
   const customers = rentals / Math.max(0.1, inp.freq);
   const dresses = rentals / Math.max(0.1, inp.util);
   const ops = Math.max(1, Math.ceil(customers / Math.max(1, inp.cap)));
   const contribution = rentals * inp.contrib;
-  const variable = Math.max(0, inp.target - contribution);
+  const variable = Math.max(0, rev - contribution);
   const team = ops*inp.ops + inp.support;
-  const fixed = inp.fixed + inp.ads;
+  const ads = inp.adspct > 0 ? rev*inp.adspct/100 : inp.ads;
+  const fixed = inp.fixed + ads;
   const net = contribution - fixed - team - inp.owner;
   const stock = dresses * inp.stock;
-  return { rentals, customers, dresses, ops, contribution, variable, team, fixed, net, stock, perDay: rentals/26 };
+  return { revenue:rev, rentals, customers, dresses, ops, contribution, variable, team, ads, fixed, net, stock, perDay: rentals/26 };
+}
+// หายอดขายที่ทำให้กำไรสุทธิ = เป้า (ทีม/แอดสเกลตามขนาด)
+function solveForNet(inp, targetNet){
+  let r;
+  for(let rev=10000; rev<=80000000; rev+=10000){
+    r = calc(inp, rev);
+    if(r.net >= targetNet) return r;
+  }
+  return r;
 }
 function planInputs(){
-  return { target:num('i_target'), rpr:num('i_rpr'), freq:num('i_freq'), contrib:num('i_contrib'),
+  return { type:gTargetType, target:num('i_target'), rpr:num('i_rpr'), freq:num('i_freq'), contrib:num('i_contrib'),
     util:num('i_util'), cap:num('i_cap'), ops:num('i_ops'), support:num('i_support'),
-    owner:num('i_owner'), fixed:num('i_fixed'), ads:num('i_ads'), stock:num('i_stock') };
+    owner:num('i_owner'), fixed:num('i_fixed'), ads:num('i_ads'), adspct:num('i_adspct'), stock:num('i_stock') };
 }
 function statHTML(l,v,h,cls){ return `<div class="stat ${cls||''}"><div class="l">${l}</div><div class="v">${v}</div><div class="h">${h||''}</div></div>`; }
 
+function planResult(inp){
+  return inp.type==='net' ? solveForNet(inp, inp.target) : calc(inp, inp.target);
+}
+function setTarget(t){
+  gTargetType = t;
+  document.getElementById('ttRev').classList.toggle('on', t==='rev');
+  document.getElementById('ttNet').classList.toggle('on', t==='net');
+  document.getElementById('lb_target').textContent = t==='net' ? 'เป้ากำไรสุทธิ / เดือน (บาท)' : 'เป้ายอดขาย / เดือน (บาท)';
+  const ti = document.getElementById('i_target');
+  ti.value = t==='net' ? 500000 : 300000;
+  if(t==='net' && num('i_adspct')===0) document.getElementById('i_adspct').value = 12;  // สเกลใหญ่ตั้งแอด 12% ให้สมจริง
+  renderPlan(); if(ACT) renderGap();
+}
+
 function renderPlan(){
-  const r = calc(planInputs());
+  const inp = planInputs();
+  const r = planResult(inp);
+  const revCard = inp.type==='net'
+    ? statHTML('ยอดขายที่ต้องทำ', baht(r.revenue), 'เพื่อกำไรสุทธิ '+baht(inp.target), 'good')
+    : statHTML('กำไรสุทธิ/เดือน', baht(r.net), r.net>=0?'หลังจ่ายทุกคน':'ขาด — เพิ่มยอด/ลดต้นทุน', r.net>=0?'good':'bad');
   document.getElementById('planStats').innerHTML =
-    statHTML('ลูกค้าหมุนเวียน/เดือน', NF.format(Math.round(r.customers))+' คน', '~'+NF.format(Math.round(r.rentals))+' ครั้งเช่า')
-  + statHTML('ครั้งเช่า/วันทำการ', Math.round(r.perDay)+' ชุด', '26 วัน/เดือน')
+    revCard
+  + statHTML('ลูกค้าหมุนเวียน/เดือน', NF.format(Math.round(r.customers))+' คน', '~'+NF.format(Math.round(r.rentals))+' ครั้งเช่า')
   + statHTML('ชุดในคลัง', NF.format(Math.round(r.dresses))+' ตัว', 'ทุน '+baht(r.stock))
-  + statHTML('ทีมจับชุด', r.ops+' คน', '+ทีมเสริม+เจ้าของ')
-  + statHTML('เงินเดือนทีมรวม', baht(r.team), 'ยังไม่รวมเจ้าของ')
-  + statHTML('เหลือสุทธิ/เดือน', baht(r.net), r.net>=0?'หลังจ่ายทุกคน':'ขาด — เพิ่มยอด/ลดต้นทุน', r.net>=0?'good':'bad');
+  + statHTML('ทีมจับชุด', r.ops+' คน', '~'+Math.round(r.perDay)+' ชุด/วัน')
+  + statHTML('งบแอด/เดือน', baht(r.ads), inp.adspct>0?inp.adspct+'% ของยอดขาย':'คงที่')
+  + statHTML(inp.type==='net'?'กำไรสุทธิ/เดือน':'เหลือสุทธิ/เดือน', baht(r.net), 'หลังจ่ายทุกคน+เจ้าของ', r.net>=0?'good':'bad');
 
   // build allocation (variable, fixed, team, owner, net>=0)
   const parts = [
@@ -216,10 +256,13 @@ function renderGap(){
   inp.target = T;
   if(a.avg_rev_per_rental) inp.rpr = a.avg_rev_per_rental;
   if(a.util) inp.util = a.util;
-  const need = calc(inp);
-  const prog = Math.min(100, (a.revenue||0)/Math.max(1,T)*100);
+  const need = inp.type==='net' ? solveForNet(inp, T) : calc(inp, T);
+  const denom = inp.type==='net' ? need.revenue : T;
+  const prog = Math.min(100, (a.revenue||0)/Math.max(1,denom)*100);
   document.getElementById('rProg').style.width = prog.toFixed(0)+'%';
-  document.getElementById('rProgTxt').textContent = `ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของเป้า ${baht(T)}`;
+  document.getElementById('rProgTxt').textContent = inp.type==='net'
+    ? `ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของยอดขายที่ต้องทำ ${baht(need.revenue)} (เพื่อกำไรสุทธิ ${baht(T)})`
+    : `ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของเป้า ${baht(T)}`;
   const gC = Math.max(0, Math.round(need.customers) - (a.customers||0));
   const gD = Math.max(0, Math.round(need.dresses) - (a.dresses_ready||0));
   const gR = Math.max(0, Math.round(need.rentals) - (a.rentals||0));
