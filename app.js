@@ -123,6 +123,7 @@ function renderCatnav() {
     { label: occName('work'), on: fOccasion ==='work', act:`setOccasion('work')`},
     { label: occName('cafe'), on: fOccasion ==='cafe', act:`setOccasion('cafe')`},
     { label: (lang ==='th'?'ออเดอร์ของฉัน':'My Rentals'), on: false, act:`openOrders()`},
+    { label: (lang ==='th'?'สมาชิกรายเดือน':'Membership'), on: false, act:`openMembership()`},
     { label: (lang ==='th'?'ความดีที่หมุนเวียน':'Impact'), on: false, act:`openImpact()`},
     { label: (lang ==='th'?'โปรไฟล์':'Profile'), on: false, act:`openProfile()`},
 ];
@@ -297,10 +298,12 @@ function openDetail(id) {
       <span id="availMsg" class="availmsg"></span>
     </div>
     <div class="cta">
-      <span class="price">฿${g.price}</span>
+      <span class="price">${subCovers() ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}</span>` : '฿'+g.price}</span>
       <button id="bookBtn" onclick="reserve('${g.id}')">${t('reserveBtn')}</button>
     </div>
-    <div class="creditline">${t('creditPre')}${credit}${t('creditMid')}${g.price - credit}</div>`;
+    ${subCovers()
+      ? `<div class="creditline">${lang==='th'?`ใช้สิทธิ์สมาชิก ${CUSTOMER._sub.plan_name} · เหลือ ${CUSTOMER._sub.remaining} ชุดรอบนี้`:`Using ${CUSTOMER._sub.plan_name} · ${CUSTOMER._sub.remaining} left this cycle`}</div>`
+      : `<div class="creditline">${t('creditPre')}${credit}${t('creditMid')}${g.price - credit}</div>`}`;
   $('#overlay').classList.add('open');
   document.body.style.overflow ='hidden';
   renderAvailCalendar(g.id);
@@ -463,9 +466,17 @@ const SEASONS = [
   ['winter', ['#D5142B','#1E47A6','#111317']],
 ];
 let pSeason ='winter';
-function openProfile() {
+function openProfile(onboard) {
   const c = CUSTOMER;
   pSeason = c.my_color_season ||'winter';
+  const dispName = c.name || c.display_name ||'';
+  const avatar = c.picture_url ?`<img class="pavatar" src="${c.picture_url}" alt="" referrerpolicy="no-referrer">`
+    :`<div class="pavatar pavatar-x">${(dispName[0]||'L').toUpperCase()}</div>`;
+  const head = onboard
+    ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'ยินดีต้อนรับ':'Welcome'}${dispName?' '+dispName:''}</div><div class="onbsub">${lang==='th'?'กรอกข้อมูลสั้น ๆ ครั้งเดียว เพื่อให้เราแนะนำลุคที่ใช่ และจัดส่งถึงคุณได้':'A few details, once — so we can recommend your looks and ship to you'}</div></div></div>`
+    : (c.line_uid || c.display_name || c.picture_url
+      ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'สวัสดีคุณ':'Hi'} ${dispName||''}</div><div class="onbsub">${lang==='th'?'เข้าสู่ระบบด้วย LINE แล้ว':'Signed in with LINE'}</div></div></div>`
+      :'');
   const labels = window.I18N[lang].seasons;
   const seasons = SEASONS.map((s, i) =>`
     <div class="seasonbtn ${pSeason === s[0]?'active':''}" data-s="${s[0]}" onclick="pickSeason('${s[0]}')">
@@ -475,12 +486,13 @@ function openProfile() {
   $('#pSheet').innerHTML =`
     <div class="pform">
       <button class="close" style="position:static;float:right" onclick="closeProfile()">×</button>
-      <h3>${t('pTitle')}</h3>
+      ${head}
+      <h3>${onboard?(lang==='th'?'ข้อมูลเบื้องต้น':'Quick details'):t('pTitle')}</h3>
       <p class="hint">${t('pHint')}</p>
       ${renderStyleCard(c)}
       ${renderImpactCard()}
       ${renderReferralCard()}
-      <div class="field"><label>${t('pName')}</label><input id="pName" value="${c.name ||''}"></div>
+      <div class="field"><label>${t('pName')}</label><input id="pName" value="${c.name || c.display_name ||''}"></div>
       <div class="frow">
         <div class="field"><label>${t('pHeight')}</label><input id="pHeight" type="number" value="${c.height_cm ||''}"></div>
         <div class="field"><label>${t('pShoe')}</label><input id="pShoe" value="${c.shoe_size ||''}"></div>
@@ -610,6 +622,101 @@ async function openImpact() {
   setTimeout(() => animateCounts($('#impactSheet')), 60);
 }
 function closeImpact() { $('#impactOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
+// ===== สมาชิกรายเดือน (Membership / subscription) =====
+// ลูกค้ามีสิทธิ์สมาชิกเหลือไหม → ชุดนี้ "รวมในแพ็กเกจ"
+function subCovers() {
+  const s = CUSTOMER && CUSTOMER._sub;
+  return !!(s && s.active && (s.remaining || 0) > 0);
+}
+function fmtThaiDate(s) {
+  if (!s) return '—';
+  try { return new Date(s + 'T00:00:00').toLocaleDateString(lang === 'en' ? 'en-GB' : 'th-TH', { day: 'numeric', month: 'short', year: '2-digit' }); }
+  catch (_e) { return s; }
+}
+async function openMembership() {
+  const en = lang === 'en';
+  $('#memberOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const sh = $('#memberSheet');
+  sh.innerHTML = `<button class="close" onclick="closeMembership()">×</button>
+    <div style="text-align:center;padding:18px 0 6px">
+      <div style="font-size:11px;letter-spacing:3px;color:var(--muted)">${en ? 'MEMBERSHIP' : 'สมาชิกรายเดือน'}</div>
+      <div style="font-family:var(--display);font-size:24px;font-weight:700;color:var(--ink);margin-top:4px">Looper Membership</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">${en ? 'rotate new looks every month' : 'หมุนเวียนลุคใหม่ได้ทุกเดือน คุ้มกว่าเช่ารายชุด'}</div>
+    </div>
+    <div id="memberBody" style="padding:6px 2px 24px">${en ? 'Loading…' : 'กำลังโหลด…'}</div>`;
+  let sub = CUSTOMER._sub || { active: false };
+  let plans = [];
+  try { plans = await window.API.subPlans?.() || []; } catch (e) { /**/ }
+  renderMembership(sub, plans);
+}
+function closeMembership() { $('#memberOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function renderMembership(sub, plans) {
+  const en = lang === 'en';
+  const body = $('#memberBody'); if (!body) return;
+  let html = '';
+  // การ์ดสถานะปัจจุบัน (ถ้ามีสมาชิก)
+  if (sub && sub.plan_code) {
+    const paused = sub.status === 'paused';
+    const remaining = sub.remaining != null ? sub.remaining : 0;
+    html += `<div style="background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:16px;margin-bottom:18px">
+      <div style="font-size:11px;letter-spacing:2px;color:#0c3a33;background:var(--sage-bg);display:inline-block;padding:3px 10px;border-radius:30px">${paused ? (en ? 'PAUSED' : 'พักชั่วคราว') : (en ? 'ACTIVE' : 'กำลังใช้งาน')}</div>
+      <div style="font-size:18px;font-weight:600;color:var(--ink);margin-top:8px">${sub.plan_name || ''}</div>
+      <div style="display:flex;gap:16px;margin-top:10px">
+        <div><div style="font-size:22px;font-weight:700;color:var(--ink)">${remaining}<span style="font-size:13px;font-weight:400;color:var(--muted)">/${sub.rentals_per_month || 0}</span></div><div style="font-size:11px;color:var(--muted)">${en ? 'looks left this cycle' : 'สิทธิ์เหลือรอบนี้'}</div></div>
+        <div><div style="font-size:14px;color:var(--ink);margin-top:6px">${fmtThaiDate(sub.renews_at)}</div><div style="font-size:11px;color:var(--muted)">${sub.cancel_at_period_end ? (en ? 'ends on' : 'สิ้นสุด') : (en ? 'renews on' : 'รอบต่อไป')}</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        ${paused
+          ? `<button onclick="subActionClick('resume')" style="flex:1;background:var(--ink);color:#fff;border:none;padding:10px;font-size:12px;letter-spacing:1px;text-transform:uppercase">${en ? 'Resume' : 'กลับมาใช้'}</button>`
+          : `<button onclick="subActionClick('pause')" style="flex:1;background:#fff;color:var(--ink);border:1px solid var(--ink);padding:10px;font-size:12px;letter-spacing:1px;text-transform:uppercase">${en ? 'Pause' : 'พักชั่วคราว'}</button>`}
+        ${sub.cancel_at_period_end ? '' : `<button onclick="subActionClick('cancel')" style="flex:1;background:#fff;color:#A75F3A;border:1px solid #A75F3A;padding:10px;font-size:12px;letter-spacing:1px;text-transform:uppercase">${en ? 'Cancel' : 'ยกเลิก'}</button>`}
+      </div>
+    </div>
+    <div style="font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">${en ? 'Change plan' : 'เปลี่ยนแพ็กเกจ'}</div>`;
+  }
+  // รายการแพ็กเกจ
+  html += plans.map(p => {
+    const current = sub && sub.plan_code === p.code && sub.status !== 'cancelled';
+    const perks = (p.perks || []).map(x => `<div style="font-size:13px;color:var(--ink);padding:3px 0">· ${x}</div>`).join('');
+    return `<div style="background:#fff;border:${current ? '2px solid var(--sage)' : '1px solid var(--line)'};border-radius:4px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div style="font-size:17px;font-weight:600;color:var(--ink)">${p.name}</div>
+        <div style="font-size:16px;font-weight:600;color:var(--ink)">฿${Number(p.price_month).toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted)">/${en ? 'mo' : 'เดือน'}</span></div>
+      </div>
+      <div style="margin-top:8px">${perks}</div>
+      ${current
+        ? `<div style="text-align:center;font-size:12px;letter-spacing:1px;color:var(--sage);margin-top:12px;text-transform:uppercase">${en ? 'Current plan' : 'แพ็กเกจปัจจุบัน'}</div>`
+        : `<button onclick="subscribeClick('${p.code}','${(p.name || '').replace(/'/g, '')}')" style="width:100%;background:var(--ink);color:#fff;border:none;padding:11px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-top:12px">${en ? 'Choose this plan' : 'เลือกแพ็กเกจนี้'}</button>`}
+    </div>`;
+  }).join('');
+  body.innerHTML = html;
+}
+async function subscribeClick(code, name) {
+  const en = lang === 'en';
+  if (!confirm(en ? `Subscribe to ${name}?` : `ยืนยันสมัครแพ็กเกจ ${name}?`)) return;
+  try {
+    await window.API.subscribe?.(CUSTOMER, code);
+    CUSTOMER._sub = await window.API.mySubscription?.(CUSTOMER) || { active: false };
+    let plans = []; try { plans = await window.API.subPlans?.() || []; } catch (e) { /**/ }
+    renderMembership(CUSTOMER._sub, plans);
+    toast(en ? 'Welcome to ' + name : 'ยินดีต้อนรับสู่ ' + name);
+  } catch (e) { toast(en ? 'Something went wrong' : 'เกิดข้อผิดพลาด ลองใหม่นะคะ'); }
+}
+async function subActionClick(action) {
+  const en = lang === 'en';
+  const msg = action === 'cancel' ? (en ? 'Cancel at end of cycle?' : 'ยกเลิกเมื่อสิ้นรอบ?')
+    : action === 'pause' ? (en ? 'Pause membership?' : 'พักสมาชิกชั่วคราว?')
+    : (en ? 'Resume membership?' : 'กลับมาใช้สมาชิก?');
+  if (!confirm(msg)) return;
+  try {
+    await window.API.subSetStatus?.(CUSTOMER, action);
+    CUSTOMER._sub = await window.API.mySubscription?.(CUSTOMER) || { active: false };
+    let plans = []; try { plans = await window.API.subPlans?.() || []; } catch (e) { /**/ }
+    renderMembership(CUSTOMER._sub, plans);
+  } catch (e) { toast(en ? 'Something went wrong' : 'เกิดข้อผิดพลาด ลองใหม่นะคะ'); }
+}
 
 // ===== ออเดอร์ของฉัน (My Rentals) =====
 const COURIER_TRACK = {
@@ -807,6 +914,19 @@ async function acceptTermsClick() {
   document.body.style.overflow ='';
   CUSTOMER.terms_accepted_version = _termsVersion;
   try { await window.API.acceptTerms(CUSTOMER, _termsVersion); } catch (e) { console.warn(e); }
+  maybeOnboard();
+}
+// ต้อนรับครั้งแรก: login ผ่าน LINE แล้ว แต่ยังไม่มีข้อมูลสำคัญ → เด้งฟอร์มกรอกครั้งเดียว
+function maybeOnboard() {
+  const c = CUSTOMER;
+  const loggedIn =!!(c.line_uid || c.display_name || c.picture_url);
+  if (!loggedIn) return;
+  if (sessionStorage.getItem('lloop_onboarded')) return;
+  if ($('#termsOverlay').classList.contains('open')) return; // รอยอมรับ terms ก่อน
+  const incomplete =!c.phone && c.height_cm == null &&!c.address; // ยังไม่เคยกรอก
+  if (!incomplete) return;
+  sessionStorage.setItem('lloop_onboarded','1');
+  setTimeout(() => openProfile(true), 450);
 }
 // การ์ดอิมแพกต์รักษ์โลก (โชว์ในโปรไฟล์)
 function renderImpactCard() {
@@ -857,23 +977,32 @@ async function boot() {
   try { CUSTOMER._impact = await window.API.myImpact?.(CUSTOMER); } catch (e) { /**/ }
   // โหลดรายการที่หมายตา (wishlist) — guard กรณีไม่ได้ล็อกอิน
   try { gWish = await window.API.myWishlist?.(CUSTOMER) || new Set(); } catch (e) { gWish = new Set(); }
+  // โหลดสถานะสมาชิกรายเดือน (subscription)
+  try { CUSTOMER._sub = await window.API.mySubscription?.(CUSTOMER) || { active: false }; } catch (e) { CUSTOMER._sub = { active: false }; }
   // เดโม: ยังไม่ได้ล็อกอินผ่าน LINE (เปิดบน localhost) ใส่ตัวอย่างให้หน้าผลกระทบดูมีชีวิต
   if (!CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();
-  maybeShowTerms();
+  await maybeShowTerms();
+  maybeOnboard();
   routeDeepLink();
 }
 // rich menu deep-link: เปิด LIFF ?go=foryou|orders|impact|profile|stylist แล้วเด้งไปหน้านั้น
 function routeDeepLink() {
   try {
-    let go = new URLSearchParams(location.search).get('go');
-    if (!go && window.liff && liff.state) {
-      try { go = new URLSearchParams((liff.state || '').replace(/^\?/, '')).get('go'); } catch (_e) { /**/ }
+    const qs = new URLSearchParams(location.search);
+    const ls = (window.liff && liff.state) ? new URLSearchParams((liff.state || '').replace(/^\?/, '')) : null;
+    // deep-link จากการ์ด LINE: ?garment=CODE → เปิด detail ของชุดนั้นทันที
+    const gcode = qs.get('garment') || (ls && ls.get('garment'));
+    if (gcode) {
+      const g = GARMENTS.find(x => (x.code || '').toLowerCase() === gcode.toLowerCase());
+      if (g) { setTimeout(() => openDetail(g.id), 80); return; }
     }
+    let go = qs.get('go') || (ls && ls.get('go'));
     if (!go) return;
     setTimeout(() => {
       if (go === 'foryou') { if (!fForYou) toggleForYou(); }
       else if (go === 'orders') openOrders();
+      else if (go === 'membership') openMembership();
       else if (go === 'impact') openImpact();
       else if (go === 'profile') openProfile();
       else if (go === 'stylist') { const el = $('#venueInput'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); } }
