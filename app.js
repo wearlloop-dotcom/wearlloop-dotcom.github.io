@@ -466,6 +466,12 @@ const SEASONS = [
   ['winter', ['#D5142B','#1E47A6','#111317']],
 ];
 let pSeason ='winter';
+let pStyles = new Set(), pOccasions = new Set();
+function togglePref(kind, val, el) {
+  const set = kind === 'style' ? pStyles : pOccasions;
+  if (set.has(val)) set.delete(val); else set.add(val);
+  el.classList.toggle('on');
+}
 function openProfile(onboard) {
   const c = CUSTOMER;
   pSeason = c.my_color_season ||'winter';
@@ -483,6 +489,19 @@ function openProfile(onboard) {
       <div class="sw">${s[1].map(h =>`<i style="background:${h}"></i>`).join('')}</div>
       <span>${labels[i]}</span>
     </div>`).join('');
+  // ความชอบส่วนตัว — ลูกค้ากรอกเอง (ไม่ต้องพึ่ง personal color จากพาร์ทเนอร์)
+  const pf = c.prefs || {};
+  pStyles = new Set(pf.styles || []); pOccasions = new Set(pf.occasions || []);
+  const STYLE_OPTS = lang==='th'
+    ? [['minimal','มินิมอล'],['sweet','หวาน/วินเทจ'],['elegant','เรียบหรู'],['street','เท่/สตรีท'],['boho','โบฮีเมียน'],['glam','หรูหรา/ราตรี']]
+    : [['minimal','Minimal'],['sweet','Sweet/Vintage'],['elegant','Elegant'],['street','Street'],['boho','Boho'],['glam','Glam']];
+  const OCC_OPTS = lang==='th'
+    ? [['work','ทำงาน'],['date','เดต'],['wedding','งานแต่ง'],['party','ปาร์ตี้'],['cafe','คาเฟ่/เที่ยว'],['formal','ทางการ']]
+    : [['work','Work'],['date','Date'],['wedding','Wedding'],['party','Party'],['cafe','Cafe/Trip'],['formal','Formal']];
+  const chip = (kind,k,l,set)=>`<button type="button" class="prefchip ${set.has(k)?'on':''}" onclick="togglePref('${kind}','${k}',this)">${l}</button>`;
+  const styleChips = STYLE_OPTS.map(([k,l])=>chip('style',k,l,pStyles)).join('');
+  const occChips = OCC_OPTS.map(([k,l])=>chip('occ',k,l,pOccasions)).join('');
+  const sizeOpts = ['','XS','S','M','L','XL','Freesize'].map(s=>`<option ${c.size===s?'selected':''}>${s}</option>`).join('');
   $('#pSheet').innerHTML =`
     <div class="pform">
       <button class="close" style="position:static;float:right" onclick="closeProfile()">×</button>
@@ -498,11 +517,27 @@ function openProfile(onboard) {
         <div class="field"><label>${t('pShoe')}</label><input id="pShoe" value="${c.shoe_size ||''}"></div>
       </div>
       <div class="frow">
+        <div class="field"><label>${lang==='th'?'น้ำหนัก (กก.)':'Weight (kg)'}</label><input id="pWeight" type="number" value="${c.weight_kg ||''}"></div>
+        <div class="field"><label>${lang==='th'?'ไซซ์ที่ใส่ประจำ':'Usual size'}</label><select id="pSize">${sizeOpts}</select></div>
+      </div>
+      <div class="frow">
         <div class="field"><label>${t('pBustL')}</label><input id="pBust" type="number" value="${c.bust_in ||''}"></div>
         <div class="field"><label>${t('pWaistL')}</label><input id="pWaist" type="number" value="${c.waist_in ||''}"></div>
         <div class="field"><label>${t('pHipL')}</label><input id="pHip" type="number" value="${c.hip_in ||''}"></div>
       </div>
-      <div class="field"><label>${t('pColor')}</label><div class="seasons">${seasons}</div></div>
+      <div class="prefsec">
+        <div class="preflabel">${lang==='th'?'สไตล์ที่ชอบ':'Styles you like'}</div>
+        <div class="prefchips">${styleChips}</div>
+      </div>
+      <div class="prefsec">
+        <div class="preflabel">${lang==='th'?'โอกาสที่มักไปงาน':'Occasions you dress for'}</div>
+        <div class="prefchips">${occChips}</div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>${lang==='th'?'สีที่ชอบ':'Favourite colours'}</label><input id="pFav" value="${pf.fav_colors ||''}" placeholder="${lang==='th'?'เช่น ครีม เอิร์ธโทน':'e.g. cream, earth'}"></div>
+        <div class="field"><label>${lang==='th'?'สีที่เลี่ยง':'Colours to avoid'}</label><input id="pAvoid" value="${pf.avoid_colors ||''}" placeholder="${lang==='th'?'เช่น ส้มสด':'e.g. neon'}"></div>
+      </div>
+      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง — ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>
       <div class="frow">
         <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" value="${c.phone || ''}"></div>
       </div>
@@ -887,6 +922,13 @@ async function saveProfile() {
   CUSTOMER.notes = $('#pNotes').value;
   CUSTOMER.phone = $('#pPhone') ? $('#pPhone').value : CUSTOMER.phone;
   CUSTOMER.address = $('#pAddress') ? $('#pAddress').value : CUSTOMER.address;
+  CUSTOMER.weight_kg = $('#pWeight') ? (+$('#pWeight').value || null) : CUSTOMER.weight_kg;
+  CUSTOMER.size = $('#pSize') ? ($('#pSize').value || null) : CUSTOMER.size;
+  CUSTOMER.prefs = {
+    styles: [...pStyles], occasions: [...pOccasions],
+    fav_colors: $('#pFav') ? $('#pFav').value : '',
+    avoid_colors: $('#pAvoid') ? $('#pAvoid').value : '',
+  };
   closeProfile();
   renderFilters(); renderGrid();
   toast(t('saved'));

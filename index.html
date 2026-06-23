@@ -67,6 +67,13 @@
     font-family:var(--display);font-weight:700;font-size:20px}
   .onbhi{font-family:var(--display);font-size:17px;font-weight:600;color:var(--ink);line-height:1.2}
   .onbsub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .prefsec{margin:14px 0}
+  .preflabel{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .prefchips{display:flex;flex-wrap:wrap;gap:8px}
+  .prefchip{background:#fff;border:1px solid var(--line);color:var(--ink);font-size:13px;padding:7px 14px;border-radius:18px;cursor:pointer;transition:.15s}
+  .prefchip:hover{border-color:var(--ink)}
+  .prefchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .optnote{font-size:11px;color:var(--muted);font-weight:400}
   .catnav{border-bottom:1px solid var(--line);background:#fff}
   .catnav .row{display:flex;gap:26px;justify-content:center;align-items:center;height:42px;overflow-x:auto;scrollbar-width:none}
   .catnav .row::-webkit-scrollbar{display:none}
@@ -333,7 +340,7 @@
   .lookrow .lv i{font-style:normal;font-size:13px;background:#fff;border:1px solid #EADFCB;border-radius:20px;padding:4px 11px;color:#4A4438}
   .looknote{font-size:11px;color:#A39472;margin-top:10px;font-style:italic;line-height:1.5}
   .pform{padding:18px}.pform h3{font-family:var(--display);font-size:22px;font-weight:600;margin-bottom:2px}.pform .hint{font-size:12px;color:var(--muted);margin-bottom:16px}
-  .field{margin-bottom:14px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input{width:100%;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:15px}
+  .field{margin-bottom:14px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:15px;background:#fff}
   .frow{display:flex;gap:10px}.frow .field{flex:1}
   .seasons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.seasonbtn{border:1px solid var(--line);padding:8px 4px;text-align:center;background:#fff}.seasonbtn.active{border-color:var(--ink);background:var(--soft)}
   .seasonbtn .sw{display:flex;gap:2px;justify-content:center;margin-bottom:5px}.seasonbtn .sw i{width:11px;height:11px;border-radius:50%}.seasonbtn span{font-size:11px}
@@ -426,12 +433,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=25"></script>
-<script src="pixel.js?v=25"></script>
-<script src="i18n.js?v=25"></script>
-<script src="data.js?v=25"></script>
-<script src="liffAuth.js?v=25"></script>
-<script src="api.js?v=25"></script>
-<script src="app.js?v=25"></script>
+<script src="config.js?v=26"></script>
+<script src="pixel.js?v=26"></script>
+<script src="i18n.js?v=26"></script>
+<script src="data.js?v=26"></script>
+<script src="liffAuth.js?v=26"></script>
+<script src="api.js?v=26"></script>
+<script src="app.js?v=26"></script>
 </body>
 </html>

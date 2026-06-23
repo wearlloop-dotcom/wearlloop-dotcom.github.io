@@ -89,6 +89,7 @@ window.API = (function () {
       bust_in: customer.bust_in, waist_in: customer.waist_in, hip_in: customer.hip_in,
       my_color_season: customer.my_color_season, notes: customer.notes,
       phone: customer.phone, address: customer.address,
+      weight_kg: customer.weight_kg, size: customer.size, prefs: customer.prefs,
     }).eq('line_uid', lineUid);
     return { ok:!error, error };
   }
@@ -276,5 +277,35 @@ window.API = (function () {
     return { ok: true, id };
   }
 
-  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview };
+  // ===== สมาชิกรายเดือน (subscription) =====
+  // รายการแพ็กเกจ → array {code,name,price_month,rentals_per_month,max_active,perks}
+  async function subPlans() {
+    if (CONFIG.USE_MOCK) return [
+      { code:'LOOPER_LITE', name:'Looper Lite', price_month:690,  rentals_per_month:2, max_active:1, perks:['เช่าได้ 2 ชุด/เดือน','ส่งฟรีทุกชุด'] },
+      { code:'LOOPER_PLUS', name:'Looper Plus', price_month:1290, rentals_per_month:4, max_active:1, perks:['เช่าได้ 4 ชุด/เดือน','คิวจองก่อนใคร','สไตลิสต์เลือกให้'] },
+      { code:'LOOPER_LUXE', name:'Looper Luxe', price_month:2390, rentals_per_month:8, max_active:2, perks:['เช่าได้ 8 ชุด/เดือน','ถือพร้อมกัน 2 ชุด','ชุดดีไซเนอร์'] },
+    ];
+    const { data } = await client().rpc('sub_plans');
+    return data || [];
+  }
+  // สถานะสมาชิกของฉัน → {active, plan_name, remaining, rentals_per_month, renews_at, ...}
+  async function mySubscription(customer) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return { active: false };
+    const { data } = await client().rpc('my_subscription', { p_customer: customer.id });
+    return data || { active: false };
+  }
+  // สมัคร/เปลี่ยนแพ็กเกจ
+  async function subscribe(customer, planCode) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true };
+    const { data, error } = await client().rpc('subscribe', { p_customer: customer.id, p_plan: planCode });
+    return { ok: !error, data, error };
+  }
+  // พัก/กลับมา/ยกเลิก  (p_action = pause|resume|cancel)
+  async function subSetStatus(customer, action) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true };
+    const { data, error } = await client().rpc('sub_set_status', { p_customer: customer.id, p_action: action });
+    return { ok: !error, data, error };
+  }
+
+  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus };
 })();
