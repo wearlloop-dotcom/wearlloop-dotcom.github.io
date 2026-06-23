@@ -1,0 +1,280 @@
+// ===== Data layer — Supabase จริง หรือ mock (ตาม CONFIG.USE_MOCK) =====
+window.API = (function () {
+  let sb = null; // supabase client
+  let lineUid = null; // เก็บ UID ไว้ใช้ remarketing
+
+  function client() {
+    if (!sb) sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    return sb;
+  }
+
+  // map garment row (DB) รูปการ์ดหน้าเว็บ
+  function mapGarment(r) {
+    return {
+      id: r.id, code: r.code, name: r.name || r.code, brand: r.brand, tier: r.tier, price: r.rental_price, category: r.category,
+      styling_tips: r.styling_tips || [],
+      fabric: r.fabric_composition, stretch: r.stretch ||'none',
+      lining: r.has_lining, sheer: r.is_sheer, weight: r.fabric_weight,
+      bust: (r.bust_min_in!= null)? [r.bust_min_in, r.bust_max_in] : null,
+      waist: (r.waist_min_in!= null)? [r.waist_min_in, r.waist_max_in] : null,
+      hip: r.hip_in, length: r.length_cm,
+      colors: r.color_hex? [[r.color_name ||'สี', r.color_hex]] : [['—','#E7E2DA']],
+      season: r.color_season, occasion_tags: r.occasion_tags || [],
+      bg: r.color_hex ||'#E7E2DA', isNew: false,
+    };
+  }
+
+  async function init() {
+    if (CONFIG.USE_MOCK) {
+      return {...window.MOCK, lineUid: null };
+    }
+    // 1) LINE login + ดึง UID มาเก็บ (remarketing)
+    const profile = await window.LiffAuth.login(); // {userId, displayName, pictureUrl} | null
+    lineUid = profile && profile.userId;
+    const c = client();
+
+    // 2) upsert ลูกค้าจาก UID + log touchpoint (remarketing audience)
+    let customer = window.MOCK.CUSTOMER;
+    if (lineUid) {
+      await c.from('customers').upsert(
+        { line_uid: lineUid, display_name: profile.displayName, picture_url: profile.pictureUrl },
+        { onConflict:'line_uid'});
+      await c.from('customer_touchpoints').insert(
+        { line_uid: lineUid, kind:'open_app', detail: { source:'liff'} });
+      const { data } = await c.from('customers').select('*').eq('line_uid', lineUid).single();
+      if (data) customer = data;
+      // สร้าง/ดึงรหัสนัดสไตลิสต์ (ให้พาร์ทเนอร์ค้นเจอ)
+      if (customer.id &&!customer.link_code) {
+        const { data: code } = await c.rpc('ensure_link_code', { p_customer: customer.id });
+        if (code) customer.link_code = code;
+      }
+    }
+
+    // 3) แคตตาล็อก (เฉพาะที่ data_status='ready')
+    const { data: rows } = await c.from('garments').select('*').eq('data_status','ready');
+    const garments = (rows || []).map(mapGarment);
+
+    // 4) event ใกล้สุดของลูกค้า
+    let event = null;
+    if (customer.id) {
+      const { data: ev } = await c.from('customer_events')
+.select('*').eq('customer_id', customer.id).eq('notified', false)
+.order('event_date', { ascending: true }).limit(1).maybeSingle();
+      if (ev) {
+        const d = new Date(ev.event_date);
+        event = { title: ev.title, day: String(d.getDate()),
+          month: d.toLocaleDateString('th-TH', { month:'short'}),
+          occasion: ev.occasion, dress_code: ev.dress_code };
+      }
+    }
+    return { OCCASIONS: window.MOCK.OCCASIONS, CUSTOMER: customer, EVENT: event, GARMENTS: garments, lineUid };
+  }
+
+  async function reserve(garmentId, customer) {
+    if (CONFIG.USE_MOCK) return { ok: true };
+    const c = client();
+    // log touchpoint สำหรับ remarketing (สนใจชุดนี้)
+    if (lineUid) await c.from('customer_touchpoints').insert(
+      { line_uid: lineUid, kind:'reserve', detail: { garment_id: garmentId } });
+    // จองจริงควรทำใน Edge Function (transaction กันจองชน) — ที่นี่เรียกผ่าน RPC
+    const { data, error } = await c.rpc('reserve_garment', { p_garment: garmentId, p_customer: customer.id });
+    return { ok:!error, data, error };
+  }
+
+  async function saveProfile(customer) {
+    if (CONFIG.USE_MOCK ||!lineUid) return { ok: true };
+    const c = client();
+    const { error } = await c.from('customers').update({
+      display_name: customer.name, height_cm: customer.height_cm, shoe_size: customer.shoe_size,
+      bust_in: customer.bust_in, waist_in: customer.waist_in, hip_in: customer.hip_in,
+      my_color_season: customer.my_color_season, notes: customer.notes,
+      phone: customer.phone, address: customer.address,
+    }).eq('line_uid', lineUid);
+    return { ok:!error, error };
+  }
+
+  // AI Stylist — รับชื่อสถานที่ใดก็ได้ dress code + สีที่ถ่ายรูปสวย
+  async function stylist(venue, season, occasion, lang) {
+    if (!CONFIG.USE_MOCK) {
+      const r = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/stylist`, {
+        method:'POST',
+        headers: {'Content-Type':'application/json', Authorization:`Bearer ${CONFIG.SUPABASE_ANON_KEY}`},
+        body: JSON.stringify({ venue, season, occasion, lang }),
+      });
+      if (r.ok) return await r.json();
+    }
+    // mock — จับคู่ประเภทที่รู้จัก หรือคืนคำแนะนำกลาง ๆ (ของจริงจะเป็น AI วิเคราะห์ชื่อเจาะจง)
+    const q = (venue ||'').toLowerCase();
+    const v = (window.MOCK.VENUES || []).find(x => x.match.some(m => q.includes(m.toLowerCase())));
+    if (v) return {
+      venue_type: v.venue_type, dress_code_th: v.dress_code, occasion: v.occasion,
+      recommended_colors: v.colors.map(h => ({ hex: h, name:''})),
+      photo_tip: v.photo_tip, avoid: v.avoid, note: v.note,
+    };
+    return {
+      venue_type:'สถานที่ของคุณ', dress_code_th:'สมาร์ทแคชชวล', occasion: null,
+      recommended_colors: [{ hex:'#15233F', name:'navy'}, { hex:'#9FB7AC', name:'sage'}, { hex:'#B8A179', name:'champagne'}],
+      photo_tip:'โทนสุภาพ เข้าได้หลายบรรยากาศ ถ่ายรูปดูดี',
+      avoid:'สีสะท้อนแสงจัด', note:'เปิด AI จริง (deploy) เพื่อวิเคราะห์ชื่อสถานที่แบบเจาะจง',
+    };
+  }
+
+  // เช็กชุดว่างในวันที่กำหนด
+  async function availableOn(garmentId, dateStr) {
+    if (CONFIG.USE_MOCK) return true;
+    const { data } = await client().rpc('garment_available_on', { p_garment: garmentId, p_date: dateStr });
+    return data!== false;
+  }
+  // ชุดที่ว่างทั้งหมดในวันเดียว (กรองหน้าแรก) → Set ของ id (null = ถือว่าว่างหมด/mock)
+  async function availableSetOn(dateStr) {
+    if (CONFIG.USE_MOCK) return null;
+    const { data } = await client().rpc('available_garments_on', { p_date: dateStr });
+    return new Set((data || []).map(x => (x && x.id) ? x.id : x));
+  }
+  // ช่วงวันที่ถูกจองของชุด (สำหรับปฏิทินในรายละเอียด)
+  async function bookedRanges(garmentId) {
+    if (CONFIG.USE_MOCK) return [];
+    const { data } = await client().rpc('garment_booked_ranges', { p_garment: garmentId });
+    return data || [];
+  }
+  // จองตามช่วงวัน (กันจองชนวันเดียวกัน)
+  async function reserveDates(garmentId, customer, fromStr, toStr) {
+    if (CONFIG.USE_MOCK) return { ok: true };
+    const c = client();
+    if (lineUid) await c.from('customer_touchpoints').insert({ line_uid: lineUid, kind:'reserve', detail: { garment_id: garmentId, from: fromStr } });
+    const { data, error } = await c.rpc('reserve_garment_dates', { p_garment: garmentId, p_customer: customer.id || null, p_from: fromStr, p_to: toStr });
+    return { ok:!error, data, error };
+  }
+
+  // กฎ/สัญญาการใช้บริการ
+  async function getTerms() {
+    if (CONFIG.USE_MOCK) return { version:'demo', body:'ข้อตกลงตัวอย่าง (โหมดเดโม)'};
+    const { data } = await client().rpc('current_terms');
+    return data;
+  }
+  async function acceptTerms(customer, version) {
+    if (CONFIG.USE_MOCK ||!customer.id) return;
+    await client().rpc('accept_terms', { p_customer: customer.id, p_version: version });
+  }
+  // จองพร้อมชุดสำรอง 2 ตัว
+  async function bookWithBackups(customer, primaryCode, fromStr, toStr) {
+    if (CONFIG.USE_MOCK) return { data: { primary: { code: primaryCode }, backups: [] } };
+    const c = client();
+    if (lineUid) await c.from('customer_touchpoints').insert({ line_uid: lineUid, kind:'reserve', detail: { garment: primaryCode } });
+    const { data, error } = await c.rpc('book_with_backups', { p_customer: customer.id || null, p_primary_code: primaryCode, p_from: fromStr, p_to: toStr, p_backups: null });
+    return { data, error };
+  }
+  // อิมแพกต์รักษ์โลกของฉัน
+  async function myImpact(customer) {
+    if (CONFIG.USE_MOCK ||!customer.id) return null;
+    const { data } = await client().rpc('my_impact', { p_customer: customer.id });
+    return data;
+  }
+  // AI ครบลุค — ทรงผม/เครื่องประดับที่เข้ากับชุด (prod = Edge Function, ไม่งั้น mock)
+  async function hairStyle(garmentCode, occasion) {
+    if (!CONFIG.USE_MOCK) {
+      try {
+        const r = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/hair-style`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${CONFIG.SUPABASE_ANON_KEY}` },
+          body: JSON.stringify({ garment_code: garmentCode, occasion, lang: 'th' }),
+        });
+        if (r.ok) { const d = await r.json(); if (d && d.hair) return d; }
+      } catch (e) { /* ตกไป mock */ }
+    }
+    return null; // ให้ฝั่ง UI ใช้ mock เอง
+  }
+  // ภาพกิจกรรม charity (แชร์ให้ลูกค้า)
+  async function recentCharity() {
+    if (CONFIG.USE_MOCK) return [];
+    const { data } = await client().rpc('recent_charity', { n: 8 });
+    return data || [];
+  }
+
+  // ===== ออเดอร์ของฉัน / wishlist / รีวิว / referral =====
+  // ออเดอร์ของฉัน → array ของ {rental_id, code, name, status, role, use_date, due_at, courier, tracking_no, eta, price}
+  async function myRentals(customer) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return [];
+    const { data } = await client().rpc('my_rentals', { p_customer: customer.id });
+    return data || [];
+  }
+  // กดหัวใจ — สลับสถานะ wishlist (true = เพิ่งเพิ่ม)
+  async function toggleWishlist(customer, garmentId) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return null;
+    const { data } = await client().rpc('toggle_wishlist', { p_customer: customer.id, p_garment: garmentId });
+    return data === true;
+  }
+  // รายการ wishlist ของฉัน → Set ของ garment id
+  async function myWishlist(customer) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return new Set();
+    const { data } = await client().rpc('my_wishlist', { p_customer: customer.id });
+    return new Set((data || []).map(x => (x && x.id) ? x.id : x));
+  }
+  // เพิ่มรีวิวหลังคืนชุด
+  async function addReview(rentalId, rating, fit, comment, photos) {
+    if (CONFIG.USE_MOCK || !rentalId) return null;
+    const { data, error } = await client().rpc('add_review', {
+      p_rental: rentalId, p_rating: rating, p_fit: fit, p_comment: comment || null, p_photos: photos || null,
+    });
+    return error ? null : data;
+  }
+  // เรตติ้งเฉลี่ยของชุด → {avg, count}
+  async function garmentRating(garmentId) {
+    if (CONFIG.USE_MOCK || !garmentId) return null;
+    const { data } = await client().rpc('garment_rating', { p_garment: garmentId });
+    return data || null;
+  }
+  // รูปจริงจากลูกค้าที่รีวิวชุดนี้ (UGC) → array {url, rating, comment}
+  async function garmentReviewPhotos(garmentId) {
+    if (CONFIG.USE_MOCK || !garmentId) return [];
+    const { data } = await client().rpc('garment_review_photos', { p_garment: garmentId });
+    return data || [];
+  }
+  // อัปโหลดรูป (รีวิว) ไป Storage 'uploads' → คืน url (fallback ว่างถ้า bucket ยังไม่เปิด)
+  async function uploadPhotos(files) {
+    if (CONFIG.USE_MOCK || !files || !files.length) return [];
+    const c = client(); const urls = [];
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i]; const path = `rev-${Date.now()}-${i}-${(f.name || 'p').replace(/\s+/g, '_')}`;
+      try {
+        const { error } = await c.storage.from('uploads').upload(path, f);
+        if (error) throw error;
+        const { data } = c.storage.from('uploads').getPublicUrl(path);
+        if (data && data.publicUrl) urls.push(data.publicUrl);
+      } catch (e) { /* bucket ยังไม่เปิด — ข้าม */ }
+    }
+    return urls;
+  }
+  // โค้ดชวนเพื่อนของฉัน (สร้างถ้ายังไม่มี)
+  async function ensureReferralCode(customer) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return null;
+    const { data } = await client().rpc('ensure_referral_code', { p_customer: customer.id });
+    return data || null;
+  }
+  // ใส่โค้ดเพื่อนที่ชวนเรา → 'ok' | 'self' | 'used' | 'not_found'
+  async function applyReferral(customer, code) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return 'not_found';
+    const { data } = await client().rpc('apply_referral', { p_customer: customer.id, p_code: code });
+    return data || 'not_found';
+  }
+  // คลิปรีวิว → บันทึก + ส่งให้ AI เช็ก (ได้เครดิตเมื่อรีวิวเป็นบวก)
+  async function submitVideoReview(rentalId, rating, fit, comment, videoUrl, platform, reviewText) {
+    if (CONFIG.USE_MOCK || !rentalId) return { ok: false };
+    const c = client();
+    const { data: id, error } = await c.rpc('submit_video_review', {
+      p_rental: rentalId, p_rating: rating, p_fit: fit, p_comment: comment || null,
+      p_video_url: videoUrl, p_platform: platform || null, p_review_text: reviewText || null,
+    });
+    if (error || !id) return { ok: false, error };
+    // ให้ AI เช็ก (prod เท่านั้น — localhost/ยังไม่ deploy จะรอเจ้าของตรวจ)
+    try {
+      await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/review-check`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${CONFIG.SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ review_id: id }),
+      });
+    } catch (e) { /* รอ AI/เจ้าของภายหลัง */ }
+    return { ok: true, id };
+  }
+
+  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview };
+})();
