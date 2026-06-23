@@ -306,7 +306,7 @@ function openDetail(id) {
       <input type="date" id="useDate" min="${todayStr()}" value="${gUseDate || ''}" onchange="checkAvail('${g.id}')">
       <span id="availMsg" class="availmsg"></span>
     </div>
-    ${subCovers() ? '' : `<div class="durpick">
+    ${subCovers(g) ? '' : `<div class="durpick">
       <span class="durlbl">${lang==='th'?'ระยะเวลาเช่า':'Duration'}</span>
       <div class="durchips" id="durchips">
         <button data-d="1" class="${gDur===1?'on':''}" onclick="setDur('${g.id}',1)">${lang==='th'?'1 วัน':'1 day'}</button>
@@ -316,11 +316,11 @@ function openDetail(id) {
     </div>
     <div id="quotebox" class="quotebox"></div>`}
     <div class="cta">
-      <span class="price">${subCovers() ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}</span>` : '฿'+g.price}</span>
-      ${subCovers() ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
+      <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}</span>` : '฿'+g.price}</span>
+      ${subCovers(g) ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
       <button id="bookBtn" onclick="reserve('${g.id}')">${t('reserveBtn')}</button>
     </div>
-    ${subCovers()
+    ${subCovers(g)
       ? `<div class="creditline">${lang==='th'?`ใช้สิทธิ์สมาชิก ${CUSTOMER._sub.plan_name} · เหลือ ${CUSTOMER._sub.remaining} ชุดรอบนี้`:`Using ${CUSTOMER._sub.plan_name} · ${CUSTOMER._sub.remaining} left this cycle`}</div>`
       : `<div class="creditline">${t('creditPre')}${credit}${t('creditMid')}${g.price - credit}</div>`}`;
   $('#overlay').classList.add('open');
@@ -459,7 +459,7 @@ function setDur(id, d) {
 // สรุปยอดเต็ม: ค่าเช่า + มัดจำ + ค่าส่ง + วันส่ง/คืน (เรียก quote_rental)
 async function renderQuote(id, date) {
   const box = $('#quotebox'); if (!box) return;
-  if (subCovers()) { box.innerHTML = ''; return; }
+  if (subCovers(g)) { box.innerHTML = ''; return; }
   const g = GARMENTS.find(x => x.id === id); if (!g) return;
   if (!date) { box.innerHTML = ''; return; }
   const to = durEnd(date);
@@ -822,9 +822,12 @@ function closeImpact() { $('#impactOverlay').classList.remove('open'); document.
 
 // ===== สมาชิกรายเดือน (Membership / subscription) =====
 // ลูกค้ามีสิทธิ์สมาชิกเหลือไหม → ชุดนี้ "รวมในแพ็กเกจ"
-function subCovers() {
+function subCovers(g) {
   const s = CUSTOMER && CUSTOMER._sub;
-  return !!(s && s.active && (s.remaining || 0) > 0);
+  if (!s || !s.active || (s.remaining || 0) <= 0) return false;
+  // เช็คประเภทชุดว่าอยู่ในสิทธิ์แพ็กไหม (ถ้าไม่ส่งชุดมา = เช็คแค่โควต้า)
+  if (g && g.tier && Array.isArray(s.tiers) && s.tiers.length && !s.tiers.includes(g.tier)) return false;
+  return true;
 }
 function fmtThaiDate(s) {
   if (!s) return '—';
@@ -846,6 +849,7 @@ async function openMembership() {
   let sub = CUSTOMER._sub || { active: false };
   let plans = [];
   try { plans = await window.API.subPlans?.() || []; } catch (e) { /**/ }
+  if (sub && sub.period) gMemPeriod = sub.period;   // เปิดมาที่รอบของสมาชิกเดิม
   renderMembership(sub, plans);
 }
 function closeMembership() { $('#memberOverlay').classList.remove('open'); document.body.style.overflow = ''; }
@@ -853,17 +857,21 @@ function perWord(period) {
   const en = lang === 'en';
   return ({ week: en ? 'wk' : 'สัปดาห์', month: en ? 'mo' : 'เดือน', quarter: en ? '3mo' : '3 เดือน', year: en ? 'yr' : 'ปี' })[period] || (en ? 'mo' : 'เดือน');
 }
+let gMemPeriod = 'month';
+function memSetPeriod(pr) { gMemPeriod = pr; renderMembership(window._memSub, window._memPlans); }
 function renderMembership(sub, plans) {
   const en = lang === 'en';
   const body = $('#memberBody'); if (!body) return;
+  window._memSub = sub; window._memPlans = plans;
   let html = '';
   // การ์ดสถานะปัจจุบัน (ถ้ามีสมาชิก)
   if (sub && sub.plan_code) {
     const paused = sub.status === 'paused';
     const remaining = sub.remaining != null ? sub.remaining : 0;
-    html += `<div style="background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:16px;margin-bottom:18px">
+    html += `<div style="background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:18px">
       <div style="font-size:11px;letter-spacing:2px;color:#0c3a33;background:var(--sage-bg);display:inline-block;padding:3px 10px;border-radius:30px">${paused ? (en ? 'PAUSED' : 'พักชั่วคราว') : (en ? 'ACTIVE' : 'กำลังใช้งาน')}</div>
       <div style="font-size:18px;font-weight:600;color:var(--ink);margin-top:8px">${sub.plan_name || ''}${sub.period_label ? ` <span style="font-size:11px;font-weight:400;color:var(--muted)">· ${sub.period_label}</span>` : ''}</div>
+      ${sub.tier_label ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">${en ? 'covers' : 'ครอบคลุม'}: ${sub.tier_label}</div>` : ''}
       <div style="display:flex;gap:16px;margin-top:10px">
         <div><div style="font-size:22px;font-weight:700;color:var(--ink)">${remaining}<span style="font-size:13px;font-weight:400;color:var(--muted)">/${sub.rentals_per_month || 0}</span></div><div style="font-size:11px;color:var(--muted)">${en ? 'looks left this cycle' : 'สิทธิ์เหลือรอบนี้'}</div></div>
         <div><div style="font-size:14px;color:var(--ink);margin-top:6px">${fmtThaiDate(sub.renews_at)}</div><div style="font-size:11px;color:var(--muted)">${sub.cancel_at_period_end ? (en ? 'ends on' : 'สิ้นสุด') : (en ? 'renews on' : 'รอบต่อไป')}</div></div>
@@ -877,30 +885,47 @@ function renderMembership(sub, plans) {
     </div>
     <div style="font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">${en ? 'Change plan' : 'เปลี่ยนแพ็กเกจ'}</div>`;
   }
-  // รายการแพ็กเกจ
-  html += plans.map(p => {
+  // ฟิลเตอร์รอบบิล — โชว์ทีละรอบ ดูง่าย
+  const ORDER = ['week', 'month', 'quarter', 'year'];
+  const PL = { week: en ? 'Weekly' : 'รายสัปดาห์', month: en ? 'Monthly' : 'รายเดือน', quarter: en ? '3-month' : 'ราย 3 เดือน', year: en ? 'Yearly' : 'รายปี' };
+  const periods = [...new Set(plans.map(p => p.period || 'month'))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+  if (!periods.includes(gMemPeriod)) gMemPeriod = periods.includes('month') ? 'month' : periods[0];
+  html += `<div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;scrollbar-width:none">` + periods.map(pr =>
+    `<button onclick="memSetPeriod('${pr}')" style="white-space:nowrap;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid ${pr === gMemPeriod ? 'var(--ink)' : 'var(--line)'};background:${pr === gMemPeriod ? 'var(--ink)' : '#fff'};color:${pr === gMemPeriod ? '#fff' : 'var(--muted)'}">${PL[pr] || pr}</button>`
+  ).join('') + `</div>`;
+  // การ์ดแพ็กเกจ (เฉพาะรอบที่เลือก) — ราคา/เดือน + ชุด/เดือน + ครอบคลุม + เก็บเงินยังไง
+  const filtered = plans.filter(p => (p.period || 'month') === gMemPeriod);
+  html += filtered.map(p => {
     const current = sub && sub.plan_code === p.code && sub.status !== 'cancelled';
-    const perks = (p.perks || []).map(x => `<div style="font-size:13px;color:var(--ink);padding:3px 0">· ${x}</div>`).join('');
-    const per = perWord(p.period);
-    const cyclePrice = Number(p.price != null ? p.price : p.price_month) || 0;
-    const longTerm = p.period && p.period !== 'month';
-    const subline = longTerm
-      ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">≈ ฿${Number(p.price_per_month || 0).toLocaleString()}/${en ? 'mo' : 'เดือน'}${p.save_pct ? ` · ${en ? 'save' : 'ประหยัด'} ${p.save_pct}%` : ''}</div>`
-      : '';
-    return `<div style="background:#fff;border:${current ? '2px solid var(--sage)' : '1px solid var(--line)'};border-radius:4px;padding:16px;margin-bottom:12px">
+    const pm = Number(p.price_per_month || p.price || p.price_month) || 0;
+    const cyclePrice = Number(p.price || p.price_month) || 0;
+    const qpm = p.rentals_per_month_equiv || p.rentals_per_cycle || 0;
+    const longTerm = (p.period || 'month') !== 'month';
+    const popular = p.code === 'LOOPER_PLUS';
+    const perks = (p.perks || []).slice(0, 3).map(x => `<div style="font-size:12.5px;color:var(--ink);padding:2px 0">· ${x}</div>`).join('');
+    const billNote = longTerm
+      ? `${en ? 'billed' : 'เก็บ'} ฿${cyclePrice.toLocaleString()} ${en ? 'every' : 'ทุก'} ${perWord(p.period)}${p.save_pct ? ` · ${en ? 'save' : 'ประหยัด'} ${p.save_pct}%` : ''}`
+      : (en ? 'billed monthly' : 'เก็บรายเดือน');
+    return `<div style="position:relative;background:#fff;border:${current ? '2px solid var(--sage)' : (popular ? '2px solid var(--ink)' : '1px solid var(--line)')};border-radius:10px;padding:16px;margin-bottom:12px">
+      ${popular ? `<div style="position:absolute;top:-9px;left:16px;background:var(--ink);color:#fff;font-size:10px;letter-spacing:1px;padding:2px 10px;border-radius:20px">${en ? 'POPULAR' : 'แนะนำ'}</div>` : ''}
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div style="font-size:17px;font-weight:600;color:var(--ink)">${p.name}</div>
+        <div>
+          <div style="font-size:16px;font-weight:600;color:var(--ink)">${p.name}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${en ? 'covers' : 'ครอบคลุม'}: ${p.tier_label || (en ? 'everyday' : 'ชุดทั่วไป')}</div>
+        </div>
         <div style="text-align:right">
-          <div style="font-size:16px;font-weight:600;color:var(--ink)">฿${cyclePrice.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted)">/${per}</span></div>
-          ${subline}
+          <div style="font-size:20px;font-weight:700;color:var(--ink);line-height:1.1">฿${pm.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted)">/${en ? 'mo' : 'เดือน'}</span></div>
+          <div style="font-size:12px;color:var(--sage);font-weight:600;margin-top:1px">${qpm} ${en ? 'looks/mo' : 'ชุด/เดือน'}</div>
         </div>
       </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;padding:7px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">${billNote}</div>
       <div style="margin-top:8px">${perks}</div>
       ${current
         ? `<div style="text-align:center;font-size:12px;letter-spacing:1px;color:var(--sage);margin-top:12px;text-transform:uppercase">${en ? 'Current plan' : 'แพ็กเกจปัจจุบัน'}</div>`
-        : `<button onclick="subscribeClick('${p.code}','${(p.name || '').replace(/'/g, '')}')" style="width:100%;background:var(--ink);color:#fff;border:none;padding:11px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-top:12px">${en ? 'Choose this plan' : 'เลือกแพ็กเกจนี้'}</button>`}
+        : `<button onclick="subscribeClick('${p.code}','${(p.name || '').replace(/'/g, '')}')" style="width:100%;background:var(--ink);color:#fff;border:none;padding:11px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-top:12px;border-radius:6px;cursor:pointer">${en ? 'Choose this plan' : 'เลือกแพ็กเกจนี้'}</button>`}
     </div>`;
   }).join('');
+  html += `<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.5">${en ? 'Premium/designer dresses are included only in higher plans — others still rent at the normal price.' : 'ชุดพรีเมียม/ดีไซเนอร์รวมเฉพาะแพ็กสูง — ชุดนอกสิทธิ์ยังเช่าได้ในราคาปกติ'}</div>`;
   body.innerHTML = html;
 }
 async function subscribeClick(code, name) {
