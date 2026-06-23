@@ -459,7 +459,7 @@
   .ed-craft .body{color:rgba(242,236,221,.66);max-width:480px;margin:22px auto 0;font-size:15px;line-height:1.7}
 
   /* story — how it works */
-  .ed-how{background:var(--soft);margin-top:54px;padding:54px 22px;text-align:center}
+  .ed-how{background:#fff;margin-top:0;padding:54px 22px;text-align:center}
   .ed-how .ek{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
   .ed-how h3{font-family:var(--display);font-weight:700;font-size:clamp(24px,6vw,34px);letter-spacing:.5px;margin-top:8px}
   .ed-steps{display:grid;grid-template-columns:repeat(2,1fr);gap:28px 20px;max-width:880px;margin:36px auto 0}
@@ -553,6 +553,12 @@
   <div class="grid" id="grid"></div>
 </div>
 
+<section class="ed-mani">
+  <div class="ek">why we loop</div>
+  <p class="lead">“เสื้อผ้าสวยหนึ่งตัว ไม่ควรถูกใส่แค่ครั้งเดียว แล้วหลับใหลอยู่ในตู้ตลอดไป”</p>
+  <p class="body">LLOOP เกิดจากความเชื่อง่าย ๆ ว่าความสวยควรหมุนเวียน — เช่า ใส่ คืน ส่งต่อ ให้ชุดหนึ่งตัวได้ออกไปเปล่งประกายในหลายค่ำคืน หลายเจ้าของ สวยใหม่ทุกครั้ง โดยโลกไม่ต้องแบกขยะแฟชั่นเพิ่มอีกชิ้น</p>
+</section>
+
 <section class="ed-how">
   <div class="ek">how it works</div>
   <h3>หมุนเวียน ไม่ทิ้งขว้าง</h3>
@@ -562,6 +568,13 @@
     <div class="ed-step"><div class="no">03</div><h4>คืน</h4><p>ส่งกลับ เราดูแลซักให้เอง</p></div>
     <div class="ed-step"><div class="no">04</div><h4>ส่งต่อ</h4><p>ชุดหมุนเข้า loop ไปเปล่งประกายให้คนต่อไป</p></div>
   </div>
+</section>
+
+<section class="ed-craft">
+  <div class="ek">the craft</div>
+  <div class="num">1 : 7</div>
+  <p class="cap">ชุดหนึ่งตัว หมุนเวียนเฉลี่ย 7 ครั้ง ก่อนกลับเข้าสู่ loop อีกรอบ</p>
+  <p class="body">ทุกตัวผ่านการดูแล ซัก และตรวจเนื้อผ้าด้วยมือ ก่อนถึงคุณ — เราหลงใหลในสัมผัสของผ้า รอยจับจีบ และเรื่องราวที่มันสะสมไว้ในแต่ละค่ำคืน</p>
 </section>
 
 <section class="ed-teaser">
@@ -605,13 +618,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=32"></script>
-<script src="pixel.js?v=32"></script>
-<script src="i18n.js?v=32"></script>
-<script src="data.js?v=32"></script>
-<script src="liffAuth.js?v=32"></script>
-<script src="me-api.js?v=32"></script>
-<script src="api.js?v=32"></script>
+<script src="config.js?v=33"></script>
+<script src="pixel.js?v=33"></script>
+<script src="i18n.js?v=33"></script>
+<script src="data.js?v=33"></script>
+<script src="liffAuth.js?v=33"></script>
+<script src="me-api.js?v=33"></script>
+<script src="api.js?v=33"></script>
 <script>
   /* Spotlight — ดึงชุดที่เช่าน้อยสุดมาโชว์รูปใหญ่ + สลับสไลด์อัตโนมัติ (visual layer) */
   window.renderSpotlight = function(garments){
@@ -649,6 +662,6 @@
     restart();
   };
 </script>
-<script src="app.js?v=32"></script>
+<script src="app.js?v=33"></script>
 </body>
 </html>

@@ -321,7 +321,7 @@ function openDetail(id) {
       <button id="bookBtn" onclick="reserve('${g.id}')">${t('reserveBtn')}</button>
     </div>
     ${subCovers(g)
-      ? `<div class="creditline">${lang==='th'?`ใช้สิทธิ์สมาชิก ${CUSTOMER._sub.plan_name} · เหลือ ${CUSTOMER._sub.remaining} ชุดรอบนี้`:`Using ${CUSTOMER._sub.plan_name} · ${CUSTOMER._sub.remaining} left this cycle`}</div>`
+      ? `<div class="creditline">${lang==='th'?`ใช้สิทธิ์สมาชิก ${CUSTOMER._sub.plan_name} · เหลือ ${CUSTOMER._sub.remaining} ชุดรอบนี้ · ส่งฟรีขาไป (ค่าส่งคืนผู้เช่าออกเอง)`:`Using ${CUSTOMER._sub.plan_name} · ${CUSTOMER._sub.remaining} left · free outbound (return shipping on you)`}</div>`
       : `<div class="creditline">${t('creditPre')}${credit}${t('creditMid')}${g.price - credit}</div>`}`;
   $('#overlay').classList.add('open');
   document.body.style.overflow ='hidden';
@@ -459,8 +459,8 @@ function setDur(id, d) {
 // สรุปยอดเต็ม: ค่าเช่า + มัดจำ + ค่าส่ง + วันส่ง/คืน (เรียก quote_rental)
 async function renderQuote(id, date) {
   const box = $('#quotebox'); if (!box) return;
-  if (subCovers(g)) { box.innerHTML = ''; return; }
   const g = GARMENTS.find(x => x.id === id); if (!g) return;
+  if (subCovers(g)) { box.innerHTML = ''; return; }
   if (!date) { box.innerHTML = ''; return; }
   const to = durEnd(date);
   let q = null;
@@ -481,6 +481,7 @@ async function renderQuote(id, date) {
     ${row(TH ? 'ค่าส่ง' : 'Shipping', q.shipping > 0 ? baht(q.shipping) : (TH ? 'ส่งฟรี' : 'Free'))}
     ${row(TH ? 'รวมโอน' : 'Total', baht(q.total), true)}
     <div class="qdates">${TH ? 'จัดส่งราว' : 'Ships ~'} ${fmtDate(q.ship_date)} · ${TH ? 'กำหนดคืน' : 'Return by'} ${fmtDate(q.return_date)}</div>
+    <div class="qdates">${TH ? 'ค่าส่งคืนผู้เช่าออกเอง' : 'Return shipping paid by renter'}</div>
     ${kyc}`;
 }
 
@@ -768,10 +769,34 @@ function renderStyleCard(c) {
     const pal = (sp.palette || []).map(h =>`<i style="background:${h}"></i>`).join('');
     const rec = (sp.recommend || []).map(catName).join(' · ');
     const stype = sp.season_type ? `<div class="styletype">${lang ==='th'?'โทนสีของคุณ':'Your season'}: <b style="color:#A75F3A">${sp.season_type}</b></div>` : '';
+    const g = sp.guide || {};
+    const th = lang === 'th';
+    const arr = a => Array.isArray(a) && a.length ? a.join(' · ') : '';
+    const ln = (label, val) => val ? `<div class="stylerec"><b>${label}:</b> ${val}</div>` : '';
+    const avoidPal = (g.avoid_colors || []).map(h => `<i style="background:${h}"></i>`).join('');
+    const guideHtml = [
+      ln(th?'นิวทรัลที่ใช่':'Neutrals', g.neutrals),
+      ln(th?'โลหะ/เครื่องประดับ':'Metals', arr(g.metals)),
+      g.soul_color ? ln(th?'Soul color':'Soul color', g.soul_color) : '',
+      avoidPal ? `<div class="stylerec"><b>${th?'สีที่ควรเลี่ยง':'Avoid'}:</b></div><div class="stylepal">${avoidPal}</div>` : '',
+      ln(th?'ทรงที่ใช่':'Silhouettes', arr(g.silhouettes)),
+      ln(th?'คอเสื้อ':'Necklines', arr(g.necklines)),
+      ln(th?'ทรงแขน':'Sleeves', g.sleeves),
+      ln(th?'ความยาวที่เหมาะ':'Hemline', g.hemline),
+      ln(th?'รองเท้า':'Footwear', g.footwear),
+      ln(th?'เนื้อผ้า/ลาย':'Fabrics', g.fabrics),
+      ln(th?'ทรงผมที่แนะนำ':'Hair', arr(g.hairstyles)),
+      ln(th?'แว่นที่เข้า':'Eyewear', g.eyewear),
+      ln(th?'ควรเลี่ยง':'Avoid wearing', g.avoid_clothing),
+      ln(th?'ไอเท็มควรมี':'Must-have', arr(g.must_have)),
+      ln(th?'โอกาสใช้งาน':'Occasions', g.occasions),
+      g.dos_donts ? `<div class="stylerec" style="white-space:pre-line"><b>${th?'ข้อแนะนำ':'Tips'}:</b> ${g.dos_donts}</div>` : ''
+    ].filter(Boolean).join('');
     inner =`<div class="stylehead">${sp.headline || (lang ==='th'?'สรุปสไตล์ของคุณ':'Your style')}</div>
       ${stype}
       ${pal?`<div class="stylepal">${pal}</div>`:''}
-      ${rec?`<div class="stylerec">${lang ==='th'?'ชุดที่แนะนำ':'For you'}: ${rec}</div>`:''}`;
+      ${rec?`<div class="stylerec">${lang ==='th'?'ชุดที่แนะนำ':'For you'}: ${rec}</div>`:''}
+      ${guideHtml?`<div class="styleguide" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,.08)">${guideHtml}</div>`:''}`;
   } else {
     inner =`<div class="stylehead">${lang ==='th'?'ยังไม่มีผลวิเคราะห์สไตล์':'No style analysis yet'}</div>
       <div class="stylerec">${lang ==='th'?'แสดงรหัสนี้กับสไตลิสต์พาร์ทเนอร์ตอนไปทำ Personal Color':'Show this code to our partner stylist'}</div>`;
