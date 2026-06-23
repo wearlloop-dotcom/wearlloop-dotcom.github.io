@@ -307,5 +307,63 @@ window.API = (function () {
     return { ok: !error, data, error };
   }
 
-  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus };
+  // ===== สรุปยอด / มัดจำ / ยืนยันตัวตน / ตะกร้า / แก้ไซส์ =====
+  // สรุปยอดเต็ม (ค่าเช่า+มัดจำ+ค่าส่ง+วันส่ง/คืน+total) ตามจำนวนวัน
+  async function quote(code, customer, fromStr, toStr, courier, remote) {
+    if (CONFIG.USE_MOCK) {
+      const f = new Date(fromStr), t = new Date(toStr);
+      const days = Math.max(1, Math.round((t - f) / 86400000) + 1);
+      const rate = days <= 1 ? 262 : days <= 3 ? 320 : 416;
+      const dep = (customer && customer.kyc_verified && (customer.rentals_count|0) > 0) ? 0
+                : (customer && customer.kyc_verified) ? rate : 500;
+      const ship = (String(courier||'flash')==='ems') ? 60 : (days >= 3 ? 0 : 55) + (remote ? 30 : 0);
+      return { code, days, rate, deposit: dep, shipping: ship, total: rate+dep+ship,
+        ship_date: fromStr, use_date: fromStr, return_date: toStr,
+        kyc_required: !(customer && customer.kyc_verified), free_shipping: ship===0 };
+    }
+    const { data } = await client().rpc('quote_rental', {
+      p_code: code, p_customer: (customer && customer.id) || null,
+      p_from: fromStr, p_to: toStr, p_courier: courier || 'flash', p_remote: !!remote });
+    return data || null;
+  }
+  // สถานะยืนยันตัวตน → {verified, method, has_social}
+  async function customerKyc(customer) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return { verified: false };
+    const { data } = await client().rpc('customer_kyc', { p_customer: customer.id });
+    return data || { verified: false };
+  }
+  // ส่งบัตร+โซเชียลยืนยันตัวตน
+  async function submitKyc(customer, idUrl, social) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true };
+    const { data, error } = await client().rpc('submit_kyc', { p_customer: customer.id, p_id_url: idUrl || '', p_social: social || '' });
+    return { ok: !error && data === 'ok', data, error };
+  }
+  // อัปโหลดบัตร ปชช ไป Storage (private-ish bucket 'uploads') → url
+  async function uploadIdCard(file) {
+    if (CONFIG.USE_MOCK || !file) return '';
+    const urls = await uploadPhotos([file]);
+    return urls[0] || '';
+  }
+  // จองหลายชุดในออเดอร์เดียว (ส่งกล่องเดียว)
+  async function bookCart(customer, codes, fromStr, toStr, courier, remote) {
+    if (CONFIG.USE_MOCK) return { data: { items: codes.map(c => ({ code: c })) } };
+    const c = client();
+    if (lineUid) await c.from('customer_touchpoints').insert({ line_uid: lineUid, kind:'reserve', detail: { cart: codes } });
+    const { data, error } = await c.rpc('book_cart', { p_customer: (customer && customer.id) || null, p_codes: codes, p_from: fromStr, p_to: toStr, p_courier: courier || 'flash', p_remote: !!remote });
+    return { data, error };
+  }
+  // ขอแก้ไซส์
+  async function addAlteration(rentalId, note) {
+    if (CONFIG.USE_MOCK || !rentalId) return { ok: true };
+    const { data, error } = await client().rpc('add_alteration', { p_rental: rentalId, p_note: note });
+    return { ok: !error, data, error };
+  }
+  // สอบถามเช่ากลุ่มใหญ่
+  async function groupInquiry(customer, count, budget, eventDate, note) {
+    if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true };
+    const { data, error } = await client().rpc('group_inquiry', { p_customer: customer.id, p_count: count, p_budget: budget || null, p_event_date: eventDate || null, p_note: note || null });
+    return { ok: !error, data, error };
+  }
+
+  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry };
 })();

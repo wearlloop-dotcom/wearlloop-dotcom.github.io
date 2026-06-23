@@ -3,6 +3,15 @@ let OCCASIONS = {}, CUSTOMER = {}, EVENT = null, GARMENTS = [], VENUES = [];
 let fOccasion = null, fColor = null, fBrand ='', fToneOnly = false, fForYou = false, fWishOnly = false;
 let gUseDate = null, gAvailSet = null, gOnlyAvail = false;  // เลือกวันใช้ตั้งแต่หน้าแรก
 let gWish = new Set();  // garment id ที่หมายตา (wishlist)
+let gDur = 3;           // ระยะเวลาเช่า (วัน) ในหน้ารายละเอียด
+let gCart = [];         // ตะกร้าจองหลายชุด → [{id,code,name,price}]
+
+// บวกวันแบบ local (กัน toISOString เลื่อนโซน +7) → คืน 'YYYY-MM-DD'
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00'); d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function durEnd(fromStr) { return addDays(fromStr, gDur - 1); }
 let lang = (localStorage.getItem('lloop_lang') ||'th');
 const $ = s => document.querySelector(s);
 
@@ -297,8 +306,18 @@ function openDetail(id) {
       <input type="date" id="useDate" min="${todayStr()}" value="${gUseDate || ''}" onchange="checkAvail('${g.id}')">
       <span id="availMsg" class="availmsg"></span>
     </div>
+    ${subCovers() ? '' : `<div class="durpick">
+      <span class="durlbl">${lang==='th'?'ระยะเวลาเช่า':'Duration'}</span>
+      <div class="durchips" id="durchips">
+        <button data-d="1" class="${gDur===1?'on':''}" onclick="setDur('${g.id}',1)">${lang==='th'?'1 วัน':'1 day'}</button>
+        <button data-d="3" class="${gDur===3?'on':''}" onclick="setDur('${g.id}',3)">${lang==='th'?'3 วัน':'3 days'}</button>
+        <button data-d="5" class="${gDur===5?'on':''}" onclick="setDur('${g.id}',5)">${lang==='th'?'5 วัน':'5 days'}</button>
+      </div>
+    </div>
+    <div id="quotebox" class="quotebox"></div>`}
     <div class="cta">
       <span class="price">${subCovers() ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}</span>` : '฿'+g.price}</span>
+      ${subCovers() ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
       <button id="bookBtn" onclick="reserve('${g.id}')">${t('reserveBtn')}</button>
     </div>
     ${subCovers()
@@ -425,7 +444,44 @@ async function checkAvail(id) {
     msg.className ='availmsg busy';
     msg.textContent = lang ==='th'?`✕ ไม่ว่าง ${fmtDate(date)} ลองวันอื่น`:`✕ Booked on ${fmtDate(date)}`;
   }
+  renderQuote(id, date);
   return free;
+}
+
+// เลือกระยะเวลาเช่า → คำนวณยอดใหม่
+function setDur(id, d) {
+  gDur = d;
+  document.querySelectorAll('#durchips button').forEach(b => b.classList.toggle('on', +b.dataset.d === d));
+  const date = $('#useDate') && $('#useDate').value;
+  if (date) renderQuote(id, date);
+}
+
+// สรุปยอดเต็ม: ค่าเช่า + มัดจำ + ค่าส่ง + วันส่ง/คืน (เรียก quote_rental)
+async function renderQuote(id, date) {
+  const box = $('#quotebox'); if (!box) return;
+  if (subCovers()) { box.innerHTML = ''; return; }
+  const g = GARMENTS.find(x => x.id === id); if (!g) return;
+  if (!date) { box.innerHTML = ''; return; }
+  const to = durEnd(date);
+  let q = null;
+  try { q = await window.API.quote(g.code || g.id, CUSTOMER, date, to); } catch (e) { /**/ }
+  if (!q || q.error) { box.innerHTML = ''; return; }
+  const TH = lang === 'th';
+  const row = (k, v, hl) => `<div class="qrow${hl ? ' hl' : ''}"><span>${k}</span><b>${v}</b></div>`;
+  const baht = n => '฿' + n;
+  const kyc = q.kyc_required ? `<div class="kycnote">
+      <div class="kt">${TH ? 'ลูกค้าใหม่: ยืนยันตัวตนเพื่อใช้มัดจำปกติ' : 'New customer — verify to lower deposit'}</div>
+      <div class="ks">${TH ? 'แนบบัตรประชาชน + IG/FB สาธารณะ หรือวางมัดจำเพิ่มตามนี้ก็ได้' : 'Attach ID + public IG/FB, or keep the higher deposit'}</div>
+      <button class="kbtn" onclick="openKyc('${id}')">${TH ? 'ยืนยันตัวตน' : 'Verify identity'}</button>
+    </div>` : '';
+  box.innerHTML = `
+    <div class="qhd">${TH ? 'สรุปยอด' : 'Summary'} · ${q.days} ${TH ? 'วัน' : 'days'}</div>
+    ${row(TH ? 'ค่าเช่า' : 'Rental', baht(q.rate))}
+    ${q.deposit > 0 ? row(TH ? 'มัดจำ (คืนหลังตรวจชุด)' : 'Deposit (refundable)', baht(q.deposit)) : ''}
+    ${row(TH ? 'ค่าส่ง' : 'Shipping', q.shipping > 0 ? baht(q.shipping) : (TH ? 'ส่งฟรี' : 'Free'))}
+    ${row(TH ? 'รวมโอน' : 'Total', baht(q.total), true)}
+    <div class="qdates">${TH ? 'จัดส่งราว' : 'Ships ~'} ${fmtDate(q.ship_date)} · ${TH ? 'กำหนดคืน' : 'Return by'} ${fmtDate(q.return_date)}</div>
+    ${kyc}`;
 }
 
 async function reserve(id) {
@@ -439,10 +495,11 @@ async function reserve(id) {
   // กันจองชน — เช็กว่างก่อน
   const free = await checkAvail(id);
   if (free === false) return;
+  const toDate = durEnd(date);
   const credit = Math.min(CUSTOMER.credit_balance || 0, Math.round(g.price * 0.5));
   let ok = true, backups = [];
   try {
-    const res = await window.API.bookWithBackups(CUSTOMER, g.code || g.id, date, date);
+    const res = await window.API.bookWithBackups(CUSTOMER, g.code || g.id, date, toDate);
     ok =!res.error && res.data &&!res.data.error;
     backups = (res.data && res.data.backups) || [];
     if (!ok) toast(lang ==='th'?'ชุดนี้เพิ่งถูกจองวันนั้นพอดี ลองวันอื่นนะคะ':'Just got booked for that date — try another');
@@ -456,6 +513,107 @@ async function reserve(id) {
 ? (lang ==='th'?` · เตรียมชุดสำรองให้ ${backups.length} ตัวแล้ว`:` · ${backups.length} backups reserved`)
     :'';
   toast(`${t('reservedPre')} ${g.name} ${t('reservedPost')} ${fmtDate(date)}${bk}`);
+}
+
+// ===== ยืนยันตัวตน (KYC) =====
+function openKyc(id) {
+  const TH = lang === 'th';
+  $('#kycSheet').innerHTML = `
+    <div class="ksheet">
+      <button class="close" onclick="closeKyc()">×</button>
+      <div class="khd">${TH ? 'ยืนยันตัวตน' : 'Verify identity'}</div>
+      <div class="ksub">${TH ? 'เพื่อความปลอดภัยของทั้งสองฝ่าย ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว รอบหน้าไม่ต้องทำอีก' : 'One-time verification for new customers'}</div>
+      <label class="klabel">${TH ? 'บัตรประชาชน (ถ่ายชัดเจน)' : 'ID card photo'}</label>
+      <input type="file" id="kycId" accept="image/*">
+      <label class="klabel">${TH ? 'ลิงก์ IG หรือ Facebook (สาธารณะ)' : 'IG / Facebook link (public)'}</label>
+      <input type="url" id="kycSocial" placeholder="https://instagram.com/..." class="kinput">
+      <button class="ksubmit" onclick="submitKycForm('${id}')">${TH ? 'ส่งยืนยันตัวตน' : 'Submit'}</button>
+      <div class="knote">${TH ? 'หรือไม่ต้องยืนยันก็ได้ — เพียงวางมัดจำเพิ่มตามที่แจ้งในสรุปยอด' : 'Or skip and keep the higher deposit shown in the summary'}</div>
+    </div>`;
+  $('#kycOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
+}
+function closeKyc() { $('#kycOverlay').classList.remove('open'); document.body.style.overflow = 'hidden'; }
+async function submitKycForm(id) {
+  const TH = lang === 'th';
+  const fileEl = $('#kycId'), social = ($('#kycSocial') && $('#kycSocial').value || '').trim();
+  if (!social && !(fileEl && fileEl.files && fileEl.files.length)) {
+    toast(TH ? 'แนบบัตรหรือใส่ลิงก์โซเชียลก่อนนะคะ' : 'Attach ID or add a social link'); return;
+  }
+  const btn = $('.ksubmit'); if (btn) { btn.disabled = true; btn.textContent = TH ? 'กำลังส่ง…' : 'Sending…'; }
+  let idUrl = '';
+  try { if (fileEl && fileEl.files && fileEl.files.length) idUrl = await window.API.uploadIdCard(fileEl.files[0]); } catch (e) { /**/ }
+  const res = await window.API.submitKyc(CUSTOMER, idUrl, social);
+  if (res.ok) {
+    CUSTOMER.kyc_verified = true;
+    closeKyc();
+    toast(TH ? 'ยืนยันตัวตนเรียบร้อย ขอบคุณค่ะ' : 'Verified — thank you');
+    const date = $('#useDate') && $('#useDate').value;
+    if (date) renderQuote(id, date);   // มัดจำลดลงทันที
+  } else {
+    if (btn) { btn.disabled = false; btn.textContent = TH ? 'ส่งยืนยันตัวตน' : 'Submit'; }
+    toast(TH ? 'ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะคะ' : 'Failed — try again');
+  }
+}
+
+// ===== ตะกร้า (จองหลายชุด ส่งกล่องเดียว) =====
+function addToCart(id) {
+  const g = GARMENTS.find(x => x.id === id); if (!g) return;
+  if (gCart.find(x => x.id === id)) { toast(lang === 'th' ? 'ชุดนี้อยู่ในตะกร้าแล้ว' : 'Already in cart'); return; }
+  gCart.push({ id, code: g.code || g.id, name: g.name, price: g.price });
+  renderCartBtn();
+  toast(lang === 'th' ? `เพิ่ม "${g.name}" ลงตะกร้าแล้ว` : `Added "${g.name}"`);
+}
+function removeFromCart(id) { gCart = gCart.filter(x => x.id !== id); renderCartBtn(); openCart(); }
+function renderCartBtn() {
+  const b = $('#cartFab'); if (!b) return;
+  b.style.display = gCart.length ? 'flex' : 'none';
+  const c = $('#cartCount'); if (c) c.textContent = gCart.length;
+}
+function openCart() {
+  const TH = lang === 'th';
+  if (!gCart.length) { toast(TH ? 'ยังไม่มีชุดในตะกร้า' : 'Cart is empty'); return; }
+  const date = (($('#useDate') && $('#useDate').value) || gUseDate || '');
+  const items = gCart.map(it => `<div class="crow"><span>${it.name}</span><b>฿${it.price}</b><button class="cx" onclick="removeFromCart('${it.id}')">×</button></div>`).join('');
+  $('#cartSheet').innerHTML = `
+    <div class="csheet">
+      <button class="close" onclick="closeCart()">×</button>
+      <div class="khd">${TH ? 'ตะกร้าของฉัน' : 'My cart'} · ${gCart.length} ${TH ? 'ชุด' : 'items'}</div>
+      <div class="cdesc">${TH ? 'เช่าหลายชุด ส่งกล่องเดียว ค่าส่งครั้งเดียว' : 'Multiple dresses, one shipment, one shipping fee'}</div>
+      <div class="clist">${items}</div>
+      <div class="cdate">
+        <label>${TH ? 'วันที่ต้องใช้' : 'Date'}</label>
+        <input type="date" id="cartDate" min="${todayStr()}" value="${date}">
+        <div class="durchips" id="cartDur">
+          <button data-d="1" class="${gDur === 1 ? 'on' : ''}" onclick="setCartDur(1)">${TH ? '1 วัน' : '1d'}</button>
+          <button data-d="3" class="${gDur === 3 ? 'on' : ''}" onclick="setCartDur(3)">${TH ? '3 วัน' : '3d'}</button>
+          <button data-d="5" class="${gDur === 5 ? 'on' : ''}" onclick="setCartDur(5)">${TH ? '5 วัน' : '5d'}</button>
+        </div>
+      </div>
+      <button class="ksubmit" onclick="bookCartNow()">${TH ? 'จองทั้งหมด' : 'Book all'}</button>
+    </div>`;
+  $('#cartOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
+}
+function setCartDur(d) { gDur = d; document.querySelectorAll('#cartDur button').forEach(b => b.classList.toggle('on', +b.dataset.d === d)); }
+function closeCart() { $('#cartOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+async function bookCartNow() {
+  const TH = lang === 'th';
+  const date = $('#cartDate') && $('#cartDate').value;
+  if (!date) { toast(TH ? 'เลือกวันที่ก่อนนะคะ' : 'Pick a date'); return; }
+  const btn = $('#cartSheet .ksubmit'); if (btn) { btn.disabled = true; btn.textContent = TH ? 'กำลังจอง…' : 'Booking…'; }
+  const codes = gCart.map(x => x.code);
+  const res = await window.API.bookCart(CUSTOMER, codes, date, durEnd(date));
+  const data = res && res.data;
+  if (res && !res.error && data && !data.error) {
+    const unavail = (data.unavailable || []);
+    gCart = [];
+    renderCartBtn(); closeCart();
+    toast(unavail.length
+      ? (TH ? `จองสำเร็จ · ${unavail.length} ชุดไม่ว่างวันนั้น` : `Booked · ${unavail.length} unavailable`)
+      : (TH ? 'จองทั้งออเดอร์สำเร็จ ส่งกล่องเดียว' : 'Order booked — one shipment'));
+  } else {
+    if (btn) { btn.disabled = false; btn.textContent = TH ? 'จองทั้งหมด' : 'Book all'; }
+    toast(TH ? 'จองไม่สำเร็จ ลองใหม่นะคะ' : 'Booking failed');
+  }
 }
 
 // ===== profile =====

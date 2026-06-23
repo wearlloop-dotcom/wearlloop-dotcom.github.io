@@ -207,6 +207,47 @@
   .availmsg.busy{color:#A32D2D}
   .availmsg.checking{color:var(--muted);font-weight:500}
 
+  /* ระยะเวลาเช่า */
+  .durpick{display:flex;align-items:center;gap:10px;padding:12px 18px 0;flex-wrap:wrap}
+  .durlbl{font-size:12px;color:var(--muted);font-weight:500}
+  .durchips{display:flex;gap:8px}
+  .durchips button{font-family:var(--sans);font-size:12px;font-weight:600;padding:7px 14px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:20px;cursor:pointer}
+  .durchips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  /* สรุปยอด */
+  .quotebox{margin:12px 18px 0;border:1px solid var(--line);border-radius:6px;padding:14px 16px;background:#FAFAF9}
+  .quotebox:empty{display:none}
+  .quotebox .qhd{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:8px}
+  .qrow{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);padding:3px 0}
+  .qrow b{color:var(--ink);font-weight:500}
+  .qrow.hl{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-size:15px}
+  .qrow.hl span,.qrow.hl b{color:var(--ink);font-weight:700}
+  .qdates{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
+  .kycnote{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+  .kycnote .kt{font-size:12px;font-weight:600;color:var(--clay,#A75F3A)}
+  .kycnote .ks{font-size:11px;color:var(--muted);margin:2px 0 8px}
+  .kbtn{font-family:var(--sans);font-size:12px;font-weight:600;padding:8px 16px;border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:20px;cursor:pointer}
+  /* ปุ่มตะกร้าในแถบ cta */
+  .cta .cartbtn{flex:0 0 auto;background:#fff;color:var(--ink);border:1px solid var(--ink);padding:14px 14px;font-size:12px;letter-spacing:.5px;text-transform:none;font-weight:600}
+  /* FAB ตะกร้า */
+  .cartfab{position:fixed;right:16px;bottom:80px;z-index:60;display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border:none;border-radius:30px;padding:12px 18px;font-family:var(--sans);font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.18);cursor:pointer}
+  .cartfab i{background:#fff;color:var(--ink);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:700}
+  /* KYC / cart sheets */
+  .ksheet,.csheet{padding:24px 22px 28px;position:relative}
+  .ksheet .close,.csheet .close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:24px;color:var(--muted);cursor:pointer}
+  .khd{font-family:var(--display);font-size:20px;font-weight:600;margin-bottom:4px}
+  .ksub,.cdesc,.knote{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .klabel{display:block;font-size:12px;font-weight:600;color:var(--ink);margin:12px 0 6px}
+  .kinput,.cdate input[type=date],.ksheet input[type=file]{width:100%;font-family:var(--sans);font-size:13px;padding:10px;border:1px solid var(--line);border-radius:6px;background:#fff;box-sizing:border-box}
+  .ksubmit{width:100%;margin-top:18px;background:var(--ink);color:#fff;border:none;padding:14px;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:600;cursor:pointer}
+  .knote{margin-top:12px;margin-bottom:0;text-align:center}
+  .clist{margin:6px 0 4px}
+  .crow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .crow span{flex:1}
+  .crow b{font-weight:500}
+  .cx{background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1}
+  .cdate{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+  .cdate label{font-size:12px;color:var(--muted);font-weight:500}
+
   /* craft impact + style summary cards */
   .ecocard{background:#EAF1EC;border:1px solid #d4e4da;border-radius:4px;padding:16px;margin:0 0 16px;position:relative}
   .ecocard.new{font-size:13px;color:#2E4A3A;text-align:center;font-style:italic}
@@ -419,6 +460,9 @@
 <div class="overlay" id="ordersOverlay"><div class="sheet" id="ordersSheet"></div></div>
 <div class="overlay" id="memberOverlay"><div class="sheet" id="memberSheet"></div></div>
 <div class="overlay" id="reviewOverlay"><div class="sheet" id="reviewSheet"></div></div>
+<div class="overlay" id="kycOverlay"><div class="sheet" id="kycSheet"></div></div>
+<div class="overlay" id="cartOverlay"><div class="sheet" id="cartSheet"></div></div>
+<button class="cartfab" id="cartFab" style="display:none" onclick="openCart()"><span>ตะกร้า</span><i id="cartCount">0</i></button>
 <div class="termsoverlay" id="termsOverlay">
   <div class="termsbox">
     <div class="termshd">ข้อตกลงการใช้บริการ · LLOOP</div>
@@ -433,12 +477,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=26"></script>
-<script src="pixel.js?v=26"></script>
-<script src="i18n.js?v=26"></script>
-<script src="data.js?v=26"></script>
-<script src="liffAuth.js?v=26"></script>
-<script src="api.js?v=26"></script>
-<script src="app.js?v=26"></script>
+<script src="config.js?v=27"></script>
+<script src="pixel.js?v=27"></script>
+<script src="i18n.js?v=27"></script>
+<script src="data.js?v=27"></script>
+<script src="liffAuth.js?v=27"></script>
+<script src="api.js?v=27"></script>
+<script src="app.js?v=27"></script>
 </body>
 </html>
