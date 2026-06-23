@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>LLOOP · สัญญาความร่วมมือพาร์ทเนอร์</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#FAF8F5;--surface:#FFFFFF;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;
+    --navy:#0D2F4F;--sage:#6FB3A6;--champ:#B8A179;--ok:#0F6E56;--danger:#A32D2D;
+    --sans:'Noto Sans Thai',system-ui,sans-serif;--display:'Cormorant',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:16px;line-height:1.7;-webkit-text-size-adjust:100%}
+  .top{background:var(--surface);border-bottom:1px solid var(--hair);padding:16px 18px;text-align:center}
+  .top .mark{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:2px}
+  .top .tl{font-size:11px;letter-spacing:3px;color:var(--champ);text-transform:uppercase}
+  .wrap{max-width:680px;margin:0 auto;padding:18px 16px 140px}
+  .doc{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:26px 22px}
+  .klabel{font-size:11px;letter-spacing:2.5px;color:var(--stone);text-transform:uppercase}
+  .doc h1{font-family:var(--display);font-weight:700;font-size:30px;line-height:1.15;margin:6px 0 4px}
+  .meta{font-size:13px;color:var(--stone);border-bottom:1px solid var(--hair);padding-bottom:16px;margin-bottom:18px}
+  .meta b{color:var(--ink);font-weight:600}
+  .parties{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:4px 0 20px}
+  @media(max-width:540px){.parties{grid-template-columns:1fr}}
+  .party{border:1px solid var(--hair);border-radius:2px;padding:14px}
+  .party .role{font-size:11px;letter-spacing:1.5px;color:var(--champ);text-transform:uppercase;margin-bottom:6px}
+  .party .nm{font-weight:600;font-size:15px}
+  .party .dt{font-size:13px;color:var(--stone);margin-top:3px}
+  .comp{background:#F4F1EB;border:1px solid var(--hair);border-radius:2px;padding:16px 16px 8px;margin:6px 0 22px}
+  .comp .ct{font-size:11px;letter-spacing:2px;color:var(--champ);text-transform:uppercase;margin-bottom:10px}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dotted var(--hair);font-size:14px}
+  .row:last-child{border-bottom:none}.row .k{color:var(--stone)}.row .v{font-weight:600;text-align:right}
+  .clause{margin:0 0 18px}
+  .clause h3{font-size:15px;font-weight:700;margin-bottom:6px}
+  .clause h3 .no{color:var(--champ);font-family:var(--display);font-size:18px;margin-right:8px}
+  .clause p{font-size:14.5px;color:#2c2b28;margin:0 0 7px;text-align:justify}
+  .clause ul{margin:2px 0 8px;padding-left:20px}
+  .clause li{font-size:14.5px;color:#2c2b28;margin-bottom:4px}
+  .divider{height:1px;background:var(--hair);margin:24px 0}
+  /* signing */
+  .signcard{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:22px;margin-top:18px}
+  .signcard h2{font-family:var(--display);font-size:24px;font-weight:700;margin-bottom:2px}
+  .signcard .sub{font-size:13px;color:var(--stone);margin-bottom:16px}
+  label{display:block;font-size:13px;color:var(--stone);margin:14px 0 5px;font-weight:500}
+  input[type=text]{width:100%;border:1px solid var(--hair);border-radius:2px;padding:12px;font-size:16px;font-family:var(--sans);background:var(--canvas)}
+  input:focus{outline:none;border-color:var(--navy)}
+  .padwrap{border:1px solid var(--hair);border-radius:2px;background:#fff;position:relative;margin-top:6px}
+  .padwrap canvas{display:block;width:100%;height:170px;touch-action:none;border-radius:2px}
+  .padwrap .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#C7C2B8;font-size:14px;pointer-events:none}
+  .padbar{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+  .padbar .hint{font-size:12px;color:var(--stone)}
+  .lnk{background:none;border:none;color:var(--navy);font-size:13px;cursor:pointer;font-family:var(--sans);text-decoration:underline;padding:4px}
+  .consent{display:flex;gap:10px;align-items:flex-start;margin:18px 0 4px;font-size:13.5px;color:#2c2b28;line-height:1.55}
+  .consent input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:var(--navy)}
+  .btn{width:100%;border:none;border-radius:2px;padding:16px;font-size:16px;font-weight:600;font-family:var(--sans);cursor:pointer;margin-top:16px}
+  .btn.go{background:var(--navy);color:#fff}.btn.go:disabled{background:#B9C2CC;cursor:not-allowed}
+  .btn.ghost{background:none;border:1px solid var(--hair);color:var(--stone)}
+  .note{font-size:12px;color:var(--stone);line-height:1.6;margin-top:14px;text-align:center}
+  /* states */
+  .state{max-width:520px;margin:60px auto;text-align:center;padding:0 24px}
+  .state .em{font-family:var(--display);font-size:32px;font-weight:700;margin-bottom:8px}
+  .state p{color:var(--stone)}
+  .badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:30px;border:1px solid var(--hair)}
+  .badge.signed{color:var(--ok);border-color:#BFE0D4;background:#EAF4EF}
+  .badge.viewed{color:var(--navy)}
+  .badge.declined{color:var(--danger);border-color:#E6C9C9;background:#F8EEEE}
+  .receipt{background:#EAF4EF;border:1px solid #BFE0D4;border-radius:2px;padding:18px;text-align:center;margin-top:18px}
+  .receipt .em{font-family:var(--display);font-size:26px;font-weight:700;color:var(--ok)}
+  .receipt .sig{max-width:220px;margin:10px auto 4px;border-bottom:1px solid var(--hair)}
+  .receipt .sig img{max-width:100%;max-height:90px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:30;font-size:14px;max-width:90%;text-align:center}
+  .toast.show{opacity:1}
+  .hide{display:none!important}
+  .skel{color:var(--stone);text-align:center;padding:70px 0}
+  .actionbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--hair);padding:12px 16px;z-index:20}
+  .actionbar .inner{max-width:680px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .actionbar .st{flex:1;font-size:12px;color:var(--stone)}
+  .actionbar .b{background:var(--navy);color:#fff;border:none;border-radius:2px;padding:13px 22px;font-size:15px;font-weight:600;font-family:var(--sans);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="top"><div class="mark">LLOOP</div><div class="tl">love · loop</div></div>
+
+<div id="loading" class="skel">กำลังเปิดสัญญา…</div>
+<div id="error" class="state hide"><div class="em">ไม่พบสัญญา</div><p>ลิงก์อาจหมดอายุหรือไม่ถูกต้อง — กรุณาติดต่อทีม LLOOP เพื่อขอลิงก์ใหม่ค่ะ</p></div>
+
+<div id="main" class="wrap hide">
+  <!-- เอกสารสัญญา -->
+  <div class="doc">
+    <div class="klabel">หนังสือสัญญา</div>
+    <h1 id="docTitle">สัญญาความร่วมมือพาร์ทเนอร์</h1>
+    <div class="meta">เลขที่ <b id="cNo">—</b> · สถานะ <span id="cStatusTxt">—</span></div>
+
+    <div class="parties">
+      <div class="party">
+        <div class="role">ฝ่ายที่ 1 — ผู้ว่าจ้าง</div>
+        <div class="nm">LLOOP (แอลลูป)</div>
+        <div class="dt">แพลตฟอร์มเช่าชุด &amp; AI สไตลิสต์<br>“บริษัท” / “LLOOP”</div>
+      </div>
+      <div class="party">
+        <div class="role">ฝ่ายที่ 2 — พาร์ทเนอร์</div>
+        <div class="nm" id="pName">—</div>
+        <div class="dt" id="pDetail">—</div>
+      </div>
+    </div>
+
+    <div class="comp">
+      <div class="ct">สรุปสาระสำคัญ</div>
+      <div id="compRows"></div>
+    </div>
+
+    <div id="clauses"></div>
+  </div>
+
+  <!-- โซนลงนาม -->
+  <div id="signzone" class="signcard">
+    <h2>ลงนามในสัญญา</h2>
+    <div class="sub">โปรดอ่านสัญญาโดยละเอียดก่อนลงนาม การลงนามอิเล็กทรอนิกส์นี้มีผลผูกพันตามกฎหมาย</div>
+
+    <label>ชื่อ-นามสกุล ผู้ลงนาม</label>
+    <input type="text" id="signerName" placeholder="ชื่อ-นามสกุล ตามบัตรประชาชน">
+
+    <label>เลขบัตรประชาชน / เลขผู้เสียภาษี</label>
+    <input type="text" id="signerId" inputmode="numeric" placeholder="x-xxxx-xxxxx-xx-x">
+
+    <label>ลายเซ็น — เซ็นด้วยนิ้วหรือเมาส์ในกรอบด้านล่าง</label>
+    <div class="padwrap">
+      <canvas id="pad"></canvas>
+      <div class="ph" id="padPh">เซ็นที่นี่</div>
+    </div>
+    <div class="padbar">
+      <span class="hint">ลายเซ็นจะถูกบันทึกเป็นหลักฐานพร้อมวันเวลา</span>
+      <button class="lnk" onclick="clearPad()">ล้างลายเซ็น</button>
+    </div>
+
+    <label class="consent">
+      <input type="checkbox" id="consent">
+      <span id="consentTxt">ข้าพเจ้าได้อ่านและเข้าใจข้อความในสัญญาฉบับนี้โดยตลอดแล้ว ตกลงยอมรับและผูกพันตามเงื่อนไขทุกประการ และยินยอมให้การลงนามอิเล็กทรอนิกส์นี้มีผลสมบูรณ์เทียบเท่าการลงนามด้วยลายมือ ตามพระราชบัญญัติว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์</span>
+    </label>
+
+    <button class="btn go" id="signBtn" onclick="doSign()" disabled>ยอมรับและลงนาม</button>
+    <button class="btn ghost" onclick="openDecline()">ขอแก้ไข / ยังไม่ลงนาม</button>
+    <div class="note">เมื่อลงนาม ระบบจะบันทึกชื่อ ลายเซ็น วันเวลา และข้อมูลอุปกรณ์เพื่อเป็นหลักฐาน · สำเนาสัญญาจะส่งให้คุณทาง LINE</div>
+  </div>
+
+  <!-- ใบเสร็จเมื่อเซ็นแล้ว -->
+  <div id="done" class="receipt hide">
+    <div class="badge signed">ลงนามเรียบร้อย</div>
+    <div class="em" style="margin-top:10px">ขอบคุณค่ะ</div>
+    <p style="color:var(--stone);font-size:14px">สัญญาเลขที่ <b id="doneNo"></b> มีผลสมบูรณ์แล้ว</p>
+    <div class="sig" id="doneSig"></div>
+    <p style="font-size:13px;color:var(--stone)" id="doneMeta"></p>
+  </div>
+</div>
+
+<!-- แถบลงนามลอยล่าง -->
+<div id="actionbar" class="actionbar hide">
+  <div class="inner">
+    <div class="st" id="abSt">เลื่อนอ่านจนจบ แล้วลงนามด้านล่าง</div>
+    <button class="b" onclick="scrollToSign()">ไปที่ลงนาม</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const LIFF_ID='2010486714-1g6lDuHo';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+  const $=id=>document.getElementById(id);
+  const token=new URLSearchParams(location.search).get('token');
+  let C=null, lineUid=null;
+
+  function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
+  const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH');
+  function thDate(s){ if(!s) return '—'; const d=new Date(s+(s.length<=10?'T00:00:00':'')); if(isNaN(d)) return s;
+    return d.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}); }
+
+  // ---------- เทมเพลตสัญญา (ตัวแปรเติมจากระเบียน) ----------
+  const COMP_LABEL={commission:'ค่าคอมมิชชัน (% ต่อเคส)',fixed:'ค่าตอบแทนเหมาจ่าย',per_job:'ค่าตอบแทนต่อชิ้นงาน',mixed:'แบบผสม (เหมาจ่าย + คอมมิชชัน)',quota:'เงินล่วงหน้าต่อหัว (โควต้า)'};
+  const CYCLE_LABEL={monthly:'รายเดือน',biweekly:'ราย 15 วัน',per_job:'จ่ายเป็นรายเคส',milestone:'ตามงวดงาน'};
+  const quotaTotal=v=>Number(v.per_head||0)*Number(v.quota||0);
+
+  function compRows(v){
+    const r=[];
+    r.push(['รูปแบบค่าตอบแทน', COMP_LABEL[v.comp_type]||'ตามที่ตกลง']);
+    if(v.comp_type==='commission'||v.comp_type==='mixed') if(v.commission_pct) r.push(['อัตราคอมมิชชัน', v.commission_pct+'% ต่อเคส']);
+    if(v.comp_type==='fixed'||v.comp_type==='mixed')      if(v.rate)           r.push(['ค่าตอบแทนเหมาจ่าย', baht(v.rate)+(v.payment_cycle==='monthly'?' / เดือน':'')]);
+    if(v.comp_type==='per_job')                            if(v.per_job_rate)   r.push(['ค่าตอบแทนต่อเคส', baht(v.per_job_rate)]);
+    if(v.comp_type==='quota'){
+      if(v.per_head) r.push(['ค่าบริการต่อราย', baht(v.per_head)]);
+      if(v.quota)    r.push(['โควต้าจำนวนลูกค้า', Number(v.quota).toLocaleString('th-TH')+' ราย']);
+      if(v.per_head&&v.quota){
+        const adv=v.advance_pct||100;
+        r.push(['มูลค่ารวมตามสัญญา', baht(quotaTotal(v))]);
+        r.push(['เงินจ่ายล่วงหน้า', adv+'% = '+baht(Math.round(quotaTotal(v)*adv/100))+' (ก่อนเริ่มงาน)']);
+      }
+      if(v.valid_until) r.push(['ใช้โควต้าให้ครบภายใน', thDate(v.valid_until)]);
+    }
+    if(v.payment_cycle && v.comp_type!=='quota') r.push(['รอบจ่ายค่าตอบแทน', CYCLE_LABEL[v.payment_cycle]||v.payment_cycle]);
+    if(v.wht_pct)       r.push(['หักภาษี ณ ที่จ่าย', v.wht_pct+'%']);
+    r.push(['ระยะเวลาสัญญา', thDate(v.start_date)+' — '+(v.end_date?thDate(v.end_date):'จนกว่าจะบอกเลิก')]);
+    if(v.notice_days)  r.push(['แจ้งบอกเลิกล่วงหน้า', v.notice_days+' วัน']);
+    return r;
+  }
+
+  // ค่าตอบแทนเป็นข้อความสำหรับ clause
+  function compSentence(v){
+    const cy=CYCLE_LABEL[v.payment_cycle]||'ตามที่ตกลง';
+    if(v.comp_type==='commission') return `ผู้ว่าจ้างตกลงจ่ายค่าตอบแทนแก่พาร์ทเนอร์เป็นค่าคอมมิชชันในอัตรา ${v.commission_pct||'__'}% ของมูลค่าบริการที่ LLOOP เรียกเก็บจากลูกค้าซึ่งพาร์ทเนอร์เป็นผู้ให้บริการ โดยจ่าย${cy}`;
+    if(v.comp_type==='fixed')      return `ผู้ว่าจ้างตกลงจ่ายค่าตอบแทนแก่พาร์ทเนอร์แบบเหมาจ่ายเป็นเงิน ${baht(v.rate)} ต่อรอบ โดยจ่าย${cy}`;
+    if(v.comp_type==='per_job')    return `ผู้ว่าจ้างตกลงจ่ายค่าตอบแทนแก่พาร์ทเนอร์เป็นเงิน ${baht(v.per_job_rate)} ต่อเคส/ชิ้นงานที่ส่งมอบและผ่านการตรวจรับ`;
+    if(v.comp_type==='mixed')      return `ผู้ว่าจ้างตกลงจ่ายค่าตอบแทนแก่พาร์ทเนอร์แบบผสม ประกอบด้วยค่าเหมาจ่าย ${baht(v.rate)} ต่อรอบ และค่าคอมมิชชัน ${v.commission_pct||'__'}% ของมูลค่าบริการต่อเคส โดยจ่าย${cy}`;
+    if(v.comp_type==='quota'){ const adv=v.advance_pct||100;
+      return `ผู้ว่าจ้างตกลงชำระค่าบริการแก่พาร์ทเนอร์ในอัตรา ${baht(v.per_head)} ต่อลูกค้าหนึ่งราย สำหรับโควต้าจำนวน ${Number(v.quota).toLocaleString('th-TH')} ราย รวมเป็นเงินทั้งสิ้น ${baht(quotaTotal(v))} โดยผู้ว่าจ้างจะชำระเงินล่วงหน้า ${adv}% เป็นเงิน ${baht(Math.round(quotaTotal(v)*adv/100))} ก่อนเริ่มให้บริการ เพื่อให้พาร์ทเนอร์สำรองคิวและจัดเตรียมการให้บริการแก่ลูกค้าที่ LLOOP ส่งต่อ`;
+    }
+    return 'ผู้ว่าจ้างตกลงจ่ายค่าตอบแทนแก่พาร์ทเนอร์ตามรายละเอียดสรุปสาระสำคัญข้างต้น';
+  }
+
+  function buildClauses(c){
+    const v=c.vars||{};
+    const partner = c.partner_org ? `${c.partner_name} (ในนาม ${c.partner_org})` : c.partner_name;
+    const scope = c.scope || 'งานวิเคราะห์ Personal Color, การวิเคราะห์รูปหน้า–รูปร่าง, การจัดสไตล์และให้คำแนะนำการแต่งกายแก่ลูกค้าที่ LLOOP ส่งต่อให้ รวมถึงการบันทึกผลวิเคราะห์ลงระบบของ LLOOP';
+    const wht = v.wht_pct||3;
+    const notice = v.notice_days||15;
+    const isQuota = v.comp_type==='quota';
+
+    return [
+    {h:'คู่สัญญาและการมีผลของสัญญา', p:[
+      `สัญญาฉบับนี้ทำขึ้นระหว่าง <b>LLOOP</b> ผู้ดำเนินกิจการแพลตฟอร์มเช่าชุดและบริการสไตลิสต์ด้วย AI ("ผู้ว่าจ้าง" หรือ "LLOOP") ฝ่ายหนึ่ง กับ <b>${esc(partner)}</b> ("พาร์ทเนอร์" หรือ "ผู้รับจ้าง") อีกฝ่ายหนึ่ง`,
+      `คู่สัญญาทั้งสองฝ่ายตกลงทำสัญญาในลักษณะผู้ประกอบการอิสระ (Independent Contractor) มิใช่สัญญาจ้างแรงงาน พาร์ทเนอร์มิได้เป็นลูกจ้างของ LLOOP และไม่มีสิทธิเรียกร้องสวัสดิการแรงงานใด ๆ เว้นแต่ที่ระบุไว้ในสัญญานี้`
+    ]},
+    {h:'ขอบเขตงานและบริการ', p:[
+      `พาร์ทเนอร์ตกลงให้บริการแก่ลูกค้าของ LLOOP ในขอบเขตดังนี้: ${esc(scope)}`,
+      `พาร์ทเนอร์จะให้บริการด้วยความรู้ความชำนาญตามมาตรฐานวิชาชีพ ด้วยความสุภาพ ตรงต่อเวลา และรักษาภาพลักษณ์ที่ดีของ LLOOP ต่อลูกค้าทุกราย`
+    ]},
+    {h:'มาตรฐานงานและการส่งมอบ', p:[
+      `พาร์ทเนอร์จะส่งมอบผลงานผ่านระบบ/ฟอร์มที่ LLOOP กำหนด (เช่น พอร์ทัลสไตลิสต์) ให้ครบถ้วนถูกต้องภายในกำหนดเวลาที่ตกลงในแต่ละเคส`,
+      `กรณีงานไม่เป็นไปตามมาตรฐานหรือมีข้อผิดพลาด พาร์ทเนอร์ตกลงแก้ไขปรับปรุงโดยไม่คิดค่าใช้จ่ายเพิ่มภายในเวลาอันสมควร`
+    ]},
+    {h:'ค่าตอบแทนและการชำระเงิน', p:[
+      compSentence(v)+'.',
+      `LLOOP จะหักภาษี ณ ที่จ่ายในอัตรา ${wht}% (หรืออัตราตามกฎหมาย) และนำส่งกรมสรรพากรตามหน้าที่ พาร์ทเนอร์มีหน้าที่ออกใบเสร็จ/หลักฐานการรับเงิน และรับผิดชอบภาษีของตนเองตามกฎหมาย`
+    ]},
+    ...(isQuota ? [{h:'เงินจ่ายล่วงหน้า โควต้า และการคืนเงินส่วนที่ไม่ได้ใช้', p:[
+      `เงินที่ผู้ว่าจ้างชำระล่วงหน้าถือเป็นค่าบริการล่วงหน้าสำหรับโควต้าลูกค้าจำนวน ${Number(v.quota||0).toLocaleString('th-TH')} ราย และจะถูกหักลดในอัตรา ${baht(v.per_head)} ต่อการให้บริการลูกค้าหนึ่งรายที่พาร์ทเนอร์ส่งมอบผลงานครบถ้วนและบันทึกผลลงระบบของ LLOOP เรียบร้อย`,
+      `พาร์ทเนอร์ตกลงสำรองคิวและให้บริการแก่ลูกค้าที่ LLOOP ส่งต่อจนครบโควต้า ${v.valid_until?`ภายในวันที่ ${thDate(v.valid_until)}`:'ภายในระยะเวลาของสัญญา'} โดยให้บริการตามมาตรฐานวิชาชีพและคิวที่ตกลงร่วมกัน`,
+      `เมื่อสิ้นสุดระยะเวลาดังกล่าวหรือมีการบอกเลิกสัญญา หากพาร์ทเนอร์ยังให้บริการไม่ครบโควต้า พาร์ทเนอร์ตกลงคืนเงินล่วงหน้าส่วนที่ยังมิได้ให้บริการ คำนวณเท่ากับ ${baht(v.per_head)} คูณด้วยจำนวนรายที่คงเหลือ ให้แก่ผู้ว่าจ้างภายใน 15 วันนับแต่วันสิ้นสุด`,
+      `กรณีลูกค้าที่ LLOOP ส่งต่อและนัดหมายแล้วไม่มารับบริการตามนัด (no-show) โดยมิใช่ความผิดของพาร์ทเนอร์ และพาร์ทเนอร์ได้จัดเตรียมพร้อมให้บริการแล้ว ให้นับรวมเป็นการใช้โควต้าหนึ่งรายได้ เพื่อความเป็นธรรมแก่พาร์ทเนอร์`,
+      `LLOOP มีหน้าที่ส่งต่อลูกค้าให้พาร์ทเนอร์อย่างต่อเนื่องตามสมควรเพื่อให้ใช้โควต้าได้ครบ หากครบโควต้าแล้วและทั้งสองฝ่ายประสงค์ดำเนินการต่อ จะตกลงต่อโควต้ารอบใหม่เป็นลายลักษณ์อักษร`
+    ]}] : []),
+    {h:'ระยะเวลาของสัญญา', p:[
+      `สัญญานี้มีผลตั้งแต่วันที่ ${thDate(v.start_date)} ${v.end_date?`จนถึงวันที่ ${thDate(v.end_date)}`:'จนกว่าฝ่ายใดฝ่ายหนึ่งจะบอกเลิก'} เมื่อครบกำหนดคู่สัญญาอาจตกลงต่ออายุเป็นลายลักษณ์อักษร`
+    ]},
+    {h:'การรักษาความลับ', p:[
+      `พาร์ทเนอร์ตกลงรักษาความลับของข้อมูลลูกค้า ข้อมูลธุรกิจ ราคา กลยุทธ์ และข้อมูลใด ๆ ที่ได้รับรู้จากการปฏิบัติงาน จะไม่เปิดเผยหรือนำไปใช้เพื่อประโยชน์อื่นนอกเหนือจากการปฏิบัติตามสัญญานี้ ทั้งในระหว่างและภายหลังสิ้นสุดสัญญา`
+    ]},
+    {h:'การคุ้มครองข้อมูลส่วนบุคคล (PDPA)', p:[
+      `ในการให้บริการ พาร์ทเนอร์อาจเข้าถึงข้อมูลส่วนบุคคลของลูกค้า พาร์ทเนอร์ตกลงประมวลผลข้อมูลเฉพาะเท่าที่จำเป็นต่องาน ภายใต้คำสั่งของ LLOOP และตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562`,
+      `ห้ามคัดลอก เก็บ หรือนำข้อมูลลูกค้าออกนอกระบบเพื่อใช้ส่วนตัว เมื่อสิ้นสุดสัญญาพาร์ทเนอร์จะลบหรือส่งคืนข้อมูลทั้งหมดที่ครอบครองอยู่`
+    ]},
+    {h:'ทรัพย์สินทางปัญญา', p:[
+      `ผลงาน ผลวิเคราะห์ ภาพถ่าย ลุคบุ๊ก และเอกสารที่จัดทำขึ้นเพื่อ LLOOP ภายใต้สัญญานี้ ให้ตกเป็นกรรมสิทธิ์/สิทธิ์ในการใช้งานของ LLOOP เพื่อให้บริการลูกค้าและทำการตลาดได้`,
+      `พาร์ทเนอร์ยังคงสิทธิ์ในองค์ความรู้และวิธีการเฉพาะตัวของตน และอนุญาตให้ LLOOP ใช้ชื่อ/ตราสัญลักษณ์ของพาร์ทเนอร์เพื่อการประชาสัมพันธ์ความร่วมมือได้`
+    ]},
+    {h:'การไม่ชักจูงลูกค้าออกนอกระบบ', p:[
+      `พาร์ทเนอร์ตกลงจะไม่ชักชวน โน้มน้าว หรือรับงานโดยตรงจากลูกค้าที่ LLOOP เป็นผู้แนะนำหรือส่งต่อให้ เพื่อหลีกเลี่ยงค่าตอบแทนแก่ LLOOP ทั้งในระหว่างสัญญาและภายใน 12 เดือนหลังสิ้นสุดสัญญา`
+    ]},
+    {h:'ความรับผิดและการรับประกันงาน', p:[
+      `พาร์ทเนอร์รับผิดชอบต่อความเสียหายที่เกิดจากความประมาทเลินเล่อหรือการจงใจของตน ความรับผิดรวมไม่เกินมูลค่าค่าตอบแทนที่ได้รับในเคสที่เกี่ยวข้อง เว้นแต่กรณีจงใจหรือประมาทเลินเล่ออย่างร้ายแรง`
+    ]},
+    {h:'การบอกเลิกสัญญา', p:[
+      `ฝ่ายใดฝ่ายหนึ่งอาจบอกเลิกสัญญาได้โดยแจ้งเป็นลายลักษณ์อักษรล่วงหน้าไม่น้อยกว่า ${notice} วัน`,
+      `หากฝ่ายใดผิดสัญญาอย่างมีนัยสำคัญและไม่แก้ไขภายใน 7 วันนับแต่ได้รับแจ้ง อีกฝ่ายมีสิทธิบอกเลิกสัญญาได้ทันที โดยไม่กระทบสิทธิเรียกค่าเสียหาย`
+    ]},
+    {h:'เหตุสุดวิสัย', p:[
+      `คู่สัญญาไม่ต้องรับผิดต่อความล่าช้าหรือการไม่ปฏิบัติตามสัญญาอันเกิดจากเหตุสุดวิสัยที่อยู่นอกเหนือการควบคุม โดยจะแจ้งอีกฝ่ายโดยเร็วและร่วมกันบรรเทาผลกระทบ`
+    ]},
+    {h:'กฎหมายและการระงับข้อพิพาท', p:[
+      `สัญญานี้อยู่ภายใต้บังคับและตีความตามกฎหมายไทย กรณีมีข้อพิพาทคู่สัญญาจะเจรจาโดยสุจริตก่อน หากไม่อาจตกลงได้ให้นำขึ้นสู่ศาลที่มีเขตอำนาจในประเทศไทย`
+    ]},
+    {h:'ข้อตกลงทั่วไป', p:[
+      `สัญญานี้เป็นข้อตกลงทั้งหมดระหว่างคู่สัญญา การแก้ไขเพิ่มเติมต้องทำเป็นลายลักษณ์อักษรและได้รับความยินยอมจากทั้งสองฝ่าย หากข้อใดเป็นโมฆะ ให้ข้ออื่นยังคงมีผลบังคับ`
+    ]},
+    {h:'การลงนามอิเล็กทรอนิกส์', p:[
+      `คู่สัญญาตกลงให้การลงนามอิเล็กทรอนิกส์ผ่านระบบของ LLOOP มีผลสมบูรณ์และผูกพันตามกฎหมายเทียบเท่าการลงนามด้วยลายมือ ตามพระราชบัญญัติว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544 ระบบจะบันทึกชื่อผู้ลงนาม ลายเซ็น วันเวลา และข้อมูลอุปกรณ์ไว้เป็นหลักฐาน`
+    ]}
+    ];
+  }
+
+  // ---------- render ----------
+  function render(c){
+    C=c;
+    const title=c.title || (c.template==='influencer'?'สัญญาความร่วมมืออินฟลูเอนเซอร์':c.template==='supplier'?'สัญญาจัดหาสินค้า/บริการ':'สัญญาความร่วมมือพาร์ทเนอร์สไตลิสต์');
+    $('docTitle').textContent=title;
+    $('cNo').textContent=c.contract_no||'—';
+    $('pName').textContent=c.partner_name||'—';
+    const pd=[]; if(c.partner_org) pd.push(c.partner_org);
+    if(c.partner_type==='company') pd.push('นิติบุคคล'); else pd.push('บุคคลธรรมดา');
+    if(c.partner_tax_id) pd.push('เลขประจำตัว '+c.partner_tax_id);
+    $('pDetail').innerHTML=esc(pd.join(' · '));
+
+    // สรุปสาระสำคัญ
+    $('compRows').innerHTML=compRows(c.vars||{}).map(([k,v])=>
+      `<div class="row"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`).join('');
+
+    // ข้อสัญญา
+    const clauses=buildClauses(c).concat((c.extra_clauses||[]).map(x=>({h:x.h||'ข้อตกลงเพิ่มเติม',p:[x.body||'']})));
+    $('clauses').innerHTML=clauses.map((cl,i)=>
+      `<div class="clause"><h3><span class="no">${i+1}.</span>${esc(cl.h)}</h3>${cl.p.map(t=>`<p>${t}</p>`).join('')}</div>`).join('');
+
+    // prefill ผู้ลงนาม
+    $('signerName').value=c.partner_name||'';
+    $('signerId').value=c.partner_tax_id||'';
+
+    // สถานะ
+    const stTxt={draft:'ฉบับร่าง',sent:'รอลงนาม',viewed:'เปิดอ่านแล้ว',signed:'ลงนามแล้ว',declined:'ขอแก้ไข',void:'ยกเลิก'}[c.status]||c.status;
+    $('cStatusTxt').textContent=stTxt;
+
+    $('loading').classList.add('hide');
+    $('main').classList.remove('hide');
+
+    if(c.status==='signed'){ showSigned(c); }
+    else if(c.status==='void'){ $('signzone').innerHTML='<p style="color:var(--danger);text-align:center">สัญญาฉบับนี้ถูกยกเลิกแล้ว</p>'; }
+    else { $('actionbar').classList.remove('hide'); setupPad(); wireForm(); }
+  }
+
+  function showSigned(c){
+    $('signzone').classList.add('hide');
+    $('actionbar').classList.add('hide');
+    $('done').classList.remove('hide');
+    $('doneNo').textContent=c.contract_no||'';
+    if(c.signature && c.signature.startsWith('data:image')) $('doneSig').innerHTML=`<img src="${c.signature}" alt="ลายเซ็น">`;
+    else if(c.signer_name) $('doneSig').innerHTML=`<div style="font-family:var(--display);font-size:24px;padding:10px 0">${esc(c.signer_name)}</div>`;
+    const when=c.signed_at?new Date(c.signed_at).toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'}):'';
+    $('doneMeta').textContent=(c.signer_name?('ผู้ลงนาม '+c.signer_name+' · '):'')+(when?('ลงนามเมื่อ '+when):'');
+  }
+
+  // ---------- signature pad ----------
+  let pad,ctx,drawing=false,hasInk=false;
+  function setupPad(){
+    pad=$('pad'); ctx=pad.getContext('2d');
+    const resize=()=>{ const r=pad.getBoundingClientRect(); const dpr=window.devicePixelRatio||1;
+      pad.width=r.width*dpr; pad.height=r.height*dpr; ctx.scale(dpr,dpr);
+      ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#1C1B19'; };
+    resize();
+    const pos=e=>{ const r=pad.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return [t.clientX-r.left,t.clientY-r.top]; };
+    const start=e=>{ e.preventDefault(); drawing=true; const [x,y]=pos(e); ctx.beginPath(); ctx.moveTo(x,y); };
+    const move=e=>{ if(!drawing)return; e.preventDefault(); const [x,y]=pos(e); ctx.lineTo(x,y); ctx.stroke();
+      if(!hasInk){hasInk=true;$('padPh').classList.add('hide');checkReady();} };
+    const end=()=>{ drawing=false; };
+    pad.addEventListener('mousedown',start); pad.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',end);
+    pad.addEventListener('touchstart',start,{passive:false}); pad.addEventListener('touchmove',move,{passive:false});
+    pad.addEventListener('touchend',end);
+  }
+  function clearPad(){ if(!ctx)return; ctx.clearRect(0,0,pad.width,pad.height); hasInk=false; $('padPh').classList.remove('hide'); checkReady(); }
+
+  function wireForm(){
+    ['signerName','signerId'].forEach(id=>$(id).addEventListener('input',checkReady));
+    $('consent').addEventListener('change',checkReady);
+  }
+  function checkReady(){
+    const ok = $('signerName').value.trim().length>2 && $('consent').checked && (hasInk || $('signerName').value.trim().length>2);
+    $('signBtn').disabled=!($('consent').checked && $('signerName').value.trim().length>2 && hasInk);
+  }
+  function scrollToSign(){ $('signzone').scrollIntoView({behavior:'smooth'}); }
+
+  // ---------- snapshot ข้อความสัญญาเต็ม (เก็บหลักฐาน) ----------
+  function snapshot(c){
+    const lines=[`${($('docTitle').textContent)}`,`เลขที่ ${c.contract_no}`,''];
+    lines.push('สรุปสาระสำคัญ:'); compRows(c.vars||{}).forEach(([k,v])=>lines.push(`  - ${k}: ${v}`)); lines.push('');
+    const clauses=buildClauses(c).concat((c.extra_clauses||[]).map(x=>({h:x.h||'ข้อตกลงเพิ่มเติม',p:[x.body||'']})));
+    clauses.forEach((cl,i)=>{ lines.push(`ข้อ ${i+1}. ${cl.h}`); cl.p.forEach(t=>lines.push('   '+t.replace(/<[^>]+>/g,''))); lines.push(''); });
+    return lines.join('\n');
+  }
+
+  // ---------- actions ----------
+  async function doSign(){
+    if($('signBtn').disabled) return;
+    $('signBtn').disabled=true; $('signBtn').textContent='กำลังบันทึก…';
+    const sig = hasInk ? pad.toDataURL('image/png') : $('signerName').value.trim();
+    const { data, error } = await sb.rpc('contract_sign',{ p_token:token, p:{
+      signer_name:$('signerName').value.trim(),
+      signer_id_card:$('signerId').value.trim(),
+      signature:sig, consent:true,
+      body_snapshot:snapshot(C), line_uid:lineUid
+    }});
+    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); $('signBtn').disabled=false; $('signBtn').textContent='ยอมรับและลงนาม'; return; }
+    if(data!=='ok'){
+      const m={already:'สัญญานี้ถูกลงนามไปแล้ว',void:'สัญญาถูกยกเลิกแล้ว',not_found:'ไม่พบสัญญา',no_consent:'กรุณายอมรับเงื่อนไขก่อน'}[data]||'ไม่สำเร็จ';
+      toast(m); $('signBtn').disabled=false; $('signBtn').textContent='ยอมรับและลงนาม'; return;
+    }
+    const merged=Object.assign({},C,{status:'signed',signer_name:$('signerName').value.trim(),signature:sig,signed_at:new Date().toISOString()});
+    showSigned(merged);
+    window.scrollTo({top:0,behavior:'smooth'});
+    toast('ลงนามเรียบร้อย — ขอบคุณค่ะ');
+  }
+
+  async function openDecline(){
+    const reason=prompt('อยากให้แก้ไขส่วนไหน หรือเหตุผลที่ยังไม่ลงนามคะ? (ทีม LLOOP จะติดต่อกลับ)');
+    if(reason===null) return;
+    const { data, error } = await sb.rpc('contract_decline',{ p_token:token, p_reason:reason });
+    if(error){ toast('ส่งไม่สำเร็จ: '+error.message); return; }
+    toast('ส่งคำขอแก้ไขให้ทีม LLOOP แล้วค่ะ');
+  }
+
+  // ---------- boot ----------
+  async function boot(){
+    if(!token){ $('loading').classList.add('hide'); $('error').classList.remove('hide'); return; }
+    // LIFF (ไม่บังคับ — เปิดในเบราว์เซอร์ปกติก็ได้)
+    try{ await liff.init({liffId:LIFF_ID}); if(liff.isLoggedIn()){ const p=await liff.getProfile(); lineUid=p.userId; } }catch(e){ /* เบราว์เซอร์ปกติ */ }
+    const { data, error } = await sb.rpc('contract_get',{ p_token:token, p_line_uid:lineUid });
+    if(error || !data || data.error){ $('loading').classList.add('hide'); $('error').classList.remove('hide'); return; }
+    render(data);
+  }
+  boot();
+</script>
+</body>
+</html>
