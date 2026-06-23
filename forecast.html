@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ประมาณการตัวเลข</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --navy:#0D2F4F; --teal:#3DC5B7; --ink:#1A2330; --muted:#7C8694; --line:#E6E9ED;
+    --bg:#F6F8FA; --card:#FFFFFF; --gold:#B8975A;
+    --sans:'IBM Plex Sans Thai','Inter',sans-serif; --disp:'Poppins','IBM Plex Sans Thai',sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+  .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .brand{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:1px;color:var(--navy)}
+  .sub{font-size:12px;color:var(--muted)}
+  h1{font-family:var(--disp);font-weight:600;font-size:18px;color:var(--ink);margin:14px 0 2px}
+  .tabs{display:flex;gap:8px;margin:16px 0 18px}
+  .tabs button{flex:1;font-family:var(--sans);font-size:14px;font-weight:600;padding:11px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:10px;cursor:pointer}
+  .tabs button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin-bottom:14px}
+  .card h2{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+  .f{display:flex;flex-direction:column;gap:4px}
+  .f label{font-size:12px;color:var(--muted)}
+  .f input{font-family:var(--sans);font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
+  .f input:focus{outline:none;border-color:var(--teal)}
+  .res{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 13px}
+  .stat .l{font-size:11.5px;color:var(--muted)}
+  .stat .v{font-family:var(--disp);font-weight:600;font-size:21px;color:var(--navy);margin-top:2px;line-height:1.15}
+  .stat .h{font-size:11px;color:var(--muted);margin-top:1px}
+  .stat.good .v{color:#0F7B5A}
+  .stat.bad .v{color:#B4543A}
+  .bar{display:flex;width:100%;height:34px;border-radius:9px;overflow:hidden;margin:14px 0 12px}
+  .bar i{display:block}
+  .leg{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13px}
+  .leg span{display:flex;align-items:center;gap:8px}
+  .leg .d{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+  .leg b{margin-left:auto;font-weight:600}
+  .note{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+  .lock{max-width:380px;margin:64px auto;text-align:center}
+  .lock .ic{font-family:var(--disp);font-size:30px;color:var(--navy)}
+  .lock h2{font-family:var(--disp);font-weight:600;font-size:18px;margin:8px 0 6px}
+  .lock p{font-size:13px;color:var(--muted);margin-bottom:16px}
+  .lock input{width:100%;font-family:var(--sans);font-size:14px;padding:11px;border:1px solid var(--line);border-radius:9px;margin-bottom:10px}
+  .lock button,.applybtn{width:100%;background:var(--navy);color:#fff;border:none;padding:12px;font-family:var(--sans);font-size:14px;font-weight:600;border-radius:9px;cursor:pointer}
+  .trend{display:flex;align-items:flex-end;gap:6px;height:70px;margin-top:6px}
+  .trend .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .trend .bk{width:100%;background:var(--teal);border-radius:4px 4px 0 0;min-height:3px;opacity:.85}
+  .trend .mo{font-size:10px;color:var(--muted)}
+  .hidden{display:none}
+  .gaprow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .gaprow:last-child{border-bottom:none}
+  .gaprow b{font-weight:600}
+  .prog{height:9px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 2px}
+  .prog i{display:block;height:100%;background:var(--teal)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="lock" id="lock">
+    <div class="ic">LLOOP</div>
+    <h2>หน้านี้สำหรับเจ้าของเท่านั้น</h2>
+    <p id="lockmsg">กำลังตรวจสอบสิทธิ์…</p>
+    <div id="uidbox" class="hidden">
+      <input id="uidin" placeholder="วาง LINE UID เจ้าของ (ขึ้นต้น U…)">
+      <button onclick="unlock()">ปลดล็อก</button>
+    </div>
+  </div>
+
+  <div id="main" class="hidden">
+    <div class="top">
+      <span class="brand">LLOOP</span>
+      <span class="sub" id="who">ประมาณการตัวเลข</span>
+    </div>
+
+    <div class="tabs">
+      <button id="tabPlan" class="on" onclick="setMode('plan')">ประมาณการ (ก่อน kick-off)</button>
+      <button id="tabReal" onclick="setMode('real')">ของจริง (เดือนนี้)</button>
+    </div>
+
+    <div id="planMode">
+      <div class="card">
+        <h2>ตั้งเป้า &amp; สมมติฐาน (แก้ได้)</h2>
+        <div class="grid">
+          <div class="f"><label>เป้ายอดขาย / เดือน (บาท)</label><input type="number" id="i_target" value="300000"></div>
+          <div class="f"><label>รายได้เฉลี่ย / การเช่า</label><input type="number" id="i_rpr" value="286"></div>
+          <div class="f"><label>เช่า / ลูกค้า / เดือน</label><input type="number" id="i_freq" value="2"></div>
+          <div class="f"><label>กำไรขั้นต้น / การเช่า</label><input type="number" id="i_contrib" value="174"></div>
+          <div class="f"><label>เช่า / ชุด / เดือน (util)</label><input type="number" step="0.1" id="i_util" value="2.7"></div>
+          <div class="f"><label>ลูกค้าที่ 1 คนจับชุดดูแลได้</label><input type="number" id="i_cap" value="190"></div>
+          <div class="f"><label>เงินเดือน / คนจับชุด</label><input type="number" id="i_ops" value="18000"></div>
+          <div class="f"><label>เงินเดือนทีมเสริม (สไตลิสต์+คอนเทนต์)</label><input type="number" id="i_support" value="18000"></div>
+          <div class="f"><label>เงินเดือนเจ้าของ</label><input type="number" id="i_owner" value="30000"></div>
+          <div class="f"><label>ค่าใช้จ่ายคงที่ (เช่า+จิปาถะ)</label><input type="number" id="i_fixed" value="8000"></div>
+          <div class="f"><label>งบการตลาด / แอด</label><input type="number" id="i_ads" value="30000"></div>
+          <div class="f"><label>ทุน / ชุด (เหมา ~266, ทีละตัว ~520)</label><input type="number" id="i_stock" value="266"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>ต้องเตรียมเท่าไหร่</h2>
+        <div class="res" id="planStats"></div>
+        <div class="bar" id="planBar"></div>
+        <div class="leg" id="planLeg"></div>
+        <div class="note" id="planNote"></div>
+      </div>
+    </div>
+
+    <div id="realMode" class="hidden">
+      <div class="card">
+        <h2 id="realHd">เดือนนี้ (ของจริงจากระบบ)</h2>
+        <div class="res" id="realStats"></div>
+        <div class="note" id="realTrendWrap" style="margin-top:14px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:2px">รายได้ย้อนหลัง 6 เดือน</div>
+          <div class="trend" id="realTrend"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>ถ้าอยากได้ยอดเท่านี้ ต้องเพิ่มเท่าไหร่</h2>
+        <div class="f" style="margin-bottom:12px"><label>เป้ายอดขาย / เดือน (บาท)</label><input type="number" id="r_target" value="300000"></div>
+        <div class="prog"><i id="rProg"></i></div>
+        <div class="note" id="rProgTxt" style="margin:0 0 10px"></div>
+        <div id="gapRows"></div>
+        <div class="note">ใช้รายได้/การเช่า และ util จากของจริงเดือนนี้ (ถ้ายังไม่มีข้อมูล ใช้ค่าประมาณการ). สมมติฐานค่าใช้จ่าย/เงินเดือน ปรับได้ในแท็บ "ประมาณการ".</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=28"></script>
+<script>
+const NF = new Intl.NumberFormat('th-TH');
+const baht = n => '฿' + NF.format(Math.round(n));
+let sb = null, OWNER_UID = null, ACT = null;
+
+function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
+function num(id){ return Number(document.getElementById(id).value) || 0; }
+
+// ---------- core math ----------
+function calc(inp){
+  const rentals = inp.target / Math.max(1, inp.rpr);
+  const customers = rentals / Math.max(0.1, inp.freq);
+  const dresses = rentals / Math.max(0.1, inp.util);
+  const ops = Math.max(1, Math.ceil(customers / Math.max(1, inp.cap)));
+  const contribution = rentals * inp.contrib;
+  const variable = Math.max(0, inp.target - contribution);
+  const team = ops*inp.ops + inp.support;
+  const fixed = inp.fixed + inp.ads;
+  const net = contribution - fixed - team - inp.owner;
+  const stock = dresses * inp.stock;
+  return { rentals, customers, dresses, ops, contribution, variable, team, fixed, net, stock, perDay: rentals/26 };
+}
+function planInputs(){
+  return { target:num('i_target'), rpr:num('i_rpr'), freq:num('i_freq'), contrib:num('i_contrib'),
+    util:num('i_util'), cap:num('i_cap'), ops:num('i_ops'), support:num('i_support'),
+    owner:num('i_owner'), fixed:num('i_fixed'), ads:num('i_ads'), stock:num('i_stock') };
+}
+function statHTML(l,v,h,cls){ return `<div class="stat ${cls||''}"><div class="l">${l}</div><div class="v">${v}</div><div class="h">${h||''}</div></div>`; }
+
+function renderPlan(){
+  const r = calc(planInputs());
+  document.getElementById('planStats').innerHTML =
+    statHTML('ลูกค้าหมุนเวียน/เดือน', NF.format(Math.round(r.customers))+' คน', '~'+NF.format(Math.round(r.rentals))+' ครั้งเช่า')
+  + statHTML('ครั้งเช่า/วันทำการ', Math.round(r.perDay)+' ชุด', '26 วัน/เดือน')
+  + statHTML('ชุดในคลัง', NF.format(Math.round(r.dresses))+' ตัว', 'ทุน '+baht(r.stock))
+  + statHTML('ทีมจับชุด', r.ops+' คน', '+ทีมเสริม+เจ้าของ')
+  + statHTML('เงินเดือนทีมรวม', baht(r.team), 'ยังไม่รวมเจ้าของ')
+  + statHTML('เหลือสุทธิ/เดือน', baht(r.net), r.net>=0?'หลังจ่ายทุกคน':'ขาด — เพิ่มยอด/ลดต้นทุน', r.net>=0?'good':'bad');
+
+  // build allocation (variable, fixed, team, owner, net>=0)
+  const parts = [
+    ['ต้นทุนผันแปร', r.variable, '#9AA4B0'],
+    ['คงที่ + แอด', r.fixed, '#E8B24A'],
+    ['เงินเดือนทีม', r.team, '#3DC5B7'],
+    ['เงินเดือนเจ้าของ', num('i_owner'), '#0D2F4F'],
+    ['เหลือสุทธิ', Math.max(0,r.net), '#0F7B5A'],
+  ];
+  const tot = parts.reduce((s,p)=>s+p[1],0) || 1;
+  document.getElementById('planBar').innerHTML = parts.map(p=>`<i style="width:${(p[1]/tot*100).toFixed(1)}%;background:${p[2]}"></i>`).join('');
+  document.getElementById('planLeg').innerHTML = parts.map(p=>`<span><span class="d" style="background:${p[2]}"></span>${p[0]}<b>${baht(p[1])}</b></span>`).join('');
+  document.getElementById('planNote').textContent =
+    `กำไรขั้นต้น (contribution) ฿${NF.format(Math.round(r.contribution))} = รายได้ลบต้นทุนผันแปร · คอขวดคือคนจับชุด (~${Math.round(r.perDay)} ชุด/วัน). ดันสมาชิกรายเดือนเพื่อใช้ลูกค้าใหม่น้อยลง.`;
+}
+
+// ---------- actuals ----------
+function renderReal(){
+  if(!ACT){ return; }
+  const a = ACT;
+  document.getElementById('realHd').textContent = `เดือนนี้ · ${a.month} (ของจริงจากระบบ)`;
+  document.getElementById('realStats').innerHTML =
+    statHTML('รายได้เดือนนี้', baht(a.revenue||0), 'จากบัญชีจริง')
+  + statHTML('ครั้งเช่า', NF.format(a.rentals||0)+' ครั้ง', (a.customers||0)+' ลูกค้า')
+  + statHTML('ชุดพร้อมเช่า', NF.format(a.dresses_ready||0)+' ตัว', 'ทั้งหมด '+NF.format(a.dresses_total||0))
+  + statHTML('รายได้/การเช่า', a.avg_rev_per_rental? baht(a.avg_rev_per_rental):'—', 'เฉลี่ยจริง')
+  + statHTML('เช่า/ชุด (util)', (a.util!=null? a.util:'—'), 'หมุนเวียนต่อชุด')
+  + statHTML('ลูกค้าหมุนเวียน', NF.format(a.customers||0)+' คน', 'เดือนนี้');
+
+  const series = a.series||[];
+  const max = Math.max(1, ...series.map(s=>s.revenue||0));
+  document.getElementById('realTrend').innerHTML = series.map(s=>{
+    const h = Math.round((s.revenue||0)/max*64);
+    return `<div class="col"><div class="bk" style="height:${h}px" title="${baht(s.revenue||0)}"></div><div class="mo">${(s.m||'').slice(5)}</div></div>`;
+  }).join('');
+  renderGap();
+}
+function renderGap(){
+  if(!ACT) return;
+  const a = ACT, T = num('r_target');
+  const inp = planInputs();
+  inp.target = T;
+  if(a.avg_rev_per_rental) inp.rpr = a.avg_rev_per_rental;
+  if(a.util) inp.util = a.util;
+  const need = calc(inp);
+  const prog = Math.min(100, (a.revenue||0)/Math.max(1,T)*100);
+  document.getElementById('rProg').style.width = prog.toFixed(0)+'%';
+  document.getElementById('rProgTxt').textContent = `ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของเป้า ${baht(T)}`;
+  const gC = Math.max(0, Math.round(need.customers) - (a.customers||0));
+  const gD = Math.max(0, Math.round(need.dresses) - (a.dresses_ready||0));
+  const gR = Math.max(0, Math.round(need.rentals) - (a.rentals||0));
+  document.getElementById('gapRows').innerHTML =
+    `<div class="gaprow"><span>ลูกค้าหมุนเวียน/เดือน</span><span>${a.customers||0} → <b>${Math.round(need.customers)}</b> (+${gC})</span></div>`
+  + `<div class="gaprow"><span>ครั้งเช่า/เดือน</span><span>${a.rentals||0} → <b>${Math.round(need.rentals)}</b> (+${gR})</span></div>`
+  + `<div class="gaprow"><span>ชุดพร้อมเช่า</span><span>${a.dresses_ready||0} → <b>${Math.round(need.dresses)}</b> (+${gD})</span></div>`
+  + `<div class="gaprow"><span>ทีมจับชุด</span><span><b>${need.ops}</b> คน</span></div>`
+  + `<div class="gaprow"><span>ทุนสต็อกเพิ่ม</span><span><b>${baht(gD*num('i_stock'))}</b></span></div>`
+  + `<div class="gaprow"><span>เหลือสุทธิที่เป้านี้</span><span><b style="color:${need.net>=0?'#0F7B5A':'#B4543A'}">${baht(need.net)}</b>/เดือน</span></div>`;
+}
+
+// ---------- mode + boot ----------
+function setMode(m){
+  document.getElementById('tabPlan').classList.toggle('on', m==='plan');
+  document.getElementById('tabReal').classList.toggle('on', m==='real');
+  document.getElementById('planMode').classList.toggle('hidden', m!=='plan');
+  document.getElementById('realMode').classList.toggle('hidden', m!=='real');
+  if(m==='real' && ACT) renderReal();
+}
+function bindInputs(){
+  document.querySelectorAll('#planMode input').forEach(el=> el.addEventListener('input', ()=>{ renderPlan(); if(ACT) renderGap(); }));
+  document.getElementById('r_target').addEventListener('input', renderGap);
+}
+async function loadActuals(uid){
+  const { data, error } = await client().rpc('forecast_actuals', { p_uid: uid });
+  if(error || !data) return null;
+  return data;
+}
+function showMain(){
+  document.getElementById('lock').classList.add('hidden');
+  document.getElementById('main').classList.remove('hidden');
+  renderPlan(); bindInputs();
+  if(ACT) renderReal();
+}
+function showLock(msg, askUid){
+  document.getElementById('lockmsg').textContent = msg;
+  document.getElementById('uidbox').classList.toggle('hidden', !askUid);
+}
+async function tryUid(uid){
+  if(!uid) return false;
+  const data = await loadActuals(uid);
+  if(data && data.owner){ OWNER_UID = uid; ACT = data; localStorage.setItem('lloop_owner_uid', uid); return true; }
+  return false;
+}
+async function unlock(){
+  const uid = (document.getElementById('uidin').value||'').trim();
+  showLock('กำลังตรวจสอบ…', false);
+  if(await tryUid(uid)) showMain();
+  else showLock('UID นี้ไม่ใช่เจ้าของ ลองใหม่อีกครั้ง', true);
+}
+async function boot(){
+  let uid = null;
+  try{
+    await liff.init({ liffId: CONFIG.LIFF_ID });
+    if(liff.isLoggedIn()){ const p = await liff.getProfile(); uid = p.userId; }
+    else if(liff.isInClient()){ liff.login(); return; }
+  }catch(e){ /* นอก LINE */ }
+  if(!uid) uid = localStorage.getItem('lloop_owner_uid');
+  if(uid && await tryUid(uid)){ showMain(); return; }
+  showLock('เปิดผ่าน LINE ด้วยบัญชีเจ้าของ หรือใส่ UID เจ้าของด้านล่าง', true);
+}
+boot();
+</script>
+</body>
+</html>
