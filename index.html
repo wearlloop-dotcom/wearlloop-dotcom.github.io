@@ -446,6 +446,18 @@
   .spot-dot{width:7px;height:7px;border-radius:50%;border:none;background:rgba(80,64,38,.25);cursor:pointer;padding:0}
   .spot-dot.on{background:var(--clay)}
 
+  /* story — manifesto (ความเชื่อแบรนด์) */
+  .ed-mani{background:var(--soft);padding:60px 22px;text-align:center}
+  .ed-mani .ek{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+  .ed-mani .lead{font-family:var(--display);font-weight:500;font-size:clamp(20px,4.6vw,30px);line-height:1.45;max-width:640px;margin:20px auto 0;color:var(--ink)}
+  .ed-mani .body{max-width:520px;margin:22px auto 0;color:var(--muted);font-size:15px;line-height:1.7}
+  /* story — the craft (รักษ์โลก ฉากดำ-ทอง) */
+  .ed-craft{background:var(--ink);color:#F2ECDD;padding:64px 22px;text-align:center}
+  .ed-craft .ek{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+  .ed-craft .num{font-family:var(--display);font-weight:700;font-size:clamp(56px,15vw,120px);line-height:1;color:var(--gold);letter-spacing:2px;margin:14px 0 6px}
+  .ed-craft .cap{font-family:var(--display);font-weight:500;font-size:clamp(19px,4vw,26px);line-height:1.4;max-width:560px;margin:0 auto}
+  .ed-craft .body{color:rgba(242,236,221,.66);max-width:480px;margin:22px auto 0;font-size:15px;line-height:1.7}
+
   /* story — how it works */
   .ed-how{background:var(--soft);margin-top:54px;padding:54px 22px;text-align:center}
   .ed-how .ek{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
@@ -593,13 +605,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=31"></script>
-<script src="pixel.js?v=31"></script>
-<script src="i18n.js?v=31"></script>
-<script src="data.js?v=31"></script>
-<script src="liffAuth.js?v=31"></script>
-<script src="me-api.js?v=31"></script>
-<script src="api.js?v=31"></script>
+<script src="config.js?v=32"></script>
+<script src="pixel.js?v=32"></script>
+<script src="i18n.js?v=32"></script>
+<script src="data.js?v=32"></script>
+<script src="liffAuth.js?v=32"></script>
+<script src="me-api.js?v=32"></script>
+<script src="api.js?v=32"></script>
 <script>
   /* Spotlight — ดึงชุดที่เช่าน้อยสุดมาโชว์รูปใหญ่ + สลับสไลด์อัตโนมัติ (visual layer) */
   window.renderSpotlight = function(garments){
@@ -637,6 +649,6 @@
     restart();
   };
 </script>
-<script src="app.js?v=31"></script>
+<script src="app.js?v=32"></script>
 </body>
 </html>
