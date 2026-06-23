@@ -132,6 +132,17 @@
         </div>
         <div id="planMargin" style="font-size:13px;color:var(--muted)">กำลังโหลด…</div>
         <div class="note">คิดแบบใช้เต็มโควต้า + ชั้นชุดสูงสุด + ค่าส่งทุกครั้ง + เผื่อชุดเสีย (มาร์จิ้นขั้นต่ำสุด) · ค่าชำรุดปกติอยู่ในต้นทุนต่อการเช่าแล้ว — ช่องนี้คือกันชน "เสียหนัก/หาย" เพิ่ม · 🔴 = ต่ำกว่าเกณฑ์ ควรปรับราคา</div>
+
+        <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">แก้ราคาแพ็ก — บันทึกเข้าระบบจริง (มีผลกับหน้าลูกค้าทันที)</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+            <div class="f" style="flex:1;min-width:150px"><label>แพ็ก</label><select id="ppPlan" onchange="ppFill()"></select></div>
+            <div class="f" style="width:110px"><label>ราคา/รอบ</label><input type="number" id="ppPrice"></div>
+            <div class="f" style="width:92px"><label>ชุด/รอบ</label><input type="number" id="ppRentals"></div>
+            <button class="applybtn" style="width:auto;padding:11px 18px" onclick="savePlanPrice()">บันทึก</button>
+          </div>
+          <div id="ppMsg" style="font-size:12px;margin-top:8px"></div>
+        </div>
       </div>
     </div>
 
@@ -298,6 +309,33 @@ async function loadPlanMargin(){
     </div>`;
   }).join('') +
     `<div style="margin-top:10px;font-size:12px;font-weight:600;color:${belowCount?'#B4543A':'#0F7B5A'}">${belowCount ? `🔴 ${belowCount} แพ็กต่ำกว่าเกณฑ์ ${minMargin}% — ควรขึ้นราคา/ลดส่วนลด/จำกัดชุดพรีเมียม` : `ทุกแพ็กผ่านเกณฑ์มาร์จิ้น ≥ ${minMargin}%`}</div>`;
+  populatePpSelect();
+}
+function populatePpSelect(){
+  const sel = document.getElementById('ppPlan'); if(!sel || !_planEcon) return;
+  const cur = sel.value;
+  sel.innerHTML = _planEcon.map(p => `<option value="${p.code}">${p.name}</option>`).join('');
+  if(cur && _planEcon.some(p=>p.code===cur)) sel.value = cur;
+  ppFill();
+}
+function ppFill(){
+  const sel = document.getElementById('ppPlan'); if(!sel || !_planEcon) return;
+  const p = _planEcon.find(x => x.code === sel.value); if(!p) return;
+  document.getElementById('ppPrice').value = p.price;
+  document.getElementById('ppRentals').value = p.rentals_per_cycle;
+}
+async function savePlanPrice(){
+  const msg = document.getElementById('ppMsg');
+  const code = document.getElementById('ppPlan').value;
+  const price = Number(document.getElementById('ppPrice').value) || 0;
+  const rentals = Number(document.getElementById('ppRentals').value) || null;
+  if(!code || price <= 0){ msg.style.color='#B4543A'; msg.textContent='ใส่ราคาให้ถูกต้องก่อนนะคะ'; return; }
+  msg.style.color='var(--color-text-secondary)'; msg.style.color='#7C8694'; msg.textContent='กำลังบันทึก…';
+  const { data, error } = await client().rpc('update_plan_price', { p_uid: OWNER_UID, p_code: code, p_price: price, p_rentals: rentals });
+  if(error || !data || data.error){ msg.style.color='#B4543A'; msg.textContent='บันทึกไม่สำเร็จ' + (data&&data.error?(' ('+data.error+')'):''); return; }
+  _planEcon = null;                                  // refetch ราคาใหม่
+  await loadPlanMargin();
+  msg.style.color='#0F7B5A'; msg.textContent=`บันทึกแล้ว — ${code} ฿${NF.format(price)}${data.save_pct?` · ส่วนลด ${data.save_pct}%`:''} (หน้าลูกค้าอัปเดตทันที)`;
 }
 
 // ---------- actuals ----------
