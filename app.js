@@ -849,6 +849,10 @@ async function openMembership() {
   renderMembership(sub, plans);
 }
 function closeMembership() { $('#memberOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function perWord(period) {
+  const en = lang === 'en';
+  return ({ week: en ? 'wk' : 'สัปดาห์', month: en ? 'mo' : 'เดือน', quarter: en ? '3mo' : '3 เดือน', year: en ? 'yr' : 'ปี' })[period] || (en ? 'mo' : 'เดือน');
+}
 function renderMembership(sub, plans) {
   const en = lang === 'en';
   const body = $('#memberBody'); if (!body) return;
@@ -859,7 +863,7 @@ function renderMembership(sub, plans) {
     const remaining = sub.remaining != null ? sub.remaining : 0;
     html += `<div style="background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:16px;margin-bottom:18px">
       <div style="font-size:11px;letter-spacing:2px;color:#0c3a33;background:var(--sage-bg);display:inline-block;padding:3px 10px;border-radius:30px">${paused ? (en ? 'PAUSED' : 'พักชั่วคราว') : (en ? 'ACTIVE' : 'กำลังใช้งาน')}</div>
-      <div style="font-size:18px;font-weight:600;color:var(--ink);margin-top:8px">${sub.plan_name || ''}</div>
+      <div style="font-size:18px;font-weight:600;color:var(--ink);margin-top:8px">${sub.plan_name || ''}${sub.period_label ? ` <span style="font-size:11px;font-weight:400;color:var(--muted)">· ${sub.period_label}</span>` : ''}</div>
       <div style="display:flex;gap:16px;margin-top:10px">
         <div><div style="font-size:22px;font-weight:700;color:var(--ink)">${remaining}<span style="font-size:13px;font-weight:400;color:var(--muted)">/${sub.rentals_per_month || 0}</span></div><div style="font-size:11px;color:var(--muted)">${en ? 'looks left this cycle' : 'สิทธิ์เหลือรอบนี้'}</div></div>
         <div><div style="font-size:14px;color:var(--ink);margin-top:6px">${fmtThaiDate(sub.renews_at)}</div><div style="font-size:11px;color:var(--muted)">${sub.cancel_at_period_end ? (en ? 'ends on' : 'สิ้นสุด') : (en ? 'renews on' : 'รอบต่อไป')}</div></div>
@@ -877,10 +881,19 @@ function renderMembership(sub, plans) {
   html += plans.map(p => {
     const current = sub && sub.plan_code === p.code && sub.status !== 'cancelled';
     const perks = (p.perks || []).map(x => `<div style="font-size:13px;color:var(--ink);padding:3px 0">· ${x}</div>`).join('');
+    const per = perWord(p.period);
+    const cyclePrice = Number(p.price != null ? p.price : p.price_month) || 0;
+    const longTerm = p.period && p.period !== 'month';
+    const subline = longTerm
+      ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">≈ ฿${Number(p.price_per_month || 0).toLocaleString()}/${en ? 'mo' : 'เดือน'}${p.save_pct ? ` · ${en ? 'save' : 'ประหยัด'} ${p.save_pct}%` : ''}</div>`
+      : '';
     return `<div style="background:#fff;border:${current ? '2px solid var(--sage)' : '1px solid var(--line)'};border-radius:4px;padding:16px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
         <div style="font-size:17px;font-weight:600;color:var(--ink)">${p.name}</div>
-        <div style="font-size:16px;font-weight:600;color:var(--ink)">฿${Number(p.price_month).toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted)">/${en ? 'mo' : 'เดือน'}</span></div>
+        <div style="text-align:right">
+          <div style="font-size:16px;font-weight:600;color:var(--ink)">฿${cyclePrice.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted)">/${per}</span></div>
+          ${subline}
+        </div>
       </div>
       <div style="margin-top:8px">${perks}</div>
       ${current
@@ -1186,6 +1199,7 @@ async function boot() {
   // เดโม: ยังไม่ได้ล็อกอินผ่าน LINE (เปิดบน localhost) ใส่ตัวอย่างให้หน้าผลกระทบดูมีชีวิต
   if (!CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();
+  if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
   await maybeShowTerms();
   maybeOnboard();
   routeDeepLink();

@@ -12,6 +12,7 @@ window.API = (function () {
   function mapGarment(r) {
     return {
       id: r.id, code: r.code, name: r.name || r.code, brand: r.brand, tier: r.tier, price: r.rental_price, category: r.category,
+      timesRented: r.times_rented ?? 0,
       styling_tips: r.styling_tips || [],
       fabric: r.fabric_composition, stretch: r.stretch ||'none',
       lining: r.has_lining, sheer: r.is_sheer, weight: r.fabric_weight,
@@ -281,9 +282,12 @@ window.API = (function () {
   // รายการแพ็กเกจ → array {code,name,price_month,rentals_per_month,max_active,perks}
   async function subPlans() {
     if (CONFIG.USE_MOCK) return [
-      { code:'LOOPER_LITE', name:'Looper Lite', price_month:690,  rentals_per_month:2, max_active:1, perks:['เช่าได้ 2 ชุด/เดือน','ส่งฟรีทุกชุด'] },
-      { code:'LOOPER_PLUS', name:'Looper Plus', price_month:1290, rentals_per_month:4, max_active:1, perks:['เช่าได้ 4 ชุด/เดือน','คิวจองก่อนใคร','สไตลิสต์เลือกให้'] },
-      { code:'LOOPER_LUXE', name:'Looper Luxe', price_month:2390, rentals_per_month:8, max_active:2, perks:['เช่าได้ 8 ชุด/เดือน','ถือพร้อมกัน 2 ชุด','ชุดดีไซเนอร์'] },
+      { code:'LOOPER_WEEK', name:'Looper Week', period:'week', period_label:'รายสัปดาห์', price:390, price_month:390, price_per_month:1560, rentals_per_cycle:1, rentals_per_month:1, save_pct:0, max_active:1, perks:['เช่าได้ 1 ชุดต่อสัปดาห์','เหมาะกับงานเดียว','ส่งฟรี'] },
+      { code:'LOOPER_LITE', name:'Looper Lite', period:'month', period_label:'รายเดือน', price:690, price_month:690, price_per_month:690, rentals_per_cycle:2, rentals_per_month:2, save_pct:0, max_active:1, perks:['เช่าได้ 2 ชุด/เดือน','ส่งฟรีทุกชุด'] },
+      { code:'LOOPER_PLUS', name:'Looper Plus', period:'month', period_label:'รายเดือน', price:1290, price_month:1290, price_per_month:1290, rentals_per_cycle:4, rentals_per_month:4, save_pct:0, max_active:1, perks:['เช่าได้ 4 ชุด/เดือน','คิวจองก่อนใคร','สไตลิสต์เลือกให้'] },
+      { code:'LOOPER_LUXE', name:'Looper Luxe', period:'month', period_label:'รายเดือน', price:2390, price_month:2390, price_per_month:2390, rentals_per_cycle:8, rentals_per_month:8, save_pct:0, max_active:2, perks:['เช่าได้ 8 ชุด/เดือน','ถือพร้อมกัน 2 ชุด','ชุดดีไซเนอร์'] },
+      { code:'LOOPER_PLUS_Q', name:'Looper Plus · ราย 3 เดือน', period:'quarter', period_label:'ราย 3 เดือน', price:3490, price_month:3490, price_per_month:1163, rentals_per_cycle:12, rentals_per_month:12, save_pct:10, max_active:1, perks:['เช่าได้ 12 ชุด ใน 3 เดือน','ประหยัด ~10%','สไตลิสต์เลือกให้'] },
+      { code:'LOOPER_PLUS_Y', name:'Looper Plus · รายปี', period:'year', period_label:'รายปี', price:12900, price_month:12900, price_per_month:1075, rentals_per_cycle:48, rentals_per_month:48, save_pct:17, max_active:1, perks:['เช่าได้ 48 ชุดต่อปี','ประหยัด ~17%','สไตลิสต์ส่วนตัว'] },
     ];
     const { data } = await client().rpc('sub_plans');
     return data || [];
@@ -329,13 +333,19 @@ window.API = (function () {
   // สถานะยืนยันตัวตน → {verified, method, has_social}
   async function customerKyc(customer) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return { verified: false };
-    const { data } = await client().rpc('customer_kyc', { p_customer: customer.id });
+    // gateway me-rpc (กัน IDOR) ถ้าโหลด me-api.js แล้ว · ไม่งั้น fallback ทางเดิม (transition-safe)
+    const { data } = window.meRpc
+      ? await window.meRpc('customer_kyc', {})
+      : await client().rpc('customer_kyc', { p_customer: customer.id });
     return data || { verified: false };
   }
   // ส่งบัตร+โซเชียลยืนยันตัวตน → {ok, status:'verified'|'pending'}
   async function submitKyc(customer, idUrl, social) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true, status: 'verified' };
-    const { data, error } = await client().rpc('submit_kyc', { p_customer: customer.id, p_id_url: idUrl || '', p_social: social || '' });
+    const a = { p_id_url: idUrl || '', p_social: social || '' };
+    const { data, error } = window.meRpc
+      ? await window.meRpc('submit_kyc', a)
+      : await client().rpc('submit_kyc', { p_customer: customer.id, ...a });
     return { ok: !error && (data === 'verified' || data === 'pending'), status: data, error };
   }
   // อัปโหลดบัตร ปชช ไป Storage (private-ish bucket 'uploads') → url
