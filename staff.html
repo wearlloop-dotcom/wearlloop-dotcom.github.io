@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · พอร์ทัลพนักงาน</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;--navy:#1A1A1A;--sage:#6FB3A6;--sageDeep:#3F6F63;--champ:#C9A86A;--ok:#0F6E56;--danger:#A32D2D;
+    --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:15px}
+  .bar{background:var(--ink);color:#fff;padding:16px 18px;text-align:center}
+  .bar h1{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:2px}
+  .bar .t{font-size:11px;color:var(--champ);letter-spacing:2px;margin-top:2px}
+  .wrap{max-width:560px;margin:14px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:20px}
+  .card h2{font-family:var(--display);font-size:22px;margin-bottom:4px}
+  .card .sub{font-size:13px;color:var(--stone);margin-bottom:12px}
+  .center{text-align:center}
+  .big{font-family:var(--display);font-size:30px;font-weight:700;line-height:1.1}
+  label{display:block;font-size:12px;color:var(--stone);margin:10px 0 4px;font-weight:500}
+  input,textarea{width:100%;border:1px solid var(--hair);border-radius:2px;padding:11px;font-size:15px;font-family:var(--sans);background:var(--canvas)}
+  input:focus{outline:none;border-color:var(--navy)}
+  .btn{border:none;border-radius:2px;padding:14px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);width:100%}
+  .btn.dark{background:var(--navy);color:#fff}.btn.sage{background:var(--sageDeep);color:#fff}
+  .btn.ghost{background:none;border:1px solid var(--hair);color:var(--stone)}
+  .btn:disabled{opacity:.5}
+  .gate{text-align:center;padding:30px 18px}
+  .gate .icon{width:64px;height:64px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:30px;font-family:var(--display)}
+  .gate.deny .icon{background:#FBEEEE;color:var(--danger)}
+  .gate.ok .icon{background:#EAF4EF;color:var(--ok)}
+  .uid{font-size:12px;word-break:break-all;background:var(--canvas);border:1px solid var(--hair);padding:10px;border-radius:2px;margin:10px 0;color:var(--navy)}
+  .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--hair);font-size:14px}
+  .kv .k{color:var(--stone)}
+  .pill{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--hair);display:inline-block}
+  .pill.ok{color:var(--ok);background:#EAF4EF;border-color:#BFE0D4}
+  .overall{font-family:var(--display);font-size:48px;font-weight:700;color:var(--sageDeep);line-height:1}
+  .metric{padding:10px 0;border-bottom:1px solid var(--hair)}
+  .metric .top{display:flex;justify-content:space-between;font-size:14px}
+  .barbg{height:6px;background:var(--hair);border-radius:3px;margin-top:6px;overflow:hidden}
+  .barfill{height:100%;background:var(--sageDeep)}
+  .seg{display:flex;gap:6px;margin-bottom:12px}
+  .seg span{flex:1;text-align:center;font-size:13px;padding:8px;border:1px solid var(--hair);border-radius:2px;cursor:pointer;color:var(--stone)}
+  .seg span.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .clause{margin:10px 0}.clause b{font-size:14px}.clause p{font-size:13px;color:var(--stone);margin-top:2px}
+  canvas{border:1px dashed var(--hair);border-radius:2px;width:100%;height:140px;background:#fff;touch-action:none}
+  .chk{display:flex;gap:8px;align-items:flex-start;margin:12px 0;font-size:13px}
+  .chk input{width:auto;margin-top:3px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:9;font-size:14px}
+  .toast.show{opacity:1}
+  .hide{display:none}
+  .doc{max-height:320px;overflow:auto;border:1px solid var(--hair);border-radius:2px;padding:14px;font-size:13px;line-height:1.7;background:var(--canvas)}
+  .doc h3{font-family:var(--display);font-size:18px;margin:10px 0 4px}
+</style>
+</head>
+<body>
+<div class="bar"><h1>LLOOP</h1><div class="t">STAFF · ทีมงาน</div></div>
+<div class="wrap" id="wrap">
+  <div class="card center" id="loading"><p style="color:var(--stone);padding:30px 0">กำลังโหลด…</p></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<script>
+  const sb=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY);
+  const LIFF_ID=CONFIG.LIFF_ID;
+  const $=id=>document.getElementById(id);
+  const wrap=$('wrap');
+  const qs=new URLSearchParams(location.search);
+  const verifyToken=qs.get('token');   // ผูก/ยืนยัน UID
+  const ecToken=qs.get('ec');           // สัญญาจ้าง
+  const annId=qs.get('ann');            // ประกาศ (เปิดอ่าน+รับทราบ)
+  let lineUid=null, lineName=null;
+  function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
+  const ROLE_TH={admin:'แอดมิน',stylist:'สไตลิสต์',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง',sales:'ขาย',owner:'เจ้าของ'};
+  const ST_TH={applicant:'ผู้สมัคร',interview:'สัมภาษณ์',offer:'เสนองาน',hired:'จ้างแล้ว',probation:'ทดลองงาน',active:'ทำงาน',suspended:'พักงาน',resigned:'ลาออก',rejected:'ไม่ผ่าน'};
+
+  // ---------- โหมดยืนยัน UID ----------
+  async function showVerify(){
+    if(!lineUid){
+      wrap.innerHTML=`<div class="card gate deny"><div class="icon">!</div>
+        <h2>ต้องเปิดผ่าน LINE</h2>
+        <p class="sub">กรุณาเปิดลิงก์นี้จากแอป LINE เพื่อยืนยันตัวตนค่ะ</p></div>`;
+      return;
+    }
+    wrap.innerHTML=`<div class="card center">
+      <h2>ยืนยันตัวตนพนักงาน</h2>
+      <p class="sub">ผูกบัญชี LINE ของคุณกับระบบ เพื่อเปิดสิทธิ์เข้าทำงาน</p>
+      <div class="uid">LINE UID: ${lineUid}</div>
+      <p style="font-size:13px;color:var(--stone)">เปิดด้วยชื่อ LINE: <b>${lineName||'-'}</b></p>
+      <button class="btn sage" style="margin-top:16px" id="bindBtn" onclick="doBind()">ยืนยันตัวตน · เปิดสิทธิ์ทำงาน</button>
+    </div>`;
+  }
+  async function doBind(){
+    $('bindBtn').disabled=true;
+    const {data,error}=await sb.rpc('hr_verify_bind',{p_token:verifyToken,p_line_uid:lineUid});
+    if(error){toast('ไม่สำเร็จ: '+error.message);$('bindBtn').disabled=false;return;}
+    if(data&&data.error){
+      const m={bad_token:'ลิงก์ไม่ถูกต้องหรือหมดอายุ',uid_taken:'LINE นี้ถูกผูกกับพนักงานคนอื่นแล้ว',no_uid:'อ่าน LINE UID ไม่ได้'}[data.error]||data.error;
+      toast(m);$('bindBtn').disabled=false;return;
+    }
+    wrap.innerHTML=`<div class="card gate ok"><div class="icon">✓</div>
+      <h2>ยืนยันสำเร็จ</h2>
+      <p class="sub">ยินดีต้อนรับ ${data.name} (${data.emp_no||'-'})</p>
+      <p style="font-size:14px">ตอนนี้คุณเข้าทำงานในแชต OA หลังบ้านได้แล้ว</p>
+      <button class="btn dark" style="margin-top:16px" onclick="location.href=location.pathname">เข้าพอร์ทัลพนักงาน</button>
+    </div>`;
+  }
+
+  // ---------- โหมดสัญญาจ้าง ----------
+  function defaultTitle(t){return {employment:'สัญญาจ้างงาน',probation:'สัญญาจ้างทดลองงาน',parttime:'สัญญาจ้างพาร์ทไทม์',freelance:'สัญญาจ้างทำของ/ฟรีแลนซ์',nda:'สัญญารักษาความลับ (NDA)'}[t]||'สัญญาจ้างงาน';}
+  function contractBody(c){
+    const v=c.vars||{}; const cyc={monthly:'ราย​เดือน',biweekly:'ราย 15 วัน',daily:'รายวัน',per_job:'รายงาน'}[v.payment_cycle]||v.payment_cycle||'รายเดือน';
+    const rows=[
+      ['ตำแหน่ง',v.position],['ประเภทการจ้าง',{fulltime:'ประจำ',parttime:'พาร์ทไทม์',contract:'สัญญาจ้าง',freelance:'ฟรีแลนซ์'}[v.emp_type]||v.emp_type],
+      ['ค่าจ้าง',v.salary?('฿'+Number(v.salary).toLocaleString()+' / '+cyc):null],
+      ['วันทำงาน',v.work_days],['เวลาทำงาน',v.work_hours],
+      ['ทดลองงาน',v.probation_months?(v.probation_months+' เดือน'):null],
+      ['วันเริ่มงาน',v.start_date],['วันสิ้นสุด',v.end_date],
+      ['บอกเลิกล่วงหน้า',v.notice_days?(v.notice_days+' วัน'):null],
+    ].filter(r=>r[1]);
+    const extra=(c.extra_clauses||[]).map((x,i)=>`<div class="clause"><b>${i+1}. ${x.h||''}</b><p>${x.body||''}</p></div>`).join('');
+    return `<h3>${c.title||defaultTitle(c.template)}</h3>
+      <p>เลขที่สัญญา ${c.contract_no} · ทำขึ้นระหว่าง บริษัท LLOOP ("นายจ้าง") กับ <b>${c.emp_name}</b> ("ลูกจ้าง")</p>
+      ${c.scope?`<div class="clause"><b>ขอบเขตหน้าที่</b><p>${c.scope}</p></div>`:''}
+      <div style="margin:10px 0">${rows.map(r=>`<div class="kv"><span class="k">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div>
+      ${extra}
+      <p style="margin-top:10px;color:var(--stone)">ลูกจ้างตกลงปฏิบัติตามระเบียบบริษัท รักษาความลับทางการค้า และดูแลทรัพย์สิน/ชุดเช่าด้วยความระมัดระวัง การลงนามอิเล็กทรอนิกส์นี้มีผลผูกพันตามกฎหมาย</p>`;
+  }
+  let sigPad=null;
+  async function showContract(){
+    const {data:c,error}=await sb.rpc('emp_contract_get',{p_token:ecToken,p_line_uid:lineUid});
+    if(error||!c||c.error){
+      wrap.innerHTML=`<div class="card gate deny"><div class="icon">!</div><h2>ไม่พบสัญญา</h2><p class="sub">ลิงก์อาจไม่ถูกต้องหรือถูกยกเลิกค่ะ</p></div>`;return;
+    }
+    if(c.status==='signed'){
+      wrap.innerHTML=`<div class="card gate ok"><div class="icon">✓</div><h2>ลงนามแล้ว</h2>
+        <p class="sub">${c.contract_no} · ลงนามเมื่อ ${c.signed_at?new Date(c.signed_at).toLocaleString('th-TH'):'-'}</p></div>
+        <div class="card"><div class="doc">${contractBody(c)}</div></div>`;return;
+    }
+    wrap.innerHTML=`<div class="card">
+      <h2>สัญญารอลงนาม</h2><p class="sub">อ่านรายละเอียดให้ครบก่อนลงนามนะคะ</p>
+      <div class="doc">${contractBody(c)}</div>
+      <label>ชื่อผู้ลงนาม</label><input id="signer" value="${c.emp_name||''}">
+      <label>เลขบัตรประชาชน (ถ้ามี)</label><input id="signid" value="${c.emp_id_card||''}">
+      <label>ลายเซ็น (เซ็นด้วยนิ้ว/เมาส์)</label>
+      <canvas id="sig"></canvas>
+      <button class="btn ghost" style="margin-top:6px" onclick="clearSig()">ล้างลายเซ็น</button>
+      <div class="chk"><input type="checkbox" id="consent"><label for="consent" style="margin:0">ข้าพเจ้าได้อ่านและยอมรับเงื่อนไขในสัญญาฉบับนี้ และยินยอมลงนามด้วยลายเซ็นอิเล็กทรอนิกส์</label></div>
+      <button class="btn sage" id="signBtn" onclick="doSign()">ลงนามสัญญา</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="doDecline()">ขอแก้ไข / ปฏิเสธ</button>
+    </div>`;
+    initSig();
+  }
+  function initSig(){
+    const cv=$('sig');const r=cv.getBoundingClientRect();cv.width=r.width;cv.height=140;
+    const ctx=cv.getContext('2d');ctx.lineWidth=2.2;ctx.lineCap='round';ctx.strokeStyle='#1C1B19';
+    let drawing=false,has=false;
+    const pos=e=>{const t=e.touches?e.touches[0]:e;const b=cv.getBoundingClientRect();return[t.clientX-b.left,t.clientY-b.top];};
+    const start=e=>{drawing=true;has=true;const[x,y]=pos(e);ctx.beginPath();ctx.moveTo(x,y);e.preventDefault();};
+    const move=e=>{if(!drawing)return;const[x,y]=pos(e);ctx.lineTo(x,y);ctx.stroke();e.preventDefault();};
+    const end=()=>{drawing=false;};
+    cv.addEventListener('mousedown',start);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+    cv.addEventListener('touchstart',start);cv.addEventListener('touchmove',move);cv.addEventListener('touchend',end);
+    sigPad={cv,clear:()=>{ctx.clearRect(0,0,cv.width,cv.height);has=false;},hasInk:()=>has};
+  }
+  function clearSig(){sigPad&&sigPad.clear();}
+  async function doSign(){
+    if(!$('consent').checked){toast('กรุณาติ๊กยอมรับเงื่อนไขก่อนค่ะ');return;}
+    if(!$('signer').value.trim()){toast('กรอกชื่อผู้ลงนามค่ะ');return;}
+    const sig=(sigPad&&sigPad.hasInk())?sigPad.cv.toDataURL('image/png'):$('signer').value.trim();
+    $('signBtn').disabled=true;
+    const docEl=document.querySelector('.doc');
+    const p={signer_name:$('signer').value.trim(),signer_id_card:$('signid').value.trim(),
+      signature:sig,consent:true,line_uid:lineUid,body_snapshot:docEl?docEl.innerText:''};
+    const {data,error}=await sb.rpc('emp_contract_sign',{p_token:ecToken,p});
+    if(error){toast('ไม่สำเร็จ: '+error.message);$('signBtn').disabled=false;return;}
+    if(data!=='ok'){
+      const m={already:'สัญญานี้ลงนามไปแล้ว',void:'สัญญาถูกยกเลิก',not_found:'ไม่พบสัญญา',no_consent:'กรุณายอมรับเงื่อนไข'}[data]||data;
+      toast(m);$('signBtn').disabled=false;return;
+    }
+    wrap.innerHTML=`<div class="card gate ok"><div class="icon">✓</div><h2>ลงนามเรียบร้อย</h2>
+      <p class="sub">สัญญาของคุณมีผลสมบูรณ์แล้ว ขอบคุณค่ะ</p>
+      <button class="btn dark" style="margin-top:14px" onclick="location.href=location.pathname">เข้าพอร์ทัลพนักงาน</button></div>`;
+  }
+  async function doDecline(){
+    const reason=prompt('ขอแก้ไขเรื่องอะไรคะ? (จะส่งให้ฝ่ายบุคคล)');
+    if(reason===null)return;
+    const {error}=await sb.rpc('emp_contract_decline',{p_token:ecToken,p_reason:reason});
+    if(error){toast('ไม่สำเร็จ: '+error.message);return;}
+    toast('ส่งคำขอแก้ไขให้ฝ่ายบุคคลแล้วค่ะ');
+  }
+
+  // ---------- โหมดแดชบอร์ดพนักงาน (ค่าเริ่มต้น) ----------
+  async function showDashboard(){
+    if(!lineUid){
+      wrap.innerHTML=`<div class="card gate deny"><div class="icon">!</div>
+        <h2>ต้องเปิดผ่าน LINE</h2><p class="sub">กรุณาเปิดพอร์ทัลนี้จากแอป LINE OA หลังบ้านค่ะ</p></div>`;return;
+    }
+    const {data:acc}=await sb.rpc('hr_check_access',{p_line_uid:lineUid});
+    if(!acc||!acc.ok){
+      // ===== GATE: UID ไม่ถูก/ยังไม่ยืนยัน/พ้นสภาพ → เข้าทำงานไม่ได้ =====
+      const reason=acc?acc.reason:'not_found';
+      const msg={not_found:'ไม่พบบัญชีพนักงานสำหรับ LINE นี้ — หากเป็นพนักงานใหม่ ส่ง UID ด้านล่างให้ฝ่ายบุคคลค่ะ',
+        not_verified:'บัญชีของคุณยังไม่ได้ยืนยันตัวตน กรุณาเปิดลิงก์ยืนยันที่ฝ่ายบุคคลส่งให้ค่ะ',
+        inactive:'สถานะพนักงานของคุณยังเข้าทำงานไม่ได้ ติดต่อฝ่ายบุคคลค่ะ',no_uid:'อ่าน UID ไม่ได้'}[reason]||reason;
+      wrap.innerHTML=`<div class="card gate deny"><div class="icon">✕</div>
+        <h2>ยังเข้าทำงานไม่ได้</h2>
+        <p class="sub">${msg}</p>
+        ${acc&&acc.name?`<p style="font-size:14px">${acc.name} · สถานะ ${ST_TH[acc.status]||acc.status||'-'}</p>`:''}
+        <div class="uid">UID: ${lineUid}</div>
+        <button class="btn ghost" onclick="navigator.clipboard.writeText('${lineUid}').then(()=>toast('คัดลอก UID แล้ว'))">คัดลอก UID</button>
+      </div>`;return;
+    }
+    const {data:e}=await sb.rpc('hr_employee_self',{p_line_uid:lineUid});
+    wrap.innerHTML=`
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><h2>${e.name}${e.nickname?` (${e.nickname})`:''}</h2>
+          <div class="sub">${e.emp_no||''} · ${ROLE_TH[e.role]||e.role||'-'}</div></div>
+          <span class="pill ok">เข้าทำงานได้</span>
+        </div>
+        <div class="kv"><span class="k">สถานะ</span><span>${ST_TH[e.status]||e.status}</span></div>
+        <div class="kv"><span class="k">ประเภทจ้าง</span><span>${{fulltime:'ประจำ',parttime:'พาร์ทไทม์',contract:'สัญญาจ้าง',freelance:'ฟรีแลนซ์'}[e.emp_type]||e.emp_type||'-'}</span></div>
+        <div class="kv"><span class="k">เริ่มงาน</span><span>${e.start_date||'-'}</span></div>
+        <button class="btn ghost" style="margin-top:10px" onclick="editProfile()">แก้ข้อมูลส่วนตัว (เบอร์/บัญชี)</button>
+      </div>
+      <div class="card" id="attCard"><p style="color:var(--stone);text-align:center">กำลังโหลดเวลางาน…</p></div>
+      <div class="seg" style="flex-wrap:wrap">
+        <span class="on" onclick="dtab(this,'kpi')">KPI</span>
+        <span onclick="dtab(this,'ann')" id="annTab">ประกาศ</span>
+        <span onclick="dtab(this,'sched')">ตารางเวร</span>
+        <span onclick="dtab(this,'leave')">ลางาน</span>
+        <span onclick="dtab(this,'claim')">เบิกเงิน</span>
+        <span onclick="dtab(this,'task')">งาน</span>
+        <span onclick="dtab(this,'pay')">เงินเดือน</span>
+        <span onclick="dtab(this,'contract')">สัญญา</span>
+      </div>
+      <div id="tabbody"></div>`;
+    curE=e; loadAttendance(); loadKpiTab(); annBadge();
+  }
+  let curE=null;
+  function dtab(el,t){document.querySelectorAll('.seg span').forEach(s=>s.classList.remove('on'));el.classList.add('on');
+    ({kpi:loadKpiTab,ann:loadAnnTab,sched:loadSchedTab,leave:loadLeaveTab,claim:loadClaimTab,task:loadTaskTab,pay:loadPayTab,contract:loadContractTab}[t]||loadKpiTab)();}
+  async function loadClaimTab(){
+    const {data}=await sb.rpc('hr_claim_self',{p_line_uid:lineUid});const b=$('tabbody');
+    const list=(data&&!data.error)?data:[];
+    const ST={pending:'รออนุมัติ',approved:'อนุมัติ',rejected:'ไม่อนุมัติ',settled:'จ่ายแล้ว'};
+    b.innerHTML=`<div class="card">
+      <h2 style="font-size:18px">เบิกเงิน</h2>
+      <label>ประเภท</label><select id="clKind" style="width:100%;border:1px solid var(--hair);border-radius:2px;padding:11px;background:var(--canvas)">
+        <option value="expense">เบิกค่าใช้จ่าย (มีใบเสร็จ)</option><option value="advance">เบิกเงินเดือนล่วงหน้า</option></select>
+      <label>จำนวนเงิน (฿)</label><input id="clAmount" type="number" inputmode="numeric">
+      <label>เหตุผล / รายละเอียด</label><input id="clReason">
+      <button class="btn sage" style="margin-top:12px" id="clBtn" onclick="submitClaim()">ส่งคำขอเบิก</button>
+    </div>
+    ${list.length?`<div class="card"><div class="sub">รายการเบิกของฉัน</div>${list.map(c=>`<div class="kv"><span>${c.kind==='advance'?'ล่วงหน้า':'ค่าใช้จ่าย'} ฿${Number(c.amount).toLocaleString()}${c.reason?`<br><span style="font-size:12px;color:var(--stone)">${c.reason}</span>`:''}</span><span style="color:var(--stone)">${ST[c.status]||c.status}</span></div>`).join('')}</div>`:''}`;
+  }
+  function editProfile(){
+    const e=curE;
+    wrap.innerHTML=`<div class="card"><h2>แก้ข้อมูลส่วนตัว</h2>
+      <p class="sub">แก้เบอร์/อีเมล/ที่อยู่/บัญชีธนาคารของคุณได้เอง</p>
+      <label>ชื่อเล่น</label><input id="pfNick" value="${e.nickname||''}">
+      <label>เบอร์โทร</label><input id="pfPhone" value="${e.phone||''}">
+      <label>อีเมล</label><input id="pfEmail" value="${e.email||''}">
+      <label>ธนาคาร</label><input id="pfBank" value="">
+      <label>เลขบัญชี</label><input id="pfAcc" value="">
+      <button class="btn sage" style="margin-top:12px" onclick="saveProfile()">บันทึก</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="showDashboard()">ยกเลิก</button></div>`;
+  }
+  async function saveProfile(){
+    const p={nickname:$('pfNick').value.trim()||undefined,phone:$('pfPhone').value.trim()||undefined,
+      email:$('pfEmail').value.trim()||undefined,bank_name:$('pfBank').value.trim()||undefined,bank_account:$('pfAcc').value.trim()||undefined};
+    const {data}=await sb.rpc('hr_self_update',{p_line_uid:lineUid,p});
+    if(data&&data.ok){toast('บันทึกแล้วค่ะ');showDashboard();}else toast('ไม่สำเร็จค่ะ');
+  }
+  async function submitClaim(){
+    const amt=Number($('clAmount').value);if(!amt||amt<=0){toast('ใส่จำนวนเงินก่อนค่ะ');return;}
+    $('clBtn').disabled=true;
+    const {data}=await sb.rpc('hr_claim_request',{p_line_uid:lineUid,p:{kind:$('clKind').value,amount:amt,reason:$('clReason').value.trim()||null}});
+    if(!data||data.error){toast('ส่งไม่สำเร็จค่ะ');$('clBtn').disabled=false;return;}
+    toast('ส่งคำขอเบิกแล้ว รอเจ้าของอนุมัติค่ะ');loadClaimTab();
+  }
+  async function annBadge(){
+    const {data}=await sb.rpc('hr_announcement_unacked',{p_line_uid:lineUid});
+    const tab=$('annTab'); if(tab&&data>0){tab.innerHTML='ประกาศ <span style="background:var(--danger);color:#fff;border-radius:10px;padding:0 6px;font-size:11px">'+data+'</span>';}
+  }
+  async function loadAnnTab(){
+    const {data}=await sb.rpc('hr_announcement_self',{p_line_uid:lineUid,p_limit:30});const b=$('tabbody');
+    const list=(data&&!data.error)?data:[];
+    if(!list.length){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ยังไม่มีประกาศค่ะ</p></div>';return;}
+    b.innerHTML='<div class="card">'+list.map(a=>`<div style="border-bottom:1px solid var(--hair);padding:12px 0">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <b>${a.title}</b>
+        ${a.acked?'<span class="pill ok">รับทราบแล้ว</span>':(a.require_ack?'<span class="pill" style="color:var(--danger);border-color:#E6C9C9">ยังไม่รับทราบ</span>':(a.read?'<span class="pill">อ่านแล้ว</span>':''))}
+      </div>
+      ${a.image?`<img src="${a.image}" style="width:100%;border-radius:2px;margin-top:6px">`:''}
+      ${a.body?`<p style="font-size:13px;color:var(--stone);margin-top:4px">${a.body}</p>`:''}
+      <div style="font-size:11px;color:var(--stone);margin-top:4px">${new Date(a.created_at).toLocaleString('th-TH')}</div>
+      ${(a.require_ack&&!a.acked)?`<button class="btn sage" style="margin-top:8px" onclick="ackAnn('${a.id}')">กดรับทราบ</button>`:''}
+    </div>`).join('')+'</div>';
+    // เปิดแท็บ = อ่านทั้งหมด
+    list.filter(a=>!a.read).forEach(a=>sb.rpc('hr_announcement_read',{p_line_uid:lineUid,p_id:a.id}));
+  }
+  async function ackAnn(id){
+    const {data}=await sb.rpc('hr_announcement_ack',{p_line_uid:lineUid,p_id:id});
+    if(data==='ok'){toast('รับทราบแล้ว ขอบคุณค่ะ');loadAnnTab();annBadge();}else toast('ไม่สำเร็จค่ะ');
+  }
+  function dThai(s){return s?new Date(s+'T00:00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'}):'-';}
+
+  async function loadSchedTab(){
+    const {data}=await sb.rpc('hr_schedule_self',{p_line_uid:lineUid,p_days:14});
+    const b=$('tabbody');const list=(data&&!data.error)?data:[];
+    if(!list.length){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ยังไม่มีตารางเวรล่วงหน้าค่ะ</p></div>';return;}
+    b.innerHTML=`<div class="card">${list.map(s=>`<div class="kv"><span>${dThai(s.work_date)}</span>
+      <span>${s.off?'<span style="color:var(--stone)">หยุด</span>':(s.shift?`${s.shift} <span style="color:var(--stone)">${String(s.start).slice(0,5)}-${String(s.end).slice(0,5)}</span>`:'เข้างาน')}</span></div>`).join('')}</div>`;
+  }
+  async function loadLeaveTab(){
+    const {data}=await sb.rpc('hr_leave_self',{p_line_uid:lineUid});const b=$('tabbody');
+    if(!data||data.error){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ดูข้อมูลลาไม่ได้ค่ะ</p></div>';return;}
+    const LT={sick:'ป่วย',personal:'กิจ',vacation:'พักร้อน',unpaid:'ไม่รับเงิน'};
+    const ST={pending:'รออนุมัติ',approved:'อนุมัติ',rejected:'ไม่อนุมัติ',cancelled:'ยกเลิก'};
+    const q=data.quota||{},used=data.used||{};
+    const quota=Object.keys(q).map(k=>`<div class="kv"><span class="k">${LT[k]||k}</span><span>ใช้ ${used[k]||0} / ${q[k]} วัน</span></div>`).join('');
+    const recent=(data.recent||[]).map(r=>`<div class="kv"><span>${LT[r.type]||r.type} ${r.from}${r.to!==r.from?`–${r.to}`:''}</span><span style="color:var(--stone)">${ST[r.status]||r.status}</span></div>`).join('');
+    b.innerHTML=`<div class="card"><div class="sub">สิทธิ์ลาปีนี้</div>${quota}
+      <button class="btn sage" style="margin-top:14px" onclick="leaveForm()">+ ขอลา</button></div>
+      ${recent?`<div class="card"><div class="sub">ประวัติการลา</div>${recent}</div>`:''}`;
+  }
+  function leaveForm(){
+    const b=$('tabbody');
+    b.innerHTML=`<div class="card"><h2 style="font-size:18px">ขอลางาน</h2>
+      <label>ประเภท</label><select id="lvType" style="width:100%;border:1px solid var(--hair);border-radius:2px;padding:11px;background:var(--canvas)">
+        <option value="sick">ลาป่วย</option><option value="personal">ลากิจ</option><option value="vacation">พักร้อน</option><option value="unpaid">ลาไม่รับเงิน</option></select>
+      <label>ตั้งแต่วันที่</label><input type="date" id="lvFrom">
+      <label>ถึงวันที่</label><input type="date" id="lvTo">
+      <label>เหตุผล</label><input id="lvReason" placeholder="">
+      <button class="btn sage" style="margin-top:14px" id="lvBtn" onclick="submitLeave()">ส่งคำขอลา</button>
+      <button class="btn ghost" style="margin-top:8px" onclick="loadLeaveTab()">ยกเลิก</button></div>`;
+  }
+  async function submitLeave(){
+    const from=$('lvFrom').value, to=$('lvTo').value||from;
+    if(!from){toast('เลือกวันที่ลาก่อนค่ะ');return;}
+    $('lvBtn').disabled=true;
+    const {data}=await sb.rpc('hr_leave_request',{p_line_uid:lineUid,p:{leave_type:$('lvType').value,from_date:from,to_date:to,reason:$('lvReason').value.trim()||null}});
+    if(!data||data.error){toast('ส่งไม่สำเร็จค่ะ');$('lvBtn').disabled=false;return;}
+    toast('ส่งคำขอลาแล้ว รอฝ่ายบุคคลอนุมัติค่ะ'); loadLeaveTab();
+  }
+  async function loadTaskTab(){
+    const {data}=await sb.rpc('hr_task_self',{p_line_uid:lineUid});const b=$('tabbody');
+    const list=(data&&!data.error)?data:[];
+    if(!list.length){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ไม่มีงานค้างค่ะ เยี่ยมมาก!</p></div>';return;}
+    b.innerHTML=`<div class="card">${list.map(t=>`<div class="kv"><span><b>${t.title}</b>${t.due?`<br><span style="font-size:12px;color:var(--stone)">ภายใน ${t.due}</span>`:''}${t.detail?`<br><span style="font-size:12px;color:var(--stone)">${t.detail}</span>`:''}</span>
+      <span><button class="pill" style="color:var(--sageDeep);border-color:#BFE0D4;cursor:pointer" onclick="doneTask('${t.id}')">เสร็จ</button></span></div>`).join('')}</div>`;
+  }
+  async function doneTask(id){
+    const {data}=await sb.rpc('hr_task_done',{p_line_uid:lineUid,p_id:id});
+    if(data==='ok'){toast('ปิดงานแล้ว ✓');loadTaskTab();}else toast('ไม่สำเร็จค่ะ');
+  }
+  async function loadPayTab(){
+    const {data}=await sb.rpc('hr_payslip_self',{p_line_uid:lineUid,p_period:null});const b=$('tabbody');
+    const list=(data&&!data.error)?data:[];
+    if(!list.length){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ยังไม่มีสลิปเงินเดือนค่ะ</p></div>';return;}
+    b.innerHTML=list.map(s=>`<div class="card">
+      <div class="sub">งวด ${s.period} · ${s.status==='paid'?'โอนแล้ว':'ออกสลิปแล้ว'}</div>
+      <div class="big" style="color:var(--sageDeep)">฿${Number(s.net).toLocaleString()}</div><div class="sub">ยอดสุทธิ</div>
+      <div class="kv"><span class="k">เงินเดือนฐาน</span><span>฿${Number(s.base_salary).toLocaleString()}</span></div>
+      ${(s.additions||[]).map(a=>`<div class="kv"><span class="k">+ ${a.label}</span><span>฿${Number(a.amount).toLocaleString()}</span></div>`).join('')}
+      ${(s.deductions||[]).map(d=>`<div class="kv"><span class="k">− ${d.label}</span><span>−฿${Number(d.amount).toLocaleString()}</span></div>`).join('')}
+      <div class="kv"><span class="k">วันทำงาน · โอที · มาสาย</span><span>${s.work_days} วัน · ${Math.round((s.ot_minutes||0)/60*10)/10} ชม. · ${s.late_count} ครั้ง</span></div>
+    </div>`).join('');
+  }
+
+  // ---------- ลงเวลาเข้า-ออกงาน ----------
+  function hhmm(ts){return ts?new Date(ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Bangkok'}):'-';}
+  function hmin(m){if(m==null)return '-';const h=Math.floor(m/60),mm=m%60;return (h?h+' ชม. ':'')+mm+' นาที';}
+  async function loadAttendance(){
+    const {data}=await sb.rpc('hr_attendance_today',{p_line_uid:lineUid});
+    const c=$('attCard'); if(!data||data.error){c.style.display='none';return;}
+    if(data.checked_in){
+      c.innerHTML=`<div class="center"><div class="sub">กำลังเข้างานอยู่</div>
+        <div class="big" style="color:var(--sageDeep)">เข้างาน ${hhmm(data.open_since)} น.</div>
+        <button class="btn dark" style="margin-top:14px" id="attBtn" onclick="clockOut()">ออกงาน / เลิกงาน</button></div>`;
+    }else{
+      const done=data.today_minutes>0?`<div class="sub">วันนี้ทำงานไปแล้ว ${hmin(data.today_minutes)}</div>`:'<div class="sub">วันนี้ยังไม่ได้ลงเวลา</div>';
+      c.innerHTML=`<div class="center">${done}
+        <button class="btn sage" style="margin-top:10px" id="attBtn" onclick="clockIn()">เข้างาน / ลงเวลา</button></div>`;
+    }
+  }
+  async function clockIn(){
+    $('attBtn').disabled=true;
+    const {data}=await sb.rpc('hr_check_in',{p_line_uid:lineUid,p_note:null});
+    if(!data||data.error){toast(data&&data.error==='already_in'?'ลงเวลาเข้าไว้แล้วค่ะ':'ลงเวลาไม่สำเร็จ');loadAttendance();return;}
+    toast('เข้างานแล้ว '+hhmm(data.check_in)+' น. ✓'); loadAttendance();
+  }
+  async function clockOut(){
+    $('attBtn').disabled=true;
+    const {data}=await sb.rpc('hr_check_out',{p_line_uid:lineUid,p_note:null});
+    if(!data||data.error){toast(data&&data.error==='not_in'?'ยังไม่ได้เข้างานค่ะ':'ลงเวลาไม่สำเร็จ');loadAttendance();return;}
+    toast('ออกงานแล้ว · รวม '+hmin(data.work_minutes)); loadAttendance();
+  }
+  async function loadKpiTab(){
+    const {data}=await sb.rpc('hr_kpi_self',{p_line_uid:lineUid,p_period:null});
+    const b=$('tabbody');
+    if(!data||!data.period){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ยังไม่มี KPI บันทึกไว้ค่ะ</p></div>';return;}
+    const ms=data.metrics||[];
+    b.innerHTML=`<div class="card center">
+      <div class="sub">งวด ${data.period}</div>
+      <div class="overall">${data.overall??'–'}</div><div class="sub">คะแนนรวม / 100</div>
+      <div style="text-align:left;margin-top:14px">${ms.map(m=>{
+        const pct=m.score!=null?m.score:(m.target?Math.min(100,Math.round((m.actual||0)/m.target*100)):0);
+        return `<div class="metric"><div class="top"><span>${m.metric}</span><span><b>${m.actual??'-'}</b>/${m.target??'-'}${m.unit?' '+m.unit:''}${m.score!=null?` · ${m.score}`:''}</span></div>
+        <div class="barbg"><div class="barfill" style="width:${pct}%"></div></div></div>`;}).join('')}</div>
+    </div>`;
+  }
+  async function loadContractTab(){
+    const {data}=await sb.rpc('emp_contract_list',{p_status:null,p_employee:curE.id});
+    const list=data||[];const b=$('tabbody');
+    const ST={draft:'ฉบับร่าง',sent:'รอลงนาม',viewed:'เปิดอ่าน',signed:'ลงนามแล้ว',declined:'ขอแก้ไข',void:'ยกเลิก'};
+    if(!list.length){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ยังไม่มีสัญญาจ้างค่ะ</p></div>';return;}
+    b.innerHTML=`<div class="card">${list.map(c=>{
+      const url=location.pathname+'?ec='+c.token;const pend=c.status==='sent'||c.status==='viewed';
+      return `<div class="kv"><span><b>${c.contract_no}</b><br><span style="font-size:12px;color:var(--stone)">${ST[c.status]||c.status}</span></span>
+        <span>${pend?`<a class="pill" style="color:var(--sageDeep);border-color:#BFE0D4" href="${url}">ลงนาม ›</a>`:`<a class="pill" href="${url}">ดู</a>`}</span></div>`;}).join('')}</div>`;
+  }
+
+  // ---------- boot ----------
+  async function boot(){
+    try{ await liff.init({liffId:LIFF_ID});
+      if(liff.isLoggedIn()){const p=await liff.getProfile();lineUid=p.userId;lineName=p.displayName;}
+      else if(liff.isInClient()){liff.login();return;}
+    }catch(e){/* เบราว์เซอร์ปกติ — lineUid ว่าง */}
+    if(verifyToken) return showVerify();
+    if(ecToken)     return showContract();
+    if(annId)       return showAnnouncement();
+    return showDashboard();
+  }
+  // ---------- โหมดประกาศ (เปิดจากการ์ด LINE) ----------
+  async function showAnnouncement(){
+    if(!lineUid){ wrap.innerHTML=`<div class="card gate deny"><div class="icon">!</div><h2>ต้องเปิดผ่าน LINE</h2><p class="sub">กรุณาเปิดลิงก์นี้จากแอป LINE ค่ะ</p></div>`; return; }
+    await sb.rpc('hr_announcement_read',{p_line_uid:lineUid,p_id:annId});  // เปิด = อ่านแล้ว
+    const {data}=await sb.rpc('hr_announcement_self',{p_line_uid:lineUid,p_limit:50});
+    const a=((data&&!data.error)?data:[]).find(x=>x.id===annId);
+    if(!a){ wrap.innerHTML=`<div class="card gate deny"><div class="icon">!</div><h2>ไม่พบประกาศ</h2><p class="sub">ลิงก์อาจไม่ถูกต้อง หรือคุณไม่ใช่ผู้รับค่ะ</p></div>`; return; }
+    wrap.innerHTML=`<div class="card">
+      <div class="sub">ประกาศบริษัท · ${new Date(a.created_at).toLocaleString('th-TH')}</div>
+      <h2>${a.title}</h2>
+      ${a.image?`<img src="${a.image}" style="width:100%;border-radius:2px;margin-top:10px">`:''}
+      ${a.body?`<p style="margin-top:8px;line-height:1.7">${a.body}</p>`:''}
+      <div id="annAction" style="margin-top:16px">${
+        a.acked? '<span class="pill ok">รับทราบแล้ว ✓</span>'
+        : (a.require_ack? `<button class="btn sage" id="ackBtn" onclick="ackAnnFocus('${a.id}')">กดรับทราบ</button>` : '<span class="pill">อ่านแล้ว</span>')
+      }</div>
+      <button class="btn ghost" style="margin-top:10px" onclick="location.href=location.pathname">เข้าพอร์ทัลพนักงาน</button>
+    </div>`;
+  }
+  async function ackAnnFocus(id){
+    $('ackBtn').disabled=true;
+    const {data}=await sb.rpc('hr_announcement_ack',{p_line_uid:lineUid,p_id:id});
+    if(data==='ok'){ $('annAction').innerHTML='<span class="pill ok">รับทราบแล้ว ✓ ขอบคุณค่ะ</span>'; toast('รับทราบแล้ว'); }
+    else { toast('ไม่สำเร็จค่ะ'); $('ackBtn').disabled=false; }
+  }
+  boot();
+</script>
+</body>
+</html>
