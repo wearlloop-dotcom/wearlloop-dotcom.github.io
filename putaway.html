@@ -9,6 +9,8 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="../liff/config.js"></script>
 <script src="ops-api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="scan.js"></script>
 <style>
   :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -46,7 +48,7 @@
     <div class="card">
       <h2>เก็บเข้าช่อง (put-away)</h2>
       <div class="row">
-        <div><label>รหัสชุด</label><input id="paCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doPutAway()"></div>
+        <div><label>รหัสชุด</label><div style="display:flex;gap:6px"><input id="paCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doPutAway()"><button type="button" class="btn ghost" style="width:auto;margin:0;padding:0 14px;white-space:nowrap" onclick="scanInto('paCode')">สแกน</button></div></div>
         <div><label>ช่องเก็บ (พิมพ์ หรือเลือก)</label><input id="paBin" placeholder="เช่น A-03" autocomplete="off" list="binList"></div>
       </div>
       <button class="btn sage" onclick="doPutAway()">เก็บเข้าช่อง</button>
@@ -68,7 +70,7 @@
     <!-- ตามหาชุด -->
     <div class="card">
       <h2>ตามหาชุด</h2>
-      <label>รหัสชุด</label><input id="locCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doLocate()">
+      <label>รหัสชุด</label><div style="display:flex;gap:6px"><input id="locCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doLocate()"><button type="button" class="btn ghost" style="width:auto;margin:0;padding:0 14px;white-space:nowrap" onclick="scanInto('locCode',doLocate)">สแกน</button></div>
       <button class="btn" onclick="doLocate()">ตามหา</button>
       <div class="res" id="locRes"></div>
     </div>

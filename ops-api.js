@@ -15,7 +15,8 @@
     if (_ready) return true;
     if (!window.liff || !LIFF_ID) throw new Error('ยังไม่ได้ตั้งค่า LINE Login (LIFF_ID)');
     await liff.init({ liffId: LIFF_ID });
-    if (!liff.isLoggedIn()) { liff.login(); return false; } // redirect ไป LINE แล้วกลับมา
+    // redirectUri = หน้าปัจจุบัน → กลับมาหน้า ops หลัง login (ไม่เด้งไปหน้าลูกค้า/endpoint)
+    if (!liff.isLoggedIn()) { liff.login({ redirectUri: window.location.href }); return false; }
     _ready = true;
     return true;
   }

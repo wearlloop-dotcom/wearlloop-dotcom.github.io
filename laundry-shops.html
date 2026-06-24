@@ -9,6 +9,8 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="../liff/config.js"></script>
 <script src="ops-api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="scan.js"></script>
 <style>
   :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -47,7 +49,7 @@
     <div class="card">
       <h2>ส่งชุดไปซัก</h2>
       <div class="row">
-        <div><label>รหัสชุด</label><input id="wsCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doSend()"></div>
+        <div><label>รหัสชุด</label><div style="display:flex;gap:6px"><input id="wsCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doSend()"><button type="button" class="btn ghost" style="width:auto;margin:0;padding:0 14px;white-space:nowrap" onclick="scanInto('wsCode')">สแกน</button></div></div>
         <div><label>ร้านซัก</label><select id="wsVendor"></select></div>
       </div>
       <button class="btn sage" onclick="doSend()">ส่งซัก</button>
@@ -58,7 +60,7 @@
     <!-- รับกลับ / ซักเสร็จ -->
     <div class="card">
       <h2>ซักเสร็จ / รับกลับ</h2>
-      <label>รหัสชุด</label><input id="wdCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doDone()">
+      <label>รหัสชุด</label><div style="display:flex;gap:6px"><input id="wdCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doDone()"><button type="button" class="btn ghost" style="width:auto;margin:0;padding:0 14px;white-space:nowrap" onclick="scanInto('wdCode',doDone)">สแกน</button></div>
       <button class="btn" onclick="doDone()">ซักเสร็จ</button>
       <div class="res" id="wdRes"></div>
     </div>
