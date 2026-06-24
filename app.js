@@ -320,6 +320,11 @@ function openDetail(id) {
       ${subCovers(g) ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
       <button id="bookBtn" onclick="reserve('${g.id}')">${t('reserveBtn')}</button>
     </div>
+    ${(window.BDAY && window.BDAY.voucher && window.BDAY.voucher.active && !subCovers(g))
+      ? `<button class="bdaybtn" onclick="bdayBook('${g.id}')">${lang==='th'
+          ? (g.price<=window.BDAY.voucher.value_cap?'ใช้สิทธิ์วันเกิด · เช่าฟรี':`ใช้สิทธิ์วันเกิด · จ่ายเพิ่ม ฿${g.price-window.BDAY.voucher.value_cap}`)
+          : (g.price<=window.BDAY.voucher.value_cap?'Use birthday gift · free':`Use birthday gift · pay ฿${g.price-window.BDAY.voucher.value_cap}`)}</button>`
+      : ''}
     ${subCovers(g)
       ? `<div class="creditline">${lang==='th'?`ใช้สิทธิ์สมาชิก ${CUSTOMER._sub.plan_name} · เหลือ ${CUSTOMER._sub.remaining} ชุดรอบนี้ · ส่งฟรีขาไป (ค่าส่งคืนผู้เช่าออกเอง)`:`Using ${CUSTOMER._sub.plan_name} · ${CUSTOMER._sub.remaining} left · free outbound (return shipping on you)`}</div>`
       : `<div class="creditline">${t('creditPre')}${credit}${t('creditMid')}${g.price - credit}</div>`}`;
@@ -469,6 +474,22 @@ async function renderQuote(id, date) {
   const TH = lang === 'th';
   const row = (k, v, hl) => `<div class="qrow${hl ? ' hl' : ''}"><span>${k}</span><b>${v}</b></div>`;
   const baht = n => '฿' + n;
+  // ช่องทางชำระ (บัญชี/พร้อมเพย์ QR) — โชว์ใต้ยอดรวม
+  let pay = null; try { pay = await window.API.payInfo(); } catch (e) { /**/ }
+  const hasPay = pay && (pay.pay_account_no || pay.pay_promptpay_qr || pay.pay_promptpay_id);
+  const payBlock = !hasPay ? '' : `
+    <div class="paybox" style="margin-top:12px;border-top:1px solid var(--line,#E7E5E1);padding-top:12px">
+      <div class="qhd">${TH ? 'ช่องทางชำระ' : 'Pay to'}</div>
+      ${pay.pay_account_no ? `<div class="qrow"><span>${pay.pay_bank_name || (TH ? 'โอนเข้าบัญชี' : 'Bank')}</span><b>${pay.pay_account_no}</b></div>
+        ${pay.pay_account_name ? `<div style="font-size:12px;color:var(--muted,#8C8B86);text-align:right">${pay.pay_account_name}</div>` : ''}` : ''}
+      ${pay.pay_promptpay_id ? `<div style="text-align:center;margin:10px 0">
+        <div id="ppqr"></div>
+        <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(q.total)}</b></div></div>`
+      : pay.pay_promptpay_qr ? `<div style="text-align:center;margin:10px 0">
+        <img src="${pay.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:70%;border:1px solid var(--line,#E7E5E1);border-radius:6px">
+        <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(q.total)}</b></div></div>` : ''}
+      <div style="font-size:12px;color:var(--muted,#8C8B86);margin-top:6px">${pay.pay_note || (TH ? 'โอนแล้วแนบสลิปในแชตนี้' : 'Transfer then send slip in chat')}</div>
+    </div>`;
   const kyc = q.kyc_required ? `<div class="kycnote">
       <div class="kt">${TH ? 'ลูกค้าใหม่: ยืนยันตัวตนเพื่อใช้มัดจำปกติ' : 'New customer — verify to lower deposit'}</div>
       <div class="ks">${TH ? 'แนบบัตรประชาชน + IG/FB สาธารณะ หรือวางมัดจำเพิ่มตามนี้ก็ได้' : 'Attach ID + public IG/FB, or keep the higher deposit'}</div>
@@ -482,7 +503,13 @@ async function renderQuote(id, date) {
     ${row(TH ? 'รวมโอน' : 'Total', baht(q.total), true)}
     <div class="qdates">${TH ? 'จัดส่งราว' : 'Ships ~'} ${fmtDate(q.ship_date)} · ${TH ? 'กำหนดคืน' : 'Return by'} ${fmtDate(q.return_date)}</div>
     <div class="qdates">${TH ? 'ค่าส่งคืนผู้เช่าออกเอง' : 'Return shipping paid by renter'}</div>
-    ${kyc}`;
+    ${kyc}
+    ${payBlock}`;
+  // วาด QR แบรนด์ LLOOP ฝังยอด (หลัง element อยู่ใน DOM แล้ว)
+  if (pay && pay.pay_promptpay_id && window.promptpayBrandedQR) {
+    const ppEl = document.getElementById('ppqr');
+    if (ppEl) window.promptpayBrandedQR(ppEl, pay.pay_promptpay_id, q.total, pay.pay_promptpay_type);
+  }
 }
 
 async function reserve(id) {
@@ -514,6 +541,29 @@ async function reserve(id) {
 ? (lang ==='th'?` · เตรียมชุดสำรองให้ ${backups.length} ตัวแล้ว`:` · ${backups.length} backups reserved`)
     :'';
   toast(`${t('reservedPre')} ${g.name} ${t('reservedPost')} ${fmtDate(date)}${bk}`);
+}
+
+// จองด้วยสิทธิ์วันเกิด (ฟรีถึงเพดาน · เกินจ่ายส่วนต่าง · มัดจำตามปกติ)
+async function bdayBook(id) {
+  const g = GARMENTS.find(x => x.id === id);
+  const date = $('#useDate') && $('#useDate').value;
+  if (!date) {
+    const msg = $('#availMsg');
+    if (msg) { msg.className = 'availmsg busy'; msg.textContent = lang === 'th' ? 'เลือกวันที่ต้องใช้ก่อนนะคะ' : 'Pick a date first'; }
+    return;
+  }
+  const res = await window.API.birthdayReserve(id, CUSTOMER, date, durEnd(date));
+  if (!res.ok) {
+    toast(res.error === 'unavailable' ? (lang === 'th' ? 'ชุดนี้ไม่ว่างวันนั้นค่ะ ลองวันอื่นนะคะ' : 'Unavailable that date')
+        : res.error === 'no_voucher' ? (lang === 'th' ? 'สิทธิ์วันเกิดหมดอายุ/ใช้ไปแล้วค่ะ' : 'No active birthday voucher')
+        : (lang === 'th' ? 'ใช้สิทธิ์ไม่สำเร็จ ลองใหม่นะคะ' : 'Failed, try again'));
+    return;
+  }
+  window.BDAY = null;  // ใช้สิทธิ์ไปแล้ว
+  closeDetail();
+  toast(lang === 'th'
+    ? (Number(res.pay) > 0 ? `จองวันเกิดสำเร็จ จ่ายเพิ่ม ฿${res.pay} · สุขสันต์วันเกิดค่ะ` : 'จองวันเกิดสำเร็จ เช่าฟรี! สุขสันต์วันเกิดค่ะ')
+    : (Number(res.pay) > 0 ? `Birthday booking done · pay ฿${res.pay}` : 'Birthday booking done · free! Happy birthday'));
 }
 
 // ===== ยืนยันตัวตน (KYC) =====
@@ -703,6 +753,7 @@ function openProfile(onboard) {
       <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง — ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>
       <div class="frow">
         <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" value="${c.phone || ''}"></div>
+        <div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>
       </div>
       <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label><input id="pAddress" value="${c.address || ''}"></div>
       <div class="field"><label>${t('pNotes')}</label><input id="pNotes" value="${c.notes ||''}"></div>
@@ -1153,6 +1204,7 @@ async function saveProfile() {
   CUSTOMER.address = $('#pAddress') ? $('#pAddress').value : CUSTOMER.address;
   CUSTOMER.weight_kg = $('#pWeight') ? (+$('#pWeight').value || null) : CUSTOMER.weight_kg;
   CUSTOMER.size = $('#pSize') ? ($('#pSize').value || null) : CUSTOMER.size;
+  CUSTOMER.birthday = $('#pBirthday') ? ($('#pBirthday').value || null) : CUSTOMER.birthday;
   CUSTOMER.prefs = {
     styles: [...pStyles], occasions: [...pOccasions],
     fav_colors: $('#pFav') ? $('#pFav').value : '',
@@ -1250,6 +1302,12 @@ async function boot() {
   try { gWish = await window.API.myWishlist?.(CUSTOMER) || new Set(); } catch (e) { gWish = new Set(); }
   // โหลดสถานะสมาชิกรายเดือน (subscription)
   try { CUSTOMER._sub = await window.API.mySubscription?.(CUSTOMER) || { active: false }; } catch (e) { CUSTOMER._sub = { active: false }; }
+  // ของขวัญวันเกิด: มีสิทธิ์เช่าฟรีไหม → โชว์ปุ่ม "ใช้สิทธิ์วันเกิด" ในหน้าชุด + แจ้งเตือนครั้งเดียว
+  try {
+    window.BDAY = await window.API.birthdayStatus?.(CUSTOMER);
+    if (window.BDAY && window.BDAY.voucher && window.BDAY.voucher.active)
+      setTimeout(() => toast(lang === 'th' ? `ของขวัญวันเกิด: เช่าฟรี 1 ชุด (ถึง ฿${window.BDAY.voucher.value_cap}) เลือกชุดได้เลย` : `Birthday gift: 1 free rental — pick a dress`), 1200);
+  } catch (e) { window.BDAY = null; }
   // เดโม: ยังไม่ได้ล็อกอินผ่าน LINE (เปิดบน localhost) ใส่ตัวอย่างให้หน้าผลกระทบดูมีชีวิต
   if (!CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();

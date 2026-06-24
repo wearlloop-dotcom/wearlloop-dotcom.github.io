@@ -199,6 +199,8 @@
   .cta .price{font-family:var(--display);font-size:19px;font-weight:600}
   .cta button{flex:1;background:var(--ink);color:#fff;border:none;padding:14px;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:600}
   .creditline{font-size:11px;color:var(--muted);text-align:center;padding:0 18px 16px}
+  .bdaybtn{display:block;width:calc(100% - 36px);margin:10px 18px 0;background:#A75F3A;color:#fff;border:none;padding:13px;font-size:13px;letter-spacing:.5px;font-weight:600;border-radius:2px;cursor:pointer}
+  .bdaybtn:active{opacity:.9}
   .datepick{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px 0}
   .datepick label{font-size:12px;color:var(--muted);font-weight:500}
   .datepick input[type=date]{font-family:var(--sans);font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;color:var(--ink);background:#fff}
@@ -618,13 +620,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=33"></script>
-<script src="pixel.js?v=33"></script>
-<script src="i18n.js?v=33"></script>
-<script src="data.js?v=33"></script>
-<script src="liffAuth.js?v=33"></script>
-<script src="me-api.js?v=33"></script>
-<script src="api.js?v=33"></script>
+<script src="config.js?v=34"></script>
+<script src="pixel.js?v=34"></script>
+<script src="i18n.js?v=34"></script>
+<script src="data.js?v=34"></script>
+<script src="liffAuth.js?v=34"></script>
+<script src="me-api.js?v=34"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="promptpay.js?v=34"></script>
+<script src="api.js?v=34"></script>
 <script>
   /* Spotlight — ดึงชุดที่เช่าน้อยสุดมาโชว์รูปใหญ่ + สลับสไลด์อัตโนมัติ (visual layer) */
   window.renderSpotlight = function(garments){
@@ -662,6 +666,6 @@
     restart();
   };
 </script>
-<script src="app.js?v=33"></script>
+<script src="app.js?v=34"></script>
 </body>
 </html>

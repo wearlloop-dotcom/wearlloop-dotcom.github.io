@@ -91,7 +91,7 @@ window.API = (function () {
       bust_in: customer.bust_in, waist_in: customer.waist_in, hip_in: customer.hip_in,
       my_color_season: customer.my_color_season, notes: customer.notes,
       phone: customer.phone, address: customer.address,
-      weight_kg: customer.weight_kg, size: customer.size, prefs: customer.prefs,
+      weight_kg: customer.weight_kg, size: customer.size, prefs: customer.prefs, birthday: customer.birthday || null,
     }).eq('line_uid', lineUid);
     return { ok:!error, error };
   }
@@ -376,5 +376,29 @@ window.API = (function () {
     return { ok: !error, data, error };
   }
 
-  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry };
+  // ===== ช่องทางชำระเงิน (โชว์ตอน checkout) — cache ไว้ =====
+  let _payInfo;
+  async function payInfo() {
+    if (CONFIG.USE_MOCK) return null;
+    if (_payInfo !== undefined) return _payInfo;
+    try { const { data } = await client().rpc('pay_info'); _payInfo = data || null; }
+    catch (_e) { _payInfo = null; }
+    return _payInfo;
+  }
+
+  // ===== ของขวัญวันเกิด =====
+  async function birthdayStatus(customer) {
+    if (CONFIG.USE_MOCK || !customer?.id) return null;
+    try { const { data } = await client().rpc('birthday_status', { p_customer: customer.id }); return data || null; }
+    catch (_e) { return null; }
+  }
+  async function birthdayReserve(garmentId, customer, fromStr, toStr) {
+    if (CONFIG.USE_MOCK) return { ok: true, free: 0, pay: 0 };
+    const { data, error } = await client().rpc('birthday_reserve_dates', { p_customer: customer.id, p_garment: garmentId, p_from: fromStr, p_to: toStr });
+    if (error) return { ok: false, error: error.message };
+    if (data?.error) return { ok: false, error: data.error };
+    return { ok: true, ...data };
+  }
+
+  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, payInfo, birthdayStatus, birthdayReserve };
 })();

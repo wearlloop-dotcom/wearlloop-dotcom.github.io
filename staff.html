@@ -238,6 +238,7 @@
         <span onclick="dtab(this,'claim')">เบิกเงิน</span>
         <span onclick="dtab(this,'task')">งาน</span>
         <span onclick="dtab(this,'pay')">เงินเดือน</span>
+        <span onclick="dtab(this,'doc')">เอกสาร</span>
         <span onclick="dtab(this,'contract')">สัญญา</span>
       </div>
       <div id="tabbody"></div>`;
@@ -245,7 +246,7 @@
   }
   let curE=null;
   function dtab(el,t){document.querySelectorAll('.seg span').forEach(s=>s.classList.remove('on'));el.classList.add('on');
-    ({kpi:loadKpiTab,ann:loadAnnTab,sched:loadSchedTab,leave:loadLeaveTab,claim:loadClaimTab,task:loadTaskTab,pay:loadPayTab,contract:loadContractTab}[t]||loadKpiTab)();}
+    ({kpi:loadKpiTab,ann:loadAnnTab,sched:loadSchedTab,leave:loadLeaveTab,claim:loadClaimTab,task:loadTaskTab,pay:loadPayTab,doc:loadDocTab,contract:loadContractTab}[t]||loadKpiTab)();}
   async function loadClaimTab(){
     const {data}=await sb.rpc('hr_claim_self',{p_line_uid:lineUid});const b=$('tabbody');
     const list=(data&&!data.error)?data:[];
@@ -416,6 +417,32 @@
         return `<div class="metric"><div class="top"><span>${m.metric}</span><span><b>${m.actual??'-'}</b>/${m.target??'-'}${m.unit?' '+m.unit:''}${m.score!=null?` · ${m.score}`:''}</span></div>
         <div class="barbg"><div class="barfill" style="width:${pct}%"></div></div></div>`;}).join('')}</div>
     </div>`;
+  }
+  const DOC_KIND={id_card:'สำเนาบัตรประชาชน',contract:'สัญญา',cert:'วุฒิ/ใบรับรอง',other:'อื่นๆ'};
+  async function loadDocTab(){
+    const {data}=await sb.rpc('hr_doc_self',{p_line_uid:lineUid});const b=$('tabbody');
+    const list=(data&&!data.error)?data:[];
+    b.innerHTML=`<div class="card">
+      <h2 style="font-size:18px">เอกสารของฉัน</h2>
+      <label>อัปโหลดเอกสาร</label><input type="file" id="docFile">
+      <label>ประเภท</label><select id="docKind" style="width:100%;border:1px solid var(--hair);border-radius:2px;padding:11px;background:var(--canvas)">
+        <option value="id_card">สำเนาบัตรประชาชน</option><option value="contract">สัญญา</option>
+        <option value="cert">วุฒิ/ใบรับรอง</option><option value="other">อื่นๆ</option></select>
+      <button class="btn sage" style="margin-top:12px" id="docBtn" onclick="uploadDoc()">อัปโหลด</button>
+    </div>
+    ${list.length?`<div class="card"><div class="sub">เอกสารที่มี</div>${list.map(d=>`<div class="kv"><span><a href="${d.url}" target="_blank">${d.name}</a><br><span style="font-size:12px;color:var(--stone)">${DOC_KIND[d.kind]||d.kind} · ${new Date(d.created_at).toLocaleDateString('th-TH')}</span></span></div>`).join('')}</div>`:'<div class="card center"><p style="color:var(--stone);padding:20px 0">ยังไม่มีเอกสารค่ะ</p></div>'}`;
+  }
+  async function uploadDoc(){
+    const f=$('docFile').files[0];if(!f){toast('เลือกไฟล์ก่อนค่ะ');return;}
+    $('docBtn').disabled=true;
+    const kind=$('docKind').value, empId=curE.id;
+    const path=`${empId}/${Date.now()}_${f.name}`;
+    const {error:upErr}=await sb.storage.from('hr-docs').upload(path,f,{upsert:false});
+    if(upErr){toast('อัปโหลดไม่สำเร็จค่ะ');$('docBtn').disabled=false;return;}
+    const {data:{publicUrl}}=sb.storage.from('hr-docs').getPublicUrl(path);
+    const {error}=await sb.rpc('hr_doc_add',{p:{employee_id:empId,kind,name:f.name,url:publicUrl,uploaded_by:lineUid}});
+    if(error){toast('บันทึกไม่สำเร็จค่ะ');$('docBtn').disabled=false;return;}
+    toast('อัปโหลดเอกสารแล้วค่ะ');loadDocTab();
   }
   async function loadContractTab(){
     const {data}=await sb.rpc('emp_contract_list',{p_status:null,p_employee:curE.id});
