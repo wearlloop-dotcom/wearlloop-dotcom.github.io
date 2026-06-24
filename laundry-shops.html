@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ร้านซัก + ส่งซัก</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .bar h1{font-family:var(--display);font-size:18px;font-weight:700;color:var(--clay)}
+  .bar .nav a{font-size:13px;color:var(--muted);text-decoration:none;margin-left:12px}
+  .wrap{max-width:720px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;margin-bottom:12px}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+  input,select{width:100%;font-family:var(--sans);font-size:17px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:130px}
+  .btn{border:none;border-radius:10px;padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff;width:100%;margin-top:12px}
+  .btn.sage{background:var(--sage)}.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .res{margin-top:12px;font-size:15px;line-height:1.6}
+  .li{font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;margin-top:7px}
+  .li .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .tag{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;background:var(--soft);border:1px solid var(--line);color:var(--muted)}
+  .tag.house{background:#EaF0E8;color:var(--ok);border-color:#cfe0c9}
+  .muted{color:var(--muted);font-size:13px}
+  .loading{color:var(--muted);text-align:center;padding:18px}
+  .pin{font-family:var(--display);font-weight:700;color:var(--clay)}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:80;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center}
+  .toast.show{opacity:1}.toast.bad{background:var(--clay)}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h1>ร้านซัก · ส่งซัก</h1>
+    <div class="nav"><a href="/laundry.html">QC/ซัก</a><a href="/putaway.html">เก็บเข้าช่อง</a><a href="/stock.html">สต๊อก</a><a href="/today.html">วันนี้</a></div>
+  </div>
+
+  <div class="wrap">
+    <!-- ส่งซัก -->
+    <div class="card">
+      <h2>ส่งชุดไปซัก</h2>
+      <div class="row">
+        <div><label>รหัสชุด</label><input id="wsCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doSend()"></div>
+        <div><label>ร้านซัก</label><select id="wsVendor"></select></div>
+      </div>
+      <button class="btn sage" onclick="doSend()">ส่งซัก</button>
+      <div class="muted" style="margin-top:8px">ร้านค้างไว้ให้ — ส่งหลายตัวไปร้านเดียวกัน พิมพ์รหัสถัดไปกด Enter ได้เลย</div>
+      <div class="res" id="wsRes"></div>
+    </div>
+
+    <!-- รับกลับ / ซักเสร็จ -->
+    <div class="card">
+      <h2>ซักเสร็จ / รับกลับ</h2>
+      <label>รหัสชุด</label><input id="wdCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doDone()">
+      <button class="btn" onclick="doDone()">ซักเสร็จ</button>
+      <div class="res" id="wdRes"></div>
+    </div>
+
+    <!-- ทะเบียนร้านซัก -->
+    <div class="card">
+      <h2>ทะเบียนร้านซัก <span class="muted" id="vCount"></span></h2>
+      <div id="vList"><div class="loading">กำลังโหลด…</div></div>
+      <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px">
+        <div class="muted" style="margin-bottom:8px">เพิ่มร้านใหม่</div>
+        <div class="row">
+          <div><label>ชื่อร้าน</label><input id="nvName" placeholder="ชื่อร้าน/พาร์ทเนอร์"></div>
+          <div><label>ประเภท</label><select id="nvKind"><option value="partner">พาร์ทเนอร์</option><option value="in_house">ในร้าน (in-house)</option></select></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div><label>เบอร์/LINE</label><input id="nvPhone" placeholder="08x-xxx-xxxx"></div>
+          <div><label>บริการ (คั่นด้วย ,)</label><input id="nvServices" placeholder="ซักแห้ง, ซักน้ำ, รีด"></div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div><label>เรท/ราคา</label><input id="nvRate" placeholder="ชิ้นละ 60-120"></div>
+          <div><label>คาดเสร็จ (วัน)</label><input id="nvLead" type="number" value="2"></div>
+        </div>
+        <button class="btn ghost" onclick="addVendor()">+ เพิ่มร้าน</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+<script>
+  const sb=window.supabase.createClient('https://rprwilsbjptdnvsibjgi.supabase.co','sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa');
+  if(window.opsRpc) sb.rpc=window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const up=s=>(s||'').trim();
+  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',2800);}
+
+  async function doSend(){
+    const code=up($('wsCode').value), vid=$('wsVendor').value;
+    if(!code||!vid){ toast('ใส่รหัสชุด + เลือกร้าน',true); return; }
+    const {data,error}=await sb.rpc('wash_send',{p_code:code,p_vendor_id:vid});
+    if(error||data?.error){ $('wsRes').innerHTML='<span style="color:var(--clay)">ไม่สำเร็จ: '+esc(error?.message||data.error)+'</span>'; return; }
+    $('wsRes').innerHTML='ส่ง <b>'+esc(data.name||data.code)+'</b> ไป <b>'+esc(data.vendor)+'</b> แล้ว';
+    toast('ส่งซัก '+esc(data.code));
+    $('wsCode').value=''; $('wsCode').focus(); loadVendors();
+  }
+  async function doDone(){
+    const code=up($('wdCode').value); if(!code) return;
+    const {data,error}=await sb.rpc('care_wash_done',{p_code:code,p_method:null,p_handler:null});
+    if(error||data?.error){ $('wdRes').innerHTML='<span style="color:var(--clay)">ไม่สำเร็จ: '+esc(error?.message||data.error)+'</span>'; return; }
+    // ซักเสร็จ → ให้เก็บเข้าช่องต่อทันที (ปิดลูป)
+    let h='ซัก <b>'+esc(data.name||code)+'</b> เสร็จ (ครั้งที่ '+data.wash_count+') — ชุดว่างพร้อมปล่อยเช่า';
+    if(data.needs_putaway){
+      h+='<div class="li" style="margin-top:10px"><div class="muted">เก็บเข้าช่องเลย:</div>'+
+        '<div class="row" style="margin-top:6px"><div><input id="wdBin" placeholder="ช่อง เช่น A-03" list="binList"></div>'+
+        '<div style="flex:0 0 auto"><button class="btn sage" style="margin:0" onclick="doPutAway(\''+esc(code)+'\')">เก็บ</button></div></div></div>';
+    }
+    $('wdRes').innerHTML=h; $('wdCode').value=''; loadBins();
+  }
+  async function doPutAway(code){
+    const bin=up($('wdBin')?.value); if(!bin){ toast('ใส่ช่อง',true); return; }
+    const {data,error}=await sb.rpc('put_away',{p_code:code,p_bin:bin});
+    if(error||data?.error){ toast('เก็บไม่สำเร็จ',true); return; }
+    $('wdRes').innerHTML='เก็บ <b>'+esc(data.name||code)+'</b> เข้าช่อง <span class="pin">'+esc(data.bin)+'</span> แล้ว';
+    toast('เก็บ '+esc(code)+' → '+esc(data.bin));
+  }
+  async function loadVendors(){
+    const {data,error}=await sb.rpc('laundry_vendors_list');
+    if(error){ $('vList').innerHTML='โหลดไม่สำเร็จ'; return; }
+    const vs=data||[];
+    $('vCount').textContent='('+vs.length+' ร้าน)';
+    $('wsVendor').innerHTML=vs.filter(v=>v.active).map(v=>'<option value="'+v.id+'">'+esc(v.name)+(v.kind==='in_house'?' (in-house)':'')+'</option>').join('')||'<option value="">— ยังไม่มีร้าน —</option>';
+    $('vList').innerHTML=vs.length? vs.map(v=>
+      '<div class="li"'+(v.active?'':' style="opacity:.5"')+'><div class="top"><b>'+esc(v.name)+'</b> '+
+      '<span class="tag '+(v.kind==='in_house'?'house':'')+'">'+(v.kind==='in_house'?'in-house':'พาร์ทเนอร์')+'</span></div>'+
+      '<div class="muted">'+(v.services||[]).map(esc).join(' · ')+(v.rate_note?' · '+esc(v.rate_note):'')+(v.phone?' · '+esc(v.phone):'')+'</div>'+
+      '<div class="muted">ส่งซักไปแล้ว '+(v.jobs_total||0)+' ตัว · คาดเสร็จ ~'+(v.lead_days||0)+' วัน '+
+      '<a href="#" onclick="vToggle(\''+v.id+'\','+(!v.active)+');return false" style="color:var(--clay);margin-left:8px">'+(v.active?'ปิด':'เปิด')+'</a></div></div>'
+    ).join('') : '<div class="muted">ยังไม่มีร้านซัก — เพิ่มด้านล่าง</div>';
+  }
+  async function addVendor(){
+    const name=up($('nvName').value); if(!name){ toast('ใส่ชื่อร้าน',true); return; }
+    const p={name,kind:$('nvKind').value,phone:$('nvPhone').value.trim(),rate_note:$('nvRate').value.trim(),
+      lead_days:parseInt($('nvLead').value)||2,
+      services:$('nvServices').value.split(',').map(s=>s.trim()).filter(Boolean)};
+    const {data,error}=await sb.rpc('laundry_vendor_upsert',{p});
+    if(error||data?.error){ toast('เพิ่มไม่สำเร็จ',true); return; }
+    toast('เพิ่มร้าน '+esc(name)); ['nvName','nvPhone','nvServices','nvRate'].forEach(i=>$(i).value=''); loadVendors();
+  }
+  async function vToggle(id,active){ await sb.rpc('laundry_vendor_set_active',{p_id:id,p_active:active}); loadVendors(); }
+  // datalist ช่องเก็บ (ใช้ตอน put-away หลังซักเสร็จ)
+  async function loadBins(){
+    const {data}=await sb.rpc('bins_list');
+    let dl=$('binList'); if(!dl){ dl=document.createElement('datalist'); dl.id='binList'; document.body.appendChild(dl); }
+    dl.innerHTML=(data||[]).filter(b=>b.active).map(b=>'<option value="'+esc(b.code)+'">').join('');
+  }
+  loadVendors(); loadBins();
+</script>
+</body>
+</html>

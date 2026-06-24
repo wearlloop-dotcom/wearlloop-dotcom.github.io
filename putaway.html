@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · เก็บเข้าช่อง + ตามหาชุด</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .bar h1{font-family:var(--display);font-size:18px;font-weight:700;color:var(--clay)}
+  .bar .nav a{font-size:13px;color:var(--muted);text-decoration:none;margin-left:12px}
+  .wrap{max-width:720px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;margin-bottom:12px}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+  input{width:100%;font-family:var(--sans);font-size:18px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--soft);text-transform:uppercase}
+  input::placeholder{text-transform:none}
+  .row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:130px}
+  .btn{border:none;border-radius:10px;padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff;width:100%;margin-top:12px}
+  .btn.sage{background:var(--sage)}.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .res{margin-top:14px;font-size:15px;line-height:1.6}
+  .pin{font-family:var(--display);font-weight:700;font-size:24px;color:var(--clay)}
+  .tag{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;background:var(--soft);border:1px solid var(--line);color:var(--muted)}
+  .li{font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;margin-top:6px;display:flex;justify-content:space-between;gap:8px}
+  .muted{color:var(--muted);font-size:13px}
+  .loading{color:var(--muted);text-align:center;padding:18px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:80;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center}
+  .toast.show{opacity:1}.toast.bad{background:var(--clay)}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h1>เก็บเข้าช่อง · ตามหาชุด</h1>
+    <div class="nav"><a href="/stock.html">สต๊อก</a><a href="/shipout.html">แพ็กส่ง</a><a href="/laundry.html">ซัก/QC</a><a href="/today.html">วันนี้</a></div>
+  </div>
+
+  <div class="wrap">
+    <!-- เก็บเข้าช่อง -->
+    <div class="card">
+      <h2>เก็บเข้าช่อง (put-away)</h2>
+      <div class="row">
+        <div><label>รหัสชุด</label><input id="paCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doPutAway()"></div>
+        <div><label>ช่องเก็บ (พิมพ์ หรือเลือก)</label><input id="paBin" placeholder="เช่น A-03" autocomplete="off" list="binList"></div>
+      </div>
+      <button class="btn sage" onclick="doPutAway()">เก็บเข้าช่อง</button>
+      <div class="muted" style="margin-top:8px">โหมดเก็บต่อเนื่อง: ช่องค้างไว้ให้ — เก็บหลายตัวเข้าช่องเดียวกัน พิมพ์/สแกนรหัสถัดไปกด Enter ได้เลย</div>
+      <div class="res" id="paRes"></div>
+    </div>
+
+    <!-- จัดการช่องเก็บ -->
+    <div class="card">
+      <h2>ช่องเก็บทั้งหมด <span class="muted" id="binCount"></span></h2>
+      <div id="binMgr"><div class="loading">กำลังโหลด…</div></div>
+      <div class="row" style="margin-top:12px">
+        <div><label>เพิ่มช่องใหม่</label><input id="newBin" placeholder="เช่น A-04" autocomplete="off" onkeydown="if(event.key==='Enter')addBin()"></div>
+        <div><label>ป้าย (ไม่บังคับ)</label><input id="newBinLabel" placeholder="เช่น ราว A ช่อง 4" autocomplete="off" style="text-transform:none"></div>
+      </div>
+      <button class="btn ghost" onclick="addBin()">+ เพิ่มช่อง</button>
+    </div>
+
+    <!-- ตามหาชุด -->
+    <div class="card">
+      <h2>ตามหาชุด</h2>
+      <label>รหัสชุด</label><input id="locCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doLocate()">
+      <button class="btn" onclick="doLocate()">ตามหา</button>
+      <div class="res" id="locRes"></div>
+    </div>
+
+    <!-- ดูในช่อง -->
+    <div class="card">
+      <h2>ดูชุดในช่อง</h2>
+      <label>ช่องเก็บ</label><input id="binCode" placeholder="เช่น A-01" autocomplete="off" list="binList" onkeydown="if(event.key==='Enter')doBin()">
+      <button class="btn ghost" onclick="doBin()">ดูในช่อง</button>
+      <div class="res" id="binRes"></div>
+    </div>
+
+    <!-- ภาพรวม -->
+    <div class="card">
+      <h2>ภาพรวมช่องเก็บ <span class="muted" id="ovWhen"></span></h2>
+      <div id="ov"><div class="loading">กำลังโหลด…</div></div>
+      <button class="btn ghost" onclick="loadOverview()">รีเฟรช</button>
+    </div>
+  </div>
+
+  <datalist id="binList"></datalist>
+  <div class="toast" id="toast"></div>
+<script>
+  const sb=window.supabase.createClient('https://rprwilsbjptdnvsibjgi.supabase.co','sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa');
+  if(window.opsRpc) sb.rpc = window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const up=s=>(s||'').trim();
+  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',2800);}
+  const ST={available:'ว่าง',reserved:'จองแล้ว',out:'อยู่กับลูกค้า',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',returned:'รับคืนแล้ว'};
+  const dt=s=>s?new Date(s).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+
+  async function doPutAway(){
+    const code=up($('paCode').value), bin=up($('paBin').value);
+    if(!code||!bin){ toast('ใส่รหัสชุด + ช่องเก็บ',true); return; }
+    const {data,error}=await sb.rpc('put_away',{p_code:code,p_bin:bin});
+    if(error||data?.error){ $('paRes').innerHTML='<span style="color:var(--clay)">ไม่สำเร็จ: '+esc(error?.message||data.error)+'</span>'; return; }
+    $('paRes').innerHTML='เก็บ <b>'+esc(data.name||data.code)+'</b> เข้าช่อง <span class="pin">'+esc(data.bin)+'</span> แล้ว';
+    toast('เก็บ '+esc(data.code)+' → '+esc(data.bin));
+    $('paCode').value=''; $('paCode').focus(); refresh();
+  }
+  async function doLocate(){
+    const code=up($('locCode').value); if(!code) return;
+    const {data,error}=await sb.rpc('locate',{p_code:code});
+    if(error){ $('locRes').innerHTML='ผิดพลาด'; return; }
+    if(!data.found){ $('locRes').innerHTML='<span class="muted">ไม่พบรหัส '+esc(code)+'</span>'; return; }
+    $('locRes').innerHTML='<b>'+esc(data.name||data.code)+'</b> <span class="tag">'+esc(ST[data.status]||data.status)+'</span><div class="res">เก็บที่: '+
+      (data.bin?'<span class="pin">'+esc(data.bin)+'</span>':'<span class="muted">ยังไม่เก็บเข้าช่อง</span>')+
+      '</div><div class="muted">เห็นล่าสุด '+dt(data.last_seen_at)+(data.last_seen_action?' ('+esc(data.last_seen_action)+')':'')+'</div>';
+  }
+  async function doBin(){
+    const bin=up($('binCode').value); if(!bin) return;
+    const {data,error}=await sb.rpc('bin_contents',{p_bin:bin});
+    if(error){ $('binRes').innerHTML='ผิดพลาด'; return; }
+    if(!data.length){ $('binRes').innerHTML='<span class="muted">ช่อง '+esc(bin)+' ว่าง</span>'; return; }
+    $('binRes').innerHTML='<div class="muted">ช่อง '+esc(bin)+' · '+data.length+' ตัว</div>'+
+      data.map(g=>'<div class="li"><span>'+esc(g.code)+' · '+esc(g.name)+'</span><span class="tag">'+esc(ST[g.status]||g.status)+'</span></div>').join('');
+  }
+  async function loadOverview(){
+    const {data,error}=await sb.rpc('bins_summary');
+    if(error){ $('ov').innerHTML='โหลดไม่สำเร็จ'; return; }
+    const bins=(data.bins||[]), un=(data.unshelved||[]);
+    let h='';
+    h+=bins.length?'<div class="row" style="gap:8px">'+bins.map(b=>'<div class="li" style="flex:0 0 auto"><b>'+esc(b.bin)+'</b> <span class="tag">'+b.count+' ตัว</span></div>').join('')+'</div>':'<div class="muted">ยังไม่มีชุดเก็บเข้าช่อง</div>';
+    if(un.length){ h+='<div class="muted" style="margin-top:12px">ยังไม่เก็บเข้าช่อง ('+un.length+'):</div>'+
+      un.map(g=>'<div class="li"><span>'+esc(g.code)+' · '+esc(g.name)+'</span><span class="tag">'+esc(ST[g.status]||g.status)+'</span></div>').join(''); }
+    else if(bins.length){ h+='<div class="muted" style="margin-top:10px;color:var(--ok)">ชุดว่างทุกตัวเก็บเข้าช่องครบแล้ว</div>'; }
+    $('ov').innerHTML=h;
+    $('ovWhen').textContent='อัปเดต '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  }
+  async function loadBins(){
+    const {data,error}=await sb.rpc('bins_list');
+    if(error){ $('binMgr').innerHTML='โหลดไม่สำเร็จ'; return; }
+    const bins=data||[];
+    $('binCount').textContent='('+bins.length+' ช่อง)';
+    // datalist ให้เลือกตอน put-away / ดูในช่อง (เฉพาะที่ active)
+    $('binList').innerHTML=bins.filter(b=>b.active).map(b=>'<option value="'+esc(b.code)+'">'+(b.label?esc(b.label):'')+'</option>').join('');
+    // รายการจัดการช่อง
+    $('binMgr').innerHTML = bins.length? bins.map(b=>
+      '<div class="li"'+(b.active?'':' style="opacity:.5"')+'>'+
+        '<span><b>'+esc(b.code)+'</b>'+(b.label?' · '+esc(b.label):'')+' <span class="tag">'+b.count+' ตัว</span></span>'+
+        '<a href="#" onclick="binToggle(\''+esc(b.code)+'\','+(!b.active)+');return false" style="color:var(--muted);text-decoration:none;font-size:13px">'+(b.active?'ปิด':'เปิด')+'</a>'+
+      '</div>').join('') : '<div class="muted">ยังไม่มีช่อง — เพิ่มด้านล่าง หรือเก็บของจะสร้างช่องให้อัตโนมัติ</div>';
+  }
+  async function addBin(){
+    const code=up($('newBin').value), label=$('newBinLabel').value.trim();
+    if(!code){ toast('ใส่รหัสช่อง',true); return; }
+    const {data,error}=await sb.rpc('bin_add',{p_code:code,p_zone:null,p_label:label||null});
+    if(error||data?.error){ toast('เพิ่มไม่สำเร็จ',true); return; }
+    toast('เพิ่มช่อง '+esc(data.code)); $('newBin').value=''; $('newBinLabel').value=''; loadBins();
+  }
+  async function binToggle(code,active){
+    await sb.rpc('bin_set_active',{p_code:code,p_active:active}); loadBins();
+  }
+  function refresh(){ loadOverview(); loadBins(); }
+  refresh();
+</script>
+</body>
+</html>

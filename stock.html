@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · สต๊อก + รอยรั่ว</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--amber:#8A6D08;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .bar h1{font-family:var(--display);font-size:18px;font-weight:700;color:var(--clay)}
+  .bar .nav a{font-size:13px;color:var(--muted);text-decoration:none;margin-left:12px}
+  .wrap{max-width:780px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+  .btn{border:none;border-radius:9px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media(max-width:640px){.stat{grid-template-columns:repeat(2,1fr)}}
+  .b{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+  .b .n{font-family:var(--display);font-size:22px;font-weight:700}
+  .b .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .leak{border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:10px}
+  .leak.critical{border-color:#e8c9bd;background:#FBF3EF}
+  .leak.warn{border-color:#E2D8BE;background:#FAF6EA}
+  .leak.clean{border-color:#cfe4d8;background:#F1F7F3}
+  .leak .lh{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .leak .ll{font-weight:600;font-size:15px}
+  .leak .cnt{font-family:var(--display);font-weight:700;font-size:18px;padding:2px 12px;border-radius:20px;background:#fff;border:1px solid var(--line)}
+  .leak.critical .cnt{color:var(--clay)}.leak.warn .cnt{color:var(--amber)}.leak.clean .cnt{color:var(--ok)}
+  .leak .rows{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+  .leak .r{font-size:13px;color:var(--ink);padding:7px 10px;background:#fff;border:1px solid var(--line);border-radius:8px;display:flex;justify-content:space-between;gap:8px}
+  .leak .r a{color:var(--clay);text-decoration:none;font-size:12px;white-space:nowrap}
+  .leak .more{font-size:12px;color:var(--muted);margin-top:4px}
+  .big-ok{text-align:center;color:var(--ok);font-size:16px;font-weight:600;padding:8px}
+  .loading{color:var(--muted);text-align:center;padding:24px}
+  .when{font-size:12px;color:var(--muted)}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:80;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center}
+  .toast.show{opacity:1}.toast.bad{background:var(--clay)}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h1>สต๊อก + รอยรั่ว</h1>
+    <div class="nav"><a href="/today.html">งานวันนี้</a><a href="/laundry.html">ซัก/QC</a><a href="/garment.html">ชุด</a><a href="/putaway.html">เก็บเข้าช่อง</a></div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>สต๊อกตามสถานะ <span class="when" id="when"></span></h2>
+      <div id="summary"><div class="loading">กำลังโหลด…</div></div>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn" onclick="exportCsv()" id="expBtn">Export CSV (ทั้งสต๊อก)</button>
+        <button class="btn ghost" onclick="loadAll()">ตรวจใหม่</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>รอยรั่วของสต๊อก <span class="when" id="leakWhen"></span></h2>
+      <div id="leaks"><div class="loading">กำลังตรวจ…</div></div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn" onclick="reconcile()" id="fixBtn">อุดรอยรั่วที่ปลอดภัย (1 คลิก)</button>
+        <span class="when">ยกเลิกจองค้าง · ปรับสถานะให้ตรง · ปล่อยชุดที่ค้างไม่ว่าง — เคสวิกฤตยังให้คนจัดการเอง</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',3000);}
+  const ST_TH={available:'ว่าง',reserved:'จองแล้ว',out:'ออกไป',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',lost:'หาย',needs_review:'รอตรวจ'};
+
+  async function loadSummary(){
+    const {data,error}=await sb.rpc('stock_summary');
+    if(error){ $('summary').innerHTML='<div class="loading">โหลดไม่สำเร็จ</div>'; return; }
+    const bs=data.by_status||{};
+    const order=['available','reserved','out','cleaning','repair','retired','lost','needs_review'];
+    const keys=[...new Set([...order.filter(k=>bs[k]!=null),...Object.keys(bs)])];
+    const cells=keys.map(k=>`<div class="b"><div class="n">${bs[k]}</div><div class="l">${esc(ST_TH[k]||k)}</div></div>`).join('');
+    $('summary').innerHTML=`<div class="stat">${cells}</div>`+
+      `<div class="when" style="margin-top:10px">รวม ${data.total} ตัว · ปล่อยเช่าได้ ${data.rentable} ตัว</div>`;
+    $('when').textContent='อัปเดต '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  async function loadLeaks(){
+    const {data,error}=await sb.rpc('stock_audit');
+    if(error){ $('leaks').innerHTML='<div class="loading">ตรวจไม่สำเร็จ: '+esc(error.message)+'</div>'; return; }
+    const leaks=data.leaks||[];
+    let html='';
+    if((data.total||0)===0){
+      html='<div class="leak clean"><div class="big-ok">ไม่พบรอยรั่ว — สต๊อกตรงกับการเช่าทุกตัว</div></div>';
+    }
+    html+=leaks.filter(l=>l.count>0).map(l=>{
+      const rows=(l.rows||[]).slice(0,8).map(r=>{
+        const code=r.code||r.rental_id||'';
+        const extra=[r.status?esc(r.status):'',r.due?'กำหนด '+esc(r.due):'',r.since?'ตั้งแต่ '+esc(r.since):''].filter(Boolean).join(' · ');
+        const link=r.code?`<a href="/garment.html?code=${encodeURIComponent(r.code)}">เปิด ›</a>`:'';
+        return `<div class="r"><span>${esc(code)}${r.name?' · '+esc(r.name):''}${extra?' — '+extra:''}</span>${link}</div>`;
+      }).join('');
+      const more=l.count>8?`<div class="more">…และอีก ${l.count-8} รายการ</div>`:'';
+      return `<div class="leak ${l.sev}"><div class="lh"><span class="ll">${esc(l.label)}</span><span class="cnt">${l.count}</span></div><div class="rows">${rows}</div>${more}</div>`;
+    }).join('');
+    // หมวดที่ 0 — สรุปสั้น ๆ ว่าผ่าน
+    const passed=leaks.filter(l=>l.count===0).map(l=>esc(l.label)).length;
+    if((data.total||0)>0) html+=`<div class="when" style="margin-top:6px">ผ่าน ${passed} หมวด · พบปัญหา ${leaks.filter(l=>l.count>0).length} หมวด (วิกฤต ${data.critical||0} รายการ)</div>`;
+    $('leaks').innerHTML=html;
+    $('leakWhen').textContent=(data.total||0)===0?'สะอาด':('พบ '+data.total+' จุด');
+  }
+
+  async function exportCsv(){
+    $('expBtn').disabled=true; $('expBtn').textContent='กำลังดึง…';
+    const {data,error}=await sb.rpc('stock_export_rows');
+    $('expBtn').disabled=false; $('expBtn').textContent='Export CSV (ทั้งสต๊อก)';
+    if(error||!data){ toast('export ไม่สำเร็จ',true); return; }
+    if(!data.length){ toast('ไม่มีข้อมูล',true); return; }
+    const cols=['code','name','brand','size','status','data_status','rental_price','times_rented','wash_count','condition_grade','active_due','last_seen_at'];
+    const head=['รหัส','ชื่อ','แบรนด์','ไซซ์','สถานะ','ข้อมูล','ค่าเช่า','เช่าไปแล้ว','ซักแล้ว','เกรด','คืนล่าสุด(เช่าอยู่)','เห็นล่าสุด'];
+    const cell=v=>{ let s=v==null?'':String(v); if(/[",\n]/.test(s)) s='"'+s.replace(/"/g,'""')+'"'; return s; };
+    const csv=[head.join(',')].concat(data.map(r=>cols.map(c=>cell(r[c])).join(','))).join('\n');
+    const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='lloop-stock-'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click(); URL.revokeObjectURL(a.href);
+    toast('ดาวน์โหลด '+data.length+' รายการแล้ว');
+  }
+
+  async function reconcile(){
+    if(!confirm('อุดรอยรั่วที่ปลอดภัยอัตโนมัติ?\n• ยกเลิกจองค้างที่เลยวันแล้ว\n• ปรับสถานะชุดที่ว่างแต่มีเช่าจริงให้ตรง\n• ปล่อยชุดที่ค้างสถานะไม่ว่างแต่ไม่มีเช่า\n\n(เคสวิกฤต เช่น จองชนวัน/เลยกำหนดคืน จะไม่แตะ ให้คนจัดการเอง)')) return;
+    $('fixBtn').disabled=true; $('fixBtn').textContent='กำลังอุด…';
+    const {data,error}=await sb.rpc('stock_reconcile');
+    $('fixBtn').disabled=false; $('fixBtn').textContent='อุดรอยรั่วที่ปลอดภัย (1 คลิก)';
+    if(error){ toast('อุดไม่สำเร็จ: '+esc(error.message),true); return; }
+    const n=data.total||0;
+    if(n===0){ toast('ไม่มีรอยรั่วที่อุดอัตโนมัติได้'); }
+    else{
+      const parts=[];
+      if((data.cancelled_ghost||[]).length) parts.push('ยกเลิกจองค้าง '+data.cancelled_ghost.length);
+      if((data.synced_over||[]).length) parts.push('ปรับสถานะ '+data.synced_over.length);
+      if((data.freed_stuck||[]).length) parts.push('ปล่อยว่าง '+data.freed_stuck.length);
+      toast('อุดแล้ว '+n+' จุด — '+parts.join(' · '));
+    }
+    loadAll();
+  }
+
+  function loadAll(){ loadSummary(); loadLeaks(); }
+  loadAll();
+</script>
+</body>
+</html>
