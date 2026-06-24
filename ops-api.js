@@ -8,7 +8,8 @@
 (function () {
   const CONF = window.CONFIG || {};
   const FUNCTIONS = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1';
-  const LIFF_ID = CONF.OPS_LIFF_ID || CONF.LIFF_ID || '2010486714-1g6lDuHo'; // fallback: ไม่ต้องพึ่ง config.js (LIFF_ID เปิดเผยได้)
+  // LIFF เฉพาะ ops (endpoint = root → login กลับมาหน้า ops ไม่เด้งไปหน้าลูกค้า)
+  const LIFF_ID = CONF.OPS_LIFF_ID || '2010486714-lDr0nzy0';
   let _ready = false;
 
   async function opsLogin() {
