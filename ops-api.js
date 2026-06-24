@@ -10,16 +10,20 @@
   const FUNCTIONS = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1';
   // LIFF เฉพาะ ops (endpoint = root → login กลับมาหน้า ops ไม่เด้งไปหน้าลูกค้า)
   const LIFF_ID = CONF.OPS_LIFF_ID || '2010486714-lDr0nzy0';
-  let _ready = false;
+  let _ready = false, _initP = null;
 
   async function opsLogin() {
     if (_ready) return true;
     if (!window.liff || !LIFF_ID) throw new Error('ยังไม่ได้ตั้งค่า LINE Login (LIFF_ID)');
-    await liff.init({ liffId: LIFF_ID });
-    // redirectUri = หน้าปัจจุบัน → กลับมาหน้า ops หลัง login (ไม่เด้งไปหน้าลูกค้า/endpoint)
-    if (!liff.isLoggedIn()) { liff.login({ redirectUri: window.location.href }); return false; }
-    _ready = true;
-    return true;
+    // withLoginOnExternalBrowser: ให้ login ทำงานบนเบราว์เซอร์นอกแอป LINE (ไม่งั้น isLoggedIn=false หลัง redirect → วน)
+    if (!_initP) _initP = liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+    await _initP;
+    if (liff.isLoggedIn()) { _ready = true; sessionStorage.removeItem('opsLoginTried'); return true; }
+    // ยังไม่ login → redirect "ครั้งเดียว" (กัน loop: ถ้ากลับมาแล้วยังไม่ login = หยุด)
+    if (sessionStorage.getItem('opsLoginTried')) return false;
+    sessionStorage.setItem('opsLoginTried', '1');
+    liff.login({ redirectUri: window.location.href });
+    return false;
   }
 
   // drop-in แทน sb.rpc(fn,args) → คืน { data, error }
