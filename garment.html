@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ไทม์ไลน์ชุด</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--warn:#B5860B;--danger:#A32D2D;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:15px}
+.bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.bar h1{font-family:var(--display);font-size:18px;font-weight:700}
+.bar a{font-size:13px;color:var(--muted);text-decoration:none;margin-left:14px}
+.wrap{max-width:620px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+.scan{display:flex;gap:10px}
+.scan input{flex:1;border:2px solid var(--line);border-radius:10px;padding:12px 14px;font-size:18px;text-transform:lowercase;font-family:var(--sans)}
+.btn{border:none;border-radius:9px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+.head{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+.gname{font-family:var(--display);font-size:22px;font-weight:600}
+.stat{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{font-size:13px;padding:5px 12px;border-radius:20px;background:var(--soft)}
+.pill.ok{background:#E4F0EC;color:var(--ok)}.pill.warn{background:#FDF2D6;color:#8A6D08}.pill.bad{background:#FBE3E3;color:var(--danger)}
+.tl{position:relative;padding-left:22px}
+.tl::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.ev{position:relative;margin-bottom:16px}
+.ev::before{content:'';position:absolute;left:-19px;top:4px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--ink)}
+.ev.good::before{border-color:var(--ok)}.ev.stain::before{border-color:var(--warn)}.ev.damage::before,.ev.missing::before{border-color:var(--danger)}
+.ev .when{font-size:12px;color:var(--muted)}
+.ev .what{font-weight:600;margin:2px 0}
+.ev .note{font-size:13px;color:#444}
+.photos{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.photos img{width:74px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.nophoto{font-size:12px;color:var(--muted);font-style:italic}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h2{font-family:var(--display);font-size:16px;margin-bottom:12px}
+.empty{color:var(--muted);text-align:center;padding:18px}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  .scan{display:flex;gap:10px}
+  .scan .btn{width:auto;flex:0 0 auto}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>ไทม์ไลน์ชุด</h1>
+  <div><a href="/laundry.html">ซัก/QC</a><a href="/shipout.html">เตรียมส่ง</a></div>
+</div>
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">garment lifecycle</div>
+    <h1>ทุกชุดมีเรื่องราว</h1>
+    <div class="sub">สแกนโค้ดชุด แล้วย้อนดูทุกรอบการดูแล สภาพ รูปถ่าย และการเดินทาง — เพราะชุดที่หมุนเวียนดี คือชุดที่เราใส่ใจทุกครั้ง</div>
+  </section>
+  <div class="scan">
+    <input id="code" placeholder="ใส่/สแกนโค้ดชุด เช่น g1" autocomplete="off">
+    <button class="btn" onclick="load()">ดู</button>
+  </div>
+  <div id="out"><div class="empty">สแกน QR บนชุด หรือใส่โค้ด เพื่อดูประวัติแต่ละรอบ + รูป</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;            // R-4: RPC ผ่าน gateway (LINE idToken + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+  const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'';
+  const COND={good:['ดี ✓','good'],stain:['เปื้อน','stain'],damage:['ชำรุด','damage'],missing:['ของขาด','missing']};
+  const EVT={shipped:'ส่งออก',delivered:'ถึงมือลูกค้า',return_shipped:'ลูกค้าส่งคืน',returned:'รับคืน',in_transit:'กำลังส่ง',out_for_delivery:'ออกส่ง',return_arrived:'ถึงร้าน'};
+
+  async function load(){
+    const code=$('code').value.trim().toLowerCase(); if(!code){ return; }
+    const { data, error } = await sb.rpc('garment_timeline',{ p_code: code });
+    if(error||!data||!data.garment){ $('out').innerHTML='<div class="empty" style="color:#A32D2D">ไม่พบชุด'+esc(code)+'</div>'; return; }
+    render(data);
+  }
+  function gradePill(g){ const m={A:['เกรด A','ok'],B:['เกรด B','warn'],C:['เกรด C','bad']}; const x=m[g]||['เกรด'+g,'']; return`<span class="pill ${x[1]}">${x[0]}</span>`; }
+  function render(d){
+    const g=d.garment;
+    const cycles=(d.cycles||[]).map(j=>{
+      const cond=COND[j.condition]||['',''];
+      const ph=(j.photos&&j.photos.length)?`<div class="photos">${j.photos.map(u=>`<img src="${esc(u)}" alt="">`).join('')}</div>`:'<div class="nophoto">— ไม่มีรูปรอบนี้ —</div>';
+      return`<div class="ev ${cond[1]}">
+        <div class="when">${dt(j.opened_at)}${j.handler?' · '+esc(j.handler):''}</div>
+        <div class="what">${cond[0]||esc(j.stage)}${j.complete===false?' · ของไม่ครบ':''}${j.damage_fee>0?` · ค่าเสียหาย ฿${j.damage_fee}`:''}</div>
+        ${j.notes?`<div class="note">${esc(j.notes)}</div>`:''}
+        ${j.wash_method?`<div class="note"> ${esc(j.wash_method)}</div>`:''}
+        ${ph}
+      </div>`;
+    }).join('');
+    const events=(d.events||[]).map(e=>`<div class="ev"><div class="when">${dt(e.at)}</div><div class="what">${EVT[e.kind]||esc(e.kind)}</div>${e.note?`<div class="note">${esc(e.note)}</div>`:''}</div>`).join('');
+    $('out').innerHTML=`
+      <div class="head">
+        <div class="gname">${esc(g.name)}</div>
+        <div style="color:var(--muted);font-size:13px">โค้ด ${esc(g.code)}${g.brand?' · '+esc(g.brand):''}</div>
+        <div class="stat">
+          <span class="pill">สถานะ: ${esc(g.status)}</span>
+          <span class="pill">ซักมา ${g.wash_count} ครั้ง</span>
+          ${gradePill(g.grade)}
+        </div>
+      </div>
+      <div class="card">
+        <h2>รอบการดูแล (สภาพ + รูปแต่ละรอบ)</h2>
+        ${cycles?`<div class="tl">${cycles}</div>`:'<div class="empty">ยังไม่มีรอบการดูแล</div>'}
+      </div>
+      <div class="card">
+        <h2>เหตุการณ์จัดส่ง</h2>
+        ${events?`<div class="tl">${events}</div>`:'<div class="empty">ยังไม่มีประวัติจัดส่ง</div>'}
+      </div>`;
+  }
+  $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') load(); });
+  // เปิดจาก QR: /garment.html?code=g1
+  const q=new URLSearchParams(location.search).get('code'); if(q){ $('code').value=q; load(); }
+</script>
+</body>
+</html>
