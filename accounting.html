@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · บัญชีหลังบ้าน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;--navy:#0D2F4F;--sage:#6FB3A6;--champ:#B8A179;--ok:#0F6E56;--danger:#A32D2D;
+    --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:14px}
+  .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar h1{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:1px}
+  .bar .tag{font-size:11px;background:#33312d;padding:3px 10px;border-radius:20px;letter-spacing:1px}
+  .bar .lock{margin-left:auto;font-size:12px;color:#bbb;cursor:pointer}
+  .wrap{max-width:880px;margin:16px auto;padding:0 14px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{font-size:13px;padding:7px 13px;border:1px solid var(--hair);border-radius:20px;cursor:pointer;background:#fff;color:var(--stone)}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:18px;margin-bottom:14px}
+  .card h2{font-family:var(--display);font-size:17px;margin-bottom:10px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--stone);font-weight:500;font-size:11px;letter-spacing:.5px;text-transform:uppercase;padding:8px 6px;border-bottom:1px solid var(--hair)}
+  td{padding:8px 6px;border-bottom:1px solid var(--hair)}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  .tot{font-weight:700;border-top:2px solid var(--ink)}
+  .sec{font-weight:600;color:var(--champ);font-size:12px;letter-spacing:1px;text-transform:uppercase;padding-top:12px}
+  .big{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .kpi{flex:1;min-width:150px;background:#fff;border:1px solid var(--hair);border-radius:2px;padding:14px}
+  .kpi .l{font-size:11px;color:var(--stone);letter-spacing:1px;text-transform:uppercase}
+  .kpi .v{font-family:var(--display);font-size:24px;font-weight:700;margin-top:4px}
+  .kpi .v.pos{color:var(--ok)}.kpi .v.neg{color:var(--danger)}
+  label{display:block;font-size:12px;color:var(--stone);margin:8px 0 4px;font-weight:500}
+  input,select{width:100%;border:1px solid var(--hair);border-radius:2px;padding:9px 10px;font-size:14px;font-family:var(--sans);background:var(--canvas)}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .btn{border:none;border-radius:2px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--navy);color:#fff;margin-top:12px}
+  .btn.ghost{background:none;border:1px solid var(--hair);color:var(--stone)}
+  .gate{max-width:420px;margin:80px auto;text-align:center;padding:0 20px}
+  .gate h2{font-family:var(--display);font-size:22px;margin-bottom:6px}
+  .gate p{color:var(--stone);font-size:13px;margin-bottom:14px}
+  .muted{color:var(--stone);font-size:12px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;opacity:0;transition:.3s;z-index:9;font-size:13px}
+  .toast.show{opacity:1}
+  .hide{display:none!important}
+  .note{background:#FBF6EC;border:1px solid #ECDDBD;border-radius:2px;padding:10px 12px;font-size:12px;color:#6b5a2e;margin-top:10px;line-height:1.5}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<style>
+  /* craft palette override — แทน navy/ink/dark ที่ off-brand ด้วยโทนป่า+โกลด์ */
+  :root{--navy:#0C3A33;--ink:#1f2d28;--champ:#C9A86A;--sage:#6FB3A6;--ok:#0F6E56;--danger:#A75F3A}
+  .bar{background:linear-gradient(135deg,#0C3A33,#2E4A3A);color:#fff}
+  .tab.on{background:#0C3A33;border-color:#0C3A33}
+  .btn{background:#0C3A33}
+  .kpi .v.pos{color:var(--ok)}.kpi .v.neg{color:var(--danger)}
+  .tot{border-top-color:#0C3A33}
+</style>
+</head>
+<body>
+<div class="bar"><h1>LLOOP</h1><span class="tag">บัญชีหลังบ้าน</span><span class="lock" onclick="logout()" id="lockBtn"></span></div>
+
+<!-- ประตู LINE login (เฉพาะเจ้าของ/ผู้จัดการ) -->
+<div id="gate" class="gate">
+  <h2>เข้าระบบบัญชี</h2>
+  <p>ยืนยันตัวตนด้วย LINE — เฉพาะเจ้าของ/ผู้จัดการ</p>
+  <button class="btn" style="width:100%" onclick="boot()">เข้าสู่ระบบด้วย LINE</button>
+  <div class="muted" style="margin-top:10px">ข้อมูลการเงินเข้าถึงเฉพาะผู้มีสิทธิ์ · ตรวจตัวตน+ตำแหน่งผ่าน gateway</div>
+</div>
+
+<div id="app" class="wrap hide">
+  <section class="phead">
+    <div class="eyebrow">books &amp; ledgers</div>
+    <h1>ทุกตัวเลข มีที่มาที่ไป</h1>
+    <div class="sub">งบ ภาษี ลูกหนี้–เจ้าหนี้ ลงบัญชีคู่อัตโนมัติ — โปร่งใสทุกบาท เพื่อให้ธุรกิจหมุนเวียนชุดเดินต่อได้อย่างมั่นคง</div>
+  </section>
+  <div class="tabs">
+    <span class="tab on" data-t="overview" onclick="go(this)">ภาพรวม</span>
+    <span class="tab" data-t="pnl" onclick="go(this)">งบกำไรขาดทุน</span>
+    <span class="tab" data-t="balance" onclick="go(this)">งบดุล</span>
+    <span class="tab" data-t="trial" onclick="go(this)">งบทดลอง</span>
+    <span class="tab" data-t="vat" onclick="go(this)">ภ.พ.30 (VAT)</span>
+    <span class="tab" data-t="wht" onclick="go(this)">ภ.ง.ด.3/53</span>
+    <span class="tab" data-t="invoices" onclick="go(this)">ใบกำกับภาษี</span>
+    <span class="tab" data-t="ar" onclick="go(this)">ลูกหนี้</span>
+    <span class="tab" data-t="ap" onclick="go(this)">เจ้าหนี้</span>
+    <span class="tab" data-t="cit" onclick="go(this)">ภาษีนิติบุคคล</span>
+    <span class="tab" data-t="ai" onclick="go(this)">AI อ่านเอกสาร</span>
+    <span class="tab" data-t="actions" onclick="go(this)">ทำรายการ</span>
+  </div>
+  <div id="view"></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
+  const $=id=>document.getElementById(id);
+  function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
+  const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const esc=s=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+  // auth ผ่าน LINE idToken (gateway-style): owner/manager เท่านั้น
+  async function authHeader(){
+    if(!(await window.opsLogin())) throw new Error('redirecting');
+    return 'Bearer '+liff.getIDToken();
+  }
+  async function api(action, extra){
+    const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({action},extra||{}))});
+    if(r.status===401||r.status===403){ toast('ไม่มีสิทธิ์เข้าระบบบัญชี (เฉพาะเจ้าของ/ผู้จัดการ)'); throw new Error('unauth'); }
+    return r.json();
+  }
+  function logout(){ try{ liff.logout(); }catch(e){} $('app').classList.add('hide'); $('gate').classList.remove('hide'); }
+
+  let tab='overview';
+  function go(el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); tab=el.dataset.t; render(); }
+
+  async function render(){
+    const v=$('view'); v.innerHTML='<div class="muted" style="padding:30px;text-align:center">กำลังโหลด…</div>';
+    try{
+      if(tab==='overview') return renderOverview(v);
+      if(tab==='pnl') return renderPnl(v, (await api('pnl')).rows);
+      if(tab==='balance') return renderBalance(v, (await api('balance')).rows);
+      if(tab==='trial') return renderTrial(v, (await api('trial')).rows);
+      if(tab==='vat') return renderVat(v, (await api('vat')).rows);
+      if(tab==='wht') return renderWht(v, (await api('wht')).rows);
+      if(tab==='invoices') return renderInvoices(v, (await api('invoices')).rows);
+      if(tab==='ar') return renderAr(v, (await api('ar')).rows);
+      if(tab==='ap') return renderAp(v, (await api('ap')).rows);
+      if(tab==='cit') return renderCit(v, (await api('cit',{year:String(new Date().getFullYear())})).cit);
+      if(tab==='ai') return renderAi(v);
+      if(tab==='actions') return renderActions(v);
+    }catch(e){ v.innerHTML='<div class="card">โหลดไม่สำเร็จ: '+esc(e.message)+'</div>'; }
+  }
+
+  async function renderOverview(v){
+    const d=await api('overview');
+    const rev=sum(d.pnl,'revenue'), exp=sum(d.pnl,'expense'); const net=rev-exp;
+    const cash=bal(d.balance,'1010'), assets=d.balance.filter(r=>r.type==='asset').reduce((s,r)=>s+Number(r.balance||0),0);
+    const liab=d.balance.filter(r=>r.type==='liability').reduce((s,r)=>s+Number(r.balance||0),0);
+    v.innerHTML=`
+      <div class="big">
+        <div class="kpi"><div class="l">รายได้รวม</div><div class="v">${baht(rev)}</div></div>
+        <div class="kpi"><div class="l">ค่าใช้จ่ายรวม</div><div class="v">${baht(exp)}</div></div>
+        <div class="kpi"><div class="l">กำไรสุทธิ</div><div class="v ${net>=0?'pos':'neg'}">${baht(net)}</div></div>
+      </div>
+      <div class="big">
+        <div class="kpi"><div class="l">เงินสด</div><div class="v">${baht(cash)}</div></div>
+        <div class="kpi"><div class="l">สินทรัพย์รวม</div><div class="v">${baht(assets)}</div></div>
+        <div class="kpi"><div class="l">หนี้สินรวม</div><div class="v">${baht(liab)}</div></div>
+      </div>
+      ${rev||exp?'':'<div class="note">ยังไม่มีรายการเงินในระบบ — งบจะขึ้นเองเมื่อมีการเช่า/ชำระ/รับซื้อ (ระบบลงบัญชีคู่ให้อัตโนมัติ)</div>'}`;
+  }
+  const sum=(rows,type)=>rows.filter(r=>r.type===type).reduce((s,r)=>s+Number(r.amount||0),0);
+  const bal=(rows,code)=>{const r=rows.find(x=>x.code===code);return r?Number(r.balance||0):0;};
+
+  function renderPnl(v,rows){
+    const rev=rows.filter(r=>r.type==='revenue'), exp=rows.filter(r=>r.type==='expense');
+    const tr=rev.reduce((s,r)=>s+Number(r.amount||0),0), te=exp.reduce((s,r)=>s+Number(r.amount||0),0);
+    const line=r=>`<tr><td>${esc(r.code)} ${esc(r.name)}</td><td class="n">${baht(r.amount)}</td></tr>`;
+    v.innerHTML=`<div class="card"><h2>งบกำไรขาดทุน</h2><table>
+      <tr><td class="sec" colspan="2">รายได้</td></tr>${rev.map(line).join('')||'<tr><td class="muted">—</td><td></td></tr>'}
+      <tr class="tot"><td>รวมรายได้</td><td class="n">${baht(tr)}</td></tr>
+      <tr><td class="sec" colspan="2">ค่าใช้จ่าย</td></tr>${exp.map(line).join('')||'<tr><td class="muted">—</td><td></td></tr>'}
+      <tr class="tot"><td>รวมค่าใช้จ่าย</td><td class="n">${baht(te)}</td></tr>
+      <tr class="tot"><td>กำไรสุทธิ</td><td class="n">${baht(tr-te)}</td></tr></table></div>`;
+  }
+  function renderBalance(v,rows){
+    const grp=t=>rows.filter(r=>r.type===t);
+    const blk=(title,t)=>{const rs=grp(t);const tot=rs.reduce((s,r)=>s+Number(r.balance||0),0);
+      return `<tr><td class="sec" colspan="2">${title}</td></tr>`+
+        (rs.map(r=>`<tr><td>${esc(r.code)} ${esc(r.name)}</td><td class="n">${baht(r.balance)}</td></tr>`).join('')||'<tr><td class="muted">—</td><td></td></tr>')+
+        `<tr class="tot"><td>รวม${title}</td><td class="n">${baht(tot)}</td></tr>`;};
+    v.innerHTML=`<div class="card"><h2>งบดุล</h2><table>${blk('สินทรัพย์','asset')}${blk('หนี้สิน','liability')}${blk('ส่วนของเจ้าของ','equity')}</table></div>`;
+  }
+  function renderTrial(v,rows){
+    v.innerHTML=`<div class="card"><h2>งบทดลอง</h2><table><tr><th>บัญชี</th><th class="n">เดบิต</th><th class="n">เครดิต</th></tr>
+      ${rows.map(r=>`<tr><td>${esc(r.code)} ${esc(r.name)}</td><td class="n">${baht(r.debit)}</td><td class="n">${baht(r.credit)}</td></tr>`).join('')}</table></div>`;
+  }
+  function renderVat(v,rows){
+    v.innerHTML=`<div class="card"><h2>ภ.พ.30 — ภาษีขาย/ซื้อ รายเดือน</h2><table><tr><th>งวด</th><th class="n">ภาษีขาย</th><th class="n">ภาษีซื้อ</th><th class="n">ต้องชำระ</th></tr>
+      ${rows.length?rows.map(r=>`<tr><td>${esc(r.period)}</td><td class="n">${baht(r.output_vat)}</td><td class="n">${baht(r.input_vat)}</td><td class="n">${baht(r.vat_payable)}</td></tr>`).join(''):'<tr><td class="muted" colspan="4">ยังไม่มีข้อมูล (จด VAT แล้วระบบจะแยกให้)</td></tr>'}</table>
+      <div class="note">ยื่นภายในวันที่ 15 (กระดาษ) หรือ ~23 (e-Filing) ของเดือนถัดไป</div></div>`;
+  }
+  function renderWht(v,rows){
+    v.innerHTML=`<div class="card"><h2>ภ.ง.ด.3/53 — หัก ณ ที่จ่าย รายเดือน</h2><table><tr><th>งวด</th><th>ประเภท</th><th class="n">อัตรา</th><th class="n">ฐาน</th><th class="n">ภาษีหัก</th></tr>
+      ${rows.length?rows.map(r=>`<tr><td>${esc(r.period)}</td><td>${esc(r.income_type)}</td><td class="n">${r.rate}%</td><td class="n">${baht(r.base_total)}</td><td class="n">${baht(r.wht_total)}</td></tr>`).join(''):'<tr><td class="muted" colspan="5">ยังไม่มีข้อมูล</td></tr>'}</table>
+      <div class="note">ยื่นภายในวันที่ 7 ของเดือนถัดไป · ออก 50 ทวิ ให้ผู้รับเงินทุกราย</div></div>`;
+  }
+  function renderInvoices(v,rows){
+    v.innerHTML=`<div class="card"><h2>ใบกำกับภาษีที่ออก</h2><table><tr><th>เลขที่</th><th>วันที่</th><th>ลูกค้า</th><th class="n">ฐาน</th><th class="n">VAT</th><th class="n">รวม</th><th></th></tr>
+      ${rows.length?rows.map(r=>`<tr><td>${esc(r.number)}</td><td>${esc((r.issue_date||'').slice(0,10))}</td><td>${esc(r.customer_name||'-')}</td><td class="n">${baht(r.base)}</td><td class="n">${baht(r.vat)}</td><td class="n">${baht(r.total)}</td><td><a href="tax-doc.html?type=invoice&id=${r.id}" target="_blank" style="color:var(--navy)">พิมพ์</a></td></tr>`).join(''):'<tr><td class="muted" colspan="7">ยังไม่มีใบกำกับ</td></tr>'}</table></div>`;
+  }
+
+  function renderAr(v,rows){
+    v.innerHTML=`<div class="card"><h2>ลูกหนี้ (ใบกำกับยังไม่ชำระ)</h2><table><tr><th>เลขที่</th><th>วันที่</th><th>ลูกค้า</th><th class="n">ยอด</th><th class="n">ค้าง(วัน)</th><th></th></tr>
+      ${rows.length?rows.map(r=>`<tr><td>${esc(r.number)}</td><td>${esc((r.issue_date||'').slice(0,10))}</td><td>${esc(r.customer_name||'-')}</td><td class="n">${baht(r.total)}</td><td class="n">${r.days_overdue}</td><td><button class="mini" style="border:none;background:none;color:var(--navy);text-decoration:underline;cursor:pointer" onclick="markPaid('${r.id}')">รับชำระ</button></td></tr>`).join(''):'<tr><td class="muted" colspan="6">ไม่มีลูกหนี้ค้าง</td></tr>'}</table></div>`;
+  }
+  async function markPaid(id){ const r=await api('invoice_paid',{id}); toast(r.ok?'บันทึกรับชำระแล้ว':'ไม่สำเร็จ'); render(); }
+  function renderAp(v,rows){
+    v.innerHTML=`<div class="card"><h2>เจ้าหนี้ (บิลค้างจ่าย)</h2><table><tr><th>ผู้ขาย</th><th>รายการ</th><th class="n">ยอด</th><th>ครบกำหนด</th><th class="n">ค้าง(วัน)</th></tr>
+      ${rows.length?rows.map(r=>`<tr><td>${esc(r.vendor_name||'-')}</td><td>${esc(r.description||'')}</td><td class="n">${baht(r.amount)}</td><td>${esc((r.due_date||'').slice(0,10)||'-')}</td><td class="n">${r.days_overdue}</td></tr>`).join(''):'<tr><td class="muted" colspan="5">ไม่มีบิลค้างจ่าย</td></tr>'}</table></div>`;
+  }
+  function renderCit(v,c){
+    v.innerHTML=`<div class="card"><h2>ประมาณการภาษีนิติบุคคล ปี ${esc(c.year)}</h2><table>
+      <tr><td>รายได้รวม</td><td class="n">${baht(c.revenue)}</td></tr>
+      <tr><td>ค่าใช้จ่ายรวม</td><td class="n">${baht(c.expense)}</td></tr>
+      <tr class="tot"><td>กำไรสุทธิ</td><td class="n">${baht(c.net_profit)}</td></tr>
+      <tr class="tot"><td>ภาษีนิติบุคคล (ประมาณการ)</td><td class="n">${baht(c.cit_estimate)}</td></tr></table>
+      <div class="note">${esc(c.note)}</div></div>`;
+  }
+  function renderAi(v){
+    v.innerHTML=`<div class="card"><h2>ให้ AI อ่านเอกสาร แล้วลงบัญชีให้</h2>
+      <p class="muted">ถ่าย/อัปโหลดรูปใบเสร็จ ใบกำกับ หรือสลิป — AI สกัดข้อมูลแล้วลงบัญชีคู่อัตโนมัติ (คนน้อย AI มาก)</p>
+      <label>เลือกรูปเอกสาร</label><input type="file" id="ocrFile" accept="image/*">
+      <button class="btn" onclick="runOcr(false)">ให้ AI อ่าน (พรีวิวก่อน)</button>
+      <div id="ocrOut" style="margin-top:14px"></div></div>`;
+  }
+  let _lastDoc=null;
+  function readFileB64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f);});}
+  async function runOcr(autoPost){
+    const f=$('ocrFile')&&$('ocrFile').files[0];
+    if(!f){ toast('เลือกรูปก่อน'); return; }
+    $('ocrOut').innerHTML='<div class="muted">AI กำลังอ่านเอกสาร…</div>';
+    const dataUrl=await readFileB64(f);
+    const OCR_FN=FN+'-ocr';
+    const r=await fetch(OCR_FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
+      body:JSON.stringify({image:dataUrl,media_type:f.type,auto_post:autoPost})}).then(x=>x.json());
+    if(r.error){ $('ocrOut').innerHTML='<div class="note">อ่านไม่สำเร็จ: '+esc(r.error)+(r.detail?(' — '+esc(r.detail)):'')+'</div>'; return; }
+    const e=r.extracted||{}; _lastDoc=e;
+    if(autoPost && r.posted && r.posted.ok!==false){ $('ocrOut').innerHTML='<div class="note" style="background:#EAF4EF;border-color:#BFE0D4">ลงบัญชีแล้ว ✓ '+esc(e.vendor_name||'')+' '+baht(e.base)+'</div>'; toast('AI ลงบัญชีให้แล้ว'); return; }
+    $('ocrOut').innerHTML=`<table>
+      <tr><td>ผู้ขาย</td><td>${esc(e.vendor_name||'-')}</td></tr>
+      <tr><td>เลขที่/วันที่</td><td>${esc(e.doc_number||'-')} · ${esc(e.date||'-')}</td></tr>
+      <tr><td>มูลค่าก่อน VAT</td><td class="n">${baht(e.base)}</td></tr>
+      <tr><td>VAT</td><td class="n">${baht(e.vat)}</td></tr>
+      <tr><td>หมวด/บัญชี</td><td>${esc(e.category||'-')} (${esc(e.expense_account||'5090')})</td></tr>
+      ${e.wht_rate?`<tr><td>หัก ณ ที่จ่าย</td><td class="n">${e.wht_rate}%</td></tr>`:''}
+      <tr><td>ความมั่นใจ AI</td><td>${Math.round((e.confidence||0)*100)}%</td></tr></table>
+      <button class="btn" onclick="runOcr(true)">ยืนยัน — ลงบัญชีเลย</button>
+      <div class="note">ตรวจตัวเลขก่อนกดยืนยัน · ระบบจะลงบัญชีคู่ + รายงานภาษีซื้อ + 50ทวิ (ถ้ามีหัก ณ ที่จ่าย) ให้อัตโนมัติ</div>`;
+  }
+  function renderActions(v){
+    v.innerHTML=`
+      <div class="card"><h2>ออกใบกำกับภาษี</h2>
+        <div class="g3"><div><label>ลูกค้า</label><input id="iv_name"></div><div><label>เลขผู้เสียภาษี</label><input id="iv_tax"></div><div><label>มูลค่า (ก่อน VAT)</label><input id="iv_base" type="number"></div></div>
+        <button class="btn" onclick="doInvoice()">ออกใบกำกับ</button></div>
+      <div class="card"><h2>จ่ายพาร์ทเนอร์ (หัก ณ ที่จ่าย)</h2>
+        <div class="g3"><div><label>ชื่อผู้รับ</label><input id="pp_name"></div><div><label>ฐานเงินได้</label><input id="pp_base" type="number"></div><div><label>อัตรา WHT (%)</label><input id="pp_rate" type="number" value="3"></div></div>
+        <button class="btn" onclick="doPay()">บันทึก + ออก 50 ทวิ</button></div>
+      <div class="card"><h2>บันทึกรับซื้อ</h2>
+        <div class="g3"><div><label>รายละเอียด</label><input id="aq_desc"></div><div><label>มูลค่ารวมจ่าย</label><input id="aq_gross" type="number"></div>
+        <div><label>ประเภท</label><select id="aq_kind"><option value="asset">ชุดให้เช่า (สินทรัพย์)</option><option value="inventory">เพื่อขายต่อ (สินค้า)</option></select></div></div>
+        <button class="btn" onclick="doAcquire()">บันทึกรับซื้อ</button></div>
+      <div class="card"><h2>รอบบัญชี & งานประจำงวด</h2>
+        <div class="g2"><div><label>ปิดงวด (YYYY-MM)</label><input id="cp" placeholder="2026-06"></div>
+        <div style="display:flex;align-items:flex-end;gap:8px"><button class="btn ghost" onclick="doClose()">ปิดงวด</button></div></div>
+        <button class="btn ghost" onclick="doRecognize()">รับรู้รายได้สมาชิกเดือนนี้</button>
+        <button class="btn ghost" onclick="doDepreciate()">ตัดค่าเสื่อมเดือนนี้</button>
+        <div class="note">ปกติระบบรันรับรู้รายได้/ค่าเสื่อมให้อัตโนมัติทุกวันที่ 1 — ปุ่มนี้ไว้รันเพิ่มเอง</div></div>`;
+  }
+  const today=()=>new Date().toISOString().slice(0,10);
+  async function doInvoice(){ const r=await api('issue_invoice',{invoice:{base:Number($('iv_base').value),customer_name:$('iv_name').value,customer_tax_id:$('iv_tax').value}});
+    toast(r.ok?('ออกใบกำกับ '+r.invoice.number+' · รวม '+baht(r.invoice.total)):'ไม่สำเร็จ: '+(r.error||'')); }
+  async function doPay(){ const r=await api('pay_partner',{payment:{base:Number($('pp_base').value),payee_name:$('pp_name').value,wht_rate:Number($('pp_rate').value)}});
+    toast(r.ok?('บันทึกแล้ว · หัก '+baht(r.result.wht)+' จ่ายสุทธิ '+baht(r.result.paid)):'ไม่สำเร็จ: '+(r.error||'')); }
+  async function doAcquire(){ const r=await api('acquire',{desc:$('aq_desc').value,gross:Number($('aq_gross').value),kind:$('aq_kind').value});
+    toast(r.ok?'บันทึกรับซื้อแล้ว':'ไม่สำเร็จ: '+(r.error||'')); }
+  async function doClose(){ const r=await api('close_period',{period:$('cp').value}); toast(r.ok?'ปิดงวด '+$('cp').value+' แล้ว':'ไม่สำเร็จ: '+(r.error||'')); }
+  async function doRecognize(){ const r=await api('recognize'); toast(r.ok?('รับรู้รายได้ '+r.count+' รายการ'):'ไม่สำเร็จ'); }
+  async function doDepreciate(){ const r=await api('depreciate'); toast(r.ok?('ตัดค่าเสื่อม '+r.count+' รายการ'):'ไม่สำเร็จ'); }
+
+  async function boot(){
+    const ok = await window.opsLogin().catch(()=>false);
+    if(!ok){ $('gate').classList.remove('hide'); $('app').classList.add('hide'); return; }  // ยังไม่ login (กำลัง redirect) หรือไม่มีสิทธิ์
+    $('gate').classList.add('hide'); $('app').classList.remove('hide'); $('lockBtn').textContent='ออกจากระบบ'; render();
+  }
+  boot();
+</script>
+</body>
+</html>

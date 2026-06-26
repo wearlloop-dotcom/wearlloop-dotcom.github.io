@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · จัดซื้อ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;--navy:#0D2F4F;--sage:#6FB3A6;--champ:#B8A179;--ok:#0F6E56;--danger:#A32D2D;
+    --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:14px}
+  .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar h1{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:1px}
+  .bar .tag{font-size:11px;background:#33312d;padding:3px 10px;border-radius:20px}
+  .bar .lock{margin-left:auto;font-size:12px;color:#bbb;cursor:pointer}
+  .wrap{max-width:880px;margin:16px auto;padding:0 14px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{font-size:13px;padding:7px 13px;border:1px solid var(--hair);border-radius:20px;cursor:pointer;background:#fff;color:var(--stone)}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:18px;margin-bottom:14px}
+  .card h2{font-family:var(--display);font-size:17px;margin-bottom:10px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--stone);font-weight:500;font-size:11px;letter-spacing:.5px;text-transform:uppercase;padding:8px 6px;border-bottom:1px solid var(--hair)}
+  td{padding:8px 6px;border-bottom:1px solid var(--hair)}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  .pill{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--hair)}
+  .pill.ordered{color:var(--navy);border-color:#C5D2DE}.pill.received{color:var(--ok);border-color:#BFE0D4;background:#EAF4EF}
+  .pill.low{color:var(--danger);border-color:#E6C9C9;background:#F8EEEE}
+  label{display:block;font-size:12px;color:var(--stone);margin:8px 0 4px;font-weight:500}
+  input,select{width:100%;border:1px solid var(--hair);border-radius:2px;padding:9px 10px;font-size:14px;font-family:var(--sans);background:var(--canvas)}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .btn{border:none;border-radius:2px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--navy);color:#fff;margin-top:12px}
+  .btn.ghost{background:none;border:1px solid var(--hair);color:var(--stone)}
+  .mini{font-size:12px;color:var(--navy);background:none;border:none;cursor:pointer;text-decoration:underline;padding:2px 4px;font-family:var(--sans)}
+  .gate{max-width:420px;margin:80px auto;text-align:center;padding:0 20px}
+  .gate h2{font-family:var(--display);font-size:22px;margin-bottom:6px}.gate p{color:var(--stone);font-size:13px;margin-bottom:14px}
+  .muted{color:var(--stone);font-size:12px}
+  .itemrow{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end}
+  .itemrow .x{background:none;border:1px solid var(--hair);border-radius:2px;color:var(--danger);cursor:pointer;padding:8px 11px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;opacity:0;transition:.3s;z-index:9;font-size:13px}
+  .toast.show{opacity:1}.hide{display:none!important}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+</head>
+<body>
+<div class="bar"><h1>จัดซื้อ</h1><span class="tag">จัดซื้อ</span><span class="lock" onclick="logout()" id="lockBtn"></span></div>
+
+<div id="gate" class="gate">
+  <h2>เข้าระบบจัดซื้อ</h2><p>ยืนยันตัวตนด้วย LINE — เฉพาะเจ้าของ/ผู้จัดการ</p>
+  <button class="btn" style="width:100%" onclick="boot()">เข้าสู่ระบบด้วย LINE</button>
+</div>
+
+<div id="app" class="wrap hide">
+  <section class="phead">
+    <div class="eyebrow">purchasing · supply</div>
+    <h1>เติมชุดให้ทันใจลูกค้า</h1>
+    <div class="sub">ดูว่าโทนสี ไซซ์ และวัสดุไหนกำลังขาด แล้วสั่งซื้อให้ครบ — เพื่อให้ทุกชุดหมุนเวียนกลับมาพร้อมเสมอ</div>
+  </section>
+  <div class="tabs">
+    <span class="tab on" data-t="restock" onclick="go(this)">ควรเติมชุด</span>
+    <span class="tab" data-t="low" onclick="go(this)">ของใกล้หมด</span>
+    <span class="tab" data-t="po" onclick="go(this)">ใบสั่งซื้อ</span>
+    <span class="tab" data-t="ap" onclick="go(this)">เจ้าหนี้ค้างจ่าย</span>
+    <span class="tab" data-t="create" onclick="go(this)">สร้างใบสั่งซื้อ</span>
+    <span class="tab" data-t="supplies" onclick="go(this)">วัสดุ/สต็อก</span>
+    <span class="tab" data-t="suppliers" onclick="go(this)">ซัพพลายเออร์</span>
+  </div>
+  <div id="view"></div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
+  const $=id=>document.getElementById(id);
+  function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
+  const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH');
+  const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  async function authHeader(){ if(!(await window.opsLogin())) throw new Error('redirecting'); return 'Bearer '+liff.getIDToken(); }
+  async function api(action,extra){const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action},extra||{}))});
+    if(r.status===401||r.status===403){toast('ไม่มีสิทธิ์เข้าระบบจัดซื้อ (เฉพาะเจ้าของ/ผู้จัดการ)');throw new Error('unauth');}return r.json();}
+  function logout(){ try{ liff.logout(); }catch(e){} $('app').classList.add('hide');$('gate').classList.remove('hide');}
+
+  let tab='restock', SUPPLIERS=[], SUPPLIES=[];
+  function go(el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');tab=el.dataset.t;render();}
+
+  async function render(){
+    const v=$('view');v.innerHTML='<div class="muted" style="padding:30px;text-align:center">กำลังโหลด…</div>';
+    try{
+      // โหลด master ครั้งเดียว
+      if(!SUPPLIERS.length) SUPPLIERS=(await api('suppliers')).rows||[];
+      if(!SUPPLIES.length) SUPPLIES=(await api('supplies')).rows||[];
+      if(tab==='restock') return renderRestock(v,(await api('restock')).restock);
+      if(tab==='low') return renderLow(v,(await api('low_stock')).rows);
+      if(tab==='po') return renderPo(v,(await api('po_list')).rows);
+      if(tab==='ap') return renderApPo(v,(await api('po_unpaid')).rows);
+      if(tab==='create') return renderCreate(v);
+      if(tab==='supplies') return renderSupplies(v,(await api('supplies')).rows);
+      if(tab==='suppliers') return renderSuppliers(v,(await api('suppliers')).rows);
+    }catch(e){v.innerHTML='<div class="card">โหลดไม่สำเร็จ: '+esc(e.message)+'</div>';}
+  }
+
+  const ST={spring:'สดใส (Spring)',summer:'ละมุน (Summer)',autumn:'อบอุ่น (Autumn)',winter:'คมชัด (Winter)',neutral:'โทนกลาง'};
+  function renderRestock(v,r){
+    r=r||{gaps:[],wishlist:[],hot:[],size_gaps:[],forecast:{}};
+    const gaps=r.gaps||[],wish=r.wishlist||[],hot=r.hot||[],sgaps=r.size_gaps||[],f=r.forecast||{};
+    const growthBadge=f.growth_pct!=null?`<span class="pill ${f.growth_pct>=0?'received':'low'}">${f.growth_pct>=0?'+':''}${f.growth_pct}%</span>`:'';
+    v.innerHTML=`
+      <div class="card"><h2>พยากรณ์ดีมานด์ (จากประวัติเช่าจริง)</h2>
+        ${(f.total_rentals||0)>0?`<table>
+          <tr><td>เฉลี่ย 3 เดือนล่าสุด</td><td class="n">${f.avg_last3mo} ครั้ง/เดือน</td></tr>
+          <tr><td>เทียบ 3 เดือนก่อนหน้า</td><td class="n">${f.avg_prev3mo} ครั้ง/เดือน ${growthBadge}</td></tr>
+          <tr class="tot"><td>พยากรณ์เดือนหน้า</td><td class="n">~${f.forecast_next_month} ครั้ง</td></tr>
+          ${(f.by_size||[]).length?`<tr><td>ไซซ์ขายดี (90 วัน)</td><td class="n">${f.by_size.map(x=>x.size+':'+x.rented).join(' · ')}</td></tr>`:''}
+          ${(f.by_season||[]).length?`<tr><td>โทนสีขายดี (90 วัน)</td><td class="n">${f.by_season.map(x=>(ST[x.season]||x.season).split(' ')[0]+':'+x.rented).join(' · ')}</td></tr>`:''}
+          ${(f.peak_months||[]).length?`<tr><td>เดือนพีคในรอบปี</td><td class="n">${f.peak_months.map(x=>'เดือน'+x.month_no).join(', ')}</td></tr>`:''}
+        </table>`:'<div class="muted">ยังไม่มีประวัติเช่าพอจะพยากรณ์ — ระบบจะคำนวณเองเมื่อมีข้อมูลเช่าจริง</div>'}</div>
+      <div class="card"><h2>ไซซ์ที่ดีมานด์เกินชุด — ควรเติม</h2>
+      ${sgaps.length?`<table><tr><th>ไซซ์</th><th class="n">เช่า 90 วัน</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
+        ${sgaps.map(s=>`<tr><td>${esc(s.size)}</td><td class="n">${s.rented_90d}</td><td class="n">${s.available===0?'<span class="pill low">0!</span>':s.available}</td><td class="n">${s.ratio||'-'}:1</td></tr>`).join('')}</table>`
+        :'<div class="muted">ไซซ์ในระบบเพียงพอกับดีมานด์ ✓</div>'}</div>
+      <div class="card"><h2>โทนสีที่ลูกค้าเยอะกว่าชุด — ควรเติม</h2>
+      ${gaps.length?`<table><tr><th>โทนสี</th><th class="n">ลูกค้า</th><th class="n">ลูกค้าประจำ</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
+        ${gaps.map(g=>`<tr><td>${esc(ST[g.season]||g.season)}</td><td class="n">${g.customers}</td><td class="n">${g.loyal}</td><td class="n">${g.available===0?'<span class="pill low">0 — ไม่มีเลย!</span>':g.available}</td><td class="n">${g.ratio||'-'}:1</td></tr>`).join('')}</table>`
+        :'<div class="muted">ตอนนี้ชุดในระบบเพียงพอกับฐานลูกค้าทุกโทนสี ✓</div>'}</div>
+      <div class="card"><h2>ชุดที่ลูกค้าอยากได้ (wishlist) แต่ไม่ว่าง</h2>
+      ${wish.length?`<table><tr><th>ชุด</th><th>โทน/ไซซ์</th><th class="n">คนรอ</th></tr>
+        ${wish.map(w=>`<tr><td>${esc(w.name||w.code)}</td><td>${esc(ST[w.season]||w.season||'-')} ${esc(w.size||'')}</td><td class="n">${w.wishes}</td></tr>`).join('')}</table>`:'<div class="muted">ไม่มี</div>'}</div>
+      <div class="card"><h2>ชุดที่เช่าบ่อย (ควรซื้อเพิ่มแบบเดียวกัน)</h2>
+      ${hot.length?`<table><tr><th>ชุด</th><th>โทน/ไซซ์</th><th class="n">เช่าไป</th></tr>
+        ${hot.map(h=>`<tr><td>${esc(h.name||h.code)}</td><td>${esc(ST[h.season]||h.season||'-')} ${esc(h.size||'')}</td><td class="n">${h.times_rented} ครั้ง</td></tr>`).join('')}</table>`:'<div class="muted">ยังไม่มีชุดที่เช่าบ่อย</div>'}
+      <div class="muted" style="margin-top:8px">ระบบเตือนเจ้าของทาง LINE อัตโนมัติทุกสัปดาห์เมื่อมีโทนสีที่ขาด</div></div>`;
+  }
+  function renderLow(v,rows){
+    v.innerHTML=`<div class="card"><h2>ของใกล้หมด — ควรสั่งซื้อ</h2><table><tr><th>วัสดุ</th><th class="n">คงเหลือ</th><th class="n">จุดสั่ง</th><th class="n">ควรสั่ง</th><th></th></tr>
+      ${rows.length?rows.map(r=>`<tr><td>${esc(r.name)} <span class="pill low">ใกล้หมด</span></td><td class="n">${r.qty_on_hand} ${esc(r.unit)}</td><td class="n">${r.min_qty}</td><td class="n">${r.reorder_qty>0?r.reorder_qty:0}</td><td><button class="mini" onclick='quickPo(${JSON.stringify(r)})'>สั่งซื้อ</button></td></tr>`).join(''):'<tr><td class="muted" colspan="5">ของครบ ไม่มีที่ใกล้หมด</td></tr>'}</table></div>`;
+  }
+  function quickPo(r){ tab='create'; document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.t==='create')); renderCreate($('view'),r); }
+
+  function renderPo(v,rows){
+    v.innerHTML=`<div class="card"><h2>ใบสั่งซื้อ</h2><table><tr><th>เลขที่</th><th>ซัพพลายเออร์</th><th>ประเภท</th><th class="n">ยอด</th><th>สถานะ</th><th></th></tr>
+      ${rows.length?rows.map(p=>`<tr><td>${esc(p.po_no)}<br><span class="muted">${esc((p.ordered_at||'').slice(0,10))}</span></td><td>${esc(p.supplier_name||'-')}</td><td>${({supply:'วัสดุ',asset:'ชุดให้เช่า',inventory:'สินค้า'})[p.kind]||p.kind}</td><td class="n">${baht(p.total)}</td><td><span class="pill ${p.status}">${({ordered:'สั่งแล้ว',received:'รับของแล้ว',draft:'ร่าง'})[p.status]||p.status}</span></td><td>${p.status==='ordered'?`<button class="mini" onclick="receivePo('${p.id}')">รับของ</button>`:''}</td></tr>`).join(''):'<tr><td class="muted" colspan="6">ยังไม่มีใบสั่งซื้อ</td></tr>'}</table></div>`;
+  }
+  async function receivePo(id){
+    const ans=prompt('รับของเข้าสต็อก — พิมพ์ "เชื่อ" ถ้าซื้อเชื่อ (ยังไม่จ่าย), เว้นว่าง = จ่ายเลย');
+    if(ans===null)return;
+    const paid = ans.trim()!=='เชื่อ';
+    const r=await api('po_receive',{id,paid}); toast(r.ok?('รับของแล้ว + ลงบัญชี'+(paid?'':' (เป็นเจ้าหนี้)')):'ไม่สำเร็จ: '+(r.error||(r.result&&r.result.error))); render();
+  }
+  function renderApPo(v,rows){
+    v.innerHTML=`<div class="card"><h2>เจ้าหนี้ค้างจ่าย (PO ซื้อเชื่อ)</h2><table><tr><th>เลขที่</th><th>ซัพพลายเออร์</th><th class="n">ยอด</th><th>ครบกำหนด</th><th class="n">ค้าง(วัน)</th><th></th></tr>
+      ${rows.length?rows.map(p=>`<tr><td>${esc(p.po_no)}</td><td>${esc(p.supplier||p.supplier_name||'-')}</td><td class="n">${baht(p.total)}</td><td>${esc((p.due_date||'').slice(0,10)||'-')}</td><td class="n">${p.days_overdue}</td><td><button class="mini" onclick="payPo('${p.id}')">จ่ายแล้ว</button></td></tr>`).join(''):'<tr><td class="muted" colspan="6">ไม่มีเจ้าหนี้ค้างจ่าย</td></tr>'}</table></div>`;
+  }
+  async function payPo(id){ if(!confirm('ยืนยันจ่ายเจ้าหนี้รายนี้?'))return; const r=await api('po_pay',{id}); toast(r.ok?'จ่ายเจ้าหนี้แล้ว + ลงบัญชี':'ไม่สำเร็จ: '+(r.error||'')); render(); }
+
+  let ITEMS=[];
+  function renderCreate(v,seed){
+    ITEMS = seed ? [{supply_id:seed.id,description:seed.name,qty:(seed.reorder_qty>0?seed.reorder_qty:1),unit_cost:seed.last_cost||0}] : [{description:'',qty:1,unit_cost:0}];
+    const supOpts=SUPPLIERS.map(s=>`<option value="${s.id}">${esc(s.name||'(ไม่มีชื่อ)')}</option>`).join('');
+    v.innerHTML=`<div class="card"><h2>สร้างใบสั่งซื้อ</h2>
+      <div class="g2"><div><label>ซัพพลายเออร์</label><select id="po_sup"><option value="">— เลือก —</option>${supOpts}</select></div>
+      <div><label>ประเภท</label><select id="po_kind"><option value="supply">วัสดุ/ของใช้</option><option value="asset">ชุดให้เช่า (สินทรัพย์)</option><option value="inventory">สินค้าเพื่อขาย</option></select></div></div>
+      <label>หมายเหตุ</label><input id="po_note" placeholder="เช่น สั่งถุงผ้ารอบ มิ.ย.">
+      <label>รายการ</label><div id="poItems"></div>
+      <button class="btn ghost" onclick="addItem()" style="margin-top:4px">+ เพิ่มรายการ</button>
+      <div style="text-align:right;font-weight:700;margin-top:10px">รวม: <span id="poTotal">฿0</span></div>
+      <button class="btn" onclick="createPo()">สร้างใบสั่งซื้อ</button></div>`;
+    drawItems();
+  }
+  function drawItems(){
+    const supOpts=SUPPLIES.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+    $('poItems').innerHTML=ITEMS.map((it,i)=>`<div class="itemrow">
+      <div><input list="suplist" placeholder="ชื่อรายการ" value="${esc(it.description||'')}" oninput="ITEMS[${i}].description=this.value"></div>
+      <div><input type="number" placeholder="จำนวน" value="${it.qty||''}" oninput="ITEMS[${i}].qty=Number(this.value);calcT()"></div>
+      <div><input type="number" placeholder="ราคา/หน่วย" value="${it.unit_cost||''}" oninput="ITEMS[${i}].unit_cost=Number(this.value);calcT()"></div>
+      <button class="x" onclick="ITEMS.splice(${i},1);drawItems()">ลบ</button></div>`).join('')
+      +`<datalist id="suplist">${supOpts}</datalist>`;
+    calcT();
+  }
+  function addItem(){ITEMS.push({description:'',qty:1,unit_cost:0});drawItems();}
+  function calcT(){const t=ITEMS.reduce((s,it)=>s+(Number(it.qty)||0)*(Number(it.unit_cost)||0),0);if($('poTotal'))$('poTotal').textContent=baht(t);}
+  async function createPo(){
+    const items=ITEMS.filter(it=>it.qty>0&&it.unit_cost>=0&&(it.description||it.supply_id))
+      .map(it=>{const m=SUPPLIES.find(s=>s.name===it.description);return{supply_id:it.supply_id||(m?m.id:null),description:it.description,qty:Number(it.qty),unit_cost:Number(it.unit_cost)};});
+    if(!items.length){toast('ใส่รายการก่อน');return;}
+    const r=await api('po_create',{po:{supplier_id:$('po_sup').value||null,kind:$('po_kind').value,note:$('po_note').value,items}});
+    toast(r.ok?('สร้าง '+r.po.po_no+' · '+baht(r.po.total)):'ไม่สำเร็จ: '+(r.error||''));
+    if(r.ok){tab='po';document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.t==='po'));render();}
+  }
+
+  function renderSupplies(v,rows){
+    v.innerHTML=`<div class="card"><h2>วัสดุ/สต็อก</h2><table><tr><th>ชื่อ</th><th>หมวด</th><th class="n">คงเหลือ</th><th class="n">จุดสั่ง</th><th class="n">ต้นทุนล่าสุด</th></tr>
+      ${rows.length?rows.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.category||'-')}</td><td class="n">${s.qty_on_hand} ${esc(s.unit)}</td><td class="n">${s.min_qty}</td><td class="n">${s.last_cost?baht(s.last_cost):'-'}</td></tr>`).join(''):'<tr><td class="muted" colspan="5">ยังไม่มีวัสดุ</td></tr>'}</table></div>
+      <div class="card"><h2>เพิ่มวัสดุ</h2><div class="g3"><div><label>ชื่อ</label><input id="s_name"></div><div><label>หมวด</label><select id="s_cat"><option value="packaging">แพ็กเกจ</option><option value="hanger">ไม้แขวน</option><option value="laundry">น้ำยาซัก</option><option value="office">ออฟฟิศ</option><option value="other">อื่นๆ</option></select></div><div><label>หน่วย</label><input id="s_unit" value="ชิ้น"></div></div>
+      <div class="g2"><div><label>จุดสั่งซื้อ (min)</label><input id="s_min" type="number" value="0"></div><div><label>คงเหลือเริ่มต้น</label><input id="s_qty" type="number" value="0"></div></div>
+      <button class="btn" onclick="addSupply()">บันทึกวัสดุ</button></div>`;
+  }
+  async function addSupply(){const r=await api('supply_upsert',{supply:{name:$('s_name').value,category:$('s_cat').value,unit:$('s_unit').value,min_qty:Number($('s_min').value),qty_on_hand:Number($('s_qty').value)}});
+    if(r.ok){toast('บันทึกวัสดุแล้ว');SUPPLIES=[];render();}else toast('ไม่สำเร็จ');}
+
+  function renderSuppliers(v,rows){
+    v.innerHTML=`<div class="card"><h2>ซัพพลายเออร์</h2><table><tr><th>ชื่อ</th><th>โทร</th><th>เลขผู้เสียภาษี</th></tr>
+      ${rows.length?rows.map(s=>`<tr><td>${esc(s.name||'-')}</td><td>${esc(s.phone||'-')}</td><td>${esc(s.tax_id||'-')}</td></tr>`).join(''):'<tr><td class="muted" colspan="3">ยังไม่มี</td></tr>'}</table></div>
+      <div class="card"><h2>เพิ่มซัพพลายเออร์</h2><div class="g3"><div><label>ชื่อ</label><input id="v_name"></div><div><label>โทร</label><input id="v_phone"></div><div><label>เลขผู้เสียภาษี</label><input id="v_tax"></div></div>
+      <button class="btn" onclick="addSupplier()">บันทึก</button></div>`;
+  }
+  async function addSupplier(){const r=await api('supplier_upsert',{supplier:{name:$('v_name').value,phone:$('v_phone').value,tax_id:$('v_tax').value}});
+    if(r.ok){toast('บันทึกซัพพลายเออร์แล้ว');SUPPLIERS=[];render();}else toast('ไม่สำเร็จ');}
+
+  async function boot(){
+    const ok = await window.opsLogin().catch(()=>false);
+    if(!ok){$('gate').classList.remove('hide');$('app').classList.add('hide');return;}
+    $('gate').classList.add('hide');$('app').classList.remove('hide');$('lockBtn').textContent='ออกจากระบบ';render();}
+  boot();
+</script>
+</body>
+</html>
