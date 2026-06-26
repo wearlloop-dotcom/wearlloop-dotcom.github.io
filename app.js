@@ -681,7 +681,7 @@ async function openKycRequired() {
       <label class="klabel">${TH ? 'เลขบัตรประชาชน 13 หลัก' : 'ID card number'}</label>
       <input type="text" id="kycIdNo" inputmode="numeric" maxlength="20" placeholder="${TH ? 'กรอกเลขบัตร' : 'ID number'}" class="kinput">
       <label class="klabel">${TH ? 'รูปบัตรประชาชน (ถ่ายชัดเจน)' : 'ID card photo'}</label>
-      <input type="file" id="kycIdImg" accept="image/*" capture="environment">
+      <input type="file" id="kycIdImg" accept="image/*" capture="environment" onchange="kycOcr(this)">
       <label class="klabel">${TH ? 'เซลฟี่ถือบัตรประชาชน' : 'Selfie holding your ID'}</label>
       <input type="file" id="kycSelfie" accept="image/*" capture="environment">
       <button class="ksubmit" onclick="submitKycRequired()">${TH ? 'ส่งยืนยันตัวตน' : 'Submit verification'}</button>
@@ -709,6 +709,29 @@ async function _kycUpload(idToken, kind, dataUrl, mediaType, extra) {
   });
   let out = {}; try { out = await res.json(); } catch (e) { /**/ }
   return { status: res.status, ok: res.ok && out && out.ok === true, data: out };
+}
+
+// อ่านเลขบัตรจากรูปอัตโนมัติ (OCR) → เติมช่องเลขบัตรให้ ลูกค้าไม่ต้องพิมพ์ · ตรวจแก้ได้
+async function kycOcr(input) {
+  const TH = lang === 'th';
+  const f = input && input.files && input.files[0]; if (!f) return;
+  const idEl = $('#kycIdNo'); if (idEl && idEl.value.trim()) return;  // มีเลขแล้วไม่ทับ
+  let idToken = null; try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (e) { idToken = null; }
+  if (!idToken) return;
+  if (idEl) idEl.placeholder = TH ? 'กำลังอ่านเลขบัตรจากรูป…' : 'Reading ID from photo…';
+  try {
+    const dataUrl = await _fileToDataUrl(f);
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/kyc`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'ocr', id_token: idToken, role: 'customer', image: dataUrl, media_type: f.type }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (out && out.id_number && idEl && !idEl.value.trim()) {
+      idEl.value = out.id_number;
+      toast(TH ? 'อ่านเลขบัตรให้แล้ว ช่วยตรวจอีกครั้งนะคะ' : 'ID number filled — please double-check');
+    }
+  } catch (e) { /* เงียบ — ลูกค้าพิมพ์เองได้ */ }
+  if (idEl) idEl.placeholder = TH ? 'กรอกเลขบัตร' : 'ID number';
 }
 
 async function submitKycRequired() {
