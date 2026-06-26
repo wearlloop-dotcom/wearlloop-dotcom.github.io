@@ -39,6 +39,10 @@
   .thumbs img{width:64px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
   .thumbs .fn{font-size:10px;color:var(--muted);word-break:break-all;line-height:1.2;margin-top:2px}
   .upnote{background:#FBF3E2;border:1px solid #ECDDBD;border-radius:9px;padding:10px 12px;font-size:13px;color:#6b5a2e;margin-top:10px;line-height:1.5}
+  .files{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .files a{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);text-decoration:none;border:1.5px solid var(--line);border-radius:20px;padding:6px 12px;max-width:240px}
+  .files a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .files svg{flex:none;width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:1.6}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
 </head>
@@ -119,7 +123,10 @@
       <div><label>ระบบสีที่ใช้</label><input id="system" placeholder="Korean 12-tone / AIM 12-season"></div>
       <div><label>ระดับผู้วิเคราะห์</label><select id="tier"><option value="">—</option><option>Senior</option><option>Master</option><option>Certified</option></select></div>
     </div>
-    <label>ไฟล์ดิจิทัล Personal Color (ลิงก์)</label><input id="pc_file" placeholder="https://...">
+    <label>ไฟล์งาน Personal Color (PDF/รูป/เอกสาร)</label>
+    <input type="file" id="pc_file_up" accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.key,.heic" multiple onchange="uploadDocs(this,'pc_file','pc_file_chips')">
+    <div class="files" id="pc_file_chips"></div>
+    <label>หรือวางลิงก์ไฟล์ (คั่นด้วย ,)</label><input id="pc_file" placeholder="https://...">
   </div>
 
   <div class="card">
@@ -157,7 +164,10 @@
     <label>เนื้อผ้า / ลายที่แนะนำ</label><input id="fabrics" placeholder="ผ้าทิ้งตัว, ลายเล็ก, เลี่ยงผ้าแข็ง">
     <label>จุดที่ควรพราง / โครงสร้างที่ควรเลี่ยง</label><input id="camouflage" placeholder="พรางต้นแขน, เลี่ยงระบายช่วงสะโพก">
     <label>เสื้อผ้า/ทรงที่ควรเลี่ยง</label><input id="avoid_clothing" placeholder="คอปาด, กระโปรงบานช่วงสะโพก">
-    <label>ไฟล์ดิจิทัล Face & Body (ลิงก์)</label><input id="fb_file" placeholder="https://...">
+    <label>ไฟล์งาน Face & Body (PDF/รูป/เอกสาร)</label>
+    <input type="file" id="fb_file_up" accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.key,.heic" multiple onchange="uploadDocs(this,'fb_file','fb_file_chips')">
+    <div class="files" id="fb_file_chips"></div>
+    <label>หรือวางลิงก์ไฟล์ (คั่นด้วย ,)</label><input id="fb_file" placeholder="https://...">
   </div>
 
   <div class="card">
@@ -203,7 +213,10 @@
       <div><label>งบประมาณต่อชิ้น/เดือน</label><input id="budget" placeholder="เช่น 1,000-3,000/ชิ้น"></div>
     </div>
     <label>ข้อควรทำ / ข้อควรเลี่ยง (Do's & Don'ts)</label><textarea id="dos_donts" placeholder="DO: เน้นเอว, โทนอุ่น · DON'T: ผ้าแข็ง, สีตัดเย็น"></textarea>
-    <label>Mood Board (ลิงก์)</label><input id="mood_board" placeholder="https://...">
+    <label>ไฟล์ Mood Board / ไฟล์งานสไตล์ (PDF/รูป/เอกสาร)</label>
+    <input type="file" id="mood_board_up" accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.key,.heic" multiple onchange="uploadDocs(this,'mood_board','mood_board_chips')">
+    <div class="files" id="mood_board_chips"></div>
+    <label>หรือวางลิงก์ Mood Board (คั่นด้วย ,)</label><input id="mood_board" placeholder="https://...">
   </div>
 
   <div class="card">
@@ -272,6 +285,7 @@
       else if(el.type!=='color'){ el.value=''; }
     });
     [['c1','#15233F'],['c2','#7A1F3D'],['c3','#0E0E0E'],['c4','#1E5C5A'],['c5','#C9A86A'],['a1','#E8C9A0'],['a2','#B7B7B7']].forEach(([id,v])=>{ if($(id)) $(id).value=v; });
+    ['pc_file_chips','fb_file_chips','mood_board_chips','lookbook_thumbs','photos_thumbs'].forEach(id=>{ if($(id)) $(id).innerHTML=''; });
   }
   // map ค่ากลับเข้าฟอร์ม (โครงสร้างเดียวกับที่ save() สร้าง)
   function fillForm(d){
@@ -292,7 +306,7 @@
     (col.palette||[]).slice(0,5).forEach((c,i)=>setColor('c'+(i+1), c));
     (col.avoid_colors||[]).slice(0,2).forEach((c,i)=>setColor('a'+(i+1), c));
     setV('soul_color', col.soul_color); setV('makeup_colors', col.makeup_colors);
-    setV('hair_color', col.hair_color); setV('pc_file', col.pc_file);
+    setV('hair_color', col.hair_color); setV('pc_file', col.pc_file); renderFileChips('pc_file','pc_file_chips');
     // หน้า
     setV('face_shape', f.shape); setV('eyewear', f.eyewear); setList('hairstyles', f.hairstyles);
     setV('makeup_dir', f.makeup); setV('lip', f.makeup_lip); setV('cheek', f.makeup_cheek); setV('eye', f.makeup_eye);
@@ -301,13 +315,13 @@
     setV('body_type', b.type); setV('body_proportion', b.proportion); setV('body_highlight', b.highlight);
     setList('silhouettes', b.silhouettes); setList('necklines', b.necklines);
     setV('sleeves', b.sleeves); setV('hemline', b.hemline); setV('rise', b.rise); setV('footwear', b.footwear);
-    setV('fabrics', b.fabrics); setV('camouflage', b.camouflage); setV('avoid_clothing', b.avoid_clothing); setV('fb_file', b.fb_file);
+    setV('fabrics', b.fabrics); setV('camouflage', b.camouflage); setV('avoid_clothing', b.avoid_clothing); setV('fb_file', b.fb_file); renderFileChips('fb_file','fb_file_chips');
     // สไตล์
     setV('core_style', st.core_style); setList('vibe', st.vibe); setV('mix_match', st.mix_match);
     const rec=st.recommend_categories||[];
     $('recommend').querySelectorAll('input[type=checkbox]').forEach(cb=>{ cb.checked=rec.includes(cb.value); });
     setList('must_have', st.must_have); setList('brands', st.brands);
-    setV('occasions', st.occasions); setV('budget', st.budget); setV('dos_donts', st.dos_donts); setV('mood_board', st.mood_board);
+    setV('occasions', st.occasions); setV('budget', st.budget); setV('dos_donts', st.dos_donts); setV('mood_board', st.mood_board); renderFileChips('mood_board','mood_board_chips');
     // lookbook / รูป / สรุป
     setList('lookbook', d.lookbook); setList('photos', d.photos);
     setV('headline', d.headline); setV('analyst', d.analyst); setV('partner', d.partner); setV('tier', d.analyst_tier);
@@ -375,6 +389,46 @@
       toast('อัปโหลดแล้ว '+added.length+' รูป');
     }
     input.value='';
+  }
+
+  // แนบไฟล์งาน (PDF/เอกสาร/รูป) — อัปขึ้น bucket uploads แล้วเติมลิงก์ลงช่องเป้าหมาย + แสดง chip
+  // graceful fallback: ถ้า Storage ยังไม่เปิด ให้วางลิงก์เองได้ตามเดิม
+  async function uploadDocs(input, targetId, chipsId){
+    const files=[...input.files]; if(!files.length) return;
+    const target=$(targetId);
+    let added=[];
+    for(let i=0;i<files.length;i++){
+      const file=files[i];
+      const path=`docs/${Date.now()}-${i}-${file.name}`.replace(/\s+/g,'_');
+      try{
+        const { error:upErr } = await sb.storage.from('uploads').upload(path, file, { upsert:false });
+        if(upErr) throw upErr;
+        const { data:pub } = sb.storage.from('uploads').getPublicUrl(path);
+        const url=pub&&pub.publicUrl; if(!url) throw new Error('no url');
+        added.push(url);
+      }catch(e){
+        $('upnote').style.display='block';
+        $('upnote').textContent='แนบไฟล์จะใช้ได้เมื่อเปิด Storage (ตอนนี้วางลิงก์ไฟล์เองได้)';
+      }
+    }
+    if(added.length){
+      const cur=(target.value||'').trim();
+      target.value = cur ? cur.replace(/,\s*$/,'')+', '+added.join(', ') : added.join(', ');
+      renderFileChips(targetId, chipsId);
+      toast('แนบไฟล์แล้ว '+added.length+' ไฟล์');
+    }
+    input.value='';
+  }
+  // วาด chip ลิงก์ไฟล์จากค่าในช่อง (คั่นด้วย ,) — ชื่อไฟล์ย่อจาก path
+  function renderFileChips(targetId, chipsId){
+    const box=$(chipsId); if(!box) return; box.innerHTML='';
+    const clip='<svg viewBox="0 0 24 24"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.6 1.6 0 0 1-2.3-2.3l7.8-7.8"/></svg>';
+    list(targetId).forEach(url=>{
+      let name=url; try{ name=decodeURIComponent(url.split('/').pop().split('?')[0]).replace(/^docs\//,'').replace(/^\d+-\d+-/,''); }catch(e){}
+      const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener';
+      a.innerHTML=clip+'<span>'+(name||url).slice(0,40)+'</span>';
+      box.appendChild(a);
+    });
   }
 </script>
 <script src="ops-menu.js"></script>

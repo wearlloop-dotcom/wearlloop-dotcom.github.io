@@ -131,6 +131,7 @@
     <h2>รูปถ่าย</h2>
     <p id="photoHint">ถ่ายรูป หรือเลือกรูปจากเครื่อง (อย่างน้อย 1 รูป)</p>
     <input type="file" id="gphotos_file" accept="image/*" multiple onchange="uploadFiles(this)">
+    <button type="button" id="aiBtn" onclick="aiFillSeller()" style="margin-top:10px;background:#fff;color:var(--ink);border:1.5px solid var(--ink);border-radius:20px;padding:9px 16px;font-size:14px;cursor:pointer;font-family:inherit">AI ช่วยกรอกจากรูป</button>
     <div class="thumbs" id="thumbs"></div>
     <div class="upnote" id="upnote" style="display:none">อัปโหลดรูปจะใช้ได้เมื่อเปิด Storage (ตอนนี้วางลิงก์รูปได้)</div>
     <label>หรือวางลิงก์รูป (คั่นด้วย ,)</label>
@@ -183,6 +184,26 @@
     if(added) toast('อัปโหลดแล้ว '+added+' รูป');
     input.value='';
   }
+  // AI ช่วยกรอกจากรูป (ใช้ intake-tagger เดียวกับหน้ารับเข้า) — ผู้ขายแค่ตรวจ/แก้
+  async function aiFillSeller(){
+    const pasted=($('gphotos').value||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const img=uploaded[0]||pasted[0];
+    if(!img){ toast('เพิ่มรูปก่อนนะคะ แล้วกด AI ช่วยกรอก'); return; }
+    const btn=$('aiBtn'); const orig=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='กำลังอ่านรูป…'; }
+    try{
+      const r=await fetch(SUPABASE_URL+'/functions/v1/intake-tagger',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+SUPABASE_KEY},body:JSON.stringify({image_url:img})});
+      if(!r.ok) throw new Error('not ready');
+      const t=await r.json();
+      if(t.name && !$('gname').value) $('gname').value=t.name;
+      if(t.category) $('gcat').value=t.category;
+      if(t.color_name && !$('gcolor').value) $('gcolor').value=t.color_name;
+      if(t.fabric_guess && !$('gfabric').value) $('gfabric').value=t.fabric_guess;
+      (t.occasion_tags||[]).forEach(v=>{const el=document.querySelector('#occ input[value="'+v+'"]'); if(el) el.checked=true;});
+      toast('AI ช่วยกรอกให้แล้ว ตรวจ/แก้ได้เลยค่ะ');
+    }catch(e){ toast('AI ยังไม่พร้อม กรอกมือไปก่อนได้ค่ะ'); }
+    if(btn){ btn.disabled=false; btn.textContent=orig; }
+  }
+
   function setMode(m){
     mode=m;
     $('mOffer').classList.toggle('on',m==='offer'); $('mBulk').classList.toggle('on',m==='bulk');
