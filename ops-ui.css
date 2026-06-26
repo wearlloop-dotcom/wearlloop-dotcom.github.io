@@ -1,0 +1,164 @@
+/* ===========================================================================
+   ops-ui.css — ดีไซน์ระบบกลางของหน้าหลังบ้าน LLOOP
+   เป้าหมาย: ให้หน้า "เครื่องมือทำงาน" มี impact + การโต้ตอบ (interaction)
+   และอ่านสบายตา (ลดความแน่นของข้อมูล) — โทนงาน craft เดียวกับ home.html
+   ใช้: <link rel="stylesheet" href="ops-ui.css"> (ชื่อคลาสเดิมทั้งหมด ใช้ได้ทันที)
+   ฟอนต์ที่ควรโหลดคู่กัน:
+     Cormorant+Garamond / Noto+Serif+Thai (display) · Noto+Sans+Thai (body)
+   =========================================================================== */
+
+:root{
+  /* พื้นผิว */
+  --canvas:#F4F1EC; --surface:#fff; --soft:#F6F2EA; --hair:#E7E1D6;
+  /* หมึก */
+  --ink:#23211C; --stone:#7C766B; --faint:#A8A296;
+  /* สีแบรนด์ */
+  --navy:#0D2F4F; --sage:#6FB3A6; --sageDeep:#3F6F63; --sageWash:#EDF4F1;
+  --champ:#B8975A; --champWash:#FAF4E8; --clay:#A75F3A; --clayWash:#FBF1EB;
+  --ok:#2E7D63; --okWash:#EEF6F1; --warn:#9A7A12; --warnWash:#FAF5E6; --danger:#B23B33;
+  /* ตัวอักษร */
+  --sans:'Noto Sans Thai',system-ui,-apple-system,sans-serif;
+  --serif:'Cormorant Garamond','Noto Serif Thai',Georgia,serif;
+  --serifth:'Noto Serif Thai','Cormorant Garamond',serif;
+  --r:14px; --r-sm:10px;
+  --shadow:0 1px 2px rgba(35,33,28,.04), 0 8px 24px -16px rgba(35,33,28,.18);
+  --shadow-lg:0 18px 50px -28px rgba(13,47,79,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:15.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
+
+/* ===== แถบบนสุด (sticky brand bar) ===== */
+.bar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.86);backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--hair);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bar h1{font-family:var(--serif);font-size:21px;font-weight:600;letter-spacing:.5px;color:var(--ink);display:flex;align-items:center;gap:9px}
+.bar h1::before{content:"LLOOP";font-family:var(--serif);font-weight:600;letter-spacing:3px;font-size:16px;color:var(--navy);
+  padding-right:11px;margin-right:2px;border-right:1px solid var(--hair)}
+.bar .nav{display:flex;flex-wrap:wrap;gap:2px}
+.bar .nav a{font-size:13px;color:var(--stone);text-decoration:none;padding:5px 10px;border-radius:20px;transition:.15s}
+.bar .nav a:hover{color:var(--navy);background:var(--sageWash)}
+
+.wrap{max-width:780px;margin:18px auto;padding:0 15px 72px;display:flex;flex-direction:column;gap:16px}
+
+/* ===== HERO ของหน้า — สร้าง impact + โชว์ KPI สด ===== */
+.phead{position:relative;overflow:hidden;border-radius:var(--r);color:#fff;padding:26px 24px 22px;
+  background:linear-gradient(135deg,#0D2F4F 0%, #2A5A55 58%, #3F6F63 100%);box-shadow:var(--shadow-lg);
+  animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+.phead::after{content:"";position:absolute;right:-90px;top:-90px;width:260px;height:260px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.16)}
+.phead::before{content:"";position:absolute;right:-30px;top:-30px;width:150px;height:150px;border-radius:50%;
+  border:1px solid rgba(111,179,166,.5)}
+.phead .eyebrow{position:relative;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#E7C98C}
+.phead h1{position:relative;font-family:var(--serif);font-weight:600;font-size:31px;line-height:1.1;margin:7px 0 3px}
+.phead .sub{position:relative;font-size:13.5px;color:rgba(255,255,255,.82);max-width:46ch}
+.phead .kpis{position:relative;display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.kpi{flex:1;min-width:88px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-sm);
+  padding:11px 13px;backdrop-filter:blur(2px)}
+.kpi .n{font-family:var(--serif);font-weight:600;font-size:26px;line-height:1;color:#fff}
+.kpi .n small{font-size:13px;color:rgba(255,255,255,.7);font-family:var(--sans);margin-left:2px}
+.kpi .l{font-size:11.5px;color:rgba(255,255,255,.72);margin-top:5px;letter-spacing:.2px}
+.kpi.warn .n{color:#FFD98A} .kpi.ok .n{color:#A9E6CF} .kpi.bad .n{color:#FFC2B8}
+
+/* ===== การ์ด ===== */
+.card{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);
+  animation:rise .45s cubic-bezier(.2,.7,.3,1) both}
+.card h2{font-family:var(--serifth);font-size:17px;font-weight:600;margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card h2 .when,.card h2 .muted{font-family:var(--sans)}
+.card > .hint{font-size:12.5px;color:var(--stone);margin:-6px 0 12px;line-height:1.5}
+
+/* ===== ฟอร์ม ===== */
+label{font-size:12.5px;color:var(--stone);display:block;margin-bottom:5px;letter-spacing:.2px}
+input,select,textarea{width:100%;font-family:var(--sans);font-size:16.5px;padding:12px 14px;border:1px solid var(--hair);
+  border-radius:var(--r-sm);background:var(--soft);color:var(--ink);transition:.16s;outline:none}
+input::placeholder{color:var(--faint)}
+input:focus,select:focus,textarea:focus{border-color:var(--sage);background:#fff;box-shadow:0 0 0 3px var(--sageWash)}
+input.code,input[data-code]{text-transform:uppercase;font-family:var(--serif);font-weight:600;letter-spacing:1px}
+.row{display:flex;gap:11px;flex-wrap:wrap}.row>div{flex:1;min-width:140px}
+
+/* ===== ปุ่ม — มี feedback ตอนกด ===== */
+.btn{position:relative;border:none;border-radius:var(--r-sm);padding:13px 20px;font-size:15px;font-weight:600;cursor:pointer;
+  font-family:var(--sans);background:var(--navy);color:#fff;width:100%;margin-top:14px;
+  transition:transform .12s ease, box-shadow .18s ease, filter .15s;box-shadow:0 6px 16px -10px rgba(13,47,79,.7);letter-spacing:.2px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 12px 22px -12px rgba(13,47,79,.65);filter:brightness(1.04)}
+.btn:active{transform:translateY(0) scale(.99);box-shadow:0 4px 10px -8px rgba(13,47,79,.7)}
+.btn:disabled{opacity:.55;cursor:default;transform:none;filter:none}
+.btn.sage{background:linear-gradient(135deg,var(--sageDeep),var(--sage));box-shadow:0 6px 16px -10px rgba(63,111,99,.8)}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--hair);box-shadow:none}
+.btn.ghost:hover{border-color:var(--sage);background:var(--sageWash);filter:none}
+.btn.sm{width:auto;margin:0;padding:0 16px;font-size:14px;white-space:nowrap}
+
+/* ===== ผลลัพธ์ — เด้งเข้ามาให้รู้สึกว่ามีอะไรเกิดขึ้น ===== */
+.res{margin-top:14px;font-size:15px;line-height:1.65}
+.res:empty{margin-top:0}
+.res > *{animation:rise .34s cubic-bezier(.2,.7,.3,1) both}
+.res b{font-weight:600}
+.pin{display:inline-block;font-family:var(--serif);font-weight:600;font-size:22px;color:var(--clay);
+  background:var(--clayWash);border:1px solid #EAD6CB;border-radius:9px;padding:2px 12px;letter-spacing:.5px}
+
+/* ===== รายการ (list item) — เด้งทีละชิ้น (stagger) ===== */
+.li{font-size:14px;padding:11px 13px;border:1px solid var(--hair);border-radius:var(--r-sm);margin-top:8px;
+  background:#fff;display:flex;justify-content:space-between;gap:10px;align-items:center;transition:.15s;
+  animation:rise .3s cubic-bezier(.2,.7,.3,1) both}
+.li:hover{border-color:var(--sage);background:var(--sageWash)}
+.li .top{display:flex;justify-content:space-between;gap:8px;align-items:center;width:100%}
+.li:nth-child(1){animation-delay:.02s}.li:nth-child(2){animation-delay:.05s}.li:nth-child(3){animation-delay:.08s}
+.li:nth-child(4){animation-delay:.11s}.li:nth-child(5){animation-delay:.14s}.li:nth-child(6){animation-delay:.17s}
+.li:nth-child(7){animation-delay:.2s}.li:nth-child(8){animation-delay:.23s}
+
+.tag{display:inline-block;font-size:11.5px;padding:3px 11px;border-radius:20px;background:var(--soft);
+  border:1px solid var(--hair);color:var(--stone);white-space:nowrap;font-weight:500}
+.tag.house,.tag.ok{background:var(--okWash);color:var(--ok);border-color:#cfe6da}
+.tag.warn{background:var(--warnWash);color:var(--warn);border-color:#e8ddbc}
+.tag.bad{background:var(--clayWash);color:var(--clay);border-color:#ead2c6}
+.muted{color:var(--stone);font-size:13px}
+.when{font-size:12px;color:var(--faint);font-weight:400}
+
+/* ===== KPI cards แบบในหน้า (stock summary) ===== */
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+@media(max-width:640px){.stat{grid-template-columns:repeat(2,1fr)}}
+.b{position:relative;background:var(--soft);border:1px solid var(--hair);border-radius:var(--r-sm);padding:14px 12px;text-align:center;
+  overflow:hidden;transition:.15s;animation:rise .3s cubic-bezier(.2,.7,.3,1) both}
+.b::before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:var(--sage);opacity:.7}
+.b:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.b .n{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1;color:var(--ink)}
+.b .l{font-size:12px;color:var(--stone);margin-top:6px}
+
+/* ===== กล่องตรวจ/รอยรั่ว (stock) ===== */
+.leak{border:1px solid var(--hair);border-radius:var(--r);padding:15px;margin-bottom:11px;background:#fff;
+  animation:rise .35s cubic-bezier(.2,.7,.3,1) both}
+.leak.critical{border-color:#ead2c6;background:var(--clayWash)}
+.leak.warn{border-color:#e8ddbc;background:var(--warnWash)}
+.leak.clean{border-color:#cfe6da;background:var(--okWash)}
+.leak .lh{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.leak .ll{font-weight:600;font-size:15px}
+.leak .cnt{font-family:var(--serif);font-weight:600;font-size:19px;padding:2px 13px;border-radius:20px;background:#fff;border:1px solid var(--hair)}
+.leak.critical .cnt{color:var(--clay)}.leak.warn .cnt{color:var(--warn)}.leak.clean .cnt{color:var(--ok)}
+.leak .rows{margin-top:11px;display:flex;flex-direction:column;gap:6px}
+.leak .r{font-size:13px;color:var(--ink);padding:8px 11px;background:#fff;border:1px solid var(--hair);border-radius:9px;display:flex;justify-content:space-between;gap:8px}
+.leak .r a{color:var(--clay);text-decoration:none;font-size:12px;white-space:nowrap}
+.leak .more{font-size:12px;color:var(--stone);margin-top:6px}
+.big-ok{text-align:center;color:var(--ok);font-size:16px;font-weight:600;padding:10px;font-family:var(--serifth)}
+
+/* ===== สถานะว่าง / โหลด — skeleton shimmer ===== */
+.loading{color:var(--stone);text-align:center;padding:26px 0;font-family:var(--serifth)}
+.skel{height:14px;border-radius:7px;margin:9px 0;background:linear-gradient(100deg,var(--soft) 30%,#efe9df 50%,var(--soft) 70%);
+  background-size:200% 100%;animation:shimmer 1.3s linear infinite}
+.empty{text-align:center;color:var(--stone);padding:22px 8px;line-height:1.6}
+.empty .ico{font-size:26px;color:var(--faint);display:block;margin-bottom:6px}
+
+/* ===== divider เบา ๆ ===== */
+.div{border:none;border-top:1px solid var(--hair);margin:16px 0}
+
+/* ===== toast ===== */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--ink);color:#fff;
+  padding:12px 20px;border-radius:12px;font-size:14px;z-index:90;opacity:0;transition:.28s cubic-bezier(.2,.7,.3,1);
+  max-width:90vw;text-align:center;box-shadow:0 16px 40px -16px rgba(0,0,0,.5);pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.bad{background:var(--clay)}
+.toast.ok{background:var(--sageDeep)}
+
+/* ===== animations ===== */
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{to{background-position:-200% 0}}
+@keyframes pulseOk{0%{box-shadow:0 0 0 0 rgba(111,179,166,.5)}100%{box-shadow:0 0 0 14px rgba(111,179,166,0)}}
+.flash{animation:pulseOk .7s ease-out}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

@@ -4,54 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LLOOP · สต๊อก + รอยรั่ว</title>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="../liff/config.js"></script>
 <script src="ops-api.js"></script>
-<style>
-  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--amber:#8A6D08;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
-  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-  .bar h1{font-family:var(--display);font-size:18px;font-weight:700;color:var(--clay)}
-  .bar .nav a{font-size:13px;color:var(--muted);text-decoration:none;margin-left:12px}
-  .wrap{max-width:780px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
-  .card h2{font-family:var(--display);font-size:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-  .btn{border:none;border-radius:9px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
-  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
-  .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-  @media(max-width:640px){.stat{grid-template-columns:repeat(2,1fr)}}
-  .b{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
-  .b .n{font-family:var(--display);font-size:22px;font-weight:700}
-  .b .l{font-size:12px;color:var(--muted);margin-top:2px}
-  .leak{border:1px solid var(--line);border-radius:11px;padding:14px;margin-bottom:10px}
-  .leak.critical{border-color:#e8c9bd;background:#FBF3EF}
-  .leak.warn{border-color:#E2D8BE;background:#FAF6EA}
-  .leak.clean{border-color:#cfe4d8;background:#F1F7F3}
-  .leak .lh{display:flex;justify-content:space-between;align-items:center;gap:10px}
-  .leak .ll{font-weight:600;font-size:15px}
-  .leak .cnt{font-family:var(--display);font-weight:700;font-size:18px;padding:2px 12px;border-radius:20px;background:#fff;border:1px solid var(--line)}
-  .leak.critical .cnt{color:var(--clay)}.leak.warn .cnt{color:var(--amber)}.leak.clean .cnt{color:var(--ok)}
-  .leak .rows{margin-top:10px;display:flex;flex-direction:column;gap:5px}
-  .leak .r{font-size:13px;color:var(--ink);padding:7px 10px;background:#fff;border:1px solid var(--line);border-radius:8px;display:flex;justify-content:space-between;gap:8px}
-  .leak .r a{color:var(--clay);text-decoration:none;font-size:12px;white-space:nowrap}
-  .leak .more{font-size:12px;color:var(--muted);margin-top:4px}
-  .big-ok{text-align:center;color:var(--ok);font-size:16px;font-weight:600;padding:8px}
-  .loading{color:var(--muted);text-align:center;padding:24px}
-  .when{font-size:12px;color:var(--muted)}
-  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:80;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center}
-  .toast.show{opacity:1}.toast.bad{background:var(--clay)}
-</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>.btn{width:auto;margin-top:0}</style>
 </head>
 <body>
   <div class="bar">
-    <h1>สต๊อก + รอยรั่ว</h1>
+    <h1>สต๊อก</h1>
     <div class="nav"><a href="/today.html">งานวันนี้</a><a href="/laundry.html">ซัก/QC</a><a href="/garment.html">ชุด</a><a href="/putaway.html">เก็บเข้าช่อง</a></div>
   </div>
 
   <div class="wrap">
+    <!-- HERO -->
+    <section class="phead">
+      <div class="eyebrow">stock health</div>
+      <h1>สต๊อกที่หมุนได้จริง</h1>
+      <div class="sub">ดูทั้งคลังในหน้าเดียว — มีกี่ชุด ปล่อยเช่าได้กี่ชุด และมีรอยรั่วตรงไหนให้อุด</div>
+      <div class="kpis">
+        <div class="kpi"><div class="n" id="k_total">—</div><div class="l">ชุดทั้งหมด</div></div>
+        <div class="kpi ok"><div class="n" id="k_rentable">—</div><div class="l">ปล่อยเช่าได้</div></div>
+        <div class="kpi bad"><div class="n" id="k_leak">—</div><div class="l">จุดรอยรั่ว</div></div>
+      </div>
+    </section>
+
     <div class="card">
       <h2>สต๊อกตามสถานะ <span class="when" id="when"></span></h2>
       <div id="summary"><div class="loading">กำลังโหลด…</div></div>
@@ -94,6 +74,7 @@
     $('summary').innerHTML=`<div class="stat">${cells}</div>`+
       `<div class="when" style="margin-top:10px">รวม ${data.total} ตัว · ปล่อยเช่าได้ ${data.rentable} ตัว</div>`;
     $('when').textContent='อัปเดต '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    $('k_total').textContent=data.total; $('k_rentable').textContent=data.rentable;
   }
 
   async function loadLeaks(){
@@ -119,6 +100,7 @@
     if((data.total||0)>0) html+=`<div class="when" style="margin-top:6px">ผ่าน ${passed} หมวด · พบปัญหา ${leaks.filter(l=>l.count>0).length} หมวด (วิกฤต ${data.critical||0} รายการ)</div>`;
     $('leaks').innerHTML=html;
     $('leakWhen').textContent=(data.total||0)===0?'สะอาด':('พบ '+data.total+' จุด');
+    const kl=$('k_leak'); kl.textContent=data.total||0; kl.parentElement.className='kpi '+((data.total||0)===0?'ok':'bad');
   }
 
   async function exportCsv(){
@@ -160,5 +142,7 @@
   function loadAll(){ loadSummary(); loadLeaks(); }
   loadAll();
 </script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
 </body>
 </html>

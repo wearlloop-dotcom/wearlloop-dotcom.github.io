@@ -4,52 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LLOOP · ร้านซัก + ส่งซัก</title>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="../liff/config.js"></script>
 <script src="ops-api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="scan.js"></script>
-<style>
-  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
-  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-  .bar h1{font-family:var(--display);font-size:18px;font-weight:700;color:var(--clay)}
-  .bar .nav a{font-size:13px;color:var(--muted);text-decoration:none;margin-left:12px}
-  .wrap{max-width:720px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
-  .card h2{font-family:var(--display);font-size:16px;margin-bottom:12px}
-  label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
-  input,select{width:100%;font-family:var(--sans);font-size:17px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
-  .row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:130px}
-  .btn{border:none;border-radius:10px;padding:13px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff;width:100%;margin-top:12px}
-  .btn.sage{background:var(--sage)}.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
-  .res{margin-top:12px;font-size:15px;line-height:1.6}
-  .li{font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;margin-top:7px}
-  .li .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
-  .tag{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;background:var(--soft);border:1px solid var(--line);color:var(--muted)}
-  .tag.house{background:#EaF0E8;color:var(--ok);border-color:#cfe0c9}
-  .muted{color:var(--muted);font-size:13px}
-  .loading{color:var(--muted);text-align:center;padding:18px}
-  .pin{font-family:var(--display);font-weight:700;color:var(--clay)}
-  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:80;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center}
-  .toast.show{opacity:1}.toast.bad{background:var(--clay)}
-</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>.li{flex-direction:column;align-items:stretch;gap:5px}</style>
 </head>
 <body>
   <div class="bar">
-    <h1>ร้านซัก · ส่งซัก</h1>
+    <h1>ร้านซัก</h1>
     <div class="nav"><a href="/laundry.html">QC/ซัก</a><a href="/putaway.html">เก็บเข้าช่อง</a><a href="/stock.html">สต๊อก</a><a href="/today.html">วันนี้</a></div>
   </div>
 
   <div class="wrap">
+    <!-- HERO -->
+    <section class="phead">
+      <div class="eyebrow">laundry partners</div>
+      <h1>ส่งซักอย่างมั่นใจ</h1>
+      <div class="sub">เริ่มจากพาร์ทเนอร์ที่ไว้ใจได้เพื่อลดแรงคน แล้วค่อยขยับมาทำเองในอนาคต — ทุกตัวมีร่องรอยว่าไปอยู่ที่ไหน</div>
+      <div class="kpis">
+        <div class="kpi ok"><div class="n" id="k_active">—</div><div class="l">ร้านพร้อมใช้</div></div>
+        <div class="kpi"><div class="n" id="k_jobs">—</div><div class="l">ส่งซักสะสม (ตัว)</div></div>
+        <div class="kpi"><div class="n" id="k_house">—</div><div class="l">in-house</div></div>
+      </div>
+    </section>
+
     <!-- ส่งซัก -->
     <div class="card">
       <h2>ส่งชุดไปซัก</h2>
       <div class="row">
-        <div><label>รหัสชุด</label><div style="display:flex;gap:6px"><input id="wsCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doSend()"><button type="button" class="btn ghost" style="width:auto;margin:0;padding:0 14px;white-space:nowrap" onclick="scanInto('wsCode')">สแกน</button></div></div>
+        <div><label>รหัสชุด</label><div style="display:flex;gap:6px"><input id="wsCode" data-code placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doSend()"><button type="button" class="btn ghost" style="width:auto;margin:0;padding:0 14px;white-space:nowrap" onclick="scanInto('wsCode')">สแกน</button></div></div>
         <div><label>ร้านซัก</label><select id="wsVendor"></select></div>
       </div>
       <button class="btn sage" onclick="doSend()">ส่งซัก</button>
@@ -60,7 +49,7 @@
     <!-- รับกลับ / ซักเสร็จ -->
     <div class="card">
       <h2>ซักเสร็จ / รับกลับ</h2>
-      <label>รหัสชุด</label><div style="display:flex;gap:6px"><input id="wdCode" placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doDone()"><button type="button" class="btn ghost" style="width:auto;margin:0;padding:0 14px;white-space:nowrap" onclick="scanInto('wdCode',doDone)">สแกน</button></div>
+      <label>รหัสชุด</label><div style="display:flex;gap:6px"><input id="wdCode" data-code placeholder="เช่น g1" autocomplete="off" onkeydown="if(event.key==='Enter')doDone()"><button type="button" class="btn ghost" style="width:auto;margin:0;padding:0 14px;white-space:nowrap" onclick="scanInto('wdCode',doDone)">สแกน</button></div>
       <button class="btn" onclick="doDone()">ซักเสร็จ</button>
       <div class="res" id="wdRes"></div>
     </div>
@@ -96,7 +85,8 @@
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
   const up=s=>(s||'').trim();
-  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',2800);}
+  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':' ok');clearTimeout(T);T=setTimeout(()=>t.className='toast',2800);}
+  function fl(el){ if(!el)return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
 
   async function doSend(){
     const code=up($('wsCode').value), vid=$('wsVendor').value;
@@ -104,6 +94,7 @@
     const {data,error}=await sb.rpc('wash_send',{p_code:code,p_vendor_id:vid});
     if(error||data?.error){ $('wsRes').innerHTML='<span style="color:var(--clay)">ไม่สำเร็จ: '+esc(error?.message||data.error)+'</span>'; return; }
     $('wsRes').innerHTML='ส่ง <b>'+esc(data.name||data.code)+'</b> ไป <b>'+esc(data.vendor)+'</b> แล้ว';
+    fl($('wsRes'));
     toast('ส่งซัก '+esc(data.code));
     $('wsCode').value=''; $('wsCode').focus(); loadVendors();
   }
@@ -125,6 +116,7 @@
     const {data,error}=await sb.rpc('put_away',{p_code:code,p_bin:bin});
     if(error||data?.error){ toast('เก็บไม่สำเร็จ',true); return; }
     $('wdRes').innerHTML='เก็บ <b>'+esc(data.name||code)+'</b> เข้าช่อง <span class="pin">'+esc(data.bin)+'</span> แล้ว';
+    fl($('wdRes').querySelector('.pin'));
     toast('เก็บ '+esc(code)+' → '+esc(data.bin));
   }
   async function loadVendors(){
@@ -132,6 +124,10 @@
     if(error){ $('vList').innerHTML='โหลดไม่สำเร็จ'; return; }
     const vs=data||[];
     $('vCount').textContent='('+vs.length+' ร้าน)';
+    // KPI ที่ hero
+    $('k_active').textContent=vs.filter(v=>v.active).length;
+    $('k_jobs').textContent=vs.reduce((s,v)=>s+(v.jobs_total||0),0);
+    $('k_house').textContent=vs.filter(v=>v.kind==='in_house').length;
     $('wsVendor').innerHTML=vs.filter(v=>v.active).map(v=>'<option value="'+v.id+'">'+esc(v.name)+(v.kind==='in_house'?' (in-house)':'')+'</option>').join('')||'<option value="">— ยังไม่มีร้าน —</option>';
     $('vList').innerHTML=vs.length? vs.map(v=>
       '<div class="li"'+(v.active?'':' style="opacity:.5"')+'><div class="top"><b>'+esc(v.name)+'</b> '+
@@ -159,5 +155,7 @@
   }
   loadVendors(); loadBins();
 </script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
 </body>
 </html>
