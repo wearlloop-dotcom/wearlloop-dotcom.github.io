@@ -79,6 +79,7 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="../liff/config.js"></script>
 <script src="ops-api.js"></script>
+<script src="qc-photo.js"></script>
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
@@ -96,12 +97,14 @@
     current=code; renderPanel(data); loadQueue();
   }
   function renderPanel(d){
+    qcShotCount=0;
     $('panel').innerHTML=`
       <div style="margin-top:14px">
         <div class="name">${d.name||current}</div>
         <div class="sub">โค้ด ${current} · ซักมาแล้ว ${d.wash_count} ครั้ง</div>
         <div class="hint"> วิธีซัก: <b>${d.wash}</b></div>
         <div style="font-weight:600;margin:6px 0">2) ตรวจสภาพ — ของกลับมาเป็นยังไง?</div>
+        <div style="margin:4px 0 8px"><button class="btn" style="background:var(--soft);padding:9px 13px;font-size:14px" onclick="qcShot()">ถ่ายรูปสภาพ (ตอนรับคืน) <span id="qcShotN" style="color:var(--muted)"></span></button></div>
         <div class="big">
           <button class="good" onclick="qc('good',true,0)"> ดี ครบ</button>
           <button class="warn" onclick="qc('stain',true,0)"> เปื้อน</button>
@@ -110,6 +113,13 @@
           <button class="wash" onclick="washDone()"> ซักเสร็จแล้ว ปล่อยเช่าต่อ</button>
         </div>
       </div>`;
+  }
+  let qcShotCount=0;
+  async function qcShot(){
+    if(!current){ toast('เปิดชุดก่อนค่ะ'); return; }
+    const r=await window.qcPhotoCapture({ phase:'after', garment_code:current, note:'ตอนรับคืน' });
+    if(r.ok){ qcShotCount++; const el=$('qcShotN'); if(el) el.textContent='('+qcShotCount+' รูป)'; toast('บันทึกรูปสภาพแล้ว'); }
+    else if(r.error!=='ยกเลิก'){ toast('รูปไม่สำเร็จ: '+r.error); }
   }
   async function qc(cond, complete, fee, notes){
     const { data, error } = await sb.rpc('care_qc',{ p_code: current, p_condition: cond, p_complete: complete, p_fee: fee||0, p_notes: notes||null, p_handler: null });

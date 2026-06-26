@@ -38,6 +38,8 @@
     { section: 'เจ้าของ', items: [
       { href: 'hr.html',        label: 'บุคคล (HR)',    icon: '☗', roles: ['owner'] },
       { href: 'partner.html',   label: 'พาร์ทเนอร์',     icon: '⚭', roles: ['owner'] },
+      { href: 'disputes.html',  label: 'ทะเบียนคดี',     icon: '⚖', roles: ['owner','manager'] },
+      { href: 'case-file.html', label: 'แฟ้มหลักฐาน',    icon: '☰', roles: ['owner','manager'] },
       { href: 'settings.html',  label: 'ตั้งค่าฮับ',     icon: '⚙', roles: ['owner'] },
     ] },
   ];

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · แฟ้มคดี / รวบรวมหลักฐาน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<style>
+  :root{--ink:#1a1a1a;--line:#999;--muted:#666;--navy:#0C3A33}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Sarabun',sans-serif;color:var(--ink);background:#eee;font-size:14px;padding:16px}
+  .bar{max-width:820px;margin:0 auto 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .bar input,.bar select{padding:9px 10px;border:1px solid #bbb;border-radius:4px;font-family:inherit;font-size:14px}
+  .bar input.ref{flex:1;min-width:200px}
+  .bar button{padding:9px 16px;border:1px solid var(--navy);border-radius:4px;background:#fff;cursor:pointer;font-family:inherit}
+  .bar button.p{background:var(--navy);color:#fff}
+  .doc{max-width:820px;margin:0 auto;background:#fff;padding:38px 44px;border:1px solid #ccc;min-height:300px}
+  .head{border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:6px}
+  .head .co{font-size:20px;font-weight:700;letter-spacing:1px}
+  .head .t{font-size:16px;font-weight:700;margin-top:4px}
+  .meta{font-size:12px;color:var(--muted);margin:8px 0 16px}
+  h3{font-size:14px;font-weight:700;margin:18px 0 6px;border-left:4px solid var(--navy);padding-left:8px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#f3f3f3;white-space:nowrap}
+  .kv{font-size:13px;line-height:1.9}.kv b{display:inline-block;min-width:140px;color:var(--muted)}
+  .imgs{display:flex;gap:10px;flex-wrap:wrap}.imgs img{max-height:160px;border:1px solid #ccc;border-radius:4px}
+  .snap{white-space:pre-wrap;font-size:11px;background:#fafafa;border:1px solid #eee;border-radius:4px;padding:10px;max-height:300px;overflow:auto}
+  .muted{color:var(--muted)}.badge{display:inline-block;font-size:11px;border:1px solid var(--navy);color:var(--navy);border-radius:20px;padding:2px 8px}
+  .foot{margin-top:26px;font-size:11px;color:var(--muted);border-top:1px solid #eee;padding-top:10px;line-height:1.6}
+  @media print{body{background:#fff;padding:0}.doc{border:none;max-width:100%}.bar{display:none}.snap{max-height:none;overflow:visible}.imgs img{max-height:200px}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <select id="stype"><option value="customer">ลูกค้า</option><option value="contract">สัญญาพาร์ทเนอร์</option><option value="seller">ผู้ขายมือสอง</option></select>
+  <input class="ref" id="sref" placeholder="วาง ID (customer/contract/acquisition uuid)">
+  <button class="p" onclick="loadCase()">รวบรวมหลักฐาน</button>
+  <button onclick="window.print()">พิมพ์ / PDF</button>
+</div>
+<div class="doc" id="doc"><div class="muted" style="text-align:center;padding:60px">เลือกประเภท + วาง ID แล้วกด "รวบรวมหลักฐาน"<br><span style="font-size:12px">เข้าระบบด้วย LINE (เฉพาะเจ้าของ/ผู้จัดการ)</span></div></div>
+
+<script>
+  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null||s==='')?'—':String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const dt=s=>s?new Date(s).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'—';
+  const baht=n=>n==null?'—':'฿'+Number(n).toLocaleString('th-TH');
+  async function api(action,extra){
+    if(!(await window.opsLogin())) throw new Error('redirecting');
+    const r=await fetch(FN,{method:'POST',headers:{'Authorization':'Bearer '+liff.getIDToken(),'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action},extra))});
+    if(r.status===401||r.status===403){throw new Error('ไม่มีสิทธิ์ (เฉพาะเจ้าของ/ผู้จัดการ)');}
+    return r.json();
+  }
+  const rows=(arr,cols)=>!arr||!arr.length?'<div class="muted">— ไม่มี —</div>':
+    `<table><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr>${arr.map(o=>`<tr>${cols.map(c=>`<td>${c[1](o)}</td>`).join('')}</tr>`).join('')}</table>`;
+
+  async function loadCase(){
+    const stype=$('stype').value, sref=$('sref').value.trim();
+    if(!sref){$('doc').innerHTML='<div class="muted" style="padding:40px;text-align:center">วาง ID ก่อนค่ะ</div>';return;}
+    $('doc').innerHTML='<div class="muted" style="padding:60px;text-align:center">กำลังรวบรวมหลักฐาน…</div>';
+    let res; try{ res=await api('case_file',{subject_type:stype,subject_ref:sref}); }catch(e){ $('doc').innerHTML='<div class="muted" style="padding:40px;text-align:center">'+esc(e.message)+'</div>'; return; }
+    const cf=res.case_file; if(!cf||cf.error){$('doc').innerHTML='<div class="muted" style="padding:40px;text-align:center">ไม่พบข้อมูล: '+esc(cf&&cf.error)+'</div>';return;}
+    $('doc').innerHTML = cf.type==='customer'?renderCustomer(cf):cf.type==='contract'?renderContract(cf):renderSeller(cf);
+  }
+
+  function shell(title, inner){
+    return `<div class="head"><div class="co">LLOOP</div><div class="t">${title}</div></div>
+      <div class="meta">จัดทำเมื่อ ${dt(new Date().toISOString())} · เอกสารภายในเพื่อประกอบการดำเนินคดี/แจ้งความ</div>${inner}
+      <div class="foot">เอกสารนี้รวบรวมจากระบบ LLOOP โดยอัตโนมัติ บันทึกพร้อมวันเวลาและที่อยู่ IP เป็นหลักฐานอิเล็กทรอนิกส์ตาม พ.ร.บ.ว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544 · ใช้ประกอบกับสำเนาบัตร/หลักฐานอื่นเพื่อยื่นต่อพนักงานสอบสวนหรือศาล</div>`;
+  }
+  function qcPhotos(ph){
+    if(!ph||!ph.length) return '<div class="muted">— ยังไม่มีรูป QC ก่อน/หลัง — (ถ่ายตอนแพ็กส่ง = ก่อน, ตอน QC รับคืน = หลัง)</div>';
+    const grp={}; ph.forEach(p=>{const k=esc(p.garment)+' · เช่า '+String(p.rental_id||'').slice(0,8); (grp[k]=grp[k]||[]).push(p);});
+    return Object.entries(grp).map(([k,arr])=>{
+      const before=arr.filter(p=>p.phase==='before'), after=arr.filter(p=>p.phase==='after');
+      const col=(label,list)=>`<div style="flex:1"><div class="muted" style="font-size:12px;margin-bottom:3px">${label}</div>`+
+        (list.length?'<div class="imgs">'+list.map(p=>`<div><img src="${p.url||''}" alt="${label}"><div class="muted" style="font-size:11px">${esc(p.note)} · ${dt(p.created_at)}</div></div>`).join('')+'</div>':'<div class="muted">— ไม่มี —</div>')+'</div>';
+      return `<div style="margin-bottom:12px"><div style="font-weight:700;font-size:12.5px;margin-bottom:4px">${k}</div><div style="display:flex;gap:14px">${col('ก่อนส่ง',before)}${col('ตอนรับคืน',after)}</div></div>`;
+    }).join('');
+  }
+  function imgs(files){ return !files||!files.length?'<div class="muted">— ไม่มีไฟล์ KYC —</div>':
+    '<div class="imgs">'+files.map(f=>f.url?`<div><img src="${f.url}" alt="${esc(f.kind)}"><div class="muted" style="font-size:11px">${esc(f.kind)}</div></div>`:`<div class="muted">${esc(f.kind)} (ลิงก์หมดอายุ)</div>`).join('')+'</div>'; }
+
+  function renderCustomer(cf){
+    const id=cf.identity||{};
+    return shell('แฟ้มหลักฐาน — ลูกค้า', `
+      <h3>1. ตัวตนลูกค้า (KYC)</h3>
+      <div class="kv"><b>ชื่อ:</b> ${esc(id.display_name)} ${id.kyc_verified?'<span class="badge">ยืนยันตัวตนแล้ว</span>':'<span class="badge">ยังไม่ยืนยัน</span>'}</div>
+      <div class="kv"><b>เลขบัตรประชาชน:</b> ${esc(id.id_card)}</div>
+      <div class="kv"><b>โทร:</b> ${esc(id.phone)} · <b style="min-width:auto">LINE:</b> ${esc(id.line_uid)}</div>
+      <div class="kv"><b>ยืนยันเมื่อ:</b> ${dt(id.kyc_at)} (${esc(id.kyc_method)})</div>
+      ${imgs(cf.kyc_files)}
+      <h3>2. ความยินยอม (PDPA)</h3>
+      ${rows(cf.consents,[['วัตถุประสงค์',o=>esc(o.purpose)],['เวอร์ชัน',o=>esc(o.version)],['ยินยอมเมื่อ',o=>dt(o.granted_at)],['ช่องทาง',o=>esc(o.channel)]])}
+      <h3>3. การยอมรับสัญญาเช่า</h3>
+      ${rows(cf.terms_accepted,[['เวอร์ชัน',o=>esc(o.version)],['ยอมรับเมื่อ',o=>dt(o.accepted_at)],['IP',o=>esc(o.ip)]])}
+      <h3>4. ประวัติการเช่า</h3>
+      ${rows(cf.rentals,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['สถานะ',o=>esc(o.status)],['เช่า',o=>dt(o.reserved_at)],['กำหนดคืน',o=>dt(o.due_at)],['คืนเมื่อ',o=>o.returned_at?dt(o.returned_at):'<b>ยังไม่คืน</b>'],['ค่าเช่า',o=>baht(o.price)]])}
+      <h3>5. รูปสภาพชุด ก่อน-หลังเช่า (หลักฐานความเสียหาย)</h3>
+      ${qcPhotos(cf.qc_photos)}
+      <h3>6. การชำระเงิน</h3>
+      ${rows(cf.payments,[['ยอด',o=>baht(o.amount)],['ประเภท',o=>esc(o.purpose)],['สถานะ',o=>esc(o.status)],['เมื่อ',o=>dt(o.at)]])}
+      <h3>7. การแจ้งเตือน/ทวงถาม (ส่งผ่าน LINE)</h3>
+      ${rows((cf.notices_sent||[]).slice(0,30),[['ประเภท',o=>esc(o.kind)],['เมื่อ',o=>dt(o.at)],['ส่งแล้ว',o=>o.sent?'✓':'รอส่ง']])}
+    `);
+  }
+  function renderContract(cf){
+    const c=cf.contract||{}, a=cf.esign_audit||{};
+    return shell('แฟ้มหลักฐาน — สัญญาพาร์ทเนอร์', `
+      <h3>1. สัญญา</h3>
+      <div class="kv"><b>เลขที่:</b> ${esc(c.contract_no)} · <b style="min-width:auto">สถานะ:</b> ${esc(c.status)}</div>
+      <div class="kv"><b>พาร์ทเนอร์:</b> ${esc(c.partner_name)} ${c.partner_org?'('+esc(c.partner_org)+')':''}</div>
+      <h3>2. หลักฐานการลงนามอิเล็กทรอนิกส์</h3>
+      <div class="kv"><b>ผู้ลงนาม:</b> ${esc(a.signer_name)}</div>
+      <div class="kv"><b>เลขบัตร:</b> ${esc(a.signer_id_card)}</div>
+      <div class="kv"><b>ลงนามเมื่อ:</b> ${dt(a.signed_at)}</div>
+      <div class="kv"><b>IP / อุปกรณ์:</b> ${esc(a.signed_ip)} · ${esc(a.signed_ua)}</div>
+      <div class="kv"><b>มีลายเซ็น:</b> ${a.has_signature?'มี (เก็บในระบบ)':'—'}</div>
+      <h3>3. ข้อความสัญญา ณ เวลาลงนาม (snapshot)</h3>
+      <div class="snap">${esc(a.document_snapshot)||'—'}</div>
+      <h3>4. ความยินยอม (PDPA)</h3>
+      ${rows(cf.consents,[['วัตถุประสงค์',o=>esc(o.purpose)],['ยินยอมเมื่อ',o=>dt(o.granted_at)]])}
+    `);
+  }
+  function renderSeller(cf){
+    const a=cf.acquisition||{};
+    return shell('แฟ้มหลักฐาน — ผู้ขายมือสอง', `
+      <h3>1. ผู้ขาย</h3>
+      <div class="kv"><b>ชื่อ:</b> ${esc(a.seller_name)}</div>
+      <div class="kv"><b>เลขบัตร:</b> ${esc(a.seller_id_card)} · <b style="min-width:auto">โทร:</b> ${esc(a.seller_phone)}</div>
+      <div class="kv"><b>ใบรับซื้อเลขที่:</b> ${esc(a.voucher_no)} · <b style="min-width:auto">สถานะ:</b> ${esc(a.status)}</div>
+      <div class="kv"><b>ชุด:</b> ${esc(a.name)} · <b style="min-width:auto">ยอด:</b> ${baht(a.offered_price||a.asking_price)}</div>
+      <h3>2. ไฟล์ KYC</h3>${imgs(cf.kyc_files)}
+      <h3>3. ความยินยอม (PDPA)</h3>
+      ${rows(cf.consents,[['วัตถุประสงค์',o=>esc(o.purpose)],['ยินยอมเมื่อ',o=>dt(o.granted_at)]])}
+    `);
+  }
+</script>
+</body>
+</html>

@@ -59,6 +59,7 @@
   <input id="code" placeholder="ใส่โค้ดชุด เช่น g1" autocomplete="off">
   <button class="btn" onclick="load()">เตรียม</button>
   <button class="btn print" onclick="window.print()"> ปริ้นทั้งหมด</button>
+  <button class="btn" id="qcBtn" style="display:none" onclick="qcShot()">ถ่ายรูปสภาพ (ก่อนส่ง) <span id="qcShotN" style="color:var(--muted)"></span></button>
   <span id="hint" style="color:var(--muted);font-size:13px"></span>
 </div>
 <div class="sheets" id="sheets"><div class="placeholder">ใส่โค้ดชุดเพื่อสร้างสติ๊กเกอร์ + ใบส่งกลับ</div></div>
@@ -67,6 +68,7 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="../liff/config.js"></script>
 <script src="ops-api.js"></script>
+<script src="qc-photo.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
@@ -134,6 +136,14 @@
     new QRCode($('qrG'),{text:'https://lloop.app/g/'+g.code,width:96,height:96});
     new QRCode($('qrR'),{text:'https://lloop.app/g/'+g.code,width:84,height:84});
     $('hint').textContent='พร้อมปริ้น — กด';
+    qcCode=g.code; qcShotCount=0; const qb=$('qcBtn'); if(qb){ qb.style.display=''; $('qcShotN').textContent=''; }
+  }
+  let qcCode=null, qcShotCount=0;
+  async function qcShot(){
+    if(!qcCode){ return; }
+    const r=await window.qcPhotoCapture({ phase:'before', garment_code:qcCode, note:'ก่อนส่ง' });
+    if(r.ok){ qcShotCount++; $('qcShotN').textContent='('+qcShotCount+' รูป)'; $('hint').textContent='บันทึกรูปก่อนส่งแล้ว'; }
+    else if(r.error!=='ยกเลิก'){ $('hint').textContent='รูปไม่สำเร็จ: '+r.error; }
   }
   $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') load(); });
 </script>
