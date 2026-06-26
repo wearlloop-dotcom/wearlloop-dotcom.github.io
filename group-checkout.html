@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · จองชุดทั้งกลุ่ม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --ink:#1A1A1A; --soft:#F5F4F2; --soft2:#EFEDE9; --line:#E7E5E1;
+    --muted:#8C8B86; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56;
+    --gold:#C9A86A; --sand:#F2ECDD;
+    --display:'Poppins','Prompt',sans-serif;
+    --sans:'Inter','Prompt',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:96px}
+  .contain{max-width:920px;margin:0 auto;padding:0 18px}
+  button{font-family:inherit;cursor:pointer}
+  a{color:inherit}
+
+  header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
+  .hbar{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .logo{font-family:var(--display);font-size:23px;font-weight:700;letter-spacing:1px}
+  .hnav{font-size:12px;color:var(--muted)}
+  .back{font-size:12.5px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  /* hero */
+  .hero{padding:28px 0 14px}
+  .eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .htitle{font-family:var(--display);font-size:28px;font-weight:600;margin-top:8px;letter-spacing:.5px}
+  .hsub{color:var(--muted);margin-top:6px;max-width:560px}
+
+  /* steps */
+  .steps{display:flex;gap:8px;align-items:center;margin:16px 0 2px;flex-wrap:wrap}
+  .step{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+  .sdot{width:22px;height:22px;border-radius:50%;background:var(--soft);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;font-family:var(--display)}
+  .step.on .sdot{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .step.done .sdot{background:var(--sage);color:#fff;border-color:var(--sage)}
+  .step.on{color:var(--ink);font-weight:600}
+  .sline{flex:1;min-width:14px;height:1px;background:var(--line)}
+
+  /* section */
+  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
+  .sechead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .sectitle{font-family:var(--display);font-size:16px;font-weight:600}
+  .seccap{font-size:12px;color:var(--muted)}
+
+  .btn{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:13px;font-weight:600;letter-spacing:.02em}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.sage{background:var(--sage)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  /* toolbar */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:12px}
+  .fld{flex:1;min-width:130px}
+  .fld label{display:block;font-size:11px;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+  .fld input,.fld select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
+
+  /* palette + looks (mirror family.html) */
+  .palette{display:inline-flex;align-items:center;gap:8px;background:var(--sand);border-radius:30px;padding:6px 14px;font-size:12px;color:#7a6433;font-weight:500;margin-top:14px}
+  .pdot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+  .look{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:var(--bg)}
+  .lhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;color:#fff}
+  .lhead .ava{width:34px;height:34px;font-size:14px}
+  .lname{font-weight:600}.lrel{font-size:11px;color:var(--muted)}
+  .lpick{margin-left:auto;font-size:11.5px;color:var(--ok);font-weight:600;display:none}
+  .look.has .lpick{display:block}
+  .picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .pick{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;cursor:pointer;transition:.13s;position:relative}
+  .pick:hover{border-color:var(--sage)}
+  .pick.sel{border-color:var(--sage);box-shadow:0 0 0 2px var(--sage-bg)}
+  .pick.sel::after{content:'✓';position:absolute;top:6px;left:6px;width:18px;height:18px;border-radius:50%;background:var(--sage);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .swatch{height:64px;display:flex;align-items:flex-end;justify-content:space-between;padding:7px}
+  .ontheme{font-size:9px;background:rgba(255,255,255,.85);color:#5a4a1f;padding:2px 6px;border-radius:10px;letter-spacing:.5px}
+  .fitpill{font-size:9px;background:rgba(0,0,0,.55);color:#fff;padding:2px 6px;border-radius:10px}
+  .pmeta{padding:8px 9px}
+  .pmeta .pn{font-size:12.5px;font-weight:500;line-height:1.3}
+  .pmeta .pc{font-size:11px;color:var(--muted)}
+  .sourcing{background:#FBF3E9;border:1px dashed var(--gold);border-radius:10px;padding:13px;font-size:12.5px;color:#8a6d2f;display:flex;gap:9px;align-items:center;text-align:left;line-height:1.5}
+  .sourcing svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.6;flex-shrink:0}
+
+  /* empty state */
+  .empty{text-align:center;padding:34px 18px;color:var(--muted)}
+  .empty .ei{width:54px;height:54px;margin:0 auto 12px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center}
+  .empty .ei svg{width:26px;height:26px;stroke:var(--sage);fill:none;stroke-width:1.6}
+  .empty h4{font-family:var(--display);font-size:16px;color:var(--ink);font-weight:600;margin-bottom:5px}
+  .empty p{max-width:400px;margin:0 auto 14px}
+
+  /* shipping choice per look */
+  .shipctl{margin-top:11px;border-top:1px dashed var(--line);padding-top:11px;display:none}
+  .shipctl.show{display:block}
+  .shiprow{display:flex;gap:8px;flex-wrap:wrap}
+  .shipopt{flex:1;min-width:130px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;display:flex;gap:8px;align-items:flex-start;cursor:pointer;background:#fff;line-height:1.35}
+  .shipopt.on{border-color:var(--sage);background:var(--sage-bg)}
+  .shipopt .dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;margin-top:1px}
+  .shipopt.on .dot{border-color:var(--sage);background:var(--sage);box-shadow:inset 0 0 0 2px #fff}
+  .shipopt b{display:block;font-size:12.5px}
+  .shipopt span{color:var(--muted);font-size:11px}
+  /* box chooser + destinations */
+  .boxsel{margin-top:9px}
+  .boxlabel{font-size:11px;color:var(--muted);margin-bottom:5px}
+  .boxchips{display:flex;flex-wrap:wrap;gap:6px}
+  .boxchip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;font-size:12px;color:#555}
+  .boxchip.on{background:var(--sage-bg);border-color:var(--sage);color:var(--ok);font-weight:600}
+  .boxchip.add{border-style:dashed;color:var(--muted)}
+  .destwrap{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:15px;background:var(--sand)}
+  .desthd{font-family:var(--display);font-size:13px;font-weight:600;color:#7a6433;margin-bottom:10px}
+  .destcard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px;margin-top:9px}
+  .destcard .dn{font-size:12.5px;font-weight:600;margin-bottom:3px}
+  .destcard .dwho{font-weight:400;color:var(--muted);font-size:11.5px;margin-left:4px}
+  .destcard input,.destcard textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;margin-top:6px;background:#fff;color:var(--ink);resize:vertical}
+
+  /* sticky summary bar */
+  .summary{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 18px rgba(0,0,0,.05);z-index:30;transform:translateY(110%);transition:.22s}
+  .summary.show{transform:translateY(0)}
+  .summary .inner{max-width:920px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:14px}
+  .summary .scount{font-size:12.5px;color:var(--muted);flex:1;min-width:0}
+  .summary .scount b{color:var(--ink);font-weight:600}
+  .summary .sbtn{flex-shrink:0}
+
+  /* order result */
+  .orow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .orow:last-child{border-bottom:none}
+  .osw{width:34px;height:34px;border-radius:8px;flex-shrink:0;border:1px solid rgba(0,0,0,.06)}
+  .ot{flex:1;min-width:0}
+  .ot .on{font-size:13.5px;font-weight:500;line-height:1.3}
+  .ot .ow{font-size:11.5px;color:var(--muted)}
+  .op{text-align:right;font-size:12.5px;flex-shrink:0}
+  .op b{font-weight:600}.op .od{font-size:11px;color:var(--muted)}
+  .totbox{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .trow{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+  .trow.hl{font-size:15px;font-weight:700;margin-top:6px;padding-top:9px;border-top:1px dashed var(--line)}
+  .trow .muted{color:var(--muted)}
+  .holdnote{background:var(--sage-bg);border:1px solid #cfe6df;border-radius:10px;padding:11px 13px;font-size:12.5px;color:var(--ok);margin-top:14px;display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+  .holdnote svg{width:17px;height:17px;stroke:var(--ok);fill:none;stroke-width:1.7;flex-shrink:0;margin-top:1px}
+  .unavail{background:#FBF0EE;border:1px solid #e8cfc8;border-radius:10px;padding:11px 13px;font-size:12.5px;color:#9c5746;margin-top:12px;line-height:1.5}
+  .kycbox{background:#FBF3E9;border:1px solid #ecdcc0;border-radius:12px;padding:18px;text-align:center}
+  .kycbox h4{font-family:var(--display);font-size:16px;font-weight:600;color:#8a6d2f;margin-bottom:6px}
+  .kycbox p{color:#8a6d2f;max-width:380px;margin:0 auto 14px;font-size:13px}
+
+  /* pay box (mirror app.js field names) */
+  .paybox{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+  .qhd{font-family:var(--display);font-size:13.5px;font-weight:600;margin-bottom:8px}
+  .qrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:3px 0}
+  .ppwrap{text-align:center;margin:10px 0}
+
+  .demo{font-size:11px;color:var(--muted);text-align:center;margin-top:26px;letter-spacing:.3px}
+  .demo b{color:var(--sage)}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<header><div class="contain hbar">
+  <div class="logo">LLOOP</div>
+  <a class="back" href="family.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> ครอบครัว &amp; กลุ่ม</a>
+</div></header>
+
+<div class="contain">
+  <div class="hero">
+    <div class="eyebrow">group booking</div>
+    <h1 class="htitle">จองชุดทั้งกลุ่ม</h1>
+    <p class="hsub">เลือกชุดเข้าตีมให้ทุกคนในกลุ่ม แล้วจองพร้อมกันในออเดอร์เดียว — ส่งกล่องเดียว บิลรวมที่หัวหน้ากลุ่ม</p>
+  </div>
+
+  <!-- step indicator -->
+  <div class="steps" id="steps">
+    <div class="step on" data-s="1"><span class="sdot">1</span>เลือกโอกาส</div>
+    <span class="sline"></span>
+    <div class="step" data-s="2"><span class="sdot">2</span>จัดชุดให้แต่ละคน</div>
+    <span class="sline"></span>
+    <div class="step" data-s="3"><span class="sdot">3</span>ยืนยัน &amp; ชำระ</div>
+  </div>
+
+  <!-- STEP 1: occasion / date -->
+  <div class="sec" id="setupSec">
+    <div class="sechead">
+      <div><div class="sectitle" id="grpName">—</div>
+      <div class="seccap" id="grpCap"></div></div>
+    </div>
+    <div class="toolbar">
+      <div class="fld" style="max-width:210px"><label>งาน / โอกาส</label>
+        <select id="t_occ">
+          <option value="wedding_guest">ไปงานแต่ง</option>
+          <option value="family_portrait">ถ่ายรูปครอบครัว</option>
+          <option value="songkran">สงกรานต์</option>
+          <option value="dinner">ดินเนอร์</option>
+        </select></div>
+      <div class="fld" style="max-width:160px"><label>วันใช้งาน</label><input id="t_date" type="date"></div>
+      <button class="btn" id="suggestBtn">จัดชุดเข้าตีม</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: assign looks -->
+  <div class="sec hide" id="assignSec">
+    <div class="sechead">
+      <div><div class="sectitle">เลือกชุดให้แต่ละคน</div>
+      <div class="seccap">แตะเลือก 1 ชุดต่อคน — สไตลิสต์คัด “ตัวที่เข้าตีม + พอดีตัว ที่ว่างจริงในวันนั้น” มาให้</div></div>
+    </div>
+    <div id="assignBody"></div>
+  </div>
+
+  <!-- STEP 3 / result -->
+  <div class="sec hide" id="resultSec"><div id="resultBody"></div></div>
+
+  <div class="demo">หน้าจอง LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (book_group_cart สร้าง hold 30 นาที + คืนยอดรวม)</div>
+</div>
+
+<!-- sticky summary -->
+<div class="summary" id="summary"><div class="inner">
+  <div class="scount" id="scount">เลือกแล้ว <b>0</b> ชุด</div>
+  <button class="btn sage sbtn" id="bookBtn" disabled>ยืนยันจองทั้งกลุ่ม</button>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=34"></script>
+<script src="data.js?v=34"></script>
+<script src="liffAuth.js?v=34"></script>
+<script src="me-api.js?v=34"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="promptpay.js?v=34"></script>
+<script src="api.js?v=34"></script>
+<script>
+// ============================================================
+//  group-checkout.html — จองชุดทั้งกลุ่มในออเดอร์เดียว
+//  LIVE = ต่อ Supabase จริงผ่าน window.API · ไม่งั้นวิ่งบน MOCK ในไฟล์นี้
+// ============================================================
+const $ = s => document.querySelector(s);
+const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
+const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู้ใหญ่', senior:'ผู้ใหญ่ขึ้นวัย' };
+const SEASON_TH = { autumn:'ออทัม', winter:'วินเทอร์', spring:'สปริง', summer:'ซัมเมอร์' };
+const SEASON_HEX = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };
+const initial = n => (n||'?').trim().charAt(0);
+const avaColor = id => AVA[Math.abs([...String(id||'?')].reduce((a,c)=>a+c.charCodeAt(0),0))%AVA.length];
+const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const baht = n => '฿' + Number(n||0).toLocaleString('th-TH');
+function qparam(k){ return new URLSearchParams(location.search).get(k); }
+function dateStr(d){ return new Date(d).toISOString().slice(0,10); }
+
+// ---- state ----
+let LIVE = false;          // true = Supabase จริง
+let CUSTOMER = null;       // {id,...}
+let GROUP = null;          // {group_id,name,kind,my_role,members:[...]}
+let THEME = null;          // ผลจาก groupThemeSuggest
+let SEL = {};              // wearer(customer_id) -> code ที่เลือก
+let SHIP = {};             // wearer -> { separate:bool, box:int } (วิธีส่งรายชุด)
+let DEST = {};             // boxNo -> { recipient, address } (ปลายทางของกล่องส่งแยก)
+
+// ขั้นบันไดส่วนลดแพคเกจครอบครัว (ตรงกับดีฟอลต์ใน group_discount_pct ฝั่ง DB)
+const DISC_TIERS = [{min:2,pct:5},{min:3,pct:10},{min:4,pct:15}];
+function discPct(n){ let p=0; DISC_TIERS.forEach(t=>{ if(n>=t.min && t.pct>p) p=t.pct; }); return p; }
+// กล่องส่งแยกที่ถูกใช้อยู่ (เรียงเลข)
+function usedBoxes(){ return [...new Set(Object.entries(SHIP).filter(([w,s])=>SEL[w]&&s&&s.separate).map(([w,s])=>s.box||1))].sort((a,b)=>a-b); }
+function boxMembers(n){ return Object.entries(SHIP).filter(([w,s])=>SEL[w]&&s&&s.separate&&(s.box||1)===n).map(([w])=>w); }
+const GROUP_ID = qparam('group');
+
+// ============================================================
+//  MOCK (พรีวิวได้โดยไม่ต้องล็อกอิน LINE) — mirror family.html
+// ============================================================
+const MOCK_GROUP = {
+  group_id:'g1', name:'ครอบครัวของฉัน', kind:'family', my_role:'owner', my_status:'active',
+  members:[
+    {customer_id:'me', name:'พลอย',        relation:null,      role:'owner',  status:'active', age_band:'adult',  gender:'female', managed:false, season:'autumn'},
+    {customer_id:'c1', name:'น้องเป่าเปา',  relation:'ลูกสาว',  role:'member', status:'active', age_band:'kid',    gender:'female', managed:true,  season:'autumn'},
+    {customer_id:'c2', name:'คุณยายสมร',    relation:'คุณยาย',  role:'member', status:'active', age_band:'senior', gender:'female', managed:true,  season:'autumn'},
+  ]
+};
+const MOCK_STOCK = [
+  {code:'D21',name:'ชุดเดรสลินินโอลด์โรส',     age:'adult', gen:'female', hex:'#C98A7A', cn:'โอลด์โรส',   season:'autumn', fit:92, rate:416, deposit:0},
+  {code:'D08',name:'เดรสผ้าไหมสีน้ำตาลทอง',    age:'adult', gen:'female', hex:'#B07D4F', cn:'น้ำตาลทอง',  season:'autumn', fit:88, rate:520, deposit:0},
+  {code:'D33',name:'เดรสคอวีสีอิฐ',            age:'adult', gen:'female', hex:'#A85B43', cn:'สีอิฐ',      season:'autumn', fit:81, rate:416, deposit:500},
+  {code:'K12',name:'เดรสเด็กระบายสีพีช',       age:'kid',   gen:'female', hex:'#E6A57E', cn:'พีช',       season:'autumn', fit:90, rate:262, deposit:0},
+  {code:'K05',name:'ชุดกระโปรงเด็กสีครีม',     age:'kid',   gen:'female', hex:'#E4D5B7', cn:'ครีม',       season:'autumn', fit:84, rate:262, deposit:0},
+  {code:'S40',name:'เดรสผู้ใหญ่สีน้ำตาลกุหลาบ',age:'senior',gen:'female', hex:'#C8A18C', cn:'น้ำตาลกุหลาบ',season:'autumn', fit:87, rate:416, deposit:0},
+  {code:'S41',name:'เสื้อคลุมยาวโทนเอิร์ธ',    age:'senior',gen:'female', hex:'#9C7B5B', cn:'เอิร์ธ',     season:'autumn', fit:79, rate:390, deposit:0},
+];
+function mockSuggestFor(m, season){
+  return MOCK_STOCK
+    .filter(s => s.age===m.age_band && (!m.gender || s.gen===m.gender))
+    .map(s => ({ code:s.code, name:s.name, color_name:s.cn, color_hex:s.hex, on_theme:s.season===season, fit:s.fit }))
+    .sort((a,b)=> (b.on_theme-a.on_theme) || (b.fit-a.fit))
+    .slice(0,3);
+}
+function mockTheme(){
+  const season='autumn', occ=$('#t_occ').value;
+  return { season, occasion:occ, members: MOCK_GROUP.members.map(m=>({
+    customer_id:m.customer_id, name:m.name, relation:m.relation, age_band:m.age_band, gender:m.gender,
+    picks: mockSuggestFor(m, season), needs_sourcing: mockSuggestFor(m, season).length===0
+  }))};
+}
+function mockBook(assignments, fromStr, toStr, shipments){
+  const f=new Date(fromStr), t=new Date(toStr);
+  const days=Math.max(1, Math.round((t-f)/86400000)+1);
+  const items = assignments.map(a=>{
+    const g = MOCK_STOCK.find(s=>s.code===a.code) || {name:a.code, rate:416, deposit:0};
+    return { code:a.code, name:g.name, wearer:a.wearer, rate:g.rate, deposit:g.deposit, included:true, parcel:a.parcel||'main' };
+  });
+  const rate_sum = items.reduce((s,i)=>s+i.rate,0);
+  const deposit_sum = items.reduce((s,i)=>s+i.deposit,0);
+  const perBox = days>=3 ? 0 : 55;                       // ค่าส่งต่อกล่อง
+  const cfg = {}; (shipments||[]).forEach(s=>cfg[s.parcel]=s);
+  const used = [...new Set(items.map(i=>i.parcel))];
+  const parcels = used.map(pk=>({ parcel:pk, recipient:(cfg[pk]&&cfg[pk].recipient)||null,
+    courier:'flash', shipping:perBox, count:items.filter(i=>i.parcel===pk).length, separate: pk!=='main' }));
+  const shipping = parcels.reduce((s,p)=>s+p.shipping,0);
+  const discount_pct = discPct(items.length);
+  const discount = Math.floor(rate_sum * discount_pct / 100);
+  return { order_group:'GRP-'+Date.now().toString().slice(-6), items, rate_sum, deposit_sum,
+           shipping, parcels, discount, discount_pct, count: items.length,
+           total: rate_sum - discount + deposit_sum + shipping, unavailable:[] };
+}
+const MOCK_PAY = { pay_bank_name:'ธ.กสิกรไทย', pay_account_no:'123-4-56789-0', pay_account_name:'บจก. แอลลูป',
+                   pay_promptpay_id:'0649990250', pay_promptpay_type:'phone', pay_note:'โอนแล้วแนบสลิปในแชตนี้ได้เลยค่ะ' };
+
+// ============================================================
+//  BOOTSTRAP
+// ============================================================
+async function boot(){
+  $('#t_date').value = dateStr(Date.now()+7*864e5);
+
+  // ไม่มี group id ใน URL → empty/edge
+  if(!GROUP_ID){
+    edgeState('ยังไม่ได้เลือกกลุ่ม',
+      'เปิดหน้านี้จากหน้า “ครอบครัว & กลุ่ม” โดยเลือกกลุ่มที่อยากจองให้ทั้งกลุ่มก่อนนะคะ',
+      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    return;
+  }
+
+  // ลอง init จริง
+  try{
+    if(window.API && window.CONFIG && !window.CONFIG.USE_MOCK){
+      const r = await window.API.init();
+      const cust = r && r.CUSTOMER;
+      if(cust && cust.id && r.lineUid){
+        CUSTOMER = cust; LIVE = true;
+      }
+    }
+  }catch(e){ /* ตกไป mock */ }
+
+  if(LIVE){
+    // ดึงกลุ่มจริงของฉัน แล้วหากลุ่มที่ตรงกับ group id
+    let groups = [];
+    try{ const g = await window.API.myGroups(CUSTOMER); groups = (g && g.data) || []; }catch(e){}
+    GROUP = groups.find(x => String(x.group_id)===String(GROUP_ID)) || null;
+    if(!GROUP){
+      edgeState('ไม่พบกลุ่มนี้',
+        'อาจเป็นเพราะคุณยังไม่ได้เป็นสมาชิกกลุ่มนี้ หรือกลุ่มถูกลบไปแล้ว',
+        'ไปหน้าครอบครัว & กลุ่ม','family.html');
+      return;
+    }
+  } else {
+    // โหมดพรีวิว / mock
+    GROUP = JSON.parse(JSON.stringify(MOCK_GROUP));
+    $('.demo').innerHTML = 'โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อจองกับ Supabase';
+  }
+
+  // กลุ่มไม่มีสมาชิกอื่น
+  const active = (GROUP.members||[]).filter(m => (m.status||'active')==='active');
+  if(active.length<2){
+    edgeState('กลุ่มนี้ยังมีสมาชิกไม่พอ',
+      'การจองทั้งกลุ่มต้องมีสมาชิกอย่างน้อย 2 คน — กลับไปเพิ่มคนในครอบครัวหรือชวนเพื่อนเข้ากลุ่มก่อนได้เลยค่ะ',
+      'ไปเพิ่มสมาชิก','family.html');
+    return;
+  }
+
+  renderHeader();
+  $('#suggestBtn').onclick = onSuggest;
+  $('#bookBtn').onclick = onBook;
+}
+
+function renderHeader(){
+  $('#grpName').textContent = GROUP.name || 'กลุ่มของฉัน';
+  const active = (GROUP.members||[]).filter(m=>(m.status||'active')==='active');
+  const role = GROUP.my_role==='owner' ? 'คุณเป็นหัวหน้ากลุ่ม (เป็นผู้ชำระ)' : 'หัวหน้ากลุ่มจะเป็นผู้ชำระ';
+  $('#grpCap').textContent = `${active.length} คน · ${role}`;
+}
+
+function setStep(n){
+  document.querySelectorAll('#steps .step').forEach(el=>{
+    const s = +el.dataset.s;
+    el.classList.toggle('on', s===n);
+    el.classList.toggle('done', s<n);
+  });
+}
+
+function edgeState(title, body, btnLabel, href){
+  $('#setupSec').classList.add('hide');
+  $('#assignSec').classList.add('hide');
+  $('#summary').classList.remove('show');
+  const r = $('#resultSec'); r.classList.remove('hide');
+  $('#resultBody').innerHTML = `<div class="empty">
+    <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
+    <h4>${esc(title)}</h4><p>${esc(body)}</p>
+    ${btnLabel?`<a class="btn ghost" href="${href}">${esc(btnLabel)}</a>`:''}</div>`;
+}
+
+// ============================================================
+//  STEP 2 — ขอ AI จัดตีม แล้วให้เลือก 1 ชุด/คน
+// ============================================================
+async function onSuggest(){
+  const btn = $('#suggestBtn'); btn.disabled = true; btn.textContent = 'กำลังจัดชุด…';
+  const occ = $('#t_occ').value, from = $('#t_date').value, to = $('#t_date').value;
+  try{
+    if(LIVE){
+      const r = await window.API.groupThemeSuggest(GROUP_ID, CUSTOMER, occ, from, to);
+      THEME = (r && r.data) || null;
+      if(!THEME){ alert('ยังจัดชุดให้ไม่ได้ในตอนนี้ ลองใหม่อีกครั้งนะคะ'); return; }
+    } else {
+      THEME = mockTheme();
+    }
+  }catch(e){ alert('เกิดข้อผิดพลาด ลองใหม่อีกครั้งนะคะ'); return; }
+  finally{ btn.disabled=false; btn.textContent='จัดชุดเข้าตีม'; }
+
+  SEL = {};
+  renderAssign();
+  setStep(2);
+  $('#assignSec').classList.remove('hide');
+  $('#assignSec').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderAssign(){
+  const body = $('#assignBody');
+  const season = THEME.season || 'autumn';
+  const mems = THEME.members || [];
+
+  // ทุกคน sourcing → ไม่มีชุดเลย
+  const anyPicks = mems.some(m => (m.picks||[]).length>0 && !m.needs_sourcing);
+  if(!anyPicks){
+    body.innerHTML = `<div class="empty" style="padding:26px">
+      <h4>ยังไม่มีชุดที่ว่างในวันนี้</h4>
+      <p>ทุกคนในกลุ่มยังไม่มีชุดเข้าตีมที่ว่างในวันที่เลือก — ลองเปลี่ยนวัน หรือทีมจะช่วยจัดหา (sourcing) ให้เข้าตีมเดียวกัน</p></div>`;
+    $('#summary').classList.remove('show');
+    return;
+  }
+
+  let html = `<div class="palette"><span class="pdot" style="background:${SEASON_HEX[season]||'#B07D4F'}"></span>พาเลตตีมร่วม · โทน${SEASON_TH[season]||season}</div>`;
+  mems.forEach(m=>{
+    const id = m.customer_id;
+    const sub = `${m.relation || ''}${m.relation?' · ':''}${AGE_TH[m.age_band]||m.age_band||''}`;
+    html += `<div class="look" id="look-${esc(id)}">
+      <div class="lhead">
+        <div class="ava" style="background:${avaColor(id)}">${esc(initial(m.name))}</div>
+        <div><div class="lname">${esc(m.name)}</div><div class="lrel">${esc(sub)}</div></div>
+        <div class="lpick" id="lpick-${esc(id)}"></div>
+      </div>`;
+    const picks = m.picks || [];
+    if(m.needs_sourcing || picks.length===0){
+      html += `<div class="sourcing"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>
+        ยังไม่มีชุด${AGE_TH[m.age_band]||''}ที่ว่างในวันนี้ — ทีมจะช่วย <b>จัดหาเพิ่ม (sourcing)</b> ให้เข้าตีมเดียวกัน (ไม่รวมในออเดอร์นี้)</div>`;
+    } else {
+      html += `<div class="picks">${picks.map(p=>`
+        <div class="pick" data-w="${esc(id)}" data-code="${esc(p.code)}" onclick="pickOne('${esc(id)}','${esc(p.code)}')">
+          <div class="swatch" style="background:${esc(p.color_hex||'#E7E2DA')}">
+            ${p.on_theme?'<span class="ontheme">เข้าตีม</span>':'<span></span>'}
+            ${p.fit!=null?`<span class="fitpill">พอดี ${p.fit}%</span>`:'<span></span>'}
+          </div>
+          <div class="pmeta"><div class="pn">${esc(p.name)}</div><div class="pc">${esc(p.color_name||'')}${p.color_name?' · ':''}${esc(p.code)}</div></div>
+        </div>`).join('')}</div>`;
+      // วิธีส่งของชุดนี้ (โผล่เมื่อเลือกชุดแล้ว)
+      const sp = SHIP[id] || {};
+      html += `<div class="shipctl" id="ship-${esc(id)}">
+        <div class="shiprow">
+          <div class="shipopt ${sp.separate?'':'on'}" id="shopt0-${esc(id)}" onclick="setShip('${esc(id)}',false)">
+            <span class="dot"></span><span><b>ส่งรวมกล่องหลัก</b><span>ไปพร้อมชุดอื่น ประหยัดค่าส่ง</span></span></div>
+          <div class="shipopt ${sp.separate?'on':''}" id="shopt1-${esc(id)}" onclick="setShip('${esc(id)}',true)">
+            <span class="dot"></span><span><b>ส่งแยก</b><span>เลือกกล่อง/ที่อยู่ปลายทางได้</span></span></div>
+        </div>
+        <div class="boxsel" id="boxsel-${esc(id)}"></div>
+      </div>`;
+    }
+    html += `</div>`;
+  });
+  html += `<div id="destPanel"></div>`;
+  body.innerHTML = html;
+  renderShipping();
+  refreshSummary();
+}
+
+window.pickOne = function(wearer, code){
+  if(SEL[wearer]===code) delete SEL[wearer];   // แตะซ้ำ = ยกเลิก
+  else SEL[wearer] = code;
+  // อัปเดต UI ของ look นี้
+  const look = document.getElementById('look-'+wearer);
+  if(look){
+    look.querySelectorAll('.pick').forEach(p=>{
+      p.classList.toggle('sel', p.dataset.code===SEL[wearer]);
+    });
+    look.classList.toggle('has', !!SEL[wearer]);
+    const lp = document.getElementById('lpick-'+wearer);
+    if(lp) lp.textContent = SEL[wearer] ? 'เลือกแล้ว' : '';
+    // โชว์ตัวเลือกวิธีส่งเมื่อเลือกชุดแล้ว
+    const sc = document.getElementById('ship-'+wearer);
+    if(sc) sc.classList.toggle('show', !!SEL[wearer]);
+    if(!SEL[wearer]) delete SHIP[wearer];      // ยกเลิกชุด = รีเซ็ตวิธีส่ง
+  }
+  renderShipping();
+  refreshSummary();
+};
+
+// เลือกวิธีส่งของชุดนี้: รวม (separate=false) / แยก (separate=true)
+window.setShip = function(wearer, separate){
+  let box = (SHIP[wearer] && SHIP[wearer].box) || (usedBoxes()[0] || 1);  // เข้ากล่องที่มีอยู่ หรือกล่อง 1
+  SHIP[wearer] = { separate: separate, box: box };
+  const o0=document.getElementById('shopt0-'+wearer), o1=document.getElementById('shopt1-'+wearer);
+  if(o0) o0.classList.toggle('on', !separate);
+  if(o1) o1.classList.toggle('on', separate);
+  renderShipping();
+  refreshSummary();
+};
+// เลือกกล่องปลายทางให้สมาชิกคนนี้ (ใช้ร่วมกล่องเดียวกันได้ = ส่งที่อยู่เดียว ค่าส่งกล่องเดียว)
+window.setBox = function(wearer, n){
+  SHIP[wearer] = Object.assign({}, SHIP[wearer], { separate:true, box:n });
+  renderShipping();
+};
+window.addBox = function(wearer){
+  const next = (usedBoxes().reduce((m,n)=>Math.max(m,n),0) || 0) + 1;
+  setBox(wearer, next);
+};
+window.destInput = function(n){
+  const r=document.getElementById('drcpt-'+n), a=document.getElementById('daddr-'+n);
+  DEST[n] = { recipient:(r&&r.value)||'', address:(a&&a.value)||'' };
+};
+
+// วาดตัวเลือกกล่อง (ต่อสมาชิก) + แผงปลายทาง — เรียกเมื่อชุด/กล่องเปลี่ยน (ไม่เรียกตอนพิมพ์ที่อยู่ → ไม่หลุดโฟกัส)
+function renderShipping(){
+  const mems = (THEME && THEME.members) || [];
+  const boxes = usedBoxes();
+  mems.forEach(m=>{
+    const id = m.customer_id, host = document.getElementById('boxsel-'+id);
+    if(!host) return;
+    const sp = SHIP[id];
+    if(!SEL[id] || !sp || !sp.separate){ host.innerHTML=''; return; }
+    const chips = boxes.map(n=>{
+      const rc = DEST[n] && DEST[n].recipient;
+      return `<button class="boxchip ${sp.box===n?'on':''}" onclick="setBox('${esc(id)}',${n})">กล่อง ${n}${rc?(' · '+esc(rc)):''}</button>`;
+    }).join('');
+    host.innerHTML = `<div class="boxlabel">ส่งไปกล่อง:</div><div class="boxchips">${chips}
+      <button class="boxchip add" onclick="addBox('${esc(id)}')">+ กล่องใหม่</button></div>`;
+  });
+  // แผงปลายทาง: 1 การ์ดต่อกล่องที่ใช้งาน (ที่อยู่ใช้ร่วมทั้งกล่อง)
+  const dp = document.getElementById('destPanel');
+  if(dp){
+    const nameOf = id => { const x=mems.find(z=>String(z.customer_id)===String(id)); return x?x.name:id; };
+    dp.innerHTML = boxes.length===0 ? '' : `<div class="destwrap">
+      <div class="desthd">ที่อยู่ปลายทางของกล่องส่งแยก</div>
+      ${boxes.map(n=>{
+        const d = DEST[n]||{}; const who = boxMembers(n).map(nameOf).join(', ');
+        return `<div class="destcard"><div class="dn">กล่องที่ ${n} <span class="dwho">${esc(who)}</span></div>
+          <input id="drcpt-${n}" placeholder="ชื่อผู้รับ" value="${esc(d.recipient||'')}" oninput="destInput(${n})">
+          <textarea id="daddr-${n}" rows="2" placeholder="ที่อยู่จัดส่ง" oninput="destInput(${n})">${esc(d.address||'')}</textarea>
+        </div>`;
+      }).join('')}</div>`;
+  }
+}
+
+function refreshSummary(){
+  const n = Object.keys(SEL).length;
+  const p = discPct(n);
+  $('#scount').innerHTML = `เลือกแล้ว <b>${n}</b> ชุด${p>0?` · <span style="color:var(--sage)">ลดแพคเกจ ${p}%</span>`:''} · ออเดอร์เดียว`;
+  $('#bookBtn').disabled = n===0;
+  $('#summary').classList.toggle('show', true);
+}
+
+// ============================================================
+//  STEP 3 — จอง (book_group_cart สร้าง hold + คืนยอด)
+// ============================================================
+async function onBook(){
+  // แต่ละชุด: ส่งแยก → พัสดุตามกล่องที่เลือก (box_N — แชร์กล่องกันได้) ; ส่งรวม → 'main'
+  const assignments = Object.entries(SEL).map(([wearer,code])=>{
+    const sp = SHIP[wearer];
+    return { code, wearer, parcel: (sp && sp.separate) ? ('box_'+(sp.box||1)) : 'main' };
+  });
+  const shipments = usedBoxes().map(n => ({
+    parcel:'box_'+n, recipient:(DEST[n]&&DEST[n].recipient)||'', address:(DEST[n]&&DEST[n].address)||'', remote:false
+  }));
+  if(!assignments.length) return;
+  const btn = $('#bookBtn'); btn.disabled=true; btn.textContent='กำลังจอง…';
+  const from = $('#t_date').value, to = $('#t_date').value;
+  const opts = { theme: THEME && THEME.season, occasion: $('#t_occ').value,
+                 payer: GROUP.my_role==='owner'?(CUSTOMER&&CUSTOMER.id):null, shipments };
+
+  let res = null;
+  try{
+    if(LIVE){
+      const r = await window.API.bookGroupCart(GROUP_ID, assignments, from, to, opts);
+      if(r && r.error){ res = { error: (r.error.message||String(r.error)) }; }
+      else res = (r && r.data) || null;
+    } else {
+      res = mockBook(assignments, from, to, shipments);
+    }
+  }catch(e){ res = { error:'network' }; }
+  finally{ btn.disabled=false; btn.textContent='ยืนยันจองทั้งกลุ่ม'; }
+
+  if(!res){ alert('จองไม่สำเร็จ ลองใหม่อีกครั้งนะคะ'); return; }
+  await renderResult(res, from, to);
+}
+
+async function renderResult(res, from, to){
+  setStep(3);
+  $('#summary').classList.remove('show');
+  $('#assignSec').classList.add('hide');
+  $('#setupSec').classList.add('hide');
+  const sec = $('#resultSec'); sec.classList.remove('hide');
+  const box = $('#resultBody');
+
+  // --- error: ต้องยืนยันตัวตนก่อน ---
+  if(res.error==='kyc_required'){
+    box.innerHTML = `<div class="kycbox">
+      <h4>ยืนยันตัวตนก่อนจองนะคะ</h4>
+      <p>การจองทั้งกลุ่มจะบิลรวมที่หัวหน้ากลุ่ม (ผู้จ่าย) — ระบบขอให้ผู้จ่ายยืนยันตัวตน (บัตรประชาชน + โซเชียลสาธารณะ) ครั้งเดียวเพื่อความปลอดภัยก่อนค่ะ</p>
+      <a class="btn" href="index.html">ไปยืนยันตัวตน</a></div>`;
+    sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
+  }
+  if(res.error==='no_payer'){
+    box.innerHTML = `<div class="kycbox"><h4>ยังไม่มีผู้ชำระ</h4>
+      <p>ต้องให้หัวหน้ากลุ่มเป็นผู้ชำระเงิน — ขอให้หัวหน้ากลุ่มเป็นคนกดจอง หรือโอนสิทธิ์ให้คุณก่อนค่ะ</p>
+      <a class="btn ghost" href="family.html">กลับหน้ากลุ่ม</a></div>`;
+    sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
+  }
+  if(res.error==='all_unavailable'){
+    box.innerHTML = `<div class="empty" style="padding:24px"><h4>ชุดที่เลือกเต็มแล้ว</h4>
+      <p>ชุดทั้งหมดที่เลือกไว้ไม่ว่างในวันนี้ — กลับไปเลือกใหม่ หรือลองเปลี่ยนวันใช้งานนะคะ</p>
+      <button class="btn ghost" onclick="backToAssign()">เลือกชุดใหม่</button></div>`;
+    sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
+  }
+  if(res.error){
+    box.innerHTML = `<div class="empty" style="padding:24px"><h4>จองไม่สำเร็จ</h4>
+      <p>เกิดข้อผิดพลาด (${esc(res.error)}) — ลองใหม่อีกครั้ง หรือกลับไปเลือกชุดใหม่ค่ะ</p>
+      <button class="btn ghost" onclick="backToAssign()">กลับไปเลือกชุด</button></div>`;
+    sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
+  }
+
+  // --- success ---
+  const items = res.items || [];
+  const nameOf = id => { const m=(GROUP.members||[]).find(x=>String(x.customer_id)===String(id)); return m?m.name:id; };
+  let itemHtml = items.map(it=>{
+    const sw = MOCK_STOCK.find(s=>s.code===it.code);
+    const hex = (sw&&sw.hex) || '#E7E2DA';
+    return `<div class="orow">
+      <div class="osw" style="background:${hex}"></div>
+      <div class="ot"><div class="on">${esc(it.name||it.code)}</div>
+        <div class="ow">${esc(nameOf(it.wearer))} ใส่ · ${esc(it.code)}${(it.parcel&&it.parcel!=='main')?' · <span style="color:var(--sage)">ส่งแยก</span>':''}</div></div>
+      <div class="op"><b>${baht(it.rate)}</b>${it.deposit>0?`<div class="od">มัดจำ ${baht(it.deposit)}</div>`:''}</div>
+    </div>`;
+  }).join('');
+
+  const unavailHtml = (res.unavailable && res.unavailable.length)
+    ? `<div class="unavail"><b>เต็มแล้ว:</b> ${res.unavailable.map(u=>esc(u.code||u)).join(', ')} — ชุดเหล่านี้ไม่ว่างในวันนี้ จึงไม่รวมในออเดอร์</div>` : '';
+
+  // ช่องทางชำระ
+  let pay = null;
+  try{ pay = LIVE ? await window.API.payInfo() : MOCK_PAY; }catch(e){}
+  const hasPay = pay && (pay.pay_account_no || pay.pay_promptpay_qr || pay.pay_promptpay_id);
+  const payBlock = !hasPay ? '' : `
+    <div class="paybox">
+      <div class="qhd">ช่องทางชำระ</div>
+      ${pay.pay_account_no?`<div class="qrow"><span>${esc(pay.pay_bank_name||'โอนเข้าบัญชี')}</span><b>${esc(pay.pay_account_no)}</b></div>
+        ${pay.pay_account_name?`<div style="font-size:12px;color:var(--muted);text-align:right">${esc(pay.pay_account_name)}</div>`:''}`:''}
+      ${pay.pay_promptpay_id?`<div class="ppwrap"><div id="ppqr"></div>
+        <div style="font-size:13px;margin-top:6px">สแกนแล้วโอน <b>${baht(res.total)}</b></div></div>`
+      : pay.pay_promptpay_qr?`<div class="ppwrap">
+        <img src="${esc(pay.pay_promptpay_qr)}" alt="PromptPay QR" style="width:200px;max-width:70%;border:1px solid var(--line);border-radius:6px">
+        <div style="font-size:13px;margin-top:6px">สแกนแล้วโอน <b>${baht(res.total)}</b></div></div>`:''}
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">${esc(pay.pay_note||'โอนแล้วแนบสลิปในแชตนี้ได้เลยค่ะ')}</div>
+    </div>`;
+
+  const parcels = res.parcels || [];
+  const multiBox = parcels.length > 1;
+  const capTxt = multiBox
+    ? `แบ่งส่ง ${parcels.length} กล่อง (${parcels.filter(p=>p.separate).length} กล่องส่งแยก) · บิลรวมที่หัวหน้ากลุ่ม`
+    : 'ชุดทั้งหมดส่งพร้อมกันในกล่องเดียว บิลรวมที่หัวหน้ากลุ่ม';
+  const shipRows = multiBox
+    ? parcels.map(p=>{
+        const label = p.separate ? `ส่งแยก${p.recipient?(' → '+esc(p.recipient)):''}` : 'กล่องหลัก';
+        return `<div class="trow"><span class="muted">${label} (${p.count} ชุด)</span><span>${p.shipping>0?baht(p.shipping):'ส่งฟรี'}</span></div>`;
+      }).join('')
+    : `<div class="trow"><span class="muted">ค่าส่ง</span><span>${res.shipping>0?baht(res.shipping):'ส่งฟรี'}</span></div>`;
+
+  box.innerHTML = `
+    <div class="sechead"><div><div class="sectitle">จองสำเร็จ · ออเดอร์ ${esc(res.order_group||'')}</div>
+      <div class="seccap">${capTxt}</div></div></div>
+    <div style="margin-top:12px">${itemHtml || '<div class="seccap">ไม่มีรายการ</div>'}</div>
+    ${unavailHtml}
+    <div class="totbox">
+      <div class="trow"><span class="muted">ค่าเช่ารวม</span><span>${baht(res.rate_sum)}</span></div>
+      ${res.discount>0?`<div class="trow"><span class="muted">ส่วนลดแพคเกจครอบครัว (-${res.discount_pct}%)</span><span style="color:var(--ok)">−${baht(res.discount)}</span></div>`:''}
+      ${res.deposit_sum>0?`<div class="trow"><span class="muted">มัดจำรวม (คืนหลังตรวจชุด)</span><span>${baht(res.deposit_sum)}</span></div>`:''}
+      ${shipRows}
+      <div class="trow hl"><span>รวมโอน</span><span>${baht(res.total)}</span></div>
+    </div>
+    <div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      เรากันชุดให้แล้ว 30 นาที — โอนและแนบสลิปภายในเวลานี้เพื่อยืนยันการจองค่ะ</div>
+    ${payBlock}
+    <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
+      <a class="btn ghost" href="family.html">กลับหน้ากลุ่ม</a>
+      <a class="btn ghost" href="index.html">ดูออเดอร์ของฉัน</a>
+    </div>`;
+
+  // วาด PromptPay QR ฝังยอด (หลัง element อยู่ใน DOM)
+  if(hasPay && pay.pay_promptpay_id && window.promptpayBrandedQR){
+    const el = document.getElementById('ppqr');
+    if(el) window.promptpayBrandedQR(el, pay.pay_promptpay_id, res.total, pay.pay_promptpay_type);
+  }
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+window.backToAssign = function(){
+  $('#resultSec').classList.add('hide');
+  $('#setupSec').classList.remove('hide');
+  $('#assignSec').classList.remove('hide');
+  setStep(2);
+  refreshSummary();
+  $('#assignSec').scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+document.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>

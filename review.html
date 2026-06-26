@@ -747,11 +747,16 @@ async function uploadPhoto(file) {
 // --- Load customer profile ---
 async function loadProfile() {
   if (!uid) return;
-  const { data } = await sb
-    .from('customers')
-    .select('display_name, size, height_cm, color_season')
-    .eq('line_uid', uid)
-    .maybeSingle();
+  // อ่านโปรไฟล์ของตัวเองผ่าน me-rpc (verify LINE idToken) — กัน anon อ่าน PII ลูกค้าทุกแถว (R-1)
+  let data = null;
+  try {
+    const r = await fetch(SB_URL + '/functions/v1/me-rpc', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: liff.getIDToken(), fn: 'me_profile', args: {} }),
+    });
+    const j = await r.json();
+    data = j.data;
+  } catch (_e) { /* ไม่มีโปรไฟล์ก็ข้าม */ }
 
   if (!data) return;
   const bar = $('profileBar');

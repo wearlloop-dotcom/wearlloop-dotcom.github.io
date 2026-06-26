@@ -495,8 +495,11 @@ async function renderQuote(id, date) {
       <div class="ks">${TH ? 'แนบบัตรประชาชน + IG/FB สาธารณะ หรือวางมัดจำเพิ่มตามนี้ก็ได้' : 'Attach ID + public IG/FB, or keep the higher deposit'}</div>
       <button class="kbtn" onclick="openKyc('${id}')">${TH ? 'ยืนยันตัวตน' : 'Verify identity'}</button>
     </div>` : '';
+  // ป้ายราคาพนักงาน — โชว์เฉพาะพนักงาน (is_staff) ลูกค้าทั่วไปไม่เห็น
+  const staffBadge = q.is_staff ? `<div style="display:inline-block;margin:2px 0 8px;font-size:12px;font-weight:600;color:#0F6E56;background:#E4F0EC;border:1px solid #cfe6da;border-radius:20px;padding:3px 11px">${TH ? 'ราคาพนักงาน' : 'Staff price'} −${q.staff_discount}%${q.rate_full ? ` · ${TH ? 'ปกติ' : 'was'} ${baht(q.rate_full)}` : ''}</div>` : '';
   box.innerHTML = `
     <div class="qhd">${TH ? 'สรุปยอด' : 'Summary'} · ${q.days} ${TH ? 'วัน' : 'days'}</div>
+    ${staffBadge}
     ${row(TH ? 'ค่าเช่า' : 'Rental', baht(q.rate))}
     ${q.deposit > 0 ? row(TH ? 'มัดจำ (คืนหลังตรวจชุด)' : 'Deposit (refundable)', baht(q.deposit)) : ''}
     ${row(TH ? 'ค่าส่ง' : 'Shipping', q.shipping > 0 ? baht(q.shipping) : (TH ? 'ส่งฟรี' : 'Free'))}
@@ -520,6 +523,8 @@ async function reserve(id) {
     if (msg) { msg.className ='availmsg busy'; msg.textContent = lang ==='th'?'เลือกวันที่ต้องใช้ก่อนนะคะ':'Pick a date first'; }
     return;
   }
+  // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
+  if (!(await kycGate())) return;
   // กันจองชน — เช็กว่างก่อน
   const free = await checkAvail(id);
   if (free === false) return;
@@ -552,6 +557,8 @@ async function bdayBook(id) {
     if (msg) { msg.className = 'availmsg busy'; msg.textContent = lang === 'th' ? 'เลือกวันที่ต้องใช้ก่อนนะคะ' : 'Pick a date first'; }
     return;
   }
+  // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
+  if (!(await kycGate())) return;
   const res = await window.API.birthdayReserve(id, CUSTOMER, date, durEnd(date));
   if (!res.ok) {
     toast(res.error === 'unavailable' ? (lang === 'th' ? 'ชุดนี้ไม่ว่างวันนั้นค่ะ ลองวันอื่นนะคะ' : 'Unavailable that date')
@@ -610,6 +617,144 @@ async function submitKycForm(id) {
   }
 }
 
+// ===== KYC บังคับก่อนเช่า (บัตรประชาชน + เซลฟี่ถือบัตร) =====
+// แยกจาก openKyc() เดิม (ที่ใช้ลดมัดจำ) — ตัวนี้เป็น "ด่าน" บังคับยืนยันก่อนจองจริง
+let _kycSb = null;
+function kycSb() {
+  if (!_kycSb && window.supabase && window.CONFIG) {
+    _kycSb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  }
+  return _kycSb;
+}
+// อ่านสถานะว่าเช่าได้ไหม → true=ผ่าน, false=ต้อง KYC
+async function customerCanRent() {
+  if (!CUSTOMER || !CUSTOMER.id) return true;  // ยังไม่ล็อกอิน — ปล่อยให้ flow เดิมจัดการ
+  try {
+    const sb = kycSb(); if (!sb) return true;  // เรียก client ไม่ได้ — อย่าบล็อก (non-breaking)
+    const { data, error } = await sb.rpc('customer_can_rent', { p_customer: CUSTOMER.id });
+    if (error) { console.warn('customer_can_rent', error); return true; }
+    const g = data || {};
+    return g.ok !== false;  // ok:true หรือไม่มีข้อมูล = ผ่าน
+  } catch (e) { console.warn(e); return true; }
+}
+// ด่านก่อนจอง: ผ่าน→true · ไม่ผ่าน→เปิดหน้า KYC + แจ้งเตือน แล้วคืน false
+async function kycGate() {
+  const ok = await customerCanRent();
+  if (!ok) {
+    toast(lang === 'th'
+      ? 'ลูกค้าใหม่ต้องยืนยันตัวตนด้วยบัตรประชาชนก่อนเช่าค่ะ'
+      : 'Please verify your identity with your ID card before renting');
+    openKycRequired();
+  }
+  return ok;
+}
+
+// เปิดหน้าจับภาพ KYC (บัตร + เซลฟี่ถือบัตร) — ใช้ overlay เดียวกับ KYC เดิม
+async function openKycRequired() {
+  const TH = lang === 'th';
+  let consent = { body: '', version: '1' };
+  try {
+    const sb = kycSb();
+    if (sb) {
+      const { data } = await sb.rpc('consent_text', { p_purpose: 'customer_kyc' });
+      if (data) consent = data;
+    }
+  } catch (e) { console.warn('consent_text', e); }
+  const ver = String(consent.version || '1');
+  const body = (consent.body || (TH
+    ? 'เราเก็บรูปบัตรประชาชนและเซลฟี่เพื่อยืนยันตัวตนผู้เช่าเท่านั้น เก็บอย่างปลอดภัยและไม่เปิดเผยต่อบุคคลภายนอก'
+    : 'We collect your ID card and selfie solely to verify renter identity. Stored securely and not shared.'));
+  $('#kycSheet').innerHTML = `
+    <div class="ksheet">
+      <button class="close" onclick="closeKyc()">×</button>
+      <div class="khd">${TH ? 'ยืนยันตัวตนก่อนเช่า' : 'Verify identity to rent'}</div>
+      <div class="ksub">${TH ? 'ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว รอบหน้าไม่ต้องทำอีกค่ะ' : 'One-time verification for new renters'}</div>
+      <div class="kconsent" style="max-height:140px;overflow:auto;border:1px solid var(--line,#E7E5E1);border-radius:8px;padding:10px;font-size:12px;line-height:1.6;color:var(--muted,#6b6a66);white-space:pre-wrap;margin:8px 0">${body}</div>
+      <label class="klabel" style="display:flex;align-items:flex-start;gap:8px;font-size:13px;margin:8px 0">
+        <input type="checkbox" id="kycConsent" data-ver="${ver}" style="margin-top:2px">
+        <span>${TH ? 'ฉันยินยอมให้เก็บรูปบัตรและเซลฟี่เพื่อยืนยันตัวตน' : 'I consent to storing my ID & selfie for verification'}</span>
+      </label>
+      <label class="klabel">${TH ? 'เลขบัตรประชาชน 13 หลัก' : 'ID card number'}</label>
+      <input type="text" id="kycIdNo" inputmode="numeric" maxlength="20" placeholder="${TH ? 'กรอกเลขบัตร' : 'ID number'}" class="kinput">
+      <label class="klabel">${TH ? 'รูปบัตรประชาชน (ถ่ายชัดเจน)' : 'ID card photo'}</label>
+      <input type="file" id="kycIdImg" accept="image/*" capture="environment">
+      <label class="klabel">${TH ? 'เซลฟี่ถือบัตรประชาชน' : 'Selfie holding your ID'}</label>
+      <input type="file" id="kycSelfie" accept="image/*" capture="environment">
+      <button class="ksubmit" onclick="submitKycRequired()">${TH ? 'ส่งยืนยันตัวตน' : 'Submit verification'}</button>
+    </div>`;
+  $('#kycOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
+}
+
+// อ่านไฟล์เป็น dataURL
+function _fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+// POST ไป edge function /kyc 1 รูป
+async function _kycUpload(idToken, kind, dataUrl, mediaType, extra) {
+  const body = Object.assign({
+    action: 'upload', id_token: idToken, role: 'customer',
+    kind, image: dataUrl, media_type: mediaType,
+  }, extra || {});
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/kyc`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  });
+  let out = {}; try { out = await res.json(); } catch (e) { /**/ }
+  return { status: res.status, ok: res.ok && out && out.ok === true, data: out };
+}
+
+async function submitKycRequired() {
+  const TH = lang === 'th';
+  const consentEl = $('#kycConsent');
+  const idNo = ($('#kycIdNo') && $('#kycIdNo').value || '').trim();
+  const idFile = $('#kycIdImg') && $('#kycIdImg').files && $('#kycIdImg').files[0];
+  const selfieFile = $('#kycSelfie') && $('#kycSelfie').files && $('#kycSelfie').files[0];
+  if (!consentEl || !consentEl.checked) { toast(TH ? 'กรุณายอมรับความยินยอมก่อนนะคะ' : 'Please accept the consent first'); return; }
+  if (!idNo) { toast(TH ? 'กรอกเลขบัตรประชาชนก่อนนะคะ' : 'Enter your ID number'); return; }
+  if (!idFile || !selfieFile) { toast(TH ? 'แนบทั้งรูปบัตรและเซลฟี่ถือบัตรนะคะ' : 'Attach both the ID and the selfie'); return; }
+  const ver = (consentEl.dataset && consentEl.dataset.ver) || '1';
+  const btn = $('#kycSheet .ksubmit'); if (btn) { btn.disabled = true; btn.textContent = TH ? 'กำลังส่ง…' : 'Sending…'; }
+  const reEnable = () => { if (btn) { btn.disabled = false; btn.textContent = TH ? 'ส่งยืนยันตัวตน' : 'Submit verification'; } };
+
+  let idToken = null;
+  try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (e) { idToken = null; }
+  if (!idToken) {
+    reEnable();
+    toast(TH ? 'กรุณาเปิดผ่าน LINE เพื่อยืนยันตัวตน' : 'Please open via LINE to verify identity');
+    return;
+  }
+  try {
+    const idData = await _fileToDataUrl(idFile);
+    const selfieData = await _fileToDataUrl(selfieFile);
+    const r1 = await _kycUpload(idToken, 'id_card', idData, idFile.type || 'image/jpeg', { id_card: idNo, consent_version: ver });
+    if (!r1.ok) {
+      reEnable();
+      toast(r1.status === 401 ? (TH ? 'เซสชัน LINE หมดอายุ ลองเปิดใหม่นะคะ' : 'LINE session expired — reopen the app')
+        : r1.status === 404 ? (TH ? 'ยังไม่พบบัญชีลูกค้า ลองเข้าผ่าน LINE อีกครั้ง' : 'Customer not found — reopen via LINE')
+        : (TH ? 'ส่งรูปบัตรไม่สำเร็จ ลองใหม่นะคะ' : 'ID upload failed — try again'));
+      return;
+    }
+    const r2 = await _kycUpload(idToken, 'selfie_id', selfieData, selfieFile.type || 'image/jpeg', { id_card: idNo, consent_version: ver });
+    if (!r2.ok) {
+      reEnable();
+      toast(TH ? 'ส่งเซลฟี่ไม่สำเร็จ ลองใหม่นะคะ' : 'Selfie upload failed — try again');
+      return;
+    }
+    closeKyc();
+    toast(TH ? 'ส่งยืนยันตัวตนแล้ว — รอทีมงานอนุมัติ (ปกติไม่เกิน 1 วัน) จากนั้นเช่าได้เลยค่ะ'
+            : 'Submitted — pending approval (usually within 1 day). You can rent once approved.');
+    customerCanRent();  // re-check เพื่ออัปเดต UI
+  } catch (e) {
+    console.warn(e);
+    reEnable();
+    toast(TH ? 'เกิดข้อผิดพลาด ลองใหม่นะคะ' : 'Something went wrong — try again');
+  }
+}
+
 // ===== ตะกร้า (จองหลายชุด ส่งกล่องเดียว) =====
 function addToCart(id) {
   const g = GARMENTS.find(x => x.id === id); if (!g) return;
@@ -654,6 +799,8 @@ async function bookCartNow() {
   const TH = lang === 'th';
   const date = $('#cartDate') && $('#cartDate').value;
   if (!date) { toast(TH ? 'เลือกวันที่ก่อนนะคะ' : 'Pick a date'); return; }
+  // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
+  if (!(await kycGate())) return;
   const btn = $('#cartSheet .ksubmit'); if (btn) { btn.disabled = true; btn.textContent = TH ? 'กำลังจอง…' : 'Booking…'; }
   const codes = gCart.map(x => x.code);
   const res = await window.API.bookCart(CUSTOMER, codes, date, durEnd(date));

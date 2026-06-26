@@ -79,6 +79,20 @@
   const annId=qs.get('ann');            // ประกาศ (เปิดอ่าน+รับทราบ)
   let lineUid=null, lineName=null;
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
+  const KYC_FN=(CONFIG.SUPABASE_URL||'https://rprwilsbjptdnvsibjgi.supabase.co')+'/functions/v1/kyc';
+  function fileToDataURL(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(f);});}
+  // อัปโหลดไฟล์เข้า private bucket ผ่าน edge function kyc (ยืนยันตัวตนด้วย LINE idToken)
+  async function kycUpload(file,kind){
+    const idToken=(window.liff&&liff.getIDToken&&liff.isLoggedIn&&liff.isLoggedIn())?liff.getIDToken():null;
+    if(!idToken){const e=new Error('no_token');e.code='no_token';throw e;}
+    const image=await fileToDataURL(file);
+    const r=await fetch(KYC_FN,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'upload',id_token:idToken,role:'employee',kind,
+        image,media_type:file.type||'image/jpeg',consent_version:'1'})});
+    const out=await r.json().catch(()=>({}));
+    if(!r.ok||!out.ok){const e=new Error(out.error||('kyc '+r.status));e.code=out.error||('http_'+r.status);throw e;}
+    return out;
+  }
   const ROLE_TH={admin:'แอดมิน',stylist:'สไตลิสต์',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง',sales:'ขาย',owner:'เจ้าของ'};
   const ST_TH={applicant:'ผู้สมัคร',interview:'สัมภาษณ์',offer:'เสนองาน',hired:'จ้างแล้ว',probation:'ทดลองงาน',active:'ทำงาน',suspended:'พักงาน',resigned:'ลาออก',rejected:'ไม่ผ่าน'};
 
@@ -243,13 +257,14 @@
         <span onclick="dtab(this,'pay')">เงินเดือน</span>
         <span onclick="dtab(this,'doc')">เอกสาร</span>
         <span onclick="dtab(this,'contract')">สัญญา</span>
+        <span onclick="dtab(this,'kyc')">ยืนยันตัวตน</span>
       </div>
       <div id="tabbody"></div>`;
     curE=e; loadAttendance(); loadKpiTab(); annBadge();
   }
   let curE=null;
   function dtab(el,t){document.querySelectorAll('.seg span').forEach(s=>s.classList.remove('on'));el.classList.add('on');
-    ({kpi:loadKpiTab,ann:loadAnnTab,sched:loadSchedTab,leave:loadLeaveTab,claim:loadClaimTab,task:loadTaskTab,pay:loadPayTab,doc:loadDocTab,contract:loadContractTab}[t]||loadKpiTab)();}
+    ({kpi:loadKpiTab,ann:loadAnnTab,sched:loadSchedTab,leave:loadLeaveTab,claim:loadClaimTab,task:loadTaskTab,pay:loadPayTab,doc:loadDocTab,contract:loadContractTab,kyc:loadKycTab}[t]||loadKpiTab)();}
   async function loadClaimTab(){
     const {data}=await sb.rpc('hr_claim_self',{p_line_uid:lineUid});const b=$('tabbody');
     const list=(data&&!data.error)?data:[];
@@ -438,14 +453,16 @@
   async function uploadDoc(){
     const f=$('docFile').files[0];if(!f){toast('เลือกไฟล์ก่อนค่ะ');return;}
     $('docBtn').disabled=true;
-    const kind=$('docKind').value, empId=curE.id;
-    const path=`${empId}/${Date.now()}_${f.name}`;
-    const {error:upErr}=await sb.storage.from('hr-docs').upload(path,f,{upsert:false});
-    if(upErr){toast('อัปโหลดไม่สำเร็จค่ะ');$('docBtn').disabled=false;return;}
-    const {data:{publicUrl}}=sb.storage.from('hr-docs').getPublicUrl(path);
-    const {error}=await sb.rpc('hr_doc_add_self',{p_kind:kind,p_name:f.name,p_url:publicUrl});
-    if(error){toast('บันทึกไม่สำเร็จค่ะ');$('docBtn').disabled=false;return;}
-    toast('อัปโหลดเอกสารแล้วค่ะ');loadDocTab();
+    try{
+      // เก็บเข้า private bucket ผ่าน edge function kyc แทน public hr-docs (กันลิงก์สาธารณะรั่ว)
+      await kycUpload(f,'other');
+      toast('อัปโหลดเอกสารแล้วค่ะ');loadDocTab();
+    }catch(e){
+      if(e&&e.code==='no_token'){toast('เปิดผ่าน LINE เพื่ออัปโหลดเอกสาร');}
+      else if(e&&(e.code==='http_404'||e.code==='not_found')){toast('ไม่พบบัญชีพนักงานสำหรับ LINE นี้ค่ะ');}
+      else{toast('อัปโหลดไม่สำเร็จค่ะ');}
+      $('docBtn').disabled=false;
+    }
   }
   async function loadContractTab(){
     const {data}=await sb.rpc('emp_contract_list_self',{});
@@ -456,6 +473,42 @@
       const url=location.pathname+'?ec='+c.token;const pend=c.status==='sent'||c.status==='viewed';
       return `<div class="kv"><span><b>${c.contract_no}</b><br><span style="font-size:12px;color:var(--stone)">${ST[c.status]||c.status}</span></span>
         <span>${pend?`<a class="pill" style="color:var(--sageDeep);border-color:#BFE0D4" href="${url}">ลงนาม ›</a>`:`<a class="pill" href="${url}">ดู</a>`}</span></div>`;}).join('')}</div>`;
+  }
+
+  // ---------- ยืนยันตัวตน (KYC) ----------
+  async function loadKycTab(){
+    const b=$('tabbody');
+    b.innerHTML=`<div class="card"><p style="color:var(--stone);text-align:center;padding:20px 0">กำลังโหลด…</p></div>`;
+    let consent={body:'',version:'1'};
+    try{const {data}=await sb.rpc('consent_text',{p_purpose:'employee_kyc'});if(data&&!data.error)consent=data;}catch(e){}
+    b.innerHTML=`<div class="card">
+      <h2 style="font-size:18px">ยืนยันตัวตน (KYC)</h2>
+      <p class="sub">ถ่ายรูปบัตรประชาชนและเซลฟี่ถือบัตร เพื่อยืนยันตัวตนพนักงาน เก็บแบบเป็นความลับตาม PDPA</p>
+      <div class="doc">${consent.body?consent.body:'บริษัทขอเก็บภาพบัตรประชาชนและภาพถ่ายของท่านเพื่อยืนยันตัวตนพนักงาน ข้อมูลจะถูกเก็บอย่างปลอดภัยและใช้ตามวัตถุประสงค์ด้านบุคคลเท่านั้น'}</div>
+      <div class="chk"><input type="checkbox" id="kycConsent"><label for="kycConsent" style="margin:0">ข้าพเจ้ายินยอมให้บริษัทเก็บและใช้ภาพบัตรประชาชน/ภาพถ่ายเพื่อยืนยันตัวตนตามนโยบายความเป็นส่วนตัว (เวอร์ชัน ${consent.version||'1'})</label></div>
+      <label>รูปบัตรประชาชน</label><input type="file" id="kycId" accept="image/*" capture="environment">
+      <label>เซลฟี่ถือบัตรประชาชน</label><input type="file" id="kycSelfie" accept="image/*" capture="environment">
+      <button class="btn sage" style="margin-top:12px" id="kycBtn" onclick="submitKyc()">ส่งยืนยันตัวตน</button>
+    </div>`;
+  }
+  async function submitKyc(){
+    if(!$('kycConsent').checked){toast('กรุณายินยอมก่อนค่ะ');return;}
+    const idFile=$('kycId').files[0], selfieFile=$('kycSelfie').files[0];
+    if(!idFile||!selfieFile){toast('แนบทั้งรูปบัตรและเซลฟี่ถือบัตรค่ะ');return;}
+    $('kycBtn').disabled=true;
+    try{
+      await kycUpload(idFile,'id_card');
+      await kycUpload(selfieFile,'selfie_id');
+      $('tabbody').innerHTML=`<div class="card gate ok"><div class="icon">✓</div>
+        <h2 style="font-size:18px">ส่งยืนยันตัวตนแล้ว ขอบคุณค่ะ</h2>
+        <p class="sub">ฝ่ายบุคคลจะตรวจสอบและยืนยันให้ค่ะ</p></div>`;
+    }catch(e){
+      if(e&&e.code==='no_token'){toast('เปิดผ่าน LINE เพื่อยืนยันตัวตน');}
+      else if(e&&(e.code==='http_404'||e.code==='not_found')){toast('ไม่พบบัญชีพนักงานสำหรับ LINE นี้ค่ะ');}
+      else if(e&&(e.code==='http_401'||e.code==='unauthorized')){toast('เซสชันหมดอายุ เปิดใหม่ผ่าน LINE ค่ะ');}
+      else{toast('ส่งไม่สำเร็จค่ะ ลองใหม่อีกครั้ง');}
+      $('kycBtn').disabled=false;
+    }
   }
 
   // ---------- boot ----------

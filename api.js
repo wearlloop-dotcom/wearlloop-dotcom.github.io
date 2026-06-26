@@ -43,7 +43,10 @@ window.API = (function () {
         { onConflict:'line_uid'});
       await c.from('customer_touchpoints').insert(
         { line_uid: lineUid, kind:'open_app', detail: { source:'liff'} });
-      const { data } = await c.from('customers').select('*').eq('line_uid', lineUid).single();
+      // อ่านโปรไฟล์ของตัวเองผ่าน me-rpc (verify LINE idToken) — กัน anon อ่าน PII ลูกค้าทุกแถว (R-1)
+      const { data } = window.meRpc
+        ? await window.meRpc('me_profile', {})
+        : await c.from('customers').select('*').eq('line_uid', lineUid).single();
       if (data) customer = data;
       // สร้าง/ดึงรหัสนัดสไตลิสต์ (ให้พาร์ทเนอร์ค้นเจอ)
       if (customer.id &&!customer.link_code) {
@@ -375,6 +378,128 @@ window.API = (function () {
     return { ok: !error, data, error };
   }
 
+  // ===== ครอบครัว / แก๊งเพื่อน — ผูกกลุ่ม + เช่าเข้าตีมพร้อมกัน =====
+  // สร้างกลุ่ม (kind: 'family' | 'friends') → { group_id }
+  async function createGroup(customer, name, kind) {
+    if (CONFIG.USE_MOCK || !customer?.id) return { ok: true };
+    const { data, error } = await client().rpc('create_group', { p_creator: customer.id, p_name: name || '', p_kind: kind || 'family' });
+    return { ok: !error, data, error };
+  }
+  // กลุ่มทั้งหมดของฉัน + สมาชิก
+  async function myGroups(customer) {
+    if (CONFIG.USE_MOCK || !customer?.id) return { ok: true, data: [] };
+    const { data, error } = await client().rpc('my_groups', { p_customer: customer.id });
+    return { ok: !error, data: data || [], error };
+  }
+  // สมาชิก + ไซซ์/ซีซันสี (ไว้จัดสไตล์) — ต้องเป็นสมาชิกกลุ่มจริงถึงดูได้ (PDPA)
+  async function groupMembers(groupId, requester) {
+    if (CONFIG.USE_MOCK || !groupId || !requester?.id) return { ok: true, data: [] };
+    const { data, error } = await client().rpc('group_members_detail', { p_group: groupId, p_requester: requester.id });
+    return { ok: !error, data: data || [], error };
+  }
+  // ผู้ปกครองสร้างโปรไฟล์เด็ก/ทุกวัย (profile = { name, relation, age_band, birth_year, bust_in, waist_in, hip_in, height_cm, color_season })
+  async function addManagedProfile(guardian, groupId, profile) {
+    if (CONFIG.USE_MOCK || !guardian?.id || !groupId) return { ok: true };
+    const { data, error } = await client().rpc('add_managed_profile', { p: { guardian: guardian.id, group_id: groupId, ...(profile || {}) } });
+    return { ok: !error, data, error };
+  }
+  // เชิญสมาชิกที่มี LINE เองด้วย link_code (ขอความยินยอม → invited)
+  async function groupInvite(groupId, inviter, linkCode, relation) {
+    if (CONFIG.USE_MOCK || !groupId || !inviter?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_invite', { p_group: groupId, p_inviter: inviter.id, p_link_code: linkCode, p_relation: relation || null });
+    return { ok: !error, data, error };
+  }
+  // รับ/ปฏิเสธคำเชิญเข้ากลุ่ม
+  async function groupRespond(groupId, customer, accept) {
+    if (CONFIG.USE_MOCK || !groupId || !customer?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_respond', { p_group: groupId, p_customer: customer.id, p_accept: !!accept });
+    return { ok: !error, data, error };
+  }
+  // AI จัดชุดเข้าตีมทั้งกลุ่ม → { season, occasion, members:[{ name, picks:[...] }] }
+  async function groupThemeSuggest(groupId, requester, occasion, fromStr, toStr) {
+    if (CONFIG.USE_MOCK || !groupId || !requester?.id) return { ok: true, data: null };
+    const { data, error } = await client().rpc('group_theme_suggest', { p_group: groupId, p_requester: requester.id, p_occasion: occasion || null, p_from: fromStr || null, p_to: toStr || null });
+    return { ok: !error, data, error };
+  }
+  // จองทั้งกลุ่มในออเดอร์เดียว (assignments = [{ code, wearer }]) → { order_group, total, ... }
+  async function bookGroupCart(groupId, assignments, fromStr, toStr, opts) {
+    if (CONFIG.USE_MOCK || !groupId) return { ok: true };
+    const o = opts || {};
+    const { data, error } = await client().rpc('book_group_cart', { p: {
+      group_id: groupId, from: fromStr, to: toStr, assignments: assignments || [],
+      courier: o.courier || 'flash', remote: !!o.remote, theme: o.theme || null,
+      occasion: o.occasion || null, payer: o.payer || null,
+      shipments: o.shipments || null   // ตั้งค่าส่งต่อกล่อง [{parcel,recipient,address,courier,remote}]
+    } });
+    return { ok: !error, data, error };
+  }
+  // จัดการสมาชิกกลุ่ม (lifecycle)
+  async function groupLeave(groupId, customer) {
+    if (CONFIG.USE_MOCK || !groupId || !customer?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_leave', { p_group: groupId, p_customer: customer.id });
+    return { ok: !error, data, error };
+  }
+  async function groupRemoveMember(groupId, actor, targetId) {
+    if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_remove_member', { p_group: groupId, p_actor: actor.id, p_target: targetId });
+    return { ok: !error, data, error };
+  }
+  async function groupTransferOwner(groupId, actor, newOwnerId) {
+    if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_transfer_owner', { p_group: groupId, p_actor: actor.id, p_new_owner: newOwnerId });
+    return { ok: !error, data, error };
+  }
+  async function groupDelete(groupId, actor) {
+    if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_delete', { p_group: groupId, p_actor: actor.id });
+    return { ok: !error, data, error };
+  }
+  async function groupUpdateMember(groupId, actor, targetId, relation) {
+    if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_update_member', { p_group: groupId, p_actor: actor.id, p_target: targetId, p_relation: relation || null });
+    return { ok: !error, data, error };
+  }
+  async function groupRename(groupId, actor, name) {
+    if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_rename', { p_group: groupId, p_actor: actor.id, p_name: name || '' });
+    return { ok: !error, data, error };
+  }
+  // ย้ายโปรไฟล์เด็ก → แอคเคานต์จริง / รวมแอคเคานต์
+  async function claimManagedProfile(guardian, managedId, lineUid, displayName) {
+    if (CONFIG.USE_MOCK || !guardian?.id || !managedId) return { ok: true };
+    const { data, error } = await client().rpc('claim_managed_profile', { p: { guardian: guardian.id, managed_id: managedId, line_uid: lineUid, display_name: displayName || null } });
+    return { ok: !error, data, error };
+  }
+  async function mergeCustomers(keepId, dropId, actor) {
+    if (CONFIG.USE_MOCK || !keepId || !dropId || !actor?.id) return { ok: true };
+    const { data, error } = await client().rpc('merge_customers', { p: { keep: keepId, drop: dropId, actor: actor.id } });
+    return { ok: !error, data, error };
+  }
+  // ลิงก์ชวนเข้ากลุ่ม (แบบ LINE) — ขอ token แล้วประกอบเป็น URL
+  async function groupJoinToken(groupId, actor) {
+    if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true, data: { token: 'demo' } };
+    const { data, error } = await client().rpc('group_join_token', { p_group: groupId, p_actor: actor.id });
+    return { ok: !error, data, error };
+  }
+  // เข้ากลุ่มผ่านลิงก์ (แตะเอง = ยินยอม → active ทันที)
+  async function joinGroup(token, customer, relation) {
+    if (CONFIG.USE_MOCK || !token || !customer?.id) return { ok: true };
+    const { data, error } = await client().rpc('join_group', { p_token: token, p_customer: customer.id, p_relation: relation || null });
+    return { ok: !error, data, error };
+  }
+  // เพิกถอนลิงก์ชวน (ลิงก์เก่าใช้ไม่ได้อีก)
+  async function groupRevokeLink(groupId, actor) {
+    if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_revoke_link', { p_group: groupId, p_actor: actor.id });
+    return { ok: !error, data, error };
+  }
+  // % ส่วนลดแพคเกจครอบครัวตามจำนวนชุด (ไว้พรีวิวก่อนจอง)
+  async function groupDiscountPct(count) {
+    if (CONFIG.USE_MOCK) return { ok: true, data: 0 };
+    const { data, error } = await client().rpc('group_discount_pct', { p_count: count || 0 });
+    return { ok: !error, data: data || 0, error };
+  }
+
   // ===== ช่องทางชำระเงิน (โชว์ตอน checkout) — cache ไว้ =====
   let _payInfo;
   async function payInfo() {
@@ -399,5 +524,5 @@ window.API = (function () {
     return { ok: true, ...data };
   }
 
-  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, payInfo, birthdayStatus, birthdayReserve };
+  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, payInfo, birthdayStatus, birthdayReserve };
 })();

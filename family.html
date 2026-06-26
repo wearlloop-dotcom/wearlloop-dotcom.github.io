@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ครอบครัว & กลุ่ม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --ink:#1A1A1A; --soft:#F5F4F2; --soft2:#EFEDE9; --line:#E7E5E1;
+    --muted:#8C8B86; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56;
+    --gold:#C9A86A; --sand:#F2ECDD;
+    --display:'Poppins','Prompt',sans-serif;
+    --sans:'Inter','Prompt',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+  .contain{max-width:920px;margin:0 auto;padding:0 18px}
+  button{font-family:inherit;cursor:pointer}
+
+  header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
+  .hbar{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .logo{font-family:var(--display);font-size:23px;font-weight:700;letter-spacing:1px}
+  .hnav{font-size:12px;color:var(--muted)}
+
+  /* hero */
+  .hero{padding:30px 0 18px}
+  .eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .htitle{font-family:var(--display);font-size:30px;font-weight:600;margin-top:8px;letter-spacing:.5px}
+  .hsub{color:var(--muted);margin-top:6px;max-width:560px}
+
+  /* group switcher */
+  .switch{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0 6px}
+  .gchip{background:#fff;border:1px solid var(--line);border-radius:30px;padding:9px 16px;font-size:13px;font-weight:500;color:var(--ink);display:flex;align-items:center;gap:8px;transition:.15s}
+  .gchip .k{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+  .gchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .gchip.on .k{color:var(--gold)}
+  .gchip.add{border-style:dashed;color:var(--muted)}
+
+  /* section */
+  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
+  .sechead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .sectitle{font-family:var(--display);font-size:16px;font-weight:600}
+  .seccap{font-size:12px;color:var(--muted)}
+
+  /* member grid */
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:14px}
+  .mcard{border:1px solid var(--line);border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:9px;background:var(--bg);position:relative}
+  .ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;color:#fff}
+  .mname{font-weight:600;font-size:15px}
+  .mrel{font-size:12px;color:var(--muted)}
+  .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+  .tag{font-size:10.5px;letter-spacing:.3px;padding:3px 8px;border-radius:20px;background:var(--soft);color:#555}
+  .tag.sage{background:var(--sage-bg);color:var(--ok)}
+  .tag.gold{background:#F6EDD8;color:#8a6d2f}
+  .badge{position:absolute;top:12px;right:12px;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .mcard.add{border-style:dashed;align-items:center;justify-content:center;text-align:center;color:var(--muted);cursor:pointer;min-height:150px;gap:6px}
+  .mcard.add .plus{font-size:30px;font-weight:300;line-height:1;color:var(--sage)}
+
+  /* empty state */
+  .empty{text-align:center;padding:34px 18px;color:var(--muted)}
+  .empty .ei{width:54px;height:54px;margin:0 auto 12px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center}
+  .empty .ei svg{width:26px;height:26px;stroke:var(--sage);fill:none;stroke-width:1.6}
+  .empty h4{font-family:var(--display);font-size:16px;color:var(--ink);font-weight:600;margin-bottom:5px}
+  .empty p{max-width:380px;margin:0 auto 14px}
+
+  .btn{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:13px;font-weight:600;letter-spacing:.02em}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.sage{background:var(--sage)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  /* add form */
+  .form{margin-top:14px;border-top:1px dashed var(--line);padding-top:16px;display:none}
+  .form.show{display:block}
+  .frow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+  .fld{flex:1;min-width:130px}
+  .fld label{display:block;font-size:11px;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
+  .fld input,.fld select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
+  .quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .quick button{background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12px;color:#555}
+  .quick button.on{background:var(--sage-bg);border-color:var(--sage);color:var(--ok)}
+
+  /* theme styling */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:12px}
+  .palette{display:inline-flex;align-items:center;gap:8px;background:var(--sand);border-radius:30px;padding:6px 14px;font-size:12px;color:#7a6433;font-weight:500;margin-top:14px}
+  .pdot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+  .look{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:var(--bg)}
+  .lhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .lhead .ava{width:34px;height:34px;font-size:14px}
+  .lname{font-weight:600}.lrel{font-size:11px;color:var(--muted)}
+  .picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .pick{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+  .swatch{height:64px;display:flex;align-items:flex-end;justify-content:space-between;padding:7px}
+  .ontheme{font-size:9px;background:rgba(255,255,255,.85);color:#5a4a1f;padding:2px 6px;border-radius:10px;letter-spacing:.5px}
+  .fitpill{font-size:9px;background:rgba(0,0,0,.55);color:#fff;padding:2px 6px;border-radius:10px}
+  .pmeta{padding:8px 9px}
+  .pmeta .pn{font-size:12.5px;font-weight:500;line-height:1.3}
+  .pmeta .pc{font-size:11px;color:var(--muted)}
+  .sourcing{background:#FBF3E9;border:1px dashed var(--gold);border-radius:10px;padding:13px;font-size:12.5px;color:#8a6d2f;display:flex;gap:9px;align-items:center;text-align:left;line-height:1.5}
+  .sourcing svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.6;flex-shrink:0}
+
+  /* invites */
+  .invbanner{background:linear-gradient(180deg,#fff,var(--sage-bg));border:1px solid #cfe6df;border-radius:14px;padding:16px 18px;margin-top:16px}
+  .invbanner .ib-h{font-family:var(--display);font-size:14px;font-weight:600;color:var(--ok);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .invrow{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-top:8px}
+  .invrow .ir-t{flex:1;min-width:0}
+  .invrow .ir-n{font-weight:600;font-size:14px}
+  .invrow .ir-f{font-size:11.5px;color:var(--muted)}
+  .invrow .ir-k{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .mini{border:none;border-radius:7px;padding:8px 13px;font-size:12.5px;font-weight:600}
+  .mini.yes{background:var(--sage);color:#fff}
+  .mini.no{background:var(--soft);color:#666}
+  .pendtag{font-size:10px;letter-spacing:.5px;padding:3px 8px;border-radius:20px;background:#FBF3E9;color:#a07c33}
+  /* invite link box */
+  .invlink{display:flex;align-items:center;gap:9px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:8px 8px 8px 13px}
+  .invlink .lk{flex:1;font-size:12.5px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--sans)}
+  .ordiv{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11.5px;margin:15px 0}
+  .ordiv::before,.ordiv::after{content:'';flex:1;height:1px;background:var(--line)}
+
+  .demo{font-size:11px;color:var(--muted);text-align:center;margin-top:26px;letter-spacing:.3px}
+  .demo b{color:var(--sage)}
+</style>
+</head>
+<body>
+<header><div class="contain hbar">
+  <div class="logo">LLOOP</div>
+  <div class="hnav">ครอบครัว &amp; กลุ่ม</div>
+</div></header>
+
+<div class="contain">
+  <div class="hero">
+    <div class="eyebrow">together</div>
+    <h1 class="htitle">ครอบครัว &amp; กลุ่ม</h1>
+    <p class="hsub">ผูกคนที่รักไว้ในกลุ่มเดียว — คุณแม่ คุณลูก คุณยาย หรือแก๊งเพื่อน แล้วให้สไตลิสต์ของเราจัดชุดเข้าตีมเดียวกัน เช่าพร้อมกันในออเดอร์เดียว</p>
+  </div>
+
+  <!-- คำเชิญรอตอบรับ -->
+  <div id="invites"></div>
+
+  <div class="switch" id="switch"></div>
+
+  <!-- members -->
+  <div class="sec" id="memberSec">
+    <div class="sechead">
+      <div>
+        <div class="sectitle" id="grpName">—</div>
+        <div class="seccap" id="grpCap"></div>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button class="btn ghost" id="inviteBtn" style="font-size:12px;padding:8px 12px">ชวนเพื่อน</button>
+        <button class="btn ghost" id="addBtn" style="font-size:12px;padding:8px 12px">+ เพิ่มสมาชิก</button>
+      </div>
+    </div>
+
+    <div id="memberBody"></div>
+
+    <!-- ชวนเพื่อน -->
+    <div class="form" id="invForm">
+      <div style="font-weight:600;margin-bottom:4px">ชวนเพื่อนเข้ากลุ่ม</div>
+      <div class="seccap" style="margin-bottom:12px">วิธีง่ายสุด: แชร์ลิงก์ทาง LINE ให้เพื่อนแตะเข้าร่วมได้เลย</div>
+      <div class="invlink" id="invLink">
+        <span class="lk" id="invLinkUrl">lloop.app/join/…</span>
+        <button class="btn sage" id="copyLink" style="padding:8px 14px;font-size:12px">แชร์ทาง LINE</button>
+      </div>
+      <div class="ordiv"><span>หรือ ชวนด้วยรหัสเพื่อน</span></div>
+      <div class="frow">
+        <div class="fld"><label>รหัสเพื่อน (6 ตัว)</label><input id="i_code" placeholder="เช่น A1B2C3" maxlength="8" style="text-transform:uppercase"></div>
+        <div class="fld"><label>ความสัมพันธ์</label><input id="i_rel" placeholder="เช่น เพื่อน"></div>
+      </div>
+      <div style="display:flex;gap:9px">
+        <button class="btn" id="sendInvite">ส่งคำเชิญ</button>
+        <button class="btn ghost" id="cancelInvite">ปิด</button>
+      </div>
+    </div>
+
+    <!-- add managed profile form -->
+    <div class="form" id="form">
+      <div class="quick" id="relQuick"></div>
+      <div class="frow">
+        <div class="fld"><label>ชื่อเล่น</label><input id="f_name" placeholder="เช่น น้องเป่าเปา"></div>
+        <div class="fld"><label>ช่วงวัย</label><select id="f_age">
+          <option value="kid">เด็ก</option><option value="teen">วัยรุ่น</option>
+          <option value="adult" selected>ผู้ใหญ่</option><option value="senior">ผู้ใหญ่ขึ้นวัย</option>
+        </select></div>
+        <div class="fld"><label>เพศ</label><select id="f_gender">
+          <option value="female" selected>หญิง</option><option value="male">ชาย</option><option value="">ไม่ระบุ</option>
+        </select></div>
+      </div>
+      <div class="frow">
+        <div class="fld"><label>อก (นิ้ว)</label><input id="f_bust" type="number" placeholder="32"></div>
+        <div class="fld"><label>เอว (นิ้ว)</label><input id="f_waist" type="number" placeholder="26"></div>
+        <div class="fld"><label>สะโพก (นิ้ว)</label><input id="f_hip" type="number" placeholder="35"></div>
+        <div class="fld"><label>สูง (ซม.)</label><input id="f_height" type="number" placeholder="120"></div>
+      </div>
+      <div style="display:flex;gap:9px">
+        <button class="btn sage" id="saveMember">บันทึกเข้ากลุ่ม</button>
+        <button class="btn ghost" id="cancelMember">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- theme styling -->
+  <div class="sec" id="themeSec">
+    <div class="sechead">
+      <div><div class="sectitle">จัดชุดเข้าตีมทั้งกลุ่ม</div>
+      <div class="seccap">สไตลิสต์เลือก “ตัวที่เข้าตีม + พอดีตัวที่สุด ที่ว่างจริงในวันนั้น” ให้ทุกคน</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="fld" style="max-width:200px"><label>งาน / โอกาส</label>
+        <select id="t_occ">
+          <option value="wedding_guest">ไปงานแต่ง</option>
+          <option value="family_portrait">ถ่ายรูปครอบครัว</option>
+          <option value="songkran">สงกรานต์</option>
+          <option value="dinner">ดินเนอร์</option>
+        </select></div>
+      <div class="fld" style="max-width:160px"><label>วันใช้งาน</label><input id="t_date" type="date"></div>
+      <button class="btn" id="suggestBtn">จัดชุดให้เลย</button>
+    </div>
+    <div id="themeResult"></div>
+  </div>
+
+  <div class="demo">หน้าตัวอย่าง (prototype) · ข้อมูลเป็น <b>mock</b> เพื่อดูดีไซน์ · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> ที่เตรียมไว้แล้ว</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=34"></script>
+<script src="data.js?v=34"></script>
+<script src="liffAuth.js?v=34"></script>
+<script src="me-api.js?v=34"></script>
+<script src="api.js?v=34"></script>
+<script>
+// ===== MOCK DATA (แทน Supabase ระหว่างพรีวิว) =====
+const PALETTE = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };
+const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
+const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู้ใหญ่', senior:'ผู้ใหญ่ขึ้นวัย' };
+const GEN_TH = { female:'หญิง', male:'ชาย', '':'' };
+const REL_QUICK = ['คุณแม่','คุณพ่อ','ลูกสาว','ลูกชาย','คุณยาย','คุณย่า','คุณตา','คุณปู่','ป้า','น้า','หลาน','เพื่อน'];
+
+// ชุดตัวอย่าง (สต็อก) — มี age_band/gender/สี/ฤดูสี
+const STOCK = [
+  {code:'D21',name:'ชุดเดรสลินินโอลด์โรส',age:'adult',gen:'female',hex:'#C98A7A',cn:'โอลด์โรส',season:'autumn',fit:92},
+  {code:'D08',name:'เดรสผ้าไหมสีน้ำตาลทอง',age:'adult',gen:'female',hex:'#B07D4F',cn:'น้ำตาลทอง',season:'autumn',fit:88},
+  {code:'D33',name:'เดรสคอวีสีอิฐ',age:'adult',gen:'female',hex:'#A85B43',cn:'สีอิฐ',season:'autumn',fit:81},
+  {code:'K12',name:'เดรสเด็กระบายสีพีช',age:'kid',gen:'female',hex:'#E6A57E',cn:'พีช',season:'autumn',fit:90},
+  {code:'K05',name:'ชุดกระโปรงเด็กสีครีม',age:'kid',gen:'female',hex:'#E4D5B7',cn:'ครีม',season:'autumn',fit:84},
+  {code:'B07',name:'เสื้อเชิ้ตเด็กชายสีน้ำตาล',age:'kid',gen:'male',hex:'#9C6B45',cn:'น้ำตาล',season:'autumn',fit:86},
+  {code:'M03',name:'สูทผู้ชายโทนเอิร์ธ',age:'adult',gen:'male',hex:'#7A5C3E',cn:'เอิร์ธโทน',season:'autumn',fit:79},
+];
+
+// กลุ่มตัวอย่าง — รวมเคส "คุณยาย" และเคส "ยังไม่มีสมาชิก"
+let ME = { id:'me', name:'พลอย' };
+let GROUPS = [
+  { id:'g1', name:'ครอบครัวของฉัน', kind:'family', members:[
+      {id:'me', name:'พลอย', rel:null, role:'owner', age:'adult', gen:'female', managed:false, bust:33,waist:26,hip:36, season:'autumn'},
+      {id:'c1', name:'น้องเป่าเปา', rel:'ลูกสาว', role:'member', age:'kid', gen:'female', managed:true, bust:24,waist:22,hip:25, season:'autumn'},
+      {id:'c2', name:'คุณยายสมร', rel:'คุณยาย', role:'member', age:'senior', gen:'female', managed:true, bust:38,waist:34,hip:40, season:'winter'},
+  ]},
+  { id:'g2', name:'เพื่อนมหา’ลัย', kind:'friends', members:[
+      {id:'me', name:'พลอย', rel:null, role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'f1', name:'มิ้นต์', rel:'เพื่อน', role:'member', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'f2', name:'ใบเฟิร์น', rel:'เพื่อน', role:'member', age:'adult', gen:'female', managed:false, season:'summer', pend:true},
+  ]},
+  { id:'g4', name:'เพื่อนที่ทำงาน', kind:'friends', members:[
+      {id:'me', name:'พลอย', rel:null, role:'member', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'w1', name:'พี่กิ๊ฟ', rel:'เพื่อน', role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'w2', name:'ตูน', rel:'เพื่อน', role:'member', age:'adult', gen:'female', managed:false, season:'winter'},
+  ]},
+  { id:'g5', name:'แก๊งทริปทะเล', kind:'friends', members:[
+      {id:'me', name:'พลอย', rel:null, role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'t1', name:'ฟ้า', rel:'เพื่อน', role:'member', age:'adult', gen:'female', managed:false, season:'spring'},
+  ]},
+  { id:'g3', name:'ครอบครัวใหม่', kind:'family', members:[
+      {id:'me', name:'พลอย', rel:null, role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
+  ]},
+];
+// คำเชิญที่ "พลอย" ถูกชวน รอกดรับ
+let INVITES = [
+  { group_id:'inv1', name:'ทริปเชียงใหม่ปีใหม่', kind:'friends', from:'น้ำหวาน' },
+  { group_id:'inv2', name:'ครอบครัวฝั่งคุณสามี', kind:'family', from:'คุณแม่เปิ้ล' },
+];
+let active = 'g1', selRel = null;
+
+// ===== LIVE vs MOCK =====
+// LIVE=true → ต่อ Supabase จริงผ่าน window.API; LIVE=false → ใช้ mock arrays ด้านบน (พรีวิว)
+let LIVE = false;
+const SEASONS = ['autumn','winter','spring','summer'];
+function escHtml(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function toast(msg){ try{ alert(msg); }catch(_e){} }
+// unwrap { ok, data, error } จาก window.API; คืน data หรือโยน error แบบนุ่ม
+function unwrap(res){
+  if(!res) return null;
+  if(res.error) throw (res.error.message ? res.error : { message: String(res.error) });
+  return res.data;
+}
+
+// map row จาก my_groups → รูป GROUPS ที่หน้าเว็บใช้
+function mapGroup(g){
+  return {
+    id: g.group_id, name: g.name||'กลุ่ม', kind: g.kind||'family',
+    my_role: g.my_role, my_status: g.my_status,
+    members: (g.members||[]).map(m=>({
+      id: m.customer_id, name: m.name||'สมาชิก', rel: m.relation||null,
+      role: m.role||'member', age: m.age_band||'adult', gen: m.gender||'',
+      managed: !!m.managed, season: m.color_season||null,
+      bust: m.bust_in||null, waist: m.waist_in||null, hip: m.hip_in||null,
+      pend: (m.status==='invited')
+    }))
+  };
+}
+
+// โหลดกลุ่มของฉันจริง → แยก invited ไป INVITES, ที่เหลือไป GROUPS
+async function reloadGroups(){
+  const rows = unwrap(await window.API.myGroups(ME)) || [];
+  const mapped = rows.map(mapGroup);
+  GROUPS = mapped.filter(g => g.my_status !== 'invited');
+  INVITES = mapped.filter(g => g.my_status === 'invited').map(g=>{
+    const owner = (g.members||[]).find(m=>m.role==='owner');
+    return { group_id: g.id, name: g.name, kind: g.kind, from: (owner && owner.name) || 'มีคนชวนคุณ' };
+  });
+  if(!GROUPS.find(x=>x.id===active)) active = GROUPS[0] ? GROUPS[0].id : null;
+}
+
+const $ = s => document.querySelector(s);
+const initial = n => (n||'?').trim().charAt(0);
+const avaColor = id => AVA[Math.abs([...id].reduce((a,c)=>a+c.charCodeAt(0),0))%AVA.length];
+
+function curGroup(){ return GROUPS.find(g=>g.id===active) || null; }
+function others(g){ return g.members.filter(m=>m.id!==ME.id); }
+
+function renderSwitch(){
+  const el = $('#switch'); el.innerHTML='';
+  GROUPS.forEach(g=>{
+    const b=document.createElement('button');
+    b.className='gchip'+(g.id===active?' on':'');
+    b.innerHTML=`<span class="k">${g.kind==='friends'?'เพื่อน':g.kind==='couple'?'คู่':'ครอบครัว'}</span>${g.name}`;
+    b.onclick=()=>{active=g.id;selRel=null;render();};
+    el.appendChild(b);
+  });
+  const add=document.createElement('button');
+  add.className='gchip add'; add.textContent='+ สร้างกลุ่มใหม่';
+  add.onclick=createGroupFlow;
+  el.appendChild(add);
+}
+
+async function createGroupFlow(){
+  const name = (prompt('ตั้งชื่อกลุ่มใหม่','กลุ่มใหม่')||'').trim();
+  if(name===null) return;
+  if(LIVE){
+    try{
+      const res = unwrap(await window.API.createGroup(ME, name||'กลุ่มใหม่', 'family'));
+      await reloadGroups();
+      if(res && res.group_id) active = res.group_id;
+      render();
+    }catch(e){ toast('สร้างกลุ่มไม่สำเร็จ: '+(e.message||e)); }
+  } else {
+    const id='g'+(GROUPS.length+1);
+    GROUPS.push({id,name:name||('กลุ่มใหม่ '+id),kind:'family',members:[{id:'me',name:ME.name,rel:null,role:'owner',age:'adult',gen:'female',managed:false,season:'autumn'}]});
+    active=id; render();
+  }
+}
+
+function memberCard(m){
+  const tags=[`<span class="tag">${AGE_TH[m.age]||m.age}</span>`];
+  if(m.gen) tags.push(`<span class="tag">${GEN_TH[m.gen]}</span>`);
+  if(m.season) tags.push(`<span class="tag sage">โทน${({autumn:'ออทัม',winter:'วินเทอร์',spring:'สปริง',summer:'ซัมเมอร์'})[m.season]||m.season}</span>`);
+  if(m.managed) tags.push(`<span class="tag gold">ผู้ปกครองดูแล</span>`);
+  if(m.pend) tags.unshift(`<span class="pendtag">รอตอบรับ</span>`);
+  return `<div class="mcard" style="${m.pend?'opacity:.72':''}">
+    ${m.role==='owner'?'<span class="badge">หัวหน้ากลุ่ม</span>':''}
+    <div class="ava" style="background:${avaColor(m.id)}">${initial(m.name)}</div>
+    <div><div class="mname">${m.name}</div><div class="mrel">${m.rel|| (m.role==='owner'?'ตัวคุณเอง':'สมาชิก')}</div></div>
+    <div class="tags">${tags.join('')}</div>
+  </div>`;
+}
+
+function renderMembers(){
+  const g=curGroup();
+  if(!g){
+    $('#grpName').textContent='ยังไม่มีกลุ่ม';
+    $('#grpCap').textContent='';
+    $('#memberBody').innerHTML=`<div class="empty">
+      <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
+      <h4>ยังไม่มีกลุ่มของคุณ</h4>
+      <p>เริ่มจากสร้างกลุ่มครอบครัวหรือแก๊งเพื่อน แล้วเพิ่มสมาชิก — เราจะช่วยจัดชุดเข้าตีมให้</p>
+      <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
+        <button class="btn sage" onclick="createGroupFlow()">+ สร้างกลุ่มใหม่</button>
+      </div></div>`;
+    return;
+  }
+  $('#grpName').textContent=g.name;
+  const oth=others(g);
+  $('#grpCap').textContent=`${g.members.length} คน · ${oth.length} สมาชิกที่ผูกไว้`;
+  const body=$('#memberBody');
+
+  if(oth.length===0){
+    // ===== เคส "ยังไม่มีสมาชิก" =====
+    body.innerHTML=`<div class="empty">
+      <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
+      <h4>ยังไม่มีสมาชิกในกลุ่มนี้</h4>
+      <p>เริ่มจากเพิ่มคนในครอบครัว — คุณลูก คุณยาย หรือชวนเพื่อนที่มีแอคเคานต์ LLOOP อยู่แล้ว แล้วเราจะช่วยจัดชุดเข้าตีมให้</p>
+      <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
+        <button class="btn sage" onclick="openForm()">+ เพิ่มสมาชิก (เด็ก/ผู้สูงวัย)</button>
+        <button class="btn ghost" onclick="openInvite()">ชวนเพื่อนด้วยลิงก์/รหัส</button>
+      </div></div>`;
+  } else {
+    body.innerHTML=`<div class="mgrid">${g.members.map(memberCard).join('')}
+      <div class="mcard add" onclick="openForm()"><div class="plus">+</div><div>เพิ่มสมาชิก</div></div></div>`;
+  }
+}
+
+function renderRelQuick(){
+  $('#relQuick').innerHTML=REL_QUICK.map(r=>`<button class="${r===selRel?'on':''}" onclick="pickRel('${r}')">${r}</button>`).join('');
+}
+window.pickRel=r=>{selRel=r;renderRelQuick();};
+window.openForm=()=>{ $('#form').classList.add('show'); renderRelQuick(); $('#form').scrollIntoView({behavior:'smooth',block:'center'}); };
+
+function bindForm(){
+  $('#addBtn').onclick=openForm;
+  $('#cancelMember').onclick=()=>$('#form').classList.remove('show');
+  $('#saveMember').onclick=async ()=>{
+    const g=curGroup(); if(!g) return;
+    const name=$('#f_name').value||'สมาชิกใหม่';
+    const profile={
+      name, relation:selRel, age_band:$('#f_age').value, gender:$('#f_gender').value||null,
+      bust_in:+$('#f_bust').value||null, waist_in:+$('#f_waist').value||null,
+      hip_in:+$('#f_hip').value||null, height_cm:+$('#f_height').value||null,
+    };
+    if(LIVE){
+      try{
+        unwrap(await window.API.addManagedProfile(ME, g.id, profile));
+        await reloadGroups();
+        $('#form').classList.remove('show'); $('#f_name').value=''; selRel=null;
+        render();
+      }catch(e){ toast('เพิ่มสมาชิกไม่สำเร็จ: '+(e.message||e)); }
+    } else {
+      const id='c'+Date.now();
+      g.members.push({ id, name, rel:selRel, role:'member',
+        age:$('#f_age').value, gen:$('#f_gender').value, managed:true,
+        bust:+$('#f_bust').value||null, waist:+$('#f_waist').value||null, hip:+$('#f_hip').value||null,
+        season:'autumn' });
+      $('#form').classList.remove('show'); $('#f_name').value=''; selRel=null;
+      render();
+    }
+  };
+}
+
+// ===== theme styling (เลียนแบบ group_theme_suggest) =====
+function suggestFor(m, occ){
+  // best-match ที่ว่างจริง: กรองวัย+เพศ, เรียง on-theme ก่อน แล้ว fit
+  const season = groupSeason();
+  return STOCK
+    .filter(s => (s.age===m.age || s.age==='all') && (!m.gen || s.gen===m.gen || s.gen==='unisex'))
+    .map(s => ({...s, on: s.season===season}))
+    .sort((a,b)=> (b.on-a.on) || (b.fit-a.fit))
+    .slice(0,3);
+}
+function groupSeason(){
+  const g=curGroup(); if(!g) return 'autumn';
+  const c={}; (g.members||[]).forEach(m=>{ if(m.season) c[m.season]=(c[m.season]||0)+1; });
+  return Object.entries(c).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'autumn';
+}
+
+const SEASON_TH = {autumn:'ออทัม',winter:'วินเทอร์',spring:'สปริง',summer:'ซัมเมอร์'};
+
+// คำนวณ picks (mock) → รูปกลางที่ใช้ render
+function mockThemeMembers(g, occ){
+  return g.members.map(m=>{
+    const picks=suggestFor(m,occ).map(p=>({ code:p.code, name:p.name, color_name:p.cn, color_hex:p.hex, on_theme:p.on, fit:p.fit }));
+    return { name:m.name, rel:m.rel, role:m.role, age_band:m.age, id:m.id, picks, needs_sourcing:picks.length===0 };
+  });
+}
+
+// วาดผล theme จากรูปกลาง {season, members:[{name,rel,role,age_band,id,picks:[{code,name,color_name,color_hex,on_theme,fit}],needs_sourcing}]}
+function paintTheme(g, season, members){
+  const box=$('#themeResult');
+  let html=`<div class="palette"><span class="pdot" style="background:${PALETTE[season]||'#B07D4F'}"></span>พาเลตตีมร่วม · โทน${SEASON_TH[season]||season}</div>`;
+  members.forEach(m=>{
+    const ageTh = AGE_TH[m.age_band]||m.age_band||'';
+    html+=`<div class="look"><div class="lhead">
+      <div class="ava" style="background:${avaColor(m.id||m.name)}">${initial(m.name)}</div>
+      <div><div class="lname">${escHtml(m.name)}</div><div class="lrel">${escHtml(m.rel||(m.role==='owner'?'ตัวคุณเอง':'สมาชิก'))}${ageTh?(' · '+ageTh):''}</div></div></div>`;
+    const picks = m.picks||[];
+    if(m.needs_sourcing || picks.length===0){
+      html+=`<div class="sourcing"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>
+        ยังไม่มีชุด${ageTh}ที่ว่างในวันนี้ — ทีมจะช่วย <b>จัดหาเพิ่ม (sourcing)</b> ให้เข้าตีมเดียวกัน</div>`;
+    } else {
+      html+=`<div class="picks">${picks.map(p=>`<div class="pick">
+        <div class="swatch" style="background:${p.color_hex||'#E7E2DA'}">
+          ${p.on_theme?'<span class="ontheme">เข้าตีม</span>':'<span></span>'}
+          ${(p.fit!=null)?`<span class="fitpill">พอดี ${p.fit}%</span>`:'<span></span>'}</div>
+        <div class="pmeta"><div class="pn">${escHtml(p.name||'')}</div><div class="pc">${escHtml(p.color_name||'')}${p.code?(' · '+escHtml(p.code)):''}</div></div>
+      </div>`).join('')}</div>`;
+    }
+    html+=`</div>`;
+  });
+  const checkoutHref = LIVE && g && g.id ? `group-checkout.html?group=${encodeURIComponent(g.id)}` : null;
+  html+=`<div style="margin-top:14px">`;
+  if(checkoutHref){
+    html+=`<a class="btn" style="display:inline-block;text-decoration:none" href="${checkoutHref}">เช่าทั้งกลุ่มเข้าตีม →</a>`;
+  } else {
+    html+=`<button class="btn" onclick="alert('ตัวอย่าง: ส่งชุดที่เลือกไป book_group_cart — จองทั้งกลุ่มในออเดอร์เดียว ส่งพร้อมกัน บิลรวมที่ผู้จ่าย')">เช่าทั้งกลุ่มเข้าตีม →</button>`;
+  }
+  html+=`</div>`;
+  box.innerHTML=html;
+}
+
+async function renderTheme(show){
+  const box=$('#themeResult'); if(!show){box.innerHTML='';return;}
+  const g=curGroup(), occ=$('#t_occ').value;
+  if(!g || others(g).length===0){
+    box.innerHTML=`<div class="empty" style="padding:24px"><h4>ยังจัดตีมไม่ได้</h4><p>ต้องมีสมาชิกอย่างน้อย 1 คนก่อน ถึงจะให้สไตลิสต์จัดชุดเข้าตีมให้ทั้งกลุ่มได้</p></div>`;
+    return;
+  }
+  if(LIVE){
+    box.innerHTML=`<div class="empty" style="padding:24px"><p>กำลังให้สไตลิสต์จัดชุด…</p></div>`;
+    const fromStr=$('#t_date').value||new Date().toISOString().slice(0,10);
+    try{
+      const data=unwrap(await window.API.groupThemeSuggest(g.id, ME, occ, fromStr, fromStr));
+      if(!data){ box.innerHTML=`<div class="empty" style="padding:24px"><p>ยังจัดชุดให้ไม่ได้ตอนนี้ ลองใหม่อีกครั้งนะคะ</p></div>`; return; }
+      paintTheme(g, data.season||groupSeason(), data.members||[]);
+    }catch(e){
+      box.innerHTML=`<div class="empty" style="padding:24px"><h4>จัดชุดไม่สำเร็จ</h4><p>${escHtml(e.message||'ลองใหม่อีกครั้ง')}</p></div>`;
+    }
+  } else {
+    paintTheme(g, groupSeason(), mockThemeMembers(g, occ));
+  }
+}
+
+// ===== คำเชิญรอตอบรับ =====
+function renderInvites(){
+  const el=$('#invites');
+  if(INVITES.length===0){ el.innerHTML=''; return; }
+  el.innerHTML=`<div class="invbanner">
+    <div class="ib-h"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--ok);fill:none;stroke-width:1.7"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
+      คำเชิญรอคุณตอบรับ (${INVITES.length})</div>
+    ${INVITES.map(iv=>`<div class="invrow">
+      <div class="ir-t"><div class="ir-n">${iv.name}</div>
+        <div class="ir-f"><span class="ir-k">${iv.kind==='friends'?'เพื่อน':'ครอบครัว'}</span> · ${iv.from} ชวนคุณเข้าร่วม</div></div>
+      <button class="mini yes" onclick="respondInvite('${iv.group_id}',true)">ตอบรับ</button>
+      <button class="mini no" onclick="respondInvite('${iv.group_id}',false)">ปฏิเสธ</button>
+    </div>`).join('')}
+  </div>`;
+}
+window.respondInvite=async (gid,ok)=>{
+  const iv=INVITES.find(x=>x.group_id===gid);
+  if(LIVE){
+    try{
+      unwrap(await window.API.groupRespond(gid, ME, ok));
+      await reloadGroups();
+      if(ok) active=gid;
+      render();
+      if(ok && iv) setTimeout(()=>alert('เข้าร่วม “'+iv.name+'” แล้ว'),50);
+    }catch(e){ toast('ตอบรับคำเชิญไม่สำเร็จ: '+(e.message||e)); }
+    return;
+  }
+  INVITES=INVITES.filter(x=>x.group_id!==gid);
+  if(ok && iv){ // join_group / group_respond(accept) → กลายเป็นสมาชิก active
+    const ng={id:gid,name:iv.name,kind:iv.kind,members:[
+      {id:'host',name:iv.from,rel:'เพื่อน',role:'owner',age:'adult',gen:'female',managed:false,season:'autumn'},
+      {id:'me',name:ME.name,rel:null,role:'member',age:'adult',gen:'female',managed:false,season:'autumn'}]};
+    GROUPS.push(ng); active=gid;
+  }
+  render();
+  if(ok) setTimeout(()=>alert('เข้าร่วม “'+iv.name+'” แล้ว · ของจริงเรียก group_respond(accept) แล้วแจ้งเตือนหัวหน้ากลุ่ม'),50);
+};
+
+// ===== ชวนเพื่อน =====
+let inviteUrl = '';  // URL ล่าสุดสำหรับแชร์ทาง LINE
+// ประกอบลิงก์ join แบบ LIFF: https://liff.line.me/<LIFF_ID>?join=<token>
+function buildJoinUrl(token){
+  const lid = (window.CONFIG && window.CONFIG.LIFF_ID) || '';
+  return `https://liff.line.me/${lid}?join=${encodeURIComponent(token)}`;
+}
+window.openInvite=async ()=>{
+  $('#form').classList.remove('show');
+  $('#invForm').classList.add('show');
+  $('#invForm').scrollIntoView({behavior:'smooth',block:'center'});
+  if(LIVE){
+    const g=curGroup(); if(!g) return;
+    $('#invLinkUrl').textContent='กำลังสร้างลิงก์…';
+    try{
+      const data=unwrap(await window.API.groupJoinToken(g.id, ME));
+      const token=(data && data.token) || '';
+      inviteUrl = buildJoinUrl(token);
+      $('#invLinkUrl').textContent = inviteUrl;
+    }catch(e){
+      $('#invLinkUrl').textContent='สร้างลิงก์ไม่สำเร็จ';
+      inviteUrl='';
+    }
+  } else {
+    inviteUrl='lloop.app/join/'+active+'-'+Math.random().toString(36).slice(2,8);
+    $('#invLinkUrl').textContent=inviteUrl;
+  }
+};
+function bindInvite(){
+  $('#inviteBtn').onclick=openInvite;
+  $('#cancelInvite').onclick=()=>$('#invForm').classList.remove('show');
+  $('#copyLink').onclick=()=>{
+    if(LIVE){
+      if(!inviteUrl){ toast('ยังไม่มีลิงก์ ลองเปิดใหม่อีกครั้ง'); return; }
+      // เปิด LINE share sheet ถ้าใช้งานได้ ไม่งั้น copy ลงคลิปบอร์ด
+      try{
+        if(window.liff && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')){
+          liff.shareTargetPicker([{ type:'text', text:'มาเข้ากลุ่ม LLOOP กับเรา แตะลิงก์นี้เลย\n'+inviteUrl }]);
+          return;
+        }
+      }catch(_e){}
+      if(navigator.clipboard){ navigator.clipboard.writeText(inviteUrl).then(()=>toast('คัดลอกลิงก์แล้ว ส่งให้เพื่อนทาง LINE ได้เลย'),()=>toast(inviteUrl)); }
+      else toast(inviteUrl);
+    } else {
+      alert('ของจริง: เปิด LINE share sheet ส่งลิงก์นี้ — เพื่อนแตะแล้วเข้าร่วมได้เลย (join_group)');
+    }
+  };
+  $('#sendInvite').onclick=async ()=>{
+    const code=$('#i_code').value.trim();
+    if(!code){ alert('ใส่รหัสเพื่อนก่อนนะคะ'); return; }
+    const g=curGroup(); if(!g) return;
+    const rel=$('#i_rel').value||null;
+    if(LIVE){
+      try{
+        const data=unwrap(await window.API.groupInvite(g.id, ME, code.toUpperCase(), rel));
+        if(data && data.error){ toast('ส่งคำเชิญไม่สำเร็จ: '+friendlyErr(data.error)); return; }
+        await reloadGroups();
+        $('#invForm').classList.remove('show'); $('#i_code').value=''; $('#i_rel').value='';
+        render();
+        setTimeout(()=>alert('ส่งคำเชิญแล้ว · เพื่อนได้แจ้งเตือนให้กดรับ (ขึ้นป้าย “รอตอบรับ”)'),50);
+      }catch(e){ toast('ส่งคำเชิญไม่สำเร็จ: '+(e.message||e)); }
+    } else {
+      g.members.push({id:'inv'+Date.now(),name:'เพื่อน ('+code.toUpperCase()+')',rel:rel||'เพื่อน',
+        role:'member',age:'adult',gen:'female',managed:false,season:'autumn',pend:true});
+      $('#invForm').classList.remove('show'); $('#i_code').value=''; $('#i_rel').value='';
+      render();
+      setTimeout(()=>alert('ส่งคำเชิญแล้ว · ของจริงเรียก group_invite → เพื่อนได้แจ้งเตือนให้กดรับ (ตอนนี้ขึ้นป้าย “รอตอบรับ”)'),50);
+    }
+  };
+}
+
+// แปลง error code จาก RPC → ข้อความไทยอ่านง่าย
+function friendlyErr(code){
+  const m={ not_member:'คุณไม่ใช่สมาชิกของกลุ่มนี้', not_found:'ไม่พบรหัสเพื่อนนี้',
+    not_owner:'เฉพาะหัวหน้ากลุ่มเท่านั้น', already_member:'อยู่ในกลุ่มแล้ว',
+    self:'ชวนตัวเองไม่ได้นะคะ', expired:'ลิงก์หมดอายุแล้ว' };
+  return m[code]||code;
+}
+
+function render(){ renderInvites(); renderSwitch(); renderMembers(); renderTheme(false); }
+
+// อ่าน ?join=<token> จาก URL หรือ liff.state → ถ้ามีและ LIVE ให้เข้ากลุ่มแล้วล้าง URL
+function readJoinToken(){
+  try{
+    const sp=new URLSearchParams(location.search);
+    let t=sp.get('join');
+    if(!t){
+      const st=sp.get('liff.state');
+      if(st){ const inner=new URLSearchParams(st.replace(/^\?/,'')); t=inner.get('join'); }
+    }
+    return t||null;
+  }catch(_e){ return null; }
+}
+function cleanJoinFromUrl(){
+  try{
+    const u=new URL(location.href);
+    u.searchParams.delete('join'); u.searchParams.delete('liff.state');
+    history.replaceState(null,'',u.pathname+(u.search||'')+u.hash);
+  }catch(_e){}
+}
+
+document.addEventListener('DOMContentLoaded',async ()=>{
+  $('#t_date').value=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+  $('#suggestBtn').onclick=()=>renderTheme(true);
+  bindForm(); bindInvite();
+
+  // ===== ลอง bootstrap LIVE (Supabase + LINE) — ล้มเหลว/ไม่มี login ก็ตกไป mock =====
+  try{
+    if(window.API && window.CONFIG && !window.CONFIG.USE_MOCK){
+      const s=await window.API.init();
+      if(s && s.CUSTOMER && s.CUSTOMER.id){
+        ME={ id:s.CUSTOMER.id, name:s.CUSTOMER.displayName||s.CUSTOMER.name||s.CUSTOMER.display_name||'ฉัน' };
+        LIVE=true;
+      }
+    }
+  }catch(e){ LIVE=false; console.warn('family LIVE bootstrap failed, fallback mock:', e); }
+
+  if(LIVE){
+    // จัดการลิงก์เชิญขาเข้า ?join=<token> ก่อน แล้วค่อยโหลดกลุ่ม
+    const token=readJoinToken();
+    if(token){
+      try{
+        const r=unwrap(await window.API.joinGroup(token, ME));
+        cleanJoinFromUrl();
+        if(r && r.group_id) active=r.group_id;
+        if(r && r.group_name) setTimeout(()=>alert('เข้าร่วม “'+r.group_name+'” แล้ว'),60);
+      }catch(e){ cleanJoinFromUrl(); toast('เข้าร่วมกลุ่มไม่สำเร็จ: '+friendlyErr(e.message||e)); }
+    }
+    try{ await reloadGroups(); }
+    catch(e){ console.warn('reloadGroups failed:', e); LIVE=false; }
+  }
+
+  render();
+});
+</script>
+</body>
+</html>
