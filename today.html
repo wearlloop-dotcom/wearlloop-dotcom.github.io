@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · งานวันนี้</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--warn:#B5860B;--danger:#A32D2D;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:16px}
+  .bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+  .bar .nav a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:14px}
+  .wrap{max-width:640px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .toolrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .toolrow .when{font-size:13px;color:var(--muted)}
+  .btn{border:none;border-radius:9px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .badge{font-size:13px;font-weight:600;min-width:26px;text-align:center;padding:2px 9px;border-radius:20px;background:var(--soft);color:var(--ink)}
+  .badge.hot{background:#FBE3E3;color:var(--danger)}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+  .row:last-child{border-bottom:none}
+  .row .code{font-weight:600}
+  .row .meta{font-size:13px;color:var(--muted);margin-top:2px}
+  .tag{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--soft);color:var(--ink);white-space:nowrap}
+  .tag.washing{background:#E4F0EC;color:var(--ok)}.tag.qc{background:#FDF2D6;color:#8A6D08}.tag.repair{background:#FBE3E3;color:var(--danger)}
+  .tag.offer{background:#EDE7F6;color:#5A3E8C}.tag.bulk{background:#FDF2D6;color:#8A6D08}
+  .go{font-size:13px;color:var(--muted)}
+  .empty{color:var(--muted);padding:10px 0;font-size:15px}
+  .loading{color:var(--muted);text-align:center;padding:30px}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  .toolrow .btn{width:auto}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>งานวันนี้</h1>
+  <div class="nav"><a href="/laundry.html">ซัก/QC</a><a href="/shipout.html">เตรียมส่ง</a><a href="/intake.html">รับเข้า</a><a href="/nfc.html">แตะ NFC</a><a href="/stock.html">สต๊อก</a><a href="/market.html">เฝ้าตลาด</a></div>
+</div>
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">today at the studio</div>
+    <h1>งานวันนี้ ที่รอมือเรา</h1>
+    <div class="sub">รวมทุกชุดที่ต้องส่ง คืน ซัก ตรวจ และดูแล วันนี้ — ให้ทุกตัวหมุนเวียนต่อได้อย่างไม่ตกหล่น</div>
+  </section>
+  <div class="toolrow">
+    <div class="when" id="when"></div>
+    <button class="btn" onclick="load()">รีเฟรช</button>
+  </div>
+  <div id="out"><div class="loading">กำลังโหลด…</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+  const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'';
+  const STAGE={qc:['รอตรวจ','qc'],washing:['กำลังซัก','washing'],repair:['รอซ่อม','repair'],checkin:['รับเข้า','qc']};
+
+  // สร้างหนึ่งแถว — link ไปได้ถ้ามี href
+  function rowLink(href, left, sub, right){
+    const tag = right || '';
+    const go = href ? '<span class="go">เปิด ›</span>' : '';
+    const inner = `<div><div class="code">${left}</div>${sub?`<div class="meta">${sub}</div>`:''}</div><div style="text-align:right">${tag}${go?'<div>'+go+'</div>':''}</div>`;
+    return href ? `<a class="row" href="${esc(href)}">${inner}</a>` : `<div class="row">${inner}</div>`;
+  }
+  function section(title, count, hot, body){
+    const cls = hot && count>0 ? 'badge hot' : 'badge';
+    const list = body || '<div class="empty">ไม่มี</div>';
+    return `<div class="card"><h2><span class="${cls}">${count}</span> ${title}</h2>${list}</div>`;
+  }
+
+  function render(d){
+    d = d || {};
+    const toShip=(d.to_ship||[]).map(x=>rowLink(
+      '/shipout.html?code='+encodeURIComponent(x.code),
+      esc(x.code)+' · '+esc(x.name||''),
+      [x.customer?'ลูกค้า '+esc(x.customer):'', x.use_date?'ใช้ '+dt(x.use_date):''].filter(Boolean).join(' · '),
+      '')).join('');
+    const due=(d.due_today||[]).map(x=>rowLink(
+      null,
+      esc(x.code)+' · '+esc(x.name||''),
+      x.customer?'ลูกค้า '+esc(x.customer):'',
+      '')).join('');
+    const wash=(d.wash||[]).map(x=>{ const s=STAGE[x.stage]||[x.stage||'',''];
+      return rowLink('/laundry.html', esc(x.code)+' · '+esc(x.name||''), '', `<span class="tag ${s[1]}">${esc(s[0])}</span>`); }).join('');
+    const review=(d.review||[]).map(x=>rowLink(
+      '/shipout.html?code='+encodeURIComponent(x.code),
+      esc(x.code)+' · '+esc(x.name||''), '', '')).join('');
+    const acq=(d.acq||[]).map(x=>{
+      const isBulk = x.mode==='bulk';
+      const label = isBulk ? ('ขายเหมา '+(x.count||0)+' ตัว') : 'เสนอขาย';
+      const cls = isBulk ? 'bulk' : 'offer';
+      return rowLink(null, esc(x.name||('คำขอ #'+esc(x.id))), x.seller?'ผู้ขาย '+esc(x.seller):'', `<span class="tag ${cls}">${esc(label)}</span>`);
+    }).join('');
+
+    $('out').innerHTML =
+      section('ต้องส่งวันนี้/พรุ่งนี้', (d.to_ship||[]).length, true, toShip) +
+      section('ครบกำหนดคืนวันนี้', (d.due_today||[]).length, true, due) +
+      section('คิวซัก/ดูแล', (d.wash||[]).length, false, wash) +
+      section('รอตรวจ/อนุมัติ', (d.review||[]).length, false, review) +
+      section('รับซื้อรอจัดการ', (d.acq||[]).length, false, acq);
+  }
+
+  async function load(){
+    $('when').textContent='กำลังโหลด…';
+    const { data, error } = await sb.rpc('ops_today');
+    if(error){ $('out').innerHTML='<div class="card"><div class="empty" style="color:var(--danger)">โหลดไม่สำเร็จ: '+esc(error.message)+'</div></div>'; $('when').textContent=''; return; }
+    render(data);
+    // ชุดที่ไม่ถูกสแกนนาน (กันหาย) — โผล่เฉพาะที่มี tag แล้วและหายเกินกำหนด
+    try{
+      const { data: miss } = await sb.rpc('tag_missing', { p_days: 14 });
+      if (miss && miss.length){
+        const rows = miss.map(x=>rowLink('/garment.html?code='+encodeURIComponent(x.code),
+          esc(x.code)+' · '+esc(x.name||''),
+          x.last_seen_at?('เห็นล่าสุด '+dt(x.last_seen_at)):'ยังไม่เคยสแกน', '')).join('');
+        $('out').innerHTML += section('ชุดไม่ถูกสแกนเกิน 14 วัน (กันหาย)', miss.length, true, rows);
+      }
+    }catch(e){}
+    $('when').textContent='อัปเดต '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  }
+  load();
+</script>
+</body>
+</html>

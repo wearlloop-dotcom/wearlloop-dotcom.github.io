@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · Marketing Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700;color:var(--clay)}
+  .bar .nav a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:14px}
+  .bar .nav a.on{color:var(--ink);font-weight:700}
+  .wrap{max-width:820px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .card h2 .hint{font-family:var(--sans);font-size:12px;font-weight:400;color:var(--muted)}
+  .btn{border:none;border-radius:9px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+  .btn.sage{background:var(--sage)}
+  .btn.clay{background:var(--clay)}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:8px 12px;font-size:13px}
+  .btn:disabled{opacity:.55;cursor:default}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
+  input[type=text],input[type=number],input[type=datetime-local],input[type=url],select,textarea{width:100%;font-family:var(--sans);font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#fff}
+  textarea{resize:vertical;min-height:70px;line-height:1.5}
+  .field{margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .grid-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:640px){.grid2,.grid3,.grid-g{grid-template-columns:1fr}}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:13px;padding:5px 12px;border-radius:20px;background:var(--soft);color:var(--ink);border:1px solid var(--line);cursor:pointer;white-space:nowrap}
+  .chip.on{background:var(--clay);color:#fff;border-color:var(--clay)}
+  .chk{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink);cursor:pointer;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
+  .chk.on{background:#EAEFE8;border-color:var(--sage)}
+  .chk input{width:auto}
+  .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  @media(max-width:640px){.stat{grid-template-columns:repeat(2,1fr)}}
+  .stat .b{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+  .stat .b .n{font-family:var(--display);font-size:22px;font-weight:700;color:var(--clay)}
+  .stat .b .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .meta{font-size:13px;color:var(--muted);margin-top:2px}
+  .tag{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--soft);color:var(--ink);white-space:nowrap}
+  .tag.tiktok{background:#EFE7F2;color:#6B4A78}.tag.instagram{background:#F7E7EC;color:#9C3F5E}.tag.facebook{background:#E5ECF5;color:#3A5A86}
+  .tag.idea{background:#F0ECE2;color:#8A6D08}.tag.draft{background:#EFEDE8;color:var(--muted)}.tag.scheduled{background:#EAEFE8;color:var(--sage)}.tag.published{background:#E9F0EC;color:#0F6E56}
+  .ht{font-size:12px;padding:3px 9px;border-radius:20px;background:#EAEFE8;color:var(--sage)}
+  .gcard{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+  .gcard .ph{width:100%;aspect-ratio:3/4;object-fit:cover;background:var(--soft);display:block}
+  .gcard .gi{padding:9px 10px;flex:1;display:flex;flex-direction:column;gap:5px}
+  .gcard .gn{font-size:13px;font-weight:600;line-height:1.3}
+  .gcard .gc{font-size:12px;color:var(--muted)}
+  .aicard{border:1px solid var(--line);border-radius:11px;padding:14px;background:var(--soft);margin-top:12px}
+  .empty{color:var(--muted);padding:10px 0;font-size:15px}
+  .loading{color:var(--muted);text-align:center;padding:24px}
+  .notice{background:#F0ECE2;border:1px solid #E2D8BE;color:#7A6516;border-radius:9px;padding:11px 13px;font-size:14px;margin-top:10px;line-height:1.5}
+  .err{color:var(--clay)}
+  .expand{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+  .overlay{position:fixed;inset:0;background:rgba(40,36,28,.45);display:none;align-items:flex-start;justify-content:center;padding:24px 14px;z-index:50;overflow:auto}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:18px;max-height:88vh;overflow:auto}
+  .modal h3{font-family:var(--display);font-size:16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+  .modal .x{cursor:pointer;color:var(--muted);font-size:20px;background:none;border:none}
+  .pickgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:10px}
+  @media(max-width:640px){.pickgrid{grid-template-columns:repeat(2,1fr)}}
+  .pickgrid .gcard{cursor:pointer}
+  .pickgrid .gcard:hover{border-color:var(--clay)}
+  .selg{display:flex;align-items:center;gap:10px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:8px;margin-top:8px}
+  .selg img{width:42px;height:56px;object-fit:cover;border-radius:6px;background:#fff}
+  .selg .sx{margin-left:auto;cursor:pointer;color:var(--muted);background:none;border:none;font-size:13px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:80;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
+  .toast.show{opacity:1}
+  .toast.bad{background:var(--clay)}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .toolrow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .when{font-size:13px;color:var(--muted)}
+  .scene{font-size:13px;border-left:2px solid var(--sage);padding:4px 0 4px 10px;margin:6px 0;line-height:1.5}
+  .scene b{color:var(--clay)}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+<div class="bar">
+  <h1>คอนเทนต์</h1>
+  <div class="nav">
+    <a href="/today.html">งานวันนี้</a>
+    <a href="/marketing.html" class="on">คอนเทนต์</a>
+    <a href="/live.html">ไลฟ์</a>
+    <a href="/influencers.html">อินฟลู</a>
+    <a href="/analytics.html">รายงาน</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">marketing studio</div>
+    <h1>เล่าเรื่องชุดให้โลกได้ยิน</h1>
+    <div class="sub">วางปฏิทิน เขียนแคปชั่น และปั้นคอนเทนต์จากชุดจริง ให้ทุกชุดที่หมุนเวียนมีเรื่องราวของมันเอง</div>
+  </section>
+
+  <div class="toolrow">
+    <div class="when" id="when"></div>
+    <button class="btn ghost sm" onclick="loadAll()">รีเฟรช</button>
+  </div>
+
+  <!-- 1) OVERVIEW -->
+  <div class="card" id="ovCard">
+    <h2>ภาพรวมคอนเทนต์</h2>
+    <div id="ovBody"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+
+  <!-- 2) AI CALENDAR -->
+  <div class="card">
+    <h2>สร้างปฏิทินคอนเทนต์ด้วย AI</h2>
+    <div class="field">
+      <label>แพลตฟอร์ม</label>
+      <div class="chips" id="calPlats">
+        <label class="chk on"><input type="checkbox" value="tiktok" checked> TikTok</label>
+        <label class="chk on"><input type="checkbox" value="instagram" checked> Instagram</label>
+        <label class="chk on"><input type="checkbox" value="facebook" checked> Facebook</label>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>จำนวนวัน</label><input type="number" id="calDays" value="7" min="1" max="30"></div>
+      <div class="field"><label>โฟกัส / ธีม</label><input type="text" id="calFocus" placeholder="เช่น ชุดงานแต่ง เดือนมิถุนายน"></div>
+    </div>
+    <button class="btn clay" id="calBtn" onclick="genCalendar()">ให้ AI วางปฏิทิน</button>
+    <div id="calOut"></div>
+  </div>
+
+  <!-- 3) CAPTION / CLIP -->
+  <div class="card">
+    <h2>เขียนแคปชั่น / สคริปต์คลิป</h2>
+    <div class="grid2">
+      <div class="field">
+        <label>แพลตฟอร์ม</label>
+        <select id="capPlat"><option value="tiktok">TikTok</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option></select>
+      </div>
+      <div class="field">
+        <label>โหมด</label>
+        <div class="chips" id="capMode">
+          <span class="chip on" data-mode="caption" onclick="setCapMode(this)">แคปชั่น</span>
+          <span class="chip" data-mode="clip" onclick="setCapMode(this)">คลิป</span>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>หัวข้อ / ไอเดีย</label><textarea id="capTopic" placeholder="เล่าสิ่งที่อยากสื่อ…"></textarea></div>
+    <div class="grid2">
+      <div class="field"><label>โทน (เฉพาะแคปชั่น)</label><input type="text" id="capTone" placeholder="เช่น อบอุ่น เป็นกันเอง"></div>
+      <div class="field"><label>ชุดจริง (ถ้ามี)</label><button class="btn ghost" style="width:100%" onclick="openPicker('cap')">เลือกชุดจริง</button></div>
+    </div>
+    <div id="capSel"></div>
+    <button class="btn clay" id="capBtn" onclick="genCaption()">ให้ AI เขียน</button>
+    <div id="capOut"></div>
+  </div>
+
+  <!-- 4) GARMENT POSTS -->
+  <div class="card">
+    <h2>โพสต์จากชุดจริง</h2>
+    <div class="field"><input type="text" id="gSearch" placeholder="ค้นหาชุด (ชื่อ / รหัส / สี)" oninput="gSearchDebounce()"></div>
+    <div id="gGrid"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+
+  <!-- 5) ALL CONTENT -->
+  <div class="card">
+    <h2>คอนเทนต์ทั้งหมด</h2>
+    <div class="field">
+      <label>สถานะ</label>
+      <div class="chips" id="cStatus">
+        <span class="chip on" data-s="" onclick="setCFilter(this,'status')">ทั้งหมด</span>
+        <span class="chip" data-s="idea" onclick="setCFilter(this,'status')">idea</span>
+        <span class="chip" data-s="draft" onclick="setCFilter(this,'status')">draft</span>
+        <span class="chip" data-s="scheduled" onclick="setCFilter(this,'status')">scheduled</span>
+        <span class="chip" data-s="published" onclick="setCFilter(this,'status')">published</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>แพลตฟอร์ม</label>
+      <div class="chips" id="cPlat">
+        <span class="chip on" data-p="" onclick="setCFilter(this,'plat')">ทั้งหมด</span>
+        <span class="chip" data-p="tiktok" onclick="setCFilter(this,'plat')">TikTok</span>
+        <span class="chip" data-p="instagram" onclick="setCFilter(this,'plat')">Instagram</span>
+        <span class="chip" data-p="facebook" onclick="setCFilter(this,'plat')">Facebook</span>
+      </div>
+    </div>
+    <div id="cList"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+</div>
+
+<!-- GARMENT PICKER MODAL -->
+<div class="overlay" id="pickOverlay">
+  <div class="modal">
+    <h3>เลือกชุดจริง <button class="x" onclick="closePicker()">×</button></h3>
+    <input type="text" id="pickSearch" placeholder="ค้นหาชุด…" oninput="pickSearchDebounce()">
+    <div id="pickGrid"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const AI_URL=SUPABASE_URL+'/functions/v1/marketing-ai';
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const dt=s=>s?new Date(s).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+  const PLAT_TH={tiktok:'TikTok',instagram:'Instagram',facebook:'Facebook'};
+
+  let TOAST_T=null;
+  function toast(msg,bad){
+    const t=$('toast'); t.textContent=msg; t.className='toast show'+(bad?' bad':'');
+    clearTimeout(TOAST_T); TOAST_T=setTimeout(()=>{t.className='toast';},3200);
+  }
+  // convert <input datetime-local> value to ISO, or '' if empty
+  function localToIso(v){ return v?new Date(v).toISOString():''; }
+  function isoToLocal(s){ if(!s)return ''; const d=new Date(s); const p=n=>String(n).padStart(2,'0');
+    return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); }
+  function splitTags(str){ return (str||'').split(/[,\s]+/).map(s=>s.trim().replace(/^#/,'')).filter(Boolean); }
+  function htChips(arr){ return (arr||[]).map(h=>'<span class="ht">#'+esc(h)+'</span>').join(' '); }
+
+  // Generic AI caller. Returns {ok,data} or {ok:false,reason:'config'|'net',msg}
+  async function callAI(body){
+    try{
+      const res=await fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify(body)});
+      let j=null; try{ j=await res.json(); }catch(e){ j=null; }
+      if(!res.ok || (j&&j.error)){
+        const m=(j&&j.error)||('HTTP '+res.status);
+        const config=/key|not set|api|unauthor|missing|config/i.test(m)||res.status===500;
+        return {ok:false,reason:config?'config':'net',msg:m};
+      }
+      return {ok:true,data:j};
+    }catch(e){ return {ok:false,reason:'net',msg:e.message}; }
+  }
+  const AI_CONFIG_MSG='ยังไม่ได้ตั้งค่า AI key — ฟังก์ชันสร้างด้วย AI จะใช้งานได้เมื่อใส่ key แล้ว';
+  function aiNotice(r){
+    if(r.reason==='config') return '<div class="notice">'+AI_CONFIG_MSG+'</div>';
+    return '<div class="notice err">สร้างด้วย AI ไม่สำเร็จ: '+esc(r.msg)+'</div>';
+  }
+
+  /* ===== 1. OVERVIEW ===== */
+  async function loadOverview(){
+    const {data,error}=await sb.rpc('mkt_overview');
+    if(error){ $('ovBody').innerHTML='<div class="empty err">โหลดไม่สำเร็จ: '+esc(error.message)+'</div>'; return; }
+    const d=data||{}; const c=d.content||{};
+    const keys=['idea','draft','scheduled','published'];
+    const stat=keys.map(k=>'<div class="b"><div class="n">'+(c[k]||0)+'</div><div class="l">'+k+'</div></div>').join('');
+    const up=(d.upcoming||[]);
+    const upHtml=up.length?up.map(x=>
+      '<div class="row"><div><div style="font-weight:600">'+esc(x.title||'(ไม่มีชื่อ)')+'</div>'+
+      '<div class="meta">'+esc(PLAT_TH[x.platform]||x.platform||'')+' · '+esc(x.post_type||'')+(x.scheduled_at?' · '+dt(x.scheduled_at):'')+'</div></div>'+
+      '<span class="tag scheduled">นัดโพสต์</span></div>').join('')
+      :'<div class="empty">ยังไม่มีคอนเทนต์ที่ตั้งเวลาไว้</div>';
+    $('ovBody').innerHTML='<div class="stat">'+stat+'</div>'+
+      '<div style="margin-top:14px"><label>กำหนดโพสต์ถัดไป</label>'+upHtml+'</div>';
+  }
+
+  /* ===== 2. CALENDAR ===== */
+  async function genCalendar(){
+    const plats=[...$('calPlats').querySelectorAll('input:checked')].map(i=>i.value);
+    if(!plats.length){ toast('เลือกอย่างน้อย 1 แพลตฟอร์ม',true); return; }
+    const days=parseInt($('calDays').value)||7;
+    const focus=$('calFocus').value.trim();
+    const btn=$('calBtn'); btn.disabled=true; const lbl=btn.textContent; btn.innerHTML='<span class="spin"></span>กำลังสร้าง…';
+    $('calOut').innerHTML='<div class="loading">AI กำลังวางปฏิทิน…</div>';
+    const r=await callAI({task:'calendar',platforms:plats,days,focus});
+    btn.disabled=false; btn.textContent=lbl;
+    if(!r.ok){ $('calOut').innerHTML=aiNotice(r); return; }
+    const posts=(r.data&&r.data.posts)||[];
+    if(!posts.length){ $('calOut').innerHTML='<div class="notice">AI ไม่ได้ส่งโพสต์กลับมา ลองใหม่อีกครั้ง</div>'; return; }
+    CAL_POSTS=posts;
+    $('calOut').innerHTML=posts.map((p,i)=>calCard(p,i)).join('');
+  }
+  let CAL_POSTS=[];
+  function calCard(p,i){
+    return '<div class="aicard" id="calc'+i+'">'+
+      '<div class="row" style="padding-top:0"><div class="meta">วันที่ '+esc(p.day||'')+' · <span class="tag '+esc(p.platform)+'">'+esc(PLAT_TH[p.platform]||p.platform||'')+'</span> · '+esc(p.post_type||'')+'</div></div>'+
+      '<div class="field"><label>หัวข้อ</label><input type="text" id="cal_t'+i+'" value="'+esc(p.title||'')+'"></div>'+
+      '<div class="field"><label>ฮุก</label><input type="text" id="cal_h'+i+'" value="'+esc(p.hook||'')+'"></div>'+
+      '<div class="field"><label>แคปชั่น</label><textarea id="cal_c'+i+'">'+esc(p.caption||p.idea||'')+'</textarea></div>'+
+      '<div class="field"><label>แฮชแท็ก (คั่นด้วยช่องว่าง/จุลภาค)</label><input type="text" id="cal_g'+i+'" value="'+esc((p.hashtags||[]).join(' '))+'"></div>'+
+      '<button class="btn sage sm" onclick="saveCal('+i+')">บันทึกเป็นดราฟต์</button></div>';
+  }
+  async function saveCal(i){
+    const p=CAL_POSTS[i];
+    const payload={platform:p.platform,post_type:p.post_type||'photo',
+      title:$('cal_t'+i).value.trim(),hook:$('cal_h'+i).value.trim(),
+      caption:$('cal_c'+i).value.trim(),hashtags:splitTags($('cal_g'+i).value),
+      script:null,status:'draft',ai_generated:true};
+    const {error}=await sb.rpc('content_upsert',{p:payload});
+    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message,true); return; }
+    toast('บันทึกเป็นดราฟต์แล้ว');
+    loadOverview(); loadContent();
+  }
+
+  /* ===== 3. CAPTION / CLIP ===== */
+  let CAP_MODE='caption', CAP_GARMENT=null, CAP_RESULT=null;
+  function setCapMode(el){ [...$('capMode').children].forEach(c=>c.classList.remove('on')); el.classList.add('on'); CAP_MODE=el.dataset.mode; }
+  function renderCapSel(){
+    if(!CAP_GARMENT){ $('capSel').innerHTML=''; return; }
+    const g=CAP_GARMENT;
+    $('capSel').innerHTML='<div class="selg"><img src="'+esc(g.photo||'')+'" alt=""><div><div style="font-weight:600;font-size:14px">'+esc(g.name||'')+'</div><div class="meta">'+esc(g.code||'')+'</div></div><button class="sx" onclick="CAP_GARMENT=null;renderCapSel()">นำออก</button></div>';
+  }
+  async function genCaption(){
+    const platform=$('capPlat').value;
+    const topic=$('capTopic').value.trim();
+    if(!topic){ toast('ใส่หัวข้อ/ไอเดียก่อน',true); return; }
+    const btn=$('capBtn'); btn.disabled=true; const lbl=btn.textContent; btn.innerHTML='<span class="spin"></span>กำลังสร้าง…';
+    $('capOut').innerHTML='<div class="loading">AI กำลังเขียน…</div>';
+    let body;
+    if(CAP_MODE==='clip') body={task:'clip_script',platform,idea:topic,garment:CAP_GARMENT};
+    else body={task:'caption',platform,topic,tone:$('capTone').value.trim(),garment:CAP_GARMENT};
+    const r=await callAI(body);
+    btn.disabled=false; btn.textContent=lbl;
+    if(!r.ok){ $('capOut').innerHTML=aiNotice(r); return; }
+    CAP_RESULT=r.data||{};
+    $('capOut').innerHTML=capResultCard(CAP_RESULT);
+  }
+  function scriptHtml(arr){
+    if(!Array.isArray(arr)||!arr.length) return '';
+    return arr.map(s=>'<div class="scene"><b>ฉาก '+esc(s.scene||'')+'</b>'+(s.seconds?' ('+esc(s.seconds)+' วิ)':'')+
+      '<br>ช็อต: '+esc(s.shot||'')+'<br>พูด: '+esc(s.vo||'')+'</div>').join('');
+  }
+  function capResultCard(d){
+    const isClip=CAP_MODE==='clip';
+    let h='<div class="aicard">';
+    h+='<div class="field"><label>หัวข้อ</label><input type="text" id="cap_t" value="'+esc(d.title||'')+'"></div>';
+    h+='<div class="field"><label>ฮุก</label><input type="text" id="cap_h" value="'+esc(d.hook||'')+'"></div>';
+    if(isClip){
+      h+='<div class="field"><label>สคริปต์</label>'+(scriptHtml(d.script)||'<div class="meta">ไม่มีสคริปต์</div>')+'</div>';
+      if(d.sound_idea) h+='<div class="meta">ไอเดียเสียง: '+esc(d.sound_idea)+'</div>';
+    }
+    h+='<div class="field"><label>แคปชั่น</label><textarea id="cap_c">'+esc(d.caption||'')+'</textarea></div>';
+    if(d.cta) h+='<div class="meta" style="margin-bottom:10px">CTA: '+esc(d.cta)+'</div>';
+    h+='<div class="field"><label>แฮชแท็ก</label><input type="text" id="cap_g" value="'+esc((d.hashtags||[]).join(' '))+'"></div>';
+    h+='<button class="btn sage sm" onclick="saveCap()">บันทึก</button></div>';
+    return h;
+  }
+  async function saveCap(){
+    const isClip=CAP_MODE==='clip';
+    const payload={platform:$('capPlat').value,post_type:isClip?'clip':'photo',
+      title:$('cap_t').value.trim(),hook:$('cap_h').value.trim(),
+      caption:$('cap_c').value.trim(),hashtags:splitTags($('cap_g').value),
+      script:(isClip&&CAP_RESULT&&CAP_RESULT.script)?CAP_RESULT.script:null,
+      status:'draft',ai_generated:true};
+    if(CAP_GARMENT) payload.garment_id=CAP_GARMENT.id;
+    const {error}=await sb.rpc('content_upsert',{p:payload});
+    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message,true); return; }
+    toast('บันทึกแล้ว');
+    loadOverview(); loadContent();
+  }
+
+  /* ===== 4. GARMENT POSTS ===== */
+  let G_LIST=[], gTimer=null;
+  function gSearchDebounce(){ clearTimeout(gTimer); gTimer=setTimeout(loadGarments,300); }
+  async function loadGarments(){
+    const q=$('gSearch').value.trim()||null;
+    const {data,error}=await sb.rpc('garments_pick',{p_q:q,p_limit:24});
+    if(error){ $('gGrid').innerHTML='<div class="empty err">โหลดไม่สำเร็จ: '+esc(error.message)+'</div>'; return; }
+    G_LIST=data||[];
+    if(!G_LIST.length){ $('gGrid').innerHTML='<div class="empty">ไม่พบชุด</div>'; return; }
+    $('gGrid').innerHTML='<div class="grid-g">'+G_LIST.map((g,i)=>
+      '<div class="gcard"><img class="ph" src="'+esc(g.photo||'')+'" alt=""><div class="gi">'+
+      '<div class="gn">'+esc(g.name||'')+'</div><div class="gc">'+esc(g.code||'')+(g.color_name?' · '+esc(g.color_name):'')+'</div>'+
+      '<button class="btn clay sm" style="margin-top:auto" onclick="genGarmentPost('+i+')">ให้ AI เขียนโพสต์</button>'+
+      '<div id="gout'+i+'"></div></div></div>').join('')+'</div>';
+  }
+  let GARMENT_RESULTS={};
+  async function genGarmentPost(i){
+    const g=G_LIST[i]; const out=$('gout'+i);
+    const platform=document.getElementById('gplat'+i)?document.getElementById('gplat'+i).value:'instagram';
+    out.innerHTML='<div class="loading" style="padding:12px">AI กำลังเขียน…</div>';
+    const r=await callAI({task:'garment_post',platform,garment:g});
+    if(!r.ok){ out.innerHTML=aiNotice(r); return; }
+    const d=r.data||{}; GARMENT_RESULTS[i]={data:d,platform};
+    out.innerHTML='<div class="aicard" style="margin-top:10px">'+
+      '<div class="field"><label>หัวข้อ</label><input type="text" id="g_t'+i+'" value="'+esc(d.title||'')+'"></div>'+
+      '<div class="field"><label>แคปชั่น</label><textarea id="g_c'+i+'">'+esc(d.caption||'')+'</textarea></div>'+
+      '<div class="field"><label>แฮชแท็ก</label><input type="text" id="g_g'+i+'" value="'+esc((d.hashtags||[]).join(' '))+'"></div>'+
+      '<button class="btn sage sm" onclick="saveGarmentPost('+i+')">บันทึก</button></div>';
+  }
+  async function saveGarmentPost(i){
+    const g=G_LIST[i]; const meta=GARMENT_RESULTS[i]||{};
+    const d=meta.data||{};
+    const payload={platform:meta.platform||'instagram',post_type:'photo',
+      title:$('g_t'+i).value.trim(),hook:d.hook||'',
+      caption:$('g_c'+i).value.trim(),hashtags:splitTags($('g_g'+i).value),
+      script:null,garment_id:g.id,status:'draft',ai_generated:true};
+    const {error}=await sb.rpc('content_upsert',{p:payload});
+    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message,true); return; }
+    toast('บันทึกแล้ว');
+    loadOverview(); loadContent();
+  }
+
+  /* ===== 5. ALL CONTENT ===== */
+  let C_STATUS='', C_PLAT='', C_DATA=[], C_OPEN=null;
+  function setCFilter(el,kind){
+    const cont=kind==='status'?$('cStatus'):$('cPlat');
+    [...cont.children].forEach(c=>c.classList.remove('on')); el.classList.add('on');
+    if(kind==='status') C_STATUS=el.dataset.s; else C_PLAT=el.dataset.p;
+    loadContent();
+  }
+  async function loadContent(){
+    const {data,error}=await sb.rpc('content_list',{p_status:C_STATUS||null,p_platform:C_PLAT||null});
+    if(error){ $('cList').innerHTML='<div class="empty err">โหลดไม่สำเร็จ: '+esc(error.message)+'</div>'; return; }
+    C_DATA=data||[];
+    if(!C_DATA.length){ $('cList').innerHTML='<div class="empty">ยังไม่มีคอนเทนต์</div>'; return; }
+    $('cList').innerHTML=C_DATA.map((x,i)=>contentRow(x,i)).join('');
+  }
+  function contentRow(x,i){
+    const open=C_OPEN===x.id;
+    let h='<div class="row" style="cursor:pointer;align-items:flex-start" onclick="toggleContent('+i+')">'+
+      '<div><div style="font-weight:600">'+esc(x.title||'(ไม่มีชื่อ)')+'</div>'+
+      '<div class="meta">'+(x.hook?esc(x.hook):'')+'</div>'+
+      '<div class="meta"><span class="tag '+esc(x.platform)+'">'+esc(PLAT_TH[x.platform]||x.platform||'')+'</span> '+esc(x.post_type||'')+(x.ai_generated?' · AI':'')+'</div></div>'+
+      '<span class="tag '+esc(x.status)+'">'+esc(x.status||'')+'</span></div>';
+    if(open) h+=contentExpand(x,i);
+    return '<div style="border-bottom:1px solid var(--line);padding-bottom:'+(open?'12px':'0')+'">'+h+'</div>';
+  }
+  function toggleContent(i){ const x=C_DATA[i]; C_OPEN=(C_OPEN===x.id)?null:x.id; loadContentRows(); }
+  function loadContentRows(){ $('cList').innerHTML=C_DATA.map((x,i)=>contentRow(x,i)).join(''); }
+  function contentExpand(x,i){
+    let h='<div class="expand">';
+    if(x.garment_photo||x.garment_name){
+      h+='<div class="selg" style="margin-top:0"><img src="'+esc(x.garment_photo||'')+'" alt=""><div><div style="font-weight:600;font-size:14px">'+esc(x.garment_name||'')+'</div><div class="meta">'+esc(x.garment_code||'')+'</div></div></div>';
+    }
+    h+='<div class="field" style="margin-top:10px"><label>แคปชั่น</label><textarea id="ed_c'+i+'">'+esc(x.caption||'')+'</textarea></div>';
+    h+='<div class="field"><label>แฮชแท็ก</label><input type="text" id="ed_g'+i+'" value="'+esc((x.hashtags||[]).join(' '))+'"></div>';
+    if(Array.isArray(x.script)&&x.script.length){ h+='<div class="field"><label>สคริปต์</label>'+scriptHtml(x.script)+'</div>'; }
+    h+='<div class="grid3">';
+    h+='<div class="field"><label>สถานะ</label><select id="ed_s'+i+'">'+
+      ['idea','draft','scheduled','published'].map(s=>'<option value="'+s+'"'+(x.status===s?' selected':'')+'>'+s+'</option>').join('')+'</select></div>';
+    h+='<div class="field"><label>เวลาโพสต์</label><input type="datetime-local" id="ed_t'+i+'" value="'+esc(isoToLocal(x.scheduled_at))+'"></div>';
+    h+='<div class="field"><label>ลิงก์โพสต์</label><input type="url" id="ed_u'+i+'" value="'+esc(x.post_url||'')+'"></div>';
+    h+='</div>';
+    h+='<div class="toolrow"><button class="btn sage sm" onclick="saveContent('+i+')">บันทึก</button>'+
+      '<button class="btn clay sm" onclick="publishContent('+i+')">เผยแพร่แล้ว</button></div></div>';
+    return h;
+  }
+  async function saveContent(i){
+    const x=C_DATA[i];
+    const payload={id:x.id,platform:x.platform,post_type:x.post_type,
+      title:x.title,hook:x.hook,
+      caption:$('ed_c'+i).value.trim(),hashtags:splitTags($('ed_g'+i).value),
+      script:Array.isArray(x.script)?x.script:null,
+      status:$('ed_s'+i).value,scheduled_at:localToIso($('ed_t'+i).value),
+      post_url:$('ed_u'+i).value.trim(),ai_generated:x.ai_generated};
+    if(x.garment_id) payload.garment_id=x.garment_id;
+    const {error}=await sb.rpc('content_upsert',{p:payload});
+    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message,true); return; }
+    toast('บันทึกแล้ว'); loadOverview(); loadContent();
+  }
+  async function publishContent(i){
+    const x=C_DATA[i];
+    const url=prompt('ใส่ลิงก์โพสต์ (ถ้ามี)', $('ed_u'+i)?$('ed_u'+i).value:(x.post_url||''));
+    if(url===null) return;
+    const {error}=await sb.rpc('content_set_status',{p_id:x.id,p_status:'published',p_url:url.trim()||null});
+    if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }
+    toast('ตั้งเป็นเผยแพร่แล้ว'); loadOverview(); loadContent();
+  }
+
+  /* ===== GARMENT PICKER MODAL ===== */
+  let PICK_FOR=null, pickTimer=null;
+  function openPicker(forWhat){ PICK_FOR=forWhat; $('pickOverlay').classList.add('show'); $('pickSearch').value=''; loadPicker(); }
+  function closePicker(){ $('pickOverlay').classList.remove('show'); }
+  function pickSearchDebounce(){ clearTimeout(pickTimer); pickTimer=setTimeout(loadPicker,300); }
+  async function loadPicker(){
+    const q=$('pickSearch').value.trim()||null;
+    $('pickGrid').innerHTML='<div class="loading">กำลังโหลด…</div>';
+    const {data,error}=await sb.rpc('garments_pick',{p_q:q,p_limit:24});
+    if(error){ $('pickGrid').innerHTML='<div class="empty err">โหลดไม่สำเร็จ: '+esc(error.message)+'</div>'; return; }
+    PICK_LIST=data||[];
+    if(!PICK_LIST.length){ $('pickGrid').innerHTML='<div class="empty">ไม่พบชุด</div>'; return; }
+    $('pickGrid').innerHTML='<div class="pickgrid">'+PICK_LIST.map((g,i)=>
+      '<div class="gcard" onclick="choosePick('+i+')"><img class="ph" src="'+esc(g.photo||'')+'" alt=""><div class="gi">'+
+      '<div class="gn">'+esc(g.name||'')+'</div><div class="gc">'+esc(g.code||'')+'</div></div></div>').join('')+'</div>';
+  }
+  let PICK_LIST=[];
+  function choosePick(i){
+    const g=PICK_LIST[i];
+    if(PICK_FOR==='cap'){ CAP_GARMENT=g; renderCapSel(); }
+    closePicker();
+  }
+  $('pickOverlay').addEventListener('click',e=>{ if(e.target===$('pickOverlay')) closePicker(); });
+
+  /* ===== INIT ===== */
+  async function loadAll(){
+    $('when').textContent='กำลังโหลด…';
+    await Promise.all([loadOverview(),loadGarments(),loadContent()]);
+    $('when').textContent='อัปเดต '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  }
+  // toggle .on class on platform checkboxes (visual)
+  $('calPlats').addEventListener('change',e=>{ const l=e.target.closest('.chk'); if(l) l.classList.toggle('on',e.target.checked); });
+  loadAll();
+</script>
+</body>
+</html>

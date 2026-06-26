@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · สาขา + จุดรับ-ส่งเสื้อ (เฟส 2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;--navy:#1A1A1A;--sage:#6FB3A6;--sageDeep:#3F6F63;--champ:#C9A86A;--ok:#0F6E56;--danger:#A32D2D;
+    --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:15px}
+  .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar h1{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:1px}
+  .bar .tag{font-size:11px;background:#33312d;padding:3px 10px;border-radius:20px;letter-spacing:1px}
+  .banner{background:#FBF4E6;border:1px solid #E3D6BE;color:#7a6730;font-size:12px;padding:10px 14px;border-radius:2px}
+  .wrap{max-width:880px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:18px}
+  .card h2{font-family:var(--display);font-size:20px;margin-bottom:2px}
+  .sub{font-size:12px;color:var(--stone);margin-bottom:12px}
+  label{display:block;font-size:12px;color:var(--stone);margin:10px 0 4px;font-weight:500}
+  input,select,textarea{width:100%;border:1px solid var(--hair);border-radius:2px;padding:10px 11px;font-size:15px;font-family:var(--sans);background:var(--canvas)}
+  input:focus,select:focus{outline:none;border-color:var(--navy)}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media(max-width:560px){.g3,.g2{grid-template-columns:1fr 1fr}}
+  @media(max-width:430px){.g2,.g3{grid-template-columns:1fr}}
+  .btn{border:none;border-radius:2px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .btn.dark{background:var(--navy);color:#fff;width:100%;padding:14px}.btn.sage{background:var(--sageDeep);color:#fff}
+  .btn.ghost{background:none;border:1px solid var(--hair);color:var(--stone)}.btn.sm{padding:7px 11px;font-size:13px}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .tab{font-size:14px;padding:8px 16px;border:1px solid var(--hair);border-radius:20px;cursor:pointer;background:#fff;color:var(--stone)}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--stone);font-weight:500;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:8px 6px;border-bottom:1px solid var(--hair)}
+  td{padding:10px 6px;border-bottom:1px solid var(--hair);vertical-align:top}
+  .pill{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--hair);display:inline-block;white-space:nowrap}
+  .pill.on{color:var(--ok);background:#EAF4EF;border-color:#BFE0D4}.pill.off{color:var(--stone)}
+  .kind{font-size:10px;padding:2px 7px;border-radius:20px;background:#F0EDE7;color:var(--stone)}
+  .mini{font-size:12px;color:var(--navy);background:none;border:none;cursor:pointer;text-decoration:underline;padding:2px 4px;font-family:var(--sans)}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:9;font-size:14px}
+  .toast.show{opacity:1}
+  details summary{cursor:pointer;font-weight:600;color:var(--navy);font-size:14px;padding:4px 0}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .chip{font-size:13px;padding:6px 10px;border:1px solid var(--hair);border-radius:20px;cursor:pointer;user-select:none}
+  .chip.on{background:var(--sageDeep);color:#fff;border-color:var(--sageDeep)}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+<div class="bar"><h1>สาขา + จุดรับ-ส่ง</h1><span class="tag">เฟส 2</span><a href="settings.html" style="margin-left:auto;font-size:14px;color:#86857F;text-decoration:none">ตั้งค่าฮับ →</a></div>
+<div class="wrap">
+  <!-- HERO -->
+  <section class="phead">
+    <div class="eyebrow">branches · pickup points</div>
+    <h1>ขยายบ้านให้ทุกชุดได้เดินทาง</h1>
+    <div class="sub">วางสาขา ฮับ และจุดรับ-ส่งทั่วเมือง ให้การหมุนเวียนชุดใกล้มือคนเช่าขึ้นทุกย่าน</div>
+  </section>
+
+  <div class="banner">เฟส 2 (เผื่อขยาย) — สร้าง/เตรียมไว้ได้เลย ค่าเริ่มต้น "ปิด" จะยังไม่แสดงให้ลูกค้าจนกว่าจะกดเปิด</div>
+
+  <div class="tabs">
+    <span class="tab on" data-t="branch" onclick="setTab(this)">สาขา / ฮับ</span>
+    <span class="tab" data-t="pickup" onclick="setTab(this)">จุดรับ-ส่งเสื้อ</span>
+  </div>
+
+  <!-- ===== สาขา ===== -->
+  <div id="branchView">
+    <div class="card">
+      <details id="brBox"><summary id="brTitle">+ เพิ่มสาขา / ฮับ</summary>
+        <input type="hidden" id="br_id">
+        <div class="g2">
+          <div><label>ชื่อสาขา *</label><input id="br_name" placeholder="เช่น LLOOP สยาม"></div>
+          <div><label>ประเภท</label><select id="br_kind">
+            <option value="store">สาขาเต็ม (หน้าร้าน)</option><option value="hub">ฮับ/คลังกระจาย</option>
+            <option value="pickup">จุดรับ-ส่ง</option><option value="popup">ป๊อปอัพชั่วคราว</option>
+            <option value="office">สำนักงาน</option></select></div>
+        </div>
+        <div class="g3">
+          <div><label>เขต/อำเภอ</label><input id="br_district"></div>
+          <div><label>จังหวัด</label><input id="br_province"></div>
+          <div><label>ความจุ (ชุด)</label><input id="br_capacity" type="number"></div>
+        </div>
+        <label>ที่อยู่</label><input id="br_address">
+        <div class="g2">
+          <div><label>เบอร์โทร</label><input id="br_phone"></div>
+          <div><label>เวลาเปิด</label><input id="br_hours" placeholder="10:00-20:00"></div>
+        </div>
+        <label>ผู้จัดการสาขา</label><select id="br_manager"><option value="">— เลือกพนักงาน —</option></select>
+        <button class="btn dark" style="margin-top:14px" onclick="saveBranch()">บันทึกสาขา</button>
+      </details>
+    </div>
+    <div class="card">
+      <h2>สาขาทั้งหมด</h2>
+      <div style="overflow-x:auto"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>ประเภท</th><th>คน/ชุด</th><th>สถานะ</th><th></th></tr></thead>
+      <tbody id="brRows"><tr><td colspan="6" style="color:var(--stone);padding:18px">กำลังโหลด…</td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- ===== จุดรับ-ส่ง ===== -->
+  <div id="pickupView" style="display:none">
+    <div class="card">
+      <details id="ppBox"><summary id="ppTitle">+ เพิ่มจุดรับ-ส่งเสื้อ</summary>
+        <input type="hidden" id="pp_id">
+        <div class="g2">
+          <div><label>ชื่อจุด *</label><input id="pp_name" placeholder="เช่น จุดรับ-ส่ง อารีย์"></div>
+          <div><label>ประเภทผู้ดูแล</label><select id="pp_host"><option value="branch">สาขาของเรา</option><option value="partner">พาร์ทเนอร์ (ร้านฝาก)</option><option value="locker">ตู้ล็อกเกอร์</option></select></div>
+        </div>
+        <div class="g2">
+          <div><label>สาขาที่สังกัด</label><select id="pp_branch"><option value="">— ไม่ผูกสาขา —</option></select></div>
+          <div><label>ชื่อร้าน/พาร์ทเนอร์</label><input id="pp_hostname" placeholder="เช่น Café Loop"></div>
+        </div>
+        <div class="g3">
+          <div><label>เขต/อำเภอ</label><input id="pp_district"></div>
+          <div><label>จังหวัด</label><input id="pp_province"></div>
+          <div><label>เวลาเปิด</label><input id="pp_hours"></div>
+        </div>
+        <label>ที่อยู่</label><input id="pp_address">
+        <label>บริการ</label>
+        <div class="chips" id="pp_services">
+          <span class="chip on" data-v="pickup">รับชุด</span>
+          <span class="chip on" data-v="dropoff">คืนชุด</span>
+          <span class="chip" data-v="fitting">ลองชุด</span>
+        </div>
+        <label>พนักงานประจำจุด</label><select id="pp_staff"><option value="">— เลือกพนักงาน —</option></select>
+        <button class="btn dark" style="margin-top:14px" onclick="savePickup()">บันทึกจุด</button>
+      </details>
+    </div>
+    <div class="card">
+      <h2>จุดรับ-ส่งทั้งหมด</h2>
+      <div style="overflow-x:auto"><table><thead><tr><th>รหัส</th><th>ชื่อ</th><th>ผู้ดูแล</th><th>บริการ</th><th>สถานะ</th><th></th></tr></thead>
+      <tbody id="ppRows"><tr><td colspan="6" style="color:var(--stone);padding:18px">กำลังโหลด…</td></tr></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const sb=window.supabase.createClient('https://rprwilsbjptdnvsibjgi.supabase.co','sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa');
+  // หลังบ้าน: ทุก sb.rpc(...) วิ่งผ่าน gateway ops-rpc (verify LINE idToken + เช็คสิทธิ์พนักงาน)
+  if(window.opsRpc) sb.rpc = window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{}); // ให้ staff login ตั้งแต่เปิดหน้า
+  const $=id=>document.getElementById(id);const v=id=>$(id).value.trim();
+  const numv=id=>{const x=$(id).value;return x===''?undefined:Number(x);};
+  function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2400);}
+  const KIND={store:'สาขาเต็ม',hub:'ฮับ',pickup:'จุดรับ-ส่ง',popup:'ป๊อปอัพ',office:'สำนักงาน'};
+  let staffOpts='';
+
+  function setTab(el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+    const t=el.dataset.t;$('branchView').style.display=t==='branch'?'':'none';$('pickupView').style.display=t==='pickup'?'':'none';
+    if(t==='pickup')loadPickups();}
+
+  async function loadStaffOptions(){
+    const {data}=await sb.rpc('hr_employee_list',{p_status:'staff'});
+    staffOpts=(data||[]).map(e=>`<option value="${e.id}">${e.name}${e.nickname?' ('+e.nickname+')':''}</option>`).join('');
+    $('br_manager').innerHTML='<option value="">— เลือกพนักงาน —</option>'+staffOpts;
+    $('pp_staff').innerHTML='<option value="">— เลือกพนักงาน —</option>'+staffOpts;
+  }
+  async function loadBranchOptions(){
+    const {data}=await sb.rpc('branch_list',{p_kind:null,p_include_inactive:true});
+    $('pp_branch').innerHTML='<option value="">— ไม่ผูกสาขา —</option>'+(data||[]).map(b=>`<option value="${b.id}">${b.code} ${b.name}</option>`).join('');
+  }
+
+  // ----- สาขา -----
+  async function saveBranch(){
+    if(!v('br_name')){toast('กรอกชื่อสาขาก่อนค่ะ');return;}
+    const p={id:$('br_id').value||undefined,name:v('br_name'),kind:v('br_kind'),district:v('br_district'),
+      province:v('br_province'),capacity:numv('br_capacity'),address:v('br_address'),phone:v('br_phone'),
+      opening_hours:v('br_hours'),manager_id:v('br_manager')||undefined,created_by:'ops'};
+    const {data,error}=await sb.rpc('branch_upsert',{p});
+    if(error){toast('ไม่สำเร็จ: '+error.message);return;}
+    toast('บันทึกสาขา '+(data.code||'')+' แล้ว');
+    ['br_id','br_name','br_district','br_province','br_capacity','br_address','br_phone','br_hours'].forEach(i=>$(i).value='');
+    $('br_manager').value='';$('brTitle').textContent='+ เพิ่มสาขา / ฮับ';loadBranches();loadBranchOptions();
+  }
+  async function loadBranches(){
+    const {data,error}=await sb.rpc('branch_list',{p_kind:null,p_include_inactive:true});
+    const tb=$('brRows');
+    if(error){tb.innerHTML=`<tr><td colspan="6" style="color:var(--danger)">โหลดไม่ได้</td></tr>`;return;}
+    const list=data||[];
+    if(!list.length){tb.innerHTML='<tr><td colspan="6" style="color:var(--stone);padding:18px">ยังไม่มีสาขา</td></tr>';return;}
+    tb.innerHTML=list.map(b=>`<tr>
+      <td><b>${b.code||'-'}</b></td>
+      <td>${b.name}${b.province?`<br><span style="color:var(--stone);font-size:11px">${b.province}</span>`:''}</td>
+      <td><span class="kind">${KIND[b.kind]||b.kind}</span></td>
+      <td>${b.staff_count} คน · ${b.garment_count} ชุด</td>
+      <td><span class="pill ${b.active?'on':'off'}">${b.active?'เปิด':'ปิด'}</span></td>
+      <td style="white-space:nowrap"><button class="mini" onclick="toggleBranch('${b.id}',${!b.active})">${b.active?'ปิด':'เปิด'}</button></td>
+    </tr>`).join('');
+  }
+  async function toggleBranch(id,on){
+    await sb.rpc('branch_set_active',{p_id:id,p_on:on});toast(on?'เปิดสาขาแล้ว':'ปิดสาขาแล้ว');loadBranches();
+  }
+
+  // ----- จุดรับ-ส่ง -----
+  function svcSelected(){return [...document.querySelectorAll('#pp_services .chip.on')].map(c=>c.dataset.v);}
+  document.addEventListener('click',e=>{if(e.target.classList&&e.target.classList.contains('chip'))e.target.classList.toggle('on');});
+  async function savePickup(){
+    if(!v('pp_name')){toast('กรอกชื่อจุดก่อนค่ะ');return;}
+    const p={id:$('pp_id').value||undefined,name:v('pp_name'),host_type:v('pp_host'),branch_id:v('pp_branch')||undefined,
+      host_name:v('pp_hostname'),district:v('pp_district'),province:v('pp_province'),hours:v('pp_hours'),
+      address:v('pp_address'),services:svcSelected(),staff_id:v('pp_staff')||undefined};
+    const {data,error}=await sb.rpc('pickup_upsert',{p});
+    if(error){toast('ไม่สำเร็จ: '+error.message);return;}
+    toast('บันทึกจุด '+(data.code||'')+' แล้ว');
+    ['pp_id','pp_name','pp_hostname','pp_district','pp_province','pp_hours','pp_address'].forEach(i=>$(i).value='');
+    $('ppTitle').textContent='+ เพิ่มจุดรับ-ส่งเสื้อ';loadPickups();
+  }
+  async function loadPickups(){
+    const {data,error}=await sb.rpc('pickup_list',{p_include_inactive:true});
+    const tb=$('ppRows');
+    if(error){tb.innerHTML=`<tr><td colspan="6" style="color:var(--danger)">โหลดไม่ได้</td></tr>`;return;}
+    const list=data||[];const SVC={pickup:'รับ',dropoff:'คืน',fitting:'ลอง'};
+    if(!list.length){tb.innerHTML='<tr><td colspan="6" style="color:var(--stone);padding:18px">ยังไม่มีจุดรับ-ส่ง</td></tr>';return;}
+    tb.innerHTML=list.map(pp=>`<tr>
+      <td><b>${pp.code||'-'}</b></td>
+      <td>${pp.name}${pp.province?`<br><span style="color:var(--stone);font-size:11px">${pp.province}</span>`:''}</td>
+      <td>${pp.host_name||({branch:'สาขา',partner:'พาร์ทเนอร์',locker:'ล็อกเกอร์'}[pp.host_type]||pp.host_type)}</td>
+      <td>${(pp.services||[]).map(s=>SVC[s]||s).join('/')}</td>
+      <td><span class="pill ${pp.active?'on':'off'}">${pp.active?'เปิด':'ปิด'}</span></td>
+      <td style="white-space:nowrap"><button class="mini" onclick="togglePickup('${pp.id}',${!pp.active})">${pp.active?'ปิด':'เปิด'}</button></td>
+    </tr>`).join('');
+  }
+  async function togglePickup(id,on){
+    await sb.rpc('pickup_set_active',{p_id:id,p_on:on});toast(on?'เปิดจุดแล้ว':'ปิดจุดแล้ว');loadPickups();
+  }
+
+  loadStaffOptions();loadBranchOptions();loadBranches();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
+</body>
+</html>

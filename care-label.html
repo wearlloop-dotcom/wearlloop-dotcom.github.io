@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ป้ายเย็บติดชุด (มี QR)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#D9D6CF;--muted:#86857F;--cream:#FFFDF8;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:14px}
+  .bar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;z-index:5}
+  .bar h1{font-family:var(--display);font-size:18px;font-weight:700}
+  .bar .sub{font-size:12px;color:var(--muted)}
+  .bar .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .bar button{background:var(--ink);color:#fff;border:none;padding:9px 16px;font-size:13px;cursor:pointer;border-radius:6px;font-family:var(--sans)}
+  .bar button.ghost{background:#F5F2EC;color:var(--ink);border:1px solid var(--line)}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{background:#fff;color:var(--muted);border:none;border-radius:0;padding:8px 12px}
+  .seg button.on{background:var(--ink);color:#fff}
+  .note{max-width:920px;margin:10px auto 0;padding:0 14px;font-size:12.5px;color:var(--muted);line-height:1.5}
+
+  /* ── ป้ายดูแลหลัก (เย็บคอ/ตะเข็บข้าง) ── */
+  .sheet{max-width:920px;margin:14px auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 14px}
+  @media(max-width:640px){.sheet{grid-template-columns:repeat(2,1fr)}}
+  .care{background:var(--cream);border:1px dashed #c9c6bd;border-radius:4px;padding:12px 12px 11px;page-break-inside:avoid;display:flex;flex-direction:column;gap:6px}
+  .care .top{font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:3px;text-align:center;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .care .mid{display:flex;gap:10px;align-items:center}
+  .care .mid .qr{width:62px;height:62px;flex:none;background:#fff}
+  .care .mid .qr canvas,.care .mid .qr img{width:62px!important;height:62px!important}
+  .care .id .code{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:1px;line-height:1}
+  .care .id .sz{font-size:12px;color:var(--muted);margin-top:3px}
+  .care .id .br{font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+  .care .wash{font-size:11.5px;line-height:1.45;border-top:1px solid var(--line);padding-top:6px}
+  .care .wash b{font-weight:600}
+  .care .own{font-size:10.5px;color:#000;font-weight:600;text-align:center;letter-spacing:.3px}
+  .care .found{font-size:10px;color:var(--muted);text-align:center;line-height:1.4}
+
+  /* ── ป้ายสำรองซ่อนตะเข็บ (เล็ก กันตัดป้ายหลักทิ้ง) ── */
+  .sheet.mini{grid-template-columns:repeat(5,1fr)}
+  @media(max-width:640px){.sheet.mini{grid-template-columns:repeat(3,1fr)}}
+  .tag{background:var(--cream);border:1px dashed #c9c6bd;border-radius:3px;padding:8px 6px;text-align:center;page-break-inside:avoid;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .tag .ll{font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:2px}
+  .tag .qr{width:54px;height:54px;background:#fff}
+  .tag .qr canvas,.tag .qr img{width:54px!important;height:54px!important}
+  .tag .code{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:1px}
+  .tag .hid{font-size:8px;color:var(--muted)}
+
+  .hide{display:none}
+  .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px}
+  @media print{
+    .bar,.note{display:none} body{background:#fff}
+    .sheet{margin:0;gap:6px;max-width:none;padding:5px}
+  }
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  /* override กลาง: หน้านี้เป็นหน้าพิมพ์ คลาส .bar/.tag/.empty/.sub ถูกใช้ความหมายเฉพาะ */
+  .bar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;z-index:5}
+  .bar button{width:auto}
+  .care .top,.tag{background:var(--cream)}
+  .phead{max-width:920px;margin:14px auto 0;padding:0 14px}
+  @media print{ .bar,.note,.phead{display:none!important} }
+</style>
+</head>
+<body>
+<div class="bar">
+  <div><h1>ป้ายเย็บติดชุด</h1><div class="sub">ปริ้นลงผ้า/ฉลากรีดติด แล้วเย็บที่คอเสื้อหรือตะเข็บข้าง · มี QR สแกนเช็คชุดได้</div></div>
+  <div class="tools">
+    <div class="seg" id="seg">
+      <button data-m="care" class="on" onclick="setMode('care')">ป้ายดูแลหลัก</button>
+      <button data-m="mini" onclick="setMode('mini')">ป้ายสำรองซ่อน</button>
+    </div>
+    <button onclick="window.print()">ปริ้น</button>
+  </div>
+</div>
+<div class="note" id="note"></div>
+
+<section class="phead">
+  <div class="eyebrow">care label · sew-in tag</div>
+  <h1>ป้ายดูแลที่อยู่กับชุดไปทุกที่</h1>
+  <div class="sub">พิมพ์ป้ายเย็บติดชุดเช่า ทั้งวิธีดูแลและ QR เช็คชุด เพื่อให้ทุกตัวกลับมาหมุนเวียนได้นานที่สุด</div>
+</section>
+
+<div class="sheet" id="careSheet"><div class="empty">กำลังโหลดชุดจากฐานข้อมูล…</div></div>
+<div class="sheet mini hide" id="miniSheet"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const QR_BASE='https://lloop.app/g/';           // QR = ลิงก์เช็คชุด (เปลี่ยนเป็นโดเมนจริงทีหลัง)
+  const CONTACT='LINE @lloop';                     // ช่องติดต่อเวลาพบชุดหาย
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
+  let ROWS=[];
+
+  function setMode(m){
+    document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+    document.getElementById('careSheet').classList.toggle('hide',m!=='care');
+    document.getElementById('miniSheet').classList.toggle('hide',m!=='mini');
+    document.getElementById('note').textContent = m==='care'
+      ? 'ป้ายดูแลหลัก: เย็บที่คอเสื้อด้านในหรือตะเข็บข้าง · มีวิธีดูแล + ระบุว่าเป็นชุดเช่า + QR เช็คชุด'
+      : 'ป้ายสำรองซ่อน: เย็บซ่อนในตะเข็บ/ชายเสื้อ เผื่อป้ายหลักถูกตัดทิ้ง ยังระบุตัวชุดได้ (กันขโมย/สับเปลี่ยน)';
+  }
+
+  (async function(){
+    const { data, error } = await sb.rpc('care_label_rows');
+    const cs=document.getElementById('careSheet');
+    if(error||!data||!data.length){ cs.innerHTML=`<div class="empty">โหลดไม่ได้: ${error?esc(error.message):'ไม่มีข้อมูล'}</div>`; return; }
+    ROWS=data;
+    // ป้ายดูแลหลัก
+    cs.innerHTML=ROWS.map(g=>{
+      const sz=g.size?`ไซซ์ ${esc(g.size)}`:'';
+      const wash=g.wash?esc(g.wash):'ซักตามชนิดผ้า แนะนำซักมือ/ซักแห้ง';
+      return `<div class="care">
+        <div class="top">LLOOP</div>
+        <div class="mid">
+          <div class="qr" id="cq_${esc(g.code)}"></div>
+          <div class="id">
+            <div class="code">${esc(g.code)}</div>
+            ${sz?`<div class="sz">${sz}</div>`:''}
+            ${g.color_name?`<div class="br">${esc(g.color_name)}</div>`:''}
+          </div>
+        </div>
+        <div class="wash"><b>วิธีดูแล:</b> ${wash}</div>
+        <div class="own">ชุดเช่า · ไม่จำหน่าย · ห้ามซื้อขายต่อ</div>
+        <div class="found">พบชุดนี้? กรุณาส่งคืน ${esc(CONTACT)}</div>
+      </div>`;
+    }).join('');
+    // ป้ายสำรองซ่อน (เล็ก)
+    document.getElementById('miniSheet').innerHTML=ROWS.map(g=>`<div class="tag">
+        <div class="ll">LLOOP</div>
+        <div class="qr" id="mq_${esc(g.code)}"></div>
+        <div class="code">${esc(g.code)}</div>
+        <div class="hid">ชุดเช่า · ห้ามนำออก</div>
+      </div>`).join('');
+    // วาด QR ทั้งสองชุด
+    ROWS.forEach(g=>{
+      new QRCode(document.getElementById('cq_'+g.code), { text: QR_BASE+g.code, width:62, height:62, correctLevel: QRCode.CorrectLevel.M });
+      new QRCode(document.getElementById('mq_'+g.code), { text: QR_BASE+g.code, width:54, height:54, correctLevel: QRCode.CorrectLevel.M });
+    });
+  })();
+</script>
+</body>
+</html>

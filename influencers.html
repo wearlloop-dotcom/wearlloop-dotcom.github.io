@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · อินฟลูเอนเซอร์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;
+    --sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;
+    --sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px;line-height:1.45}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+  .bar .nav a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:14px}
+  .bar .nav a.on{color:var(--clay);font-weight:600}
+  .wrap{max-width:820px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .toolrow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .toolrow .when{font-size:13px;color:var(--muted)}
+  .btn{border:none;border-radius:9px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn.sage{background:var(--sage)}
+  .btn.clay{background:var(--clay)}
+  .btn.sm{padding:7px 12px;font-size:13px;border-radius:8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .sectitle{font-family:var(--display);font-size:15px;color:var(--muted);margin:2px 2px -4px}
+  /* pipeline chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1px solid var(--line);background:var(--soft);border-radius:20px;padding:7px 13px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--ink)}
+  .chip .n{font-weight:700}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip.on .n{color:#fff}
+  /* influencer + deal rows */
+  .item{padding:14px 0;border-bottom:1px solid var(--line)}
+  .item:last-child{border-bottom:none}
+  .item .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .item .h{font-weight:600;font-size:16px}
+  .item .sub{font-size:13px;color:var(--muted);margin-top:3px}
+  .item .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+  .badge{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--soft);color:var(--ink);white-space:nowrap}
+  .badge.sage{background:#E4ECE1;color:#3E5A3B}
+  .badge.clay{background:#F1E1D6;color:#824326}
+  .badge.soft{background:var(--soft);color:var(--muted)}
+  .st{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--soft);color:var(--ink);white-space:nowrap}
+  .st.prospect,.st.proposed{background:var(--soft);color:var(--muted)}
+  .st.contacted,.st.sent{background:#EFE7DC;color:#7A5A2E}
+  .st.negotiating,.st.agreed{background:#F1E1D6;color:#824326}
+  .st.active,.st.shipped{background:#E4ECE1;color:#3E5A3B}
+  .st.posted{background:#DCE8DA;color:#33522F}
+  .st.done,.st.completed{background:#E4ECE1;color:#3E5A3B}
+  .st.declined,.st.cancelled{background:#EFE6E2;color:#9A4A28}
+  .metrics{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:8px}
+  .metrics b{color:var(--ink)}
+  .empty{color:var(--muted);padding:10px 0;font-size:15px}
+  .loading{color:var(--muted);text-align:center;padding:30px}
+  .err{color:var(--clay)}
+  /* inline AI panel */
+  .panel{margin-top:11px;border:1px solid var(--line);border-radius:10px;background:var(--soft);padding:13px}
+  .panel h4{font-family:var(--display);font-size:13px;margin-bottom:8px;color:var(--muted)}
+  .panel .body{white-space:pre-wrap;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:11px;margin:6px 0}
+  .pillrow{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+  .pill{font-size:12px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+  .kvlist{margin:6px 0;padding-left:18px}
+  .kvlist li{font-size:14px;margin:3px 0}
+  /* forms */
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  input,select,textarea{width:100%;font-family:var(--sans);font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+  textarea{resize:vertical;min-height:64px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(59,54,44,.45);display:none;align-items:flex-start;justify-content:center;padding:20px 12px;overflow:auto;z-index:50}
+  .ov.show{display:flex}
+  .modal{background:var(--card);border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow:auto;padding:20px}
+  .modal h3{font-family:var(--display);font-size:17px;margin-bottom:4px}
+  .modal .mr{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;flex-wrap:wrap}
+  /* garment picker */
+  .gpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px;max-height:280px;overflow:auto;padding:2px}
+  .gcard{border:1px solid var(--line);border-radius:9px;padding:6px;cursor:pointer;font-size:12px;background:#fff}
+  .gcard.on{border-color:var(--clay);background:#FBF3ED}
+  .gcard img{width:100%;height:78px;object-fit:cover;border-radius:6px;background:var(--soft)}
+  .gcard .gn{font-weight:600;margin-top:4px;line-height:1.25}
+  .gcard .gm{color:var(--muted)}
+  .notice{font-size:13px;color:var(--muted);margin-top:6px}
+  @media (max-width:640px){
+    .grid2{grid-template-columns:1fr}
+    .bar .nav a{margin-left:10px}
+    .item .top{flex-direction:column}
+  }
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  /* keep modal action buttons inline (flex row), not full-width */
+  .modal .mr .btn{width:auto;margin-top:0}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>อินฟลูเอนเซอร์</h1>
+  <div class="nav">
+    <a href="/today.html">งานวันนี้</a>
+    <a href="/marketing.html">คอนเทนต์</a>
+    <a href="/live.html">ไลฟ์</a>
+    <a href="/influencers.html" class="on">อินฟลู</a>
+    <a href="/analytics.html">รายงาน</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">influencer collab</div>
+    <h1>เสียงที่ช่วยชุดได้หมุนต่อ</h1>
+    <div class="sub">ทะเบียนอินฟลูเอนเซอร์และดีลความร่วมมือ ตั้งแต่ทาบทามจนถึงโพสต์ — ทุกคนที่ช่วยเล่าเรื่องชุดเช่าให้เดินทางไปไกลขึ้น</div>
+  </section>
+  <div class="toolrow">
+    <div class="when" id="when"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn ghost sm" onclick="loadAll()">รีเฟรช</button>
+      <button class="btn sm" onclick="openInf()">เพิ่มอินฟลู</button>
+    </div>
+  </div>
+
+  <div class="sectitle">ภาพรวมไปป์ไลน์</div>
+  <div class="card">
+    <div class="chips" id="pipe"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+
+  <div class="sectitle">รายชื่ออินฟลูเอนเซอร์</div>
+  <div class="card">
+    <div id="infList"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+
+  <div class="sectitle">ดีลความร่วมมือ</div>
+  <div class="card">
+    <div class="toolrow" style="margin-bottom:10px">
+      <div class="chips" id="dealFilter"></div>
+      <button class="btn clay sm" onclick="openDeal()">สร้างดีล</button>
+    </div>
+    <div id="dealList"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+</div>
+
+<!-- modal -->
+<div class="ov" id="ov" onclick="if(event.target===this)closeOv()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
+  const AI_URL=SUPABASE_URL+'/functions/v1/marketing-ai';
+
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'';
+  const fnum=n=>{ if(n==null||n==='')return '–'; n=Number(n); if(isNaN(n))return '–';
+    if(n>=1e6)return (n/1e6).toFixed(n%1e6===0?0:1)+'M';
+    if(n>=1e3)return (n/1e3).toFixed(n%1e3===0?0:1)+'K'; return String(n); };
+  const baht=n=>(n==null||n===''||isNaN(Number(n)))?'–':Number(n).toLocaleString('th-TH')+' บาท';
+
+  const PLAT={tiktok:'TikTok',instagram:'Instagram',facebook:'Facebook'};
+  const INF_STATUS=[['prospect','ว่าที่'],['contacted','ติดต่อแล้ว'],['negotiating','เจรจา'],['active','ทำงานอยู่'],['done','จบงาน'],['declined','ปฏิเสธ']];
+  const DEAL_STATUS=[['proposed','เสนอ'],['sent','ส่งแล้ว'],['agreed','ตกลง'],['shipped','ส่งชุดแล้ว'],['posted','โพสต์แล้ว'],['completed','เสร็จสิ้น'],['cancelled','ยกเลิก']];
+  const TIER=[['nano','nano','soft'],['micro','micro','sage'],['mid','mid','clay'],['macro','macro','clay']];
+
+  let INFS=[], DEALS=[], infFilter=null, dealFilter=null;
+
+  const labelOf=(arr,k)=>{const f=arr.find(x=>x[0]===k);return f?f[1]:(k||'');};
+  const tierMeta=k=>TIER.find(t=>t[0]===k)||[k,k||'–','soft'];
+
+  /* ---------- AI helper ---------- */
+  async function callAI(payload){
+    const r=await fetch(AI_URL,{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},
+      body:JSON.stringify(payload)});
+    let j=null; try{j=await r.json();}catch(e){}
+    if(!r.ok||!j||j.error) throw new Error((j&&j.error)||('HTTP '+r.status));
+    return j;
+  }
+  function copyText(t,btn){
+    navigator.clipboard.writeText(t).then(()=>{ if(btn){const o=btn.textContent;btn.textContent='คัดลอกแล้ว';setTimeout(()=>btn.textContent=o,1500);} })
+      .catch(()=>{ if(btn)btn.textContent='คัดลอกไม่ได้'; });
+  }
+
+  /* ---------- modal helpers ---------- */
+  function openOv(html){ $('modal').innerHTML=html; $('ov').classList.add('show'); }
+  function closeOv(){ $('ov').classList.remove('show'); $('modal').innerHTML=''; }
+
+  /* ---------- pipeline overview ---------- */
+  function renderPipe(){
+    const counts={}; INF_STATUS.forEach(([k])=>counts[k]=0);
+    INFS.forEach(i=>{ if(counts[i.status]!=null)counts[i.status]++; });
+    let h=INF_STATUS.map(([k,th])=>
+      `<div class="chip ${infFilter===k?'on':''}" onclick="setInfFilter('${k}')"><span>${esc(th)}</span><span class="n">${counts[k]}</span></div>`
+    ).join('');
+    h+=`<div class="chip ${infFilter===null?'on':''}" onclick="setInfFilter(null)"><span>ทั้งหมด</span><span class="n">${INFS.length}</span></div>`;
+    $('pipe').innerHTML=h;
+  }
+  function setInfFilter(k){ infFilter=(infFilter===k?null:k); renderPipe(); renderInfList(); }
+
+  /* ---------- influencer list ---------- */
+  function renderInfList(){
+    let list=INFS.filter(i=>!infFilter||i.status===infFilter);
+    if(!list.length){ $('infList').innerHTML='<div class="empty">ยังไม่มีรายชื่อในสถานะนี้</div>'; return; }
+    $('infList').innerHTML=list.map(i=>{
+      const tm=tierMeta(i.tier);
+      const handle=i.handle?('@'+esc(i.handle)):(i.name?esc(i.name):(i.line_uid?'LINE: '+esc(i.line_uid):'(ไม่มีชื่อ)'));
+      const sub=[
+        i.platform?esc(PLAT[i.platform]||i.platform):'',
+        i.followers!=null?fnum(i.followers)+' ผู้ติดตาม':'',
+        i.engagement_rate!=null&&i.engagement_rate!==''?'ER '+esc(i.engagement_rate)+'%':'',
+        i.niche?esc(i.niche):'',
+        i.contact?esc(i.contact):''
+      ].filter(Boolean).join(' · ');
+      return `<div class="item">
+        <div class="top">
+          <div>
+            <div class="h">${handle}${i.name&&i.handle?' · '+esc(i.name):''}</div>
+            <div class="sub">${sub||'<span style="color:var(--muted)">ยังไม่มีข้อมูล CRM</span>'}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+            ${i.tier?`<span class="badge ${tm[2]}">${esc(tm[1])}</span>`:''}
+            <span class="st ${esc(i.status||'')}">${esc(labelOf(INF_STATUS,i.status)||i.status||'–')}</span>
+          </div>
+        </div>
+        <div class="acts">
+          <button class="btn ghost sm" onclick='openInf(${JSON.stringify(i.id)})'>แก้ไข</button>
+          <button class="btn sage sm" onclick='aiOutreach(${JSON.stringify(i.id)})'>ร่างข้อความทาบทามด้วย AI</button>
+        </div>
+        <div id="ai-inf-${esc(i.id)}"></div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---------- AI outreach panel ---------- */
+  function aiOutreach(id){
+    const box=$('ai-inf-'+id); if(!box)return;
+    box.innerHTML=`<div class="panel">
+      <h4>ร่างข้อความทาบทาม</h4>
+      <label>ข้อเสนอ (ไม่บังคับ)</label>
+      <textarea id="offer-${esc(id)}" placeholder="เช่น ยืมชุดฟรี + ค่าตอบแทน 2,000 บาท ต่อ 1 รีล"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn sage sm" onclick='runOutreach(${JSON.stringify(id)})'>สร้างข้อความ</button>
+        <button class="btn ghost sm" onclick="this.closest('.panel').remove()">ปิด</button>
+      </div>
+      <div id="oz-${esc(id)}"></div>
+    </div>`;
+  }
+  async function runOutreach(id){
+    const i=INFS.find(x=>x.id===id); if(!i)return;
+    const zone=$('oz-'+id), offer=($('offer-'+id)||{}).value||'';
+    zone.innerHTML='<div class="notice">กำลังร่างข้อความ…</div>';
+    try{
+      const r=await callAI({task:'influencer_outreach',
+        influencer:{handle:i.handle,platform:i.platform,followers:i.followers,niche:i.niche},offer});
+      const msg=r.message||'';
+      zone.innerHTML=`
+        ${r.subject?`<div style="margin-top:8px"><b>หัวข้อ:</b> ${esc(r.subject)}</div>`:''}
+        <div class="body">${esc(msg)}</div>
+        ${r.why_fit?`<div class="notice"><b>เหมาะเพราะ:</b> ${esc(r.why_fit)}</div>`:''}
+        <button class="btn sm" id="cp-${esc(id)}">คัดลอกข้อความ</button>`;
+      const b=$('cp-'+id); if(b)b.onclick=()=>copyText(msg,b);
+    }catch(e){
+      zone.innerHTML=`<div class="notice err">ยังร่างด้วย AI ไม่ได้ตอนนี้ (${esc(e.message)}) — พิมพ์ข้อความเองได้ตามปกติ</div>`;
+    }
+  }
+
+  /* ---------- influencer form ---------- */
+  function openInf(id){
+    const i=(id!=null?INFS.find(x=>x.id===id):null)||{};
+    const opt=(arr,sel)=>arr.map(([k,th])=>`<option value="${k}"${sel===k?' selected':''}>${esc(th)}</option>`).join('');
+    const platOpt=Object.entries(PLAT).map(([k,v])=>`<option value="${k}"${i.platform===k?' selected':''}>${esc(v)}</option>`).join('');
+    openOv(`
+      <h3>${id!=null?'แก้ไขอินฟลูเอนเซอร์':'เพิ่มอินฟลูเอนเซอร์'}</h3>
+      <div class="notice">tier คำนวณอัตโนมัติจากจำนวนผู้ติดตาม</div>
+      <input type="hidden" id="f_id" value="${i.id!=null?esc(i.id):''}">
+      <div class="grid2">
+        <div><label>แฮนเดิล (ไม่ต้องใส่ @)</label><input id="f_handle" value="${esc(i.handle||'')}"></div>
+        <div><label>แพลตฟอร์ม</label><select id="f_platform">${platOpt}</select></div>
+        <div><label>ชื่อ</label><input id="f_name" value="${esc(i.name||'')}"></div>
+        <div><label>ผู้ติดตาม</label><input id="f_followers" type="number" min="0" value="${i.followers!=null?esc(i.followers):''}"></div>
+        <div><label>Engagement rate (%)</label><input id="f_er" type="number" step="0.01" min="0" value="${i.engagement_rate!=null?esc(i.engagement_rate):''}"></div>
+        <div><label>หมวด/ไนช์</label><input id="f_niche" value="${esc(i.niche||'')}"></div>
+        <div><label>ช่องทางติดต่อ</label><input id="f_contact" value="${esc(i.contact||'')}"></div>
+        <div><label>ค่าตอบแทน (บาท)</label><input id="f_rate" type="number" min="0" value="${i.rate!=null?esc(i.rate):''}"></div>
+        <div><label>สถานะ</label><select id="f_status">${opt(INF_STATUS,i.status||'prospect')}</select></div>
+        <div><label>โค้ดแนะนำ</label><input id="f_ref" value="${esc(i.referral_code||'')}"></div>
+      </div>
+      <label>โน้ต</label><textarea id="f_notes">${esc(i.notes||'')}</textarea>
+      <div id="f_msg" class="notice"></div>
+      <div class="mr">
+        <button class="btn ghost" onclick="closeOv()">ยกเลิก</button>
+        <button class="btn" onclick="saveInf()">บันทึก</button>
+      </div>`);
+  }
+  async function saveInf(){
+    const v=id=>($(id)||{}).value;
+    const num=x=>x===''||x==null?null:Number(x);
+    const p={
+      handle:v('f_handle')||null, platform:v('f_platform'), name:v('f_name')||null,
+      followers:num(v('f_followers')), niche:v('f_niche')||null,
+      engagement_rate:num(v('f_er')), contact:v('f_contact')||null, rate:num(v('f_rate')),
+      status:v('f_status'), referral_code:v('f_ref')||null, notes:v('f_notes')||null
+    };
+    if(v('f_id'))p.id=v('f_id');
+    $('f_msg').textContent='กำลังบันทึก…'; $('f_msg').className='notice';
+    const {error}=await sb.rpc('influencer_upsert',{p});
+    if(error){ $('f_msg').textContent='บันทึกไม่สำเร็จ: '+error.message; $('f_msg').className='notice err'; return; }
+    closeOv(); await loadInfs(); renderPipe(); renderInfList();
+  }
+
+  /* ---------- deals ---------- */
+  function renderDealFilter(){
+    const counts={}; DEAL_STATUS.forEach(([k])=>counts[k]=0);
+    DEALS.forEach(d=>{ if(counts[d.status]!=null)counts[d.status]++; });
+    let h=`<div class="chip ${dealFilter===null?'on':''}" onclick="setDealFilter(null)"><span>ทั้งหมด</span><span class="n">${DEALS.length}</span></div>`;
+    h+=DEAL_STATUS.map(([k,th])=>
+      `<div class="chip ${dealFilter===k?'on':''}" onclick="setDealFilter('${k}')"><span>${esc(th)}</span><span class="n">${counts[k]}</span></div>`
+    ).join('');
+    $('dealFilter').innerHTML=h;
+  }
+  function setDealFilter(k){ dealFilter=(dealFilter===k?null:k); renderDealFilter(); renderDealList(); }
+  function renderDealList(){
+    let list=DEALS.filter(d=>!dealFilter||d.status===dealFilter);
+    if(!list.length){ $('dealList').innerHTML='<div class="empty">ยังไม่มีดีลในสถานะนี้</div>'; return; }
+    $('dealList').innerHTML=list.map(d=>{
+      const who=d.inf_handle?('@'+esc(d.inf_handle)):(d.inf_name?esc(d.inf_name):'(ไม่ระบุ)');
+      const plat=d.inf_platform?esc(PLAT[d.inf_platform]||d.inf_platform):'';
+      const ng=(d.garment_ids||[]).length;
+      const showMetrics=['posted','completed'].includes(d.status)||d.reach!=null||d.revenue!=null;
+      return `<div class="item">
+        <div class="top">
+          <div>
+            <div class="h">${who}${plat?' · '+plat:''}</div>
+            <div class="sub">${d.code?'โค้ด '+esc(d.code)+' · ':''}${ng?ng+' ชุด · ':''}${d.cost!=null?baht(d.cost):''}</div>
+            ${d.brief?`<div class="sub" style="margin-top:5px">${esc(String(d.brief).slice(0,90))}${String(d.brief).length>90?'…':''}</div>`:''}
+          </div>
+          <span class="st ${esc(d.status||'')}">${esc(labelOf(DEAL_STATUS,d.status)||d.status||'–')}</span>
+        </div>
+        ${showMetrics?`<div class="metrics">
+          <span>เข้าถึง <b>${fnum(d.reach)}</b></span>
+          <span>คลิก <b>${fnum(d.clicks)}</b></span>
+          <span>ปิดการขาย <b>${fnum(d.conversions)}</b></span>
+          <span>รายได้ <b>${baht(d.revenue)}</b></span>
+        </div>`:''}
+        <div class="acts">
+          <button class="btn ghost sm" onclick='openDeal(${JSON.stringify(d.id)})'>แก้ไข / อัปเดตสถานะ</button>
+          <button class="btn sage sm" onclick='aiBrief(${JSON.stringify(d.id)})'>ร่างบรีฟด้วย AI</button>
+          ${d.posted_url?`<a class="btn ghost sm" style="text-decoration:none" href="${esc(d.posted_url)}" target="_blank" rel="noopener">ดูโพสต์</a>`:''}
+        </div>
+        <div id="ai-deal-${esc(d.id)}"></div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ---------- AI brief ---------- */
+  function aiBrief(id){
+    const box=$('ai-deal-'+id); if(!box)return;
+    box.innerHTML=`<div class="panel">
+      <h4>ร่างบรีฟคอนเทนต์</h4>
+      <label>เป้าหมายแคมเปญ</label>
+      <input id="goal-${esc(id)}" placeholder="เช่น สร้างการรับรู้ชุดเช่าสำหรับงานแต่ง">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn sage sm" onclick='runBrief(${JSON.stringify(id)})'>สร้างบรีฟ</button>
+        <button class="btn ghost sm" onclick="this.closest('.panel').remove()">ปิด</button>
+      </div>
+      <div id="bz-${esc(id)}"></div>
+    </div>`;
+  }
+  async function runBrief(id){
+    const d=DEALS.find(x=>x.id===id); if(!d)return;
+    const zone=$('bz-'+id), goal=($('goal-'+id)||{}).value||'';
+    zone.innerHTML='<div class="notice">กำลังร่างบรีฟ…</div>';
+    let garments=[];
+    try{
+      const ids=d.garment_ids||[];
+      if(ids.length){
+        const {data}=await sb.rpc('garments_pick',{p_q:null,p_limit:60});
+        garments=(data||[]).filter(g=>ids.includes(g.id));
+      }
+    }catch(e){}
+    try{
+      const r=await callAI({task:'influencer_brief',
+        influencer:{handle:d.inf_handle,platform:d.inf_platform},garments,goal});
+      const li=a=>(a||[]).map(x=>`<li>${esc(x)}</li>`).join('');
+      const txt=[
+        r.goal?'เป้าหมาย: '+r.goal:'',
+        (r.key_messages||[]).length?'\nคีย์เมสเสจ:\n- '+(r.key_messages||[]).join('\n- '):'',
+        r.deliverables?'\nสิ่งที่ต้องส่ง: '+r.deliverables:'',
+        (r.dos||[]).length?'\nควรทำ:\n- '+(r.dos||[]).join('\n- '):'',
+        (r.donts||[]).length?'\nไม่ควรทำ:\n- '+(r.donts||[]).join('\n- '):'',
+        (r.hashtags||[]).length?'\nแฮชแท็ก: '+(r.hashtags||[]).map(h=>'#'+String(h).replace(/^#/,'')).join(' '):'',
+        r.caption_example?'\nตัวอย่างแคปชัน:\n'+r.caption_example:''
+      ].filter(Boolean).join('\n');
+      zone.innerHTML=`
+        ${r.goal?`<div style="margin-top:8px"><b>เป้าหมาย</b><div class="body">${esc(r.goal)}</div></div>`:''}
+        ${(r.key_messages||[]).length?`<div><b>คีย์เมสเสจ</b><ul class="kvlist">${li(r.key_messages)}</ul></div>`:''}
+        ${r.deliverables?`<div><b>สิ่งที่ต้องส่ง</b><div class="notice">${esc(r.deliverables)}</div></div>`:''}
+        ${(r.dos||[]).length?`<div style="margin-top:6px"><b>ควรทำ</b><ul class="kvlist">${li(r.dos)}</ul></div>`:''}
+        ${(r.donts||[]).length?`<div><b>ไม่ควรทำ</b><ul class="kvlist">${li(r.donts)}</ul></div>`:''}
+        ${(r.hashtags||[]).length?`<div style="margin-top:6px"><b>แฮชแท็ก</b><div class="pillrow">${(r.hashtags||[]).map(h=>`<span class="pill">#${esc(String(h).replace(/^#/,''))}</span>`).join('')}</div></div>`:''}
+        ${r.caption_example?`<div style="margin-top:6px"><b>ตัวอย่างแคปชัน</b><div class="body">${esc(r.caption_example)}</div></div>`:''}
+        <button class="btn sm" id="cpb-${esc(id)}">คัดลอกบรีฟ</button>`;
+      const b=$('cpb-'+id); if(b)b.onclick=()=>copyText(txt,b);
+    }catch(e){
+      zone.innerHTML=`<div class="notice err">ยังร่างด้วย AI ไม่ได้ตอนนี้ (${esc(e.message)}) — เขียนบรีฟเองในช่องบรีฟของดีลได้</div>`;
+    }
+  }
+
+  /* ---------- deal form ---------- */
+  let pickedGarments=[];
+  function openDeal(id){
+    const d=(id!=null?DEALS.find(x=>x.id===id):null)||{};
+    pickedGarments=(d.garment_ids||[]).slice();
+    const infOpt=INFS.map(i=>{
+      const lab=(i.handle?'@'+i.handle:(i.name||i.line_uid||i.id));
+      return `<option value="${esc(i.id)}"${d.influencer_id===i.id?' selected':''}>${esc(lab)}</option>`;
+    }).join('');
+    const dsOpt=DEAL_STATUS.map(([k,th])=>`<option value="${k}"${(d.status||'proposed')===k?' selected':''}>${esc(th)}</option>`).join('');
+    openOv(`
+      <h3>${id!=null?'แก้ไขดีล':'สร้างดีล'}</h3>
+      <input type="hidden" id="d_id" value="${d.id!=null?esc(d.id):''}">
+      <label>อินฟลูเอนเซอร์</label>
+      <select id="d_inf"><option value="">— เลือก —</option>${infOpt}</select>
+      <label>ชุดที่แนบ</label>
+      <input id="g_search" placeholder="ค้นหาชุด แล้วกดเลือก" oninput="searchGarments(this.value)">
+      <div class="gpick" id="g_pick"><div class="notice">กำลังโหลดชุด…</div></div>
+      <div class="notice" id="g_count"></div>
+      <label>บรีฟ</label><textarea id="d_brief">${esc(d.brief||'')}</textarea>
+      <div class="grid2">
+        <div><label>สิ่งที่ต้องส่งมอบ</label><input id="d_deliv" value="${esc(d.deliverables||'')}"></div>
+        <div><label>ค่าใช้จ่าย (บาท)</label><input id="d_cost" type="number" min="0" value="${d.cost!=null?esc(d.cost):''}"></div>
+        <div><label>โค้ดติดตามยอด</label><input id="d_code" value="${esc(d.code||'')}"></div>
+        <div><label>สถานะ</label><select id="d_status">${dsOpt}</select></div>
+      </div>
+      <div id="d_results">
+        <label>ผลลัพธ์ (กรอกเมื่อโพสต์/เสร็จสิ้น)</label>
+        <div class="grid2">
+          <div><label>ลิงก์โพสต์</label><input id="d_url" value="${esc(d.posted_url||'')}"></div>
+          <div><label>เข้าถึง (reach)</label><input id="d_reach" type="number" min="0" value="${d.reach!=null?esc(d.reach):''}"></div>
+          <div><label>คลิก</label><input id="d_clicks" type="number" min="0" value="${d.clicks!=null?esc(d.clicks):''}"></div>
+          <div><label>ปิดการขาย</label><input id="d_conv" type="number" min="0" value="${d.conversions!=null?esc(d.conversions):''}"></div>
+          <div><label>รายได้ (บาท)</label><input id="d_rev" type="number" min="0" value="${d.revenue!=null?esc(d.revenue):''}"></div>
+        </div>
+      </div>
+      <div id="d_msg" class="notice"></div>
+      <div class="mr">
+        <button class="btn ghost" onclick="closeOv()">ยกเลิก</button>
+        <button class="btn clay" onclick="saveDeal()">บันทึก</button>
+      </div>`);
+    searchGarments('');
+  }
+  let gCache=[];
+  async function searchGarments(q){
+    const box=$('g_pick'); if(!box)return;
+    const {data,error}=await sb.rpc('garments_pick',{p_q:q||null,p_limit:24});
+    if(error){ box.innerHTML='<div class="notice err">โหลดชุดไม่สำเร็จ</div>'; return; }
+    // keep previously-picked items in cache so selection persists across searches
+    (data||[]).forEach(g=>{ if(!gCache.find(x=>x.id===g.id))gCache.push(g); });
+    renderGarments(data||[]);
+  }
+  function renderGarments(list){
+    const box=$('g_pick');
+    if(!list.length){ box.innerHTML='<div class="notice">ไม่พบชุด</div>'; }
+    else box.innerHTML=list.map(g=>{
+      const on=pickedGarments.includes(g.id);
+      const img=g.photo?`<img src="${esc(g.photo)}" alt="">`:`<div style="height:78px;border-radius:6px;background:var(--soft)"></div>`;
+      return `<div class="gcard ${on?'on':''}" onclick="toggleGarment('${esc(g.id)}')">
+        ${img}
+        <div class="gn">${esc(g.name||g.code||'')}</div>
+        <div class="gm">${esc(g.code||'')}${g.rental_price!=null?' · '+baht(g.rental_price):''}</div>
+      </div>`;
+    }).join('');
+    updateGCount();
+  }
+  function toggleGarment(id){
+    const i=pickedGarments.indexOf(id);
+    if(i>=0)pickedGarments.splice(i,1); else pickedGarments.push(id);
+    // re-sync the 'on' class on currently-shown cards without re-fetching
+    const cur=Array.from($('g_pick').querySelectorAll('.gcard'));
+    cur.forEach(c=>{
+      const oc=c.getAttribute('onclick')||'';
+      const m=oc.match(/'([^']+)'/);
+      if(m){ c.classList.toggle('on', pickedGarments.includes(m[1])); }
+    });
+    updateGCount();
+  }
+  function updateGCount(){ const c=$('g_count'); if(c)c.textContent='เลือกแล้ว '+pickedGarments.length+' ชุด'; }
+  async function saveDeal(){
+    const v=id=>($(id)||{}).value;
+    const num=x=>x===''||x==null?null:Number(x);
+    if(!v('d_inf')){ $('d_msg').textContent='กรุณาเลือกอินฟลูเอนเซอร์'; $('d_msg').className='notice err'; return; }
+    const p={
+      influencer_id:v('d_inf'), garment_ids:pickedGarments.slice(),
+      brief:v('d_brief')||null, deliverables:v('d_deliv')||null,
+      cost:num(v('d_cost')), code:v('d_code')||null, status:v('d_status'),
+      posted_url:v('d_url')||null, reach:num(v('d_reach')), clicks:num(v('d_clicks')),
+      conversions:num(v('d_conv')), revenue:num(v('d_rev'))
+    };
+    if(v('d_id'))p.id=v('d_id');
+    $('d_msg').textContent='กำลังบันทึก…'; $('d_msg').className='notice';
+    const {error}=await sb.rpc('collab_upsert',{p});
+    if(error){ $('d_msg').textContent='บันทึกไม่สำเร็จ: '+error.message; $('d_msg').className='notice err'; return; }
+    closeOv(); await loadDeals(); renderDealFilter(); renderDealList();
+  }
+
+  /* ---------- loaders ---------- */
+  async function loadInfs(){
+    const {data,error}=await sb.rpc('influencer_list',{p_status:null});
+    if(error){ $('infList').innerHTML='<div class="empty err">โหลดไม่สำเร็จ: '+esc(error.message)+'</div>'; INFS=[]; return; }
+    INFS=data||[];
+  }
+  async function loadDeals(){
+    const {data,error}=await sb.rpc('collab_list',{p_status:null});
+    if(error){ $('dealList').innerHTML='<div class="empty err">โหลดไม่สำเร็จ: '+esc(error.message)+'</div>'; DEALS=[]; return; }
+    DEALS=data||[];
+  }
+  async function loadAll(){
+    $('when').textContent='กำลังโหลด…';
+    await Promise.all([loadInfs(),loadDeals()]);
+    renderPipe(); renderInfList(); renderDealFilter(); renderDealList();
+    $('when').textContent='อัปเดต '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  }
+  loadAll();
+</script>
+</body>
+</html>

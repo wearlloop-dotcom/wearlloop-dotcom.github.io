@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · CSV ชุด (export / import)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--danger:#A32D2D;--sans:'Inter','Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:14px}
+.bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.bar h1{font-family:var(--display);font-size:18px;font-weight:700}
+.bar a{font-size:13px;color:var(--muted);text-decoration:none;margin-left:14px}
+.wrap{max-width:760px;margin:18px auto;padding:0 16px;display:flex;flex-direction:column;gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:20px}
+.card h2{font-family:var(--display);font-size:16px;font-weight:600;margin-bottom:6px}
+.card p{font-size:13px;color:var(--muted);margin-bottom:14px}
+.btn{background:var(--ink);color:#fff;border:none;padding:12px 22px;font-size:13px;font-weight:600;cursor:pointer;border-radius:3px}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  input[type=file]{font-size:13px}
+.log{margin-top:14px;font-size:13px;background:var(--soft);border-radius:6px;padding:12px;max-height:240px;overflow:auto;white-space:pre-wrap;display:none}
+.log.show{display:block}
+  code{background:var(--soft);padding:1px 5px;border-radius:3px;font-size:12px}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+<div class="bar">
+  <h1>CSV ชุด</h1>
+  <div><a href="/intake.html">รับชุดเข้า</a><a href="/labels.html">ปริ้นป้าย QR</a></div>
+</div>
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">bulk data · csv</div>
+    <h1>ชุดทั้งคลังในไฟล์เดียว</h1>
+    <div class="sub">ส่งออกทั้งคลังไปแก้ในชีต แล้วนำกลับเข้าระบบทีละเยอะ — ดูแลข้อมูลทุกชุดให้ครบถ้วนพร้อมหมุนเวียนต่อ</div>
+  </section>
+  <div class="card">
+    <h2> Export — ดึงชุดทั้งหมดออกเป็น CSV</h2>
+    <p>ได้ไฟล์ <code>lloop_garments.csv</code> เปิดด้วย Excel/Google Sheets ได้ (รองรับภาษาไทย) — แก้ในชีตแล้วเอากลับมา import ได้</p>
+    <button class="btn" onclick="exportCSV()">ดาวน์โหลด CSV ทั้งหมด</button>
+  </div>
+  <div class="card">
+    <h2> Import — เพิ่ม/แก้ชุดทีละเยอะจาก CSV</h2>
+    <p>หัวคอลัมน์ต้องตรง (โหลด template ด้านล่าง) · ฟิลด์หลายค่า (occasion_tags, styling_tips, photos) คั่นด้วย <code>;</code><br>โค้ดเดิม = อัปเดต · โค้ดใหม่/เว้นว่าง = เพิ่มใหม่ (สถานะ needs_review)</p>
+    <div class="row">
+      <input type="file" id="file" accept=".csv">
+      <button class="btn" onclick="importCSV()">นำเข้า</button>
+      <button class="btn ghost" onclick="downloadTemplate()">โหลด template ว่าง</button>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const COLS=['code','name','brand','tier','rental_price','category','dress_code','occasion_tags','color_name','color_hex','color_season','bust_min_in','bust_max_in','waist_min_in','waist_max_in','length_cm','stretch','fabric_composition','has_lining','is_sheer','fabric_weight','styling_tips','photos'];
+  const MULTI=['occasion_tags','styling_tips','photos'];
+  const $=id=>document.getElementById(id);
+  function log(msg,cls){ const l=$('log'); l.className='log show'; l.textContent += msg+'\n'; if(cls)l.style.color=cls; }
+  function dl(name,text){ const b=new Blob(['﻿'+text],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); }
+
+  async function exportCSV(){
+    const { data, error } = await sb.rpc('ops_garments');
+    if(error){ alert('ดึงไม่ได้:'+error.message); return; }
+    const rows = data.map(g=>{ const o={}; COLS.forEach(c=> o[c]= MULTI.includes(c)? (g[c]||[]).join(';') : (g[c]??'')); return o; });
+    dl('lloop_garments.csv', Papa.unparse({fields:COLS, data:rows}));
+  }
+  function downloadTemplate(){ dl('lloop_template.csv', Papa.unparse({fields:COLS, data:[{code:'',name:'ตัวอย่างเดรส',brand:'LLOOP',tier:'Standard',rental_price:'320',category:'dress',dress_code:'smart_casual',occasion_tags:'cafe;work',color_name:'navy',color_hex:'#15233F',color_season:'winter',bust_min_in:'32',bust_max_in:'36',waist_min_in:'26',waist_max_in:'30',length_cm:'92',stretch:'slight',fabric_composition:'ซาตินโพลี 95%',has_lining:'true',is_sheer:'false',fabric_weight:'ทิ้งตัว',styling_tips:'ใส่บราเกาะอก;ซ่อนสายในได้',photos:''}]})); }
+
+  function importCSV(){
+    const f=$('file').files[0]; if(!f){ alert('เลือกไฟล์ CSV ก่อนค่ะ'); return; }
+    $('log').textContent=''; $('log').style.color='';
+    Papa.parse(f,{header:true,skipEmptyLines:true,complete:async(res)=>{
+      let ok=0,fail=0;
+      log(`พบ ${res.data.length} แถว — กำลังนำเข้า…`);
+      for(const r of res.data){
+        const p={...r};
+        MULTI.forEach(c=> p[c]= (r[c]||'').split(';').map(s=>s.trim()).filter(Boolean));
+        const { data, error } = await sb.rpc('intake_garment',{ p });
+        if(error){ fail++; log(`✗ ${r.code||r.name||'(แถว)'} : ${error.message}`,'#A32D2D'); }
+        else { ok++; log(`✓ ${data} · ${r.name||''}`); }
+      }
+      log(`\nเสร็จ — สำเร็จ ${ok} · ผิดพลาด ${fail}`, ok&&!fail?'#0F6E56':'');
+    }});
+  }
+</script>
+</body>
+</html>

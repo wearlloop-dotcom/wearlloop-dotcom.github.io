@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · เฝ้าตลาด / ชุดใหม่</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .bar h1{font-family:var(--display);font-size:18px;font-weight:700;color:var(--clay)}
+  .bar .nav a{font-size:13px;color:var(--muted);text-decoration:none;margin-left:12px}
+  .wrap{max-width:780px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .card h2 .hint{font-family:var(--sans);font-size:12px;font-weight:400;color:var(--muted)}
+  .btn{border:none;border-radius:9px;padding:10px 15px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+  .btn.sage{background:var(--sage)}.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:7px 11px;font-size:13px}
+  .btn:disabled{opacity:.55}
+  input,select{font-family:var(--sans);font-size:14px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:#fff}
+  .frm{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .frm input{flex:1;min-width:120px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:13px;padding:5px 12px;border-radius:20px;background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .chip .p1{color:var(--clay);font-weight:600}
+  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .row .nm{font-weight:600;font-size:15px}
+  .row .meta{font-size:13px;color:var(--muted);margin-top:3px}
+  .tag{font-size:12px;padding:3px 10px;border-radius:20px;white-space:nowrap}
+  .tag.spotted{background:#EAEFE8;color:var(--sage)}.tag.considering{background:#F0ECE2;color:#8A6D08}
+  .tag.acquired{background:#E9F0EC;color:var(--ok)}.tag.skip{background:#EFEDE8;color:var(--muted)}
+  .tag.ai{background:#EFE7F2;color:#6B4A78}
+  .acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .empty{color:var(--muted);padding:10px 0;font-size:15px}
+  .loading{color:var(--muted);text-align:center;padding:20px}
+  .notice{background:#F0ECE2;border:1px solid #E2D8BE;color:#7A6516;border-radius:9px;padding:11px 13px;font-size:14px;margin-top:10px;line-height:1.5}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{background:#fff;color:var(--muted);border:none;padding:7px 11px;font-size:13px;cursor:pointer}
+  .seg button.on{background:var(--ink);color:#fff}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:80;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center}
+  .toast.show{opacity:1}.toast.bad{background:var(--clay)}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  .seg button.on{background:#2E4A3A}
+  .btn{width:auto}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h1>เฝ้าตลาด / ชุดใหม่</h1>
+    <div class="nav"><a href="/today.html">งานวันนี้</a><a href="/purchasing.html">จัดซื้อ</a><a href="/stock.html">สต๊อก</a></div>
+  </div>
+
+  <div class="wrap">
+    <section class="phead">
+      <div class="eyebrow">market radar</div>
+      <h1>ฟังเสียงตลาด ก่อนใคร</h1>
+      <div class="sub">ให้ AI ส่องเทรนด์และชุดใหม่ทั่วตลาด แล้วเลือกตุนเฉพาะที่ใช่ — หมุนเวียนชุดให้ทันใจ โดยไม่ตุนเกินจำเป็น</div>
+    </section>
+
+    <!-- AI สแกน -->
+    <div class="card">
+      <h2>สแกนตลาดด้วย AI <span class="hint">Claude ค้นเว็บหาชุดใหม่/เทรนด์ → แนะนำตุน</span></h2>
+      <button class="btn sage" onclick="scan()" id="scanBtn">ให้ AI สแกนตลาดเดี๋ยวนี้</button>
+      <div id="scanNote"></div>
+    </div>
+
+    <!-- ชุดใหม่ที่เจอ -->
+    <div class="card">
+      <h2>ชุดใหม่ที่เจอในตลาด
+        <span class="seg" id="fSeg">
+          <button data-s="" class="on" onclick="setF('')">ทั้งหมด</button>
+          <button data-s="spotted" onclick="setF('spotted')">รอพิจารณา</button>
+          <button data-s="considering" onclick="setF('considering')">สนใจ</button>
+          <button data-s="acquired" onclick="setF('acquired')">ซื้อแล้ว</button>
+        </span>
+      </h2>
+      <div class="frm">
+        <input id="mBrand" placeholder="แบรนด์"><input id="mName" placeholder="ชื่อชุด/รุ่น"><input id="mUrl" placeholder="ลิงก์ (ถ้ามี)">
+        <button class="btn sm" onclick="addFind()">+ เพิ่มเอง</button>
+      </div>
+      <div id="finds"><div class="loading">กำลังโหลด…</div></div>
+    </div>
+
+    <!-- แบรนด์ที่ตาม -->
+    <div class="card">
+      <h2>แบรนด์ที่เราตาม</h2>
+      <div class="frm">
+        <input id="bName" placeholder="ชื่อแบรนด์"><input id="bUrl" placeholder="ลิงก์ new arrivals (ถ้ามี)">
+        <select id="bPrio"><option value="1">ตามใกล้ชิด</option><option value="2" selected>ปกติ</option><option value="3">ห่าง ๆ</option></select>
+        <button class="btn sm" onclick="addBrand()">+ เพิ่มแบรนด์</button>
+      </div>
+      <div class="chips" id="brands"><div class="loading">กำลังโหลด…</div></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const SCAN_URL=SUPABASE_URL+'/functions/v1/market-scan';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',3200);}
+  let F_STATUS='';
+
+  async function scan(){
+    $('scanBtn').disabled=true; $('scanBtn').textContent='กำลังสแกน… (อาจใช้เวลาสักครู่)';
+    try{
+      const res=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:'{}'});
+      const j=await res.json().catch(()=>null);
+      if(j&&j.skipped==='no_key'){ $('scanNote').innerHTML='<div class="notice">ยังไม่ได้ตั้ง ANTHROPIC key — AI สแกนจะทำงานเมื่อใส่ key แล้ว (ตอนนี้เพิ่มชุดเอง + watchlist ใช้ได้ปกติ)</div>'; }
+      else if(!res.ok||!j||j.ok===false){ toast('สแกนไม่สำเร็จ: '+((j&&j.error)||('HTTP '+res.status)),true); }
+      else{ toast('สแกนเสร็จ เจอ '+(j.count||0)+' รายการ'); $('scanNote').innerHTML=j.brief?('<div class="notice">'+esc(j.brief)+'</div>'):''; loadFinds(); }
+    }catch(e){ toast('เชื่อมต่อไม่ได้: '+e.message,true); }
+    $('scanBtn').disabled=false; $('scanBtn').textContent='ให้ AI สแกนตลาดเดี๋ยวนี้';
+  }
+
+  function setF(s){ F_STATUS=s; document.querySelectorAll('#fSeg button').forEach(b=>b.classList.toggle('on',b.dataset.s===s)); loadFinds(); }
+
+  async function loadFinds(){
+    const {data,error}=await sb.rpc('market_finds_list',{p_status:F_STATUS||null});
+    if(error){ $('finds').innerHTML='<div class="empty">โหลดไม่สำเร็จ</div>'; return; }
+    const fs=data||[];
+    if(!fs.length){ $('finds').innerHTML='<div class="empty">ยังไม่มีรายการ — กดสแกน AI หรือเพิ่มเอง</div>'; return; }
+    const ST={spotted:'รอพิจารณา',considering:'สนใจ',acquired:'ซื้อแล้ว',skip:'ข้าม'};
+    $('finds').innerHTML=fs.map(f=>{
+      const occ=(f.occasion_tags||[]).join(' · ');
+      const link=f.source_url?`<a href="${esc(f.source_url)}" target="_blank" style="color:var(--clay);font-size:12px">ดูแหล่ง ›</a>`:'';
+      return `<div class="row"><div style="flex:1;min-width:0">
+          <div class="nm">${esc(f.brand||'')}${f.name?' · '+esc(f.name):''} ${f.found_by==='ai'?'<span class="tag ai">AI</span>':''}</div>
+          <div class="meta">${[occ,f.est_price?'~฿'+esc(f.est_price):'',f.reason?esc(f.reason):''].filter(Boolean).join(' · ')}</div>
+          <div class="acts">
+            <span class="tag ${esc(f.status)}">${esc(ST[f.status]||f.status)}</span>
+            <button class="btn ghost sm" onclick="setStatus('${f.id}','considering')">สนใจ</button>
+            <button class="btn ghost sm" onclick="setStatus('${f.id}','acquired')">ซื้อแล้ว</button>
+            <button class="btn ghost sm" onclick="setStatus('${f.id}','skip')">ข้าม</button>
+            ${link}
+          </div>
+        </div></div>`;
+    }).join('');
+  }
+  async function setStatus(id,s){
+    const {error}=await sb.rpc('market_find_status',{p_id:id,p_status:s});
+    if(error){ toast('อัปเดตไม่สำเร็จ',true); return; } toast('อัปเดตแล้ว'); loadFinds();
+  }
+  async function addFind(){
+    const brand=$('mBrand').value.trim(), name=$('mName').value.trim();
+    if(!brand&&!name){ toast('ใส่แบรนด์หรือชื่อชุด',true); return; }
+    const {error}=await sb.rpc('market_find_add',{p:{brand,name,source_url:$('mUrl').value.trim()||null,found_by:'manual'}});
+    if(error){ toast('เพิ่มไม่สำเร็จ',true); return; }
+    $('mBrand').value='';$('mName').value='';$('mUrl').value=''; toast('เพิ่มแล้ว'); loadFinds();
+  }
+
+  async function loadBrands(){
+    const {data,error}=await sb.rpc('market_brands_list',{p_active:true});
+    if(error){ $('brands').innerHTML='<div class="empty">โหลดไม่สำเร็จ</div>'; return; }
+    const bs=data||[];
+    $('brands').innerHTML=bs.length?bs.map(b=>`<span class="chip">${b.priority==1?'<span class="p1">★</span> ':''}${esc(b.name)}</span>`).join('')
+      :'<div class="empty">ยังไม่มีแบรนด์</div>';
+  }
+  async function addBrand(){
+    const name=$('bName').value.trim();
+    if(!name){ toast('ใส่ชื่อแบรนด์',true); return; }
+    const {error}=await sb.rpc('market_brand_upsert',{p:{name,url:$('bUrl').value.trim()||null,priority:$('bPrio').value}});
+    if(error){ toast('เพิ่มไม่สำเร็จ',true); return; }
+    $('bName').value='';$('bUrl').value=''; toast('เพิ่มแบรนด์แล้ว'); loadBrands();
+  }
+
+  loadFinds(); loadBrands();
+</script>
+</body>
+</html>

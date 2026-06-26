@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ตั้งค่าฮับ self-service</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--warn:#B5860B;--danger:#A32D2D;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:16px}
+  .bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+  .bar .nav a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:14px}
+  .wrap{max-width:640px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .card .desc{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+  .feat{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .feat:last-child{border-bottom:none}
+  .feat .info{flex:1}
+  .feat .info .name{font-weight:600;font-size:15px}
+  .feat .info .note{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+  .feat .info .need{font-size:12px;color:var(--warn);margin-top:5px}
+  /* toggle switch */
+  .sw{position:relative;width:50px;height:28px;flex:0 0 auto;cursor:pointer}
+  .sw input{opacity:0;width:0;height:0}
+  .sw .track{position:absolute;inset:0;background:#CFCDC8;border-radius:20px;transition:.18s}
+  .sw .knob{position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .sw input:checked + .track{background:var(--ok)}
+  .sw input:checked + .track + .knob{transform:translateX(22px)}
+  .sw.busy{opacity:.5;pointer-events:none}
+  .disc{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .disc label{font-size:14px;font-weight:600;flex:1}
+  .disc .sub{font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+  .disc input{width:90px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-family:var(--sans);font-size:15px;text-align:right}
+  .disc .unit{font-size:14px;color:var(--muted)}
+  .status{font-size:13px;color:var(--muted);text-align:center;min-height:18px;padding:2px 0}
+  .status.ok{color:var(--ok)}.status.err{color:var(--danger)}
+  .loading{color:var(--muted);text-align:center;padding:34px}
+  .hint{font-size:12.5px;color:var(--muted);line-height:1.55;background:var(--soft);border-radius:10px;padding:12px 14px}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+<div class="bar">
+  <h1>ตั้งค่าฮับ self-service</h1>
+  <div class="nav"><a href="/today.html">งานวันนี้</a><a href="/branches.html">สาขา/จุดรับ</a><a href="/stock.html">สต๊อก</a></div>
+</div>
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">hub feature flags</div>
+    <h1>เปิดไฟทีละดวงให้ฮับ</h1>
+    <div class="sub">สวิตช์เล็ก ๆ ที่ค่อย ๆ เปิดบริการรับเอง ล็อกเกอร์ และบูธสไตลิสต์ให้ลูกค้า — เปิดเมื่อพร้อม ปิดได้ทันที โดยไม่ต้อง deploy ใหม่</div>
+  </section>
+  <div id="status" class="status"></div>
+
+  <div class="card" id="panel" style="display:none">
+    <h2>เปิด/ปิดฟีเจอร์</h2>
+    <div class="desc">สวิตช์นี้คุมว่าฟีเจอร์จะแสดงให้ลูกค้าเห็นไหม — เปิดได้เมื่อ “ส่วนที่ต้องสร้างก่อน” พร้อมแล้วเท่านั้น มีผลทันที ไม่ต้อง deploy ใหม่</div>
+
+    <div class="feat">
+      <div class="info">
+        <div class="name">จุดรับของรวม (มารับเอง)</div>
+        <div class="note">ให้ลูกค้าเลือก “รับเองที่จุดรับ” ตอน checkout เพื่อลดค่าส่ง</div>
+        <div class="need" data-need="pickup">ต้องมี: ตัวเลือกรับเองในหน้า checkout + เปิด pickup_point</div>
+      </div>
+      <label class="sw" data-key="hub_pickup_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+
+    <div class="feat">
+      <div class="info">
+        <div class="name">ล็อกเกอร์รับ–คืนชุด</div>
+        <div class="note">รับ/คืนชุดผ่านตู้ล็อกเกอร์ด้วยรหัส PIN/QR ตลอด 24 ชม.</div>
+        <div class="need" data-need="locker">ต้องมี: ตู้ + locker-gateway + ลงทะเบียน locker_slots</div>
+      </div>
+      <label class="sw" data-key="hub_locker_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+
+    <div class="feat">
+      <div class="info">
+        <div class="name">บูธสไตลิสต์ self-service</div>
+        <div class="note">ลูกค้าถ่ายรูป/วัดตัวเอง แล้วระบบจัดลุค + คัดชุดให้</div>
+        <div class="need" data-need="kiosk">ต้องมี: หน้า kiosk ต่อ stylist/fit-match + consent PDPA</div>
+      </div>
+      <label class="sw" data-key="hub_kiosk_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+
+    <div class="disc">
+      <label>ส่วนลดค่าส่งเมื่อมารับเอง<div class="sub">หักจากค่าส่งตอน checkout (บาท)</div></label>
+      <input id="disc" type="number" min="0" step="5" inputmode="numeric">
+      <span class="unit">บาท</span>
+    </div>
+  </div>
+
+  <div class="hint" id="hint" style="display:none">
+    หมายเหตุ: สวิตช์เป็นแค่ “สวิตช์เปิดไฟ” — โค้ดหน้าจอ/edge function/ฮาร์ดแวร์ที่อ่านค่านี้ต้องสร้างก่อนถึงจะเห็นผลจริง
+    ค่าทั้งหมดเก็บใน app_settings และอ่านในระบบผ่าน get_setting() · แก้ไขได้เฉพาะเจ้าของ
+  </div>
+
+  <div id="loading" class="loading">กำลังโหลด…</div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const statusEl = $('#status');
+function setStatus(msg, cls){ statusEl.textContent = msg || ''; statusEl.className = 'status' + (cls ? ' ' + cls : ''); }
+
+function paint(s){
+  document.querySelectorAll('.sw').forEach((sw) => {
+    const key = sw.dataset.key;
+    sw.querySelector('input').checked = (s[key] === 'true');
+  });
+  $('#disc').value = s.hub_pickup_discount ?? '0';
+}
+
+async function load(){
+  const { data, error } = await window.opsRpc('hub_settings_get', {});
+  if (error) { $('#loading').textContent = 'โหลดไม่สำเร็จ: ' + error.message; return; }
+  paint(data || {});
+  $('#loading').style.display = 'none';
+  $('#panel').style.display = '';
+  $('#hint').style.display = '';
+}
+
+async function save(key, value, sw){
+  if (sw) sw.classList.add('busy');
+  setStatus('กำลังบันทึก…');
+  const { data, error } = await window.opsRpc('hub_settings_set', { p_key: key, p_value: value });
+  if (sw) sw.classList.remove('busy');
+  if (error) { setStatus('บันทึกไม่สำเร็จ: ' + error.message, 'err'); await load(); return; }
+  if (data && data.error) {
+    const m = { key_not_allowed: 'คีย์นี้แก้ไม่ได้', bad_value: 'ค่าไม่ถูกต้อง' };
+    setStatus(m[data.error] || data.error, 'err'); await load(); return;
+  }
+  paint(data || {});
+  setStatus('บันทึกแล้ว', 'ok');
+  setTimeout(() => setStatus(''), 1800);
+}
+
+// toggles
+document.querySelectorAll('.sw').forEach((sw) => {
+  sw.querySelector('input').addEventListener('change', (e) => {
+    save(sw.dataset.key, e.target.checked ? 'true' : 'false', sw);
+  });
+});
+// discount (บันทึกตอนเลิกพิมพ์)
+$('#disc').addEventListener('change', (e) => {
+  const v = String(parseFloat(e.target.value || '0') || 0);
+  save('hub_pickup_discount', v);
+});
+
+load();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
+</body>
+</html>

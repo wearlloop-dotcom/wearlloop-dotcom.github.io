@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · หลังบ้าน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;
+    --navy:#1C1B19;--sage:#D8C7A8;--sageDeep:#5E5746;--champ:#B8A179;--sageWash:#F4EEE1;--terra:#A75F3A;
+    --sans:'Noto Sans Thai',system-ui,sans-serif;
+    --serif:'Cormorant Garamond','Noto Serif Thai',serif;
+    --serifth:'Noto Serif Thai','Cormorant Garamond',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:15px;line-height:1.5}
+  .bar{background:var(--surface);border-bottom:1px solid var(--hair);padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar .wm{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:3px}
+  .bar .sm{font-size:11px;color:var(--stone);letter-spacing:2px;text-transform:uppercase}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px;display:flex;flex-direction:column;gap:22px}
+
+  /* ===== hero ===== */
+  .hero{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:40px 30px 32px;text-align:center;position:relative;overflow:hidden}
+  .hero .ring{position:absolute;width:280px;height:280px;border:1px solid var(--hair);border-radius:50%;right:-120px;top:-120px;opacity:.6}
+  .hero .ring.two{width:180px;height:180px;right:-70px;top:-70px;border-color:var(--sage);opacity:.35}
+  .hero .eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--champ);position:relative}
+  .hero h1{font-family:var(--serif);font-weight:600;font-size:38px;line-height:1.08;margin:14px 0 6px;position:relative}
+  .hero .th{font-family:var(--serifth);font-size:20px;color:var(--ink);font-weight:600;position:relative}
+  .hero .essence{font-size:12.5px;color:var(--stone);letter-spacing:1px;margin-top:14px;position:relative}
+  .hero .who{margin-top:22px;padding-top:18px;border-top:1px solid var(--hair);font-size:15px;color:var(--ink);position:relative}
+  .hero .who b{font-weight:600}
+  .hero .who .rl{display:inline-block;font-size:12px;color:#fff;background:var(--sageDeep);padding:2px 11px;border-radius:20px;margin-left:6px;letter-spacing:.5px}
+  .hero .who .dt{display:block;font-size:12.5px;color:var(--stone);margin-top:5px}
+  .hero .who .meaning{display:block;font-family:var(--serifth);font-size:14.5px;color:var(--sageDeep);margin-top:12px;line-height:1.55}
+  .hero .who .tenure{display:block;font-size:12.5px;color:var(--champ);margin-top:8px;letter-spacing:.3px}
+  .hero .who .tenure.anniv{font-family:var(--serifth);font-size:14px;font-weight:600}
+
+  /* ===== มากกว่าเงิน ===== */
+  .more{background:#FBF7EF;border:1px solid #ECE0C8;border-radius:3px;padding:24px 22px}
+  .more .h{font-family:var(--serifth);font-size:18px;font-weight:600;color:#7a6730;text-align:center}
+  .more .sub{font-size:12.5px;color:var(--stone);text-align:center;margin:4px 0 16px}
+  .more .items{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:460px){.more .items{grid-template-columns:1fr}}
+  .more .it{display:flex;gap:11px;align-items:flex-start}
+  .more .it .k{font-family:var(--serif);font-size:22px;color:var(--champ);line-height:1;flex:0 0 auto}
+  .more .it .x .t{font-weight:600;font-size:14px}
+  .more .it .x .d{font-size:12px;color:var(--stone);line-height:1.5;margin-top:2px}
+
+  /* ===== impact ===== */
+  .impact{background:var(--sageWash);border:1px solid #E7DCC5;border-radius:3px;padding:24px 22px}
+  .impact .lead{font-family:var(--serifth);font-size:18px;font-weight:600;text-align:center;color:var(--sageDeep)}
+  .impact .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 14px}
+  .stat{text-align:center}
+  .stat .n{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--terra);line-height:1}
+  .stat .n small{font-size:15px;color:var(--stone)}
+  .stat .l{font-size:11.5px;color:var(--stone);margin-top:6px;letter-spacing:.3px}
+  .impact .per{font-size:12.5px;color:var(--sageDeep);text-align:center;line-height:1.7;background:#fff;border:1px solid #E7DCC5;border-radius:3px;padding:12px 14px}
+  .impact .per b{font-weight:600}
+  .impact .note{font-size:11px;color:var(--stone);text-align:center;margin-top:9px;font-style:italic}
+
+  /* ===== story ===== */
+  .story{border-left:2px solid var(--champ);padding:4px 0 4px 20px}
+  .story .q{font-family:var(--serifth);font-size:18px;line-height:1.6;color:var(--ink);font-weight:500}
+  .story .by{font-size:12.5px;color:var(--stone);margin-top:10px}
+  .story .by b{color:var(--sageDeep);font-weight:600}
+
+  /* ===== values ===== */
+  .vh{font-family:var(--serifth);font-size:16px;font-weight:600;color:var(--ink);margin:2px 2px -4px}
+  .vals{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .val{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:15px 16px}
+  .val .vn{font-size:11px;color:var(--champ);letter-spacing:1px}
+  .val .vt{font-weight:600;font-size:14.5px;margin:5px 0 4px}
+  .val .vd{font-size:12.5px;color:var(--stone);line-height:1.5}
+
+  /* ===== tools ===== */
+  .th-row{display:flex;align-items:baseline;justify-content:space-between;margin:2px 2px -4px}
+  .th-row h2{font-family:var(--serifth);font-size:16px;font-weight:600}
+  .th-row .hint{font-size:12px;color:var(--stone)}
+  .sec{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+  .sec > .t{font-size:11px;color:var(--stone);letter-spacing:2px;text-transform:uppercase;padding:0 2px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+  .tile{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:14px 15px;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:11px;transition:.12s}
+  .tile:hover{border-color:var(--navy)}
+  .tile .ic{width:30px;height:30px;flex:0 0 auto;border-radius:50%;background:var(--canvas);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--sageDeep)}
+  .tile .lb{font-weight:600;font-size:14.5px}
+  .tile.primary{grid-column:1/-1;background:var(--navy);border-color:var(--navy);color:#fff;justify-content:center;padding:16px}
+  .tile.primary .ic{background:rgba(255,255,255,.14);border-color:transparent;color:#fff}
+  .tile.primary .lb{font-family:var(--serifth);font-size:16px}
+
+  .loading{color:var(--stone);text-align:center;padding:60px 0;font-family:var(--serifth)}
+  .err{color:#A32D2D;text-align:center;padding:40px 0;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="bar"><span class="wm">LLOOP</span><span class="sm">หลังบ้าน</span></div>
+<div class="wrap">
+  <div id="loading" class="loading">กำลังเข้าสู่ระบบ…</div>
+
+  <div id="main" style="display:none;flex-direction:column;gap:22px">
+    <!-- HERO -->
+    <section class="hero">
+      <span class="ring"></span><span class="ring two"></span>
+      <div class="eyebrow">circular fashion house</div>
+      <h1>share the look,<br>save the planet</h1>
+      <div class="th">แชร์ลุคสวย ช่วยรักษ์โลก</div>
+      <div class="essence">เช่า · ใส่ · คืน · ส่งต่อ — หมุนเวียน ไม่ทิ้งขว้าง</div>
+      <div class="who">
+        <span id="greet">สวัสดีค่ะ</span> <b id="nm">—</b><span class="rl" id="rl">—</span>
+        <span class="dt" id="dt"></span>
+        <span class="meaning" id="meaning"></span>
+        <span class="tenure" id="tenure" style="display:none"></span>
+      </div>
+    </section>
+
+    <!-- IMPACT -->
+    <section class="impact">
+      <div class="lead">งานของเรา ไม่ได้แค่ให้เช่าชุด — เราช่วยให้โลกแบกขยะแฟชั่นน้อยลงทุกวัน</div>
+      <div class="stats">
+        <div class="stat"><div class="n" id="s_garments">—</div><div class="l">ชุดหมุนเวียนในระบบ</div></div>
+        <div class="stat"><div class="n" id="s_loops">—</div><div class="l">หมุนเวียนไปแล้ว (ครั้ง)</div></div>
+        <div class="stat"><div class="n" id="s_water">—</div><div class="l">น้ำที่ช่วยประหยัด</div></div>
+      </div>
+      <div class="per" id="per"></div>
+      <div class="note">ประมาณการจากค่าเฉลี่ยอุตสาหกรรม (การผลิตชุดใหม่ ~2,700 ลิตร และ ~6 กก. CO₂ ต่อชุด)</div>
+    </section>
+
+    <!-- STORY -->
+    <section class="story">
+      <div class="q">“เสื้อผ้าสวยหนึ่งตัว ไม่ควรถูกใส่แค่ครั้งเดียว แล้วหลับใหลอยู่ในตู้ตลอดไป”</div>
+      <div class="by">ความเชื่อของ <b>LLOOP</b> — และงานของคุณคือสิ่งที่ทำให้มันเกิดขึ้นจริงทุกวัน</div>
+    </section>
+
+    <!-- VALUES -->
+    <div class="vh">เสาหลักที่เรายึดถือ</div>
+    <div class="vals">
+      <div class="val"><div class="vn">01</div><div class="vt">หมุนเวียน ไม่ทิ้งขว้าง</div><div class="vd">เช่า · ใส่ · คืน · ส่งต่อ ให้ชุดหนึ่งตัวเปล่งประกายได้หลายค่ำคืน ลดขยะแฟชั่น</div></div>
+      <div class="val"><div class="vn">02</div><div class="vt">มั่นใจก่อนจอง</div><div class="vd">รู้ไซซ์จริง รู้เนื้อผ้า รู้ว่าเข้าโทน + วิธีใส่ให้สวย ดูแลลูกค้าเหมือนเพื่อนสนิท</div></div>
+      <div class="val"><div class="vn">03</div><div class="vt">สไตลิสต์ส่วนตัว (AI)</div><div class="vd">บอกสถานที่ที่จะไป เราแนะ dress code + สีที่ถ่ายรูปสวย ให้ทุกคนมั่นใจในลุคตัวเอง</div></div>
+      <div class="val"><div class="vn">04</div><div class="vt">ชุมชน Loopers</div><div class="vd">ลุคใหม่หมุนเวียนทุกเดือน + สิทธิพิเศษ สร้างคอมมูนิตี้คนรักการแต่งตัวที่รักษ์โลก</div></div>
+    </div>
+
+    <!-- MORE THAN MONEY -->
+    <section class="more">
+      <div class="h">ทำไมที่นี่ถึงมากกว่าเงินเดือน</div>
+      <div class="sub">สิ่งที่เราสัญญาจะมอบให้กันและกัน</div>
+      <div class="items">
+        <div class="it"><span class="k">✦</span><div class="x"><div class="t">งานที่มีความหมาย</div><div class="d">เราช่วยให้โลกแบกขยะแฟชั่นน้อยลงจริง ไม่ใช่แค่ขายของ — ทุกวันของคุณมีค่า</div></div></div>
+        <div class="it"><span class="k">✦</span><div class="x"><div class="t">ได้เติบโต</div><div class="d">ฝึกฝีมือ craft เรียนรู้สิ่งใหม่ และโตไปพร้อมองค์กรที่กำลังเติบโต</div></div></div>
+        <div class="it"><span class="k">✦</span><div class="x"><div class="t">ถูกมองเห็นเสมอ</div><div class="d">ทุกแรงที่คุณลงไป เรารู้ และขอบคุณ — ไม่มีความตั้งใจไหนหายไปเฉย ๆ</div></div></div>
+        <div class="it"><span class="k">✦</span><div class="x"><div class="t">ครอบครัว Loopers</div><div class="d">ที่นี่เราดูแลกัน รับฟังกัน เติบโตไปด้วยกัน — ไม่ใช่แค่เพื่อนร่วมงาน</div></div></div>
+      </div>
+    </section>
+
+    <!-- TOOLS -->
+    <div class="th-row"><h2>เครื่องมือของคุณ</h2><span class="hint" id="tools_hint"></span></div>
+    <div id="sections" style="display:flex;flex-direction:column;gap:16px"></div>
+  </div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script src="ops-menu.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const TH_DOW=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const TH_MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const thDate=(d)=>`วัน${TH_DOW[d.getDay()]} ${d.getDate()} ${TH_MON[d.getMonth()]} ${d.getFullYear()+543}`;
+const fmt=(n)=>Math.round(n).toLocaleString('en-US');
+function renderImpact(im){
+  const g=im.garments_active||0, loops=im.loops_total||0;
+  // ค่าประมาณการ eco — แหล่งเดียวกับฝั่งลูกค้า (ops_impact() ดึงจาก app_settings)
+  const perW=Number(im.eco_water_l||2700), perC=Number(im.eco_co2_kg||6);
+  const water=Number(im.water_l!=null?im.water_l:loops*perW);
+  const co2=Number(im.co2_kg!=null?im.co2_kg:loops*perC);
+  $('#s_garments').textContent=fmt(g);
+  $('#s_loops').textContent=fmt(loops);
+  $('#s_water').innerHTML = water>=1000000
+    ? `${(water/1000000).toFixed(1)}<small> ล้านลิตร</small>`
+    : `${fmt(water)}<small> ลิตร</small>`;
+  if(loops>0){
+    $('#per').innerHTML=`หมุนเวียนไปแล้ว <b>${fmt(loops)}</b> ครั้ง = ประหยัดน้ำราว <b>${fmt(water)}</b> ลิตร · ลดคาร์บอน ~<b>${fmt(co2)}</b> กก. · และผ้าอีก <b>${fmt(loops)}</b> ผืนไม่กลายเป็นขยะ`;
+  } else {
+    $('#per').innerHTML=`ทุกครั้งที่ลูกค้าเช่าแทนซื้อใหม่ 1 ชุด ≈ ประหยัดน้ำ <b>~${fmt(perW)}</b> ลิตร · ลดคาร์บอน <b>~${fmt(perC)}</b> กก. · ผ้าอีกหนึ่งผืนไม่กลายเป็นขยะ<br>เราเพิ่งเริ่มต้น — ทุกชุดที่คุณดูแลวันนี้ คือก้าวแรกของตัวเลขที่จะเติบโต`;
+  }
+  const note=document.querySelector('.impact .note');
+  if(note) note.textContent=`ประมาณการจากค่าเฉลี่ยอุตสาหกรรม (การผลิตชุดใหม่ ~${fmt(perW)} ลิตร และ ~${fmt(perC)} กก. CO₂ ต่อชุด) · ตัวเลขชุดเดียวกับที่ลูกค้าเห็น`;
+}
+
+async function init(){
+  let me;
+  try{ me=await window.opsMe(); }
+  catch(e){ $('#loading').className='err'; $('#loading').textContent='เข้าสู่ระบบไม่สำเร็จ — '+e.message; return; }
+
+  const isOwner=me.is_owner===true;
+  const role=me.role||(isOwner?'owner':'');
+  const now=new Date(), hr=now.getHours();
+  const greet = hr<12 ? 'อรุณสวัสดิ์ค่ะ' : hr<17 ? 'สวัสดีตอนบ่ายค่ะ' : hr<20 ? 'สวัสดีตอนเย็นค่ะ' : 'สวัสดียามค่ำค่ะ';
+  $('#greet').textContent=greet;
+  $('#nm').textContent=me.nickname||me.name||'พนักงาน';
+  $('#rl').textContent=isOwner?'เจ้าของ':(window.opsRoleTH[role]||'พนักงาน');
+  $('#dt').textContent=thDate(now);
+
+  // ความหมายของตำแหน่ง — ทำไมงานของคุณสำคัญต่อภารกิจ
+  const MEANING={
+    owner:'คุณคือคนที่ทำให้ทุกคนเดินไปทางเดียวกัน — ความฝันที่ว่าความสวยควรหมุนเวียน เริ่มจากคุณ',
+    manager:'คุณคือคนที่ทำให้ทั้งทีมเดินไปข้างหน้าพร้อมกัน ทุกการตัดสินใจของคุณมีคนคอยพึ่งพา',
+    care:'มือของคุณทำให้ทุกชุดสะอาด สวย พร้อมส่งความมั่นใจถึงลูกค้า — และยืดชีวิตให้ผ้าอีกหลายปี',
+    stock:'ความแม่นยำของคุณ ทำให้ทุกชุดพร้อมหมุนเวียนได้ไม่มีสะดุด เบื้องหลังที่ขาดไม่ได้',
+    marketing:'เสียงของคุณ ทำให้คนทั้งเมืองรู้ว่า แต่งตัวสวยกับรักษ์โลก ไปด้วยกันได้',
+  };
+  $('#meaning').textContent = MEANING[role] || 'ทุกอย่างที่คุณทำวันนี้ ช่วยให้ชุดหนึ่งตัวได้มีชีวิตต่อ และโลกแบกขยะน้อยลงอีกนิด';
+
+  // เส้นทางของฉัน — ร่วมงานมากี่วัน / ครบรอบ
+  window.opsRpc('ops_my_journey',{}).then(({data})=>{
+    if(!data || data.tenure_days==null) return;
+    const el=$('#tenure'); el.style.display='block';
+    if(data.is_anniversary && data.anniversary_years>0){
+      el.className='tenure anniv';
+      el.textContent=`วันนี้ครบ ${data.anniversary_years} ปีที่ร่วมเดินทางกับ LLOOP — ขอบคุณที่อยู่ด้วยกันมาตลอดนะคะ`;
+    } else {
+      el.textContent=`ร่วมเดินทางกับ LLOOP มาแล้ว ${Number(data.tenure_days).toLocaleString('en-US')} วัน`;
+    }
+  }).catch(()=>{});
+
+  // impact (ไม่บล็อกหน้า ถ้าพลาดก็ซ่อน)
+  window.opsRpc('ops_impact',{}).then(({data})=>{ if(data) renderImpact(data); }).catch(()=>{});
+
+  // tools ตาม role
+  const nav=window.opsVisibleNav(role,isOwner);
+  const box=$('#sections');
+  box.innerHTML=`<a class="tile primary" href="today.html"><span class="ic">◷</span><span class="lb">เริ่มงานวันนี้</span></a>`;
+  let count=0;
+  for(const sec of nav){
+    const items=sec.items.filter(it=>it.href!=='today.html');
+    if(!items.length) continue;
+    count+=items.length;
+    const tiles=items.map(it=>`<a class="tile" href="${it.href}"><span class="ic">${it.icon||'•'}</span><span class="lb">${it.label}</span></a>`).join('');
+    const el=document.createElement('div'); el.className='sec';
+    el.innerHTML=`<div class="t">${sec.section}</div><div class="grid">${tiles}</div>`;
+    box.appendChild(el);
+  }
+  $('#tools_hint').textContent=`${count} รายการสำหรับตำแหน่งคุณ`;
+
+  $('#loading').style.display='none';
+  $('#main').style.display='flex';
+  window.opsMenu.mount();
+}
+init();
+</script>
+</body>
+</html>

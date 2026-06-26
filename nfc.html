@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · แตะ NFC เช็คชุด</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .bar h1{font-family:var(--display);font-size:18px;font-weight:700;color:var(--clay)}
+  .bar a{font-size:13px;color:var(--muted);text-decoration:none}
+  .wrap{max-width:560px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;background:#fff;color:var(--muted);border:none;padding:11px;font-size:15px;font-family:var(--sans);cursor:pointer}
+  .seg button.on{background:var(--ink);color:#fff;font-weight:600}
+  .btn{border:none;border-radius:10px;padding:14px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff;width:100%}
+  .btn.sage{background:var(--sage)}.btn.clay{background:var(--clay)}.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn:disabled{opacity:.55}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+  input{width:100%;font-family:var(--sans);font-size:16px;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff;text-transform:uppercase}
+  .big{text-align:center;padding:26px 14px;border:2px dashed var(--line);border-radius:14px;color:var(--muted);font-size:15px;line-height:1.6}
+  .big.scan{border-color:var(--sage);color:var(--sage);background:#F2F7F1}
+  .res{margin-top:14px}
+  .gc{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--soft)}
+  .gc .code{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:1px}
+  .gc .nm{font-size:15px;margin-top:2px}
+  .gc .meta{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6}
+  .pill{display:inline-block;font-size:13px;padding:3px 12px;border-radius:20px;background:#fff;border:1px solid var(--line);margin-top:8px}
+  .pill.ok{background:#E9F0EC;color:var(--ok);border-color:#cfe4d8}
+  .pill.warn{background:#F6E3DC;color:var(--clay);border-color:#e8c9bd}
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+  .notice{background:#F0ECE2;border:1px solid #E2D8BE;color:#7A6516;border-radius:10px;padding:12px;font-size:14px;line-height:1.55;margin-top:10px}
+  .field{margin-bottom:12px}
+  .hide{display:none}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:80;opacity:0;transition:opacity .25s;max-width:90vw;text-align:center}
+  .toast.show{opacity:1}.toast.bad{background:var(--clay)}
+  .muted{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px}
+  .lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:100}
+  .lockbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;max-width:340px;width:100%;text-align:center}
+  .lockbox .lt{font-family:var(--display);font-size:18px;font-weight:700;color:var(--clay)}
+  .lockbox .ls{font-size:14px;color:var(--muted);margin:6px 0 16px}
+  .lockbox input{text-align:center;letter-spacing:4px;margin-bottom:12px}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+  <div class="bar">
+    <h1>แตะ NFC เช็คชุด</h1>
+    <a href="/today.html">งานวันนี้ ></a>
+  </div>
+
+  <div class="wrap">
+    <section class="phead">
+      <div class="eyebrow">nfc tap · pair</div>
+      <h1>แตะครั้งเดียว รู้จักทั้งชุด</h1>
+      <div class="sub">ผูกแท็กให้ทุกชุดมีชื่อของตัวเอง — แตะเบา ๆ ก็เช็คอินเช็คเอาท์ ติดตามทุกการเดินทางของชุดได้</div>
+    </section>
+
+    <div class="seg" id="seg">
+      <button data-m="check" class="on" onclick="setMode('check')">แตะเช็คชุด</button>
+      <button data-m="pair" onclick="setMode('pair')">ผูก tag ใหม่</button>
+    </div>
+
+    <!-- โหมดเช็คชุด -->
+    <div class="card" id="checkCard">
+      <div class="big" id="checkZone" onclick="startScan('check')">แตะปุ่มนี้ แล้วแตะ tag กับด้านหลังมือถือ</div>
+      <div class="res" id="checkRes"></div>
+    </div>
+
+    <!-- โหมดผูก tag -->
+    <div class="card hide" id="pairCard">
+      <div class="field"><label>รหัสชุดที่จะผูก</label><input id="pairCode" placeholder="เช่น G1" autocapitalize="characters"></div>
+      <button class="btn clay" onclick="startScan('pair')" id="pairBtn">แตะ tag เปล่าเพื่อผูก + เขียนรหัส</button>
+      <div class="res" id="pairRes"></div>
+      <div class="muted">ผูกแล้ว: tag จะชี้กลับมาที่ระบบด้วยรหัสนี้ · แตะซ้ำได้ทุกเมื่อเพื่อเช็คชุด</div>
+    </div>
+
+    <div class="notice hide" id="noNfc"></div>
+  </div>
+
+  <!-- gate หลังบ้าน: เฉพาะสตาฟ (ลูกค้าแตะ tag จะเด้งหน้าชุดสวย ๆ ไม่ใช่หน้านี้) -->
+  <div class="lock" id="lock">
+    <div class="lockbox">
+      <div class="lt">เฉพาะสตาฟ</div>
+      <div class="ls">ใส่ PIN เพื่อเข้าโหมดหลังบ้าน</div>
+      <input id="pin" type="password" inputmode="numeric" placeholder="PIN" onkeydown="if(event.key==='Enter')unlock()">
+      <button class="btn" onclick="unlock()">เข้าระบบ</button>
+      <div class="muted">ลูกค้าที่แตะ tag จะเห็นหน้าชุดของลูกค้า ไม่ใช่หน้านี้</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const CUSTOMER_SITE='https://lloop.app';          // หน้าลูกค้า: แตะ tag → เปิดหน้าชุด ?g=รหัส (รูป/สไตล์/เช่าชุดนี้)
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const dt=s=>s?new Date(s).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'ยังไม่เคยสแกน';
+  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',3000);}
+  const NFC_OK = ('NDEFReader' in window);
+
+  function setMode(m){
+    document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+    $('checkCard').classList.toggle('hide',m!=='check');
+    $('pairCard').classList.toggle('hide',m!=='pair');
+  }
+
+  // อ่าน UID จาก tag (Web NFC — Android Chrome)
+  async function readUid(){
+    const reader=new NDEFReader();
+    await reader.scan();
+    return await new Promise((resolve,reject)=>{
+      const to=setTimeout(()=>reject(new Error('หมดเวลา — ลองแตะใหม่')),20000);
+      reader.onreading=(e)=>{ clearTimeout(to); resolve(e.serialNumber||''); };
+      reader.onreadingerror=()=>{ clearTimeout(to); reject(new Error('อ่าน tag ไม่ได้')); };
+    });
+  }
+  async function writeUrl(code){
+    // เขียน URL หน้าลูกค้าลง tag → ลูกค้าแตะเฉย ๆ มือถือเด้งหน้าชุด (ไม่ใช่หลังบ้าน)
+    try{ const w=new NDEFReader(); await w.write({records:[{recordType:'url',data:CUSTOMER_SITE+'/?g='+encodeURIComponent(code)}]}); }catch(e){/* เขียนไม่ได้ไม่เป็นไร ผูกใน DB แล้ว */}
+  }
+
+  async function startScan(mode){
+    if(!NFC_OK){ toast('อุปกรณ์นี้แตะ NFC ในเว็บไม่ได้',true); return; }
+    const zone=$('checkZone');
+    if(mode==='check'){ zone.classList.add('scan'); zone.textContent='ถือ tag ไว้ที่ด้านหลังมือถือ...'; }
+    try{
+      const uid=await readUid();
+      if(mode==='check') await doCheck(uid);
+      else await doPair(uid);
+    }catch(e){ toast(e.message||'ผิดพลาด',true); }
+    finally{ if(mode==='check'){ zone.classList.remove('scan'); zone.textContent='แตะปุ่มนี้ แล้วแตะ tag กับด้านหลังมือถือ'; } }
+  }
+
+  // เช็คชุดจาก UID
+  async function doCheck(uid){
+    const {data,error}=await sb.rpc('tag_lookup',{p_tag_uid:uid});
+    if(error){ toast('เชื่อมระบบไม่ได้',true); return; }
+    if(!data.found){
+      $('checkRes').innerHTML='<div class="gc"><div class="nm">ยังไม่ได้ผูก tag นี้กับชุดไหน</div>'+
+        '<div class="meta">UID: '+esc(uid)+'</div>'+
+        '<button class="btn ghost" style="margin-top:12px" onclick="setMode(\'pair\')">ไปผูก tag นี้</button></div>';
+      return;
+    }
+    renderGarment(data, uid);
+    sb.rpc('tag_scan',{p_tag_uid:uid,p_action:'lookup',p_source:'nfc',p_location:null}); // log เงียบ ๆ
+  }
+
+  function renderGarment(g, uid){
+    const ready = g.data_status==='ready';
+    $('checkRes').innerHTML='<div class="gc">'+
+      '<div class="code">'+esc(g.code)+'</div>'+
+      '<div class="nm">'+esc(g.name||'')+'</div>'+
+      '<span class="pill '+(ready?'ok':'warn')+'">'+esc(g.status||'')+' · '+esc(g.data_status)+'</span>'+
+      '<div class="meta">'+[g.size?'ไซซ์ '+esc(g.size):'',g.color_name?esc(g.color_name):''].filter(Boolean).join(' · ')+
+        '<br>วิธีดูแล: '+esc(g.wash||'-')+
+        '<br>เห็นล่าสุด: '+dt(g.last_seen_at)+(g.last_seen_action?' ('+esc(g.last_seen_action)+')':'')+'</div>'+
+      '<div class="acts">'+
+        '<button class="btn sage" onclick="logScan(\''+esc(uid)+'\',\'checkin\')">เช็คอิน (กลับร้าน)</button>'+
+        '<button class="btn ghost" onclick="logScan(\''+esc(uid)+'\',\'checkout\')">เช็คเอาท์ (ออก)</button>'+
+      '</div>'+
+      '<a href="/garment.html?code='+esc(g.code)+'" style="display:block;text-align:center;margin-top:10px;font-size:14px;color:var(--muted)">ดูไทม์ไลน์ชุด ></a>'+
+    '</div>';
+  }
+
+  async function logScan(uid,action){
+    const {data,error}=await sb.rpc('tag_scan',{p_tag_uid:uid,p_action:action,p_source:'nfc',p_location:null});
+    if(error||!data){ toast('บันทึกไม่สำเร็จ',true); return; }
+    toast((action==='checkin'?'เช็คอิน':'เช็คเอาท์')+' '+(data.code||'')+' แล้ว');
+    // refresh last_seen
+    doCheck(uid);
+  }
+
+  // ผูก tag ใหม่
+  async function doPair(uid){
+    const code=$('pairCode').value.trim().toUpperCase();
+    if(!code){ toast('ใส่รหัสชุดก่อน',true); return; }
+    const {data,error}=await sb.rpc('tag_register',{p_tag_uid:uid,p_code:code,p_type:'nfc'});
+    if(error){ toast('เชื่อมระบบไม่ได้',true); return; }
+    if(data.error==='garment_not_found'){ toast('ไม่พบรหัสชุด '+code,true); return; }
+    if(data.error){ toast('ผิดพลาด: '+data.error,true); return; }
+    await writeUrl(code);
+    $('pairRes').innerHTML='<div class="gc"><div class="nm">ผูกสำเร็จ</div>'+
+      '<div class="meta">tag UID: '+esc(uid)+'<br>→ ชุด '+esc(code)+'</div></div>';
+    toast('ผูก tag กับ '+code+' แล้ว');
+    $('pairCode').value='';
+  }
+
+  // gate หลังบ้าน
+  function gate(){ if(sessionStorage.getItem('nfc_ok')==='1') $('lock').style.display='none'; }
+  async function unlock(){
+    const pin=$('pin').value.trim();
+    if(!pin){ toast('ใส่ PIN',true); return; }
+    const {data,error}=await sb.rpc('nfc_staff_ok',{p_pin:pin});
+    if(error){ toast('เชื่อมระบบไม่ได้',true); return; }
+    if(data===true){ sessionStorage.setItem('nfc_ok','1'); $('lock').style.display='none'; toast('เข้าระบบแล้ว'); }
+    else toast('PIN ไม่ถูกต้อง',true);
+  }
+  gate();
+
+  // ตรวจรองรับ NFC
+  if(!NFC_OK){
+    $('noNfc').classList.remove('hide');
+    $('noNfc').innerHTML='อุปกรณ์/เบราว์เซอร์นี้ยังแตะ NFC ในเว็บไม่ได้ — ใช้ <b>มือถือ Android + Chrome</b> (iPhone แตะอ่าน tag ที่เขียน URL แล้วได้ แต่หน้านี้ใช้เขียน/ผูกบน Android). โครงระบบพร้อมแล้ว พอเปิดบนเครื่องที่รองรับก็ใช้ได้ทันที';
+    $('checkZone').textContent='อุปกรณ์นี้ไม่รองรับการแตะ NFC';
+    $('checkZone').style.cursor='default';
+  }
+</script>
+</body>
+</html>

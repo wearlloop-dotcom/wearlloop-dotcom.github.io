@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · HR บุคคล (หลังบ้าน)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;--navy:#1A1A1A;--sage:#6FB3A6;--sageDeep:#3F6F63;--champ:#C9A86A;--ok:#0F6E56;--danger:#A32D2D;
+    --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:15px}
+  .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar h1{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:1px}
+  .bar .tag{font-size:11px;background:#33312d;padding:3px 10px;border-radius:20px;letter-spacing:1px}
+  .wrap{max-width:880px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:18px}
+  .card h2{font-family:var(--display);font-size:20px;margin-bottom:2px}
+  .card .sub{font-size:12px;color:var(--stone);margin-bottom:12px}
+  label{display:block;font-size:12px;color:var(--stone);margin:10px 0 4px;font-weight:500}
+  input,select,textarea{width:100%;border:1px solid var(--hair);border-radius:2px;padding:10px 11px;font-size:15px;font-family:var(--sans);background:var(--canvas)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--navy)}
+  textarea{min-height:54px;resize:vertical}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media(max-width:560px){.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+  .btn{border:none;border-radius:2px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .btn.dark{background:var(--navy);color:#fff;width:100%;padding:15px}
+  .btn.sage{background:var(--sageDeep);color:#fff}
+  .btn.ghost{background:none;border:1px solid var(--hair);color:var(--stone)}
+  .btn.sm{padding:8px 12px;font-size:13px}
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  @media(max-width:680px){.stats{grid-template-columns:repeat(3,1fr)}}
+  .stat{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:12px 10px;text-align:center}
+  .stat .n{font-family:var(--display);font-size:26px;font-weight:700;line-height:1}
+  .stat .l{font-size:11px;color:var(--stone);margin-top:4px}
+  .stat.warn .n{color:var(--danger)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--stone);font-weight:500;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:8px 6px;border-bottom:1px solid var(--hair)}
+  td{padding:10px 6px;border-bottom:1px solid var(--hair);vertical-align:top}
+  tr.click{cursor:pointer}tr.click:hover td{background:#FBF9F5}
+  .pill{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--hair);white-space:nowrap;display:inline-block}
+  .pill.applicant,.pill.interview,.pill.offer{color:var(--stone)}
+  .pill.hired{color:var(--navy);border-color:#C5D2DE}
+  .pill.probation{color:var(--champ);border-color:#E3D6BE}
+  .pill.active{color:var(--ok);border-color:#BFE0D4;background:#EAF4EF}
+  .pill.suspended{color:var(--danger);border-color:#E6C9C9}
+  .pill.resigned,.pill.rejected,.pill.void{color:#999;text-decoration:line-through}
+  .vbadge{font-size:10px;padding:2px 7px;border-radius:20px}
+  .vbadge.y{color:var(--ok);background:#EAF4EF;border:1px solid #BFE0D4}
+  .vbadge.n{color:var(--danger);background:#FBEEEE;border:1px solid #E6C9C9}
+  .mini{font-size:12px;color:var(--navy);background:none;border:none;cursor:pointer;text-decoration:underline;padding:2px 4px;font-family:var(--sans)}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:9;font-size:14px}
+  .toast.show{opacity:1}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .tab{font-size:13px;padding:6px 12px;border:1px solid var(--hair);border-radius:20px;cursor:pointer;background:#fff;color:var(--stone)}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .link-out{background:#F4F1EB;border:1px solid var(--hair);border-radius:2px;padding:12px;margin-top:10px}
+  .link-out .u{font-size:13px;word-break:break-all;color:var(--navy);background:#fff;border:1px solid var(--hair);padding:8px;border-radius:2px;margin:8px 0}
+  .row-btns{display:flex;gap:8px;flex-wrap:wrap}
+  details summary{cursor:pointer;font-weight:600;color:var(--navy);font-size:14px;padding:4px 0}
+  .drawer{border-left:3px solid var(--sageDeep)}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+  .seg span{font-size:12px;padding:6px 12px;border:1px solid var(--hair);border-radius:2px;cursor:pointer;color:var(--stone)}
+  .seg span.on{background:var(--sageDeep);color:#fff;border-color:var(--sageDeep)}
+  .kpiRow{display:grid;grid-template-columns:2fr 1fr 1fr .8fr .8fr auto;gap:6px;margin-bottom:6px;align-items:center}
+  @media(max-width:560px){.kpiRow{grid-template-columns:1fr 1fr;}}
+  .kpiRow .x{background:none;border:1px solid var(--hair);border-radius:2px;cursor:pointer;color:var(--danger);padding:6px 9px}
+  .overall{font-family:var(--display);font-size:34px;font-weight:700;color:var(--sageDeep)}
+  .hint{font-size:12px;color:var(--stone);margin-top:4px}
+  .clauseRow{display:grid;grid-template-columns:1fr 2fr auto;gap:8px;margin-bottom:8px;align-items:start}
+  .clauseRow .x{background:none;border:1px solid var(--hair);border-radius:2px;cursor:pointer;color:var(--danger);padding:8px 11px}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+<div class="bar"><h1>บุคคล</h1><span class="tag">HR บุคคล · หลังบ้าน</span></div>
+
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">people &amp; payroll</div>
+    <h1>ดูแลคนที่ดูแลทุกชุด</h1>
+    <div class="sub">รวมพนักงาน ลงเวลา เงินเดือน และการลา ไว้ที่เดียว เพราะทุกชุดที่หมุนเวียนเริ่มจากมือคนที่ตั้งใจ</div>
+  </section>
+
+  <!-- ภาพรวม -->
+  <div class="stats" id="stats"></div>
+
+  <!-- สรุป HR วันนี้ (ตรวจจุดเดียว) -->
+  <div class="card" id="briefCard" style="border-left:3px solid var(--champ)">
+    <h2>สรุป HR วันนี้</h2>
+    <div id="brief" class="hint">กำลังโหลด…</div>
+  </div>
+
+  <!-- คำขอลารออนุมัติ -->
+  <div class="card" id="leaveInbox" style="display:none">
+    <h2>คำขอลารออนุมัติ</h2>
+    <div id="leaveRows"></div>
+  </div>
+
+  <!-- คำขอเบิกเงินรออนุมัติ -->
+  <div class="card" id="claimInbox" style="display:none">
+    <h2>คำขอเบิกเงินรออนุมัติ</h2>
+    <div id="claimRows"></div>
+  </div>
+
+  <!-- รับสมัคร / เพิ่มพนักงาน -->
+  <div class="card">
+    <details id="recruitBox">
+      <summary id="recruitTitle">+ รับสมัคร / เพิ่มพนักงานใหม่</summary>
+      <input type="hidden" id="editId">
+      <div class="g2">
+        <div><label>ชื่อ-นามสกุล *</label><input id="name" placeholder="ชื่อจริง นามสกุล"></div>
+        <div><label>ชื่อเล่น</label><input id="nickname" placeholder="ชื่อเล่น"></div>
+      </div>
+      <div class="g3">
+        <div><label>ตำแหน่ง</label><select id="role">
+          <option value="">— เลือก —</option>
+          <option value="admin">แอดมิน</option><option value="stylist">สไตลิสต์</option>
+          <option value="laundry">ซัก/ดูแลชุด</option><option value="repair">ช่างซ่อม</option>
+          <option value="shipping">จัดส่ง</option><option value="sales">ขาย</option>
+          <option value="owner">เจ้าของ/ผู้บริหาร</option></select></div>
+        <div><label>แผนก</label><input id="department" placeholder="เช่น คลัง/ดูแลชุด"></div>
+        <div><label>ประเภทจ้าง</label><select id="emp_type">
+          <option value="fulltime">ประจำ</option><option value="parttime">พาร์ทไทม์</option>
+          <option value="contract">สัญญาจ้าง</option><option value="freelance">ฟรีแลนซ์</option></select></div>
+      </div>
+      <div class="g3">
+        <div><label>เบอร์โทร</label><input id="phone" placeholder=""></div>
+        <div><label>อีเมล</label><input id="email" placeholder=""></div>
+        <div><label>เลขบัตรประชาชน</label><input id="id_card" placeholder=""></div>
+      </div>
+      <div class="g3">
+        <div><label>เงินเดือน (ฐาน ฿)</label><input id="base_salary" type="number" placeholder=""></div>
+        <div><label>วันเริ่มงาน</label><input id="start_date" type="date"></div>
+        <div><label>คะแนนสัมภาษณ์ (1-5)</label><input id="rating" type="number" min="1" max="5" placeholder=""></div>
+      </div>
+      <div class="g2">
+        <div><label>ตำแหน่งที่สมัคร</label><input id="applied_for" placeholder="เช่น ป้าซัก / สไตลิสต์"></div>
+        <div><label>ช่องทางที่มา</label><input id="source" placeholder="เช่น แนะนำ / JobThai / IG"></div>
+      </div>
+      <label>ที่อยู่</label><input id="address" placeholder="">
+      <div class="g2">
+        <div><label>ธนาคาร</label><input id="bank_name" placeholder=""></div>
+        <div><label>เลขบัญชี</label><input id="bank_account" placeholder=""></div>
+      </div>
+      <label>หมายเหตุ / บันทึกสัมภาษณ์</label><textarea id="notes" placeholder=""></textarea>
+      <button class="btn dark" style="margin-top:14px" onclick="saveEmp()">บันทึก</button>
+      <div class="hint">ผู้สมัครใหม่จะอยู่สถานะ "ผู้สมัคร" — กด "จ้าง" ในรายการเพื่อออกรหัสพนักงาน + ส่งลิงก์ยืนยัน UID</div>
+    </details>
+  </div>
+
+  <!-- เครื่องมือ HR: กะ + ประกาศ -->
+  <div class="card">
+    <details>
+      <summary>กะทำงาน + ประกาศถึงทีม</summary>
+      <h2 style="font-size:15px;margin-top:10px">กะทำงาน</h2>
+      <div id="shiftList" class="hint">กำลังโหลด…</div>
+      <div class="g3" style="margin-top:8px">
+        <div><label>ชื่อกะ</label><input id="sh_name" placeholder="กะเช้า"></div>
+        <div><label>เข้า</label><input id="sh_start" type="time" value="10:00"></div>
+        <div><label>ออก</label><input id="sh_end" type="time" value="19:00"></div>
+      </div>
+      <div class="g2">
+        <div><label>สายหลัง (นาที)</label><input id="sh_grace" type="number" value="15"></div>
+        <div><label>พักไม่คิดเงิน (นาที)</label><input id="sh_break" type="number" value="0"></div>
+      </div>
+      <button class="btn ghost sm" style="margin-top:8px" onclick="addShift()">+ เพิ่มกะ</button>
+
+      <h2 style="font-size:15px;margin-top:18px">ประกาศถึงทีม</h2>
+      <input id="annTitle" placeholder="หัวข้อ (เว้นว่าง = ประกาศจากทีม)">
+      <textarea id="annBody" placeholder="ข้อความประกาศ" style="margin-top:6px"></textarea>
+      <div class="g2">
+        <div><label>ส่งถึง</label><select id="annAudience"><option value="all">ทั้งทีม</option></select></div>
+        <div><label>ลิงก์รูป (ถ้ามี)</label><input id="annImage" placeholder="https://..."></div>
+      </div>
+      <label style="display:flex;gap:6px;align-items:center;font-size:13px;margin-top:8px"><input type="checkbox" id="annAck" checked style="width:auto"> ต้องกดรับทราบ</label>
+      <button class="btn sage sm" style="margin-top:8px" onclick="sendAnnounce()">ส่งประกาศ</button>
+      <div id="annList" style="margin-top:14px"></div>
+    </details>
+  </div>
+
+  <!-- รายชื่อ -->
+  <div class="card">
+    <h2>พนักงานทั้งหมด</h2>
+    <div class="tabs" id="tabs">
+      <span class="tab on" data-s="" onclick="setTab(this)">ทั้งหมด</span>
+      <span class="tab" data-s="pipeline" onclick="setTab(this)">ผู้สมัคร</span>
+      <span class="tab" data-s="staff" onclick="setTab(this)">ทีมงาน</span>
+      <span class="tab" data-s="active" onclick="setTab(this)">ทำงานอยู่</span>
+      <span class="tab" data-s="suspended" onclick="setTab(this)">พักงาน</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table><thead><tr><th>ชื่อ</th><th>ตำแหน่ง</th><th>สถานะ</th><th>UID</th><th></th></tr></thead>
+      <tbody id="rows"><tr><td colspan="5" style="color:var(--stone);padding:20px">กำลังโหลด…</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- รายละเอียด/จัดการ -->
+  <div class="card drawer" id="detail" style="display:none"></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  // หลังบ้าน: ทุก sb.rpc(...) วิ่งผ่าน gateway ops-rpc (verify LINE idToken + เช็คสิทธิ์พนักงาน)
+  // โค้ด sb.rpc('fn',{...}) เดิมไม่ต้องแก้ · gateway ใช้ secret key เรียก RPC ฝั่ง server
+  if(window.opsRpc) sb.rpc = window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{}); // ให้ staff login ตั้งแต่เปิดหน้า
+  const STAFF_BASE=(location.origin.includes('http')?location.origin:'https://lloop.app').replace('lloop-ops','lloop')+'/liff/staff.html';
+
+  const $=id=>document.getElementById(id);
+  const v=id=>$(id).value.trim();
+  const numv=id=>{const x=$(id).value;return x===''?undefined:Number(x);};
+  let curStatus='', curEmp=null, curKpiPeriod=thisPeriod();
+  function thisPeriod(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+  function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2500);}
+  const ROLE_TH={admin:'แอดมิน',stylist:'สไตลิสต์',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง',sales:'ขาย',owner:'เจ้าของ'};
+  const ST_TH={applicant:'ผู้สมัคร',interview:'สัมภาษณ์',offer:'เสนองาน',hired:'จ้างแล้ว',probation:'ทดลองงาน',active:'ทำงาน',suspended:'พักงาน',resigned:'ลาออก',rejected:'ไม่ผ่าน'};
+  function pill(s){return `<span class="pill ${s}">${ST_TH[s]||s}</span>`;}
+
+  async function loadStats(){
+    const {data}=await sb.rpc('hr_overview');
+    if(!data)return;
+    $('stats').innerHTML=[
+      ['applicants','ผู้สมัคร',''],['active','ทีมทำงาน',''],['unverified','ค้างยืนยัน UID','warn'],
+      ['suspended','พักงาน',''],['contracts_pending','สัญญารอเซ็น',''],['contracts_signed','สัญญาลงนาม','']
+    ].map(([k,l,c])=>`<div class="stat ${c}"><div class="n">${data[k]??0}</div><div class="l">${l}</div></div>`).join('');
+  }
+
+  async function saveEmp(){
+    if(!v('name')){toast('กรอกชื่อก่อนค่ะ');return;}
+    const p={id:$('editId').value||undefined,name:v('name'),nickname:v('nickname'),role:v('role'),
+      department:v('department'),emp_type:v('emp_type'),phone:v('phone'),email:v('email'),id_card:v('id_card'),
+      base_salary:numv('base_salary'),start_date:v('start_date')||undefined,rating:numv('rating'),
+      applied_for:v('applied_for'),source:v('source'),address:v('address'),
+      bank_name:v('bank_name'),bank_account:v('bank_account'),notes:v('notes'),created_by:'ops'};
+    const {data,error}=await sb.rpc('hr_employee_upsert',{p});
+    if(error){toast('บันทึกไม่สำเร็จ: '+error.message);return;}
+    if(data&&data.error){toast('ไม่สำเร็จ: '+data.error);return;}
+    toast($('editId').value?'อัปเดตแล้ว':'เพิ่มพนักงานแล้ว');
+    clearForm(); loadStats(); load();
+  }
+  function clearForm(){['editId','name','nickname','department','phone','email','id_card','base_salary','start_date','rating','applied_for','source','address','bank_name','bank_account','notes'].forEach(i=>$(i).value='');$('role').value='';$('emp_type').value='fulltime';$('recruitTitle').textContent='+ รับสมัคร / เพิ่มพนักงานใหม่';}
+
+  function setTab(el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');curStatus=el.dataset.s;load();}
+
+  async function load(){
+    const {data,error}=await sb.rpc('hr_employee_list',{p_status:curStatus||null});
+    const tb=$('rows');
+    if(error){tb.innerHTML=`<tr><td colspan="5" style="color:var(--danger);padding:16px">โหลดไม่ได้: ${error.message}</td></tr>`;return;}
+    const list=data||[];
+    if(!list.length){tb.innerHTML='<tr><td colspan="5" style="color:var(--stone);padding:20px">ยังไม่มีรายชื่อ</td></tr>';return;}
+    tb.innerHTML=list.map(e=>{
+      const working=['hired','probation','active'].includes(e.status);
+      const vb=working?(e.verified?'<span class="vbadge y">ยืนยันแล้ว</span>':'<span class="vbadge n">ยังไม่ยืนยัน</span>'):'<span style="color:var(--stone)">—</span>';
+      return `<tr class="click" onclick="openEmp('${e.id}')">
+        <td><b>${e.name}</b>${e.nickname?` <span style="color:var(--stone)">(${e.nickname})</span>`:''}${e.emp_no?`<br><span style="color:var(--stone);font-size:11px">${e.emp_no}</span>`:''}</td>
+        <td>${ROLE_TH[e.role]||e.role||'—'}</td>
+        <td>${pill(e.status)}</td>
+        <td>${vb}</td>
+        <td style="white-space:nowrap"><span class="mini">จัดการ ›</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ---------- รายละเอียด / จัดการ ----------
+  async function openEmp(id){
+    const {data}=await sb.rpc('hr_employee_get',{p_id:id});
+    if(!data){toast('โหลดไม่ได้');return;}
+    curEmp=data; curKpiPeriod=thisPeriod();
+    renderDetail();
+    $('detail').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function nextStatusBtns(e){
+    const map={applicant:['interview','offer','rejected'],interview:['offer','rejected'],offer:['hired','rejected'],
+      hired:['probation','active','suspended'],probation:['active','suspended'],active:['suspended','resigned'],
+      suspended:['active','resigned'],resigned:[],rejected:['applicant']};
+    return (map[e.status]||[]).map(s=>`<button class="btn ghost sm" onclick="setStatus('${e.id}','${s}')">→ ${ST_TH[s]}</button>`).join(' ');
+  }
+  function renderDetail(){
+    const e=curEmp; const working=['hired','probation','active'].includes(e.status);
+    const verifyUrl=STAFF_BASE+'?token='+e.verify_token;
+    $('detail').style.display='block';
+    $('detail').innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <div><h2>${e.name}${e.nickname?` (${e.nickname})`:''}</h2>
+        <div class="sub">${e.emp_no||'ยังไม่ออกรหัส'} · ${ROLE_TH[e.role]||e.role||'-'} · ${pill(e.status)}</div></div>
+        <button class="mini" onclick="$('detail').style.display='none'">ปิด ✕</button>
+      </div>
+      <div class="seg" id="dseg" style="flex-wrap:wrap">
+        <span class="on" onclick="dtab(this,'info')">ข้อมูล</span>
+        <span onclick="dtab(this,'kpi')">KPI</span>
+        <span onclick="dtab(this,'att')">เวลางาน</span>
+        <span onclick="dtab(this,'pay')">เงินเดือน</span>
+        <span onclick="dtab(this,'asset')">ทรัพย์สิน</span>
+        <span onclick="dtab(this,'warn')">ใบเตือน</span>
+        <span onclick="dtab(this,'doc')">เอกสาร</span>
+        <span onclick="dtab(this,'contract')">สัญญาจ้าง</span>
+      </div>
+      <div id="dbody"></div>`;
+    dtabRender('info');
+  }
+  let curDtab='info';
+  function dtab(el,t){document.querySelectorAll('#dseg span').forEach(s=>s.classList.remove('on'));el.classList.add('on');dtabRender(t);}
+  async function dtabRender(t){curDtab=t;const e=curEmp;const body=$('dbody');
+    if(t==='info'){
+      const working=['hired','probation','active'].includes(e.status);
+      const verifyUrl=STAFF_BASE+'?token='+e.verify_token;
+      body.innerHTML=`
+        <div class="g2">
+          <div><b>เบอร์</b> ${e.phone||'-'}</div><div><b>อีเมล</b> ${e.email||'-'}</div>
+          <div><b>ประเภทจ้าง</b> ${e.emp_type||'-'}</div><div><b>เงินเดือน</b> ${e.base_salary?('฿'+Number(e.base_salary).toLocaleString()):'-'}</div>
+          <div><b>เริ่มงาน</b> ${e.start_date||'-'}</div><div><b>คะแนนสัมภาษณ์</b> ${e.rating?e.rating+'/5':'-'}</div>
+        </div>
+        ${e.notes?`<p class="hint" style="margin-top:8px">${e.notes}</p>`:''}
+        <div class="g2">
+          <div><label>กะประจำ</label><select id="empShift" onchange="assignShift()"><option value="">— ไม่กำหนด —</option></select></div>
+          <div><label>สังกัดสาขา (เฟส 2)</label><select id="empBranch" onchange="assignBranch()"><option value="">— ไม่กำหนด —</option></select></div>
+        </div>
+        <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-top:8px"><input type="checkbox" id="empMgr" ${e.is_manager?'checked':''} style="width:auto" onchange="toggleMgr(this.checked)"> หัวหน้าสาขา (อนุมัติลา/เบิกของพนักงานสาขาเดียวกันได้)</label>
+        <label style="margin-top:14px">เปลี่ยนสถานะ</label>
+        <div class="row-btns">${nextStatusBtns(e)||'<span class="hint">สิ้นสุดสายงานแล้ว</span>'}
+          <button class="btn ghost sm" onclick="editEmp()">แก้ไขข้อมูล</button></div>
+        ${working?`
+        <div class="link-out">
+          <b>ลิงก์ยืนยันตัวตน (UID)</b> — ส่งให้พนักงานเปิดครั้งแรกเพื่อผูก LINE UID
+          <div class="u">${verifyUrl}</div>
+          <div class="row-btns">
+            <button class="btn ghost sm" onclick="cp('${verifyUrl}')">คัดลอกลิงก์</button>
+            <span class="hint" style="align-self:center">${e.verified?'✓ ยืนยันแล้ว — เข้าทำงานได้':'⚠ ยังไม่ยืนยัน — ยังเข้าทำงานไม่ได้'}</span>
+          </div>
+        </div>`:''}`;
+      fillShiftBranch();
+    }
+    if(t==='kpi'){
+      body.innerHTML=`<div class="hint">งวด (YYYY-MM หรือ Qn-YYYY)</div>
+        <div style="display:flex;gap:8px;align-items:center;margin:6px 0 12px">
+          <input id="kperiod" value="${curKpiPeriod}" style="max-width:160px">
+          <button class="btn ghost sm" onclick="loadKpi()">ดู</button>
+          <span class="overall" id="koverall">–</span><span class="hint">/100</span>
+        </div>
+        <div id="kpiList"></div>
+        <button class="btn ghost sm" onclick="addKpiRow()" style="margin-top:8px">+ เพิ่มตัวชี้วัด</button>
+        <button class="btn ghost sm" onclick="autoKpi()" style="margin-top:8px;margin-left:6px">ดึงจากข้อมูลจริง (ลงเวลา/งาน)</button>
+        <button class="btn sage sm" onclick="saveKpi()" style="margin-top:8px;margin-left:6px">บันทึก KPI งวดนี้</button>
+        <div class="hint" style="margin-top:6px">"ดึงจากข้อมูลจริง" = คำนวณวันเข้างาน/ตรงเวลา/งานที่ปิดให้อัตโนมัติ · เว้นคะแนนว่าง = คิดจาก ทำได้/เป้า · บันทึกแล้วแจ้งพนักงาน</div>`;
+      loadKpi();
+    }
+    if(t==='att'){ loadAtt(); }
+    if(t==='pay'){ loadPay(); }
+    if(t==='asset'){ loadAsset(); }
+    if(t==='warn'){ loadWarn(); }
+    if(t==='doc'){ loadDoc(); }
+    if(t==='contract'){ renderContract(); }
+  }
+  // ---------- ทรัพย์สิน + offboarding ----------
+  async function loadAsset(){
+    const b=$('dbody');const {data}=await sb.rpc('hr_asset_list',{p_employee:curEmp.id});
+    const list=data||[];const K={uniform:'ยูนิฟอร์ม',key:'กุญแจ',device:'อุปกรณ์',other:'อื่นๆ'};
+    const ST={issued:'ถืออยู่',returned:'คืนแล้ว',lost:'สูญหาย'};
+    b.innerHTML=`
+      <div class="g3"><div><label>ชื่อทรัพย์สิน</label><input id="asName" placeholder="เช่น เสื้อยูนิฟอร์ม"></div>
+        <div><label>ประเภท</label><select id="asKind"><option value="uniform">ยูนิฟอร์ม</option><option value="key">กุญแจ</option><option value="device">อุปกรณ์</option><option value="other">อื่นๆ</option></select></div>
+        <div><label>ซีเรียล/เบอร์</label><input id="asSerial"></div></div>
+      <button class="btn ghost sm" style="margin-top:8px" onclick="issueAsset()">+ จ่ายทรัพย์สิน</button>
+      <div style="margin-top:14px">${list.length?list.map(a=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--hair);padding:8px 0">
+        <span>${a.name} <span style="color:var(--stone);font-size:12px">(${K[a.kind]||a.kind})${a.serial?' · '+a.serial:''}</span><br><span style="font-size:11px;color:var(--stone)">${ST[a.status]||a.status}${a.returned_at?' '+a.returned_at:''}</span></span>
+        ${a.status==='issued'?`<span style="white-space:nowrap"><button class="mini" onclick="returnAsset('${a.id}',false)">รับคืน</button> <button class="mini" onclick="returnAsset('${a.id}',true)">สูญหาย</button></span>`:'✓'}
+      </div>`).join(''):'<p class="hint">ยังไม่มีทรัพย์สิน</p>'}</div>
+      <div style="margin-top:16px;border-top:1px solid var(--hair);padding-top:12px">
+        <h2 style="font-size:15px">ลาออก / พ้นสภาพ</h2>
+        ${curEmp.status==='resigned'?`<p class="hint">พ้นสภาพแล้ว (วันสุดท้าย ${curEmp.end_date||'-'})</p>${offChecklistHtml()}`:`
+        <div class="g2"><div><label>วันสุดท้าย</label><input type="date" id="resignDate"></div>
+          <div><label>เหตุผล</label><input id="resignReason"></div></div>
+        <button class="btn ghost sm" style="margin-top:8px;color:var(--danger);border-color:#E6C9C9" onclick="doResign()">บันทึกลาออก + สร้าง checklist</button>`}
+      </div>`;
+  }
+  function offChecklistHtml(){
+    const items=curEmp.offboarding||[];if(!items.length)return '';
+    return '<div style="margin-top:10px">'+items.map((it,i)=>`<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:4px 0"><input type="checkbox" ${it.done?'checked':''} style="width:auto;margin-top:3px" onchange="toggleOff(${i},this.checked)"> <span>${it.item}${it.detail?` <span style="color:var(--stone)">(${it.detail})</span>`:''}</span></label>`).join('')+'</div>';
+  }
+  async function issueAsset(){
+    if(!$('asName').value.trim()){toast('กรอกชื่อก่อนค่ะ');return;}
+    await sb.rpc('hr_asset_issue',{p:{employee_id:curEmp.id,name:$('asName').value.trim(),kind:$('asKind').value,serial:$('asSerial').value.trim()}});
+    toast('จ่ายทรัพย์สินแล้ว');loadAsset();
+  }
+  async function returnAsset(id,lost){await sb.rpc('hr_asset_return',{p_id:id,p_lost:lost});toast(lost?'บันทึกสูญหาย':'รับคืนแล้ว');loadAsset();}
+  async function doResign(){
+    if(!confirm('ยืนยันบันทึกการลาออก/พ้นสภาพ? พนักงานจะเข้าทำงานไม่ได้หลังจากนี้'))return;
+    const {data}=await sb.rpc('hr_resign',{p_employee:curEmp.id,p_end_date:$('resignDate').value||null,p_reason:$('resignReason').value.trim()||null});
+    if(data&&data.ok){const sev=data.severance&&data.severance.severance;toast('บันทึกลาออกแล้ว'+(sev?(' · ค่าชดเชย ฿'+Number(sev).toLocaleString()):''));await openEmp(curEmp.id);loadStats();load();}else toast('ไม่สำเร็จ');
+  }
+  async function toggleOff(i,done){
+    const items=curEmp.offboarding||[];items[i].done=done;
+    await sb.rpc('hr_offboarding_set',{p_employee:curEmp.id,p_items:items});curEmp.offboarding=items;
+  }
+  async function autoKpi(){
+    curKpiPeriod=$('kperiod').value.trim()||curKpiPeriod;
+    const {data,error}=await sb.rpc('hr_kpi_auto',{p_employee:curEmp.id,p_period:curKpiPeriod});
+    if(error||!data||data.error){toast('ดึงไม่สำเร็จ');return;}
+    toast('ดึง KPI จริงแล้ว — เข้างาน '+data.work_days+' วัน · ตรงเวลา '+data.ontime_pct+'%');
+    loadKpi();
+  }
+  // ---------- กะ + สาขา (info tab) ----------
+  let shiftCache=null, branchCache=null;
+  async function fillShiftBranch(){
+    if(!shiftCache){const {data}=await sb.rpc('hr_shift_list');shiftCache=data||[];}
+    if(!branchCache){const {data}=await sb.rpc('branch_list',{p_kind:null,p_include_inactive:true});branchCache=data||[];}
+    const ss=$('empShift'),bs=$('empBranch');if(!ss)return;
+    ss.innerHTML='<option value="">— ไม่กำหนด —</option>'+shiftCache.map(s=>`<option value="${s.id}" ${curEmp.default_shift_id===s.id?'selected':''}>${s.name} ${String(s.start_time).slice(0,5)}-${String(s.end_time).slice(0,5)}</option>`).join('');
+    bs.innerHTML='<option value="">— ไม่กำหนด —</option>'+branchCache.map(b=>`<option value="${b.id}" ${curEmp.branch_id===b.id?'selected':''}>${b.code} ${b.name}</option>`).join('');
+  }
+  async function assignShift(){const v=$('empShift').value||null;await sb.rpc('hr_set_default_shift',{p_employee:curEmp.id,p_shift:v});curEmp.default_shift_id=v;toast('ตั้งกะประจำแล้ว');}
+  async function assignBranch(){const v=$('empBranch').value||null;await sb.rpc('hr_set_branch',{p_employee:curEmp.id,p_branch:v});curEmp.branch_id=v;toast('ตั้งสังกัดสาขาแล้ว');}
+  async function toggleMgr(on){await sb.rpc('hr_employee_upsert',{p:{id:curEmp.id,is_manager:on}});curEmp.is_manager=on;toast(on?'ตั้งเป็นหัวหน้าสาขาแล้ว':'ยกเลิกหัวหน้าสาขา');}
+
+  // ---------- เงินเดือน (payroll) ----------
+  async function loadPay(){
+    const b=$('dbody');
+    const {data:calc}=await sb.rpc('hr_payroll_calc',{p_employee:curEmp.id,p_period:curKpiPeriod});
+    const {data:slips}=await sb.rpc('hr_payslip_list',{p_period:null,p_employee:curEmp.id});
+    const ST={draft:'ร่าง',finalized:'ปิดงวดแล้ว',paid:'จ่ายแล้ว'};
+    const rows=(slips||[]).map(s=>`<tr><td><b>${s.period}</b></td><td>฿${Number(s.net).toLocaleString()}</td><td>${ST[s.status]||s.status}</td>
+      <td style="white-space:nowrap">${s.status==='draft'?`<button class="mini" onclick="payStatus('${s.id}','finalized')">ปิดงวด</button>`:s.status==='finalized'?`<button class="mini" onclick="payStatus('${s.id}','paid')">จ่ายแล้ว</button>`:'✓'}</td></tr>`).join('');
+    b.innerHTML=`
+      <div class="hint">งวด <input id="payPeriod" value="${curKpiPeriod}" style="max-width:140px;display:inline-block"> <button class="btn ghost sm" onclick="loadPay()">คำนวณใหม่</button></div>
+      <div style="margin-top:10px">${calc&&!calc.error?`
+        <div class="g3"><div><b>วันทำงาน</b> ${calc.work_days}</div><div><b>ชม.รวม</b> ${Math.round(calc.work_minutes/60*10)/10}</div><div><b>OT</b> ${Math.round(calc.ot_minutes/60*10)/10} ชม.</div>
+        <div><b>มาสาย</b> ${calc.late_count} ครั้ง</div><div><b>ลาไม่รับเงิน</b> ${calc.leave_unpaid_days} วัน</div><div><b>ฐานเงินเดือน</b> ฿${Number(calc.base_salary).toLocaleString()}</div></div>`:''}</div>
+      <h2 style="font-size:15px;margin-top:14px">ออกสลิปงวด ${curKpiPeriod}</h2>
+      <div class="g2"><div><label>โบนัส/เบี้ย (฿)</label><input id="payAdd" type="number" placeholder="0"></div>
+        <div><label>หักอื่น ๆ (฿)</label><input id="payDed" type="number" placeholder="0"></div></div>
+      <div class="hint">ประกันสังคม 5% (สูงสุด 750) หักให้อัตโนมัติในสลิป — ช่อง "หักอื่น ๆ" สำหรับรายการอื่น</div>
+      <button class="btn sage sm" style="margin-top:10px" onclick="makeSlip()">ออก/อัปเดตสลิป (ร่าง)</button>
+      ${rows?`<table style="margin-top:14px"><thead><tr><th>งวด</th><th>สุทธิ</th><th>สถานะ</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<p class="hint" style="margin-top:10px">ยังไม่มีสลิป</p>'}
+      <div style="margin-top:16px;border-top:1px solid var(--hair);padding-top:12px">
+        <button class="btn ghost sm" onclick="calcSeverance()">คำนวณค่าชดเชยเลิกจ้าง (ม.118)</button>
+        <div id="sevResult" class="hint" style="margin-top:8px"></div>
+      </div>`;
+  }
+  async function calcSeverance(){
+    const {data}=await sb.rpc('hr_severance_calc',{p_employee:curEmp.id,p_end_date:null});
+    const el=$('sevResult');
+    if(!data||data.error){el.textContent=data&&data.error==='no_start_date'?'ยังไม่มีวันเริ่มงาน — กรอกก่อนค่ะ':'คำนวณไม่ได้';return;}
+    el.innerHTML=`อายุงาน <b>${data.years} ปี</b> (${data.bracket}) → ค่าจ้าง <b>${data.days} วัน</b><br>
+      ค่าจ้างรายวัน ฿${Number(data.daily_wage).toLocaleString()} × ${data.days} = <b style="color:var(--sageDeep)">฿${Number(data.severance).toLocaleString()}</b><br>
+      <span style="font-size:11px">${data.note}</span>`;
+  }
+  async function makeSlip(){
+    curKpiPeriod=$('payPeriod').value.trim()||curKpiPeriod;
+    const add=Number($('payAdd').value)||0, ded=Number($('payDed').value)||0;
+    const p={employee_id:curEmp.id,period:curKpiPeriod,created_by:'ops',
+      additions:add?[{label:'โบนัส/เบี้ย',amount:add}]:[],deductions:ded?[{label:'หัก',amount:ded}]:[]};
+    const {data,error}=await sb.rpc('hr_payslip_upsert',{p});
+    if(error){toast('ไม่สำเร็จ: '+error.message);return;}
+    if(data&&data.error){toast(data.error==='locked'?'สลิปงวดนี้ปิดแล้ว แก้ไม่ได้':'ไม่สำเร็จ');return;}
+    toast('ออกสลิป '+curKpiPeriod+' สุทธิ ฿'+Number(data.net).toLocaleString());loadPay();
+  }
+  async function payStatus(id,st){
+    const {data}=await sb.rpc('hr_payslip_status',{p_id:id,p_status:st});
+    if(data&&data.ok){toast(st==='paid'?'ทำเครื่องหมายจ่ายแล้ว + แจ้งพนักงาน':'ปิดงวด + แจ้งพนักงานแล้ว');loadPay();}else toast('ไม่สำเร็จ');
+  }
+  // ---------- ใบเตือน ----------
+  async function loadWarn(){
+    const b=$('dbody');const {data}=await sb.rpc('hr_warn_list',{p_employee:curEmp.id});
+    const list=data||[];const LV={verbal:'ตักเตือนวาจา',written:'หนังสือเตือน',final:'เตือนครั้งสุดท้าย'};
+    b.innerHTML=`
+      <div class="g2"><div><label>ระดับ</label><select id="wLevel"><option value="verbal">ตักเตือนวาจา</option><option value="written">หนังสือเตือน</option><option value="final">เตือนครั้งสุดท้าย</option></select></div>
+        <div><label>เหตุผล</label><input id="wReason" placeholder="เช่น มาสายเกิน 3 ครั้ง"></div></div>
+      <button class="btn ghost sm" style="margin-top:10px" onclick="issueWarn()">ออกใบเตือน (แจ้งพนักงาน)</button>
+      <div style="margin-top:14px">${list.length?list.map(w=>`<div style="border-bottom:1px solid var(--hair);padding:8px 0">
+        <b>${LV[w.level]||w.level}</b> ${w.acknowledged?'<span style="color:var(--ok);font-size:11px">· รับทราบแล้ว</span>':''}<br>
+        <span style="color:var(--stone);font-size:13px">${w.reason} · ${new Date(w.created_at).toLocaleDateString('th-TH')}</span></div>`).join(''):'<p class="hint">ยังไม่มีใบเตือน</p>'}</div>`;
+  }
+  async function issueWarn(){
+    const reason=$('wReason').value.trim();if(!reason){toast('กรอกเหตุผลก่อนค่ะ');return;}
+    const {data}=await sb.rpc('hr_warn_issue',{p:{employee_id:curEmp.id,level:$('wLevel').value,reason,issued_by:'ops'}});
+    if(data&&data.ok){toast('ออกใบเตือนแล้ว + แจ้งพนักงาน');loadWarn();}else toast('ไม่สำเร็จ');
+  }
+  // ---------- เอกสาร (Supabase Storage) ----------
+  const DOC_KIND={id_card:'สำเนาบัตรประชาชน',contract:'สัญญา',cert:'วุฒิ/ใบรับรอง',other:'อื่นๆ'};
+  async function loadDoc(){
+    const b=$('dbody');const {data}=await sb.rpc('hr_doc_list',{p_employee:curEmp.id});
+    const list=data||[];
+    b.innerHTML=`
+      <div class="g3">
+        <div><label>ไฟล์เอกสาร</label><input type="file" id="docFile"></div>
+        <div><label>ประเภท</label><select id="docKind">
+          <option value="id_card">สำเนาบัตรประชาชน</option><option value="contract">สัญญา</option>
+          <option value="cert">วุฒิ/ใบรับรอง</option><option value="other">อื่นๆ</option></select></div>
+        <div style="display:flex;align-items:flex-end"><button class="btn ghost sm" style="width:100%" onclick="uploadDoc()">อัปโหลด</button></div>
+      </div>
+      <div style="margin-top:14px">${list.length?list.map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hair);padding:8px 0;gap:8px">
+        <span><a href="${d.url}" target="_blank" style="color:var(--navy)">${d.name}</a> <span style="color:var(--stone);font-size:12px">(${DOC_KIND[d.kind]||d.kind})</span><br><span style="font-size:11px;color:var(--stone)">${new Date(d.created_at).toLocaleDateString('th-TH')}</span></span>
+        <button class="mini" style="color:var(--danger)" onclick="deleteDoc('${d.id}')">ลบ</button>
+      </div>`).join(''):'<p class="hint">ยังไม่มีเอกสาร</p>'}</div>`;
+  }
+  async function uploadDoc(){
+    const f=$('docFile').files[0];if(!f){toast('เลือกไฟล์ก่อนค่ะ');return;}
+    const kind=$('docKind').value, empId=curEmp.id;
+    const path=`${empId}/${Date.now()}_${f.name}`;
+    const {error:upErr}=await sb.storage.from('hr-docs').upload(path,f,{upsert:false});
+    if(upErr){toast('อัปโหลดไม่สำเร็จ: '+upErr.message);return;}
+    const {data:{publicUrl}}=sb.storage.from('hr-docs').getPublicUrl(path);
+    const {error}=await sb.rpc('hr_doc_add',{p:{employee_id:empId,kind,name:f.name,url:publicUrl,uploaded_by:'ops'}});
+    if(error){toast('บันทึกไม่สำเร็จ: '+error.message);return;}
+    toast('อัปโหลดเอกสารแล้ว');loadDoc();
+  }
+  async function deleteDoc(id){
+    if(!confirm('ลบเอกสารนี้?'))return;
+    const {data}=await sb.rpc('hr_doc_delete',{p_id:id});
+    toast(data==='ok'?'ลบแล้ว':'ไม่พบเอกสาร');loadDoc();
+  }
+  function hhmm(ts){return ts?new Date(ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Bangkok'}):'-';}
+  function hmin(m){if(m==null)return '-';const h=Math.floor(m/60),mm=m%60;return (h?h+'ชม.':'')+mm+'น.';}
+  function dt2(s){return s?new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'-';}
+  async function loadAtt(){
+    const {data}=await sb.rpc('hr_attendance_list',{p_employee:curEmp.id,p_from:null,p_to:null});
+    const list=data||[]; const b=$('dbody');
+    if(!list.length){b.innerHTML='<p class="hint">ยังไม่มีบันทึกการลงเวลาค่ะ — พนักงานพิมพ์ "เข้างาน" ใน LINE OA หรือกดในพอร์ทัลพนักงาน</p>';return;}
+    const total=list.reduce((s,a)=>s+(a.work_minutes||0),0);
+    b.innerHTML=`<div class="hint">รวม ${list.length} วัน · ${hmin(total)}</div>
+      <table style="margin-top:8px"><thead><tr><th>วันที่</th><th>เข้า</th><th>ออก</th><th>รวม</th></tr></thead><tbody>
+      ${list.map(a=>`<tr><td>${dt2(a.work_date)}</td><td>${hhmm(a.check_in)}</td><td>${a.check_out?hhmm(a.check_out):'<span style="color:var(--champ)">ยังไม่ออก</span>'}</td><td>${a.work_minutes!=null?hmin(a.work_minutes):'-'}</td></tr>`).join('')}
+      </tbody></table>`;
+  }
+  function editEmp(){const e=curEmp;$('editId').value=e.id;$('name').value=e.name||'';$('nickname').value=e.nickname||'';
+    $('role').value=e.role||'';$('department').value=e.department||'';$('emp_type').value=e.emp_type||'fulltime';
+    $('phone').value=e.phone||'';$('email').value=e.email||'';$('id_card').value=e.id_card||'';
+    $('base_salary').value=e.base_salary||'';$('start_date').value=e.start_date||'';$('rating').value=e.rating||'';
+    $('applied_for').value=e.applied_for||'';$('source').value=e.source||'';$('address').value=e.address||'';
+    $('bank_name').value=e.bank_name||'';$('bank_account').value=e.bank_account||'';$('notes').value=e.notes||'';
+    $('recruitBox').open=true;$('recruitTitle').textContent='แก้ไข: '+e.name;
+    $('recruitBox').scrollIntoView({behavior:'smooth'});toast('แก้ไขข้อมูล '+e.name);}
+
+  async function setStatus(id,s){
+    if(s==='resigned'&&!confirm('ยืนยันให้พนักงานคนนี้ลาออก/พ้นสภาพ?'))return;
+    const {data,error}=await sb.rpc('hr_set_status',{p_id:id,p_status:s});
+    if(error){toast('ไม่สำเร็จ: '+error.message);return;}
+    if(data&&data.error){toast('ไม่สำเร็จ: '+data.error);return;}
+    toast('เปลี่ยนสถานะเป็น '+(ST_TH[s]||s)+(data.emp_no?(' · รหัส '+data.emp_no):''));
+    await openEmp(id); loadStats(); load();
+  }
+
+  // ---------- KPI ----------
+  function kpiRowHtml(m={}){return `<div class="kpiRow">
+    <input placeholder="ตัวชี้วัด" value="${(m.metric||'').replace(/"/g,'&quot;')}" data-f="metric">
+    <input type="number" placeholder="เป้า" value="${m.target??''}" data-f="target">
+    <input type="number" placeholder="ทำได้" value="${m.actual??''}" data-f="actual">
+    <input placeholder="หน่วย" value="${(m.unit||'').replace(/"/g,'&quot;')}" data-f="unit">
+    <input type="number" placeholder="คะแนน" value="${m.score??''}" data-f="score">
+    <button class="x" onclick="this.parentNode.remove()">ลบ</button></div>`;}
+  function addKpiRow(m){$('kpiList').insertAdjacentHTML('beforeend',kpiRowHtml(m||{}));}
+  async function loadKpi(){
+    curKpiPeriod=$('kperiod').value.trim()||thisPeriod();
+    const {data}=await sb.rpc('hr_kpi_period',{p_employee:curEmp.id,p_period:curKpiPeriod});
+    $('koverall').textContent=(data&&data.overall!=null)?data.overall:'–';
+    const ms=(data&&data.metrics)||[];
+    $('kpiList').innerHTML=ms.length?ms.map(kpiRowHtml).join(''):'';
+    if(!ms.length)addKpiRow();
+  }
+  async function saveKpi(){
+    const rows=[...$('kpiList').querySelectorAll('.kpiRow')];
+    let n=0;
+    for(const r of rows){
+      const f={};r.querySelectorAll('[data-f]').forEach(i=>{const k=i.dataset.f;f[k]=i.value.trim();});
+      if(!f.metric)continue;
+      const p={employee_id:curEmp.id,period:curKpiPeriod,metric:f.metric,
+        target:f.target===''?undefined:Number(f.target),actual:f.actual===''?undefined:Number(f.actual),
+        unit:f.unit||undefined,score:f.score===''?undefined:Number(f.score),created_by:'ops'};
+      const {error}=await sb.rpc('hr_kpi_upsert',{p});
+      if(error){toast('บันทึกไม่สำเร็จ: '+error.message);return;}
+      n++;
+    }
+    toast('บันทึก KPI '+n+' ตัวชี้วัดแล้ว (แจ้งพนักงานทาง LINE)');
+    loadKpi();
+  }
+
+  // ---------- สัญญาจ้าง ----------
+  async function renderContract(){
+    const body=$('dbody');
+    const {data}=await sb.rpc('emp_contract_list',{p_status:null,p_employee:curEmp.id});
+    const list=data||[];
+    const ST={draft:'ฉบับร่าง',sent:'รอลงนาม',viewed:'เปิดอ่าน',signed:'ลงนามแล้ว',declined:'ขอแก้ไข',void:'ยกเลิก'};
+    const rows=list.map(c=>{const url=STAFF_BASE+'?ec='+c.token;
+      return `<tr><td><b>${c.contract_no}</b></td><td>${ST[c.status]||c.status}</td>
+        <td style="white-space:nowrap"><a class="mini" href="${url}" target="_blank">เปิด</a>
+        <button class="mini" onclick="cp('${url}')">คัดลอก</button>
+        ${c.status==='draft'||c.status==='viewed'||c.status==='sent'?`<button class="mini" onclick="sendEC('${c.id}')">ส่ง LINE</button>`:''}</td></tr>`;}).join('');
+    body.innerHTML=`
+      ${list.length?`<table><thead><tr><th>เลขที่</th><th>สถานะ</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<p class="hint">ยังไม่มีสัญญาจ้าง</p>'}
+      <h2 style="font-size:16px;margin-top:16px">ออกสัญญาจ้างใหม่</h2>
+      <div class="g2">
+        <div><label>ประเภท</label><select id="ec_template">
+          <option value="employment">จ้างประจำ</option><option value="probation">ทดลองงาน</option>
+          <option value="parttime">พาร์ทไทม์</option><option value="freelance">ฟรีแลนซ์/จ้างทำของ</option>
+          <option value="nda">รักษาความลับ (NDA)</option></select></div>
+        <div><label>หัวสัญญา (เว้นว่าง = ค่าเริ่มต้น)</label><input id="ec_title" placeholder=""></div>
+      </div>
+      <div class="g3">
+        <div><label>ตำแหน่ง</label><input id="ec_position" value="${ROLE_TH[curEmp.role]||curEmp.role||''}"></div>
+        <div><label>เงินเดือน/ค่าจ้าง (฿)</label><input id="ec_salary" type="number" value="${curEmp.base_salary||''}"></div>
+        <div><label>รอบจ่าย</label><select id="ec_cycle"><option value="monthly">รายเดือน</option><option value="biweekly">ราย 15 วัน</option><option value="daily">รายวัน</option><option value="per_job">รายงาน</option></select></div>
+      </div>
+      <div class="g3">
+        <div><label>วันทำงาน</label><input id="ec_workdays" placeholder="เช่น จ.-ส."></div>
+        <div><label>เวลาทำงาน</label><input id="ec_workhours" placeholder="เช่น 10:00-19:00"></div>
+        <div><label>ทดลองงาน (เดือน)</label><input id="ec_probation" type="number" value="3"></div>
+      </div>
+      <div class="g3">
+        <div><label>วันเริ่ม</label><input id="ec_start" type="date" value="${curEmp.start_date||''}"></div>
+        <div><label>วันสิ้นสุด (ถ้ามี)</label><input id="ec_end" type="date"></div>
+        <div><label>บอกเลิกล่วงหน้า (วัน)</label><input id="ec_notice" type="number" value="30"></div>
+      </div>
+      <label>ขอบเขตหน้าที่ (เว้นว่าง = มาตรฐานตามตำแหน่ง)</label><textarea id="ec_scope" placeholder=""></textarea>
+      <label>ข้อตกลงเพิ่มเติม</label><div id="ec_clauses"></div>
+      <button class="btn ghost sm" onclick="addECClause()" style="margin-top:6px">+ เพิ่มข้อพิเศษ</button>
+      <button class="btn sage" style="margin-top:14px;width:100%" onclick="saveEC()">สร้างสัญญา + ออกลิงก์</button>
+      <div id="ecOut"></div>`;
+  }
+  function addECClause(h='',b=''){const d=document.createElement('div');d.className='clauseRow';
+    d.innerHTML=`<input placeholder="หัวข้อ" value="${h.replace(/"/g,'&quot;')}"><input placeholder="เนื้อหา" value="${b.replace(/"/g,'&quot;')}"><button class="x" onclick="this.parentNode.remove()">ลบ</button>`;
+    $('ec_clauses').appendChild(d);}
+  function collectEC(){return [...$('ec_clauses').children].map(r=>{const[h,b]=r.querySelectorAll('input');return{h:h.value.trim(),body:b.value.trim()};}).filter(c=>c.h||c.body);}
+  async function saveEC(){
+    const vars={position:$('ec_position').value.trim(),salary:Number($('ec_salary').value)||undefined,
+      payment_cycle:$('ec_cycle').value,work_days:$('ec_workdays').value.trim(),work_hours:$('ec_workhours').value.trim(),
+      probation_months:Number($('ec_probation').value)||undefined,start_date:$('ec_start').value||undefined,
+      end_date:$('ec_end').value||undefined,notice_days:Number($('ec_notice').value)||undefined,emp_type:curEmp.emp_type};
+    const p={employee_id:curEmp.id,template:$('ec_template').value,title:$('ec_title').value.trim()||undefined,
+      scope:$('ec_scope').value.trim()||undefined,vars,extra_clauses:collectEC(),created_by:'ops'};
+    const {data,error}=await sb.rpc('emp_contract_upsert',{p});
+    if(error){toast('ไม่สำเร็จ: '+error.message);return;}
+    if(data&&data.error){toast('ไม่สำเร็จ: '+data.error);return;}
+    const url=STAFF_BASE+'?ec='+data.token;
+    $('ecOut').innerHTML=`<div class="link-out"><b>${data.contract_no}</b> สร้างแล้ว — ส่งให้พนักงานเซ็น
+      <div class="u">${url}</div>
+      <div class="row-btns"><button class="btn ghost sm" onclick="cp('${url}')">คัดลอก</button>
+      <button class="btn sage sm" onclick="sendEC('${data.id}')">ส่งเข้า LINE</button></div></div>`;
+    toast('สร้างสัญญา '+data.contract_no); loadStats();
+  }
+  async function sendEC(id){
+    const {data,error}=await sb.rpc('emp_contract_send',{p_id:id});
+    if(error){toast('ส่งไม่สำเร็จ: '+error.message);return;}
+    if(data&&data.error){toast('ส่งไม่ได้: '+data.error);return;}
+    toast('ส่งแล้ว — ถ้ามี LINE UID พนักงานจะได้การ์ดให้เซ็นทันที'); renderContract(); loadStats();
+  }
+
+  function cp(u){navigator.clipboard.writeText(u).then(()=>toast('คัดลอกลิงก์แล้ว'));}
+
+  // ---------- กะ + ประกาศ (เครื่องมือ HR) ----------
+  async function loadShifts(){
+    const {data}=await sb.rpc('hr_shift_list');shiftCache=data||[];
+    $('shiftList').innerHTML=shiftCache.length?shiftCache.map(s=>`• ${s.name} ${String(s.start_time).slice(0,5)}-${String(s.end_time).slice(0,5)} (สายหลัง ${s.grace_minutes} นาที)`).join('<br>'):'ยังไม่มีกะ — เพิ่มด้านล่าง';
+  }
+  async function addShift(){
+    if(!v('sh_name')){toast('ตั้งชื่อกะก่อนค่ะ');return;}
+    const {error}=await sb.rpc('hr_shift_upsert',{p:{name:v('sh_name'),start_time:v('sh_start'),end_time:v('sh_end'),grace_minutes:numv('sh_grace'),break_minutes:numv('sh_break')}});
+    if(error){toast('ไม่สำเร็จ: '+error.message);return;}
+    toast('เพิ่มกะแล้ว');$('sh_name').value='';loadShifts();
+  }
+  async function loadAudienceOptions(){
+    const {data}=await sb.rpc('hr_role_counts');const rc=data||{};
+    const total=Object.values(rc).reduce((s,n)=>s+n,0);
+    const opts=['<option value="all">ทั้งทีม ('+total+' คน)</option>']
+      .concat(Object.keys(rc).map(r=>`<option value="role:${r}">เฉพาะ ${ROLE_TH[r]||r} (${rc[r]} คน)</option>`));
+    if($('annAudience'))$('annAudience').innerHTML=opts.join('');
+  }
+  async function sendAnnounce(){
+    const body=v('annBody');if(!body){toast('พิมพ์ข้อความก่อนค่ะ');return;}
+    const {data}=await sb.rpc('hr_announce',{p:{title:v('annTitle')||'ประกาศจากทีม',body,
+      audience:$('annAudience').value,image_url:v('annImage')||undefined,require_ack:$('annAck').checked}});
+    if(data&&data.ok){toast('ส่งประกาศถึง '+data.sent+' คนแล้ว');$('annBody').value='';$('annTitle').value='';$('annImage').value='';loadAnnouncements();}else toast('ไม่สำเร็จ');
+  }
+  async function loadAnnouncements(){
+    const {data}=await sb.rpc('hr_announcement_list',{p_limit:10});
+    const list=data||[];const el=$('annList');if(!el)return;
+    if(!list.length){el.innerHTML='<div class="hint">ยังไม่มีประกาศ</div>';return;}
+    el.innerHTML='<div class="hint" style="margin-bottom:4px">ประกาศล่าสุด — กดดูว่าใครยังไม่รับทราบ</div>'+list.map(a=>`
+      <div style="border-bottom:1px solid var(--hair);padding:8px 0;cursor:pointer" onclick="annPending('${a.id}',this)">
+        <div style="display:flex;justify-content:space-between"><b>${a.title}</b>
+          <span style="font-size:12px;color:var(--stone)">รับทราบ ${a.acked}/${a.sent}${a.require_ack?'':' · ไม่ต้อง ack'}</span></div>
+        <div class="annPend" style="font-size:12px;color:var(--danger);margin-top:3px"></div>
+      </div>`).join('');
+  }
+  async function annPending(id,row){
+    const box=row.querySelector('.annPend');
+    if(box.dataset.open){box.textContent='';box.dataset.open='';return;}
+    const {data}=await sb.rpc('hr_announcement_detail',{p_id:id});
+    const pend=(data&&data.pending)||[];
+    box.textContent=pend.length?('ยังไม่รับทราบ: '+pend.join(', ')):'ทุกคนรับทราบแล้ว ✓';
+    box.style.color=pend.length?'var(--danger)':'var(--ok)';box.dataset.open='1';
+  }
+
+  // ---------- สรุป HR วันนี้ ----------
+  async function loadBrief(){
+    const {data}=await sb.rpc('hr_daily_brief');
+    if(!data){$('brief').textContent='ดึงสรุปไม่ได้';return;}
+    const wn=data.working_now||[],lt=data.late_today||[],ab=data.absent||[],pe=data.probation_ending||[],ce=data.contract_ending||[];
+    const chip=(label,n,warn)=>`<span style="display:inline-block;padding:4px 10px;border:1px solid ${warn&&n?'#E6C9C9':'var(--hair)'};border-radius:20px;margin:3px 4px 0 0;font-size:12px;${warn&&n?'color:var(--danger)':''}">${label} <b>${n}</b></span>`;
+    $('brief').innerHTML=`
+      <div style="margin-bottom:6px">
+        ${chip('เข้างานแล้ว',data.present_count,false)}${chip('กำลังทำงาน',wn.length,false)}
+        ${chip('มาสาย',lt.length,true)}${chip('ขาด',ab.length,true)}
+        ${chip('ลารออนุมัติ',data.leave_pending,true)}${chip('งานเลยกำหนด',data.tasks_overdue,true)}
+        ${chip('UID ค้างยืนยัน',data.unverified,true)}
+      </div>
+      ${ab.length?`<div style="color:var(--danger);font-size:12px">ขาด: ${ab.join(', ')}</div>`:''}
+      ${pe.length?`<div style="font-size:12px;color:var(--champ)">ใกล้ครบทดลองงาน: ${pe.map(x=>x.name).join(', ')}</div>`:''}
+      ${ce.length?`<div style="font-size:12px;color:var(--champ)">สัญญาใกล้ครบ: ${ce.map(x=>x.name).join(', ')}</div>`:''}
+      <div id="analytics" class="hint" style="margin-top:8px"></div>
+      <button class="btn ghost sm" style="margin-top:8px" onclick="autoPayroll()">ออกสลิป + KPI อัตโนมัติ (งวดที่แล้ว)</button>`;
+    loadAnalytics();
+  }
+  async function loadAnalytics(){
+    const {data:a}=await sb.rpc('hr_analytics',{p_period:null});
+    if(!a||!$('analytics'))return;
+    $('analytics').innerHTML=`พนักงาน ${a.headcount} คน · ต้นทุนเงินเดือน(ฐาน) ฿${Number(a.labor_cost_base).toLocaleString()}/ด. · เข้าใหม่ ${a.hires_this_period} · ออก ${a.leavers_this_period} (turnover ${a.turnover_pct}%) · มาสายรวม ${a.late_total} · เบิกค้าง ${a.pending_claims} · ทรัพย์สินยังไม่คืน ${a.outstanding_assets}`;
+  }
+  async function autoPayroll(){
+    const d=new Date();d.setMonth(d.getMonth()-1);const p=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!confirm('ออกสลิปร่าง + ดึง KPI อัตโนมัติ งวด '+p+' ให้ทุกคน?'))return;
+    await sb.rpc('hr_kpi_auto_all',{p_period:p});
+    const {data}=await sb.rpc('hr_payslip_auto',{p_period:p});
+    toast('ออกสลิปร่าง '+(data?.drafts??0)+' ใบ + KPI งวด '+p+' แล้ว');
+  }
+
+  // ---------- คำขอลารออนุมัติ ----------
+  async function loadLeaveInbox(){
+    const {data}=await sb.rpc('hr_leave_list',{p_status:'pending',p_employee:null});
+    const list=data||[];const LT={sick:'ป่วย',personal:'กิจ',vacation:'พักร้อน',unpaid:'ไม่รับเงิน'};
+    if(!list.length){$('leaveInbox').style.display='none';return;}
+    $('leaveInbox').style.display='block';
+    $('leaveRows').innerHTML=list.map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hair);padding:10px 0;gap:8px">
+      <div><b>${l.name}</b> — ${LT[l.type]||l.type} ${l.from}${l.to!==l.from?` ถึง ${l.to}`:''} (${l.days} วัน)${l.reason?`<br><span style="color:var(--stone);font-size:12px">${l.reason}</span>`:''}</div>
+      <div style="white-space:nowrap"><button class="btn sage sm" onclick="decideLeave('${l.id}',true)">อนุมัติ</button>
+        <button class="btn ghost sm" onclick="decideLeave('${l.id}',false)">ปฏิเสธ</button></div></div>`).join('');
+  }
+  async function decideLeave(id,ok){
+    const {data}=await sb.rpc('hr_leave_decide',{p_id:id,p_approve:ok,p_by:'ops',p_note:null});
+    if(data&&data.ok){toast(ok?'อนุมัติแล้ว + แจ้งพนักงาน':'ปฏิเสธแล้ว + แจ้งพนักงาน');loadLeaveInbox();}else toast('ไม่สำเร็จ');
+  }
+  // ---------- คำขอเบิกเงิน ----------
+  async function loadClaimInbox(){
+    const {data}=await sb.rpc('hr_claim_list',{p_status:'pending',p_employee:null});
+    const list=data||[];
+    if(!list.length){$('claimInbox').style.display='none';return;}
+    $('claimInbox').style.display='block';
+    $('claimRows').innerHTML=list.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hair);padding:10px 0;gap:8px">
+      <div><b>${c.name}</b> — ${c.kind==='advance'?'เบิกล่วงหน้า':'ค่าใช้จ่าย'} ฿${Number(c.amount).toLocaleString()}${c.reason?`<br><span style="color:var(--stone);font-size:12px">${c.reason}</span>`:''}${c.receipt_url?`<br><a href="${c.receipt_url}" target="_blank" style="font-size:12px">ใบเสร็จ</a>`:''}</div>
+      <div style="white-space:nowrap"><button class="btn sage sm" onclick="decideClaim('${c.id}',true)">อนุมัติ</button>
+        <button class="btn ghost sm" onclick="decideClaim('${c.id}',false)">ปฏิเสธ</button></div></div>`).join('');
+  }
+  async function decideClaim(id,ok){
+    const {data}=await sb.rpc('hr_claim_decide',{p_id:id,p_approve:ok,p_by:'ops',p_note:null});
+    if(data&&data.ok){toast(ok?'อนุมัติเบิกแล้ว + แจ้งพนักงาน':'ปฏิเสธแล้ว');loadClaimInbox();}else toast('ไม่สำเร็จ');
+  }
+
+  $('start_date').value=new Date().toISOString().slice(0,10);
+  loadStats(); load(); loadLeaveInbox(); loadClaimInbox(); loadShifts(); loadBrief(); loadAnnouncements(); loadAudienceOptions();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
+</body>
+</html>

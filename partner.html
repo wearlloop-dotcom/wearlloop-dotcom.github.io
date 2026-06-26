@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · พอร์ทัลสไตลิสต์พาร์ทเนอร์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--danger:#A32D2D;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:16px}
+  .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar h1{font-family:var(--display);font-size:18px;font-weight:700}
+  .bar .tag{font-size:12px;background:#3a3a3a;padding:3px 10px;border-radius:20px}
+  .wrap{max-width:660px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:15px;margin-bottom:2px}
+  .card .sub{font-size:12px;color:var(--muted);margin-bottom:10px}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-weight:500}
+  input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 12px;font-size:16px;font-family:var(--sans)}
+  textarea{min-height:60px;resize:vertical}
+  .scan{display:flex;gap:10px}.scan input{flex:1;text-transform:uppercase;font-size:20px;letter-spacing:2px}
+  .btn{border:none;border-radius:9px;padding:13px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .btn.dark{background:var(--ink);color:#fff}.btn.ok{background:var(--ok);color:#fff;width:100%;padding:16px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .found{background:#E4F0EC;color:#04342C;border-radius:9px;padding:10px 14px;font-weight:600;margin-top:10px;display:none}
+  .found.show{display:block}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips label{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:14px;color:var(--ink);border:1.5px solid var(--line);border-radius:20px;padding:7px 12px;cursor:pointer}
+  .chips input{width:auto}
+  .sw{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.sw input[type=color]{width:42px;height:38px;padding:2px}
+  fieldset{border:none;opacity:.45;pointer-events:none}fieldset.on{opacity:1;pointer-events:auto}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:9}
+  .toast.show{opacity:1}
+  .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .thumbs .th{position:relative;width:64px}
+  .thumbs img{width:64px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+  .thumbs .fn{font-size:10px;color:var(--muted);word-break:break-all;line-height:1.2;margin-top:2px}
+  .upnote{background:#FBF3E2;border:1px solid #ECDDBD;border-radius:9px;padding:10px 12px;font-size:13px;color:#6b5a2e;margin-top:10px;line-height:1.5}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+<div class="bar"><h1>พอร์ทัลสไตลิสต์</h1><span class="tag">พาร์ทเนอร์ LLOOP · ข้อมูลภายใน</span></div>
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">stylist partner</div>
+    <h1>บันทึกตัวตนของลูกค้าทุกคน</h1>
+    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดที่หมุนเวียนใช่กับเขาที่สุด</div>
+  </section>
+  <div class="card">
+    <h2>ค้นหาลูกค้า — รหัสจากแอป LLOOP</h2>
+    <div class="scan">
+      <input id="code" placeholder="เช่น BA4145" autocomplete="off">
+      <button class="btn dark" onclick="lookup()">ค้นหา</button>
+    </div>
+    <div class="found" id="found"></div>
+  </div>
+
+  <fieldset id="form">
+  <div class="card">
+    <h2>ข้อมูลการให้บริการ</h2>
+    <div class="sub">บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ</div>
+    <div class="g3">
+      <div><label>วันที่ให้บริการ</label><input id="service_date" type="date"></div>
+      <div><label>บริการที่ใช้</label><select id="service_type">
+        <option value="">—</option>
+        <option>Personal Color 12 Types</option>
+        <option>Face &amp; Body Styling</option>
+        <option>Healthy Wardrobe</option>
+        <option>Color + Self Korea Makeup</option>
+        <option>อื่น ๆ</option></select></div>
+      <div><label>มูลค่าบริการ (฿)</label><input id="service_price" type="number" placeholder=""></div>
+    </div>
+    <div class="g2">
+      <div><label>นัดติดตาม/ครั้งถัดไป</label><input id="next_appt" type="date"></div>
+      <div><label>ยินยอมให้ใช้ภาพ/รีวิว</label><select id="photo_consent">
+        <option value="">—</option><option value="yes">ยินยอม</option>
+        <option value="internal">ใช้ภายในเท่านั้น</option><option value="no">ไม่ยินยอม</option></select></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Personal Color — 12 Seasons</h2>
+    <div class="sub">ผลวิเคราะห์สีจากคอร์ส (เลือก type 12 ฤดู)</div>
+    <div class="g2">
+      <div><label>12-Season Type</label><select id="type12" onchange="autoSeason()">
+        <option value="">—</option>
+        <option>Light Spring</option><option>Warm Spring</option><option>Bright Spring</option>
+        <option>Bright Winter</option><option>Cool Winter</option><option>Deep Winter</option>
+        <option>Deep Autumn</option><option>Warm Autumn</option><option>Soft Autumn</option>
+        <option>Soft Summer</option><option>Cool Summer</option><option>Light Summer</option></select></div>
+      <div><label>Soul Color</label><input id="soul_color" placeholder="สีประจำตัว"></div>
+    </div>
+    <div class="g3">
+      <div><label>Undertone</label><input id="undertone" placeholder="cool/warm"></div>
+      <div><label>Contrast</label><input id="contrast" placeholder="high/low"></div>
+      <div><label>Depth</label><input id="depth" placeholder="light/deep"></div>
+    </div>
+    <div class="g3">
+      <div><label>Clarity / Chroma</label><input id="clarity" placeholder="bright/muted/soft"></div>
+      <div><label>สีตาธรรมชาติ</label><input id="natural_eye" placeholder="น้ำตาลเข้ม/อ่อน"></div>
+      <div><label>สีผมธรรมชาติ</label><input id="natural_hair" placeholder=""></div>
+    </div>
+    <div class="g2">
+      <div><label>โทนผิวจริง</label><input id="skin_tone" placeholder="fair/medium/tan, อมชมพู/อมเหลือง"></div>
+      <div><label>สีกลาง (neutrals) ที่ใช่</label><input id="neutrals" placeholder="ครีม/เทาอุ่น/น้ำตาล"></div>
+    </div>
+    <label>พาเลตสีที่ใช่ (สีเสื้อผ้า)</label>
+    <div class="sw"><input type="color" id="c1" value="#15233F"><input type="color" id="c2" value="#7A1F3D"><input type="color" id="c3" value="#0E0E0E"><input type="color" id="c4" value="#1E5C5A"><input type="color" id="c5" value="#C9A86A"></div>
+    <label>สีที่ควรเลี่ยง</label><div class="sw"><input type="color" id="a1" value="#E8C9A0"><input type="color" id="a2" value="#B7B7B7"></div>
+    <div class="g3">
+      <div><label>สีเมคอัพ</label><input id="makeup_colors" placeholder="โทนปาก/แก้ม"></div>
+      <div><label>สีผมที่เหมาะ</label><input id="hair_color" placeholder=""></div>
+      <div><label>โลหะที่ใช่</label><input id="metals" placeholder="ทอง/เงิน"></div>
+    </div>
+    <div class="g2">
+      <div><label>ระบบสีที่ใช้</label><input id="system" placeholder="Korean 12-tone / AIM 12-season"></div>
+      <div><label>ระดับผู้วิเคราะห์</label><select id="tier"><option value="">—</option><option>Senior</option><option>Master</option><option>Certified</option></select></div>
+    </div>
+    <label>ไฟล์ดิจิทัล Personal Color (ลิงก์)</label><input id="pc_file" placeholder="https://...">
+  </div>
+
+  <div class="card">
+    <h2>Face Analysis</h2>
+    <div class="g2">
+      <div><label>รูปหน้า</label><select id="face_shape"><option value="">—</option><option>รูปไข่</option><option>กลม</option><option>เหลี่ยม</option><option>หัวใจ</option><option>ยาว</option><option>เพชร</option></select></div>
+      <div><label>แว่นตาที่เข้า</label><input id="eyewear" placeholder="ทรงเหลี่ยม/มน"></div>
+    </div>
+    <label>ทรงผมที่แนะนำ (คั่นด้วย ,)</label><textarea id="hairstyles" placeholder="ผมยาวลอนใหญ่, รวบครึ่งหัว, บ๊อบยาว"></textarea>
+    <label>เมคอัพ — สีปาก / แก้ม / ตา</label>
+    <div class="g3"><input id="lip" placeholder="สีปาก"><input id="cheek" placeholder="สีแก้ม"><input id="eye" placeholder="สีตา"></div>
+    <label>เทคนิค/ทิศทางเมคอัพ (Self Korea ฯลฯ)</label><input id="makeup_dir" placeholder="โทนอุ่น เน้นตา วางเบสบาง ฯลฯ">
+    <label>โน้ตเพิ่มเติม (หน้า/ผม)</label><input id="hair_notes" placeholder="เลี่ยงหน้าม้าหนา ฯลฯ">
+  </div>
+
+  <div class="card">
+    <h2>Body Analysis</h2>
+    <div class="g2">
+      <div><label>ประเภทหุ่น</label><select id="body_type">
+        <option value="">—</option><option>นาฬิกาทราย</option><option>สามเหลี่ยม (ล่างใหญ่)</option>
+        <option>สามเหลี่ยมกลับ (บนใหญ่)</option><option>สี่เหลี่ยม</option><option>แอปเปิล</option><option>โอวัล</option></select></div>
+      <div><label>สัดส่วน</label><input id="body_proportion" placeholder="ช่วงตัวสั้น/ขายาว"></div>
+    </div>
+    <label>จุดเด่นที่ควรเสริม / โครงสร้าง</label><input id="body_highlight" placeholder="เน้นเอว ยืดช่วงขา ฯลฯ">
+    <label>ทรงที่แนะนำ</label><input id="silhouettes" placeholder="A-line, fit-and-flare">
+    <label>คอเสื้อที่แนะนำ</label><input id="necklines" placeholder="V-neck, สเควร์">
+    <div class="g2">
+      <div><label>ทรงแขนที่แนะนำ</label><input id="sleeves" placeholder="แขนล้ำ, แขนพอง, สามส่วน"></div>
+      <div><label>ความยาวที่เหมาะ (กระโปรง/เดรส)</label><input id="hemline" placeholder="คลุมเข่า, midi"></div>
+    </div>
+    <div class="g2">
+      <div><label>เอวกางเกง (rise)</label><input id="rise" placeholder="เอวสูง/กลาง"></div>
+      <div><label>รองเท้า/ส้นที่แนะนำ</label><input id="footwear" placeholder="ส้นตัด, pointed, ส้น 2-3 นิ้ว"></div>
+    </div>
+    <label>เนื้อผ้า / ลายที่แนะนำ</label><input id="fabrics" placeholder="ผ้าทิ้งตัว, ลายเล็ก, เลี่ยงผ้าแข็ง">
+    <label>จุดที่ควรพราง / โครงสร้างที่ควรเลี่ยง</label><input id="camouflage" placeholder="พรางต้นแขน, เลี่ยงระบายช่วงสะโพก">
+    <label>เสื้อผ้า/ทรงที่ควรเลี่ยง</label><input id="avoid_clothing" placeholder="คอปาด, กระโปรงบานช่วงสะโพก">
+    <label>ไฟล์ดิจิทัล Face & Body (ลิงก์)</label><input id="fb_file" placeholder="https://...">
+  </div>
+
+  <div class="card">
+    <h2>วัดตัว (ละเอียด)</h2>
+    <div class="sub">หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก</div>
+    <div class="g3">
+      <div><label>ส่วนสูง (ซม.)</label><input id="height_cm" type="number"></div>
+      <div><label>น้ำหนัก (กก.)</label><input id="weight_kg" type="number"></div>
+      <div><label>ไซซ์เดรส</label><input id="dress_size" placeholder="S/M/L"></div>
+      <div><label>รอบอก</label><input id="bust_in" type="number"></div>
+      <div><label>ใต้อก</label><input id="underbust_in" type="number"></div>
+      <div><label>คัพ</label><input id="cup"></div>
+      <div><label>รอบเอว</label><input id="waist_in" type="number"></div>
+      <div><label>สะโพก</label><input id="hip_in" type="number"></div>
+      <div><label>สะโพกบน</label><input id="high_hip_in" type="number"></div>
+      <div><label>ไหล่</label><input id="shoulder_in" type="number"></div>
+      <div><label>ไหล่ถึงเอว</label><input id="shoulder_to_waist_in" type="number"></div>
+      <div><label>ความยาวหลัง</label><input id="back_length_in" type="number"></div>
+      <div><label>ความยาวแขน</label><input id="arm_length_in" type="number"></div>
+      <div><label>รอบต้นแขน</label><input id="bicep_in" type="number"></div>
+      <div><label>รอบคอ</label><input id="neck_in" type="number"></div>
+      <div><label>ต้นขา</label><input id="thigh_in" type="number"></div>
+      <div><label>เป้า (inseam)</label><input id="inseam_in" type="number"></div>
+      <div><label>เบอร์รองเท้า</label><input id="shoe_size"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Soul Styling & Wardrobe</h2>
+    <label>Core / Soul Style</label><input id="core_style" placeholder="ตัวตน/แก่นสไตล์">
+    <label>Vibe / ลุค</label><input id="vibe" placeholder="modern, elegant, minimal">
+    <label>หลัก Mix & Match</label><textarea id="mix_match" placeholder="แนวทางจับคู่ core style"></textarea>
+    <label>หมวดชุดที่แนะนำ</label>
+    <div class="chips" id="recommend">
+      <label><input type="checkbox" value="dress">เดรส</label><label><input type="checkbox" value="set">เซ็ต</label>
+      <label><input type="checkbox" value="top">เสื้อ</label><label><input type="checkbox" value="skirt">กระโปรง</label>
+      <label><input type="checkbox" value="pants">กางเกง</label><label><input type="checkbox" value="outerwear">เสื้อคลุม</label>
+    </div>
+    <label>Must-have Items</label><textarea id="must_have" placeholder="เสื้อเชิ้ตขาว, เบลเซอร์, ..."></textarea>
+    <label>แบรนด์/รองเท้า/เครื่องประดับที่แนะนำ</label><textarea id="brands" placeholder=""></textarea>
+    <div class="g2">
+      <div><label>ไลฟ์สไตล์ / โอกาสใช้งาน</label><input id="occasions" placeholder="ทำงานออฟฟิศ, ออกงาน, แคชชวล"></div>
+      <div><label>งบประมาณต่อชิ้น/เดือน</label><input id="budget" placeholder="เช่น 1,000-3,000/ชิ้น"></div>
+    </div>
+    <label>ข้อควรทำ / ข้อควรเลี่ยง (Do's & Don'ts)</label><textarea id="dos_donts" placeholder="DO: เน้นเอว, โทนอุ่น · DON'T: ผ้าแข็ง, สีตัดเย็น"></textarea>
+    <label>Mood Board (ลิงก์)</label><input id="mood_board" placeholder="https://...">
+  </div>
+
+  <div class="card">
+    <h2>Lookbook & รูปลูกค้า</h2>
+    <label>Personal Lookbook 20 Looks</label>
+    <input type="file" id="lookbook_file" accept="image/*" multiple onchange="uploadFiles(this,'lookbook','lookbook_thumbs')">
+    <div class="thumbs" id="lookbook_thumbs"></div>
+    <label>หรือวางลิงก์ Lookbook (คั่นด้วย ,)</label><textarea id="lookbook" placeholder="https://...look1, https://...look2"></textarea>
+    <label>รูปลูกค้า (เต็มตัว/ดราพสี)</label>
+    <input type="file" id="photos_file" accept="image/*" multiple onchange="uploadFiles(this,'photos','photos_thumbs')">
+    <div class="thumbs" id="photos_thumbs"></div>
+    <label>หรือวางลิงก์รูป (คั่นด้วย ,)</label><textarea id="photos" placeholder="https://...jpg"></textarea>
+    <div class="upnote" id="upnote" style="display:none"></div>
+    <label>ประโยคสรุป (แสดงให้ลูกค้า — เว้นว่าง=ใช้ 12-season type อัตโนมัติ)</label><input id="headline" placeholder="คุณคือ Warm Autumn โทนอุ่นละมุน">
+    <div class="g2">
+      <div><label>ชื่อสไตลิสต์</label><input id="analyst"></div>
+      <div><label>ทีม/พาร์ทเนอร์</label><input id="partner" placeholder="Classis Studio / Colorsayyoo Studio"></div>
+    </div>
+  </div>
+
+  <button class="btn ok" onclick="save()">บันทึกโปรไฟล์ลูกค้า</button>
+  </fieldset>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const $=id=>document.getElementById(id);
+  let code=null, baseSeason='';
+  const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2200);};
+  const num=id=>{const v=$(id).value;return v?Number(v):undefined;};
+  const str=id=>$(id).value||undefined;
+  const list=id=>($(id).value||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const checked=id=>[...$(id).querySelectorAll('input:checked')].map(i=>i.value);
+  // 12-season type -> base season (enum 4) สำหรับระบบ fit/For You
+  function autoSeason(){
+    const t=($('type12').value||'').toLowerCase();
+    baseSeason = t.includes('spring')?'spring':t.includes('summer')?'summer':t.includes('autumn')?'autumn':t.includes('winter')?'winter':'neutral';
+  }
+  async function lookup(){
+    const c=$('code').value.trim().toUpperCase(); if(!c){toast('ใส่รหัสก่อนค่ะ');return;}
+    const { data } = await sb.rpc('partner_lookup',{ p_code: c });
+    if(!data||!data.found){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='ไม่พบรหัส '+c; $('form').className=''; return; }
+    code=c; $('found').className='found show'; $('found').style.color='';
+    $('found').textContent='พบลูกค้า: '+data.name+(data.has_profile?' (มีผลเดิม — บันทึกทับได้)':''); $('form').className='on';
+    // ดึงข้อมูลเดิมมาเติมในฟอร์ม (ถ้ามี) เพื่อไม่ต้องพิมพ์ใหม่
+    resetForm();
+    try{
+      const { data:prof } = await sb.rpc('partner_get',{ p_code: c });
+      if(prof && (prof.color||prof.measurements||prof.face||prof.body||prof.style||prof.headline)) fillForm(prof);
+    }catch(e){ /* ลูกค้าใหม่ / ยังไม่มีผล — ปล่อยฟอร์มว่าง */ }
+  }
+  // ล้างฟอร์มก่อนเติมข้อมูลใหม่ (กันค่าค้างจากลูกค้าคนก่อน)
+  function resetForm(){
+    $('form').querySelectorAll('input,select,textarea').forEach(el=>{
+      if(el.id==='code') return;
+      if(el.type==='checkbox'){ el.checked=false; }
+      else if(el.type!=='color'){ el.value=''; }
+    });
+    [['c1','#15233F'],['c2','#7A1F3D'],['c3','#0E0E0E'],['c4','#1E5C5A'],['c5','#C9A86A'],['a1','#E8C9A0'],['a2','#B7B7B7']].forEach(([id,v])=>{ if($(id)) $(id).value=v; });
+  }
+  // map ค่ากลับเข้าฟอร์ม (โครงสร้างเดียวกับที่ save() สร้าง)
+  function fillForm(d){
+    const setV=(id,v)=>{ const el=$(id); if(el && v!==undefined && v!==null && v!=='') el.value=v; };
+    const setList=(id,arr)=>{ if(Array.isArray(arr)&&arr.length) setV(id, arr.join(', ')); };
+    const setColor=(id,v)=>{ const el=$(id); if(el && typeof v==='string' && /^#?[0-9a-fA-F]{3,8}$/.test(v)) el.value = v[0]==='#'?v:('#'+v); };
+    const m=d.measurements||{}, col=d.color||{}, f=d.face||{}, b=d.body||{}, st=d.style||{}, sv=d.service||{};
+    // วัดตัว
+    Object.keys(m).forEach(k=>setV(k, m[k]));
+    // บริการ
+    setV('service_date', sv.date); setV('service_type', sv.type); setV('service_price', sv.price);
+    setV('next_appt', sv.next_appt); setV('photo_consent', sv.photo_consent);
+    // สี
+    setV('type12', col.type_12); autoSeason();
+    setV('system', col.system); setV('undertone', col.undertone); setV('contrast', col.contrast); setV('depth', col.depth);
+    setV('clarity', col.clarity); setV('natural_eye', col.natural_eye); setV('natural_hair', col.natural_hair); setV('skin_tone', col.skin_tone); setV('neutrals', col.neutrals);
+    setList('metals', col.metals);
+    (col.palette||[]).slice(0,5).forEach((c,i)=>setColor('c'+(i+1), c));
+    (col.avoid_colors||[]).slice(0,2).forEach((c,i)=>setColor('a'+(i+1), c));
+    setV('soul_color', col.soul_color); setV('makeup_colors', col.makeup_colors);
+    setV('hair_color', col.hair_color); setV('pc_file', col.pc_file);
+    // หน้า
+    setV('face_shape', f.shape); setV('eyewear', f.eyewear); setList('hairstyles', f.hairstyles);
+    setV('makeup_dir', f.makeup); setV('lip', f.makeup_lip); setV('cheek', f.makeup_cheek); setV('eye', f.makeup_eye);
+    setV('hair_notes', f.hair_notes);
+    // หุ่น
+    setV('body_type', b.type); setV('body_proportion', b.proportion); setV('body_highlight', b.highlight);
+    setList('silhouettes', b.silhouettes); setList('necklines', b.necklines);
+    setV('sleeves', b.sleeves); setV('hemline', b.hemline); setV('rise', b.rise); setV('footwear', b.footwear);
+    setV('fabrics', b.fabrics); setV('camouflage', b.camouflage); setV('avoid_clothing', b.avoid_clothing); setV('fb_file', b.fb_file);
+    // สไตล์
+    setV('core_style', st.core_style); setList('vibe', st.vibe); setV('mix_match', st.mix_match);
+    const rec=st.recommend_categories||[];
+    $('recommend').querySelectorAll('input[type=checkbox]').forEach(cb=>{ cb.checked=rec.includes(cb.value); });
+    setList('must_have', st.must_have); setList('brands', st.brands);
+    setV('occasions', st.occasions); setV('budget', st.budget); setV('dos_donts', st.dos_donts); setV('mood_board', st.mood_board);
+    // lookbook / รูป / สรุป
+    setList('lookbook', d.lookbook); setList('photos', d.photos);
+    setV('headline', d.headline); setV('analyst', d.analyst); setV('partner', d.partner); setV('tier', d.analyst_tier);
+  }
+  async function save(){
+    if(!code){toast('ค้นหาลูกค้าก่อนค่ะ');return;}
+    autoSeason();
+    const m={}; ['height_cm','weight_kg','bust_in','underbust_in','waist_in','hip_in','high_hip_in','shoulder_in','shoulder_to_waist_in','back_length_in','arm_length_in','bicep_in','neck_in','thigh_in','inseam_in'].forEach(k=>{const v=num(k);if(v!==undefined)m[k]=v;});
+    ['cup','dress_size','shoe_size'].forEach(k=>{const v=str(k);if(v)m[k]=v;});
+    const data={
+      measurements:m,
+      service:{date:str('service_date'), type:str('service_type'), price:num('service_price'),
+        next_appt:str('next_appt'), photo_consent:str('photo_consent')},
+      color:{type_12:str('type12'), season:baseSeason, system:str('system'), undertone:str('undertone'), contrast:str('contrast'), depth:str('depth'),
+        clarity:str('clarity'), natural_eye:str('natural_eye'), natural_hair:str('natural_hair'), skin_tone:str('skin_tone'), neutrals:str('neutrals'),
+        metals:list('metals'), palette:[$('c1').value,$('c2').value,$('c3').value,$('c4').value,$('c5').value],
+        avoid_colors:[$('a1').value,$('a2').value], soul_color:str('soul_color'),
+        makeup_colors:str('makeup_colors'), hair_color:str('hair_color'), pc_file:str('pc_file')},
+      face:{shape:str('face_shape'), eyewear:str('eyewear'), hairstyles:list('hairstyles'),
+        makeup:str('makeup_dir'), makeup_lip:str('lip'), makeup_cheek:str('cheek'), makeup_eye:str('eye'), hair_notes:str('hair_notes')},
+      body:{type:str('body_type'), proportion:str('body_proportion'), highlight:str('body_highlight'),
+        silhouettes:list('silhouettes'), necklines:list('necklines'),
+        sleeves:str('sleeves'), hemline:str('hemline'), rise:str('rise'), footwear:str('footwear'),
+        fabrics:str('fabrics'), camouflage:str('camouflage'), avoid_clothing:str('avoid_clothing'), fb_file:str('fb_file')},
+      style:{core_style:str('core_style'), vibe:list('vibe'), mix_match:str('mix_match'),
+        recommend_categories:checked('recommend'), must_have:list('must_have'), brands:list('brands'),
+        occasions:str('occasions'), budget:str('budget'), dos_donts:str('dos_donts'), mood_board:str('mood_board')},
+      lookbook:list('lookbook'), photos:list('photos'),
+      headline:str('headline'), analyst:str('analyst'), partner:str('partner'), analyst_tier:str('tier')
+    };
+    const { data:res, error } = await sb.rpc('partner_save',{ p_code:code, p_data:data });
+    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
+    if(res==='not_found'){ toast('ไม่พบลูกค้า'); return; }
+    toast('บันทึกแล้ว — ลูกค้าได้สรุปสไตล์ในแอป'); $('form').className=''; $('code').value=''; $('found').className='found'; code=null;
+  }
+  $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') lookup(); });
+
+  // อัปโหลดรูปจริงไป Supabase Storage (bucket: uploads) แล้วเก็บลิงก์ลง textarea เป้าหมาย
+  // graceful fallback: ถ้า bucket ยังไม่เปิด ให้วางลิงก์เองได้ตามเดิม
+  async function uploadFiles(input, targetId, thumbsId){
+    const files=[...input.files]; if(!files.length) return;
+    const thumbs=$(thumbsId), target=$(targetId);
+    let added=[];
+    for(let i=0;i<files.length;i++){
+      const file=files[i];
+      const path=`${Date.now()}-${i}-${file.name}`.replace(/\s+/g,'_');
+      try{
+        const { error:upErr } = await sb.storage.from('uploads').upload(path, file, { upsert:false });
+        if(upErr) throw upErr;
+        const { data:pub } = sb.storage.from('uploads').getPublicUrl(path);
+        const url=pub&&pub.publicUrl; if(!url) throw new Error('no url');
+        added.push(url);
+        const local=URL.createObjectURL(file);
+        const div=document.createElement('div'); div.className='th';
+        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${(file.name||'').slice(0,18)}</div>`;
+        thumbs.appendChild(div);
+      }catch(e){
+        $('upnote').style.display='block';
+        $('upnote').textContent='อัปโหลดรูปจะใช้ได้เมื่อเปิด Storage (ตอนนี้วางลิงก์รูปได้)';
+      }
+    }
+    if(added.length){
+      const cur=(target.value||'').trim();
+      target.value = cur ? cur.replace(/,\s*$/,'')+', '+added.join(', ') : added.join(', ');
+      toast('อัปโหลดแล้ว '+added.length+' รูป');
+    }
+    input.value='';
+  }
+</script>
+</body>
+</html>
