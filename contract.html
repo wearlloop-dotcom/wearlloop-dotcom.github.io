@@ -99,6 +99,8 @@
   .actionbar .st{flex:1;font-size:12px;color:var(--stone)}
   .actionbar .b{background:var(--navy);color:#fff;border:none;border-radius:2px;padding:13px 22px;font-size:15px;font-weight:600;font-family:var(--sans);cursor:pointer}
 </style>
+<script>window.CONFIG=window.CONFIG||{};</script>
+<script src="analytics.js"></script>
 </head>
 <body>
 <div class="top"><div class="mark">LLOOP</div><div class="tl">love · loop</div></div>
@@ -534,6 +536,8 @@
       const m={already:'สัญญานี้ถูกลงนามไปแล้ว',void:'สัญญาถูกยกเลิกแล้ว',not_found:'ไม่พบสัญญา',no_consent:'กรุณายอมรับเงื่อนไขก่อน'}[data]||'ไม่สำเร็จ';
       toast(m); $('signBtn').disabled=false; $('signBtn').textContent='ยอมรับและลงนาม'; return;
     }
+    // บันทึกความยินยอม PDPA ของพาร์ทเนอร์ (best-effort)
+    try{ await sb.rpc('record_consent',{ p:{ subject_type:(C.template==='influencer'?'influencer':'partner'), subject_ref:token, purpose:'partner_kyc', version:'1', channel:'liff' } }); }catch(e){}
     const merged=Object.assign({},C,{status:'signed',signer_name:$('signerName').value.trim(),signature:sig,signed_at:new Date().toISOString()});
     showSigned(merged);
     window.scrollTo({top:0,behavior:'smooth'});

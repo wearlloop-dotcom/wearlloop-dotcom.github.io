@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ข้อตกลงการเช่าชุด — LLOOP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F9F7F4;
+    --cream2: #F2EDE6;
+    --line: #E2DDD6;
+    --ink: #2B2825;
+    --muted: #7C7771;
+    --sage: #6FB3A6;
+    --sage-light: #E4F0EC;
+    --warm: #C9A86A;
+    --warn-bg: #FDF6EC;
+    --warn-border: #C9A86A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Header ---- */
+  header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+  }
+
+  .back-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--ink); }
+  .back-link::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-left: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    margin-bottom: 1px;
+  }
+
+  .logo {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: var(--ink);
+    text-decoration: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ---- Hero band ---- */
+  .page-hero {
+    background: var(--cream2);
+    border-bottom: 1px solid var(--line);
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+
+  .page-hero .label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .page-hero h1 {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .page-hero .effective {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ---- Content layout ---- */
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ---- Sections ---- */
+  .section {
+    margin-bottom: 52px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-num {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--sage);
+    flex-shrink: 0;
+  }
+
+  .section h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+
+  .section h2 .en {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  .section p {
+    margin-bottom: 12px;
+    color: var(--ink);
+    font-weight: 300;
+  }
+
+  .section p:last-child { margin-bottom: 0; }
+
+  /* ---- Sub-section ---- */
+  .sub-section {
+    margin: 24px 0;
+  }
+
+  .sub-section h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-left: 12px;
+    border-left: 2px solid var(--sage);
+  }
+
+  .sub-section h3 .en {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 12px;
+    margin-left: 6px;
+  }
+
+  /* ---- Info table ---- */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+
+  .info-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--cream2);
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .info-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .info-table tr:last-child td { border-bottom: none; }
+  .info-table tr:hover td { background: #fff; }
+
+  /* ---- Amount highlight ---- */
+  .amt {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ---- List ---- */
+  .styled-list {
+    list-style: none;
+    margin: 14px 0;
+    padding: 0;
+  }
+
+  .styled-list li {
+    padding: 8px 0 8px 20px;
+    position: relative;
+    font-weight: 300;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .styled-list li:first-child { border-top: 1px solid var(--line); }
+
+  .styled-list li::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 17px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--sage);
+  }
+
+  /* ---- Timeline list ---- */
+  .timeline {
+    list-style: none;
+    margin: 16px 0;
+    padding: 0;
+  }
+
+  .timeline li {
+    display: flex;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .timeline li:first-child { border-top: 1px solid var(--line); }
+
+  .timeline-day {
+    flex-shrink: 0;
+    width: 52px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--sage);
+    text-transform: uppercase;
+    padding-top: 1px;
+  }
+
+  /* ---- Callout box ---- */
+  .callout {
+    background: var(--sage-light);
+    border-left: 3px solid var(--sage);
+    padding: 16px 20px;
+    border-radius: 2px;
+    margin: 20px 0;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  .callout strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ---- Warning callout ---- */
+  .callout-warn {
+    background: var(--warn-bg);
+    border-left: 3px solid var(--warn-border);
+    padding: 16px 20px;
+    border-radius: 2px;
+    margin: 20px 0;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  .callout-warn strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ---- Damage summary table ---- */
+  .damage-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+
+  .damage-table th {
+    text-align: center;
+    padding: 9px 10px;
+    background: var(--cream2);
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+
+  .damage-table th:last-child { border-right: none; }
+
+  .damage-table td {
+    padding: 11px 10px;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    vertical-align: middle;
+    line-height: 1.5;
+    font-weight: 300;
+    text-align: right;
+  }
+
+  .damage-table td:first-child { text-align: center; }
+  .damage-table td:last-child { border-right: none; font-weight: 600; color: var(--ink); }
+  .damage-table tr:last-child td { border-bottom: none; }
+  .damage-table tr:hover td { background: #fff; }
+
+  /* ---- Checkbox accept ---- */
+  .accept-box {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px;
+    margin-top: 32px;
+  }
+
+  .accept-box .accept-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  .accept-box .accept-title .en {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .checkbox-row input[type="checkbox"] {
+    display: none;
+  }
+
+  .custom-check {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, background 0.2s;
+    margin-top: 1px;
+  }
+
+  .custom-check svg {
+    display: none;
+  }
+
+  .checkbox-row input[type="checkbox"]:checked ~ .checkbox-label .custom-check {
+    background: var(--sage);
+    border-color: var(--sage);
+  }
+
+  /* workaround: checkbox is sibling, use JS */
+  .custom-check.checked {
+    background: var(--sage);
+    border-color: var(--sage);
+  }
+
+  .custom-check.checked svg {
+    display: block;
+  }
+
+  .checkbox-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+
+  .checkbox-text .en {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .accept-note {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+    padding-left: 36px;
+  }
+
+  /* ---- Divider ---- */
+  .part-divider {
+    text-align: center;
+    margin: 56px 0 52px;
+    position: relative;
+  }
+
+  .part-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .part-divider span {
+    position: relative;
+    background: var(--cream);
+    padding: 0 16px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---- Footer ---- */
+  footer {
+    background: var(--cream2);
+    border-top: 1px solid var(--line);
+    text-align: center;
+    padding: 28px 24px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 480px) {
+    .page-hero h1 { font-size: 21px; }
+    .info-table, .damage-table { font-size: 12px; }
+    .damage-table th, .damage-table td { padding: 8px 7px; }
+  }
+</style>
+<script>window.CONFIG=window.CONFIG||{};</script>
+<script src="analytics.js"></script>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <a href="index.html" class="back-link">กลับหน้าหลัก</a>
+  <a href="index.html" class="logo">LLOOP</a>
+</header>
+
+<!-- Hero -->
+<div class="page-hero">
+  <div class="label">Legal · สัญญา</div>
+  <h1>ข้อตกลงการเช่าชุด LLOOP<br><span style="font-size:18px;font-weight:400;color:var(--muted);">Rental Agreement</span></h1>
+  <p class="effective">มีผลทันทีที่ยืนยันการเช่าผ่านระบบ / Effective upon booking confirmation</p>
+</div>
+
+<!-- Main content -->
+<div class="wrap">
+
+  <!-- Intro callout -->
+  <div class="callout">
+    <strong>ข้อตกลงนี้มีผลบังคับใช้</strong>ทันทีที่ลูกค้ากดยืนยันการเช่าผ่านแอป LLOOP
+    การยืนยันการเช่าถือว่าลูกค้าได้อ่าน เข้าใจ และยอมรับข้อกำหนดทั้งหมดที่ระบุไว้ในเอกสารนี้แล้ว<br>
+    <span style="color:var(--muted);font-size:13px;">This agreement takes effect immediately upon the customer confirming a rental through the LLOOP app. Confirming a booking constitutes acceptance of all terms herein.</span>
+  </div>
+
+  <!-- ====== Section 1 ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>ข้อมูลทั่วไป
+        <span class="en">General Information</span>
+      </h2>
+    </div>
+
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th>รายการ / Item</th>
+          <th>รายละเอียด / Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ชื่อสัญญา<br><span style="color:var(--muted);font-size:12px;">Agreement name</span></td>
+          <td>ข้อตกลงการเช่าชุด LLOOP<br><span style="color:var(--muted);font-size:12px;">LLOOP Rental Agreement</span></td>
+        </tr>
+        <tr>
+          <td>ผู้ให้บริการ<br><span style="color:var(--muted);font-size:12px;">Service provider</span></td>
+          <td>LLOOP — แพลตฟอร์มเช่าชุดออนไลน์ ดำเนินงานในประเทศไทย<br><span style="color:var(--muted);font-size:12px;">LLOOP — online dress rental platform operating in Thailand</span></td>
+        </tr>
+        <tr>
+          <td>ภาษา<br><span style="color:var(--muted);font-size:12px;">Language</span></td>
+          <td>ภาษาไทยและภาษาอังกฤษ ฉบับภาษาไทยมีผลบังคับก่อนในกรณีที่ขัดกัน<br><span style="color:var(--muted);font-size:12px;">Thai and English. Thai text prevails in case of conflict.</span></td>
+        </tr>
+        <tr>
+          <td>วันมีผล<br><span style="color:var(--muted);font-size:12px;">Effective date</span></td>
+          <td>ทันทีที่ลูกค้ายืนยันการเช่าผ่านระบบ<br><span style="color:var(--muted);font-size:12px;">Immediately upon booking confirmation in the app</span></td>
+        </tr>
+        <tr>
+          <td>กฎหมายที่ใช้บังคับ<br><span style="color:var(--muted);font-size:12px;">Governing law</span></td>
+          <td>กฎหมายไทย<br><span style="color:var(--muted);font-size:12px;">Laws of Thailand</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ====== Section 2 ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>ค่าเช่าและมัดจำ
+        <span class="en">Rental Fee &amp; Deposit</span>
+      </h2>
+    </div>
+
+    <div class="sub-section">
+      <h3>ค่าเช่า <span class="en">Rental Fee</span></h3>
+      <p>ราคาเช่าเป็นไปตามที่ระบุไว้ในระบบ ณ วันที่ทำการจอง ราคาอาจแตกต่างกันตามระยะเวลาเช่า (1 วัน / 3 วัน / 5 วัน) ตามที่แสดงในหน้ารายละเอียดชุด</p>
+      <p style="font-size:13px;color:var(--muted);">Rental prices are as displayed in the system at the time of booking and vary by duration (1-day / 3-day / 5-day) as shown on the item detail page.</p>
+    </div>
+
+    <div class="sub-section">
+      <h3>มัดจำ <span class="en">Security Deposit</span></h3>
+      <p>มัดจำเท่ากับ <span class="amt">100% ของราคาขายปลีกชุดใหม่</span> ตามที่ระบุในระบบ</p>
+      <p style="font-size:13px;color:var(--muted);">The deposit equals 100% of the item's retail (new) price as listed in the system.</p>
+
+      <ul class="styled-list">
+        <li>เก็บมัดจำ ณ วันรับชุด ก่อนส่งมอบชุดให้ลูกค้า<br><span style="color:var(--muted);font-size:13px;">Deposit collected on pick-up day, before the item is handed over.</span></li>
+        <li>คืนมัดจำภายใน <span class="amt">3 วันทำการ</span> หลังจากชุดผ่านการตรวจสอบสภาพและไม่พบความเสียหาย<br><span style="color:var(--muted);font-size:13px;">Deposit refunded within 3 business days after the item passes condition inspection with no damage found.</span></li>
+        <li>หากพบความเสียหาย จะหักค่าชดใช้จากมัดจำก่อน ส่วนที่เหลือคืนให้ลูกค้า<br><span style="color:var(--muted);font-size:13px;">If damage is found, the repair/replacement cost is deducted from the deposit; the remainder is refunded.</span></li>
+      </ul>
+    </div>
+
+    <div class="sub-section">
+      <h3>วิธีชำระเงิน <span class="en">Payment Methods</span></h3>
+      <ul class="styled-list">
+        <li>PromptPay (QR Code)</li>
+        <li>โอนเงินผ่านธนาคาร (Bank Transfer)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ====== Section 3 ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>ระยะเวลาเช่าและการคืนชุด
+        <span class="en">Rental Period &amp; Return</span>
+      </h2>
+    </div>
+
+    <p>วันรับและวันคืนชุดเป็นไปตามที่ระบุในการจอง ลูกค้าต้องคืนชุดภายในเวลาที่กำหนด</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Pick-up and return dates are as specified in the booking. The customer must return the item by the agreed time.</p>
+
+    <div class="sub-section">
+      <h3>ค่าปรับกรณีคืนล่าช้า <span class="en">Late Return Fee</span></h3>
+      <div class="callout">
+        <strong>ค่าปรับ = ราคาเช่า 1 วัน &times; จำนวนวันที่เกินกำหนด</strong><br>
+        นับทุกวันรวมวันหยุดนักขัตฤกษ์และวันหยุดสุดสัปดาห์<br>
+        <span style="color:var(--muted);font-size:13px;"><strong>Late fee = 1-day rental rate &times; number of overdue days</strong> — counted every day including public holidays and weekends.</span>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <h3>กรณีเกิน 7 วัน <span class="en">Over 7 Days Overdue</span></h3>
+      <div class="callout-warn">
+        หากไม่มีการคืนชุดภายใน <strong>7 วันหลังกำหนด</strong> จะเข้าสู่กระบวนการ "สูญหาย/ขโมย" ตามที่ระบุในข้อ 5 และข้อ 4.4<br>
+        <span style="color:var(--muted);font-size:13px;">If the item is not returned within 7 days after the due date, the case escalates to the "Loss/Theft" process as described in Sections 4.4 and 5.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Section 4 ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>ความเสียหายและการชดใช้
+        <span class="en">Damage &amp; Liability</span>
+      </h2>
+    </div>
+
+    <p>LLOOP จะตรวจสอบสภาพชุดทันทีหลังได้รับคืน และแจ้งผลการตรวจสอบให้ลูกค้าทราบภายใน 24 ชั่วโมง ค่าชดใช้ประเมินตามหลักเกณฑ์ดังต่อไปนี้</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">LLOOP inspects items immediately upon return and notifies the customer of results within 24 hours. Compensation is assessed according to the following criteria.</p>
+
+    <!-- 4.1 Minor -->
+    <div class="sub-section">
+      <h3>4.1 ความเสียหายระดับเล็กน้อย <span class="en">Minor Damage</span></h3>
+      <table class="info-table">
+        <tbody>
+          <tr>
+            <td style="width:40%">ตัวอย่าง / Examples</td>
+            <td>รอยเปื้อนซักออกได้, เส้นด้ายหลุด, รอยย่นจากการใช้งาน<br><span style="color:var(--muted);font-size:12px;">Washable stains, loose threads, usage creases</span></td>
+          </tr>
+          <tr>
+            <td>ค่าชดใช้ / Fee</td>
+            <td><span class="amt">300 – 500 บาท</span> (หักจากมัดจำ)<br><span style="color:var(--muted);font-size:12px;">300 – 500 THB (deducted from deposit)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4.2 Moderate -->
+    <div class="sub-section">
+      <h3>4.2 ความเสียหายระดับกลาง <span class="en">Moderate Damage</span></h3>
+      <table class="info-table">
+        <tbody>
+          <tr>
+            <td style="width:40%">ตัวอย่าง / Examples</td>
+            <td>รอยขาด, คราบเปื้อนถาวร, ซิปพัง, เย็บหลุดต้องซ่อมมาก<br><span style="color:var(--muted);font-size:12px;">Tears, permanent stains, broken zip, major seam failure</span></td>
+          </tr>
+          <tr>
+            <td>ค่าชดใช้ / Fee</td>
+            <td><span class="amt">30 – 80% ของราคาขายปลีกชุดใหม่</span><br><span style="color:var(--muted);font-size:12px;">30 – 80% of the item's retail (new) price</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4.3 Severe -->
+    <div class="sub-section">
+      <h3>4.3 ความเสียหายระดับรุนแรง <span class="en">Severe Damage</span></h3>
+      <table class="info-table">
+        <tbody>
+          <tr>
+            <td style="width:40%">ตัวอย่าง / Examples</td>
+            <td>ขาดทั้งผืน, เสียหายจนซ่อมไม่ได้, ถูกสารเคมีกัดทำลาย<br><span style="color:var(--muted);font-size:12px;">Destroyed beyond repair, chemical damage, irreparable structural damage</span></td>
+          </tr>
+          <tr>
+            <td>ค่าชดใช้ / Fee</td>
+            <td><span class="amt">100% ราคาขายปลีกชุดใหม่</span> + ค่าดำเนินการ <span class="amt">500 บาท</span><br><span style="color:var(--muted);font-size:12px;">100% of retail price + 500 THB processing fee</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4.4 Loss / Theft -->
+    <div class="sub-section">
+      <h3>4.4 การสูญหาย / ขโมย / ไม่คืนชุด <span class="en">Loss / Theft / Non-Return</span></h3>
+
+      <div class="callout-warn">
+        <strong>ลูกค้ารับผิดชอบค่าเสียหายทั้งหมด</strong> ซึ่งประกอบด้วยองค์ประกอบดังต่อไปนี้ทุกรายการ<br>
+        <span style="color:var(--muted);font-size:13px;"><strong>The customer is liable for all damages below</strong>, which are cumulative and apply in full.</span>
+      </div>
+
+      <table class="info-table" style="margin-top:16px;">
+        <thead>
+          <tr>
+            <th>รายการ</th>
+            <th>จำนวน / วิธีคำนวณ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong>ก) มูลค่าชุด</strong><br>
+              <span style="color:var(--muted);font-size:12px;">A) Item Value</span>
+            </td>
+            <td>
+              ราคาขายปลีกชุดใหม่ตามที่ระบุในระบบ ณ วันเช่า <strong>โดยไม่หักค่าเสื่อม</strong><br>
+              <span style="color:var(--muted);font-size:12px;">Full retail (new) price as listed in the system on rental date — no depreciation deducted.</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>ข) ค่าเสียโอกาสทางธุรกิจ</strong><br>
+              <span style="color:var(--muted);font-size:12px;">B) Lost Revenue</span>
+            </td>
+            <td>
+              ราคาเช่า/วัน &times; 60 วัน<br>
+              <span style="color:var(--muted);font-size:12px;">Daily rental rate &times; 60 days</span><br>
+              <span style="font-size:12px;color:var(--muted);margin-top:4px;display:block;">อ้างอิง: ชุด 1 ชุดให้เช่าได้เฉลี่ย 4–6 ครั้ง/เดือน อายุการใช้งาน 12–18 เดือน<br>Basis: each item rents 4–6 times/month over a 12–18 month service life.</span>
+              <span style="font-size:12px;color:var(--ink);margin-top:6px;display:block;">ตัวอย่าง: ราคาเช่า 290 บาท/วัน = 290 &times; 60 = <strong>17,400 บาท</strong></span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>ค) ค่าดำเนินการทางกฎหมาย</strong><br>
+              <span style="color:var(--muted);font-size:12px;">C) Legal Costs</span>
+            </td>
+            <td>
+              ค่าทนายความเบื้องต้น: <span class="amt">5,000 บาท</span> (บวกเพิ่มหากคดีไปถึงศาล)<br>
+              ค่าธรรมเนียมศาล: ตามอัตราที่กฎหมายกำหนด<br>
+              <span style="color:var(--muted);font-size:12px;">Initial attorney fee: 5,000 THB (additional if case proceeds to court). Court fees: as prescribed by law.</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>ง) ค่าเสียเวลาและค่าดำเนินการ</strong><br>
+              <span style="color:var(--muted);font-size:12px;">D) Administrative Costs</span>
+            </td>
+            <td>
+              ค่าดำเนินการแจ้งความ: <span class="amt">1,500 บาท</span><br>
+              ค่าบริหารจัดการเคส: <span class="amt">2,000 บาท</span><br>
+              ค่าติดตามทวงถาม (ต่อครั้ง): <span class="amt">500 บาท</span><br>
+              <span style="color:var(--muted);font-size:12px;">Police report filing: 1,500 THB · Case management: 2,000 THB · Each collection notice: 500 THB</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>จ) ดอกเบี้ยผิดนัด</strong><br>
+              <span style="color:var(--muted);font-size:12px;">E) Default Interest</span>
+            </td>
+            <td>
+              <span class="amt">7.5% ต่อปี</span> นับตั้งแต่วันกำหนดคืนชุด<br>
+              <span style="color:var(--muted);font-size:12px;">7.5% per annum from the agreed return date (per Civil and Commercial Code, Section 224)</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Summary damage table -->
+      <p style="margin-top:24px;margin-bottom:4px;font-weight:500;font-size:14px;">ฉ) ตัวอย่างความเสียหายรวม (ขั้นต่ำ) <span style="font-weight:300;color:var(--muted);font-size:13px;">Summary of minimum total liability</span></p>
+
+      <table class="damage-table">
+        <thead>
+          <tr>
+            <th>ราคาเช่า/วัน</th>
+            <th>มูลค่าชุดใหม่<br>(ตัวอย่าง)</th>
+            <th>เสียโอกาส<br>60 วัน</th>
+            <th>ค่าดำเนินการ<br>(รวม)</th>
+            <th>รวมขั้นต่ำ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>290 บาท</td>
+            <td>3,000 บาท</td>
+            <td>17,400 บาท</td>
+            <td>9,000 บาท</td>
+            <td>29,400 บาท</td>
+          </tr>
+          <tr>
+            <td>490 บาท</td>
+            <td>5,000 บาท</td>
+            <td>29,400 บาท</td>
+            <td>9,000 บาท</td>
+            <td>43,400 บาท</td>
+          </tr>
+          <tr>
+            <td>890 บาท</td>
+            <td>9,000 บาท</td>
+            <td>53,400 บาท</td>
+            <td>9,000 บาท</td>
+            <td>71,400 บาท</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;">ค่าดำเนินการรวม = ค่าทนาย 5,000 + แจ้งความ 1,500 + บริหารเคส 2,000 + ทวงถาม 500 บาท ยังไม่รวมดอกเบี้ยและค่าธรรมเนียมศาล<br>Admin total = attorney 5,000 + report 1,500 + case mgmt 2,000 + 1 collection notice 500 THB. Excludes interest and court fees.</p>
+    </div>
+  </div>
+
+  <!-- ====== Section 5 ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>กระบวนการเมื่อชุดไม่ถูกคืน
+        <span class="en">Non-Return Escalation Process</span>
+      </h2>
+    </div>
+
+    <p>หากลูกค้าไม่คืนชุดตามกำหนด LLOOP จะดำเนินการตาม timeline ดังนี้</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">If the item is not returned by the due date, LLOOP will follow this escalation timeline:</p>
+
+    <ul class="timeline">
+      <li>
+        <span class="timeline-day">วัน 1</span>
+        <div>
+          แจ้งเตือนอัตโนมัติผ่าน LINE — แจ้งว่าชุดเกินกำหนดและค่าปรับที่เกิดขึ้น<br>
+          <span style="color:var(--muted);font-size:13px;">Day 1 — Automated LINE notification: item is overdue, late fee accruing.</span>
+        </div>
+      </li>
+      <li>
+        <span class="timeline-day">วัน 3</span>
+        <div>
+          โทรติดตาม + ส่ง SMS แจ้งเตือนครั้งที่สอง<br>
+          <span style="color:var(--muted);font-size:13px;">Day 3 — Phone follow-up + second SMS reminder.</span>
+        </div>
+      </li>
+      <li>
+        <span class="timeline-day">วัน 7</span>
+        <div>
+          แจ้งเตือนครั้งสุดท้ายผ่าน LINE พร้อมแนบข้อตกลงนี้และรายการค่าเสียหายทั้งหมด<br>
+          <span style="color:var(--muted);font-size:13px;">Day 7 — Final LINE notice with this agreement attached and full liability breakdown.</span>
+        </div>
+      </li>
+      <li>
+        <span class="timeline-day">วัน 8</span>
+        <div>
+          <strong>แจ้งความข้อหายักยอกทรัพย์ / ลักทรัพย์</strong> ณ สถานีตำรวจ + เริ่มดำเนินคดีแพ่งเรียกค่าเสียหายตามข้อ 4.4<br>
+          ส่งหนังสือทวงถามทางไปรษณีย์ลงทะเบียน<br>
+          <span style="color:var(--muted);font-size:13px;">Day 8 — <strong>Police report filed</strong> (misappropriation / theft) + civil claim lodged for all damages under Section 4.4. Formal demand letter sent by registered post.</span>
+        </div>
+      </li>
+    </ul>
+
+    <div class="callout">
+      การแจ้งความและดำเนินคดีแพ่งเกิดขึ้น<strong>โดยอัตโนมัติในวันที่ 8</strong> โดยไม่มีการเจรจาเพิ่มเติม เว้นแต่ลูกค้าจะติดต่อและนัดหมายคืนชุดก่อนถึงวันดังกล่าว<br>
+      <span style="color:var(--muted);font-size:13px;">Filing of the police report and civil suit proceeds automatically on Day 8 without further negotiation, unless the customer contacts LLOOP and schedules a return before that date.</span>
+    </div>
+  </div>
+
+  <!-- ====== Section 6 ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>ข้อกฎหมายที่อ้างอิง
+        <span class="en">Legal References</span>
+      </h2>
+    </div>
+
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th>กฎหมาย / Law</th>
+          <th>มาตรา / Section</th>
+          <th>เรื่อง / Subject</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ประมวลกฎหมายอาญา (ป.อ.)<br><span style="color:var(--muted);font-size:12px;">Criminal Code</span></td>
+          <td>มาตรา 335</td>
+          <td>ลักทรัพย์<br><span style="color:var(--muted);font-size:12px;">Theft</span></td>
+        </tr>
+        <tr>
+          <td>ประมวลกฎหมายอาญา (ป.อ.)<br><span style="color:var(--muted);font-size:12px;">Criminal Code</span></td>
+          <td>มาตรา 352</td>
+          <td>ยักยอกทรัพย์<br><span style="color:var(--muted);font-size:12px;">Misappropriation</span></td>
+        </tr>
+        <tr>
+          <td>ประมวลกฎหมายแพ่งและพาณิชย์ (ป.พ.พ.)<br><span style="color:var(--muted);font-size:12px;">Civil and Commercial Code</span></td>
+          <td>มาตรา 420</td>
+          <td>ละเมิด — ผู้ทำความเสียหายต้องชดใช้<br><span style="color:var(--muted);font-size:12px;">Tort — liable party must compensate</span></td>
+        </tr>
+        <tr>
+          <td>ประมวลกฎหมายแพ่งและพาณิชย์ (ป.พ.พ.)<br><span style="color:var(--muted);font-size:12px;">Civil and Commercial Code</span></td>
+          <td>มาตรา 224</td>
+          <td>ดอกเบี้ยผิดนัด 7.5% ต่อปี<br><span style="color:var(--muted);font-size:12px;">Default interest 7.5% per annum</span></td>
+        </tr>
+        <tr>
+          <td>พ.ร.บ. คุ้มครองผู้บริโภค<br><span style="color:var(--muted);font-size:12px;">Consumer Protection Act</span></td>
+          <td>พ.ศ. 2522</td>
+          <td>สิทธิ์และการคุ้มครองผู้บริโภค<br><span style="color:var(--muted);font-size:12px;">Consumer rights and protections</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ====== Section 7 ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>เขตอำนาจศาล
+        <span class="en">Jurisdiction</span>
+      </h2>
+    </div>
+
+    <p>ข้อพิพาทใด ๆ ที่เกิดจากข้อตกลงนี้ให้อยู่ในเขตอำนาจของ<strong>ศาลแพ่งกรุงเทพใต้</strong> หรือศาลที่มีเขตอำนาจเหนือที่ตั้งธุรกิจ LLOOP ณ ขณะนั้น</p>
+    <p style="font-size:13px;color:var(--muted);">Any dispute arising from this agreement shall be subject to the jurisdiction of the <strong>Bangkok South Civil Court</strong> or the court having jurisdiction over LLOOP's place of business at the time of the dispute.</p>
+  </div>
+
+  <!-- ====== Section 8 — Acceptance ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>การยืนยันและยอมรับสัญญา
+        <span class="en">Confirmation &amp; Acceptance</span>
+      </h2>
+    </div>
+
+    <p>การกดยืนยันการเช่าในแอป LLOOP ถือว่าลูกค้าได้อ่าน เข้าใจ และยอมรับข้อตกลงทุกข้อในเอกสารนี้โดยสมบูรณ์ และมีผลผูกพันตามกฎหมายเทียบเท่าการลงลายมือชื่อ</p>
+    <p style="font-size:13px;color:var(--muted);">Pressing "Confirm Rental" in the LLOOP app constitutes the customer's full acknowledgement, understanding, and acceptance of all terms in this document, with the same legal force as a handwritten signature.</p>
+
+    <!-- Checkbox UI -->
+    <div class="accept-box">
+      <div class="accept-title">
+        ยืนยันการยอมรับ
+        <span class="en">Acknowledgement</span>
+      </div>
+
+      <label class="checkbox-row" onclick="toggleCheck(this)">
+        <div class="custom-check" id="chk">
+          <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5 5L5 8.5L11.5 1.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="checkbox-text">
+          ข้าพเจ้าได้อ่านและยอมรับข้อตกลงการเช่าชุด LLOOP ทุกข้อแล้ว
+          <span class="en">I have read and agree to all terms of the LLOOP Rental Agreement.</span>
+        </div>
+      </label>
+
+      <div class="accept-note">
+        การยืนยันนี้มีผลผูกพันตามกฎหมาย และใช้เป็นหลักฐานในการดำเนินคดีหากเกิดข้อพิพาท<br>
+        This confirmation is legally binding and may be used as evidence in any dispute proceedings.
+      </div>
+    </div>
+  </div>
+
+  <div class="part-divider">
+    <span>ติดต่อ LLOOP</span>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>ติดต่อเรา
+        <span class="en">Contact</span>
+      </h2>
+    </div>
+    <p>หากมีข้อสงสัยเกี่ยวกับข้อตกลงนี้ กรุณาติดต่อก่อนทำการจอง</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">For any questions about this agreement, please contact us before confirming a booking.</p>
+
+    <div style="background:#fff;border:1px solid var(--line);border-radius:4px;padding:24px;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">ผู้ให้บริการ / Service Provider</div>
+      <p style="font-weight:500;margin-bottom:6px;">LLOOP</p>
+      <p style="font-size:14px;font-weight:300;margin-bottom:4px;">อีเมล / Email: <a href="mailto:thanchanok.khong@gmail.com" style="color:var(--sage);text-decoration:none;font-weight:500;">thanchanok.khong@gmail.com</a></p>
+      <p style="font-size:14px;font-weight:300;">LINE OA: <a href="https://line.me/R/ti/p/@lloop" style="color:var(--sage);text-decoration:none;font-weight:500;">@lloop</a></p>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px;font-weight:300;">ตอบกลับภายใน 1 วันทำการ<br>We respond within 1 business day.</p>
+    </div>
+  </div>
+
+</div><!-- end .wrap -->
+
+<footer>
+  LLOOP &nbsp;&middot;&nbsp; ข้อตกลงการเช่าชุด &nbsp;&middot;&nbsp; อัปเดต มิถุนายน 2569<br>
+  <span style="margin-top:4px;display:inline-block;">thanchanok.khong@gmail.com</span>
+</footer>
+
+<script>
+  function toggleCheck(label) {
+    var chk = document.getElementById('chk');
+    chk.classList.toggle('checked');
+  }
+</script>
+
+</body>
+</html>

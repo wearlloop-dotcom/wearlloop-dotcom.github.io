@@ -878,12 +878,13 @@ async function openImpact() {
       <div class="ihead">${en ? 'wear one look, care for the planet once more' : 'เช่าหนึ่งชุด ดูแลโลกอีกหนึ่งครั้ง'}</div>
       <div class="iline">${en ? 'every time you choose to rotate instead of buy new, you truly give back to the earth' : 'ทุกครั้งที่คุณเลือกหมุนเวียนแทนซื้อใหม่ คือการคืนบางอย่างให้โลกใบนี้จริง ๆ'}</div>
       <div class="ibig">
-        <div><b data-to="${im.water_l || 0}">0</b><span>${en ? 'litres of water saved' : 'ลิตรน้ำที่ช่วยประหยัด'}</span></div>
+        <div>~<b data-to="${im.water_l || 0}">0</b><span>${en ? 'litres water saved (est.)' : 'ลิตรน้ำที่ช่วยประหยัด (ประมาณ)'}</span></div>
         <div class="div"></div>
-        <div><b data-to="${im.co2_kg || 0}">0</b><span>${en ? 'kg carbon reduced' : 'กก. คาร์บอนที่ลด'}</span></div>
+        <div>~<b data-to="${im.co2_kg || 0}">0</b><span>${en ? 'kg carbon reduced (est.)' : 'กก. คาร์บอนที่ลด (ประมาณ)'}</span></div>
         <div class="div"></div>
         <div><b data-to="${im.rentals || 0}">0</b><span>${en ? 'looks rotated' : 'ครั้งที่หมุนเวียน'}</span></div>
       </div>
+      <div style="font-size:11px;color:#A39472;margin-top:14px">${en ? '* water & carbon are estimates based on industry averages' : '* ตัวเลขน้ำและคาร์บอนเป็นค่าประมาณจากค่าเฉลี่ยอุตสาหกรรม'}</div>
       <div class="icharity">${en ? 'and you have passed on' : 'และคุณได้ส่งต่อ'} <b data-to="${im.charity_thb || 0}" data-prefix="฿">฿0</b> ${en ? 'to ' + (im.charity_name || 'children in need') : 'ให้' + (im.charity_name || 'เด็กยากไร้')}</div>
     </div>
     <div class="igallery">
@@ -1263,10 +1264,11 @@ function renderImpactCard() {
     <div class="ecohead">${lang === 'th' ? 'สิ่งที่คุณช่วยเซฟไปแล้ว' : 'what you have saved so far'}</div>
     <div class="ecostats">
       <div><b data-to="${im.rentals}">0</b><span>${lang === 'th' ? 'ครั้งที่หมุนเวียน' : 'rotations'}</span></div>
-      <div><b data-to="${im.water_l || 0}">0</b><span>${lang === 'th' ? 'ลิตรน้ำ' : 'litres water'}</span></div>
-      <div><b data-to="${im.co2_kg || 0}">0</b><span>${lang === 'th' ? 'กก. คาร์บอน' : 'kg carbon'}</span></div>
+      <div>~<b data-to="${im.water_l || 0}">0</b><span>${lang === 'th' ? 'ลิตรน้ำ (ประมาณ)' : 'litres water (est.)'}</span></div>
+      <div>~<b data-to="${im.co2_kg || 0}">0</b><span>${lang === 'th' ? 'กก. คาร์บอน (ประมาณ)' : 'kg carbon (est.)'}</span></div>
     </div>
     <div class="ecotag">${lang === 'th' ? 'เช่าแทนซื้อ คือความสวยที่ไม่ทิ้งภาระไว้ให้โลก' : 'rent over buy — beauty that leaves no burden'}</div>
+    <div style="font-size:10px;color:#8FA697;text-align:center;margin-top:8px">${lang === 'th' ? 'ตัวเลขสิ่งแวดล้อมเป็นค่าประมาณจากค่าเฉลี่ยอุตสาหกรรม' : 'environmental figures are estimates (industry averages)'}</div>
     ${charity}
     <div class="ecomore">${lang === 'th' ? 'แตะเพื่อดูภาพกิจกรรมที่คุณเป็นส่วนหนึ่ง' : 'tap to see the moments you are part of'} <span>&rarr;</span></div>
   </div>`;

@@ -216,9 +216,8 @@ window.API = (function () {
   // เพิ่มรีวิวหลังคืนชุด
   async function addReview(rentalId, rating, fit, comment, photos) {
     if (CONFIG.USE_MOCK || !rentalId) return null;
-    const { data, error } = await client().rpc('add_review', {
-      p_rental: rentalId, p_rating: rating, p_fit: fit, p_comment: comment || null, p_photos: photos || null,
-    });
+    const a = { p_rental: rentalId, p_rating: rating, p_fit: fit, p_comment: comment || null, p_photos: photos || null };
+    const { data, error } = window.meRpc ? await window.meRpc('add_review', a) : await client().rpc('add_review', a);
     return error ? null : data;
   }
   // เรตติ้งเฉลี่ยของชุด → {avg, count}
@@ -264,10 +263,9 @@ window.API = (function () {
   async function submitVideoReview(rentalId, rating, fit, comment, videoUrl, platform, reviewText) {
     if (CONFIG.USE_MOCK || !rentalId) return { ok: false };
     const c = client();
-    const { data: id, error } = await c.rpc('submit_video_review', {
-      p_rental: rentalId, p_rating: rating, p_fit: fit, p_comment: comment || null,
-      p_video_url: videoUrl, p_platform: platform || null, p_review_text: reviewText || null,
-    });
+    const a = { p_rental: rentalId, p_rating: rating, p_fit: fit, p_comment: comment || null,
+      p_video_url: videoUrl, p_platform: platform || null, p_review_text: reviewText || null };
+    const { data: id, error } = window.meRpc ? await window.meRpc('submit_video_review', a) : await c.rpc('submit_video_review', a);
     if (error || !id) return { ok: false, error };
     // ให้ AI เช็ก (prod เท่านั้น — localhost/ยังไม่ deploy จะรอเจ้าของตรวจ)
     try {
@@ -366,7 +364,8 @@ window.API = (function () {
   // ขอแก้ไซส์
   async function addAlteration(rentalId, note) {
     if (CONFIG.USE_MOCK || !rentalId) return { ok: true };
-    const { data, error } = await client().rpc('add_alteration', { p_rental: rentalId, p_note: note });
+    const a = { p_rental: rentalId, p_note: note };
+    const { data, error } = window.meRpc ? await window.meRpc('add_alteration', a) : await client().rpc('add_alteration', a);
     return { ok: !error, data, error };
   }
   // สอบถามเช่ากลุ่มใหญ่

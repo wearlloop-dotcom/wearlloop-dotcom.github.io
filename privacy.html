@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — LLOOP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F9F7F4;
+    --cream2: #F2EDE6;
+    --line: #E2DDD6;
+    --ink: #2B2825;
+    --muted: #7C7771;
+    --sage: #6FB3A6;
+    --sage-light: #E4F0EC;
+    --warm: #C9A86A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Header ---- */
+  header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .back-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--ink); }
+  .back-link::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-left: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    margin-bottom: 1px;
+  }
+
+  .logo {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: var(--ink);
+    text-decoration: none;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ---- Hero band ---- */
+  .page-hero {
+    background: var(--cream2);
+    border-bottom: 1px solid var(--line);
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+
+  .page-hero .label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .page-hero h1 {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .page-hero .effective {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ---- Content layout ---- */
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ---- Sections ---- */
+  .section {
+    margin-bottom: 52px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-num {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--sage);
+    flex-shrink: 0;
+  }
+
+  .section h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+
+  .section h2 .en {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  .section p {
+    margin-bottom: 12px;
+    color: var(--ink);
+    font-weight: 300;
+  }
+
+  .section p:last-child { margin-bottom: 0; }
+
+  /* ---- Info table ---- */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+
+  .info-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--cream2);
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .info-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .info-table tr:last-child td { border-bottom: none; }
+  .info-table tr:hover td { background: #fff; }
+
+  /* ---- List ---- */
+  .styled-list {
+    list-style: none;
+    margin: 14px 0;
+    padding: 0;
+  }
+
+  .styled-list li {
+    padding: 8px 0 8px 20px;
+    position: relative;
+    font-weight: 300;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .styled-list li:first-child { border-top: 1px solid var(--line); }
+
+  .styled-list li::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 17px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--sage);
+  }
+
+  /* ---- Callout box ---- */
+  .callout {
+    background: var(--sage-light);
+    border-left: 3px solid var(--sage);
+    padding: 16px 20px;
+    border-radius: 2px;
+    margin: 20px 0;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  .callout strong {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ---- Contact box ---- */
+  .contact-box {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 24px;
+    margin-top: 20px;
+  }
+
+  .contact-box .contact-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .contact-box a {
+    color: var(--sage);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .contact-box a:hover {
+    text-decoration: underline;
+  }
+
+  /* ---- Divider ---- */
+  .part-divider {
+    text-align: center;
+    margin: 56px 0 52px;
+    position: relative;
+  }
+
+  .part-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .part-divider span {
+    position: relative;
+    background: var(--cream);
+    padding: 0 16px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---- Footer ---- */
+  footer {
+    background: var(--cream2);
+    border-top: 1px solid var(--line);
+    text-align: center;
+    padding: 28px 24px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 480px) {
+    .page-hero h1 { font-size: 21px; }
+    .info-table { font-size: 13px; }
+  }
+</style>
+<script>window.CONFIG=window.CONFIG||{};</script>
+<script src="analytics.js"></script>
+</head>
+<body>
+
+<!-- Header -->
+<header style="position:relative;">
+  <a href="index.html" class="back-link">กลับหน้าหลัก</a>
+  <a href="index.html" class="logo">LLOOP</a>
+</header>
+
+<!-- Hero -->
+<div class="page-hero">
+  <div class="label">Legal</div>
+  <h1>นโยบายความเป็นส่วนตัว<br><span style="font-size:18px;font-weight:400;color:var(--muted);">Privacy Policy</span></h1>
+  <p class="effective">มีผลบังคับใช้ตั้งแต่ / Effective date: 24 June 2026</p>
+</div>
+
+<!-- Main content -->
+<div class="wrap">
+
+  <!-- Intro note -->
+  <div class="callout">
+    <strong>LLOOP</strong> เป็นแพลตฟอร์มเช่าชุดออนไลน์ดำเนินงานโดยบริษัทในประเทศไทย เราให้ความสำคัญกับความเป็นส่วนตัวของคุณ
+    นโยบายนี้อธิบายว่าเราเก็บ ใช้ และปกป้องข้อมูลของคุณอย่างไร<br>
+    <span style="color:var(--muted);font-size:13px;">LLOOP is a Thai-based online dress rental platform. This policy explains how we collect, use, and protect your personal information.</span>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>ข้อมูลที่เราเก็บรวบรวม
+        <span class="en">Information We Collect</span>
+      </h2>
+    </div>
+    <p>เมื่อคุณใช้งาน LLOOP ผ่าน LINE หรือเว็บไซต์ เราอาจเก็บข้อมูลดังต่อไปนี้</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">When you use LLOOP via LINE or our website, we may collect the following information:</p>
+
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th>ประเภทข้อมูล / Data Type</th>
+          <th>ตัวอย่าง / Examples</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ข้อมูลส่วนตัว<br><span style="color:var(--muted);font-size:12px;">Identity</span></td>
+          <td>ชื่อ-นามสกุล, วันเกิด<br><span style="color:var(--muted);font-size:12px;">Full name, date of birth</span></td>
+        </tr>
+        <tr>
+          <td>ข้อมูลการติดต่อ<br><span style="color:var(--muted);font-size:12px;">Contact</span></td>
+          <td>หมายเลขโทรศัพท์, ที่อยู่จัดส่ง<br><span style="color:var(--muted);font-size:12px;">Phone number, delivery address</span></td>
+        </tr>
+        <tr>
+          <td>LINE UID</td>
+          <td>รหัสเฉพาะตัวจาก LINE Platform<br><span style="color:var(--muted);font-size:12px;">Unique identifier from LINE Platform</span></td>
+        </tr>
+        <tr>
+          <td>รูปโปรไฟล์ LINE<br><span style="color:var(--muted);font-size:12px;">LINE Profile Photo</span></td>
+          <td>รูปภาพที่คุณตั้งใน LINE (อ่านอย่างเดียว ไม่บันทึก)<br><span style="color:var(--muted);font-size:12px;">Your LINE profile picture (read-only, not stored)</span></td>
+        </tr>
+        <tr>
+          <td>ข้อมูลการทำธุรกรรม<br><span style="color:var(--muted);font-size:12px;">Transaction</span></td>
+          <td>ประวัติการเช่า, วันที่รับ-คืน, มัดจำ<br><span style="color:var(--muted);font-size:12px;">Rental history, pick-up/return dates, deposit</span></td>
+        </tr>
+        <tr>
+          <td>ข้อมูลอุปกรณ์<br><span style="color:var(--muted);font-size:12px;">Device</span></td>
+          <td>ประเภทเบราวเซอร์, ภาษา (อัตโนมัติ)<br><span style="color:var(--muted);font-size:12px;">Browser type, language (collected automatically)</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>วัตถุประสงค์ในการใช้ข้อมูล
+        <span class="en">How We Use Your Information</span>
+      </h2>
+    </div>
+    <p>เราใช้ข้อมูลของคุณเพื่อวัตถุประสงค์ดังนี้ / We use your information for the following purposes:</p>
+
+    <ul class="styled-list">
+      <li>จัดการการจอง รับ และคืนชุด รวมถึงการแจ้งเตือนผ่าน LINE<br>
+        <span style="color:var(--muted);font-size:13px;">Managing reservations, pick-up and returns, and LINE notifications</span>
+      </li>
+      <li>ตรวจสอบตัวตนและป้องกันการทุจริต (KYC)<br>
+        <span style="color:var(--muted);font-size:13px;">Identity verification and fraud prevention (KYC)</span>
+      </li>
+      <li>คำนวณและจัดการมัดจำ ค่าเช่า และค่าเสียหาย<br>
+        <span style="color:var(--muted);font-size:13px;">Processing deposits, rental fees, and damage charges</span>
+      </li>
+      <li>ส่งของขวัญวันเกิดและสิทธิพิเศษสำหรับสมาชิก (ถ้ามี)<br>
+        <span style="color:var(--muted);font-size:13px;">Sending birthday gifts and member benefits (where applicable)</span>
+      </li>
+      <li>ปรับปรุงบริการและวิเคราะห์แนวโน้มการใช้งาน<br>
+        <span style="color:var(--muted);font-size:13px;">Improving our service and analysing usage trends</span>
+      </li>
+      <li>การตลาดและโปรโมชันที่คุณให้ความยินยอม<br>
+        <span style="color:var(--muted);font-size:13px;">Marketing and promotions with your consent</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>การแชร์ข้อมูลกับบุคคลที่สาม
+        <span class="en">Sharing with Third Parties</span>
+      </h2>
+    </div>
+    <p>เราไม่ขายข้อมูลส่วนตัวของคุณ อย่างไรก็ตาม เราอาจแชร์ข้อมูลกับผู้ให้บริการดังต่อไปนี้เพื่อให้บริการทำงานได้</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">We do not sell your personal data. We may share data with the following service providers to operate the platform:</p>
+
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th>ผู้ให้บริการ / Provider</th>
+          <th>วัตถุประสงค์ / Purpose</th>
+          <th>ที่ตั้ง / Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Supabase</strong></td>
+          <td>ฐานข้อมูลและการยืนยันตัวตน<br><span style="color:var(--muted);font-size:12px;">Database and authentication</span></td>
+          <td>สหรัฐอเมริกา / US</td>
+        </tr>
+        <tr>
+          <td><strong>LINE Corporation</strong></td>
+          <td>การแจ้งเตือนและการเข้าสู่ระบบ<br><span style="color:var(--muted);font-size:12px;">Notifications and login</span></td>
+          <td>ญี่ปุ่น / Japan</td>
+        </tr>
+        <tr>
+          <td><strong>Meta Pixel</strong><br><span style="color:var(--muted);font-size:12px;">(Facebook/Instagram)</span></td>
+          <td>วัดผลโฆษณาและกำหนดกลุ่มเป้าหมาย<br><span style="color:var(--muted);font-size:12px;">Ad measurement and audience targeting</span></td>
+          <td>สหรัฐอเมริกา / US</td>
+        </tr>
+        <tr>
+          <td><strong>PromptPay / QR</strong></td>
+          <td>ระบบชำระเงิน<br><span style="color:var(--muted);font-size:12px;">Payment processing</span></td>
+          <td>ไทย / Thailand</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      ผู้ให้บริการที่อยู่นอกประเทศไทยได้รับข้อมูลเท่าที่จำเป็นเพื่อให้บริการ และต้องปฏิบัติตามนโยบายความเป็นส่วนตัวของตนเอง<br>
+      <span style="color:var(--muted);font-size:13px;">Overseas providers receive only the data necessary to provide their service and must comply with their own privacy policies.</span>
+    </div>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>ระยะเวลาการเก็บข้อมูล
+        <span class="en">Data Retention</span>
+      </h2>
+    </div>
+    <p>เราเก็บข้อมูลส่วนตัวของคุณไว้ตราบเท่าที่จำเป็นสำหรับวัตถุประสงค์ที่ระบุ หรือตามที่กฎหมายกำหนด ข้อมูลธุรกรรมจะถูกเก็บไว้อย่างน้อย 5 ปีตามข้อกำหนดทางบัญชีของประเทศไทย</p>
+    <p style="font-size:13px;color:var(--muted);">We retain your personal data for as long as necessary for the stated purpose or as required by law. Transaction records are kept for at least 5 years in accordance with Thai accounting requirements.</p>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>สิทธิ์ของคุณ
+        <span class="en">Your Rights</span>
+      </h2>
+    </div>
+    <p>ภายใต้พระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 (PDPA) คุณมีสิทธิ์ดังต่อไปนี้</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Under Thailand's Personal Data Protection Act B.E. 2562 (PDPA), you have the following rights:</p>
+
+    <ul class="styled-list">
+      <li><strong>สิทธิ์เข้าถึง</strong> — ขอดูข้อมูลที่เราเก็บเกี่ยวกับคุณ<br>
+        <span style="color:var(--muted);font-size:13px;"><strong>Right of access</strong> — request a copy of data we hold about you</span>
+      </li>
+      <li><strong>สิทธิ์แก้ไข</strong> — ขอแก้ไขข้อมูลที่ไม่ถูกต้อง<br>
+        <span style="color:var(--muted);font-size:13px;"><strong>Right to rectification</strong> — request correction of inaccurate data</span>
+      </li>
+      <li><strong>สิทธิ์ลบ</strong> — ขอให้ลบข้อมูล เมื่อไม่มีเหตุผลทางกฎหมายที่ต้องเก็บ<br>
+        <span style="color:var(--muted);font-size:13px;"><strong>Right to erasure</strong> — request deletion when there is no lawful basis to retain</span>
+      </li>
+      <li><strong>สิทธิ์คัดค้าน</strong> — คัดค้านการประมวลผลเพื่อวัตถุประสงค์การตลาด<br>
+        <span style="color:var(--muted);font-size:13px;"><strong>Right to object</strong> — object to processing for marketing purposes</span>
+      </li>
+      <li><strong>สิทธิ์ถอนความยินยอม</strong> — ถอนความยินยอมที่ให้ไว้ได้ทุกเมื่อ<br>
+        <span style="color:var(--muted);font-size:13px;"><strong>Right to withdraw consent</strong> — withdraw consent at any time without affecting prior processing</span>
+      </li>
+      <li><strong>สิทธิ์ส่งต่อข้อมูล</strong> — รับข้อมูลในรูปแบบที่อ่านได้ด้วยเครื่อง<br>
+        <span style="color:var(--muted);font-size:13px;"><strong>Right to portability</strong> — receive data in a machine-readable format</span>
+      </li>
+    </ul>
+
+    <p style="margin-top:16px;">หากต้องการใช้สิทธิ์ใด กรุณาติดต่อเราที่อีเมลด้านล่าง เราจะตอบกลับภายใน 30 วัน</p>
+    <p style="font-size:13px;color:var(--muted);">To exercise any right, please contact us at the email below. We will respond within 30 days.</p>
+  </div>
+
+  <!-- Section 6 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>ความปลอดภัยของข้อมูล
+        <span class="en">Data Security</span>
+      </h2>
+    </div>
+    <p>เราใช้มาตรการรักษาความปลอดภัยที่เหมาะสม รวมถึงการเข้ารหัส SSL, Row-Level Security บน Supabase, และการควบคุมการเข้าถึงตามบทบาท (RBAC) เพื่อปกป้องข้อมูลของคุณจากการเข้าถึง การเปิดเผย หรือการแก้ไขโดยไม่ได้รับอนุญาต</p>
+    <p style="font-size:13px;color:var(--muted);">We use appropriate security measures including SSL encryption, Supabase Row-Level Security, and role-based access controls (RBAC) to protect your data from unauthorised access, disclosure, or modification.</p>
+  </div>
+
+  <!-- Section 7 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>คุกกี้และการติดตาม
+        <span class="en">Cookies and Tracking</span>
+      </h2>
+    </div>
+    <p>เว็บไซต์ LLOOP ใช้คุกกี้และ Meta Pixel เพื่อวัดผลการใช้งานและประสิทธิภาพโฆษณา คุณสามารถปิดคุกกี้ได้ผ่านการตั้งค่าเบราวเซอร์ของคุณ แต่อาจส่งผลต่อประสบการณ์การใช้งานบางส่วน</p>
+    <p style="font-size:13px;color:var(--muted);">The LLOOP website uses cookies and Meta Pixel to measure usage and ad performance. You can disable cookies in your browser settings, though some features may be affected.</p>
+  </div>
+
+  <!-- Section 8 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>การติดต่อเรา
+        <span class="en">Contact Us</span>
+      </h2>
+    </div>
+    <p>หากมีคำถามเกี่ยวกับนโยบายความเป็นส่วนตัวนี้ หรือต้องการใช้สิทธิ์ของคุณ กรุณาติดต่อ</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">For questions about this policy or to exercise your rights, please contact:</p>
+
+    <div class="contact-box">
+      <div class="contact-label">ผู้ควบคุมข้อมูลส่วนบุคคล / Data Controller</div>
+      <p style="font-weight:500;margin-bottom:6px;">LLOOP</p>
+      <p style="font-size:14px;font-weight:300;margin-bottom:4px;">อีเมล / Email: <a href="mailto:thanchanok.khong@gmail.com">thanchanok.khong@gmail.com</a></p>
+      <p style="font-size:13px;color:var(--muted);margin-top:10px;font-weight:300;">เราจะตอบกลับภายใน 30 วันทำการ<br>We respond within 30 business days.</p>
+    </div>
+  </div>
+
+
+  <!-- Divider between Privacy and ToS -->
+  <div class="part-divider">
+    <span>Terms of Service</span>
+  </div>
+
+
+  <!-- Terms of Service (condensed) -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">ToS</span>
+      <h2>เงื่อนไขการใช้บริการ (ฉบับย่อ)
+        <span class="en">Terms of Service — Summary</span>
+      </h2>
+    </div>
+    <p>การใช้บริการ LLOOP ถือว่าคุณยอมรับเงื่อนไขดังต่อไปนี้ / By using LLOOP you agree to the following terms:</p>
+
+    <table class="info-table" style="margin-top:18px;">
+      <thead>
+        <tr>
+          <th>หัวข้อ / Topic</th>
+          <th>รายละเอียด / Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>การเช่าชุด</strong><br><span style="color:var(--muted);font-size:12px;">Rental</span></td>
+          <td>ชุดเป็นทรัพย์สินของ LLOOP ผู้เช่าต้องส่งคืนตามวันที่ตกลง ล่าช้าอาจมีค่าปรับรายวัน<br>
+            <span style="color:var(--muted);font-size:12px;">Items remain LLOOP property. Late returns may incur a daily fee.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>มัดจำ</strong><br><span style="color:var(--muted);font-size:12px;">Deposit</span></td>
+          <td>มัดจำจะถูกเก็บเพื่อค้ำประกันสภาพชุด คืนเต็มจำนวนเมื่อชุดอยู่ในสภาพปกติ<br>
+            <span style="color:var(--muted);font-size:12px;">A deposit is held as security against damage. Refunded in full when the item is returned in normal condition.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>ความเสียหาย</strong><br><span style="color:var(--muted);font-size:12px;">Damage</span></td>
+          <td>ความเสียหายที่เกินกว่าการใช้งานปกติ (รอยขาด, คราบถาวร, สูญหาย) ผู้เช่าต้องรับผิดชอบค่าซ่อมหรือค่าทดแทน<br>
+            <span style="color:var(--muted);font-size:12px;">Damage beyond normal wear (tears, permanent stains, loss) — renter is liable for repair or replacement costs.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>การยกเลิก</strong><br><span style="color:var(--muted);font-size:12px;">Cancellation</span></td>
+          <td>ยกเลิกได้ฟรีก่อน 72 ชั่วโมง ยกเลิกหลังจากนั้นอาจสูญเสียมัดจำบางส่วน<br>
+            <span style="color:var(--muted);font-size:12px;">Free cancellation up to 72 hours before pick-up. Cancellations after that may forfeit part of the deposit.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>ข้อห้าม</strong><br><span style="color:var(--muted);font-size:12px;">Prohibited</span></td>
+          <td>ห้ามซักหรือรีดชุดเอง, ห้ามแก้ไขดัดแปลง, ห้ามให้ยืมต่อ<br>
+            <span style="color:var(--muted);font-size:12px;">Do not wash, iron, alter, or sub-lend any item.</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>กฎหมายที่ใช้บังคับ</strong><br><span style="color:var(--muted);font-size:12px;">Governing Law</span></td>
+          <td>เงื่อนไขนี้อยู่ภายใต้กฎหมายไทย ข้อพิพาทอยู่ในเขตอำนาจของศาลไทย<br>
+            <span style="color:var(--muted);font-size:12px;">These terms are governed by Thai law. Disputes are subject to Thai court jurisdiction.</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:20px;font-size:13px;color:var(--muted);">เงื่อนไขเต็มจะถูกจัดส่งให้เมื่อทำการจองครั้งแรก Full terms are provided upon first reservation.</p>
+  </div>
+
+</div><!-- end .wrap -->
+
+<footer>
+  LLOOP &nbsp;&middot;&nbsp; นโยบายความเป็นส่วนตัว &nbsp;&middot;&nbsp; มีผลบังคับใช้ 24 มิถุนายน 2569<br>
+  <span style="margin-top:4px;display:inline-block;">thanchanok.khong@gmail.com</span>
+</footer>
+
+</body>
+</html>

@@ -65,8 +65,11 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js"></script>
+<script src="./analytics.js"></script>
+<script src="me-api.js"></script>
 <script>
   const sb=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY);
+  if(window.meRpc) sb.rpc=window.meRpc;   // route ทุก rpc ผ่าน gateway me-rpc (override p_line_uid จาก idToken — กัน IDOR)
   const LIFF_ID=CONFIG.LIFF_ID;
   const $=id=>document.getElementById(id);
   const wrap=$('wrap');
@@ -440,12 +443,12 @@
     const {error:upErr}=await sb.storage.from('hr-docs').upload(path,f,{upsert:false});
     if(upErr){toast('อัปโหลดไม่สำเร็จค่ะ');$('docBtn').disabled=false;return;}
     const {data:{publicUrl}}=sb.storage.from('hr-docs').getPublicUrl(path);
-    const {error}=await sb.rpc('hr_doc_add',{p:{employee_id:empId,kind,name:f.name,url:publicUrl,uploaded_by:lineUid}});
+    const {error}=await sb.rpc('hr_doc_add_self',{p_kind:kind,p_name:f.name,p_url:publicUrl});
     if(error){toast('บันทึกไม่สำเร็จค่ะ');$('docBtn').disabled=false;return;}
     toast('อัปโหลดเอกสารแล้วค่ะ');loadDocTab();
   }
   async function loadContractTab(){
-    const {data}=await sb.rpc('emp_contract_list',{p_status:null,p_employee:curE.id});
+    const {data}=await sb.rpc('emp_contract_list_self',{});
     const list=data||[];const b=$('tabbody');
     const ST={draft:'ฉบับร่าง',sent:'รอลงนาม',viewed:'เปิดอ่าน',signed:'ลงนามแล้ว',declined:'ขอแก้ไข',void:'ยกเลิก'};
     if(!list.length){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ยังไม่มีสัญญาจ้างค่ะ</p></div>';return;}

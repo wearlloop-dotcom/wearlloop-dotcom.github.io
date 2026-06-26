@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>รีวิวชุด — LLOOP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<style>
+  :root {
+    --cream: #FDFAF6;
+    --cream2: #F4EFE6;
+    --line: #E2DDD6;
+    --ink: #1A1A1A;
+    --muted: #7C7771;
+    --gold: #C9A86A;
+    --gold-light: #F5EDD8;
+    --sage: #6FB3A6;
+    --sage-light: #E4F0EC;
+    --black: #0C0B08;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Prompt', 'Poppins', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- NAV ---- */
+  header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .back-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Poppins', sans-serif;
+  }
+  .back-link::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-left: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    margin-bottom: 1px;
+  }
+
+  .logo {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    color: var(--ink);
+    text-decoration: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ---- GARMENT BAR ---- */
+  .garment-bar {
+    background: var(--cream2);
+    border-bottom: 1px solid var(--line);
+    padding: 18px 24px;
+  }
+  .garment-bar .label {
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+    font-family: 'Poppins', sans-serif;
+  }
+  .garment-bar .garment-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .garment-bar .garment-meta {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* ---- REWARD BANNER ---- */
+  .reward-banner {
+    background: var(--black);
+    color: #fff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .reward-banner .rb-text {
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.5;
+    font-family: 'Prompt', sans-serif;
+  }
+  .reward-banner .rb-credit {
+    flex-shrink: 0;
+    background: var(--gold);
+    color: var(--black);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  /* ---- LAYOUT ---- */
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 24px 100px;
+  }
+
+  .section {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px 20px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 18px;
+  }
+
+  /* ---- SCORE 1-5 ---- */
+  .score-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .score-btn {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .score-btn:hover { border-color: var(--gold); background: var(--gold-light); }
+  .score-btn.active { background: var(--gold); border-color: var(--gold); color: #fff; font-weight: 600; }
+
+  /* ---- FIT -2 to +2 ---- */
+  .fit-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+  .fit-btn {
+    flex: 1;
+    max-width: 60px;
+    height: 44px;
+    border-radius: 4px;
+    border: 1.5px solid var(--line);
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .fit-btn:hover { border-color: var(--sage); background: var(--sage-light); }
+  .fit-btn.active { background: var(--sage); border-color: var(--sage); color: #fff; }
+
+  .fit-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 4px 0;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 300;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* ---- CHIPS ---- */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--line);
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 400;
+    font-family: 'Prompt', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--gold); }
+  .chip.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+  /* ---- TEXTAREA ---- */
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Prompt', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 90px;
+    margin-top: 12px;
+  }
+  textarea:focus { border-color: var(--gold); background: #fff; }
+  textarea::placeholder { color: var(--muted); font-weight: 300; }
+
+  /* ---- UPLOAD ---- */
+  .upload-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .credit-badge {
+    background: var(--gold-light);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .upload-zone {
+    border: 2px dashed var(--line);
+    border-radius: 6px;
+    background: var(--cream);
+    cursor: pointer;
+    position: relative;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--gold);
+    background: var(--gold-light);
+  }
+  .upload-zone input[type=file] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .upload-placeholder {
+    text-align: center;
+    padding: 28px 24px;
+    pointer-events: none;
+  }
+  .upload-placeholder .up-icon {
+    width: 44px; height: 44px;
+    background: var(--cream2);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+  }
+  .upload-placeholder .up-icon svg {
+    width: 20px; height: 20px;
+    stroke: var(--muted); fill: none; stroke-width: 1.5;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .upload-placeholder .up-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .upload-placeholder .up-sub {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  #imgPreview {
+    display: none;
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+  }
+
+  /* ---- PROFILE BAR ---- */
+  .profile-bar {
+    background: var(--cream2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .profile-bar .pb-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--line);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .profile-bar .pb-avatar img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .profile-bar .pb-info {
+    flex: 1;
+  }
+  .profile-bar .pb-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 1px;
+  }
+  .profile-bar .pb-meta {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* ---- SUBMIT ---- */
+  .btn-submit {
+    width: 100%;
+    padding: 15px 20px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-submit:hover { opacity: 0.85; }
+  .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--ink);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Prompt', sans-serif;
+    white-space: nowrap;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .toast.gold {
+    background: var(--gold);
+    color: var(--black);
+    font-weight: 700;
+  }
+
+  /* ---- ERROR ---- */
+  .err-msg {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 4px;
+    color: #B91C1C;
+    font-size: 13px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: none;
+  }
+
+  /* ---- SUCCESS ---- */
+  .success-state {
+    display: none;
+    text-align: center;
+    padding: 56px 24px;
+  }
+  .success-state .sc-icon {
+    width: 56px; height: 56px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+  }
+  .success-state .sc-icon svg {
+    width: 26px; height: 26px;
+    stroke: #fff; fill: none; stroke-width: 2.5;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .success-state h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .success-state p {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  @media (max-width: 480px) {
+    .score-btn { width: 44px; height: 44px; font-size: 15px; }
+    .wrap { padding: 24px 16px 90px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="back-link">กลับ</a>
+  <a href="index.html" class="logo">LLOOP</a>
+</header>
+
+<!-- Garment info bar -->
+<div class="garment-bar" id="garmentBar">
+  <div class="label">กำลังรีวิว</div>
+  <div class="garment-name" id="garmentName">—</div>
+  <div class="garment-meta">
+    <span id="garmentSize"></span>
+    <span id="garmentDate"></span>
+  </div>
+</div>
+
+<!-- Reward banner -->
+<div class="reward-banner">
+  <div class="rb-text">แชร์รูปที่ใส่จริง รับเครดิตคืนทุกครั้ง</div>
+  <div class="rb-credit">+10 CREDIT</div>
+</div>
+
+<div class="wrap">
+
+  <!-- SUCCESS STATE -->
+  <div class="success-state" id="successState">
+    <div class="sc-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>ขอบคุณสำหรับรีวิว</h2>
+    <p id="successSub">ความเห็นของคุณช่วยให้เราพัฒนาบริการได้ดีขึ้น</p>
+  </div>
+
+  <!-- FORM STATE -->
+  <div id="formState">
+
+    <!-- Profile bar -->
+    <div class="profile-bar" id="profileBar" style="display:none">
+      <div class="pb-avatar" id="pbAvatar"><img id="pbAvatarImg" src="" alt="" style="display:none"></div>
+      <div class="pb-info">
+        <div class="pb-name" id="pbName">—</div>
+        <div class="pb-meta" id="pbMeta"></div>
+      </div>
+    </div>
+
+    <!-- 1. Score -->
+    <div class="section">
+      <div class="section-title">ให้คะแนนชุดนี้</div>
+      <div class="score-row" id="scoreRow">
+        <button class="score-btn" data-v="1">1</button>
+        <button class="score-btn" data-v="2">2</button>
+        <button class="score-btn" data-v="3">3</button>
+        <button class="score-btn" data-v="4">4</button>
+        <button class="score-btn" data-v="5">5</button>
+      </div>
+    </div>
+
+    <!-- 2. Fit -->
+    <div class="section">
+      <div class="section-title">ไซส์ตรงไหม</div>
+      <div class="fit-row" id="fitRow">
+        <button class="fit-btn" data-v="-2">-2</button>
+        <button class="fit-btn" data-v="-1">-1</button>
+        <button class="fit-btn" data-v="0">0</button>
+        <button class="fit-btn" data-v="1">+1</button>
+        <button class="fit-btn" data-v="2">+2</button>
+      </div>
+      <div class="fit-labels">
+        <span>เล็กกว่าที่คาด</span>
+        <span>ตรงไซส์</span>
+        <span>ใหญ่กว่าที่คาด</span>
+      </div>
+    </div>
+
+    <!-- 3. Occasion -->
+    <div class="section">
+      <div class="section-title">ใส่โอกาสไหน</div>
+      <div class="chips" id="occasionChips">
+        <div class="chip" data-v="ออกงาน">ออกงาน</div>
+        <div class="chip" data-v="งานแต่ง">งานแต่ง</div>
+        <div class="chip" data-v="ถ่ายรูป">ถ่ายรูป</div>
+        <div class="chip" data-v="ดินเนอร์">ดินเนอร์</div>
+        <div class="chip" data-v="everyday">everyday</div>
+        <div class="chip" data-v="ปาร์ตี้">ปาร์ตี้</div>
+      </div>
+    </div>
+
+    <!-- 4. Feel -->
+    <div class="section">
+      <div class="section-title">ความรู้สึกที่ได้รับ</div>
+      <div class="chips" id="feelChips">
+        <div class="chip" data-v="มั่นใจมาก">มั่นใจมาก</div>
+        <div class="chip" data-v="สบายใส่ง่าย">สบายใส่ง่าย</div>
+        <div class="chip" data-v="สวยแต่อึดอัด">สวยแต่อึดอัด</div>
+        <div class="chip" data-v="ไม่ตรง style">ไม่ตรง style</div>
+        <div class="chip" data-v="จะเช่าซ้ำ">จะเช่าซ้ำ</div>
+        <div class="chip" data-v="แนะนำเพื่อน">แนะนำเพื่อน</div>
+      </div>
+      <textarea id="feelNote" placeholder="อื่น ๆ — บอกเราเพิ่มเติม (optional)" rows="3"></textarea>
+    </div>
+
+    <!-- 5. Photo upload -->
+    <div class="section">
+      <div class="upload-label">
+        แชร์รูปที่ใส่จริง
+        <span class="credit-badge">+10 CREDIT</span>
+      </div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="imgFile" accept="image/*" capture="environment">
+        <div class="upload-placeholder" id="uploadPlaceholder">
+          <div class="up-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+          <div class="up-text">แตะเพื่อถ่ายหรือเลือกรูป</div>
+          <div class="up-sub">optional — ได้รับ +10 เครดิตเมื่อแนบรูป</div>
+        </div>
+        <img id="imgPreview" alt="preview">
+      </div>
+    </div>
+
+    <div class="err-msg" id="errMsg"></div>
+
+    <button class="btn-submit" id="submitBtn">ส่งรีวิว</button>
+
+  </div><!-- /formState -->
+
+</div><!-- /wrap -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CFG = window.CONFIG || {};
+const SB_URL = CFG.SUPABASE_URL;
+const SB_KEY = CFG.SUPABASE_ANON_KEY;
+const LIFF_ID = CFG.LIFF_ID;
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+const $ = id => document.getElementById(id);
+
+// URL params
+const params = new URLSearchParams(location.search);
+const RENTAL_ID   = params.get('rental_id')   || null;
+const GARMENT_ID  = params.get('garment_id')  || null;
+const GARMENT_NAME = decodeURIComponent(params.get('garment_name') || '');
+const SIZE        = decodeURIComponent(params.get('size') || '');
+const DATE_RANGE  = decodeURIComponent(params.get('date_range') || '');
+
+let uid = null;
+let selectedFile = null;
+let score = null;
+let fitScore = null;
+const occasionTags = new Set();
+const feelTags = new Set();
+
+// --- Populate garment bar ---
+function populateGarmentBar() {
+  $('garmentName').textContent = GARMENT_NAME || 'ชุดที่เช่า';
+  if (SIZE) $('garmentSize').textContent = 'ไซส์ ' + SIZE;
+  if (DATE_RANGE) $('garmentDate').textContent = DATE_RANGE;
+}
+
+// --- Score buttons ---
+$('scoreRow').querySelectorAll('.score-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    score = parseInt(btn.dataset.v);
+    $('scoreRow').querySelectorAll('.score-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// --- Fit buttons ---
+$('fitRow').querySelectorAll('.fit-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    fitScore = parseInt(btn.dataset.v);
+    $('fitRow').querySelectorAll('.fit-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// --- Occasion chips ---
+$('occasionChips').querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const v = chip.dataset.v;
+    if (occasionTags.has(v)) { occasionTags.delete(v); chip.classList.remove('active'); }
+    else { occasionTags.add(v); chip.classList.add('active'); }
+  });
+});
+
+// --- Feel chips ---
+$('feelChips').querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const v = chip.dataset.v;
+    if (feelTags.has(v)) { feelTags.delete(v); chip.classList.remove('active'); }
+    else { feelTags.add(v); chip.classList.add('active'); }
+  });
+});
+
+// --- Image upload preview ---
+$('imgFile').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    $('imgPreview').src = ev.target.result;
+    $('imgPreview').style.display = 'block';
+    $('uploadPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+});
+
+const zone = $('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      $('imgPreview').src = ev.target.result;
+      $('imgPreview').style.display = 'block';
+      $('uploadPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// --- Toast ---
+function showToast(msg, type = '') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '') + ' show';
+  setTimeout(() => { t.classList.remove('show'); }, 3500);
+}
+
+// --- Error ---
+function showErr(msg) {
+  const el = $('errMsg');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+// --- Upload photo ---
+async function uploadPhoto(file) {
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const fileName = `${uid}_${Date.now()}.${ext}`;
+  const res = await fetch(`${SB_URL}/storage/v1/object/review-photos/${fileName}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${SB_KEY}`,
+      'Content-Type': file.type,
+      'x-upsert': 'true'
+    },
+    body: file
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('Upload รูปไม่สำเร็จ: ' + err);
+  }
+  return `${SB_URL}/storage/v1/object/public/review-photos/${fileName}`;
+}
+
+// --- Load customer profile ---
+async function loadProfile() {
+  if (!uid) return;
+  const { data } = await sb
+    .from('customers')
+    .select('display_name, size, height_cm, color_season')
+    .eq('line_uid', uid)
+    .maybeSingle();
+
+  if (!data) return;
+  const bar = $('profileBar');
+  bar.style.display = 'flex';
+  $('pbName').textContent = data.display_name || 'ลูกค้า';
+  const meta = [];
+  if (data.size) meta.push('ไซส์ ' + data.size);
+  if (data.height_cm) meta.push(data.height_cm + ' cm');
+  if (data.color_season) meta.push(data.color_season);
+  $('pbMeta').textContent = meta.join('  ·  ');
+}
+
+// --- Submit ---
+$('submitBtn').addEventListener('click', async () => {
+  showErr('');
+
+  if (!uid) { showErr('กรุณาเข้าสู่ระบบก่อน'); return; }
+  if (!score) { showErr('กรุณาให้คะแนนชุดก่อน'); return; }
+
+  const btn = $('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'กำลังส่ง...';
+
+  let photoUrl = null;
+  if (selectedFile) {
+    btn.textContent = 'กำลัง upload รูป...';
+    try {
+      photoUrl = await uploadPhoto(selectedFile);
+    } catch (err) {
+      showErr(err.message);
+      btn.disabled = false;
+      btn.textContent = 'ส่งรีวิว';
+      return;
+    }
+  }
+
+  btn.textContent = 'กำลังบันทึก...';
+
+  const { data, error } = await sb.rpc('submit_review', {
+    p_rental_id:     RENTAL_ID,
+    p_garment_id:    GARMENT_ID,
+    p_uid:           uid,
+    p_score:         score,
+    p_fit_score:     fitScore,
+    p_occasion_tags: Array.from(occasionTags),
+    p_feel_tags:     Array.from(feelTags),
+    p_feel_note:     $('feelNote').value.trim() || null,
+    p_photo_url:     photoUrl
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'ส่งรีวิว';
+
+  if (error) {
+    showErr('เกิดข้อผิดพลาด: ' + error.message);
+    return;
+  }
+
+  // Success
+  if (photoUrl) {
+    showToast('ได้รับ +10 เครดิต', 'gold');
+  } else {
+    showToast('ส่งรีวิวสำเร็จ');
+  }
+
+  $('successSub').textContent = photoUrl
+    ? 'เพิ่ม +10 เครดิตในบัญชีของคุณแล้ว ขอบคุณที่แชร์รูป'
+    : 'ความเห็นของคุณช่วยให้เราพัฒนาบริการได้ดีขึ้น';
+
+  setTimeout(() => {
+    $('formState').style.display = 'none';
+    $('successState').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 1200);
+});
+
+// --- Init ---
+async function init() {
+  populateGarmentBar();
+  if (!LIFF_ID) { showErr('ยังไม่ได้ตั้งค่า LIFF_ID'); return; }
+  try {
+    await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
+    if (!liff.isLoggedIn()) {
+      liff.login({ redirectUri: window.location.href });
+      return;
+    }
+    const profile = await liff.getProfile();
+    uid = profile.userId;
+
+    // Set LINE avatar if available
+    if (profile.pictureUrl) {
+      const img = $('pbAvatarImg');
+      img.src = profile.pictureUrl;
+      img.style.display = 'block';
+    }
+
+    await loadProfile();
+  } catch (err) {
+    showErr('LINE login ไม่สำเร็จ: ' + (err.message || err));
+  }
+}
+
+init();
+</script>
+</body>
+</html>
