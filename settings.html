@@ -92,6 +92,11 @@
       <input id="disc" type="number" min="0" step="5" inputmode="numeric">
       <span class="unit">บาท</span>
     </div>
+    <div class="disc">
+      <label>ส่วนลดพนักงาน<div class="sub">พนักงานที่ใช้ LINE เดียวกับงานเช่าชุดเอง → ลดค่าเช่าอัตโนมัติ (ไม่แตะมัดจำ/ค่าส่ง)</div></label>
+      <input id="staffDisc" type="number" min="0" max="100" step="5" inputmode="numeric">
+      <span class="unit">%</span>
+    </div>
   </div>
 
   <div class="hint" id="hint" style="display:none">
@@ -116,6 +121,7 @@ function paint(s){
     sw.querySelector('input').checked = (s[key] === 'true');
   });
   $('#disc').value = s.hub_pickup_discount ?? '0';
+  $('#staffDisc').value = s.staff_discount_pct ?? '20';
 }
 
 async function load(){
@@ -152,6 +158,10 @@ document.querySelectorAll('.sw').forEach((sw) => {
 $('#disc').addEventListener('change', (e) => {
   const v = String(parseFloat(e.target.value || '0') || 0);
   save('hub_pickup_discount', v);
+});
+$('#staffDisc').addEventListener('change', (e) => {
+  const v = String(Math.min(100, Math.max(0, parseFloat(e.target.value || '0') || 0)));
+  save('staff_discount_pct', v);
 });
 
 load();
