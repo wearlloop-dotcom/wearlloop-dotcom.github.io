@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ส่งซ่อมชุด</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--warn:#B5860B;--danger:#A32D2D;--clay:#A75F3A;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:17px}
+  .bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+  .bar a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:14px}
+  .wrap{max-width:640px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:17px;margin-bottom:12px}
+  .scan{display:flex;gap:10px}
+  .scan input{flex:1;border:2px solid var(--line);border-radius:10px;padding:14px 16px;font-size:20px;font-family:var(--sans);text-transform:lowercase}
+  .btn{border:none;border-radius:10px;padding:14px 18px;font-size:17px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .btn.dark{background:var(--ink);color:#fff}
+  .btn.soft{background:var(--soft)}
+  .name{font-family:var(--display);font-size:20px;margin-bottom:2px}
+  .sub{color:var(--muted);font-size:14px}
+  .hint{background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0;font-size:15px}
+  .step{font-weight:600;margin:14px 0 8px}
+  .yn{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .yn button{padding:16px 10px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:16px;font-weight:600}
+  .yn button.sel.yes{border-color:var(--ok);color:var(--ok);background:#EAF3EF}
+  .yn button.sel.no{border-color:var(--danger);color:var(--danger);background:#FBEDED}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1.5px solid var(--line);border-radius:20px;padding:8px 14px;font-size:14px;cursor:pointer;background:#fff}
+  .chip.sel{border-color:var(--clay);background:#F4E9E1;color:var(--clay);font-weight:600}
+  label{display:block;font-size:14px;color:var(--muted);margin:12px 0 4px}
+  textarea,select,input.f{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font-size:16px;font-family:var(--sans)}
+  textarea{min-height:84px;resize:vertical}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .qrow{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line);gap:10px}
+  .qrow:last-child{border-bottom:none}
+  .tag{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--soft);white-space:nowrap}
+  .tag.assessing{background:#FDF2D6;color:#8A6D08}.tag.sent{background:#E7EAF5;color:#3A4A8A}.tag.cant{background:#FBE3E3;color:var(--danger)}
+  .empty{color:var(--muted);text-align:center;padding:18px}
+  .rowbtns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .rowbtns button{padding:8px 12px;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .rowbtns button.ok{border-color:var(--ok);color:var(--ok)}
+  .rowbtns button.no{border-color:var(--danger);color:var(--danger)}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;font-size:15px;opacity:0;transition:.3s;z-index:9}
+  .toast.show{opacity:1}
+  .vform{display:none;margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+  .vform.open{display:block}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  /* keep page-local button layout: scan-row button stays inline, not full-width */
+  .scan .btn{width:auto;margin-top:0}
+  .rowbtns button{width:auto;margin-top:0}
+  .yn button{width:auto;margin-top:0}
+  .chip{width:auto;margin-top:0}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>งานซ่อม</h1>
+  <div><a href="/laundry.html">ซัก/ตรวจ</a><a href="/today.html">งานวันนี้</a></div>
+</div>
+<div class="wrap">
+
+  <section class="phead">
+    <div class="eyebrow">repair · mending</div>
+    <h1>ชุบชีวิตให้ทุกชุด</h1>
+    <div class="sub">ซ่อมแซมอย่างใส่ใจ ยืดอายุผ้า ลดขยะแฟชั่น — ทุกตะเข็บมีความหมาย</div>
+    <div class="kpis">
+      <div class="kpi"><span class="n" id="kpiQueue">–</span><span class="l">งานในคิว</span></div>
+      <div class="kpi"><span class="n" id="kpiSent">–</span><span class="l">ส่งช่างแล้ว</span></div>
+      <div class="kpi bad"><span class="n" id="kpiOverdue">–</span><span class="l">ค้าง ≥3 วัน</span></div>
+    </div>
+  </section>
+
+  <div class="card">
+    <h2>1) ชุดที่ต้องซ่อม — ใส่โค้ด</h2>
+    <div class="scan">
+      <input id="code" placeholder="เช่น g5" autocomplete="off" enterkeyhint="go">
+      <button class="btn dark" onclick="load()">เปิด</button>
+    </div>
+    <div id="panel"></div>
+  </div>
+
+  <div class="card">
+    <h2>คิวงานซ่อม</h2>
+    <div id="queue"><div class="empty">กำลังโหลด…</div></div>
+  </div>
+
+  <div class="card">
+    <h2>ช่างในเครือ</h2>
+    <div id="vendors"><div class="empty">กำลังโหลด…</div></div>
+    <button class="btn soft" style="margin-top:10px" onclick="toggleVForm()">+ เพิ่มช่าง</button>
+    <div class="vform" id="vform">
+      <input class="f" id="vname" placeholder="ชื่อช่าง/ร้าน">
+      <div class="twocol" style="margin-top:8px">
+        <input class="f" id="vphone" placeholder="เบอร์โทร">
+        <input class="f" id="vline" placeholder="LINE ID">
+      </div>
+      <input class="f" id="vspec" placeholder="ถนัดงาน (คั่นด้วย , เช่น ซิป,ลูกไม้)" style="margin-top:8px">
+      <input class="f" id="vrate" placeholder="เรตค่าซ่อม เช่น ซิป 80-150" style="margin-top:8px">
+      <button class="btn dark" style="margin-top:10px;width:100%" onclick="saveVendor()">บันทึกช่าง</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
+  const $=id=>document.getElementById(id);
+  let current=null, TYPES=[], VENDORS=[], sel={repairable:null,type:null};
+  function toast(m){ const t=$('toast'); t.textContent=m; t.className='toast show'; setTimeout(()=>t.className='toast',2000); }
+
+  async function boot(){
+    const [{data:t},{data:v}] = await Promise.all([ sb.rpc('repair_types_list'), sb.rpc('repair_vendors_list',{p_only_active:true}) ]);
+    TYPES=t||[]; VENDORS=v||[];
+    renderVendors(); loadQueue();
+  }
+
+  async function load(){
+    const code=$('code').value.trim().toLowerCase(); if(!code){ toast('ใส่โค้ดก่อนค่ะ'); return; }
+    current=code; sel={repairable:null,type:null};
+    // ดึงโน้ตจาก QC ถ้ามีในคิว
+    const { data:q } = await sb.rpc('repair_queue');
+    const ex=(q||[]).find(r=>r.code===code);
+    renderPanel(ex);
+  }
+
+  function renderPanel(ex){
+    const note = ex && ex.instructions ? ex.instructions : '';
+    const dmg  = ex ? `<div class="hint">บันทึก QC: ${ex.repair_type?(ex.type_label||ex.repair_type):'—'} · สถานะ ${ex.repair_status||'ใหม่'}</div>` : '';
+    $('panel').innerHTML=`
+      <div style="margin-top:14px">
+        <div class="name">${current}</div>
+        <div class="sub">ประเมินการซ่อม แล้วส่งช่างในเครือ</div>
+        ${dmg}
+        <button class="btn soft" style="margin-top:10px;width:100%" onclick="aiAdvise()">AI ช่วยประเมิน (จากอาการ/รูป)</button>
+        <div class="step">2) ซ่อมได้ไหม?</div>
+        <div class="yn">
+          <button id="yesBtn" class="yes" onclick="pickRepairable(true)">ซ่อมได้</button>
+          <button id="noBtn"  class="no"  onclick="pickRepairable(false)">ซ่อมไม่ได้</button>
+        </div>
+        <div id="repairForm"></div>
+      </div>`;
+    if(ex&&ex.repair_type) sel.type=ex.repair_type;
+  }
+
+  async function aiAdvise(){
+    const note=prompt('อาการเสียหาย (พิมพ์สั้น ๆ) — ถ้ามีรูปวางลิงก์ต่อท้ายด้วย URL ก็ได้','ซิปหลังขาด'); if(note===null) return;
+    const m=note.match(/https?:\/\/\S+/); const photo=m?m[0]:null; const dmg=m?note.replace(m[0],'').trim():note;
+    toast('AI กำลังประเมิน…');
+    const { data, error } = await sb.functions.invoke('repair-advise',{ body:{ garment_code:current, photo_url:photo, damage_note:dmg } });
+    if(error||!data||data.error){ toast('AI ยังไม่พร้อม (ยังไม่ deploy) — กรอกเองได้ค่ะ'); return; }
+    pickRepairable(!!data.repairable);
+    if(data.repairable){
+      if(data.repair_type){ pickType(data.repair_type); }
+      await new Promise(r=>setTimeout(r,50));
+      if($('instr')&&data.instructions) $('instr').value=data.instructions;
+      if($('cost')&&data.est_cost) $('cost').value=data.est_cost;
+      toast(`AI: ${data.type_label||data.repair_type} · ${data.difficulty||''} · ~฿${data.est_cost||'?'}`);
+    } else {
+      if($('cantReason')) $('cantReason').value=data.note||data.instructions||'AI ประเมินว่าซ่อมไม่คุ้ม';
+      toast('AI ประเมิน: ซ่อมไม่ได้/ไม่คุ้ม');
+    }
+  }
+
+  function pickRepairable(v){
+    sel.repairable=v;
+    $('yesBtn').className='yes'+(v?' sel':''); $('noBtn').className='no'+(!v?' sel':'');
+    if(!v){
+      $('repairForm').innerHTML=`
+        <label>เพราะอะไรถึงซ่อมไม่ได้</label>
+        <textarea id="cantReason" placeholder="เช่น ผ้าขาดเป็นแนวยาว ซ่อมแล้วเห็นรอยชัด"></textarea>
+        <button class="btn dark" style="margin-top:10px;width:100%" onclick="markCant()">บันทึก: ซ่อมไม่ได้ (แจ้งเจ้าของ)</button>`;
+      return;
+    }
+    const chips=TYPES.map(t=>`<div class="chip${sel.type===t.key?' sel':''}" data-k="${t.key}" onclick="pickType('${t.key}')">${t.label}</div>`).join('');
+    const vop=VENDORS.map(v=>`<option value="${v.id}">${v.name}${v.specialties&&v.specialties.length?' · '+v.specialties.join('/'):''}</option>`).join('');
+    $('repairForm').innerHTML=`
+      <div class="step">3) ซ่อมตรงไหน</div>
+      <div class="chips">${chips}</div>
+      <label>4) ซ่อมยังไง (ส่งให้ช่าง)</label>
+      <textarea id="instr" placeholder="เลือกประเภทด้านบนเพื่อเติมวิธีซ่อมอัตโนมัติ แก้ไขได้"></textarea>
+      <div class="twocol">
+        <div><label>ค่าซ่อมโดยประมาณ (บาท)</label><input class="f" id="cost" type="number" inputmode="numeric" placeholder="0"></div>
+        <div><label>กำหนดเสร็จ (ถ้ามี)</label><input class="f" id="eta" type="date"></div>
+      </div>
+      <label>5) ส่งช่างในเครือ</label>
+      <select id="vendor"><option value="">— เลือกช่าง —</option>${vop}</select>
+      <button class="btn dark" style="margin-top:12px;width:100%" onclick="sendRepair()">ส่งซ่อม</button>`;
+    if(sel.type) pickType(sel.type);
+  }
+
+  function pickType(k){
+    sel.type=k;
+    document.querySelectorAll('.chip').forEach(c=>c.className='chip'+(c.dataset.k===k?' sel':''));
+    const t=TYPES.find(x=>x.key===k);
+    const box=$('instr');
+    if(t&&box&&!box.value.trim()) box.value=t.default_instructions||'';
+    const cost=$('cost'); if(t&&cost&&!cost.value) cost.value=t.typical_cost||'';
+  }
+
+  async function sendRepair(){
+    if(!sel.type){ toast('เลือกประเภทการซ่อมก่อนค่ะ'); return; }
+    const vendor=$('vendor').value; if(!vendor){ toast('เลือกช่างก่อนค่ะ'); return; }
+    const instr=$('instr').value.trim(), cost=Number($('cost').value)||null, eta=$('eta').value||null;
+    // บันทึกการประเมิน (เผื่อยังไม่เคยประเมิน)
+    await sb.rpc('repair_assess',{ p_code:current, p_repairable:true, p_type:sel.type, p_instructions:instr, p_est_cost:cost, p_photos:null });
+    const { data, error } = await sb.rpc('repair_assign',{ p_code:current, p_vendor_id:vendor, p_cost:cost, p_eta:eta, p_notes:instr });
+    if(error||(data&&data.error)){ toast('ผิดพลาด: '+(error?.message||data.error)); return; }
+    toast(`ส่งซ่อม ${current} → ${data.vendor} (฿${data.cost})`);
+    $('panel').innerHTML=''; $('code').value=''; current=null; loadQueue(); boot();
+  }
+
+  async function markCant(){
+    const reason=$('cantReason').value.trim();
+    const { error } = await sb.rpc('repair_cant',{ p_code:current, p_reason:reason });
+    if(error){ toast('ผิดพลาด'); return; }
+    toast(`บันทึก: ${current} ซ่อมไม่ได้ แจ้งเจ้าของแล้ว`);
+    $('panel').innerHTML=''; $('code').value=''; current=null; loadQueue();
+  }
+
+  async function loadQueue(){
+    const { data } = await sb.rpc('repair_queue');
+    const list=data||[];
+    const sent=list.filter(j=>j.repair_status==='sent'||j.repair_status==='in_progress').length;
+    const overdue=list.filter(j=>(j.days||0)>=3 && j.repair_status!=='cant').length;
+    if($('kpiQueue')) $('kpiQueue').textContent=list.length;
+    if($('kpiSent')) $('kpiSent').textContent=sent;
+    if($('kpiOverdue')) $('kpiOverdue').textContent=overdue;
+    if(!list.length){ $('queue').innerHTML='<div class="empty">ไม่มีงานซ่อมค้าง</div>'; return; }
+    const ST={assessing:['รอประเมิน/ส่ง','assessing'],sent:['ส่งช่างแล้ว','sent'],in_progress:['กำลังซ่อม','sent'],cant:['ซ่อมไม่ได้','cant']};
+    $('queue').innerHTML=list.map(j=>{ const s=ST[j.repair_status]||[j.repair_status||'ใหม่','assessing']; return `
+      <div class="qrow">
+        <div style="flex:1">
+          <div style="font-weight:600">${j.code} · ${j.name||''}</div>
+          <div class="sub">${j.type_label||j.repair_type||'ยังไม่ระบุ'}${j.vendor?' · '+j.vendor:''}${j.cost?' · ฿'+j.cost:''}${j.eta?' · เสร็จ '+j.eta:''}</div>
+          ${j.instructions?`<div class="sub" style="margin-top:4px">วิธีซ่อม: ${j.instructions}</div>`:''}
+          ${j.days>=3?`<div class="sub" style="color:var(--danger)">ค้าง ${j.days} วัน</div>`:''}
+          <div class="rowbtns">
+            <button onclick="pick('${j.code}')">เปิด/แก้</button>
+            ${j.repair_status==='sent'||j.repair_status==='in_progress'?`<button class="ok" onclick="done('${j.code}')">ซ่อมเสร็จ</button>`:''}
+            ${j.repair_status!=='cant'?`<button class="no" onclick="cant('${j.code}')">ซ่อมไม่ได้</button>`:''}
+          </div>
+        </div>
+        <div class="tag ${s[1]}">${s[0]}</div>
+      </div>`; }).join('');
+  }
+  async function pick(code){ $('code').value=code; await load(); window.scrollTo({top:0,behavior:'smooth'}); }
+  async function done(code){
+    const actual=prompt('ค่าซ่อมจริง (บาท) เว้นว่าง=ตามที่ตั้งไว้','');
+    const { error } = await sb.rpc('repair_complete',{ p_code:code, p_actual_cost:actual?Number(actual):null, p_notes:null });
+    if(error){ toast('ผิดพลาด'); return; } toast(`${code} ซ่อมเสร็จ เข้าคิวซักต่อ`); loadQueue();
+  }
+  async function cant(code){
+    const reason=prompt('เพราะอะไรถึงซ่อมไม่ได้','')||''; if(reason===null) return;
+    const { error } = await sb.rpc('repair_cant',{ p_code:code, p_reason:reason });
+    if(error){ toast('ผิดพลาด'); return; } toast(`${code} ซ่อมไม่ได้ แจ้งเจ้าของแล้ว`); loadQueue();
+  }
+
+  function renderVendors(){
+    if(!VENDORS.length){ $('vendors').innerHTML='<div class="empty">ยังไม่มีช่าง — เพิ่มด้านล่าง</div>'; return; }
+    $('vendors').innerHTML=VENDORS.map(v=>`
+      <div class="qrow">
+        <div><div style="font-weight:600">${v.name}</div>
+          <div class="sub">${(v.specialties||[]).join(' / ')||'ทั่วไป'}${v.rate_note?' · '+v.rate_note:''}</div>
+          <div class="sub">${v.phone||''}${v.line_id?' · '+v.line_id:''} · งานที่ส่ง ${v.jobs_total}</div></div>
+      </div>`).join('');
+  }
+  function toggleVForm(){ $('vform').classList.toggle('open'); }
+  async function saveVendor(){
+    const name=$('vname').value.trim(); if(!name){ toast('ใส่ชื่อช่างก่อนค่ะ'); return; }
+    const spec=$('vspec').value.split(',').map(s=>s.trim()).filter(Boolean);
+    const { error } = await sb.rpc('repair_vendor_upsert',{ p_name:name, p_phone:$('vphone').value.trim()||null,
+      p_line_id:$('vline').value.trim()||null, p_specialties:spec.length?spec:null, p_rate_note:$('vrate').value.trim()||null });
+    if(error){ toast('ผิดพลาด: '+error.message); return; }
+    toast('เพิ่มช่างแล้ว'); ['vname','vphone','vline','vspec','vrate'].forEach(i=>$(i).value=''); $('vform').classList.remove('open'); boot();
+  }
+
+  $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') load(); });
+  boot();
+</script>
+</body>
+</html>

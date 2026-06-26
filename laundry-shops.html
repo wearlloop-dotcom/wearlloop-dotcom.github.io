@@ -34,6 +34,12 @@
       </div>
     </section>
 
+    <!-- SLA alert -->
+    <div class="card" id="slaCard" style="display:none;border-left:3px solid var(--clay)">
+      <h2 style="color:var(--clay)">ชุดค้างร้านซักเกิน 7 วัน <span id="slaCount" style="font-size:14px;font-weight:400"></span></h2>
+      <div id="slaList"></div>
+    </div>
+
     <!-- ส่งซัก -->
     <div class="card">
       <h2>ส่งชุดไปซัก</h2>
@@ -153,7 +159,22 @@
     let dl=$('binList'); if(!dl){ dl=document.createElement('datalist'); dl.id='binList'; document.body.appendChild(dl); }
     dl.innerHTML=(data||[]).filter(b=>b.active).map(b=>'<option value="'+esc(b.code)+'">').join('');
   }
-  loadVendors(); loadBins();
+  async function loadSLA(){
+    const {data}=await sb.rpc('care_queue');
+    const overdue=(data||[]).filter(r=>Number(r.days)>7 && r.stage==='washing');
+    if(!overdue.length){ $('slaCard').style.display='none'; return; }
+    $('slaCard').style.display='';
+    $('slaCount').textContent='('+overdue.length+' ชิ้น)';
+    $('slaList').innerHTML=overdue.map(r=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--line)">
+        <div>
+          <span style="font-weight:500">${esc(r.code)}</span>
+          <span style="color:var(--muted);margin-left:6px">${esc(r.name||'')}</span>
+        </div>
+        <span style="color:var(--clay);font-size:13px;font-weight:500">${Number(r.days).toFixed(0)} วัน</span>
+      </div>`).join('');
+  }
+  loadVendors(); loadBins(); loadSLA();
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>

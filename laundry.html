@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ซัก + ตรวจสภาพ (ป้าแม่บ้าน)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--warn:#B5860B;--danger:#A32D2D;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:17px}
+.bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+.bar a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:14px}
+.wrap{max-width:640px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h2{font-family:var(--display);font-size:17px;margin-bottom:12px}
+.scan{display:flex;gap:10px}
+.scan input{flex:1;border:2px solid var(--line);border-radius:10px;padding:14px 16px;font-size:20px;font-family:var(--sans);text-transform:lowercase}
+.btn{border:none;border-radius:10px;padding:14px 18px;font-size:17px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.btn.dark{background:var(--ink);color:#fff}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.big button{padding:18px 10px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:17px;font-weight:600}
+.big button.good{border-color:var(--ok);color:var(--ok)}
+.big button.warn{border-color:var(--warn);color:var(--warn)}
+.big button.dmg{border-color:var(--danger);color:var(--danger)}
+.big button.wash{grid-column:1/3;background:var(--ink);color:#fff;border-color:var(--ink)}
+.hint{background:var(--soft);border-radius:10px;padding:12px 14px;margin:10px 0;font-size:16px}
+.hint b{color:var(--ok)}
+.name{font-family:var(--display);font-size:20px;margin-bottom:2px}
+.sub{color:var(--muted);font-size:14px}
+.qrow{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);gap:10px}
+.qrow:last-child{border-bottom:none}
+.tag{font-size:13px;padding:3px 10px;border-radius:20px;background:var(--soft);white-space:nowrap}
+.tag.qc{background:#FDF2D6;color:#8A6D08}.tag.washing{background:#E4F0EC;color:var(--ok)}.tag.repair{background:#FBE3E3;color:var(--danger)}
+.late{color:var(--danger);font-size:12px}
+.empty{color:var(--muted);text-align:center;padding:18px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;font-size:15px;opacity:0;transition:.3s;z-index:9}
+.toast.show{opacity:1}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  /* override เฉพาะจุด: ปุ่มในแถวต้อง width:auto ไม่ให้ ops-ui .btn width:100% ทำ layout เพี้ยน */
+  .scan{display:flex;gap:10px}
+  .scan .btn{width:auto;flex:0 0 auto}
+  .big button{width:100%}
+  .qrow .btn{width:auto}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>ซัก / ตรวจสภาพ</h1>
+  <div><a href="/laundry-shops.html">ร้านซัก</a><a href="/repair.html">ส่งซ่อม</a><a href="/putaway.html">เก็บเข้าช่อง</a><a href="/intake.html">รับชุดเข้า</a><a href="/labels.html">ป้ายQR</a></div>
+</div>
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">wash · quality check</div>
+    <h1>ส่งต่อความสะอาดที่มั่นใจ</h1>
+    <div class="sub">ตรวจสภาพ ซัก และคืนความสวยให้ทุกชุด ก่อนหมุนเวียนสู่ลูกค้าคนถัดไป</div>
+  </section>
+  <div class="card">
+    <h2>1) ชุดกลับถึงร้าน — ใส่โค้ด</h2>
+    <div class="scan">
+      <input id="code" placeholder="เช่น g1" autocomplete="off" enterkeyhint="go">
+      <button class="btn dark" onclick="checkin()">รับเข้า</button>
+    </div>
+    <div id="panel"></div>
+  </div>
+
+  <div class="card">
+    <h2>คิวค้าง (รอตรวจ/ซัก/ซ่อม)</h2>
+    <div id="queue"><div class="empty">กำลังโหลด…</div></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
+  const $=id=>document.getElementById(id);
+  let current=null;
+  function toast(m){ const t=$('toast'); t.textContent=m; t.className='toast show'; setTimeout(()=>t.className='toast',1900); }
+
+  async function checkin(){
+    const code=$('code').value.trim().toLowerCase(); if(!code){ toast('ใส่โค้ดก่อนค่ะ'); return; }
+    const { data, error } = await sb.rpc('care_checkin',{ p_code: code });
+    if(error||!data||data.error){ $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">ไม่พบชุด ${code}</div>`; return; }
+    current=code; renderPanel(data); loadQueue();
+  }
+  function renderPanel(d){
+    $('panel').innerHTML=`
+      <div style="margin-top:14px">
+        <div class="name">${d.name||current}</div>
+        <div class="sub">โค้ด ${current} · ซักมาแล้ว ${d.wash_count} ครั้ง</div>
+        <div class="hint"> วิธีซัก: <b>${d.wash}</b></div>
+        <div style="font-weight:600;margin:6px 0">2) ตรวจสภาพ — ของกลับมาเป็นยังไง?</div>
+        <div class="big">
+          <button class="good" onclick="qc('good',true,0)"> ดี ครบ</button>
+          <button class="warn" onclick="qc('stain',true,0)"> เปื้อน</button>
+          <button class="dmg" onclick="qcDamage()"> ชำรุด (คิดเงิน)</button>
+          <button class="dmg" onclick="qcMissing()"> ของขาดชิ้น</button>
+          <button class="wash" onclick="washDone()"> ซักเสร็จแล้ว ปล่อยเช่าต่อ</button>
+        </div>
+      </div>`;
+  }
+  async function qc(cond, complete, fee, notes){
+    const { data, error } = await sb.rpc('care_qc',{ p_code: current, p_condition: cond, p_complete: complete, p_fee: fee||0, p_notes: notes||null, p_handler: null });
+    if(error){ toast('ผิดพลาด:'+error.message); return; }
+    toast(data==='to_repair'?'บันทึก: เข้าคิวซ่อม':'บันทึกสภาพแล้ว ซักต่อได้');
+    loadQueue();
+  }
+  function qcDamage(){ const fee=prompt('ค่าเสียหายเท่าไร? (บาท)','300'); if(fee===null) return; const why=prompt('เสียหายตรงไหน?','ซิปขาด')||''; qc('damage',true,Number(fee)||0,why); }
+  function qcMissing(){ const why=prompt('ขาดชิ้นอะไร?','เข็มขัด')||''; const fee=prompt('คิดค่าของขาดเท่าไร? (0=ไม่คิด)','0'); qc('missing',false,Number(fee)||0,why); }
+  async function washDone(){
+    const { data, error } = await sb.rpc('care_wash_done',{ p_code: current, p_method:null, p_handler:null });
+    if(error||!data||data.error){ toast('ผิดพลาด'); return; }
+    toast(`${current} ซักเสร็จ ปล่อยเช่าต่อได้`); $('panel').innerHTML=''; $('code').value=''; current=null; loadQueue();
+  }
+
+  async function loadQueue(){
+    const { data } = await sb.rpc('care_queue');
+    const list=data||[];
+    if(!list.length){ $('queue').innerHTML='<div class="empty">ไม่มีชุดค้าง — เคลียร์หมดแล้ว </div>'; return; }
+    const STAGE={qc:['รอตรวจ','qc'],washing:['รอซัก','washing'],repair:['รอซ่อม','repair'],checkin:['รับเข้า','qc']};
+    $('queue').innerHTML=list.map(j=>{ const s=STAGE[j.stage]||[j.stage,'']; return`
+      <div class="qrow">
+        <div><div style="font-weight:600">${j.code} · ${j.name||''}</div>
+          <div class="sub"> ${j.wash}</div>
+          ${j.days>=2?`<div class="late"> ค้าง ${j.days} วัน</div>`:''}</div>
+        <div style="text-align:right">
+          <div class="tag ${s[1]}">${s[0]}</div>
+          <div><button class="btn" style="background:var(--soft);margin-top:6px;padding:8px 12px;font-size:14px" onclick="pick('${j.code}')">เปิด</button></div>
+        </div>
+      </div>`; }).join('');
+  }
+  async function pick(code){ $('code').value=code; await checkin(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+  $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') checkin(); });
+  loadQueue();
+</script>
+</body>
+</html>

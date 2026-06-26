@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · รายงานการตลาด</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+  .bar .nav a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:14px}
+  .bar .nav a.active{color:var(--ink);font-weight:600}
+  .wrap{max-width:900px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .btn{border:none;border-radius:9px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:8px 13px;font-size:14px}
+  .btn:disabled{opacity:.5;cursor:default}
+  .muted{color:var(--muted)}
+  .loading{color:var(--muted);text-align:center;padding:24px;font-size:15px}
+  .errbox{color:var(--clay);background:#F6EBE4;border:1px solid #E8D3C5;border-radius:9px;padding:12px 14px;font-size:14px}
+
+  /* headline strip */
+  .strip{display:flex;flex-wrap:wrap;gap:10px}
+  .strip .pill{flex:1 1 150px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .strip .pill .k{font-size:13px;color:var(--muted)}
+  .strip .pill .v{font-family:var(--display);font-size:20px;margin-top:3px}
+
+  /* range selector */
+  .rangerow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px}
+  .quick{display:flex;gap:8px}
+  .quick button.on{background:var(--sage);color:#fff;border-color:var(--sage)}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:12px;color:var(--muted)}
+  .field input,.field select{font-family:var(--sans);font-size:15px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+
+  /* kpi grid */
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .kpi{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fff}
+  .kpi .k{font-size:13px;color:var(--muted)}
+  .kpi .v{font-family:var(--display);font-size:22px;margin-top:4px}
+  .kpi.good{background:#EDF1EC;border-color:#D2E0CE}
+  .kpi.good .v{color:var(--sage)}
+  .kpi.bad{background:#F6EBE4;border-color:#E8D3C5}
+  .kpi.bad .v{color:var(--clay)}
+
+  /* platform bars */
+  .plat{padding:12px 0;border-bottom:1px solid var(--line)}
+  .plat:last-child{border-bottom:none}
+  .plat .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+  .plat .name{font-weight:600}
+  .barwrap{display:flex;flex-direction:column;gap:6px}
+  .barline{display:flex;align-items:center;gap:10px;font-size:13px}
+  .barline .lbl{width:64px;color:var(--muted);flex:none}
+  .track{flex:1;background:var(--soft);border-radius:6px;height:14px;overflow:hidden}
+  .track .fill{height:100%;border-radius:6px}
+  .fill.spend{background:var(--clay)}
+  .fill.rev{background:var(--sage)}
+  .barline .amt{width:90px;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+  .roasbadge{font-size:13px;font-weight:600;padding:3px 10px;border-radius:20px}
+  .roasbadge.good{background:#EDF1EC;color:var(--sage)}
+  .roasbadge.bad{background:#F6EBE4;color:var(--clay)}
+
+  /* ai */
+  .ai-head{font-family:var(--display);font-size:16px;margin-bottom:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .chip{font-size:13px;padding:5px 11px;border-radius:20px;background:#EDF1EC;color:var(--sage);border:1px solid #D2E0CE}
+  .ai-list{list-style:none;display:flex;flex-direction:column;gap:6px;margin:6px 0}
+  .ai-list li{font-size:14px;padding-left:16px;position:relative}
+  .ai-list li:before{content:'';position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%}
+  .ai-list.concern li:before{background:var(--clay)}
+  .ai-list.win li:before{background:var(--sage)}
+  .subhead{font-size:13px;color:var(--muted);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.04em}
+  .action{border:1px solid var(--line);border-radius:9px;padding:11px 12px;margin-bottom:8px;background:var(--soft)}
+  .action .a-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .action .a-act{font-weight:600;font-size:14px}
+  .action .a-why{font-size:13px;color:var(--muted);margin-top:3px}
+  .prio{font-size:12px;font-weight:600;padding:2px 9px;border-radius:20px;flex:none}
+  .prio.high{background:#F6EBE4;color:var(--clay)}
+  .prio.medium{background:#FBF1DF;color:#8A6D08}
+  .prio.low{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+  .callout{border:1px solid #D2E0CE;background:#EDF1EC;border-radius:9px;padding:12px 14px;margin-top:12px}
+  .callout .c-k{font-size:12px;color:var(--sage);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .callout .c-v{font-size:14px;margin-top:4px}
+
+  /* form */
+  .formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+  .formgrid .full{grid-column:1 / -1}
+  .formgrid .field input{width:100%}
+
+  /* table */
+  .tablescroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+  th,td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th:first-child,td:first-child,th.l,td.l{text-align:left}
+  th{font-size:12px;color:var(--muted);font-weight:600}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:var(--soft)}
+  .ptag{font-size:12px;padding:2px 9px;border-radius:20px;background:var(--soft);border:1px solid var(--line)}
+
+  /* setup guide */
+  .step{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .step:last-child{border-bottom:none}
+  .step .mark{flex:none;width:26px;height:26px;border-radius:50%;background:#EDF1EC;border:1.5px solid var(--sage);display:flex;align-items:center;justify-content:center}
+  .step .mark span{display:block;width:9px;height:5px;border-left:2px solid var(--sage);border-bottom:2px solid var(--sage);transform:rotate(-45deg);margin-top:-2px}
+  .step .body .s-k{font-weight:600;font-size:14px}
+  .step .body .s-t{font-size:14px;color:var(--ink);margin-top:2px}
+
+  @media(max-width:640px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .formgrid{grid-template-columns:1fr}
+    .strip .pill{flex:1 1 100%}
+    .barline .lbl{width:52px}
+    .barline .amt{width:78px}
+  }
+  @media(max-width:400px){
+    .kpis{grid-template-columns:1fr}
+  }
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  /* page-local overrides after ops-ui.css */
+  .quick{display:flex;gap:8px}
+  .rangerow .btn,.quick .btn,.formgrid .btn,#syncBtn,#aibtn{width:auto}
+  .strip{display:flex;flex-wrap:wrap;gap:10px}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>วิเคราะห์</h1>
+  <div class="nav">
+    <a href="/today.html">งานวันนี้</a>
+    <a href="/marketing.html">คอนเทนต์</a>
+    <a href="/live.html">ไลฟ์</a>
+    <a href="/influencers.html">อินฟลู</a>
+    <a href="/analytics.html" class="active">รายงาน</a>
+  </div>
+</div>
+<div class="wrap">
+
+  <section class="phead">
+    <div class="eyebrow">business analytics</div>
+    <h1>ตัวเลขที่บอกทิศทาง</h1>
+    <div class="sub">ดูภาพรวมธุรกิจในที่เดียว — รายได้ การหมุนเวียน และสัญญาณที่ต้องรีบลงมือ</div>
+    <div class="kpis">
+      <div class="kpi" id="hero_spend"><div class="n">—</div><div class="l">ยอดใช้จ่าย 30 วัน</div></div>
+      <div class="kpi" id="hero_rev"><div class="n">—</div><div class="l">รายได้ 30 วัน</div></div>
+      <div class="kpi" id="hero_roas"><div class="n">—</div><div class="l">ROAS 30 วัน</div></div>
+    </div>
+  </section>
+
+  <!-- headline strip -->
+  <div class="card">
+    <h2>ภาพรวม 30 วัน</h2>
+    <div class="strip" id="strip"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+
+  <!-- range selector -->
+  <div class="card">
+    <h2>ช่วงเวลา</h2>
+    <div class="rangerow">
+      <div class="quick">
+        <button class="btn ghost sm" data-days="7" onclick="setQuick(7)">7 วัน</button>
+        <button class="btn ghost sm on" data-days="30" onclick="setQuick(30)">30 วัน</button>
+        <button class="btn ghost sm" data-days="90" onclick="setQuick(90)">90 วัน</button>
+      </div>
+      <div class="field"><label for="from">ตั้งแต่</label><input type="date" id="from" onchange="customRange()"></div>
+      <div class="field"><label for="to">ถึง</label><input type="date" id="to" onchange="customRange()"></div>
+      <button class="btn sm" onclick="loadAll()">ดูรายงาน</button>
+    </div>
+    <div class="muted" id="rangenote" style="font-size:13px;margin-top:10px"></div>
+  </div>
+
+  <!-- kpi -->
+  <div class="card">
+    <h2>ตัวเลขสำคัญ</h2>
+    <div id="kpis"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+
+  <!-- platform breakdown -->
+  <div class="card">
+    <h2>แยกตามแพลตฟอร์ม</h2>
+    <div id="platforms"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+
+  <!-- ai -->
+  <div class="card">
+    <h2>ผู้ช่วย AI</h2>
+    <button class="btn" id="aibtn" onclick="runAI()">ให้ AI สรุป + แนะนำ</button>
+    <div id="ai" style="margin-top:14px"></div>
+  </div>
+
+  <!-- daily form + table -->
+  <div class="card">
+    <h2>กรอกตัวเลขรายวัน</h2>
+    <div class="formgrid">
+      <div class="field"><label>วันที่</label><input type="date" id="f_date"></div>
+      <div class="field"><label>แพลตฟอร์ม</label>
+        <select id="f_platform">
+          <option value="tiktok">TikTok</option>
+          <option value="instagram">Instagram</option>
+          <option value="facebook">Facebook</option>
+          <option value="meta_ads">Meta Ads</option>
+        </select>
+      </div>
+      <div class="field"><label>ยอดใช้จ่าย (บาท)</label><input type="number" id="f_spend" step="0.01" min="0" placeholder="0"></div>
+      <div class="field"><label>รายได้ (บาท)</label><input type="number" id="f_revenue" step="0.01" min="0" placeholder="0"></div>
+      <div class="field"><label>Impressions</label><input type="number" id="f_impressions" min="0" placeholder="0"></div>
+      <div class="field"><label>Reach</label><input type="number" id="f_reach" min="0" placeholder="0"></div>
+      <div class="field"><label>Clicks</label><input type="number" id="f_clicks" min="0" placeholder="0"></div>
+      <div class="field"><label>Conversions</label><input type="number" id="f_conversions" min="0" placeholder="0"></div>
+      <div class="full" style="display:flex;gap:10px;align-items:center">
+        <button class="btn" id="savebtn" onclick="saveRow()">บันทึก</button>
+        <button class="btn ghost" onclick="clearForm()">ล้างฟอร์ม</button>
+        <span class="muted" id="savemsg" style="font-size:13px"></span>
+      </div>
+    </div>
+    <div class="subhead">รายการล่าสุด (คลิกแถวเพื่อแก้ไข)</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="muted" id="syncNote" style="font-size:13px"></span>
+      <button class="btn ghost sm" id="syncBtn" onclick="syncNow()" style="white-space:nowrap">ซิงค์ตอนนี้</button>
+    </div>
+    <div class="tablescroll">
+      <table id="rowstable">
+        <thead><tr>
+          <th class="l">วันที่</th><th class="l">แพลตฟอร์ม</th><th class="l">แหล่ง</th><th>ใช้จ่าย</th><th>คลิก</th><th>Conv</th><th>รายได้</th><th>ROAS</th>
+        </tr></thead>
+        <tbody id="rowsbody"><tr><td colspan="8" class="l muted">กำลังโหลด…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- setup guide -->
+  <div class="card">
+    <h2>เชื่อมต่อบัญชีโฆษณา (ขั้นถัดไป)</h2>
+    <p class="muted" style="font-size:14px;margin-bottom:8px">ตอนนี้กรอกตัวเลขด้วยมือไปก่อนได้ เมื่อทำตามขั้นตอนด้านล่างครบ ระบบจะดึงตัวเลขเข้ามาให้อัตโนมัติ</p>
+    <div class="step">
+      <div class="mark"><span></span></div>
+      <div class="body">
+        <div class="s-k">ขั้นที่ 1</div>
+        <div class="s-t">สร้าง Meta Business Manager (business.facebook.com) แล้วสร้างเพจ Facebook + เชื่อม Instagram</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="mark"><span></span></div>
+      <div class="body">
+        <div class="s-k">ขั้นที่ 2</div>
+        <div class="s-t">เปิดบัญชีโฆษณา (Ads Manager) ในธุรกิจนั้น</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="mark"><span></span></div>
+      <div class="body">
+        <div class="s-k">ขั้นที่ 3</div>
+        <div class="s-t">TikTok เปิด TikTok Business Center + TikTok Ads (ต้องยืนยันตัวตน/รอรีวิว)</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="mark"><span></span></div>
+      <div class="body">
+        <div class="s-k">ขั้นที่ 4</div>
+        <div class="s-t">เมื่อพร้อม ระบบจะดึงตัวเลขเข้ามาอัตโนมัติ (ตอนนี้กรอกมือไปก่อนได้)</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+  const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'';
+
+  const PLATFORM_TH={tiktok:'TikTok',instagram:'Instagram',facebook:'Facebook',meta_ads:'Meta Ads'};
+  let curFrom=null, curTo=null, lastSummary=null;
+
+  // ---- formatting helpers ----
+  function num(n){ if(n==null||isNaN(n)) return '-'; return Number(n).toLocaleString('th-TH'); }
+  function money(n){ if(n==null||isNaN(n)) return '-'; return '฿'+Number(n).toLocaleString('th-TH',{maximumFractionDigits:0}); }
+  function dec(n,d){ if(n==null||isNaN(n)) return '-'; return Number(n).toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+  function roasTxt(n){ if(n==null||isNaN(n)) return '-'; return dec(n,2)+'x'; }
+  function isoToday(){ return new Date().toISOString().slice(0,10); }
+  function isoMinus(days){ const d=new Date(); d.setDate(d.getDate()-days+1); return d.toISOString().slice(0,10); }
+
+  // ---- range controls ----
+  function setQuick(days){
+    document.querySelectorAll('.quick button').forEach(b=>b.classList.toggle('on', +b.dataset.days===days));
+    curFrom=isoMinus(days); curTo=isoToday();
+    $('from').value=curFrom; $('to').value=curTo;
+    loadAll();
+  }
+  function customRange(){
+    document.querySelectorAll('.quick button').forEach(b=>b.classList.remove('on'));
+    if($('from').value) curFrom=$('from').value;
+    if($('to').value) curTo=$('to').value;
+  }
+
+  // ---- headline strip (mkt_overview) ----
+  async function loadStrip(){
+    const { data, error } = await sb.rpc('mkt_overview');
+    if(error || !data){ $('strip').innerHTML='<div class="errbox">โหลดภาพรวมไม่สำเร็จ'+(error?': '+esc(error.message):'')+'</div>'; return; }
+    const roas=data.roas_30d;
+    $('strip').innerHTML =
+      pill('ยอดใช้จ่าย 30 วัน', money(data.spend_30d)) +
+      pill('รายได้ 30 วัน', money(data.revenue_30d)) +
+      pill('ROAS 30 วัน', roasTxt(roas));
+    // hero KPIs
+    $('hero_spend').querySelector('.n').textContent=money(data.spend_30d);
+    $('hero_rev').querySelector('.n').textContent=money(data.revenue_30d);
+    const roasEl=$('hero_roas');
+    roasEl.querySelector('.n').textContent=roasTxt(roas);
+    roasEl.classList.remove('ok','bad');
+    if(roas!=null) roasEl.classList.add(roas>=1?'ok':'bad');
+  }
+  function pill(k,v){ return `<div class="pill"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`; }
+
+  // ---- summary + kpi + platforms ----
+  async function loadSummary(){
+    $('kpis').innerHTML='<div class="loading">กำลังโหลด…</div>';
+    $('platforms').innerHTML='<div class="loading">กำลังโหลด…</div>';
+    const { data, error } = await sb.rpc('metrics_summary',{p_from:curFrom,p_to:curTo});
+    if(error || !data){
+      const msg='<div class="errbox">โหลดสรุปไม่สำเร็จ'+(error?': '+esc(error.message):'')+'</div>';
+      $('kpis').innerHTML=msg; $('platforms').innerHTML=''; lastSummary=null; return;
+    }
+    lastSummary=data;
+    renderKPIs(data);
+    renderPlatforms(data.by_platform||[]);
+  }
+  function renderKPIs(d){
+    const roasGood = d.roas!=null && d.roas>=1;
+    const cards=[
+      {k:'ยอดใช้จ่าย', v:money(d.spend)},
+      {k:'รายได้', v:money(d.revenue)},
+      {k:'ROAS', v:roasTxt(d.roas), cls: d.roas==null?'':(roasGood?'good':'bad')},
+      {k:'Conversions', v:num(d.conversions)},
+      {k:'CPC', v:d.cpc==null?'-':money(d.cpc)},
+      {k:'CPA', v:d.cpa==null?'-':money(d.cpa)},
+    ];
+    $('kpis').innerHTML='<div class="kpis">'+cards.map(c=>
+      `<div class="kpi ${c.cls||''}"><div class="k">${esc(c.k)}</div><div class="v">${esc(c.v)}</div></div>`
+    ).join('')+'</div>';
+  }
+  function renderPlatforms(list){
+    if(!list.length){ $('platforms').innerHTML='<div class="muted">ยังไม่มีข้อมูลในช่วงนี้</div>'; return; }
+    const maxSpend=Math.max(...list.map(p=>Number(p.spend)||0),1);
+    const maxRev=Math.max(...list.map(p=>Number(p.revenue)||0),1);
+    const maxBase=Math.max(maxSpend,maxRev,1);
+    $('platforms').innerHTML=list.map(p=>{
+      const name=PLATFORM_TH[p.platform]||p.platform||'-';
+      const sp=Number(p.spend)||0, rv=Number(p.revenue)||0;
+      const good = p.roas!=null && p.roas>=1;
+      return `<div class="plat">
+        <div class="top">
+          <div class="name">${esc(name)}</div>
+          <div class="roasbadge ${p.roas==null?'':(good?'good':'bad')}">ROAS ${esc(roasTxt(p.roas))}</div>
+        </div>
+        <div class="barwrap">
+          <div class="barline"><span class="lbl">ใช้จ่าย</span><span class="track"><span class="fill spend" style="width:${(sp/maxBase*100).toFixed(1)}%"></span></span><span class="amt">${esc(money(sp))}</span></div>
+          <div class="barline"><span class="lbl">รายได้</span><span class="track"><span class="fill rev" style="width:${(rv/maxBase*100).toFixed(1)}%"></span></span><span class="amt">${esc(money(rv))}</span></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ---- AI insights ----
+  async function runAI(){
+    if(!lastSummary){ $('ai').innerHTML='<div class="errbox">ยังไม่มีข้อมูลสรุป ลองเลือกช่วงเวลาแล้วโหลดใหม่</div>'; return; }
+    $('aibtn').disabled=true;
+    $('ai').innerHTML='<div class="loading">กำลังให้ AI วิเคราะห์…</div>';
+    try{
+      const res=await fetch(SUPABASE_URL+'/functions/v1/marketing-ai',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},
+        body:JSON.stringify({task:'insights', summary:lastSummary, by_platform:lastSummary.by_platform||[]})
+      });
+      let data=null;
+      try{ data=await res.json(); }catch(e){ data=null; }
+      if(!res.ok || !data || data.error){
+        $('ai').innerHTML='<div class="errbox">ยังเรียกผู้ช่วย AI ไม่ได้ในตอนนี้ (อาจยังไม่ได้ตั้งค่า) ส่วนอื่นของรายงานยังใช้งานได้ตามปกติ</div>';
+        return;
+      }
+      renderAI(data);
+    }catch(e){
+      $('ai').innerHTML='<div class="errbox">เชื่อมต่อผู้ช่วย AI ไม่สำเร็จ ลองใหม่อีกครั้งภายหลัง</div>';
+    }finally{
+      $('aibtn').disabled=false;
+    }
+  }
+  function renderAI(d){
+    let h='';
+    if(d.headline) h+=`<div class="ai-head">${esc(d.headline)}</div>`;
+    if(Array.isArray(d.wins) && d.wins.length){
+      h+='<div class="subhead">จุดที่ทำได้ดี</div><div class="chips">'+
+        d.wins.map(w=>`<span class="chip">${esc(w)}</span>`).join('')+'</div>';
+    }
+    if(Array.isArray(d.concerns) && d.concerns.length){
+      h+='<div class="subhead">จุดที่ต้องระวัง</div><ul class="ai-list concern">'+
+        d.concerns.map(c=>`<li>${esc(c)}</li>`).join('')+'</ul>';
+    }
+    if(Array.isArray(d.actions) && d.actions.length){
+      const order={high:0,medium:1,low:2};
+      const labelTH={high:'สำคัญมาก',medium:'ปานกลาง',low:'เล็กน้อย'};
+      const sorted=[...d.actions].sort((a,b)=>(order[a.priority]??9)-(order[b.priority]??9));
+      h+='<div class="subhead">สิ่งที่ควรทำ</div>'+sorted.map(a=>{
+        const p=a.priority||'low';
+        return `<div class="action"><div class="a-top"><span class="a-act">${esc(a.action||'')}</span><span class="prio ${esc(p)}">${esc(labelTH[p]||p)}</span></div>${a.why?`<div class="a-why">${esc(a.why)}</div>`:''}</div>`;
+      }).join('');
+    }
+    if(d.budget_move){
+      h+=`<div class="callout"><div class="c-k">ปรับงบประมาณ</div><div class="c-v">${esc(d.budget_move)}</div></div>`;
+    }
+    $('ai').innerHTML=h||'<div class="muted">AI ไม่มีข้อเสนอแนะเพิ่มเติม</div>';
+  }
+
+  // ---- daily rows ----
+  async function loadRows(){
+    const { data, error } = await sb.rpc('metrics_list',{p_from:curFrom,p_to:curTo});
+    if(error){ $('rowsbody').innerHTML='<tr><td colspan="8" class="l errbox">โหลดไม่สำเร็จ: '+esc(error.message)+'</td></tr>'; return; }
+    const rows=(data||[]).slice().sort((a,b)=> (b.metric_date||'').localeCompare(a.metric_date||'') || (b.created_at||'').localeCompare(a.created_at||''));
+    if(!rows.length){ $('rowsbody').innerHTML='<tr><td colspan="8" class="l muted">ยังไม่มีข้อมูลในช่วงนี้</td></tr>'; return; }
+    // แสดง last auto-sync
+    const lastAuto = rows.find(r => r.source && r.source !== 'manual');
+    $('syncNote').textContent = lastAuto
+      ? 'ซิงค์ล่าสุด: ' + dt(lastAuto.metric_date) + ' (' + (lastAuto.source||'') + ')'
+      : 'ยังไม่มีข้อมูล auto-sync — กด "ซิงค์ตอนนี้" หลังตั้งค่า META_ADS_ACCESS_TOKEN';
+    $('rowsbody').innerHTML=rows.map(r=>{
+      const sp=Number(r.spend)||0, rv=Number(r.revenue)||0;
+      const roas = sp>0 ? rv/sp : null;
+      const name=PLATFORM_TH[r.platform]||r.platform||'-';
+      const isAuto = r.source && r.source !== 'manual';
+      const srcBadge = isAuto
+        ? `<span style="font-size:11px;padding:1px 6px;border-radius:10px;background:#E4F0EC;color:#0F6E56">auto</span>`
+        : `<span style="font-size:11px;padding:1px 6px;border-radius:10px;background:#F0EFED;color:#8C8B86">มือ</span>`;
+      const enc=encodeURIComponent(JSON.stringify(r));
+      return `<tr onclick="prefill('${enc}')">
+        <td class="l">${esc(dt(r.metric_date))}</td>
+        <td class="l"><span class="ptag">${esc(name)}</span></td>
+        <td class="l">${srcBadge}</td>
+        <td>${esc(money(sp))}</td>
+        <td>${esc(num(r.clicks))}</td>
+        <td>${esc(num(r.conversions))}</td>
+        <td>${esc(money(rv))}</td>
+        <td>${esc(roasTxt(roas))}</td>
+      </tr>`;
+    }).join('');
+  }
+  async function syncNow(){
+    const btn=$('syncBtn'); btn.disabled=true; btn.textContent='กำลังซิงค์…';
+    $('syncNote').textContent='กำลังดึงข้อมูลจาก Meta…';
+    try{
+      const res=await fetch(SUPABASE_URL+'/functions/v1/analytics-fetch',{
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY}, body:'{}'
+      });
+      const j=await res.json();
+      if(j.ok){ $('syncNote').textContent='ซิงค์สำเร็จ: '+Object.entries(j.results||{}).map(([k,v])=>k+' '+v).join(' · '); loadRows(); loadStrip(); loadSummary(); }
+      else{ $('syncNote').textContent='ซิงค์ไม่สำเร็จ: '+(j.error||JSON.stringify(j)); }
+    }catch(e){ $('syncNote').textContent='ซิงค์ไม่สำเร็จ: '+e.message; }
+    btn.disabled=false; btn.textContent='ซิงค์ตอนนี้';
+  }
+  function prefill(enc){
+    let r; try{ r=JSON.parse(decodeURIComponent(enc)); }catch(e){ return; }
+    $('f_date').value=r.metric_date||'';
+    $('f_platform').value=r.platform||'tiktok';
+    $('f_spend').value=r.spend??'';
+    $('f_revenue').value=r.revenue??'';
+    $('f_impressions').value=r.impressions??'';
+    $('f_reach').value=r.reach??'';
+    $('f_clicks').value=r.clicks??'';
+    $('f_conversions').value=r.conversions??'';
+    $('savemsg').textContent='กำลังแก้ไขรายการวันที่ '+dt(r.metric_date);
+    window.scrollTo({top:document.querySelector('.formgrid').getBoundingClientRect().top+window.scrollY-90,behavior:'smooth'});
+  }
+  function clearForm(){
+    ['f_spend','f_revenue','f_impressions','f_reach','f_clicks','f_conversions'].forEach(id=>$(id).value='');
+    $('f_date').value=isoToday(); $('f_platform').value='tiktok'; $('savemsg').textContent='';
+  }
+  function n(id){ const v=$(id).value; return v===''?0:Number(v); }
+  async function saveRow(){
+    const date=$('f_date').value;
+    if(!date){ $('savemsg').textContent='กรุณาเลือกวันที่'; return; }
+    $('savebtn').disabled=true; $('savemsg').textContent='กำลังบันทึก…';
+    const p={
+      metric_date:date,
+      platform:$('f_platform').value,
+      source:'manual',
+      spend:n('f_spend'),
+      impressions:n('f_impressions'),
+      reach:n('f_reach'),
+      clicks:n('f_clicks'),
+      conversions:n('f_conversions'),
+      revenue:n('f_revenue')
+    };
+    const { error } = await sb.rpc('metrics_upsert',{p});
+    $('savebtn').disabled=false;
+    if(error){ $('savemsg').textContent='บันทึกไม่สำเร็จ: '+error.message; return; }
+    $('savemsg').textContent='บันทึกแล้ว';
+    clearForm();
+    loadStrip(); loadSummary(); loadRows();
+  }
+
+  // ---- orchestration ----
+  function loadAll(){
+    if(!curFrom||!curTo){ $('rangenote').textContent='กรุณาเลือกช่วงเวลา'; }
+    else $('rangenote').textContent='ช่วงที่เลือก: '+dt(curFrom)+' – '+dt(curTo);
+    loadSummary();
+    loadRows();
+    $('ai').innerHTML='';
+  }
+
+  // init
+  (function init(){
+    $('f_date').value=isoToday();
+    curFrom=isoMinus(30); curTo=isoToday();
+    $('from').value=curFrom; $('to').value=curTo;
+    $('rangenote').textContent='ช่วงที่เลือก: '+dt(curFrom)+' – '+dt(curTo);
+    loadStrip();
+    loadSummary();
+    loadRows();
+  })();
+</script>
+</body>
+</html>

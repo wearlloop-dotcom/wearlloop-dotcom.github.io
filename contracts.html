@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · สัญญาพาร์ทเนอร์ (หลังบ้าน)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;--navy:#1A1A1A;--sage:#6FB3A6;--champ:#C9A86A;--ok:#0F6E56;--danger:#A32D2D;
+    --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:15px}
+  .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar h1{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:1px}
+  .bar .tag{font-size:11px;background:#33312d;padding:3px 10px;border-radius:20px;letter-spacing:1px}
+  .wrap{max-width:760px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:18px}
+  .card h2{font-family:var(--display);font-size:20px;margin-bottom:2px}
+  .card .sub{font-size:12px;color:var(--stone);margin-bottom:12px}
+  label{display:block;font-size:12px;color:var(--stone);margin:10px 0 4px;font-weight:500}
+  input,select,textarea{width:100%;border:1px solid var(--hair);border-radius:2px;padding:10px 11px;font-size:15px;font-family:var(--sans);background:var(--canvas)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--navy)}
+  textarea{min-height:60px;resize:vertical}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media(max-width:560px){.g3{grid-template-columns:1fr 1fr}}
+  .btn{border:none;border-radius:2px;padding:12px 18px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .btn.dark{background:var(--navy);color:#fff;width:100%;padding:15px}
+  .btn.ghost{background:none;border:1px solid var(--hair);color:var(--stone)}
+  .btn.sm{padding:8px 12px;font-size:13px}
+  .link-out{background:#F4F1EB;border:1px solid var(--hair);border-radius:2px;padding:14px;margin-top:14px;display:none}
+  .link-out.show{display:block}
+  .link-out .u{font-size:13px;word-break:break-all;color:var(--navy);background:#fff;border:1px solid var(--hair);padding:8px;border-radius:2px;margin:8px 0}
+  .row-btns{display:flex;gap:8px;flex-wrap:wrap}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--stone);font-weight:500;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:8px 6px;border-bottom:1px solid var(--hair)}
+  td{padding:10px 6px;border-bottom:1px solid var(--hair);vertical-align:top}
+  .pill{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--hair);white-space:nowrap}
+  .pill.draft{color:var(--stone)}.pill.sent{color:var(--navy);border-color:#C5D2DE}
+  .pill.viewed{color:var(--champ);border-color:#E3D6BE}.pill.signed{color:var(--ok);border-color:#BFE0D4;background:#EAF4EF}
+  .pill.declined{color:var(--danger);border-color:#E6C9C9}.pill.void{color:#999;text-decoration:line-through}
+  .mini{font-size:12px;color:var(--navy);background:none;border:none;cursor:pointer;text-decoration:underline;padding:2px 4px;font-family:var(--sans)}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:9;font-size:14px}
+  .toast.show{opacity:1}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+  .tab{font-size:13px;padding:6px 12px;border:1px solid var(--hair);border-radius:20px;cursor:pointer;background:#fff;color:var(--stone)}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  fieldset{border:none}
+  .clauseRow{display:grid;grid-template-columns:1fr 2fr auto;gap:8px;margin-bottom:8px;align-items:start}
+  .clauseRow .x{background:none;border:1px solid var(--hair);border-radius:2px;cursor:pointer;color:var(--danger);padding:8px 11px}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  /* override เฉพาะจุด: รักษา layout ปุ่มเดิมของหน้านี้ (ops-ui.css ตั้ง .btn{width:100%}) */
+  .row-btns .btn{width:auto}
+  .btn.dark{width:100%;background:var(--navy);color:#fff}
+  .btn.ghost.sm{width:auto}
+  .link-out .row-btns .btn{width:auto}
+</style>
+</head>
+<body>
+<div class="bar"><h1>สัญญาพาร์ทเนอร์</h1><span class="tag">หลังบ้าน</span></div>
+
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">partner contracts</div>
+    <h1>ข้อตกลงที่ชัดเจน</h1>
+    <div class="sub">ออกและติดตามสัญญาพาร์ทเนอร์ครบในที่เดียว — เซ็นออนไลน์ผ่าน LIFF ได้เลย</div>
+    <div class="kpis">
+      <div class="kpi"><span class="n" id="kpiTotal">—</span><span class="l">สัญญาทั้งหมด</span></div>
+      <div class="kpi warn"><span class="n" id="kpiPending">—</span><span class="l">รอลงนาม</span></div>
+      <div class="kpi ok"><span class="n" id="kpiSigned">—</span><span class="l">ลงนามแล้ว</span></div>
+    </div>
+  </section>
+
+  <!-- สร้างสัญญา -->
+  <div class="card">
+    <h2>ออกสัญญาใหม่</h2>
+    <div class="sub">กรอกข้อมูลพาร์ทเนอร์และค่าตอบแทน → สร้างลิงก์ให้พาร์ทเนอร์กดเซ็นผ่าน LINE</div>
+
+    <div class="row-btns" style="margin-bottom:6px">
+      <button class="btn ghost sm" onclick="applyPreset('classis_quota')">Classis · โควต้า 100×฿2,000</button>
+      <button class="btn ghost sm" onclick="applyPreset('commission20')">สไตลิสต์ · คอม 20%</button>
+      <button class="btn ghost sm" onclick="applyPreset('influencer_perjob')">อินฟลู · ต่อชิ้น</button>
+      <button class="btn ghost sm" onclick="applyPreset('influencer_creator')">อินฟลู · PC+ยืม3ชุด+฿300</button>
+    </div>
+
+    <input type="hidden" id="editId">
+    <div class="g2">
+      <div><label>ประเภทสัญญา</label>
+        <select id="template">
+          <option value="stylist">พาร์ทเนอร์สไตลิสต์ / Personal Color</option>
+          <option value="influencer">อินฟลูเอนเซอร์</option>
+          <option value="supplier">จัดหาสินค้า/บริการ</option>
+          <option value="custom">กำหนดเอง</option>
+        </select></div>
+      <div><label>หัวสัญญา (เว้นว่าง = ใช้ค่าเริ่มต้น)</label><input id="title" placeholder="เช่น สัญญาความร่วมมือสไตลิสต์ 2026"></div>
+    </div>
+
+    <div class="g2">
+      <div><label>ชื่อ-นามสกุล พาร์ทเนอร์ *</label><input id="partner_name" placeholder="ชื่อผู้ลงนาม"></div>
+      <div><label>ชื่อสตูดิโอ/นิติบุคคล</label><input id="partner_org" placeholder="เช่น Classis Studio"></div>
+    </div>
+    <div class="g3">
+      <div><label>ประเภท</label><select id="partner_type"><option value="individual">บุคคลธรรมดา</option><option value="company">นิติบุคคล</option></select></div>
+      <div><label>เลขบัตร/ผู้เสียภาษี</label><input id="partner_tax_id" placeholder=""></div>
+      <div><label>เบอร์โทร</label><input id="partner_phone" placeholder=""></div>
+    </div>
+    <div class="g2">
+      <div><label>อีเมล</label><input id="partner_email" placeholder=""></div>
+      <div><label>LINE userID (ถ้ามี — ส่งสัญญาเข้า LINE ได้ทันที)</label><input id="partner_line_uid" placeholder="Uxxxxxxxx"></div>
+    </div>
+    <label>ที่อยู่</label><input id="partner_address" placeholder="">
+
+    <label>ขอบเขตงาน (เว้นว่าง = ใช้ค่ามาตรฐานตามประเภท)</label>
+    <textarea id="scope" placeholder="เช่น วิเคราะห์ Personal Color 12 ฤดู + Face & Body + จัดสไตล์ บันทึกผลลงระบบ LLOOP"></textarea>
+
+    <h2 style="margin-top:18px;font-size:16px">ค่าตอบแทน</h2>
+    <div class="g3">
+      <div><label>รูปแบบ</label><select id="comp_type" onchange="compUI()">
+        <option value="commission">คอมมิชชัน %</option>
+        <option value="fixed">เหมาจ่าย</option>
+        <option value="per_job">ต่อเคส</option>
+        <option value="mixed">ผสม</option>
+        <option value="quota">จ่ายล่วงหน้าต่อหัว (โควต้า)</option></select></div>
+      <div id="wrap_pct"><label>คอมมิชชัน (%)</label><input id="commission_pct" type="number" placeholder="20"></div>
+      <div id="wrap_rate"><label>เหมาจ่าย (฿)</label><input id="rate" type="number" placeholder="15000"></div>
+      <div id="wrap_perjob"><label>ต่อเคส (฿)</label><input id="per_job_rate" type="number" placeholder="800"></div>
+      <div id="wrap_head"><label>ค่าบริการต่อราย (฿)</label><input id="per_head" type="number" placeholder="2000" oninput="calcTotal()"></div>
+      <div id="wrap_quota"><label>โควต้า (จำนวนราย)</label><input id="quota" type="number" placeholder="100" oninput="calcTotal()"></div>
+      <div><label>รอบจ่าย</label><select id="payment_cycle">
+        <option value="monthly">รายเดือน</option><option value="biweekly">ราย 15 วัน</option>
+        <option value="per_job">รายเคส</option><option value="milestone">ตามงวดงาน</option></select></div>
+      <div><label>หัก ณ ที่จ่าย (%)</label><input id="wht_pct" type="number" value="3"></div>
+    </div>
+    <div class="g3" id="quotaRow" style="display:none">
+      <div><label>ชำระล่วงหน้า (%)</label><input id="advance_pct" type="number" value="100" oninput="calcTotal()"></div>
+      <div><label>ใช้โควต้าให้ครบภายใน</label><input id="valid_until" type="date"></div>
+      <div><label>มูลค่ารวม (อัตโนมัติ)</label><input id="totalOut" readonly style="font-weight:600;color:var(--navy)"></div>
+    </div>
+    <div class="g3">
+      <div><label>ชุดให้ยืมถ่ายงาน (จำนวน)</label><input id="garments_lent" type="number" placeholder="เช่น 3"></div>
+      <div><label>คืนภายใน (วัน)</label><input id="return_days" type="number" placeholder="7"></div>
+      <div><label>สิทธิประโยชน์ (คั่นด้วย ,)</label><input id="perks" placeholder="บริการ Personal Color 1 ครั้ง"></div>
+    </div>
+    <div class="g3">
+      <div><label>วันเริ่มสัญญา</label><input id="start_date" type="date"></div>
+      <div><label>วันสิ้นสุด (เว้นว่าง = ไม่กำหนด)</label><input id="end_date" type="date"></div>
+      <div><label>แจ้งบอกเลิกล่วงหน้า (วัน)</label><input id="notice_days" type="number" value="15"></div>
+    </div>
+
+    <label>ข้อตกลงเพิ่มเติม (ไม่บังคับ)</label>
+    <div id="extraClauses"></div>
+    <button class="btn ghost sm" onclick="addClause()" style="margin-top:6px">+ เพิ่มข้อพิเศษ</button>
+
+    <button class="btn dark" style="margin-top:18px" onclick="save()">สร้างสัญญา + ออกลิงก์</button>
+
+    <div class="link-out" id="linkOut">
+      <b id="loNo"></b> สร้างแล้ว — ส่งลิงก์นี้ให้พาร์ทเนอร์เซ็น
+      <div class="u" id="loUrl"></div>
+      <div class="row-btns">
+        <button class="btn ghost sm" onclick="copyLink()">คัดลอกลิงก์</button>
+        <button class="btn ghost sm" onclick="sendLine()">ส่งเข้า LINE พาร์ทเนอร์</button>
+        <button class="btn ghost sm" onclick="makeCustomer()">สร้างเป็นลูกค้า + รหัส PC</button>
+        <a class="btn ghost sm" id="loOpen" target="_blank" style="text-decoration:none;text-align:center">เปิดดูสัญญา</a>
+      </div>
+      <div id="custOut" style="display:none;margin-top:10px;font-size:13px">
+        สร้างลูกค้าแล้ว — รหัสให้พาร์ทเนอร์กรอก Personal Color: <b id="custCode" style="font-size:16px;color:var(--navy)"></b>
+      </div>
+    </div>
+  </div>
+
+  <!-- รายการสัญญา -->
+  <div class="card">
+    <h2>สัญญาทั้งหมด</h2>
+    <div class="tabs" id="tabs">
+      <span class="tab on" data-s="" onclick="setTab(this)">ทั้งหมด</span>
+      <span class="tab" data-s="sent" onclick="setTab(this)">รอลงนาม</span>
+      <span class="tab" data-s="viewed" onclick="setTab(this)">เปิดอ่านแล้ว</span>
+      <span class="tab" data-s="signed" onclick="setTab(this)">ลงนามแล้ว</span>
+      <span class="tab" data-s="declined" onclick="setTab(this)">ขอแก้ไข</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table><thead><tr><th>เลขที่</th><th>พาร์ทเนอร์</th><th>สถานะ</th><th>วันที่</th><th></th></tr></thead>
+      <tbody id="rows"><tr><td colspan="5" style="color:var(--stone);padding:20px">กำลังโหลด…</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
+  // ฐานลิงก์หน้าเซ็น = LIFF deep link (เปิดใน LINE + ล็อกอิน, อิสระจากโดเมน — ใช้ได้ทั้งตอนนี้ (github.io)
+  // และตอนย้ายไป lloop.app เพราะ liff.line.me/<id> ไม่เปลี่ยน). contract.html ถูก deploy เป็น root ของเว็บลูกค้า
+  const SIGN_BASE='https://liff.line.me/2010486714-1g6lDuHo/contract.html';
+
+  const $=id=>document.getElementById(id);
+  let lastToken=null,lastId=null,curStatus='';
+  function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2500);}
+  const v=id=>$(id).value.trim();
+  const numv=id=>{const x=$(id).value;return x===''?undefined:Number(x);};
+
+  function compUI(){
+    const t=$('comp_type').value;
+    $('wrap_pct').style.display=(t==='commission'||t==='mixed')?'':'none';
+    $('wrap_rate').style.display=(t==='fixed'||t==='mixed')?'':'none';
+    $('wrap_perjob').style.display=(t==='per_job')?'':'none';
+    $('wrap_head').style.display=(t==='quota')?'':'none';
+    $('wrap_quota').style.display=(t==='quota')?'':'none';
+    $('quotaRow').style.display=(t==='quota')?'grid':'none';
+    if(t==='quota') calcTotal();
+  }
+  function calcTotal(){
+    const total=(Number($('per_head').value)||0)*(Number($('quota').value)||0);
+    const adv=Number($('advance_pct').value)||100;
+    $('totalOut').value = total? ('฿'+total.toLocaleString('th-TH')+(adv<100?(' · ล่วงหน้า ฿'+Math.round(total*adv/100).toLocaleString('th-TH')):'')) : '';
+  }
+  compUI();
+
+  function addClause(h='',body=''){
+    const div=document.createElement('div'); div.className='clauseRow';
+    div.innerHTML=`<input placeholder="หัวข้อ" value="${h.replace(/"/g,'&quot;')}">
+      <input placeholder="เนื้อหา" value="${body.replace(/"/g,'&quot;')}">
+      <button class="x" onclick="this.parentNode.remove()">ลบ</button>`;
+    $('extraClauses').appendChild(div);
+  }
+  function collectClauses(){
+    return [...$('extraClauses').children].map(r=>{
+      const [h,b]=r.querySelectorAll('input'); return {h:h.value.trim(),body:b.value.trim()};
+    }).filter(c=>c.h||c.body);
+  }
+
+  async function save(){
+    if(!v('partner_name')){ toast('กรอกชื่อพาร์ทเนอร์ก่อนค่ะ'); return; }
+    const vars={ comp_type:v('comp_type'), commission_pct:numv('commission_pct'), rate:numv('rate'),
+      per_job_rate:numv('per_job_rate'), per_head:numv('per_head'), quota:numv('quota'),
+      advance_pct:numv('advance_pct'), valid_until:v('valid_until')||null,
+      garments_lent:numv('garments_lent'), return_days:numv('return_days'),
+      perks: v('perks')? v('perks').split(',').map(s=>s.trim()).filter(Boolean) : undefined,
+      payment_cycle:v('payment_cycle'), wht_pct:numv('wht_pct'),
+      start_date:v('start_date')||null, end_date:v('end_date')||null, notice_days:numv('notice_days') };
+    const p={ id:$('editId').value||undefined, template:v('template'), title:v('title'),
+      partner_name:v('partner_name'), partner_org:v('partner_org'), partner_type:v('partner_type'),
+      partner_tax_id:v('partner_tax_id'), partner_address:v('partner_address'),
+      partner_phone:v('partner_phone'), partner_email:v('partner_email'), partner_line_uid:v('partner_line_uid'),
+      scope:v('scope'), vars, extra_clauses:collectClauses(), created_by:'ops' };
+    const { data, error } = await sb.rpc('contract_upsert',{ p });
+    if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
+    if(data && data.error){ toast(data.error==='locked'?'สัญญาที่เซ็นแล้วแก้ไม่ได้':'ไม่สำเร็จ: '+data.error); return; }
+    lastToken=data.token; lastId=data.id;
+    const url=SIGN_BASE+'?token='+data.token;
+    $('loNo').textContent=data.contract_no; $('loUrl').textContent=url; $('loOpen').href=url;
+    $('linkOut').classList.add('show');
+    $('editId').value=data.id;
+    toast('สร้างสัญญา '+data.contract_no+' แล้ว');
+    load();
+  }
+
+  function copyLink(){ navigator.clipboard.writeText($('loUrl').textContent).then(()=>toast('คัดลอกลิงก์แล้ว')); }
+  async function sendLine(){
+    if(!lastId){ toast('สร้างสัญญาก่อนค่ะ'); return; }
+    const { data, error } = await sb.rpc('contract_send',{ p_id:lastId });
+    if(error){ toast('ส่งไม่สำเร็จ: '+error.message); return; }
+    if(data && data.error){ toast('ส่งไม่ได้: '+data.error); return; }
+    toast('ทำเครื่องหมายส่งแล้ว — ถ้ามี LINE userID ระบบจะ push ให้พาร์ทเนอร์');
+    load();
+  }
+
+  async function makeCustomer(){
+    if(!lastId){ toast('สร้างสัญญาก่อนค่ะ'); return; }
+    const { data, error } = await sb.rpc('contract_make_customer',{ p:{
+      contract_id:lastId, name:v('partner_name'), phone:v('partner_phone'),
+      social_url:v('partner_email')||'' , line_uid:v('partner_line_uid') } });
+    if(error){ toast('สร้างลูกค้าไม่สำเร็จ: '+error.message); return; }
+    $('custCode').textContent=data.link_code;
+    $('custOut').style.display='block';
+    toast('สร้างเป็นลูกค้าแล้ว — รหัส '+data.link_code);
+  }
+
+  function setTab(el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); curStatus=el.dataset.s; load(); }
+
+  function pill(s){ const th={draft:'ฉบับร่าง',sent:'รอลงนาม',viewed:'เปิดอ่าน',signed:'ลงนามแล้ว',declined:'ขอแก้ไข',void:'ยกเลิก'}[s]||s;
+    return `<span class="pill ${s}">${th}</span>`; }
+  function dt(s){ return s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'—'; }
+
+  async function load(){
+    const { data, error } = await sb.rpc('contract_list',{ p_status:curStatus||null });
+    const tb=$('rows');
+    if(error){ tb.innerHTML=`<tr><td colspan="5" style="color:var(--danger);padding:16px">โหลดไม่ได้: ${error.message}</td></tr>`; return; }
+    const list=data||[];
+    if(curStatus===''){
+      const sg=$('kpiSigned'), pd=$('kpiPending'), tt=$('kpiTotal');
+      if(tt) tt.textContent=list.length;
+      if(pd) pd.textContent=list.filter(c=>c.status==='sent'||c.status==='viewed').length;
+      if(sg) sg.textContent=list.filter(c=>c.status==='signed').length;
+    }
+    if(!list.length){ tb.innerHTML='<tr><td colspan="5" style="color:var(--stone);padding:20px">ยังไม่มีสัญญา</td></tr>'; return; }
+    tb.innerHTML=list.map(c=>{
+      const url=SIGN_BASE+'?token='+c.token;
+      const when = c.signed_at||c.sent_at||c.created_at;
+      return `<tr>
+        <td><b>${c.contract_no||'—'}</b></td>
+        <td>${c.partner_name||'—'}${c.partner_org?`<br><span style="color:var(--stone);font-size:11px">${c.partner_org}</span>`:''}</td>
+        <td>${pill(c.status)}</td>
+        <td>${dt(when)}</td>
+        <td style="white-space:nowrap">
+          <a class="mini" href="${url}" target="_blank">เปิด</a>
+          <button class="mini" onclick="cp('${url}')">คัดลอก</button>
+          ${c.status!=='signed'&&c.status!=='void'?`<button class="mini" onclick="ed('${c.id}')">แก้</button>`:''}
+        </td></tr>`;
+    }).join('');
+  }
+  function cp(u){ navigator.clipboard.writeText(u).then(()=>toast('คัดลอกลิงก์แล้ว')); }
+
+  async function ed(id){
+    const c=(await sb.rpc('contract_list',{p_status:null})).data.find(x=>x.id===id);
+    if(!c){ toast('ไม่พบสัญญา'); return; }
+    const setv=(k,val)=>{ const el=$(k); if(el) el.value=(val==null?'':val); };
+    // ฟิลด์พาร์ทเนอร์ทั้งหมด
+    $('editId').value=c.id;
+    setv('partner_name',c.partner_name); setv('partner_org',c.partner_org);
+    setv('partner_type',c.partner_type||'individual'); setv('partner_tax_id',c.partner_tax_id);
+    setv('partner_address',c.partner_address); setv('partner_phone',c.partner_phone);
+    setv('partner_email',c.partner_email); setv('partner_line_uid',c.partner_line_uid);
+    setv('title',c.title); setv('template',c.template||'stylist'); setv('scope',c.scope);
+    // ค่าตอบแทน
+    const vv=c.vars||{}; setv('comp_type',vv.comp_type||'commission');
+    setv('commission_pct',vv.commission_pct); setv('rate',vv.rate); setv('per_job_rate',vv.per_job_rate);
+    setv('per_head',vv.per_head); setv('quota',vv.quota); setv('advance_pct',vv.advance_pct);
+    setv('valid_until',vv.valid_until); setv('payment_cycle',vv.payment_cycle||'monthly');
+    setv('garments_lent',vv.garments_lent); setv('return_days',vv.return_days);
+    setv('perks', Array.isArray(vv.perks)?vv.perks.join(', '):(vv.perks||''));
+    setv('wht_pct',vv.wht_pct!=null?vv.wht_pct:3); setv('start_date',vv.start_date);
+    setv('end_date',vv.end_date); setv('notice_days',vv.notice_days!=null?vv.notice_days:15);
+    compUI();
+    // ข้อตกลงเพิ่มเติม
+    $('extraClauses').innerHTML='';
+    (c.extra_clauses||[]).forEach(x=>addClause(x.h||'',x.body||''));
+    window.scrollTo({top:0,behavior:'smooth'}); toast('แก้ไขสัญญา '+(c.contract_no||'')+' — กดสร้างเพื่อบันทึก');
+  }
+
+  // ---------- พรีเซ็ตดีลที่ใช้บ่อย ----------
+  const PRESETS={
+    classis_quota:{label:'Classis · โควต้า 100×฿2,000',v:{template:'stylist',partner_name:'Classis Studio',partner_org:'Classis Studio',partner_type:'company',comp_type:'quota',per_head:2000,quota:100,advance_pct:100,wht_pct:3,notice_days:15}},
+    commission20:{label:'สไตลิสต์ · คอมมิชชัน 20%',v:{template:'stylist',comp_type:'commission',commission_pct:20,payment_cycle:'monthly',wht_pct:3,notice_days:15}},
+    influencer_perjob:{label:'อินฟลู · ต่อชิ้น ฿3,000',v:{template:'influencer',comp_type:'per_job',per_job_rate:3000,payment_cycle:'per_job',wht_pct:3,notice_days:7}},
+    influencer_creator:{label:'อินฟลู · PC + ยืม 3 ชุด + ฿300/งาน',v:{template:'influencer',comp_type:'per_job',per_job_rate:300,payment_cycle:'per_job',garments_lent:3,return_days:7,perks:'บริการ Personal Color 1 ครั้ง',wht_pct:3,notice_days:7,scope:'ผลิตคอนเทนต์ภาพ/คลิปโปรโมต LLOOP โดยใช้ชุดที่ให้ยืม ตามบรีฟที่ตกลง พร้อมรับบริการ Personal Color'}},
+  };
+  function applyPreset(k){
+    const p=PRESETS[k]; if(!p) return; const v=p.v;
+    Object.keys(v).forEach(key=>{ const el=$(key); if(el) el.value=v[key]; });
+    compUI(); if(v.comp_type==='quota') calcTotal();
+    toast('ใส่พรีเซ็ต: '+p.label);
+  }
+
+  // วันเริ่มต้น = วันนี้
+  $('start_date').value=new Date().toISOString().slice(0,10);
+  load();
+</script>
+</body>
+</html>

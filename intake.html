@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · รับชุดเข้า (intake)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--sans:'Inter','Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:14px}
+.bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.bar h1{font-family:var(--display);font-size:18px;font-weight:700}
+.bar a{font-size:13px;color:var(--muted);text-decoration:none}
+.wrap{max-width:880px;margin:18px auto;display:grid;grid-template-columns:1fr 320px;gap:18px;padding:0 16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:18px}
+.card h2{font-family:var(--display);font-size:15px;font-weight:600;margin-bottom:14px}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:4px;padding:9px 11px;font-family:var(--sans);font-size:14px;background:#fff}
+.row2{display:flex;gap:10px}.row2 .field{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;border:1px solid var(--line);padding:6px 12px;border-radius:30px;cursor:pointer;user-select:none}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.aibtn{background:#EEF2F6;color:#2B5070;border:1px solid #cfe;border-radius:4px;padding:9px 14px;font-size:13px;cursor:pointer;margin-bottom:12px}
+.savebtn{width:100%;background:var(--ink);color:#fff;border:none;padding:14px;font-size:14px;font-weight:600;letter-spacing:.5px;cursor:pointer;border-radius:3px}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+  /* preview */
+.label{border:1px solid var(--line);border-radius:6px;overflow:hidden;position:sticky;top:18px}
+.label .pic{aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,.25);background:#EDEAE4;font-family:var(--display);font-weight:600;text-align:center;padding:8px}
+.label .pic img{width:100%;height:100%;object-fit:cover}
+.label .info{padding:12px}
+.label .code{font-family:var(--display);font-size:22px;font-weight:700}
+.label .nm{font-size:14px;font-weight:500}
+.label .br{font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.label .qr{margin-top:10px;display:flex;gap:8px;align-items:center}
+.label .qr .hint{font-size:10px;color:var(--muted)}
+.ok{color:var(--ok);font-size:13px;margin-top:10px;display:none}
+  @media(max-width:760px){.wrap{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  /* override เฉพาะจุด: หน้านี้มีปุ่มเฉพาะของตัวเอง ไม่ใช้ .btn กลาง */
+  .aibtn{width:auto}
+  .savebtn{width:100%}
+  /* .wrap เป็น grid 2 คอลัมน์ — ให้ hero กินเต็มแถวบนสุด */
+  .wrap>.phead{grid-column:1/-1;margin-bottom:0}
+</style>
+</head>
+<body>
+<div class="bar"><h1>รับชุดเข้า</h1><a href="/labels.html"> ไปหน้าปริ้นป้าย QR</a></div>
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">garment intake</div>
+    <h1>ต้อนรับทุกชุดเข้าระบบ</h1>
+    <div class="sub">สแกน ถ่ายรูป ตั้งราคา แล้วเก็บเข้าช่อง — เริ่มต้นชีวิตการหมุนเวียนของชุดใหม่</div>
+  </section>
+  <div class="card">
+    <h2>ข้อมูลชุด</h2>
+    <button class="aibtn" onclick="aiFill()"> AI ช่วยกรอกจากรูป</button>
+    <div class="field"><label>ลิงก์รูป (วาง URL รูปชุด)</label><input id="f_photo" oninput="syncPreview()" placeholder="https://..."></div>
+    <div class="row2">
+      <div class="field"><label>โค้ด (เว้นว่าง = สร้างอัตโนมัติ)</label><input id="f_code" oninput="syncPreview()" placeholder="เช่น g7"></div>
+      <div class="field"><label>แบรนด์</label><input id="f_brand" oninput="syncPreview()"></div>
+    </div>
+    <div class="field"><label>เก็บเข้าช่อง (เก็บที่ไหน — เว้นว่างได้ ค่อยเก็บทีหลัง)</label><input id="f_bin" placeholder="เช่น A-03"></div>
+    <div class="field"><label>ชื่อชุด</label><input id="f_name" oninput="syncPreview()"></div>
+    <div class="row2">
+      <div class="field"><label>หมวด</label><select id="f_category"><option value="dress">เดรส</option><option value="set">เซ็ต</option><option value="top">เสื้อ</option><option value="skirt">กระโปรง</option><option value="pants">กางเกง</option><option value="jumpsuit">จัมพ์สูท</option><option value="outerwear">เอาเตอร์</option></select></div>
+      <div class="field"><label>ระดับ (tier)</label><select id="f_tier"><option>Standard</option><option>Premium</option><option>Value</option></select></div>
+      <div class="field"><label>ค่าเช่า/ครั้ง</label><input id="f_price" type="number" placeholder="320"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>ไซส์ (size)</label><select id="f_size"><option value="">— ไม่ระบุ —</option><option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option><option value="FREE">FREE SIZE</option></select></div>
+      <div class="field"><label>สภาพชุด (condition)</label><select id="f_condition"><option value="new">ใหม่มาก</option><option value="good">ดี</option><option value="fair">พอใช้</option><option value="poor">ต้องซ่อม</option></select></div>
+    </div>
+    <div class="field"><label>โอกาสที่ใส่ได้ (เลือกได้หลายอัน)</label><div class="chips" id="occ"></div></div>
+    <div class="row2">
+      <div class="field"><label>สี (ชื่อ)</label><input id="f_colorname" placeholder="navy"></div>
+      <div class="field"><label>โค้ดสี</label><input id="f_colorhex" type="color" value="#15233F" oninput="syncPreview()"></div>
+      <div class="field"><label>โทนสี</label><select id="f_season"><option value="">—</option><option value="spring">สปริง</option><option value="summer">ซัมเมอร์</option><option value="autumn">ออทัมน์</option><option value="winter">วินเทอร์</option></select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>อก (นิ้ว) min–max</label><div class="row2"><input id="f_bmin" type="number"><input id="f_bmax" type="number"></div></div>
+      <div class="field"><label>เอว (นิ้ว) min–max</label><div class="row2"><input id="f_wmin" type="number"><input id="f_wmax" type="number"></div></div>
+    </div>
+    <div class="field"><label>เนื้อผ้า</label><input id="f_fabric" placeholder="ซาตินโพลี 95% สแปนเด็กซ์ 5%"></div>
+    <div class="field"><label>วิธีใส่ให้สวย (คั่นด้วย,)</label><textarea id="f_tips" rows="2" placeholder="ใส่บราเกาะอก, ซ่อนสายในได้, แนะนำแผ่นปิดจุก"></textarea></div>
+    <button class="savebtn" onclick="save()">บันทึกเข้าระบบ + สร้าง QR</button>
+    <div class="ok" id="ok"></div>
+    <div class="note">บันทึกแล้วชุดจะอยู่สถานะ <b>needs_review</b> (ยังไม่ขึ้นหน้าลูกค้า จนกว่าจะตรวจ) — ป้าย QR ปริ้นได้เลยที่หน้า"ปริ้นป้าย QR"</div>
+  </div>
+
+  <div>
+    <div class="label">
+      <div class="pic" id="p_pic">รูปชุด</div>
+      <div class="info">
+        <div class="br" id="p_brand"></div>
+        <div class="code" id="p_code">—</div>
+        <div class="nm" id="p_name">ชื่อชุด</div>
+        <div class="qr"><div id="p_qr"></div><span class="hint">สแกนดูชุด</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="../liff/config.js"></script>
+<script src="ops-api.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const FUNCTIONS=SUPABASE_URL.replace('.supabase.co','.functions.supabase.co');
+  const QR_BASE='https://lloop.app/g/';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
+  const OCC={wedding_guest:'งานแต่ง',dinner:'ดินเนอร์',party:'งานเลี้ยง',work:'ทำงาน',cafe:'คาเฟ่',graduation:'รับปริญญา',merit:'งานบุญ',festival:'เทศกาล',trip:'ทริป',content:'คอนเทนต์'};
+  let sel=new Set();
+  document.getElementById('occ').innerHTML=Object.entries(OCC).map(([k,v])=>`<span class="chip" data-k="${k}" onclick="toggleOcc('${k}',this)">${v}</span>`).join('');
+  function toggleOcc(k,el){ if(sel.has(k)){sel.delete(k);el.classList.remove('on')}else{sel.add(k);el.classList.add('on')} }
+  const $=id=>document.getElementById(id);
+  let qr=null;
+  function syncPreview(){
+    $('p_brand').textContent=$('f_brand').value||'';
+    $('p_name').textContent=$('f_name').value||'ชื่อชุด';
+    const code=$('f_code').value||'(auto)';
+    $('p_code').textContent=code;
+    const photo=$('f_photo').value;
+    $('p_pic').innerHTML= photo?`<img src="${photo}">`: ($('f_name').value||'รูปชุด');
+    $('p_pic').style.background=$('f_colorhex').value;
+    $('p_qr').innerHTML=''; qr=new QRCode($('p_qr'),{text:QR_BASE+(code==='(auto)'?'preview':code),width:70,height:70});
+  }
+  syncPreview();
+
+  async function aiFill(){
+    const photo=$('f_photo').value;
+    if(!photo){ alert('วางลิงก์รูปก่อนค่ะ'); return; }
+    try{
+      const r=await fetch(FUNCTIONS+'/intake-tagger',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer'+SUPABASE_KEY},body:JSON.stringify({image_url:photo})});
+      if(!r.ok) throw new Error('not deployed');
+      const t=await r.json();
+      $('f_name').value=t.name||$('f_name').value; $('f_category').value=t.category||'dress';
+      $('f_colorhex').value=t.color_hex||$('f_colorhex').value; $('f_colorname').value=t.color_name||'';
+      $('f_season').value=t.color_season||''; $('f_fabric').value=t.fabric_guess||'';
+      (t.occasion_tags||[]).forEach(k=>{const el=document.querySelector(`.chip[data-k="${k}"]`); if(el&&!sel.has(k)){sel.add(k);el.classList.add('on')}});
+      syncPreview();
+    }catch(e){ alert('AI ช่วยกรอกยังไม่พร้อม — ต้องตั้ง Anthropic key + deploy ฟังก์ชัน intake-tagger ก่อน (พรุ่งนี้) ค่ะ\nตอนนี้กรอกมือไปก่อนได้เลย'); }
+  }
+
+  async function save(){
+    const tips=$('f_tips').value.split(',').map(s=>s.trim()).filter(Boolean);
+    const payload={
+      code:$('f_code').value||'', name:$('f_name').value, brand:$('f_brand').value,
+      tier:$('f_tier').value, rental_price:$('f_price').value, category:$('f_category').value,
+      occasion_tags:[...sel], color_name:$('f_colorname').value, color_hex:$('f_colorhex').value,
+      color_season:$('f_season').value, bust_min_in:$('f_bmin').value, bust_max_in:$('f_bmax').value,
+      waist_min_in:$('f_wmin').value, waist_max_in:$('f_wmax').value,
+      fabric_composition:$('f_fabric').value, styling_tips:tips,
+      photos:$('f_photo').value?[$('f_photo').value]:[],
+      size:$('f_size').value||null,
+      condition:$('f_condition').value||null
+    };
+    const { data, error } = await sb.rpc('intake_garment',{ p: payload });
+    if(error){ alert('บันทึกไม่ได้:'+error.message); return; }
+    $('f_code').value=data; syncPreview();
+    // เก็บเข้าช่องทันทีถ้าระบุ (ของใหม่มีตำแหน่งตั้งแต่วันแรก)
+    let binMsg='';
+    const bin=($('f_bin').value||'').trim();
+    if(bin){ const r=await sb.rpc('put_away',{p_code:data,p_bin:bin}); if(!r.error&&!r.data?.error) binMsg=` · เก็บเข้าช่อง <b>${bin}</b> แล้ว`; }
+    const ok=$('ok'); ok.style.display='block';
+    ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> (needs_review)${binMsg} — <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
+  }
+</script>
+</body>
+</html>
