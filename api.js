@@ -433,6 +433,18 @@ window.API = (function () {
     } });
     return { ok: !error, data, error };
   }
+  // จองแบบต่างคนต่างจ่าย — เพื่อนแต่ละคนเป็นผู้จ่ายของชุดตัวเอง ส่งไปที่อยู่ตัวเอง
+  // assignments=[{code,wearer}] · recipients=[{wearer,recipient,address,courier,remote}]
+  async function bookGroupSplit(groupId, assignments, fromStr, toStr, opts) {
+    if (CONFIG.USE_MOCK || !groupId) return { ok: true };
+    const o = opts || {};
+    const { data, error } = await client().rpc('book_group_split', { p: {
+      group_id: groupId, from: fromStr, to: toStr, assignments: assignments || [],
+      courier: o.courier || 'flash', remote: !!o.remote, theme: o.theme || null,
+      occasion: o.occasion || null, recipients: o.recipients || null
+    } });
+    return { ok: !error, data, error };
+  }
   // จัดการสมาชิกกลุ่ม (lifecycle)
   async function groupLeave(groupId, customer) {
     if (CONFIG.USE_MOCK || !groupId || !customer?.id) return { ok: true };
@@ -499,6 +511,24 @@ window.API = (function () {
     const { data, error } = await client().rpc('group_discount_pct', { p_count: count || 0 });
     return { ok: !error, data: data || 0, error };
   }
+  // บิลของออเดอร์ตัวเอง (หน้าจ่ายเงินเพื่อน) — requester ต้องเป็นเจ้าของออเดอร์
+  async function groupOrderSummary(orderGroup, requester) {
+    if (CONFIG.USE_MOCK || !orderGroup || !requester?.id) return { ok: true, data: null };
+    const { data, error } = await client().rpc('group_order_summary', { p_order: orderGroup, p_requester: requester.id });
+    return { ok: !error, data, error };
+  }
+  // เจ้าของออเดอร์กด "โอนแล้ว" → ปลด hold เป็น reserved
+  async function groupPayConfirm(orderGroup, requester) {
+    if (CONFIG.USE_MOCK || !orderGroup || !requester?.id) return { ok: true };
+    const { data, error } = await client().rpc('group_pay_confirm', { p_order: orderGroup, p_requester: requester.id });
+    return { ok: !error, data, error };
+  }
+  // สถานะการจ่ายของทั้งอีเวนต์ (dashboard หัวหน้า)
+  async function groupEventStatus(eventGroup, requester) {
+    if (CONFIG.USE_MOCK || !eventGroup || !requester?.id) return { ok: true, data: null };
+    const { data, error } = await client().rpc('group_event_status', { p_event: eventGroup, p_requester: requester.id });
+    return { ok: !error, data, error };
+  }
 
   // ===== ช่องทางชำระเงิน (โชว์ตอน checkout) — cache ไว้ =====
   let _payInfo;
@@ -524,5 +554,5 @@ window.API = (function () {
     return { ok: true, ...data };
   }
 
-  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, payInfo, birthdayStatus, birthdayReserve };
+  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, payInfo, birthdayStatus, birthdayReserve };
 })();
