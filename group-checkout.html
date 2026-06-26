@@ -718,6 +718,7 @@ async function renderResult(res, from, to){
       <div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
         เรากันชุดให้ทุกคน 30 นาที — เพื่อนแต่ละคนเปิด LINE ของตัวเองเพื่อโอนและแนบสลิปยืนยันส่วนของตนค่ะ</div>
       <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
+        <a class="btn" href="event.html?event=${esc(res.event_group||'')}">ดูสถานะการจ่าย</a>
         <a class="btn ghost" href="family.html">กลับหน้ากลุ่ม</a></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }

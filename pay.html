@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · บิลของคุณ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --ink:#1A1A1A; --soft:#F5F4F2; --soft2:#EFEDE9; --line:#E7E5E1;
+    --muted:#8C8B86; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56;
+    --gold:#C9A86A; --sand:#F2ECDD;
+    --display:'Poppins','Prompt',sans-serif;
+    --sans:'Inter','Prompt',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+  .contain{max-width:560px;margin:0 auto;padding:0 18px}
+  button{font-family:inherit;cursor:pointer}
+  a{color:inherit}
+
+  header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
+  .hbar{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .logo{font-family:var(--display);font-size:23px;font-weight:700;letter-spacing:1px}
+  .hnav{font-size:12px;color:var(--muted)}
+
+  /* hero */
+  .hero{padding:28px 0 4px}
+  .eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .htitle{font-family:var(--display);font-size:26px;font-weight:600;margin-top:8px;letter-spacing:.5px}
+  .hsub{color:var(--muted);margin-top:6px}
+
+  /* section */
+  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
+  .sechead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .sectitle{font-family:var(--display);font-size:16px;font-weight:600}
+  .seccap{font-size:12px;color:var(--muted)}
+
+  .btn{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:13px 20px;font-size:14px;font-weight:600;letter-spacing:.02em;width:100%}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.sage{background:var(--sage)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  /* item rows */
+  .orow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .orow:last-child{border-bottom:none}
+  .osw{width:34px;height:34px;border-radius:8px;flex-shrink:0;border:1px solid rgba(0,0,0,.06)}
+  .ot{flex:1;min-width:0}
+  .ot .on{font-size:13.5px;font-weight:500;line-height:1.3}
+  .ot .ow{font-size:11.5px;color:var(--muted)}
+  .op{text-align:right;font-size:12.5px;flex-shrink:0}
+  .op b{font-weight:600}.op .od{font-size:11px;color:var(--muted)}
+
+  /* totals box */
+  .totbox{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  .trow{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+  .trow.hl{font-size:16px;font-weight:700;margin-top:6px;padding-top:9px;border-top:1px dashed var(--line)}
+  .trow .muted{color:var(--muted)}
+
+  /* ship-to */
+  .shipto{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+  .shipto .sl{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .shipto .sn{font-weight:600;font-size:13.5px}
+  .shipto .sa{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.45}
+
+  .holdnote{background:var(--sage-bg);border:1px solid #cfe6df;border-radius:10px;padding:11px 13px;font-size:12.5px;color:var(--ok);margin-top:14px;display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+  .holdnote svg{width:17px;height:17px;stroke:var(--ok);fill:none;stroke-width:1.7;flex-shrink:0;margin-top:1px}
+
+  /* pay box */
+  .paybox{text-align:center}
+  .qhd{font-family:var(--display);font-size:13.5px;font-weight:600;margin-bottom:8px;text-align:left}
+  .qrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:3px 0;text-align:left}
+  .ppwrap{text-align:center;margin:6px 0 10px}
+  .payamt{font-size:14px;margin-top:6px}
+  .paynote{font-size:12px;color:var(--muted);margin-top:6px;text-align:left}
+
+  /* confirmed state */
+  .done{text-align:center;padding:30px 18px}
+  .done .di{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center}
+  .done .di .ck{width:30px;height:30px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-2px,-3px);display:block}
+  .done h4{font-family:var(--display);font-size:18px;color:var(--ok);font-weight:600;margin-bottom:6px}
+  .done p{color:var(--muted);max-width:380px;margin:0 auto}
+
+  /* empty / edge state */
+  .empty{text-align:center;padding:34px 18px;color:var(--muted)}
+  .empty .ei{width:54px;height:54px;margin:0 auto 12px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center}
+  .empty .ei svg{width:26px;height:26px;stroke:var(--sage);fill:none;stroke-width:1.6}
+  .empty h4{font-family:var(--display);font-size:16px;color:var(--ink);font-weight:600;margin-bottom:5px}
+  .empty p{max-width:400px;margin:0 auto 14px}
+
+  .demo{font-size:11px;color:var(--muted);text-align:center;margin-top:26px;letter-spacing:.3px}
+  .demo b{color:var(--sage)}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<header><div class="contain hbar">
+  <div class="logo">LLOOP</div>
+  <div class="hnav">บิลของคุณ</div>
+</div></header>
+
+<div class="contain">
+  <div class="hero">
+    <div class="eyebrow">split pay</div>
+    <h1 class="htitle">บิลของคุณ</h1>
+    <p class="hsub">จองตีมกับเพื่อน · ส่วนของคุณ</p>
+  </div>
+
+  <div id="root">
+    <div class="sec"><div class="empty"><p>กำลังโหลดบิล…</p></div></div>
+  </div>
+
+  <div class="demo" id="demo">หน้าจ่ายเงินรายคน LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (group_order_summary / group_pay_confirm)</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=34"></script>
+<script src="liffAuth.js?v=34"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="promptpay.js?v=34"></script>
+<script src="api.js?v=34"></script>
+<script>
+// ============================================================
+//  pay.html — บิลรายคนของ split-pay group rental
+//  LIVE = ต่อ Supabase จริงผ่าน window.API · ไม่งั้นวิ่งบน MOCK ในไฟล์นี้
+// ============================================================
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const baht = n => '฿' + Number(n||0).toLocaleString('th-TH');
+
+let LIVE = false;          // true = Supabase จริง
+let CUSTOMER = null;       // {id,...}
+let SUMMARY = null;        // ผลจาก groupOrderSummary
+let PAY = null;            // ผลจาก payInfo
+
+// อ่าน ?order=<order_group> จาก URL หรือ liff.state (เคสเปิดผ่าน LIFF deep-link)
+function readOrder(){
+  try{
+    const sp = new URLSearchParams(location.search);
+    let o = sp.get('order');
+    if(!o){
+      const st = sp.get('liff.state');
+      if(st){ const inner = new URLSearchParams(st.replace(/^\?/,'')); o = inner.get('order'); }
+    }
+    return o || null;
+  }catch(_e){ return null; }
+}
+const ORDER = readOrder();
+
+// ============================================================
+//  MOCK (พรีวิวได้โดยไม่ต้องล็อกอิน LINE) — mirror group-checkout.html
+// ============================================================
+const MOCK_SUMMARY = {
+  order_group:'OG-7A21', theme:'autumn',
+  recipient:'คุณยายสมร', address:'88/12 ซอยลาดพร้าว 71 แขวงลาดพร้าว เขตลาดพร้าว กรุงเทพฯ 10230',
+  items:[
+    { code:'S40', name:'เดรสผู้ใหญ่สีน้ำตาลกุหลาบ', wearer:'คุณยายสมร', rate:416, deposit:0 },
+    { code:'S41', name:'เสื้อคลุมยาวโทนเอิร์ธ',       wearer:'คุณยายสมร', rate:390, deposit:0 },
+  ],
+  rate_sum:806, discount:81, discount_pct:10, deposit_sum:0, shipping:55, total:780,
+  paid:false, hold_until:null
+};
+const MOCK_PAY = { pay_bank_name:'ธ.กสิกรไทย', pay_account_no:'123-4-56789-0', pay_account_name:'บจก. แอลลูป',
+                   pay_promptpay_id:'0649990250', pay_promptpay_type:'phone', pay_note:'โอนแล้วแนบสลิปในแชตนี้ได้เลยค่ะ' };
+const SWATCH = {
+  S40:'#C8A18C', S41:'#9C7B5B', D21:'#C98A7A', D08:'#B07D4F', D33:'#A85B43',
+  K12:'#E6A57E', K05:'#E4D5B7'
+};
+
+// ============================================================
+//  BOOTSTRAP
+// ============================================================
+async function boot(){
+  // ไม่มี order id ใน URL → empty state
+  if(!ORDER){
+    edgeState('ยังไม่มีบิลให้แสดง',
+      'เปิดหน้านี้จากปุ่ม “จ่ายส่วนของฉัน” ในข้อความ LINE ที่เพื่อนส่งให้ เพื่อดูบิลและโอนค่าเช่าของคุณค่ะ');
+    return;
+  }
+
+  // ลอง init จริง
+  try{
+    if(window.API && window.CONFIG && !window.CONFIG.USE_MOCK){
+      const r = await window.API.init();
+      const cust = r && r.CUSTOMER;
+      if(cust && cust.id && r.lineUid){ CUSTOMER = cust; LIVE = true; }
+    }
+  }catch(e){ /* ตกไป mock */ }
+
+  if(LIVE){
+    let res = null;
+    try{
+      const r = await window.API.groupOrderSummary(ORDER, CUSTOMER);
+      res = (r && r.error) ? { error:(r.error.message||String(r.error)) } : ((r && r.data) || null);
+    }catch(e){ res = { error:'network' }; }
+
+    if(!res || res.error){
+      const code = res && res.error;
+      if(code==='denied'){
+        edgeState('นี่ไม่ใช่บิลของคุณ',
+          'บิลนี้เป็นของสมาชิกคนอื่นในกลุ่ม — เปิดลิงก์ที่ส่งมาให้คุณโดยตรงเพื่อดูส่วนของตัวเองนะคะ');
+      } else if(code==='not_found'){
+        edgeState('ไม่พบบิลนี้',
+          'บิลนี้อาจหมดเวลากันชุด (hold) หรือถูกยกเลิกไปแล้ว — ลองจองใหม่กับเพื่อนอีกครั้งนะคะ');
+      } else {
+        edgeState('เปิดบิลไม่สำเร็จ',
+          'เกิดข้อผิดพลาด' + (code?(' ('+code+')'):'') + ' — ลองเปิดลิงก์ใหม่อีกครั้งนะคะ');
+      }
+      return;
+    }
+    SUMMARY = res;
+  } else {
+    // โหมดพรีวิว / mock
+    SUMMARY = JSON.parse(JSON.stringify(MOCK_SUMMARY));
+    $('#demo').innerHTML = 'โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อจ่ายกับ Supabase';
+  }
+
+  // โหลดช่องทางชำระ (payInfo คืน data ตรง ไม่ห่อ ok/data)
+  try{ PAY = LIVE ? await window.API.payInfo() : MOCK_PAY; }catch(e){ PAY = null; }
+
+  if(SUMMARY.paid===true) renderPaid();
+  else renderBill();
+}
+
+// ============================================================
+//  EDGE / EMPTY
+// ============================================================
+function edgeState(title, body){
+  $('#root').innerHTML = `<div class="sec"><div class="empty">
+    <div class="ei"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
+    <h4>${esc(title)}</h4><p>${esc(body)}</p></div></div>`;
+}
+
+// ============================================================
+//  BILL + PAYMENT
+// ============================================================
+function billHtml(s){
+  const items = s.items || [];
+  const itemHtml = items.map(it=>{
+    const hex = SWATCH[it.code] || '#E7E2DA';
+    return `<div class="orow">
+      <div class="osw" style="background:${hex}"></div>
+      <div class="ot"><div class="on">${esc(it.name||it.code)}</div>
+        <div class="ow">${esc(it.wearer||'')}${it.wearer?' ใส่ · ':''}${esc(it.code||'')}</div></div>
+      <div class="op"><b>${baht(it.rate)}</b>${it.deposit>0?`<div class="od">มัดจำ ${baht(it.deposit)}</div>`:''}</div>
+    </div>`;
+  }).join('') || '<div class="seccap">ไม่มีรายการ</div>';
+
+  const shipTo = (s.recipient || s.address) ? `<div class="shipto">
+      <div class="sl">ส่งไปที่</div>
+      <div class="sn">${esc(s.recipient||'-')}</div>
+      ${s.address?`<div class="sa">${esc(s.address)}</div>`:''}
+    </div>` : '';
+
+  const holdNote = !s.paid ? `<div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      เรากันชุดให้คุณ 30 นาที — โอนภายในเวลานี้เพื่อยืนยันการจองส่วนของคุณค่ะ</div>` : '';
+
+  return `<div class="sec">
+    <div class="sechead"><div><div class="sectitle">บิลของคุณ · จองตีมกับเพื่อน</div>
+      <div class="seccap">ชุดที่คุณรับผิดชอบในออเดอร์กลุ่มนี้</div></div></div>
+    <div style="margin-top:10px">${itemHtml}</div>
+    <div class="totbox">
+      <div class="trow"><span class="muted">ค่าเช่ารวม</span><span>${baht(s.rate_sum)}</span></div>
+      ${s.discount>0?`<div class="trow"><span class="muted">ส่วนลดแพคเกจกลุ่ม${s.discount_pct?` (-${s.discount_pct}%)`:''}</span><span style="color:var(--ok)">−${baht(s.discount)}</span></div>`:''}
+      ${s.deposit_sum>0?`<div class="trow"><span class="muted">มัดจำ (คืนหลังตรวจชุด)</span><span>${baht(s.deposit_sum)}</span></div>`:''}
+      <div class="trow"><span class="muted">ค่าส่ง</span><span>${s.shipping>0?baht(s.shipping):'ส่งฟรี'}</span></div>
+      <div class="trow hl"><span>รวมโอน</span><span>${baht(s.total)}</span></div>
+    </div>
+    ${shipTo}
+    ${holdNote}
+  </div>`;
+}
+
+function payHtml(s, pay){
+  const hasPay = pay && (pay.pay_account_no || pay.pay_promptpay_qr || pay.pay_promptpay_id);
+  const payInner = !hasPay
+    ? `<div class="seccap" style="text-align:left">ช่องทางชำระจะแสดงในแชต LINE — โอนแล้วแนบสลิปได้เลยค่ะ</div>`
+    : `<div class="qhd">ช่องทางชำระ</div>
+      ${pay.pay_account_no?`<div class="qrow"><span>${esc(pay.pay_bank_name||'โอนเข้าบัญชี')}</span><b>${esc(pay.pay_account_no)}</b></div>
+        ${pay.pay_account_name?`<div style="font-size:12px;color:var(--muted);text-align:right">${esc(pay.pay_account_name)}</div>`:''}`:''}
+      ${pay.pay_promptpay_id?`<div class="ppwrap"><div id="ppqr"></div>
+        <div class="payamt">สแกนแล้วโอน <b>${baht(s.total)}</b></div></div>`
+      : pay.pay_promptpay_qr?`<div class="ppwrap">
+        <img src="${esc(pay.pay_promptpay_qr)}" alt="PromptPay QR" style="width:210px;max-width:72%;border:1px solid var(--line);border-radius:8px">
+        <div class="payamt">สแกนแล้วโอน <b>${baht(s.total)}</b></div></div>`:''}
+      <div class="paynote">${esc(pay.pay_note||'โอนแล้วแนบสลิปในแชตนี้ได้เลยค่ะ')}</div>`;
+
+  return `<div class="sec paybox">
+    ${payInner}
+    <button class="btn sage" id="paidBtn" style="margin-top:14px">ฉันโอนแล้ว</button>
+  </div>`;
+}
+
+function renderBill(){
+  const s = SUMMARY;
+  $('#root').innerHTML = billHtml(s) + payHtml(s, PAY);
+
+  // วาด PromptPay QR ฝังยอด (หลัง element อยู่ใน DOM)
+  if(PAY && PAY.pay_promptpay_id && window.promptpayBrandedQR){
+    const el = document.getElementById('ppqr');
+    if(el) window.promptpayBrandedQR(el, PAY.pay_promptpay_id, s.total, PAY.pay_promptpay_type);
+  }
+  const btn = $('#paidBtn');
+  if(btn) btn.onclick = onPaid;
+}
+
+async function onPaid(){
+  const btn = $('#paidBtn'); btn.disabled = true; btn.textContent = 'กำลังยืนยัน…';
+  let ok = false;
+  try{
+    if(LIVE){
+      const r = await window.API.groupPayConfirm(ORDER, CUSTOMER);
+      ok = !!(r && (r.ok || (r.data && r.data.paid)) && !r.error);
+    } else {
+      ok = true;   // mock: ถือว่าโอนสำเร็จ
+    }
+  }catch(e){ ok = false; }
+
+  if(!ok){
+    btn.disabled = false; btn.textContent = 'ฉันโอนแล้ว';
+    alert('ยืนยันไม่สำเร็จ ลองใหม่อีกครั้งนะคะ');
+    return;
+  }
+  SUMMARY.paid = true;
+  renderPaid();
+}
+
+// ============================================================
+//  PAID / CONFIRMED STATE
+// ============================================================
+function renderPaid(){
+  const s = SUMMARY;
+  $('#root').innerHTML = `
+    <div class="sec">
+      <div class="done">
+        <div class="di"><span class="ck"></span></div>
+        <h4>จ่ายแล้ว</h4>
+        <p>ขอบคุณค่ะ — เราได้รับการยืนยันการโอนของคุณแล้ว ทีมงานจะตรวจสลิปและคอนเฟิร์มการจองให้ทาง LINE ค่ะ</p>
+      </div>
+      <div class="totbox" style="border-top:1px dashed var(--line)">
+        <div class="trow hl" style="border-top:none;margin-top:0;padding-top:0"><span>ยอดที่โอน</span><span>${baht(s.total)}</span></div>
+      </div>
+      ${(s.recipient||s.address)?`<div class="shipto">
+        <div class="sl">ส่งไปที่</div>
+        <div class="sn">${esc(s.recipient||'-')}</div>
+        ${s.address?`<div class="sa">${esc(s.address)}</div>`:''}</div>`:''}
+    </div>`;
+}
+
+document.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>

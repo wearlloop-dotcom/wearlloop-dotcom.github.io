@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · สถานะการจ่าย · จองตีมกับเพื่อน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --ink:#1A1A1A; --soft:#F5F4F2; --soft2:#EFEDE9; --line:#E7E5E1;
+    --muted:#8C8B86; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56;
+    --gold:#C9A86A; --sand:#F2ECDD;
+    --display:'Poppins','Prompt',sans-serif;
+    --sans:'Inter','Prompt',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+  .contain{max-width:920px;margin:0 auto;padding:0 18px}
+  button{font-family:inherit;cursor:pointer}
+  a{color:inherit}
+
+  header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
+  .hbar{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .logo{font-family:var(--display);font-size:23px;font-weight:700;letter-spacing:1px}
+  .back{font-size:12.5px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  /* hero */
+  .hero{padding:28px 0 6px}
+  .eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .htitle{font-family:var(--display);font-size:28px;font-weight:600;margin-top:8px;letter-spacing:.5px}
+  .hsub{color:var(--muted);margin-top:6px;max-width:560px}
+  .palette{display:inline-flex;align-items:center;gap:8px;background:var(--sand);border-radius:30px;padding:6px 14px;font-size:12px;color:#7a6433;font-weight:500;margin-top:14px}
+  .pdot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1);background:var(--gold)}
+
+  /* section */
+  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
+  .sechead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .sectitle{font-family:var(--display);font-size:16px;font-weight:600}
+  .seccap{font-size:12px;color:var(--muted)}
+
+  .btn{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-size:13px;font-weight:600;letter-spacing:.02em}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.sage{background:var(--sage)}
+  .btn.sm{padding:8px 14px;font-size:12px}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  /* progress summary */
+  .progwrap{margin-top:12px}
+  .progtop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .progtop .pt-x{font-family:var(--display);font-size:22px;font-weight:600}
+  .progtop .pt-x b{color:var(--ok)}
+  .progtop .pt-g{font-size:12.5px;color:var(--muted)}
+  .progtop .pt-g b{color:var(--ink);font-weight:600}
+  .bar{height:10px;background:var(--soft2);border-radius:20px;overflow:hidden;margin-top:11px}
+  .bar > i{display:block;height:100%;background:var(--sage);border-radius:20px;transition:width .35s ease}
+  .progmeta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:7px}
+
+  /* roster rows (mirror .splrow) */
+  .rrow{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:11px;padding:13px;margin-top:10px;background:var(--bg)}
+  .rrow.warn{background:#FBF3E9;border-color:var(--gold)}
+  .ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;color:#fff;flex-shrink:0}
+  .rrow .ava{width:40px;height:40px;font-size:16px}
+  .rt{flex:1;min-width:0}
+  .rt .rn{font-weight:600;font-size:14.5px;line-height:1.3}
+  .rt .rm{font-size:12px;color:var(--muted);margin-top:2px}
+  .rright{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+  .rtot{font-size:14px;font-weight:600}
+  .badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+  .bdg{font-size:10.5px;font-weight:600;letter-spacing:.3px;padding:3px 9px;border-radius:20px}
+  .bdg.ok{background:var(--sage-bg);color:var(--ok)}
+  .bdg.warn{background:#F6EDD8;color:#8a6d2f}
+  .bdg.ship{background:var(--soft);color:#555}
+
+  /* totals box (mirror .totbox/.trow/.hl) */
+  .totbox{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+  .trow{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+  .trow .muted{color:var(--muted)}
+  .trow.hl{font-size:15px;font-weight:700;margin-top:6px;padding-top:9px;border-top:1px dashed var(--line)}
+
+  /* gentle footer note */
+  .selfnote{background:var(--sage-bg);border:1px solid #cfe6df;border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--ok);margin-top:16px;display:flex;gap:9px;align-items:flex-start;line-height:1.55}
+  .selfnote svg{width:18px;height:18px;stroke:var(--ok);fill:none;stroke-width:1.7;flex-shrink:0;margin-top:1px}
+  .remindrow{margin-top:11px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .hint{font-size:11.5px;color:var(--muted)}
+
+  /* empty / edge state */
+  .empty{text-align:center;padding:34px 18px;color:var(--muted)}
+  .empty .ei{width:54px;height:54px;margin:0 auto 12px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center}
+  .empty .ei svg{width:26px;height:26px;stroke:var(--sage);fill:none;stroke-width:1.6}
+  .empty h4{font-family:var(--display);font-size:16px;color:var(--ink);font-weight:600;margin-bottom:5px}
+  .empty p{max-width:400px;margin:0 auto 14px}
+
+  .demo{font-size:11px;color:var(--muted);text-align:center;margin-top:26px;letter-spacing:.3px}
+  .demo b{color:var(--sage)}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<header><div class="contain hbar">
+  <div class="logo">LLOOP</div>
+  <a class="back" href="family.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> ครอบครัว &amp; กลุ่ม</a>
+</div></header>
+
+<div class="contain">
+  <div class="hero">
+    <div class="eyebrow">split pay</div>
+    <h1 class="htitle">สถานะการจ่าย · จองตีมกับเพื่อน</h1>
+    <p class="hsub">ในฐานะหัวหน้ากลุ่ม ดูได้ว่าเพื่อนในตีมคนไหนจ่ายแล้ว คนไหนยังรอชำระ พร้อมยอดของแต่ละคนและยอดรวมทั้งกลุ่ม</p>
+    <div class="palette" id="themePill" style="display:none"><span class="pdot"></span><span id="themeName">ตีมร่วม</span></div>
+  </div>
+
+  <!-- summary + progress -->
+  <div class="sec hide" id="summarySec">
+    <div class="sechead">
+      <div><div class="sectitle">ภาพรวมการจ่าย</div>
+      <div class="seccap" id="evCap">—</div></div>
+      <button class="btn ghost sm" id="refreshBtn">รีเฟรช</button>
+    </div>
+    <div class="progwrap">
+      <div class="progtop">
+        <div class="pt-x">จ่ายแล้ว <b id="paidX">0</b> / <span id="memY">0</span> คน</div>
+        <div class="pt-g">ยอดรวมทั้งกลุ่ม <b id="grandTot">฿0</b></div>
+      </div>
+      <div class="bar"><i id="barFill" style="width:0%"></i></div>
+      <div class="progmeta"><span id="pctTxt">0%</span><span id="leftTxt"></span></div>
+    </div>
+  </div>
+
+  <!-- roster -->
+  <div class="sec hide" id="rosterSec">
+    <div class="sechead">
+      <div><div class="sectitle">รายชื่อในตีม</div>
+      <div class="seccap">คนที่ยังรอชำระจะอยู่บนสุด เพื่อให้คุณตามได้ง่าย</div></div>
+    </div>
+    <div id="rosterBody"></div>
+
+    <!-- gentle footer note -->
+    <div class="selfnote">
+      <svg viewBox="0 0 24 24"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+      <div>เพื่อนแต่ละคนจ่ายส่วนของตัวเองผ่าน LINE ของตน — บิลและคำเตือนชำระเงินจะส่งถึงเพื่อนโดยอัตโนมัติ คุณในฐานะหัวหน้ากลุ่มช่วยกระตุ้นเพื่อนที่ยังไม่จ่ายได้ตามสบายค่ะ</div>
+    </div>
+    <div class="remindrow">
+      <button class="btn ghost sm" id="remindBtn" disabled title="ระบบส่งคำเตือนให้เพื่อนที่ยังไม่จ่ายโดยอัตโนมัติอยู่แล้ว">เตือนเพื่อนที่ยังไม่จ่าย</button>
+      <span class="hint" id="remindHint">ระบบส่งคำเตือนอัตโนมัติให้อยู่แล้ว</span>
+    </div>
+  </div>
+
+  <!-- edge / empty state -->
+  <div class="sec hide" id="edgeSec"><div id="edgeBody"></div></div>
+
+  <div class="demo" id="demoNote">หน้าสถานะการจ่าย LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (group_event_status คืนสถานะจ่ายของทั้งอีเวนต์)</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=34"></script>
+<script src="liffAuth.js?v=34"></script>
+<script src="api.js?v=34"></script>
+<script>
+// ============================================================
+//  event.html — Dashboard หัวหน้ากลุ่ม (split pay)
+//  เปิดด้วย ?event=<event_group> → ดูว่าใครจ่ายแล้ว/ยังในตีม
+//  LIVE = ต่อ Supabase จริงผ่าน window.API · ไม่งั้นวิ่งบน MOCK ในไฟล์นี้
+// ============================================================
+const $ = s => document.querySelector(s);
+const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
+const initial = n => (n||'?').trim().charAt(0);
+const avaColor = id => AVA[Math.abs([...String(id||'?')].reduce((a,c)=>a+c.charCodeAt(0),0))%AVA.length];
+const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const baht = n => '฿' + Number(n||0).toLocaleString('th-TH');
+
+// อ่าน ?event=<event_group> จาก URL หรือ liff.state (กลไกเดียวกับ family.html ?join=)
+function readEvent(){
+  try{
+    const sp = new URLSearchParams(location.search);
+    let e = sp.get('event');
+    if(!e){
+      const st = sp.get('liff.state');
+      if(st){ const inner = new URLSearchParams(st.replace(/^\?/,'')); e = inner.get('event'); }
+    }
+    return e || null;
+  }catch(_e){ return null; }
+}
+
+// ---- state ----
+let LIVE = false;       // true = Supabase จริง
+let CUSTOMER = null;    // {id,...}
+const EVENT_GROUP = readEvent();
+let POLL = null;        // ตัวจับเวลา auto-refresh
+
+// ============================================================
+//  MOCK (พรีวิวได้โดยไม่ต้องล็อกอิน LINE)
+// ============================================================
+const MOCK_STATUS = {
+  event_group:'EVT-204517', theme:'ทริปทะเลโทนซัมเมอร์',
+  paid_count:2, member_count:3, grand_total:1151,
+  members:[
+    { name:'พลอย',        order_group:'OG-9001', items:1, total:430, paid:true,  shipped:true  },
+    { name:'น้องเป่าเปา',  order_group:'OG-9002', items:1, total:291, paid:false, shipped:false },
+    { name:'คุณยายสมร',    order_group:'OG-9003', items:1, total:430, paid:true,  shipped:false },
+  ]
+};
+
+// ============================================================
+//  BOOTSTRAP
+// ============================================================
+async function boot(){
+  $('#refreshBtn').onclick = () => load(true);
+
+  // ไม่มี event id ใน URL → empty/edge
+  if(!EVENT_GROUP){
+    edgeState('ยังไม่ได้เลือกอีเวนต์',
+      'เปิดหน้านี้จากลิงก์ “จองตีมกับเพื่อน” ที่ส่งให้หัวหน้ากลุ่ม เพื่อดูสถานะการจ่ายของทุกคนในตีมค่ะ',
+      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    return;
+  }
+
+  // ลอง init จริง
+  try{
+    if(window.API && window.CONFIG && !window.CONFIG.USE_MOCK){
+      const r = await window.API.init();
+      const cust = r && r.CUSTOMER;
+      if(cust && cust.id && r.lineUid){ CUSTOMER = cust; LIVE = true; }
+    }
+  }catch(e){ /* ตกไป mock */ }
+
+  if(!LIVE){
+    $('#demoNote').innerHTML = 'โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อดึงสถานะจาก Supabase';
+  }
+
+  await load(false);
+
+  // auto-refresh ทุก ~20 วินาที (เฉพาะ LIVE) เพื่อให้สถานะจ่ายอัปเดตเอง
+  if(LIVE){
+    if(POLL) clearInterval(POLL);
+    POLL = setInterval(()=>{ if(!document.hidden) load(false); }, 20000);
+  }
+}
+
+// ============================================================
+//  LOAD + RENDER
+// ============================================================
+async function load(isRefresh){
+  const btn = $('#refreshBtn');
+  if(isRefresh){ btn.disabled = true; btn.textContent = 'กำลังโหลด…'; }
+
+  let st = null;
+  try{
+    if(LIVE){
+      const r = await window.API.groupEventStatus(EVENT_GROUP, CUSTOMER);
+      if(r && r.error){ st = { error:(r.error.message||String(r.error)) }; }
+      else st = (r && r.data) || { error:'not_found' };
+    } else {
+      st = JSON.parse(JSON.stringify(MOCK_STATUS));
+    }
+  }catch(e){ st = { error:'network' }; }
+  finally{ if(isRefresh){ btn.disabled=false; btn.textContent='รีเฟรช'; } }
+
+  renderStatus(st);
+}
+
+function showDash(on){
+  $('#summarySec').classList.toggle('hide', !on);
+  $('#rosterSec').classList.toggle('hide', !on);
+  $('#edgeSec').classList.toggle('hide', on);
+}
+
+function renderStatus(st){
+  if(!st){ edgeState('โหลดข้อมูลไม่สำเร็จ','ลองกดรีเฟรชอีกครั้งนะคะ'); return; }
+
+  // ---- errors ----
+  if(st.error==='denied'){
+    edgeState('ดูได้เฉพาะสมาชิกกลุ่ม',
+      'หน้านี้สำหรับหัวหน้ากลุ่มและสมาชิกในตีมเท่านั้น — ขอให้คนที่จัดตีมเปิดลิงก์นี้ให้ หรือชวนคุณเข้ากลุ่มก่อนค่ะ',
+      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    return;
+  }
+  if(st.error==='not_found'){
+    edgeState('ไม่พบอีเวนต์นี้',
+      'อาจเป็นเพราะลิงก์ไม่ถูกต้อง หรืออีเวนต์ถูกยกเลิกไปแล้ว',
+      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    return;
+  }
+  if(st.error){
+    edgeState('โหลดสถานะไม่สำเร็จ',
+      'เกิดข้อผิดพลาด ('+esc(st.error)+') — ลองกดรีเฟรชอีกครั้งนะคะ');
+    return;
+  }
+
+  const members = (st.members || []).slice();
+  // ไม่มีสมาชิกเลย
+  if(members.length===0){
+    edgeState('ยังไม่มีคนในตีมนี้',
+      'อีเวนต์นี้ยังไม่มีใครจองชุด — เมื่อเพื่อนเริ่มจองในตีม รายชื่อและสถานะการจ่ายจะปรากฏที่นี่ค่ะ',
+      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    return;
+  }
+
+  showDash(true);
+
+  // theme pill
+  if(st.theme){ $('#themeName').textContent = st.theme; $('#themePill').style.display='inline-flex'; }
+  else { $('#themePill').style.display='none'; }
+
+  // ---- progress summary ----
+  const memCount = st.member_count != null ? st.member_count : members.length;
+  const paidCount = st.paid_count != null ? st.paid_count : members.filter(m=>m.paid).length;
+  const grand = st.grand_total != null ? st.grand_total : members.reduce((s,m)=>s+Number(m.total||0),0);
+  const pct = memCount>0 ? Math.round(paidCount/memCount*100) : 0;
+  const unpaid = Math.max(0, memCount - paidCount);
+
+  $('#evCap').textContent = 'อีเวนต์ ' + (st.event_group || EVENT_GROUP) + ' · ต่างคนต่างจ่าย';
+  $('#paidX').textContent = paidCount;
+  $('#memY').textContent = memCount;
+  $('#grandTot').textContent = baht(grand);
+  $('#barFill').style.width = pct + '%';
+  $('#pctTxt').textContent = pct + '% ชำระแล้ว';
+  $('#leftTxt').textContent = unpaid>0 ? ('เหลืออีก ' + unpaid + ' คนที่ยังไม่จ่าย') : 'ทุกคนจ่ายครบแล้ว';
+
+  // ปุ่มเตือน: เปิดให้กดได้ (เป็น affordance อธิบาย) เมื่อยังมีคนค้างจ่าย
+  const rb = $('#remindBtn'), rh = $('#remindHint');
+  if(unpaid>0){
+    rb.disabled = false;
+    rb.onclick = () => alert('ระบบส่งคำเตือนให้เพื่อนที่ยังไม่จ่ายโดยอัตโนมัติอยู่แล้วค่ะ — คุณช่วยส่งข้อความทักเพื่อนใน LINE กลุ่มได้อีกแรงหนึ่ง');
+    rh.textContent = 'ยังเหลือ ' + unpaid + ' คนที่รอชำระ · ระบบเตือนอัตโนมัติให้อยู่แล้ว';
+  } else {
+    rb.disabled = true;
+    rh.textContent = 'ทุกคนจ่ายครบแล้ว ไม่ต้องเตือนเพิ่ม';
+  }
+
+  // ---- roster: เรียงคนที่ยังไม่จ่ายขึ้นก่อน, แล้วยอดมากก่อน ----
+  members.sort((a,b)=> (Number(!!a.paid) - Number(!!b.paid)) || (Number(b.total||0) - Number(a.total||0)) );
+
+  const rows = members.map(m=>{
+    const warn = !m.paid;
+    let badges;
+    if(m.paid){
+      badges = '<span class="bdg ok">จ่ายแล้ว</span>' + (m.shipped ? '<span class="bdg ship">จัดส่งแล้ว</span>' : '');
+    } else {
+      badges = '<span class="bdg warn">รอชำระ</span>';
+    }
+    const items = Number(m.items||0);
+    return `<div class="rrow ${warn?'warn':''}">
+      <div class="ava" style="background:${avaColor(m.order_group||m.name)}">${esc(initial(m.name))}</div>
+      <div class="rt">
+        <div class="rn">${esc(m.name||'สมาชิก')}</div>
+        <div class="rm">${items>0?(items+' ชุด'):'—'}${m.order_group?(' · '+esc(m.order_group)):''}</div>
+      </div>
+      <div class="rright">
+        <div class="rtot">${baht(m.total)}</div>
+        <div class="badges">${badges}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  $('#rosterBody').innerHTML = rows + `
+    <div class="totbox">
+      <div class="trow"><span class="muted">จ่ายแล้ว ${paidCount} คน</span><span>${baht(members.filter(m=>m.paid).reduce((s,m)=>s+Number(m.total||0),0))}</span></div>
+      ${unpaid>0?`<div class="trow"><span class="muted">รอชำระ ${unpaid} คน</span><span style="color:#8a6d2f">${baht(members.filter(m=>!m.paid).reduce((s,m)=>s+Number(m.total||0),0))}</span></div>`:''}
+      <div class="trow hl"><span>ยอดรวมทั้งกลุ่ม</span><span>${baht(grand)}</span></div>
+    </div>`;
+}
+
+function edgeState(title, body, btnLabel, href){
+  showDash(false);
+  $('#themePill').style.display='none';
+  $('#edgeBody').innerHTML = `<div class="empty">
+    <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
+    <h4>${esc(title)}</h4><p>${esc(body)}</p>
+    ${btnLabel?`<a class="btn ghost" href="${href}">${esc(btnLabel)}</a>`:''}</div>`;
+}
+
+document.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>

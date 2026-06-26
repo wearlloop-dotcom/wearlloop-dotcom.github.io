@@ -1,5 +1,9 @@
 // ===== state =====
 let OCCASIONS = {}, CUSTOMER = {}, EVENT = null, GARMENTS = [], VENUES = [];
+// ส่วนลดพนักงาน: STAFF_PCT>0 เฉพาะพนักงาน → โชว์ราคาลด + ป้าย (ลูกค้าทั่วไป=0 ไม่เปลี่ยนอะไร)
+let STAFF_PCT = 0;
+const staffPrice = (p) => STAFF_PCT > 0 ? Math.round(Number(p || 0) * (1 - STAFF_PCT / 100)) : Number(p || 0);
+const staffTag = () => STAFF_PCT > 0 ? `<span style="display:inline-block;font-size:11px;font-weight:600;color:#0F6E56;background:#E4F0EC;border:1px solid #cfe6da;border-radius:20px;padding:1px 8px;margin-left:6px">${lang==='th'?'พนักงาน':'Staff'} −${STAFF_PCT}%</span>` : '';
 let fOccasion = null, fColor = null, fBrand ='', fToneOnly = false, fForYou = false, fWishOnly = false;
 let gUseDate = null, gAvailSet = null, gOnlyAvail = false;  // เลือกวันใช้ตั้งแต่หน้าแรก
 let gWish = new Set();  // garment id ที่หมายตา (wishlist)
@@ -194,14 +198,14 @@ function renderGrid() {
           <div class="sizes">
             ${fit!= null?`<span>${t('fitGood')} ${fit}%</span>`:''}
             <span>${occName(g.occasion_tags[0])}</span>
-            <span>฿${g.price}</span>
+            <span>฿${staffPrice(g.price)}</span>
           </div>
         </div>
       </div>
       <div class="pmeta">
         <div class="pbrand">${g.brand ||''}</div>
         <div class="pname">${g.name}</div>
-        <div class="pprice">฿${g.price} <span style="color:var(--muted);font-weight:400">/ ${t('perTime')}</span></div>
+        <div class="pprice">฿${staffPrice(g.price)}${staffTag()} <span style="color:var(--muted);font-weight:400">/ ${t('perTime')}</span></div>
         <div class="pcolors">${dots}</div>
       </div>
     </div>`;
@@ -316,7 +320,7 @@ function openDetail(id) {
     </div>
     <div id="quotebox" class="quotebox"></div>`}
     <div class="cta">
-      <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}</span>` : '฿'+g.price}</span>
+      <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}</span>` : '฿'+staffPrice(g.price)+staffTag()}</span>
       ${subCovers(g) ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
       <button id="bookBtn" onclick="reserve('${g.id}')">${t('reserveBtn')}</button>
     </div>
@@ -1437,6 +1441,7 @@ async function boot() {
   try { s = await window.API.init(); }
   catch (e) { console.warn('init failed, fallback to mock', e); s = window.MOCK; }
   OCCASIONS = s.OCCASIONS; CUSTOMER = s.CUSTOMER; EVENT = s.EVENT; GARMENTS = s.GARMENTS;
+  STAFF_PCT = Number(s.staff_pct) || 0;   // พนักงาน → โชว์ราคาลด + ป้าย
   VENUES = window.MOCK.VENUES;
   // มีโปรไฟล์ (ไซซ์/โทนสี/สไตล์จากพาร์ทเนอร์) เปิด"แนะนำสำหรับคุณ"เป็นค่าเริ่มต้น
   fForYou =!!(CUSTOMER.bust_in!= null || CUSTOMER.my_color_season || (CUSTOMER.style_profile && Object.keys(CUSTOMER.style_profile).length));

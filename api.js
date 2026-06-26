@@ -72,7 +72,13 @@ window.API = (function () {
           occasion: ev.occasion, dress_code: ev.dress_code };
       }
     }
-    return { OCCASIONS: window.MOCK.OCCASIONS, CUSTOMER: customer, EVENT: event, GARMENTS: garments, lineUid };
+    // 5) ส่วนลดพนักงาน (ถ้า line_uid ตรงกับพนักงาน → % > 0) — ใช้โชว์ราคาพนักงานตอนไถดู
+    let staff_pct = 0;
+    if (customer.id) {
+      try { const { data: sp } = await c.rpc('staff_discount_pct', { p_customer: customer.id });
+            staff_pct = Number(sp) || 0; } catch (_e) {}
+    }
+    return { OCCASIONS: window.MOCK.OCCASIONS, CUSTOMER: customer, EVENT: event, GARMENTS: garments, lineUid, staff_pct };
   }
 
   async function reserve(garmentId, customer) {
