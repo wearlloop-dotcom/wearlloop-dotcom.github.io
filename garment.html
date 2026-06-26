@@ -121,5 +121,7 @@
   // เปิดจาก QR: /garment.html?code=g1
   const q=new URLSearchParams(location.search).get('code'); if(q){ $('code').value=q; load(); }
 </script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
 </body>
 </html>

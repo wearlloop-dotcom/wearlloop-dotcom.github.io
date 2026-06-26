@@ -87,5 +87,7 @@
     data.forEach(g=>{ new QRCode(document.getElementById('qr_'+g.code), { text: QR_BASE+g.code, width:74, height:74, correctLevel: QRCode.CorrectLevel.M }); });
   })();
 </script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
 </body>
 </html>
