@@ -1,11 +1,11 @@
 // ===== i18n — ไทย / อังกฤษ (เพิ่มภาษาอื่นได้โดยเติม block ใหม่) =====
 window.I18N = {
   th: {
-    promo:'love + loop · จัดส่งฟรี · ชาว Loopers รับลุคใหม่หมุนเวียนทุกเดือน',
+    promo:'love + loop · จัดส่งฟรี · ชาว Loopers มีลุคใหม่เข้า loop ทุกเดือน',
     login:'เข้าสู่ระบบ',
     creditLabel:'กระเป๋า LLOOP',
     heroKicker:'new season · 2026',
-    heroTitle:'หมุนเวียนลุคใหม่<br>ทุกโอกาส',
+    heroTitle:'วนลุคใหม่<br>ทุกโอกาส',
     heroSub:'เช่า · ใส่ · คืน — สวยได้ทุกครั้ง โดยไม่ต้องซื้อเพิ่ม',
     heroCta:'ดูคอลเลกชัน',
     stylistLabel:'จะไปที่ไหนคะ — ให้เราช่วยแนะนำ',
@@ -20,7 +20,7 @@ window.I18N = {
     stretchHelp:'ผ้ายืดช่วยได้', noStretchHelp:'ผ้าไม่ยืด',
     bust:'อก', waist:'เอว', hip:'สะโพก', length:'ความยาว', free:'อิสระ', cm:'ซม.',
     lining:'มีซับใน', sheer:'โปร่ง', notSheer:'ไม่โปร่ง', noStretch:'ไม่ยืด', slight:'ยืดเล็กน้อย', stretchy:'ยืดได้',
-    rotating:'หมุนเวียน',
+    rotating:'ใน loop',
     reserveBtn:'จองชุดนี้', readyDate:'24 มิ.ย.',
     creditPre:'ใช้กระเป๋า LLOOP ฿', creditMid:' · เหลือจ่าย ฿',
     reservedPre:'จอง', reservedPost:'แล้ว · รับวันที่',
@@ -32,6 +32,7 @@ window.I18N = {
     vAppropriate:'ความเหมาะสม', vAesthetics:'ความสวยงาม', vMobility:'ความคล่องตัว', vDressCodeOn:'มี Dress code', vDressCodeOff:'ไม่บังคับ dress code',
     vPicks:'ชุดแนะนำจากคลังเรา', vOpenGarment:'ดูรายละเอียด', vBonusHint:'เช่าชุดทุกครั้งรับสิทธิ์ AI สไตลิสต์ +3', vMapNote:'ตำแหน่งสถานที่', vFromPhoto:'จากรูปจริง',
     vBasis:'ประเมินจากโทนผิวของคุณ + บรรยากาศและ dress code ของสถานที่', vReadMore:'อ่านเพิ่ม', vReadLess:'ย่อ', vWhy:'ทำไมถึงแนะนำ', vPicksLead:'ใส่ตัวนี้สิ',
+    vPickDate:'เลือกวันที่ไปงานก่อนนะคะ จะได้แนะนำเฉพาะชุดที่ว่างวันนั้น', vDatePlaceholder:'วันที่ไป',
     empty:'ยังไม่มีชุดที่ตรงเงื่อนไข — ลองปรับตัวกรองดูนะคะ',
     introHouse:'circular fashion house', introTag:'love + loop', introSub:'แชร์ลุคสวย ช่วยรักษ์โลก · share the look, save the planet', introEnter:'เข้าสู่คอลเลกชัน',
     cyc: ['เช่า','ใส่','คืน','ส่งต่อ'],
@@ -71,6 +72,7 @@ window.I18N = {
     vAppropriate:'Appropriateness', vAesthetics:'Aesthetics', vMobility:'Comfort & movement', vDressCodeOn:'Has a dress code', vDressCodeOff:'No strict dress code',
     vPicks:'Picks from our collection', vOpenGarment:'View', vBonusHint:'Every rental adds +3 AI stylist uses', vMapNote:'Location', vFromPhoto:'from the photo',
     vBasis:'Based on your colours + the venue’s vibe and dress code', vReadMore:'more', vReadLess:'less', vWhy:'Why these', vPicksLead:'Wear this',
+    vPickDate:'Pick your date first — so we only suggest what’s free that day', vDatePlaceholder:'date',
     empty:'No pieces match — try adjusting the filters',
     introHouse:'circular fashion house', introTag:'love + loop', introSub:'share the look, save the planet', introEnter:'Enter the collection',
     cyc: ['rent','wear','return','pass on'],

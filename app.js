@@ -6,6 +6,7 @@ const staffPrice = (p) => STAFF_PCT > 0 ? Math.round(Number(p || 0) * (1 - STAFF
 const staffTag = () => STAFF_PCT > 0 ? `<span style="display:inline-block;font-size:11px;font-weight:600;color:#0F6E56;background:#E4F0EC;border:1px solid #cfe6da;border-radius:20px;padding:1px 8px;margin-left:6px">${lang==='th'?'พนักงาน':'Staff'} −${STAFF_PCT}%</span>` : '';
 let fOccasion = null, fColor = null, fBrand ='', fToneOnly = false, fForYou = false, fWishOnly = false;
 let gUseDate = null, gAvailSet = null, gOnlyAvail = false;  // เลือกวันใช้ตั้งแต่หน้าแรก
+let gStylistPending = false;  // กดแนะนำแต่ยังไม่เลือกวัน → พอเลือกแล้วยิงต่อให้เอง
 let gWish = new Set();  // garment id ที่หมายตา (wishlist)
 let gDur = 3;           // ระยะเวลาเช่า (วัน) ในหน้ารายละเอียด
 let gCart = [];         // ตะกร้าจองหลายชุด → [{id,code,name,price}]
@@ -256,7 +257,11 @@ async function setHomeDate(d) {
   gUseDate = d || null;
   if (gUseDate) { try { gAvailSet = await window.API.availableSetOn?.(gUseDate); } catch (e) { gAvailSet = null; } }
   else { gAvailSet = null; gOnlyAvail = false; }
+  // sync ช่องวันที่ทั้งสองจุด (แถบ stylist + datebar ใต้กริด)
+  const vd = $('#venueDate'); if (vd) { vd.value = gUseDate || ''; vd.classList.remove('need'); }
   renderDatebar(); renderGrid();
+  // ถ้าค้างรอเลือกวันอยู่ (กดแนะนำไปแล้วแต่ยังไม่มีวัน) → ยิงต่อให้เอง
+  if (gUseDate && gStylistPending) { gStylistPending = false; askVenue(); }
 }
 function clearHomeDate() { gUseDate = null; gAvailSet = null; gOnlyAvail = false; renderDatebar(); renderGrid(); }
 function toggleOnlyAvail() { gOnlyAvail = !gOnlyAvail; renderDatebar(); renderGrid(); }
@@ -286,11 +291,19 @@ async function askVenue() {
     el.innerHTML = `<div class="note"><b style="color:var(--ink)">${t('vLoginNeed')}</b></div>`;
     return;
   }
+  // บังคับเลือกวันที่ก่อน — เพื่อแนะนำเฉพาะชุดที่ว่างวันนั้น
+  if (!gUseDate) {
+    gStylistPending = true;
+    el.className = 'vresult show';
+    el.innerHTML = `<div class="note"><b style="color:var(--ink)">${t('vPickDate')}</b></div>`;
+    const di = $('#venueDate'); if (di) { di.classList.add('need'); try { di.focus(); di.showPicker && di.showPicker(); } catch (_e) {} }
+    return;
+  }
   const name = place ? place.name : q;
   el.className ='vresult show';
   el.innerHTML =`<span class="note">${t('vAnalyzingPre')} “${esc(name)}”…</span>`;
 
-  const v = await window.API.stylist({ venue: name, place, occasion: EVENT && EVENT.occasion }, lang);
+  const v = await window.API.stylist({ venue: name, place, occasion: EVENT && EVENT.occasion, date: gUseDate }, lang);
 
   if (!v || v.ok === false) {
     const msg = v && v.error === 'no_quota' ? t('vNoQuota')
@@ -310,10 +323,11 @@ async function askVenue() {
     if (!g) return '';
     const photo = g.photo || (Array.isArray(g.photos) && g.photos[0]);
     const thumb = photo ? `background-image:url('${esc(photo)}')` : `background:${esc(g.bg||'#E7E2DA')}`;
+    const free = gUseDate ? `<span class="pfree">${lang==='th'?'ว่าง '+fmtDate(gUseDate):'free '+fmtDate(gUseDate)}</span>` : '';
     return `<div class="vpick" onclick="openDetail('${esc(g.id)}')">
       <div class="pthumb" style="${thumb}"></div>
       <div class="pbody">
-        <div class="pname">${esc(g.name)}</div>
+        <div class="pname">${esc(g.name)}${free}</div>
         <div class="pwhy">${esc(rg.why||'')}</div>
         ${rg.fit_note?`<div class="pfit">${esc(rg.fit_note)}</div>`:''}
       </div>
@@ -1109,7 +1123,7 @@ function openProfile(onboard) {
       ${renderStyleCard(c)}
       ${renderImpactCard()}
       ${renderReferralCard()}
-      <div class="field"><label>${t('pName')}</label><input id="pName" value="${c.name || c.display_name ||''}"></div>
+      <div class="field"><label>${t('pName')}</label><input id="pName" autocomplete="name" value="${c.name || c.display_name ||''}"></div>
       <div class="frow">
         <div class="field"><label>${t('pHeight')}</label><input id="pHeight" type="number" value="${c.height_cm ||''}"></div>
         <div class="field"><label>${t('pShoe')}</label><input id="pShoe" value="${c.shoe_size ||''}"></div>
@@ -1137,10 +1151,10 @@ function openProfile(onboard) {
       </div>
       <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง — ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>
       <div class="frow">
-        <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" value="${c.phone || ''}"></div>
+        <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
         <div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>
       </div>
-      <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label><input id="pAddress" value="${c.address || ''}"></div>
+      <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label><textarea id="pAddress" rows="3" autocomplete="shipping street-address" inputmode="text" placeholder="${lang === 'th' ? 'บ้านเลขที่ / หมู่บ้าน-คอนโด / ซอย / ถนน\nตำบล/แขวง อำเภอ/เขต\nจังหวัด รหัสไปรษณีย์' : 'House no. / building / soi / road\nsubdistrict, district\nprovince, postal code'}">${c.address || ''}</textarea><div class="subhint">${lang === 'th' ? 'แตะช่องแล้วเลือกที่อยู่ที่บันทึกไว้ในมือถือได้เลย — เด้งขึ้นเหนือคีย์บอร์ด' : 'Tap the field and pick a saved address from your phone — it appears above the keyboard'}</div></div>
       <div class="field"><label>${t('pNotes')}</label><input id="pNotes" value="${c.notes ||''}"></div>
       <button class="savebtn" onclick="saveProfile()">${t('pSave')}</button>
     </div>`;
@@ -1293,15 +1307,15 @@ async function openImpact() {
     <button class="close" onclick="closeImpact()">×</button>
     <div class="impact-hero">
       ${leaf}
-      <div class="ik">${en ? 'the good you keep in the loop' : 'ความดีที่คุณหมุนเวียน'}</div>
+      <div class="ik">${en ? 'the good you keep in the loop' : 'ความดีที่คุณวนต่อ'}</div>
       <div class="ihead">${en ? 'wear one look, care for the planet once more' : 'เช่าหนึ่งชุด ดูแลโลกอีกหนึ่งครั้ง'}</div>
-      <div class="iline">${en ? 'every time you choose to rotate instead of buy new, you truly give back to the earth' : 'ทุกครั้งที่คุณเลือกหมุนเวียนแทนซื้อใหม่ คือการคืนบางอย่างให้โลกใบนี้จริง ๆ'}</div>
+      <div class="iline">${en ? 'every time you choose to rotate instead of buy new, you truly give back to the earth' : 'ทุกครั้งที่คุณเลือกวนใช้ซ้ำแทนซื้อใหม่ คือการคืนบางอย่างให้โลกใบนี้จริง ๆ'}</div>
       <div class="ibig">
         <div>~<b data-to="${im.water_l || 0}">0</b><span>${en ? 'litres water saved (est.)' : 'ลิตรน้ำที่ช่วยประหยัด (ประมาณ)'}</span></div>
         <div class="div"></div>
         <div>~<b data-to="${im.co2_kg || 0}">0</b><span>${en ? 'kg carbon reduced (est.)' : 'กก. คาร์บอนที่ลด (ประมาณ)'}</span></div>
         <div class="div"></div>
-        <div><b data-to="${im.rentals || 0}">0</b><span>${en ? 'looks rotated' : 'ครั้งที่หมุนเวียน'}</span></div>
+        <div><b data-to="${im.rentals || 0}">0</b><span>${en ? 'looks rotated' : 'ครั้งที่วนใส่'}</span></div>
       </div>
       <div style="font-size:11px;color:#A39472;margin-top:14px">${en ? '* water & carbon are estimates based on industry averages' : '* ตัวเลขน้ำและคาร์บอนเป็นค่าประมาณจากค่าเฉลี่ยอุตสาหกรรม'}</div>
       <div class="icharity">${en ? 'and you have passed on' : 'และคุณได้ส่งต่อ'} <b data-to="${im.charity_thb || 0}" data-prefix="฿">฿0</b> ${en ? 'to ' + (im.charity_name || 'children in need') : 'ให้' + (im.charity_name || 'เด็กยากไร้')}</div>
@@ -1339,7 +1353,7 @@ async function openMembership() {
     <div style="text-align:center;padding:18px 0 6px">
       <div style="font-size:11px;letter-spacing:3px;color:var(--muted)">${en ? 'MEMBERSHIP' : 'สมาชิกรายเดือน'}</div>
       <div style="font-family:var(--display);font-size:24px;font-weight:700;color:var(--ink);margin-top:4px">Looper Membership</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:4px">${en ? 'rotate new looks every month' : 'หมุนเวียนลุคใหม่ได้ทุกเดือน คุ้มกว่าเช่ารายชุด'}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">${en ? 'rotate new looks every month' : 'วนลุคใหม่ได้ทุกเดือน คุ้มกว่าเช่ารายชุด'}</div>
     </div>
     <div id="memberBody" style="padding:6px 2px 24px">${en ? 'Loading…' : 'กำลังโหลด…'}</div>`;
   let sub = CUSTOMER._sub || { active: false };
@@ -1479,7 +1493,7 @@ async function openOrders() {
     <button class="close" onclick="closeOrders()">×</button>
     <div class="ordershead">
       <div class="ok">${lang ==='th'?'ออเดอร์ของฉัน':'My Rentals'}</div>
-      <div class="ohead">${lang ==='th'?'ลุคที่คุณเช่าหมุนเวียน':'the looks you keep in the loop'}</div>
+      <div class="ohead">${lang ==='th'?'ลุคโปรดที่หยิบกลับมาใส่ได้เสมอ':'the looks you keep in the loop'}</div>
     </div>
     <div id="ordersBody" class="ordersbody"><div class="oloading">${lang ==='th'?'กำลังดึงออเดอร์…':'loading your rentals…'}</div></div>`;
   sh.scrollTop = 0;
@@ -1557,7 +1571,7 @@ function openReview(rentalId, name) {
       <div class="rvvhint">${lang ==='th'?'โพสต์คลิปรีวิวบริการเราในโซเชียล แล้วแปะลิงก์ + พิมพ์สั้น ๆ ว่ารีวิวว่าอะไร — ระบบตรวจให้ ได้เครดิตเมื่อเป็นรีวิวเชิงบวก' : 'Post a clip reviewing us, paste the link + a short summary'}</div>
       <select id="rvPlatform" class="rvtext"><option value="">${lang ==='th'?'เลือกแพลตฟอร์ม':'Platform'}</option><option>TikTok</option><option>Instagram</option><option>YouTube</option><option>Facebook</option><option>${lang ==='th'?'อื่น ๆ':'Other'}</option></select>
       <input id="rvVideo" class="rvtext" placeholder="${lang ==='th'?'ลิงก์คลิปรีวิว https://...':'Video link https://...'}">
-      <textarea id="rvVideoText" class="rvtext" rows="2" placeholder="${lang ==='th'?'พิมพ์สั้น ๆ ว่าในคลิปรีวิวว่าอะไร':'Summarize what you said in the clip'}"></textarea>
+      <textarea id="rvVideoText" class="rvtext" rows="2" placeholder="${lang ==='th'?'เล่าสั้น ๆ ว่าในคลิปพูดถึงอะไร':'Summarize what you said in the clip'}"></textarea>
     </div>
     <button class="rvsubmit" onclick="submitReview()">${lang ==='th'?'ส่งรีวิว':'Send review'}</button>`;
   $('#reviewOverlay').classList.add('open');
@@ -1594,8 +1608,8 @@ async function submitReview() {
     const photos = _reviewPhotos.length ? _reviewPhotos : null;
     try { await window.API.addReview(_reviewRental, _reviewRating, _reviewFit, comment, photos); } catch (e) { console.warn(e); }
     toast(photos
-      ? (lang ==='th'?'ขอบคุณที่แชร์รูปจริง! +฿15 — คุณช่วยให้วงจรหมุนเวียนแข็งแรง รักษ์โลกไปด้วยกันนะคะ':'Thank you for sharing! +฿15 — you keep our loop strong')
-      : (lang ==='th'?'ขอบคุณสำหรับรีวิวค่ะ ช่วยให้ชุมชนหมุนเวียนแข็งแรงขึ้น':'Thank you — you make our community stronger'));
+      ? (lang ==='th'?'ขอบคุณที่แชร์รูปจริงนะคะ! +฿15 — ทุกครั้งที่ชุดได้ใส่ซ้ำ คือช่วยกันรักษ์โลกค่ะ':'Thank you for sharing! +฿15 — you keep our loop strong')
+      : (lang ==='th'?'ขอบคุณสำหรับรีวิวนะคะ ทุกความเห็นช่วยให้เพื่อน ๆ เลือกชุดที่ใช่ได้ง่ายขึ้นค่ะ':'Thank you — you make our community stronger'));
   }
 }
 function animateCounts(root) {
@@ -1682,7 +1696,7 @@ function renderImpactCard() {
     <div class="ecokick">${lang === 'th' ? 'ทุกการเลือกของคุณ สร้างความเปลี่ยนแปลง' : 'every choice you make matters'}</div>
     <div class="ecohead">${lang === 'th' ? 'สิ่งที่คุณช่วยเซฟไปแล้ว' : 'what you have saved so far'}</div>
     <div class="ecostats">
-      <div><b data-to="${im.rentals}">0</b><span>${lang === 'th' ? 'ครั้งที่หมุนเวียน' : 'rotations'}</span></div>
+      <div><b data-to="${im.rentals}">0</b><span>${lang === 'th' ? 'ครั้งที่วนใส่' : 'rotations'}</span></div>
       <div>~<b data-to="${im.water_l || 0}">0</b><span>${lang === 'th' ? 'ลิตรน้ำ (ประมาณ)' : 'litres water (est.)'}</span></div>
       <div>~<b data-to="${im.co2_kg || 0}">0</b><span>${lang === 'th' ? 'กก. คาร์บอน (ประมาณ)' : 'kg carbon (est.)'}</span></div>
     </div>
@@ -1734,6 +1748,7 @@ async function boot() {
   if (!CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();
   if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
+  const vd = $('#venueDate'); if (vd) { vd.min = todayStr(); vd.value = gUseDate || ''; }
   refreshStylistQuota();
   await maybeShowTerms();
   maybeOnboard();

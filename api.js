@@ -12,6 +12,8 @@ window.API = (function () {
   function mapGarment(r) {
     return {
       id: r.id, code: r.code, name: r.name || r.code, brand: r.brand, tier: r.tier, price: r.rental_price, category: r.category,
+      retail: r.replacement_value != null ? Number(r.replacement_value) : null,  // มูลค่าชุด (โชว์ความคุ้ม)
+      grade: r.condition_grade || null, washCount: r.wash_count ?? null,         // ความสะอาด/ดูแล
       timesRented: r.times_rented ?? 0,
       photo: (Array.isArray(r.photos) && r.photos[0]) || r.photo || null,
       styling_tips: r.styling_tips || [],
@@ -117,14 +119,14 @@ window.API = (function () {
   // AI Stylist — วิเคราะห์สถานที่ (จาก Google Place) + personal ลูกค้า + คลังจริง → แนะนำชุดเป็นตัว ๆ
   // payload: { venue, place?:{name,types[],price_level,lat,lng}, occasion? }
   async function stylist(payload, lang) {
-    const { venue, place, occasion } = payload || {};
+    const { venue, place, occasion, date } = payload || {};
     if (!CONFIG.USE_MOCK) {
       let idToken = null;
       try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (_e) {}
       const r = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/stylist`, {
         method:'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ id_token: idToken, venue, place, occasion, lang }),
+        body: JSON.stringify({ id_token: idToken, venue, place, occasion, lang, date }),
       });
       return await r.json().catch(() => ({ ok:false, error:'network'}));
     }
@@ -199,6 +201,12 @@ window.API = (function () {
   async function myImpact(customer) {
     if (CONFIG.USE_MOCK ||!customer.id) return null;
     const { data } = await client().rpc('my_impact', { p_customer: customer.id });
+    return data;
+  }
+  // กระเป๋า LLOOP + ชั้น Loopers Club (ยอดเงินใช้จ่าย + ความคืบหน้าชั้น)
+  async function myWallet(customer) {
+    if (CONFIG.USE_MOCK ||!customer.id) return null;
+    const { data } = await client().rpc('my_wallet', { p_customer: customer.id });
     return data;
   }
   // AI ครบลุค — ทรงผม/เครื่องประดับที่เข้ากับชุด (prod = Edge Function, ไม่งั้น mock)
@@ -373,7 +381,10 @@ window.API = (function () {
     const { data, error } = window.meRpc
       ? await window.meRpc('submit_kyc', a)
       : await client().rpc('submit_kyc', { p_customer: customer.id, ...a });
-    return { ok: !error && (data === 'verified' || data === 'pending'), status: data, error };
+    // สำเร็จ = ไม่มี error และไม่ได้คืนโค้ดล้มเหลว ('no_customer'/ว่าง)
+    // ทนทุก return contract: 'verified' | 'pending' | 'ok' (เวอร์ชันเก่า) ถือว่าสำเร็จหมด
+    const ok = !error && !!data && data !== 'no_customer';
+    return { ok, status: data === 'pending' ? 'pending' : 'verified', error };
   }
   // อัปโหลดบัตร ปชช ไป Storage (private-ish bucket 'uploads') → url
   async function uploadIdCard(file) {
@@ -556,6 +567,12 @@ window.API = (function () {
     const { data, error } = await client().rpc('group_event_status', { p_event: eventGroup, p_requester: requester.id });
     return { ok: !error, data, error };
   }
+  // privacy: ซ่อน/แสดงรูปโปรไฟล์ของตัวเองในกลุ่ม
+  async function setPictureHidden(customer, hidden) {
+    if (CONFIG.USE_MOCK || !customer?.id) return { ok: true };
+    const { data, error } = await client().rpc('set_picture_hidden', { p_customer: customer.id, p_hide: !!hidden });
+    return { ok: !error, data, error };
+  }
 
   // ===== ช่องทางชำระเงิน (โชว์ตอน checkout) — cache ไว้ =====
   let _payInfo;
@@ -581,5 +598,5 @@ window.API = (function () {
     return { ok: true, ...data };
   }
 
-  return { init, reserve, saveProfile, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, payInfo, birthdayStatus, birthdayReserve };
+  return { init, reserve, saveProfile, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, payInfo, birthdayStatus, birthdayReserve };
 })();

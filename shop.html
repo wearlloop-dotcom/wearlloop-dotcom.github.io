@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เช่าชุด · หน้าร้าน</title>
+<!--
+  หน้าร้าน canonical (ต้นฉบับเดียว) — ใช้ design token ชุดเดียวกับ liff/index.html
+  ดึงชุดสด จาก garments (data_status=ready) = อัปเดตคลังที่เดียว หน้านี้เปลี่ยนตาม
+  ใช้เป็น: (1) หน้าร้านบนเว็บเรา  (2) ต้นฉบับอ้างอิงดีไซน์ตอนจัดหน้าร้าน Shopee/Lazada
+  แบนเนอร์ marketplace export จาก liff/marketplace/*.svg (โทนเดียวกัน)
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF; --ink:#1A1A1A; --soft:#F5F4F2; --soft2:#EFEDE9; --line:#E7E5E1;
+    --muted:#8C8B86; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56; --gold:#C9A86A;
+    --display:'Poppins','Prompt',sans-serif;
+    --sans:'Inter','Prompt',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  img{display:block;max-width:100%}
+  button,a{font-family:inherit;cursor:pointer;color:inherit;text-decoration:none}
+  .wrap{max-width:480px;margin:0 auto}
+
+  header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20;text-align:center;padding:13px}
+  .logo{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:1px}
+
+  .hero{position:relative;background:linear-gradient(120deg,#EDE7DF,#E6DCD2);padding:38px 22px 34px;text-align:center}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:32px;line-height:1.05;letter-spacing:.5px;color:var(--ink)}
+  .hero p{margin-top:10px;font-size:13.5px;color:#6A6760;max-width:300px;margin-left:auto;margin-right:auto}
+  .hbtn{margin-top:18px;display:inline-block;background:var(--ink);color:#fff;padding:13px 30px;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600}
+
+  .trust{display:flex;border-bottom:1px solid var(--line)}
+  .trust div{flex:1;text-align:center;padding:13px 4px;border-right:1px solid var(--line)}
+  .trust div:last-child{border-right:none}
+  .trust .ic{font-size:18px;color:var(--ok)}
+  .trust .tx{margin-top:4px;font-size:11px;color:var(--muted)}
+
+  section{padding:20px 16px}
+  .sh{font-family:var(--display);font-size:17px;font-weight:600;margin-bottom:14px}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .col{height:96px;border-radius:8px;display:flex;align-items:flex-end;padding:11px;font-family:var(--display);font-weight:600;font-size:14px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .pcard{background:#fff}
+  .pphoto{position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--soft2);border-radius:6px}
+  .pphoto img{width:100%;height:100%;object-fit:cover}
+  .pphoto .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,.22);font-family:var(--display);font-weight:500;text-align:center;padding:0 12px}
+  .pname{font-family:var(--display);font-size:13px;font-weight:500;margin-top:8px;line-height:1.25}
+  .pprice{font-size:13px;color:var(--ink);margin-top:2px}
+  .pprice small{color:var(--muted);font-weight:400}
+  .pout{position:absolute;top:8px;left:8px;background:rgba(26,26,26,.82);color:#fff;font-size:10px;padding:3px 8px;border-radius:3px;letter-spacing:.5px}
+
+  .steps{background:var(--soft);display:flex;gap:8px}
+  .step{flex:1;text-align:center}
+  .step .n{width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--display);font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto}
+  .step .t{margin-top:7px;font-size:11.5px;color:#5A584F}
+
+  footer{text-align:center;padding:26px 16px 36px;color:var(--muted);font-size:11px;border-top:1px solid var(--line)}
+  .loading{text-align:center;color:var(--muted);padding:30px;font-size:13px}
+
+  /* --- ลูกเล่น: ribbon วิ่ง --- */
+  .ribbon{overflow:hidden;background:var(--ink);white-space:nowrap}
+  .ribbon .track{display:inline-flex;animation:marq 24s linear infinite;will-change:transform}
+  .ribbon:hover .track{animation-play-state:paused}
+  .ribbon u{display:inline-flex;align-items:center;text-decoration:none;color:#F2ECDD;padding:8px 0;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+  .ribbon u i{font-style:normal;color:var(--gold);padding:0 16px}
+  @keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* --- ลูกเล่น: ฮีโร่ลายเส้น craft ลอย --- */
+  .hero{overflow:hidden}
+  .hero .inner{position:relative;z-index:3}
+  .heroart{position:absolute;inset:0;z-index:1;pointer-events:none}
+  .blob{position:absolute;border-radius:50%;z-index:1;pointer-events:none}
+  .float{animation:floaty 6s ease-in-out infinite}
+  .float.s{animation-duration:8.5s;animation-direction:reverse}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+  .rotwrap{display:inline-block;height:1.06em;overflow:hidden;vertical-align:bottom}
+  .rotw{display:inline-block;color:var(--ok);transition:transform .5s cubic-bezier(.5,0,.2,1),opacity .5s}
+  .spark{display:inline-block;color:var(--gold);animation:tw 2.4s ease-in-out infinite}
+  @keyframes tw{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><div class="logo">LLOOP</div></header>
+
+  <div class="ribbon"><div class="track">
+    <u>มัดจำคืนเต็ม<i>◇</i>ส่งทั่วไทย<i>✿</i>สไตลิสต์ช่วยเลือกฟรี<i>✦</i>เช่าง่าย จบใน LINE<i>◇</i></u>
+    <u aria-hidden="true">มัดจำคืนเต็ม<i>◇</i>ส่งทั่วไทย<i>✿</i>สไตลิสต์ช่วยเลือกฟรี<i>✦</i>เช่าง่าย จบใน LINE<i>◇</i></u>
+  </div></div>
+
+  <div class="hero">
+    <svg class="heroart" viewBox="0 0 480 320" preserveAspectRatio="xMidYMid slice" fill="none">
+      <g stroke="#C9A86A" stroke-width="1.4" opacity="0.55">
+        <path class="float" d="M386 250 V150 a44 44 0 0 1 88 0 V250"/>
+        <path d="M40 286 q40 -26 80 0 t80 0" stroke-dasharray="2 7" stroke-linecap="round"/>
+      </g>
+      <g stroke="#6FB3A6" stroke-width="1.4" opacity="0.5">
+        <path class="float s" d="M30 70 a30 30 0 0 1 60 0 V120" />
+        <path d="M300 40 q34 22 0 44 t0 44" stroke-dasharray="2 8" stroke-linecap="round"/>
+      </g>
+      <g class="float">
+        <circle cx="430" cy="150" r="3.5" fill="#C9A86A"/>
+        <circle cx="60" cy="44" r="3" fill="#6FB3A6"/>
+      </g>
+    </svg>
+    <span class="blob float" style="width:120px;height:120px;background:#E4F0EC;opacity:.55;top:-26px;right:-22px"></span>
+    <span class="blob float s" style="width:90px;height:90px;background:#F0E4CF;opacity:.55;bottom:-30px;left:-24px"></span>
+
+    <div class="inner">
+      <h1>เช่าชุดสวย<br>ใส่ไป<span class="rotwrap"><span class="rotw" id="rotw">งานแต่ง</span></span> <span class="spark">✦</span></h1>
+      <p>ไม่ต้องซื้อ ไม่ต้องเก็บ ส่งคืนแล้วเราซักให้</p>
+      <a class="hbtn" id="ctaLine">ทักไลน์ให้สไตลิสต์ช่วยเลือก</a>
+    </div>
+  </div>
+
+  <div class="trust">
+    <div><div class="ic">◇</div><div class="tx">มัดจำคืนเต็ม</div></div>
+    <div><div class="ic">✿</div><div class="tx">ส่งทั่วไทย</div></div>
+    <div><div class="ic">✦</div><div class="tx">สไตลิสต์ช่วยเลือก</div></div>
+  </div>
+
+  <section>
+    <div class="sh">เลือกตามงาน</div>
+    <div class="cols">
+      <div class="col" style="background:#F0D9CE;color:#7A4A33">งานแต่ง</div>
+      <div class="col" style="background:#F2E2C0;color:#7A5A1E">รับปริญญา</div>
+      <div class="col" style="background:#D8ECE4;color:#1E5347">ปาร์ตี้ค่ำคืน</div>
+      <div class="col" style="background:#E0DCEF;color:#463A6E">ออกงานกลางวัน</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sh">ชุดมาใหม่</div>
+    <div class="grid" id="grid"><div class="loading">กำลังโหลดชุด…</div></div>
+  </section>
+
+  <section class="steps">
+    <div class="step"><div class="n">1</div><div class="t">จองค่าจอง</div></div>
+    <div class="step"><div class="n">2</div><div class="t">ยืนยันใน LINE</div></div>
+    <div class="step"><div class="n">3</div><div class="t">รับชุด · คืน · จบ</div></div>
+  </section>
+
+  <footer>LLOOP · เช่าชุดพร้อมสไตลิสต์ · มัดจำคืนเต็มทุกครั้ง</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+(async function(){
+  const C = window.CONFIG || {};
+  const LINE = C.LINE_OA_URL || 'https://line.me/R/ti/p/@lloop';
+  document.getElementById('ctaLine').href = LINE;
+
+  const grid = document.getElementById('grid');
+  function baht(n){ return '฿' + Math.round(Number(n)||0).toLocaleString('th-TH'); }
+
+  const rotw = document.getElementById('rotw');
+  if (rotw){
+    const words = ['งานแต่ง','รับปริญญา','ปาร์ตี้ค่ำคืน','ออกเดท','ทุกวันสำคัญ'];
+    let i = 0;
+    setInterval(function(){
+      rotw.style.opacity = 0; rotw.style.transform = 'translateY(-100%)';
+      setTimeout(function(){
+        i = (i+1) % words.length; rotw.textContent = words[i];
+        rotw.style.transition = 'none'; rotw.style.transform = 'translateY(100%)';
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){
+          rotw.style.transition = ''; rotw.style.opacity = 1; rotw.style.transform = 'translateY(0)';
+        }); });
+      }, 480);
+    }, 2400);
+  }
+
+  function card(g){
+    const photo = (Array.isArray(g.photos) && g.photos[0]) || g.photo || null;
+    const price = g.rate_1d ?? g.rental_price ?? 0;
+    const out = !(g.status === 'available');
+    const img = photo
+      ? `<img src="${photo}" alt="${g.name||g.code||''}" loading="lazy">`
+      : `<div class="ph">${g.name || g.code || 'ชุด'}</div>`;
+    return `<a class="pcard" href="${LINE}">
+      <div class="pphoto">${img}${out?'<span class="pout">มีคิวจอง</span>':''}</div>
+      <div class="pname">${g.name || g.code || ''}</div>
+      <div class="pprice">${baht(price)} <small>/ วัน</small></div>
+    </a>`;
+  }
+
+  try{
+    if(!C.SUPABASE_URL || !window.supabase){ grid.innerHTML = '<div class="loading">ตั้งค่า config.js ก่อน</div>'; return; }
+    const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+    const { data, error } = await sb.from('garments')
+      .select('id,code,name,rate_1d,rental_price,photos,status,color_name,times_rented')
+      .eq('data_status','ready')
+      .order('times_rented', { ascending:false })
+      .limit(24);
+    if(error) throw error;
+    grid.innerHTML = (data && data.length)
+      ? data.map(card).join('')
+      : '<div class="loading">ยังไม่มีชุดพร้อมเช่า</div>';
+  }catch(e){
+    grid.innerHTML = '<div class="loading">โหลดชุดไม่สำเร็จ</div>';
+  }
+})();
+</script>
+</body>
+</html>
