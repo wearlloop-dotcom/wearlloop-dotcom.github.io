@@ -685,15 +685,21 @@ window.API = (function () {
 
   // ===== ชุมชน The Loop Looks =====
   // ฟีดชุมชน (อ่านสาธารณะ) — รวมลุคที่แชร์ + รีวิวรูป + UGC · กรองตามโอกาสได้
-  async function communityFeed(limit, before, occasion) {
+  async function communityFeed(limit, before, occasion, tag) {
     if (CONFIG.USE_MOCK) return [];
-    const { data } = await client().rpc('community_feed', { p_limit: limit || 24, p_before: before || null, p_occasion: occasion || null });
+    const { data } = await client().rpc('community_feed', { p_limit: limit || 24, p_before: before || null, p_occasion: occasion || null, p_tag: tag || null });
     return data || [];
   }
   // รายการโอกาส (chips กรองฟีด)
   async function lookOccasions() {
     if (CONFIG.USE_MOCK) return [];
     const { data } = await client().rpc('look_occasions', {});
+    return data || [];
+  }
+  // แฮชแท็กยอดนิยม (chips)
+  async function lookTags() {
+    if (CONFIG.USE_MOCK) return [];
+    const { data } = await client().rpc('look_tags', {});
     return data || [];
   }
   // โปรไฟล์ครีเอเตอร์สาธารณะ (ค้นด้วย handle/link_code)
@@ -751,7 +757,18 @@ window.API = (function () {
   async function addComment(lookId, body) {
     if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
     const { data, error } = await window.meRpc('add_comment', { p_look: lookId, p_body: body });
-    return error ? { ok: false, error } : (data || { ok: false });
+    const res = error ? { ok: false, error } : (data || { ok: false });
+    // AI moderation ชั้นสอง (ถ้า keyword ไม่ได้ซ่อนไว้แล้ว) — best-effort, ไม่บล็อก UX
+    if (res.ok && res.id && !res.hidden) {
+      let idToken = null; try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (e) {}
+      try {
+        await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/comment-audit`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_token: idToken, comment_id: res.id }),
+        });
+      } catch (e) { /* เงียบ */ }
+    }
+    return res;
   }
   async function lookComments(lookId) {
     if (CONFIG.USE_MOCK) return [];
@@ -779,5 +796,5 @@ window.API = (function () {
     return data || [];
   }
 
-  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, creatorProfile, myCreator, setHandle, shareLook, logLookView, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard };
+  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard };
 })();

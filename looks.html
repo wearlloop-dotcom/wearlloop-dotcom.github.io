@@ -81,6 +81,32 @@
   .occ::-webkit-scrollbar{display:none}
   .ochip{flex-shrink:0;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
   .ochip.on{background:var(--sand);color:var(--ink);border-color:var(--gold)}
+  .tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+  .tagln{font-size:11.5px;color:var(--sage);font-weight:600;cursor:pointer}
+  .tagclr{display:inline-flex;align-items:center;gap:6px;background:var(--sand);border:1px solid var(--gold);border-radius:20px;padding:5px 12px;font-size:12.5px;font-weight:600;margin-top:12px;cursor:pointer}
+  /* story viewer (เต็มจอแบบ IG) */
+  .story{position:fixed;inset:0;background:#000;z-index:300;display:none;flex-direction:column}
+  .story.open{display:flex}
+  .story .bars{display:flex;gap:4px;padding:10px 12px 6px}
+  .story .bar{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3)}
+  .story .bar.on{background:#fff}
+  .story .top{display:flex;align-items:center;gap:9px;padding:4px 14px 8px;color:#fff}
+  .story .top .sav{width:32px;height:32px;border-radius:50%;background:#555;object-fit:cover}
+  .story .top .snm{font-size:14px;font-weight:600;flex:1;min-width:0}
+  .story .top .sx{background:none;border:none;color:#fff;font-size:26px;line-height:1}
+  .story .img{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .story .img img{max-width:100%;max-height:100%;object-fit:contain}
+  .story .zone{position:absolute;top:0;bottom:0;width:38%;z-index:2}
+  .story .zone.l{left:0}.story .zone.r{right:0}
+  .story .info{padding:14px 16px calc(18px + env(safe-area-inset-bottom));color:#fff;background:linear-gradient(to top,rgba(0,0,0,.78),transparent)}
+  .story .scap{font-size:14px;line-height:1.5;margin-bottom:8px}
+  .story .stags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .story .stags span{font-size:12.5px;color:#E4C98A;font-weight:600}
+  .story .srow{display:flex;align-items:center;gap:14px}
+  .story .slike{display:inline-flex;align-items:center;gap:6px;color:#fff;background:none;border:none;font-size:14px;font-weight:600}
+  .story .slike svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8}
+  .story .slike.on svg{fill:#FF5A7A;stroke:#FF5A7A}
+  .story .srent{margin-left:auto;background:#fff;color:#1A1A1A;border:none;border-radius:8px;padding:11px 18px;font-size:13.5px;font-weight:700;text-decoration:none}
   .tabs{display:flex;gap:8px;margin-top:16px;border-bottom:1px solid var(--line)}
   .tab{background:none;border:none;padding:9px 4px;font-size:13.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
   .tab.on{color:var(--ink);border-bottom-color:var(--ink)}
@@ -135,20 +161,22 @@
 <div class="ov" id="ovShare"><div class="sheet" id="shareSheet"></div></div>
 <!-- creator profile sheet -->
 <div class="ov" id="ovProf"><div class="sheet" id="profSheet"></div></div>
+<!-- story viewer -->
+<div class="story" id="story"></div>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=39"></script>
 <script src="liffAuth.js?v=39"></script>
-<script src="me-api.js?v=47"></script>
-<script src="api.js?v=47"></script>
+<script src="me-api.js?v=48"></script>
+<script src="api.js?v=48"></script>
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 const baht = n => '฿'+Number(n||0).toLocaleString('th-TH');
 const TIER_TH = { new:'', silver:'Silver', gold:'Gold', platinum:'Platinum' };
-let CUSTOMER=null, LIVE=false, FEED=[], TAB='all', OCC=null;
+let CUSTOMER=null, LIVE=false, FEED=[], TAB='all', OCC=null, TAG=null, STORY_I=-1;
 let LIKED=new Set(), FOLLOWING=new Set();
 
 function toast(t){ const e=$('#toast'); e.textContent=t; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),2600); }
@@ -176,14 +204,17 @@ async function renderOcc(){
   el.innerHTML = `<button class="ochip ${OCC?'':'on'}" onclick="filterOcc(null)">ทั้งหมด</button>` +
     occs.map(o=>`<button class="ochip ${OCC===o?'on':''}" onclick="filterOcc('${esc(o)}')">${esc(o)}</button>`).join('');
 }
-async function filterOcc(o){
-  OCC=o;
-  if(TAB!=='all'){ TAB='all'; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on', b.dataset.tab==='all')); $('#board').classList.add('hide'); $('#feed').classList.remove('hide'); }
-  renderOcc();
+function backToAllTab(){
+  if(TAB!=='all'){ TAB='all'; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on', b.dataset.tab==='all')); $('#board').classList.add('hide'); $('#feed').classList.remove('hide'); const o=$('#occ'); if(o) o.style.display=''; }
+}
+async function reloadFeed(){
   $('#feed').innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
-  try{ FEED = await window.API.communityFeed(30, null, OCC); }catch(e){ FEED=[]; }
+  try{ FEED = await window.API.communityFeed(30, null, OCC, TAG); }catch(e){ FEED=[]; }
   renderFeed();
 }
+async function filterOcc(o){ OCC=o; TAG=null; backToAllTab(); renderOcc(); reloadFeed(); }
+async function filterTag(t){ TAG=t; OCC=null; backToAllTab(); renderOcc(); reloadFeed(); }
+function clearTag(){ TAG=null; reloadFeed(); }
 
 function lookUrl(card){
   const base = location.origin + location.pathname.replace(/looks\.html$/,'index.html');
@@ -195,13 +226,16 @@ function cardHtml(c){
   const cr = c.creator||{}, g = c.garment||{};
   const av = cr.avatar ? `<img class="av" src="${esc(cr.avatar)}" alt="">` : `<span class="av"></span>`;
   const tier = TIER_TH[cr.tier]||'';
+  const tags = (Array.isArray(c.tags)&&c.tags.length)
+    ? `<div class="tagrow">${c.tags.slice(0,4).map(t=>`<span class="tagln" onclick="filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>` : '';
   return `<div class="card">
-    <div class="ph">${c.photo?`<img src="${esc(c.photo)}" loading="lazy" alt="">`:''}${c.featured?`<span class="feat">ลุคแห่งสัปดาห์</span>`:''}</div>
+    <div class="ph" onclick="openStory('${c.id}')">${c.photo?`<img src="${esc(c.photo)}" loading="lazy" alt="">`:''}${c.featured?`<span class="feat">ลุคแห่งสัปดาห์</span>`:''}</div>
     <div class="cbody">
       <div class="crow">${av}<div style="min-width:0">
         <div class="cname" onclick="openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}</div>
         ${tier?`<div class="tier">${esc(tier)}</div>`:''}</div></div>
       ${c.caption?`<div class="cap">${esc(c.caption)}</div>`:''}
+      ${tags}
       ${g.code?`<div class="gchip"><div class="gname">ใส่ <b>${esc(g.name||g.code)}</b>${g.price?` · ${baht(g.price)}`:''}</div>
         <a class="rentbtn" href="${lookUrl(c)}">เช่าลุคนี้</a></div>`:''}
       ${c.source==='look'?`<div class="acts">
@@ -219,14 +253,16 @@ function cardHtml(c){
 }
 
 function renderFeed(){
+  const clr = TAG ? `<div style="grid-column:1/-1"><span class="tagclr" onclick="clearTag()">#${esc(TAG)} · ล้างตัวกรอง ×</span></div>` : '';
   if(!FEED.length){
     $('#feed').innerHTML = `<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div>
       <h4>ยังไม่มีลุคในชุมชน</h4>
       <p>เป็นคนแรกที่แชร์ลุค — เช่า ถ่ายรูป แล้วแชร์ ได้เครดิตเข้ากระเป๋า</p></div>`;
+    if(TAG) $('#feed').innerHTML = clr + $('#feed').innerHTML;
     return;
   }
-  $('#feed').innerHTML = FEED.map(cardHtml).join('');
+  $('#feed').innerHTML = clr + FEED.map(cardHtml).join('');
 }
 
 async function shareOut(o){
@@ -236,6 +272,56 @@ async function shareOut(o){
   }catch(e){ if(e && e.name==='AbortError') return; }
   try{ await navigator.clipboard.writeText(url); toast('คัดลอกลิงก์แล้ว — แปะลง IG/Facebook ได้เลยค่ะ'); }
   catch(e){ toast('คัดลอกลิงก์: '+url); }
+}
+
+// ---------- story viewer (เต็มจอแบบ IG) ----------
+function openStory(id){
+  STORY_I = FEED.findIndex(x=>String(x.id)===String(id));
+  if(STORY_I<0) return;
+  $('#story').classList.add('open'); document.body.style.overflow='hidden';
+  renderStory();
+}
+function closeStory(){ $('#story').classList.remove('open'); document.body.style.overflow=''; STORY_I=-1; }
+function storyNav(d){
+  const n=STORY_I+d;
+  if(n<0){ return; } if(n>=FEED.length){ closeStory(); return; }
+  STORY_I=n; renderStory();
+}
+function renderStory(){
+  const c=FEED[STORY_I]; if(!c){ closeStory(); return; }
+  const cr=c.creator||{}, g=c.garment||{};
+  const bars=FEED.map((_,i)=>`<div class="bar ${i<=STORY_I?'on':''}"></div>`).join('');
+  const av=cr.avatar?`<img class="sav" src="${esc(cr.avatar)}">`:`<span class="sav"></span>`;
+  const tags=(Array.isArray(c.tags)&&c.tags.length)?`<div class="stags">${c.tags.map(t=>`<span onclick="closeStory();filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>`:'';
+  const canLike=c.source==='look';
+  $('#story').innerHTML=`
+    <div class="bars">${bars}</div>
+    <div class="top">${av}<div class="snm" onclick="closeStory();openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}</div>
+      <button class="sx" onclick="closeStory()">×</button></div>
+    <div class="img">
+      <div class="zone l" onclick="storyNav(-1)"></div>
+      <div class="zone r" onclick="storyNav(1)"></div>
+      ${c.photo?`<img src="${esc(c.photo)}">`:''}
+    </div>
+    <div class="info">
+      ${c.caption?`<div class="scap">${esc(c.caption)}</div>`:''}
+      ${tags}
+      <div class="srow">
+        ${canLike?`<button class="slike ${LIKED.has(c.id)?'on':''}" id="slike-${c.id}" onclick="storyLike('${c.id}')">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg>
+          <span id="slikes-${c.id}">${c.likes||0}</span></button>`:''}
+        ${g.code?`<a class="srent" href="${lookUrl(c)}">เช่าลุคนี้${g.price?` · ${baht(g.price)}`:''}</a>`:''}
+      </div>
+    </div>`;
+}
+async function storyLike(id){
+  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อถูกใจค่ะ'); return; }
+  const btn=$('#slike-'+id), cnt=$('#slikes-'+id), was=btn&&btn.classList.contains('on');
+  if(btn) btn.classList.toggle('on'); if(cnt) cnt.textContent=Math.max(0,(+cnt.textContent||0)+(was?-1:1));
+  let res=null; try{ res=await window.API.toggleLike(id); }catch(e){}
+  if(res){ if(btn) btn.classList.toggle('on', !!res.liked); if(cnt) cnt.textContent=res.likes;
+    if(res.liked) LIKED.add(id); else LIKED.delete(id);
+    const it=FEED.find(x=>String(x.id)===String(id)); if(it) it.likes=res.likes; }
 }
 
 // ---------- tabs ----------
