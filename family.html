@@ -50,7 +50,6 @@
   .mcard{border:1px solid var(--line);border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:9px;background:var(--bg);position:relative}
   .ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;color:#fff}
   img.ava{object-fit:cover;background:var(--soft)}
-  .picpriv{background:none;border:none;color:var(--muted);font-size:11px;padding:2px 0;text-align:left;text-decoration:underline;text-underline-offset:2px}
   .mname{font-weight:600;font-size:15px}
   .mrel{font-size:12px;color:var(--muted)}
   .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
@@ -251,11 +250,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=37"></script>
-<script src="data.js?v=37"></script>
-<script src="liffAuth.js?v=37"></script>
-<script src="me-api.js?v=37"></script>
-<script src="api.js?v=37"></script>
+<script src="config.js?v=34"></script>
+<script src="data.js?v=34"></script>
+<script src="liffAuth.js?v=34"></script>
+<script src="me-api.js?v=34"></script>
+<script src="api.js?v=34"></script>
 <script>
 // ===== MOCK DATA (แทน Supabase ระหว่างพรีวิว) =====
 const PALETTE = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };
@@ -323,7 +322,6 @@ let INVITES = [
   { group_id:'inv2', name:'ครอบครัวฝั่งคุณสามี', kind:'family', from:'คุณแม่เปิ้ล' },
 ];
 let active = 'g1', selRel = null;
-let MY_HIDE = false;   // ซ่อนรูปโปรไฟล์ของฉัน (privacy)
 
 // ===== LIVE vs MOCK =====
 // LIVE=true → ต่อ Supabase จริงผ่าน window.API; LIVE=false → ใช้ mock arrays ด้านบน (พรีวิว)
@@ -421,20 +419,8 @@ function memberCard(m){
     ${avaHtml(m.picture, m.id, m.name)}
     <div><div class="mname">${m.name}</div><div class="mrel">${m.rel|| (m.role==='owner'?'ตัวคุณเอง':'สมาชิก')}</div></div>
     <div class="tags">${tags.join('')}</div>
-    ${m.id===ME.id?`<button class="picpriv" onclick="togglePicHide()">${MY_HIDE?'· แสดงรูปฉัน':'· ซ่อนรูปฉันจากกลุ่ม'}</button>`:''}
   </div>`;
 }
-// privacy: เปิด/ปิดการซ่อนรูปโปรไฟล์ของฉัน
-window.togglePicHide = async function(){
-  MY_HIDE = !MY_HIDE;
-  if(LIVE){
-    try{ await window.API.setPictureHidden(ME, MY_HIDE); if(typeof reloadGroups==='function'){ await reloadGroups(); } }catch(e){}
-    render();
-  } else {
-    GROUPS.forEach(g=>(g.members||[]).forEach(m=>{ if(m.id===ME.id){ if(MY_HIDE){ m._pic=m.picture; m.picture=null; } else { m.picture=m._pic||m.picture; } } }));
-    render();
-  }
-};
 
 function renderMembers(){
   const g=curGroup();

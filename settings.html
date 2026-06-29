@@ -99,6 +99,21 @@
     </div>
   </div>
 
+  <div class="card" id="stylistCard" style="display:none">
+    <h2>AI สไตลิสต์ประจำสถานที่</h2>
+    <div class="desc">คุมโควต้าการใช้ AI สไตลิสต์ของลูกค้าแต่ละคน — มีผลกับลูกค้า/การเช่า “ครั้งถัดไป” (ไม่ย้อนแก้สิทธิ์ที่แจกไปแล้ว)</div>
+    <div class="disc">
+      <label>เริ่มต้นให้ฟรีกี่ครั้ง<div class="sub">โควต้าตั้งต้นต่อลูกค้า 1 คน เมื่อเริ่มใช้งาน</div></label>
+      <input id="quotaBase" type="number" min="0" max="999" step="1" inputmode="numeric">
+      <span class="unit">ครั้ง</span>
+    </div>
+    <div class="disc">
+      <label>รับเพิ่มต่อการเช่า 1 ครั้ง<div class="sub">ทุกครั้งที่ลูกค้าเช่าชุด ได้สิทธิ์ AI สไตลิสต์เพิ่ม</div></label>
+      <input id="quotaBonus" type="number" min="0" max="999" step="1" inputmode="numeric">
+      <span class="unit">ครั้ง</span>
+    </div>
+  </div>
+
   <div class="hint" id="hint" style="display:none">
     หมายเหตุ: สวิตช์เป็นแค่ “สวิตช์เปิดไฟ” — โค้ดหน้าจอ/edge function/ฮาร์ดแวร์ที่อ่านค่านี้ต้องสร้างก่อนถึงจะเห็นผลจริง
     ค่าทั้งหมดเก็บใน app_settings และอ่านในระบบผ่าน get_setting() · แก้ไขได้เฉพาะเจ้าของ
@@ -122,6 +137,8 @@ function paint(s){
   });
   $('#disc').value = s.hub_pickup_discount ?? '0';
   $('#staffDisc').value = s.staff_discount_pct ?? '20';
+  $('#quotaBase').value = s.stylist_quota_base ?? '5';
+  $('#quotaBonus').value = s.stylist_quota_bonus ?? '3';
 }
 
 async function load(){
@@ -130,6 +147,7 @@ async function load(){
   paint(data || {});
   $('#loading').style.display = 'none';
   $('#panel').style.display = '';
+  $('#stylistCard').style.display = '';
   $('#hint').style.display = '';
 }
 
@@ -162,6 +180,15 @@ $('#disc').addEventListener('change', (e) => {
 $('#staffDisc').addEventListener('change', (e) => {
   const v = String(Math.min(100, Math.max(0, parseFloat(e.target.value || '0') || 0)));
   save('staff_discount_pct', v);
+});
+// โควต้า AI สไตลิสต์ (จำนวนเต็มไม่ติดลบ ≤ 999)
+$('#quotaBase').addEventListener('change', (e) => {
+  const v = String(Math.min(999, Math.max(0, parseInt(e.target.value || '0', 10) || 0)));
+  save('stylist_quota_base', v);
+});
+$('#quotaBonus').addEventListener('change', (e) => {
+  const v = String(Math.min(999, Math.max(0, parseInt(e.target.value || '0', 10) || 0)));
+  save('stylist_quota_bonus', v);
 });
 
 load();

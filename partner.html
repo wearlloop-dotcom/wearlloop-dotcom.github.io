@@ -43,11 +43,15 @@
   .files a{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);text-decoration:none;border:1.5px solid var(--line);border-radius:20px;padding:6px 12px;max-width:240px}
   .files a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .files svg{flex:none;width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:1.6}
+  .langtog{margin-left:auto;display:flex;border:1px solid #4a4a4a;border-radius:20px;overflow:hidden;flex:none}
+  .langtog button{background:transparent;color:#bdbcb7;border:none;padding:5px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .langtog button.on{background:#fff;color:var(--ink)}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
 </head>
 <body>
-<div class="bar"><h1>พอร์ทัลสไตลิสต์</h1><span class="tag">พาร์ทเนอร์ LLOOP · ข้อมูลภายใน</span></div>
+<div class="bar"><h1>พอร์ทัลสไตลิสต์</h1><span class="tag">พาร์ทเนอร์ LLOOP · ข้อมูลภายใน</span>
+  <span class="langtog"><button id="thBtn" class="on" onclick="setPLang('th')">TH</button><button id="enBtn" onclick="setPLang('en')">EN</button></span></div>
 <div class="wrap">
   <section class="phead">
     <div class="eyebrow">stylist partner</div>
@@ -430,6 +434,106 @@
       box.appendChild(a);
     });
   }
+
+  // ===== i18n — ไทย / อังกฤษ (สไตลิสต์พาร์ทเนอร์เอาแค่ 2 ภาษา) =====
+  // map คีย์เป็นข้อความไทยต้นฉบับ → คำแปลอังกฤษ (คีย์ที่ไม่มีในนี้จะคงภาษาไทยไว้)
+  const PARTNER_EN={
+    'พอร์ทัลสไตลิสต์':'Stylist portal',
+    'พาร์ทเนอร์ LLOOP · ข้อมูลภายใน':'LLOOP partner · internal',
+    'บันทึกตัวตนของลูกค้าทุกคน':"Record every client's profile",
+    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดที่หมุนเวียนใช่กับเขาที่สุด':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis — so every rotating piece suits them best.',
+    'ค้นหาลูกค้า — รหัสจากแอป LLOOP':'Find client — code from the LLOOP app',
+    'ค้นหา':'Search',
+    'ข้อมูลการให้บริการ':'Service details',
+    'บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ':'Record what service and when — used for follow-up and receipts',
+    'วันที่ให้บริการ':'Service date', 'บริการที่ใช้':'Service used', 'มูลค่าบริการ (฿)':'Service value (฿)',
+    'นัดติดตาม/ครั้งถัดไป':'Follow-up / next appointment', 'ยินยอมให้ใช้ภาพ/รีวิว':'Consent to use photos/reviews',
+    'ยินยอม':'Consent', 'ใช้ภายในเท่านั้น':'Internal use only', 'ไม่ยินยอม':'No consent', 'อื่น ๆ':'Other',
+    'ผลวิเคราะห์สีจากคอร์ส (เลือก type 12 ฤดู)':'Colour analysis from the course (pick a 12-season type)',
+    'สีประจำตัว':'Signature colour', 'สีตาธรรมชาติ':'Natural eye colour', 'น้ำตาลเข้ม/อ่อน':'dark/light brown',
+    'สีผมธรรมชาติ':'Natural hair colour', 'โทนผิวจริง':'Actual skin tone',
+    'fair/medium/tan, อมชมพู/อมเหลือง':'fair/medium/tan, pink/yellow undertone',
+    'สีกลาง (neutrals) ที่ใช่':'Best neutrals', 'ครีม/เทาอุ่น/น้ำตาล':'cream/warm grey/brown',
+    'พาเลตสีที่ใช่ (สีเสื้อผ้า)':'Best palette (clothing colours)', 'สีที่ควรเลี่ยง':'Colours to avoid',
+    'สีเมคอัพ':'Makeup colours', 'โทนปาก/แก้ม':'lip/cheek tone', 'สีผมที่เหมาะ':'Suitable hair colour',
+    'โลหะที่ใช่':'Best metals', 'ทอง/เงิน':'gold/silver', 'ระบบสีที่ใช้':'Colour system used', 'ระดับผู้วิเคราะห์':'Analyst level',
+    'ไฟล์งาน Personal Color (PDF/รูป/เอกสาร)':'Personal Color files (PDF/image/doc)',
+    'หรือวางลิงก์ไฟล์ (คั่นด้วย ,)':'Or paste file links (comma-separated)',
+    'รูปหน้า':'Face shape', 'รูปไข่':'Oval', 'กลม':'Round', 'เหลี่ยม':'Square', 'หัวใจ':'Heart', 'ยาว':'Long', 'เพชร':'Diamond',
+    'แว่นตาที่เข้า':'Suitable eyewear', 'ทรงเหลี่ยม/มน':'angular/round',
+    'ทรงผมที่แนะนำ (คั่นด้วย ,)':'Recommended hairstyles (comma-separated)',
+    'ผมยาวลอนใหญ่, รวบครึ่งหัว, บ๊อบยาว':'long loose waves, half-up, long bob',
+    'เมคอัพ — สีปาก / แก้ม / ตา':'Makeup — lip / cheek / eye', 'สีปาก':'lip', 'สีแก้ม':'cheek', 'สีตา':'eye',
+    'เทคนิค/ทิศทางเมคอัพ (Self Korea ฯลฯ)':'Makeup technique/direction (Self Korea etc.)',
+    'โทนอุ่น เน้นตา วางเบสบาง ฯลฯ':'warm tone, eye focus, light base, etc.',
+    'โน้ตเพิ่มเติม (หน้า/ผม)':'Extra notes (face/hair)', 'เลี่ยงหน้าม้าหนา ฯลฯ':'avoid heavy bangs, etc.',
+    'ประเภทหุ่น':'Body type', 'นาฬิกาทราย':'Hourglass', 'สามเหลี่ยม (ล่างใหญ่)':'Triangle (bottom-heavy)',
+    'สามเหลี่ยมกลับ (บนใหญ่)':'Inverted triangle (top-heavy)', 'สี่เหลี่ยม':'Rectangle', 'แอปเปิล':'Apple', 'โอวัล':'Oval',
+    'สัดส่วน':'Proportions', 'ช่วงตัวสั้น/ขายาว':'short torso/long legs',
+    'จุดเด่นที่ควรเสริม / โครงสร้าง':'Features to enhance / structure', 'เน้นเอว ยืดช่วงขา ฯลฯ':'define waist, lengthen legs, etc.',
+    'ทรงที่แนะนำ':'Recommended silhouettes', 'คอเสื้อที่แนะนำ':'Recommended necklines', 'ทรงแขนที่แนะนำ':'Recommended sleeves',
+    'แขนล้ำ, แขนพอง, สามส่วน':'cap, puff, three-quarter', 'ความยาวที่เหมาะ (กระโปรง/เดรส)':'Suitable length (skirt/dress)',
+    'คลุมเข่า, midi':'knee-length, midi', 'เอวกางเกง (rise)':'Trouser rise', 'เอวสูง/กลาง':'high/mid rise',
+    'รองเท้า/ส้นที่แนะนำ':'Recommended shoes/heels', 'ส้นตัด, pointed, ส้น 2-3 นิ้ว':'block heel, pointed, 2-3 inch heel',
+    'เนื้อผ้า / ลายที่แนะนำ':'Recommended fabrics / patterns', 'ผ้าทิ้งตัว, ลายเล็ก, เลี่ยงผ้าแข็ง':'drapey fabric, small prints, avoid stiff fabric',
+    'จุดที่ควรพราง / โครงสร้างที่ควรเลี่ยง':'Areas to camouflage / structures to avoid',
+    'พรางต้นแขน, เลี่ยงระบายช่วงสะโพก':'camouflage upper arms, avoid ruffles at hips',
+    'เสื้อผ้า/ทรงที่ควรเลี่ยง':'Clothing/shapes to avoid', 'คอปาด, กระโปรงบานช่วงสะโพก':'boat neck, skirts flaring at hips',
+    'ไฟล์งาน Face & Body (PDF/รูป/เอกสาร)':'Face & Body files (PDF/image/doc)',
+    'วัดตัว (ละเอียด)':'Measurements (detailed)', 'หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก':'Inches, except height/weight',
+    'ส่วนสูง (ซม.)':'Height (cm)', 'น้ำหนัก (กก.)':'Weight (kg)', 'ไซซ์เดรส':'Dress size', 'รอบอก':'Bust', 'ใต้อก':'Underbust',
+    'คัพ':'Cup', 'รอบเอว':'Waist', 'สะโพก':'Hip', 'สะโพกบน':'High hip', 'ไหล่':'Shoulder', 'ไหล่ถึงเอว':'Shoulder to waist',
+    'ความยาวหลัง':'Back length', 'ความยาวแขน':'Arm length', 'รอบต้นแขน':'Bicep', 'รอบคอ':'Neck', 'ต้นขา':'Thigh',
+    'เป้า (inseam)':'Inseam', 'เบอร์รองเท้า':'Shoe size',
+    'หลัก Mix & Match':'Mix & Match principles', 'แนวทางจับคู่ core style':'how to combine the core style',
+    'ตัวตน/แก่นสไตล์':'identity/core style', 'หมวดชุดที่แนะนำ':'Recommended categories',
+    'เดรส':'Dress', 'เซ็ต':'Set', 'เสื้อ':'Top', 'กระโปรง':'Skirt', 'กางเกง':'Pants', 'เสื้อคลุม':'Outerwear',
+    'แบรนด์/รองเท้า/เครื่องประดับที่แนะนำ':'Recommended brands/shoes/accessories',
+    'ไลฟ์สไตล์ / โอกาสใช้งาน':'Lifestyle / occasions', 'ทำงานออฟฟิศ, ออกงาน, แคชชวล':'office, events, casual',
+    'งบประมาณต่อชิ้น/เดือน':'Budget per piece/month', 'เช่น 1,000-3,000/ชิ้น':'e.g. 1,000-3,000/piece',
+    "ข้อควรทำ / ข้อควรเลี่ยง (Do's & Don'ts)":"Do's & Don'ts",
+    "DO: เน้นเอว, โทนอุ่น · DON'T: ผ้าแข็ง, สีตัดเย็น":"DO: define waist, warm tones · DON'T: stiff fabric, cool contrasts",
+    'ไฟล์ Mood Board / ไฟล์งานสไตล์ (PDF/รูป/เอกสาร)':'Mood board / style files (PDF/image/doc)',
+    'หรือวางลิงก์ Mood Board (คั่นด้วย ,)':'Or paste mood board links (comma-separated)',
+    'Lookbook & รูปลูกค้า':'Lookbook & client photos', 'หรือวางลิงก์ Lookbook (คั่นด้วย ,)':'Or paste lookbook links (comma-separated)',
+    'รูปลูกค้า (เต็มตัว/ดราพสี)':'Client photos (full body/colour drape)', 'หรือวางลิงก์รูป (คั่นด้วย ,)':'Or paste photo links (comma-separated)',
+    'ประโยคสรุป (แสดงให้ลูกค้า — เว้นว่าง=ใช้ 12-season type อัตโนมัติ)':'Summary line (shown to client — blank = auto 12-season type)',
+    'คุณคือ Warm Autumn โทนอุ่นละมุน':'You are a soft, warm Warm Autumn',
+    'ชื่อสไตลิสต์':'Stylist name', 'ทีม/พาร์ทเนอร์':'Team/partner', 'บันทึกโปรไฟล์ลูกค้า':'Save client profile',
+  };
+  const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.card h2,.card .sub,label,button.btn,option';
+  let plang=localStorage.getItem('partnerLang')||'th', collected=false;
+  function collectI18n(){
+    if(collected)return; collected=true;
+    document.querySelectorAll(I18N_SEL).forEach(el=>{
+      if(el.tagName==='OPTION'){ el.setAttribute('value', el.value); el.dataset.th=el.textContent; return; }
+      if(el.tagName==='LABEL' && el.querySelector('input')){   // chip: เก็บเฉพาะ text node ท้าย ไม่แตะ input
+        const tn=[...el.childNodes].reverse().find(n=>n.nodeType===3 && n.textContent.trim());
+        if(tn){ tn._th=tn.textContent; }
+        return;
+      }
+      el.dataset.th=el.textContent;
+    });
+    document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{ el.dataset.thPh=el.getAttribute('placeholder'); });
+  }
+  function tr(th){ const k=(th||'').trim(); return (plang==='en' && PARTNER_EN[k]!=null)?PARTNER_EN[k]:th; }
+  function applyLang(){
+    document.querySelectorAll(I18N_SEL).forEach(el=>{
+      if(el.tagName==='LABEL' && el.querySelector('input')){
+        const tn=[...el.childNodes].reverse().find(n=>n.nodeType===3 && n._th!=null);
+        if(tn){ const lead=tn._th.match(/^\s*/)[0]; tn.textContent = lead + tr(tn._th); }
+        return;
+      }
+      if(el.dataset.th!=null) el.textContent=tr(el.dataset.th);
+    });
+    document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{
+      if(el.dataset.thPh!=null) el.setAttribute('placeholder', tr(el.dataset.thPh));
+    });
+    document.documentElement.lang=plang;
+    const th=$('thBtn'), en=$('enBtn'); if(th)th.classList.toggle('on',plang!=='en'); if(en)en.classList.toggle('on',plang==='en');
+  }
+  function setPLang(l){ plang=l; localStorage.setItem('partnerLang',l); applyLang(); }
+  collectI18n(); applyLang();
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>

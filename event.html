@@ -63,7 +63,6 @@
   .rrow.warn{background:#FBF3E9;border-color:var(--gold)}
   .ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;color:#fff;flex-shrink:0}
   .rrow .ava{width:40px;height:40px;font-size:16px}
-  img.ava{object-fit:cover;background:var(--soft)}
   .rt{flex:1;min-width:0}
   .rt .rn{font-weight:600;font-size:14.5px;line-height:1.3}
   .rt .rm{font-size:12px;color:var(--muted);margin-top:2px}
@@ -157,9 +156,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=37"></script>
-<script src="liffAuth.js?v=37"></script>
-<script src="api.js?v=37"></script>
+<script src="config.js?v=34"></script>
+<script src="liffAuth.js?v=34"></script>
+<script src="api.js?v=34"></script>
 <script>
 // ============================================================
 //  event.html — Dashboard หัวหน้ากลุ่ม (split pay)
@@ -171,11 +170,6 @@ const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
 const initial = n => (n||'?').trim().charAt(0);
 const avaColor = id => AVA[Math.abs([...String(id||'?')].reduce((a,c)=>a+c.charCodeAt(0),0))%AVA.length];
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
-function avaHtml(picture, id, name){
-  return picture
-    ? `<img class="ava" src="${esc(picture)}" alt="${esc(initial(name))}" referrerpolicy="no-referrer">`
-    : `<div class="ava" style="background:${avaColor(id||name||'?')}">${esc(initial(name))}</div>`;
-}
 const baht = n => '฿' + Number(n||0).toLocaleString('th-TH');
 
 // อ่าน ?event=<event_group> จาก URL หรือ liff.state (กลไกเดียวกับ family.html ?join=)
@@ -350,7 +344,7 @@ function renderStatus(st){
     }
     const items = Number(m.items||0);
     return `<div class="rrow ${warn?'warn':''}">
-      ${avaHtml(m.picture, m.order_group||m.name, m.name)}
+      <div class="ava" style="background:${avaColor(m.order_group||m.name)}">${esc(initial(m.name))}</div>
       <div class="rt">
         <div class="rn">${esc(m.name||'สมาชิก')}</div>
         <div class="rm">${items>0?(items+' ชุด'):'—'}${m.order_group?(' · '+esc(m.order_group)):''}</div>

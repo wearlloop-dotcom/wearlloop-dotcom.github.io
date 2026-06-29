@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · กล่องสลิปโอน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;--navy:#0D2F4F;--sage:#6FB3A6;--champ:#B8A179;--ok:#0F6E56;--danger:#A32D2D;
+    --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:14px}
+  .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar h1{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:1px}
+  .bar .tag{font-size:11px;background:#33312d;padding:3px 10px;border-radius:20px;letter-spacing:1px}
+  .bar .lock{margin-left:auto;font-size:12px;color:#bbb;cursor:pointer}
+  .wrap{max-width:880px;margin:16px auto;padding:0 14px}
+  .phead{margin:6px 0 16px}
+  .phead .eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--champ)}
+  .phead h1{font-family:var(--display);font-size:24px;font-weight:700;margin:4px 0 4px}
+  .phead .sub{font-size:13px;color:var(--stone);line-height:1.5}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{font-size:13px;padding:7px 13px;border:1px solid var(--hair);border-radius:20px;cursor:pointer;background:#fff;color:var(--stone)}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .slip{background:var(--surface);border:1px solid var(--hair);border-radius:4px;padding:14px}
+  .slip .top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .slip .nm{font-weight:600;font-size:14px}
+  .slip .dt{font-size:11px;color:var(--stone);margin-top:2px}
+  .slip .amt{font-family:var(--display);font-size:19px;font-weight:700;margin:10px 0 2px}
+  .slip .meta{font-size:12px;color:var(--stone)}
+  .badge{font-size:10px;font-weight:700;letter-spacing:.4px;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .badge.ok{background:#E4F0EC;color:var(--ok)}
+  .badge.warn{background:#FAF1DC;color:#8A6D2F}
+  .badge.bad{background:#F6E5DE;color:var(--danger)}
+  .slip .view{margin-top:11px;width:100%;border:1px solid var(--hair);background:none;color:var(--ink);border-radius:2px;padding:9px;font-size:13px;font-weight:600;font-family:var(--sans);cursor:pointer}
+  .slip .view:hover{border-color:var(--ink)}
+  .slip .view[disabled]{opacity:.4;cursor:default}
+  .empty{text-align:center;color:var(--stone);padding:50px 20px;font-size:14px}
+  .btn{border:none;border-radius:2px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--navy);color:#fff;margin-top:12px}
+  .gate{max-width:420px;margin:80px auto;text-align:center;padding:0 20px}
+  .gate h2{font-family:var(--display);font-size:22px;margin-bottom:6px}
+  .gate p{color:var(--stone);font-size:13px;margin-bottom:14px}
+  .muted{color:var(--stone);font-size:12px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;opacity:0;transition:.3s;z-index:9;font-size:13px}
+  .toast.show{opacity:1}
+  .hide{display:none!important}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<style>
+  /* craft palette override — โทนป่า+โกลด์ ให้ตรงหน้าบัญชี */
+  :root{--navy:#0C3A33;--ink:#1f2d28;--champ:#C9A86A;--sage:#6FB3A6;--ok:#0F6E56;--danger:#A75F3A}
+  .bar{background:linear-gradient(135deg,#0C3A33,#2E4A3A);color:#fff}
+  .tab.on{background:#0C3A33;border-color:#0C3A33}
+  .btn{background:#0C3A33}
+</style>
+</head>
+<body>
+<div class="bar"><h1>LLOOP</h1><span class="tag">กล่องสลิปโอน</span><span class="lock" onclick="logout()" id="lockBtn"></span></div>
+
+<!-- ประตู LINE login (เฉพาะเจ้าของ/ผู้จัดการ) -->
+<div id="gate" class="gate">
+  <h2>เข้าดูสลิป</h2>
+  <p>ยืนยันตัวตนด้วย LINE — เฉพาะเจ้าของ/ผู้จัดการ</p>
+  <button class="btn" style="width:100%" onclick="boot()">เข้าสู่ระบบด้วย LINE</button>
+  <div class="muted" style="margin-top:10px">สลิปมีข้อมูลบัญชีธนาคาร เข้าถึงเฉพาะผู้มีสิทธิ์ · เปิดรูปผ่านลิงก์ชั่วคราว 10 นาที</div>
+</div>
+
+<div id="app" class="wrap hide">
+  <section class="phead">
+    <div class="eyebrow">payment slips</div>
+    <h1>สลิปโอนเข้า ครบทุกใบ</h1>
+    <div class="sub">ทุกสลิปที่ลูกค้าส่งเข้ามาถูกเก็บไว้ที่นี่ — ตรวจผ่าน/ไม่ผ่าน/รอยืนยันมือ มีหลักฐานครบ เปิดดูรูปย้อนหลังได้</div>
+  </section>
+  <div class="tabs">
+    <span class="tab on" data-f="all" onclick="go(this)">ทั้งหมด</span>
+    <span class="tab" data-f="confirmed" onclick="go(this)">ยืนยันแล้ว</span>
+    <span class="tab" data-f="pending" onclick="go(this)">รอยืนยันมือ</span>
+    <span class="tab" data-f="problem" onclick="go(this)">ตรวจไม่ผ่าน</span>
+  </div>
+  <div id="view"><div class="empty">กำลังโหลด…</div></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
+  const $=id=>document.getElementById(id);
+  function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
+  const baht=n=>n==null?'—':'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function fmtDate(s){ if(!s)return'—'; const d=new Date(s); return d.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}); }
+
+  // result → ป้ายไทย + กลุ่ม + สี
+  const RES={
+    confirmed:      {th:'ยืนยันแล้ว',   cls:'ok',   grp:'confirmed'},
+    not_configured: {th:'รอยืนยันมือ',  cls:'warn', grp:'pending'},
+    pending:        {th:'รอยืนยัน',     cls:'warn', grp:'pending'},
+    slip_invalid:   {th:'อ่านสลิปไม่ได้',cls:'bad',  grp:'problem'},
+    amount_low:     {th:'ยอดไม่พอ',     cls:'bad',  grp:'problem'},
+    wrong_payee:    {th:'ผู้รับไม่ตรง',  cls:'bad',  grp:'problem'},
+    duplicate_slip: {th:'สลิปซ้ำ',      cls:'bad',  grp:'problem'},
+    settle_error:   {th:'ผิดพลาด',      cls:'bad',  grp:'problem'},
+  };
+  const resOf=r=>RES[r]||{th:r||'-',cls:'warn',grp:'problem'};
+
+  async function authHeader(){
+    if(!(await window.opsLogin())) throw new Error('redirecting');
+    return 'Bearer '+liff.getIDToken();
+  }
+  async function api(action, extra){
+    const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({action},extra||{}))});
+    if(r.status===401||r.status===403){ toast('ไม่มีสิทธิ์เข้าดูสลิป (เฉพาะเจ้าของ/ผู้จัดการ)'); throw new Error('unauth'); }
+    return r.json();
+  }
+  function logout(){ try{ liff.logout(); }catch(e){} $('app').classList.add('hide'); $('gate').classList.remove('hide'); }
+
+  let ROWS=[]; let filter='all';
+  function go(el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); filter=el.dataset.f; render(); }
+
+  async function load(){
+    try{
+      const d=await api('slips',{limit:200});
+      ROWS=d.rows||[];
+      render();
+    }catch(e){ if(e.message!=='unauth'&&e.message!=='redirecting') $('view').innerHTML='<div class="empty">โหลดไม่สำเร็จ ลองใหม่อีกครั้งค่ะ</div>'; }
+  }
+
+  function render(){
+    const rows=ROWS.filter(r=> filter==='all' ? true : resOf(r.result).grp===filter);
+    if(!rows.length){ $('view').innerHTML='<div class="empty">ยังไม่มีสลิปในหมวดนี้ค่ะ</div>'; return; }
+    $('view').innerHTML='<div class="grid">'+rows.map(r=>{
+      const R=resOf(r.result);
+      const amt=r.provider_amount!=null?r.provider_amount:r.amount_expected;
+      const hasImg=!!r.slip_path;
+      return `<div class="slip">
+        <div class="top">
+          <div><div class="nm">${esc(r.customer_name||'ลูกค้า')}</div><div class="dt">${fmtDate(r.created_at)}</div></div>
+          <span class="badge ${R.cls}">${esc(R.th)}</span>
+        </div>
+        <div class="amt">${baht(amt)}</div>
+        <div class="meta">${esc(r.purpose||'-')}${r.provider_ref?' · ref '+esc(r.provider_ref):''}${r.source&&r.source!=='customer'?' · '+esc(r.source):''}</div>
+        <button class="view" ${hasImg?'':'disabled'} onclick="viewSlip('${esc(r.slip_path)}',this)">${hasImg?'ดูรูปสลิป':'ไม่มีรูป'}</button>
+      </div>`;
+    }).join('')+'</div>';
+  }
+
+  async function viewSlip(path, btn){
+    if(!path) return;
+    const old=btn.textContent; btn.textContent='กำลังเปิด…'; btn.disabled=true;
+    try{
+      const d=await api('slip_view',{path});
+      if(d&&d.url){ window.open(d.url,'_blank'); } else { toast('เปิดรูปไม่ได้'); }
+    }catch(e){ toast('เปิดรูปไม่สำเร็จ'); }
+    finally{ btn.textContent=old; btn.disabled=false; }
+  }
+
+  async function boot(){
+    const ok=await window.opsLogin().catch(()=>false);
+    if(!ok){ $('gate').classList.remove('hide'); $('app').classList.add('hide'); return; }
+    $('gate').classList.add('hide'); $('app').classList.remove('hide'); $('lockBtn').textContent='ออกจากระบบ';
+    load();
+  }
+  boot();
+</script>
+<script src="ops-menu.js"></script>
+</body>
+</html>

@@ -31,6 +31,7 @@
     { section: 'ธุรกิจ', items: [
       { href: 'analytics.html',  label: 'วิเคราะห์',     icon: '▲', roles: ['manager','owner'] },
       { href: 'accounting.html', label: 'บัญชี',         icon: '฿', roles: ['owner','manager'] },
+      { href: 'slips.html',      label: 'สลิปโอน',       icon: '⊞', roles: ['owner','manager'] },
       { href: 'purchasing.html', label: 'จัดซื้อ',       icon: '⛬', roles: ['owner','manager'] },
       { href: 'contracts.html',  label: 'สัญญา',         icon: '§', roles: ['owner','manager'] },
       { href: 'branches.html',   label: 'สาขา / จุดรับ',  icon: '⌂', roles: ['owner','manager'] },

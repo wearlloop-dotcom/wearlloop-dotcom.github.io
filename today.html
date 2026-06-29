@@ -31,6 +31,13 @@
   .go{font-size:13px;color:var(--muted)}
   .empty{color:var(--muted);padding:10px 0;font-size:15px}
   .loading{color:var(--muted);text-align:center;padding:30px}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 12px;text-align:center;text-decoration:none;color:inherit;display:block}
+  .kpi .n{font-family:var(--display);font-size:26px;font-weight:700;line-height:1}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:5px}
+  .kpi.hot{border-color:#EAC4C4;background:#FCF1F1}.kpi.hot .n{color:var(--danger)}
+  .kpi.warn .n{color:var(--warn)}.kpi.zero .n{color:var(--muted)}
+  .tag.over{background:#FBE3E3;color:var(--danger)}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
 <style>
@@ -77,14 +84,33 @@
     const inner = `<div><div class="code">${left}</div>${sub?`<div class="meta">${sub}</div>`:''}</div><div style="text-align:right">${tag}${go?'<div>'+go+'</div>':''}</div>`;
     return href ? `<a class="row" href="${esc(href)}">${inner}</a>` : `<div class="row">${inner}</div>`;
   }
-  function section(title, count, hot, body){
+  function section(title, count, hot, body, id){
     const cls = hot && count>0 ? 'badge hot' : 'badge';
     const list = body || '<div class="empty">ไม่มี</div>';
-    return `<div class="card"><h2><span class="${cls}">${count}</span> ${title}</h2>${list}</div>`;
+    return `<div class="card" ${id?`id="s-${id}"`:''}><h2><span class="${cls}">${count}</span> ${title}</h2>${list}</div>`;
   }
 
+  // KPI tiles — สรุปตัวเลขด้านบน คลิกเลื่อนไปหมวดนั้น
+  function kpiTile(id, n, label, kind){
+    const cls = n>0 ? (kind||'') : 'zero';
+    return `<a class="kpi ${cls}" href="#s-${id}"><div class="n">${n||0}</div><div class="l">${label}</div></a>`;
+  }
   function render(d){
     d = d || {};
+    const k = d.kpi || {};
+    const kpis = `<div class="kpis">
+      ${kpiTile('over', k.overdue, 'เลยกำหนด', 'hot')}
+      ${kpiTile('ship', k.to_ship, 'ต้องส่ง', 'warn')}
+      ${kpiTile('due', k.due_today, 'คืนวันนี้', 'warn')}
+      ${kpiTile('wash', k.wash, 'คิวซัก/ดูแล')}
+      ${kpiTile('review', k.review, 'รอตรวจ')}
+      ${kpiTile('acq', k.acq, 'รับซื้อ')}
+    </div>`;
+    const overdue=(d.overdue||[]).map(x=>rowLink(
+      null,
+      esc(x.code)+' · '+esc(x.name||''),
+      [x.customer?'ลูกค้า '+esc(x.customer):'', x.due_at?'กำหนด '+dt(x.due_at):''].filter(Boolean).join(' · '),
+      `<span class="tag over">เลย ${x.days||0} วัน</span>`)).join('');
     const toShip=(d.to_ship||[]).map(x=>rowLink(
       '/shipout.html?code='+encodeURIComponent(x.code),
       esc(x.code)+' · '+esc(x.name||''),
@@ -108,11 +134,13 @@
     }).join('');
 
     $('out').innerHTML =
-      section('ต้องส่งวันนี้/พรุ่งนี้', (d.to_ship||[]).length, true, toShip) +
-      section('ครบกำหนดคืนวันนี้', (d.due_today||[]).length, true, due) +
-      section('คิวซัก/ดูแล', (d.wash||[]).length, false, wash) +
-      section('รอตรวจ/อนุมัติ', (d.review||[]).length, false, review) +
-      section('รับซื้อรอจัดการ', (d.acq||[]).length, false, acq);
+      kpis +
+      ((d.overdue||[]).length ? section('เลยกำหนดคืน — ตามด่วน', (d.overdue||[]).length, true, overdue, 'over') : '') +
+      section('ต้องส่งวันนี้/พรุ่งนี้', (d.to_ship||[]).length, true, toShip, 'ship') +
+      section('ครบกำหนดคืนวันนี้', (d.due_today||[]).length, true, due, 'due') +
+      section('คิวซัก/ดูแล', (d.wash||[]).length, false, wash, 'wash') +
+      section('รอตรวจ/อนุมัติ', (d.review||[]).length, false, review, 'review') +
+      section('รับซื้อรอจัดการ', (d.acq||[]).length, false, acq, 'acq');
   }
 
   async function load(){

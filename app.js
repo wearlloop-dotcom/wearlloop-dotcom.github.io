@@ -147,7 +147,6 @@ function renderCatnav() {
     { label: occName('wedding_guest'), on: fOccasion ==='wedding_guest', act:`setOccasion('wedding_guest')`},
     { label: occName('work'), on: fOccasion ==='work', act:`setOccasion('work')`},
     { label: occName('cafe'), on: fOccasion ==='cafe', act:`setOccasion('cafe')`},
-    { label: (lang ==='th'?'ครอบครัว & กลุ่ม':'Family & Group'), on: false, act:`openFamily()`},
     { label: (lang ==='th'?'ออเดอร์ของฉัน':'My Rentals'), on: false, act:`openOrders()`},
     { label: (lang ==='th'?'สมาชิกรายเดือน':'Membership'), on: false, act:`openMembership()`},
     { label: (lang ==='th'?'ความดีที่หมุนเวียน':'Impact'), on: false, act:`openImpact()`},
@@ -1122,8 +1121,6 @@ function renderStyleCard(c) {
     ${c.link_code?`<div class="linkcode">${lang ==='th'?'รหัสนัดสไตลิสต์':'Stylist code'} <b>${c.link_code}</b></div>`:''}
   </div>`;
 }
-// ===== ครอบครัว & กลุ่ม — ไปหน้าจัดการกลุ่ม + เช่าเข้าตีม =====
-function openFamily() { location.href = 'family.html'; }
 // ===== ผลกระทบ + แกลเลอรี charity (wow, interactive) =====
 async function openImpact() {
   const im = CUSTOMER._impact || { rentals: 0, water_l: 0, co2_kg: 0, charity_thb: 0, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
