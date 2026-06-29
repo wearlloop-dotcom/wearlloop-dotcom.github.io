@@ -69,7 +69,6 @@
   .lhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
   .ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;color:#fff}
   .lhead .ava{width:34px;height:34px;font-size:14px}
-  img.ava{object-fit:cover;background:var(--soft)}
   .lname{font-weight:600}.lrel{font-size:11px;color:var(--muted)}
   .lpick{margin-left:auto;font-size:11.5px;color:var(--ok);font-weight:600;display:none}
   .look.has .lpick{display:block}
@@ -186,16 +185,6 @@
   .schip.on{background:var(--sage-bg);border-color:var(--sage);color:var(--ok);font-weight:600}
   .venuefld input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:16px;background:#fff;color:var(--ink)}
   .venuehint{font-size:11.5px;color:var(--muted);margin-top:6px}
-  .shadewrap{margin-top:14px}
-  .shadehd{font-size:12px;color:#7a6433;font-weight:600;margin-bottom:9px}
-  .shadegrid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
-  @media(max-width:380px){ .shadegrid{grid-template-columns:repeat(6,1fr)} }
-  .swatch{position:relative;aspect-ratio:1;border-radius:50%;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:0;transition:transform .12s ease}
-  .swatch:active{transform:scale(.94)}
-  .swatch.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--sage)}
-  .swatch .chk{position:absolute;inset:0;display:none;align-items:center;justify-content:center}
-  .swatch.on .chk{display:flex}
-  .swatch .chk svg{width:15px;height:15px;stroke:#fff;stroke-width:3;fill:none;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.5))}
 
   .demo{font-size:11px;color:var(--muted);text-align:center;margin-top:26px;letter-spacing:.3px}
   .demo b{color:var(--sage)}
@@ -277,13 +266,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=37"></script>
-<script src="data.js?v=37"></script>
-<script src="liffAuth.js?v=37"></script>
-<script src="me-api.js?v=37"></script>
+<script src="config.js?v=34"></script>
+<script src="data.js?v=34"></script>
+<script src="liffAuth.js?v=34"></script>
+<script src="me-api.js?v=34"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
-<script src="promptpay.js?v=37"></script>
-<script src="api.js?v=37"></script>
+<script src="promptpay.js?v=34"></script>
+<script src="api.js?v=34"></script>
 <script>
 // ============================================================
 //  group-checkout.html — จองชุดทั้งกลุ่มในออเดอร์เดียว
@@ -295,13 +284,6 @@ const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู
 const SEASON_TH = { autumn:'ออทัม', winter:'วินเทอร์', spring:'สปริง', summer:'ซัมเมอร์' };
 const SEASON_HEX = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };
 const SEASON_ORDER = ['autumn','winter','spring','summer'];
-// เฉดสีของตีม (เลือกได้หลายสี) — ต้องตรงกับ family.html ทุกประการ
-const SHADES = [
-  ['แดงเชอร์รี่','#B23A48'],['โอลด์โรส','#C98A7A'],['เทอราคอตต้า','#C96F4A'],['คาราเมล','#9C6B45'],
-  ['มัสตาร์ด','#C9A227'],['ครีมเบจ','#E4D5B7'],['แชมเปญทอง','#C9A86A'],['เซจ','#9FB7AC'],
-  ['มรกต','#2E6F5E'],['มะกอก','#7A7A3C'],['ฟ้าอ่อน','#A9C7D8'],['น้ำเงินเนวี','#2B3A55'],
-  ['ลาเวนเดอร์','#9A8AB0'],['เทาหิน','#8C8B86'],['ดำ','#1F1F1F'],['ขาวงาช้าง','#F2EFE6']
-];
 // mock: คีย์เวิร์ดสถานที่ → พาเลตสี (ใช้เฉพาะตอนพรีวิว; ของจริงเรียก API.stylist)
 const VENUE_PALETTES = [
   { keys:['ทะเล','beach','ริมทะเล','พูล','pool'], palette:['#BFE3EC','#7EA9C9','#E4D5B7','#FFFFFF'] }, // ทะเล: ฟ้า/แซนด์
@@ -321,11 +303,6 @@ function mockVenuePalette(venue){
 const initial = n => (n||'?').trim().charAt(0);
 const avaColor = id => AVA[Math.abs([...String(id||'?')].reduce((a,c)=>a+c.charCodeAt(0),0))%AVA.length];
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
-function avaHtml(picture, id, name){
-  return picture
-    ? `<img class="ava" src="${esc(picture)}" alt="${esc(initial(name))}" referrerpolicy="no-referrer">`
-    : `<div class="ava" style="background:${avaColor(id||name||'?')}">${esc(initial(name))}</div>`;
-}
 const baht = n => '฿' + Number(n||0).toLocaleString('th-TH');
 function qparam(k){ return new URLSearchParams(location.search).get(k); }
 function dateStr(d){ return new Date(d).toISOString().slice(0,10); }
@@ -333,14 +310,6 @@ function dateStr(d){ return new Date(d).toISOString().slice(0,10); }
 // ---- state ----
 let LIVE = false;          // true = Supabase จริง
 let CUSTOMER = null;       // {id,...}
-let AIQ = null;            // โควต้า AI วิเคราะห์สถานที่ (ก้อนเดียวกับ AI สไตลิสต์หน้าแรก)
-async function refreshAIQ(preset){
-  const h=document.getElementById('aiqHint'); if(!h) return;
-  if(!LIVE){ h.textContent='โหมดเดโม · ของจริงนับรวมกับโควต้า AI หน้าแรก'; return; }
-  if(preset!=null){ AIQ=preset; }
-  else { try{ AIQ = await window.API.stylistQuota(); }catch(_e){ AIQ=null; } }
-  h.textContent = (AIQ!=null) ? `AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)` : '';
-}
 let GROUP = null;          // {group_id,name,kind,my_role,members:[...]}
 let THEME = null;          // ผลจาก groupThemeSuggest
 let SEL = {};              // wearer(customer_id) -> code ที่เลือก
@@ -348,7 +317,7 @@ let SHIP = {};             // wearer -> { separate:bool, box:int } (วิธี
 let DEST = {};             // boxNo -> { recipient, address } (ปลายทางของกล่องส่งแยก)
 let PAYMODE = 'host';      // 'host' = หัวหน้าจ่ายรวม · 'split' = ต่างคนต่างจ่าย
 // แหล่งที่มาของโทนสีตีม: auto = ระบบเลือก · season = เลือกฤดูเอง · venue = ตามสถานที่ (AI แนะนำสี)
-let THEMESRC = { mode:'auto', season:null, shades:[], venue:'', place:null };
+let THEMESRC = { mode:'auto', season:null, venue:'' };
 
 // ขั้นบันไดส่วนลดแพคเกจครอบครัว (ตรงกับดีฟอลต์ใน group_discount_pct ฝั่ง DB)
 const DISC_TIERS = [{min:2,pct:5},{min:3,pct:10},{min:4,pct:15}];
@@ -518,46 +487,13 @@ window.setThemeSrc = function(mode){
   renderThemeSrc();
 };
 window.setSeason = function(season){
-  // เลือกฤดู → ล้างเฉดที่เลือกไว้ (เป็นทางเลือกแทนกัน)
   THEMESRC.season = (THEMESRC.season===season) ? null : season;
-  if(THEMESRC.season) THEMESRC.shades = [];
-  renderThemeSrc();
-};
-window.toggleShade = function(hex){
-  // เลือกเฉด ≥1 สี → ล้างฤดู (เป็นทางเลือกแทนกัน)
-  const arr = THEMESRC.shades || (THEMESRC.shades = []);
-  const i = arr.indexOf(hex);
-  if(i>=0) arr.splice(i,1); else arr.push(hex);
-  if(arr.length) THEMESRC.season = null;
   renderThemeSrc();
 };
 window.venueInput = function(){
   const el = document.getElementById('ts_venue');
   THEMESRC.venue = el ? el.value : '';
-  THEMESRC.place = null; // พิมพ์ใหม่ → ล้างสถานที่ที่เลือกจาก Google ก่อนหน้า
 };
-
-// ---- Google Places (lazy-load ครั้งเดียว; โดเมน github.io/lloop.app เท่านั้น) ----
-let _gmapsP;
-function loadGooglePlaces(){
-  if(window.google && google.maps && google.maps.places) return Promise.resolve(true);
-  if(_gmapsP) return _gmapsP;
-  const key = window.CONFIG && window.CONFIG.GOOGLE_MAPS_KEY;
-  if(!key) return Promise.resolve(false);
-  _gmapsP = new Promise(res=>{ const s=document.createElement('script');
-    s.src='https://maps.googleapis.com/maps/api/js?key='+key+'&libraries=places&language=th';
-    s.async=true; s.onload=()=>res(true); s.onerror=()=>res(false); document.head.appendChild(s); });
-  return _gmapsP;
-}
-function attachPlacesAutocomplete(input){
-  if(!input || input._acBound) return; input._acBound = true;
-  const ac = new google.maps.places.Autocomplete(input, { fields:['name','types','price_level','geometry'], types:['establishment'] });
-  ac.addListener('place_changed', ()=>{ const p=ac.getPlace();
-    THEMESRC.place = { name:p.name, types:p.types||[], price_level:p.price_level,
-      lat:p.geometry&&p.geometry.location&&p.geometry.location.lat(), lng:p.geometry&&p.geometry.location&&p.geometry.location.lng() };
-    THEMESRC.venue = p.name || input.value; });
-}
-
 function renderThemeSrc(){
   ['auto','season','venue'].forEach(m=>{
     const b = document.getElementById('tsm-'+m);
@@ -566,27 +502,14 @@ function renderThemeSrc(){
   const d = $('#tsDetail');
   if(!d) return;
   if(THEMESRC.mode==='season'){
-    const sel = THEMESRC.shades || [];
     d.innerHTML = `<div class="seasonchips">${SEASON_ORDER.map(s=>`
       <button class="schip ${THEMESRC.season===s?'on':''}" onclick="setSeason('${s}')">
-        <span class="sdotc" style="background:${SEASON_HEX[s]}"></span>${SEASON_TH[s]}</button>`).join('')}</div>
-      <div class="shadewrap">
-        <div class="shadehd">เฉดสีของตีม · เลือกได้หลายสี</div>
-        <div class="shadegrid">${SHADES.map(([nm,hex])=>`
-          <button class="swatch ${sel.indexOf(hex)>=0?'on':''}" style="background:${hex}" title="${esc(nm)}" aria-label="${esc(nm)}" onclick="toggleShade('${hex}')">
-            <span class="chk"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>
-          </button>`).join('')}</div>
-      </div>`;
+        <span class="sdotc" style="background:${SEASON_HEX[s]}"></span>${SEASON_TH[s]}</button>`).join('')}</div>`;
   } else if(THEMESRC.mode==='venue'){
     d.innerHTML = `<div class="venuefld">
-      <input id="ts_venue" type="text" placeholder="เช่น ริมทะเล, งานวัด, โรงแรมหรู" value="${esc(THEMESRC.venue||'')}" oninput="venueInput()" autocomplete="off">
-      <div class="venuehint">พิมพ์แล้วเลือกสถานที่จริงจาก Google</div>
+      <input id="ts_venue" type="text" placeholder="เช่น ริมทะเล, งานวัด, โรงแรมหรู" value="${esc(THEMESRC.venue||'')}" oninput="venueInput()">
       <div class="venuehint">AI จะแนะนำพาเลตสีจากบรรยากาศของสถานที่ แล้วจัดชุดให้เข้ากับพาเลตนั้น</div>
-      <div class="venuehint" id="aiqHint"></div>
     </div>`;
-    refreshAIQ();
-    // โหลด Google Places แล้วผูก autocomplete (degrade เป็น free-text ถ้าไม่มี key/google)
-    loadGooglePlaces().then(ok=>{ if(ok) attachPlacesAutocomplete(document.getElementById('ts_venue')); });
   } else {
     d.innerHTML = '';
   }
@@ -636,19 +559,14 @@ async function onSuggest(){
     // ---- สร้าง opts ตามโหมดที่เลือก ----
     let opts = null;                 // auto → ไม่ส่ง opts
     let venuePhotoTip = '';
-    if(mode==='season' && (THEMESRC.shades?.length || THEMESRC.season)){
-      // เฉดที่เลือกเองมาก่อน (nearest-hex) ; ถ้าไม่มีค่อยใช้ฤดู
-      opts = THEMESRC.shades?.length ? { palette: THEMESRC.shades.slice() } : { season: THEMESRC.season };
+    if(mode==='season' && THEMESRC.season){
+      opts = { season: THEMESRC.season };
     } else if(mode==='venue'){
       // ดึงพาเลตสีจากสถานที่ก่อน (LIVE: AI stylist · MOCK: แมปคีย์เวิร์ดในไฟล์นี้)
       let palette = [];
       if(LIVE){
         try{
-          const s = await window.API.stylist({ venue, place: THEMESRC.place||null, occasion: occ }, 'th');
-          if(s && s.error==='no_quota'){
-            refreshAIQ(0);
-            alert('โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) — จะใช้พาเลตจากชื่อสถานที่แทนนะคะ');
-          } else if(s && typeof s.remaining==='number'){ refreshAIQ(s.remaining); }
+          const s = await window.API.stylist({ venue, occasion: occ }, 'th');
           palette = ((s && s.recommended_colors) || []).map(c=>c.hex).filter(Boolean);
           venuePhotoTip = (s && (s.photo_tip || s.aesthetics)) || '';
         }catch(e){ palette = []; }
@@ -673,8 +591,6 @@ async function onSuggest(){
       THEME = mockTheme({ mode, season:(opts&&opts.season)||null, palette:(opts&&opts.palette)||null, venue });
       if(mode==='venue') THEME.photo_tip = venuePhotoTip;
     }
-    // โหมด season ที่เลือกเฉดเอง (palette แต่ไม่ได้เลือกฤดู) → ล้าง season เพื่อให้ป้ายแสดง "เฉดที่เลือก"
-    if(THEME && mode==='season' && opts && opts.palette) THEME.season = null;
   }catch(e){ alert('เกิดข้อผิดพลาด ลองใหม่อีกครั้งนะคะ'); return; }
   finally{ btn.disabled=false; btn.textContent='จัดชุดเข้าตีม'; }
 
@@ -694,9 +610,8 @@ function themeChip(season){
     label = `พาเลตจาก: ${esc(THEME.venue||'สถานที่')}`;
     dots = (palette || [SEASON_HEX[season]]).slice(0,5);
   } else if(mode==='season'){
-    // ถ้าเลือกเฉดเอง (มีพาเลต แต่ไม่มีฤดู) → ป้าย "เฉดที่เลือก"
-    label = (palette && !THEME.season) ? `เฉดที่เลือก · ${palette.length} สี` : `โทนที่เลือก · ${SEASON_TH[season]||season}`;
-    dots = (palette || [SEASON_HEX[season]||'#B07D4F']).slice(0,5);
+    label = `โทนที่เลือก · ${SEASON_TH[season]||season}`;
+    dots = palette || [SEASON_HEX[season]||'#B07D4F'];
   } else {
     label = `พาเลตตีมร่วม · โทน${SEASON_TH[season]||season}`;
     dots = palette || [SEASON_HEX[season]||'#B07D4F'];
@@ -731,7 +646,7 @@ function renderAssign(){
     const sub = `${m.relation || ''}${m.relation?' · ':''}${AGE_TH[m.age_band]||m.age_band||''}`;
     html += `<div class="look" id="look-${esc(id)}">
       <div class="lhead">
-        ${avaHtml(m.picture, id, m.name)}
+        <div class="ava" style="background:${avaColor(id)}">${esc(initial(m.name))}</div>
         <div><div class="lname">${esc(m.name)}</div><div class="lrel">${esc(sub)}</div></div>
         <div class="lpick" id="lpick-${esc(id)}"></div>
       </div>`;

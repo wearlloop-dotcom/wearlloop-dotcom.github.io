@@ -331,21 +331,23 @@ async function askVenue() {
   const link = v.occasion?` · <a href="#" onclick="setOccasion('${esc(v.occasion)}');return false">${t('vViewPre')} ${esc(occName(v.occasion))}</a>`:'';
 
   const dimRow = (k, val) => val ? `<div class="vrow"><span class="vk">${k}</span><span class="vv">${esc(val)}</span></div>` : '';
+  const dims = dimRow(t('vAppropriate'), v.appropriateness) + dimRow(t('vAesthetics'), v.aesthetics) + dimRow(t('vMobility'), v.mobility);
+  const tips = (v.photo_tip?`<div class="tip"><span class="tk">${t('vPhoto')}</span> ${esc(v.photo_tip)}</div>`:'')
+             + (v.avoid?`<div class="tip"><span class="tk">${t('vAvoid')}</span> ${esc(v.avoid)}</div>`:'');
+  // โชว์ชุดเป็นพระเอก — รูป+dress code+สี+ชุด มาก่อน · เหตุผล (3 มิติ/tip) ย่อใต้ปุ่ม
   el.innerHTML =`
     ${placePhoto}
     <div class="vhead">${dc}${v.venue_type?`<span class="vtype">${esc(v.venue_type)}</span>`:''}</div>
-    <div class="vbasis">${t('vBasis')}</div>
-    <div class="vdims">
-      ${dimRow(t('vAppropriate'), v.appropriateness)}
-      ${dimRow(t('vAesthetics'), v.aesthetics)}
-      ${dimRow(t('vMobility'), v.mobility)}
-    </div>
     <div class="vcolors">${t('vColors')} ${sw}${v.palette_source==='photo'?`<span class="vphtag">${t('vFromPhoto')}</span>`:''}</div>
-    ${picks?`<div class="vpicks"><div class="ph">${t('vPicks')}</div>${picks}</div>`:''}
-    <div class="vtips">
-      ${v.photo_tip?`<div class="tip"><span class="tk">${t('vPhoto')}</span> ${esc(v.photo_tip)}</div>`:''}
-      ${v.avoid?`<div class="tip"><span class="tk">${t('vAvoid')}</span> ${esc(v.avoid)}</div>`:''}
-    </div>
+    ${picks?`<div class="vpicks"><div class="ph">${t('vPicksLead')}</div>${picks}</div>`:''}
+    <details class="vwhy">
+      <summary>${t('vWhy')}</summary>
+      <div class="vwhybody">
+        <div class="vbasis">${t('vBasis')}</div>
+        <div class="vdims">${dims}</div>
+        ${tips?`<div class="vtips">${tips}</div>`:''}
+      </div>
+    </details>
     ${mapEmbed}
     <div class="vfoot">${t('vTapColor')}${link} · ${t('vBonusHint')}</div>`;
 
