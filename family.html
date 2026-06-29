@@ -306,6 +306,15 @@ function loadGooglePlaces(){
     s.async=true; s.onload=()=>res(true); s.onerror=()=>res(false); document.head.appendChild(s); });
   return _gmapsP;
 }
+// โควต้า AI วิเคราะห์สถานที่ — ใช้ก้อนเดียวกับ AI สไตลิสต์หน้าแรก (stylist_consume ต่อลูกค้า)
+let AIQ = null;
+async function refreshAIQ(preset){
+  const h=document.querySelector('#aiqHint'); if(!h) return;
+  if(!LIVE){ h.textContent='โหมดเดโม · ของจริงนับรวมกับโควต้า AI หน้าแรก'; return; }
+  if(preset!=null){ AIQ=preset; }
+  else { try{ AIQ = await window.API.stylistQuota(); }catch(_e){ AIQ=null; } }
+  h.textContent = (AIQ!=null) ? `AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)` : '';
+}
 const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
 const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู้ใหญ่', senior:'ผู้ใหญ่ขึ้นวัย' };
 const GEN_TH = { female:'หญิง', male:'ชาย', '':'' };
@@ -674,6 +683,12 @@ async function renderTheme(show){
       }
       else if(modeInfo.mode==='venue'){
         const st=await window.API.stylist({ venue: THEMESRC.venue.trim(), place: THEMESRC.place||null, occasion: occ }, 'th');
+        if(st && st.error==='no_quota'){
+          refreshAIQ(0);
+          box.innerHTML=`<div class="phototip" style="background:#FBF3E9;border-color:var(--gold);color:#8a6d2f"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) — เลือก “เลือกโทนเอง / เฉดสี” แทนได้เลยนะคะ</span></div>`;
+          return;
+        }
+        if(st && typeof st.remaining==='number'){ refreshAIQ(st.remaining); }
         const cols=(st && st.recommended_colors)||[];
         const palette=cols.map(c=>c.hex).filter(Boolean);
         if(palette.length){ opts.palette=palette; modeInfo.swatches=palette; }
@@ -720,7 +735,8 @@ function renderThemeSrc(){
       ).join('')}</div>`;
     extra.innerHTML=seasonRow+shadeGrid;
   } else if(THEMESRC.mode==='venue'){
-    extra.innerHTML=`<div class="venuebox"><input id="t_venue" placeholder="เช่น ริมทะเล, งานวัด, โรงแรมหรู" value="${escHtml(THEMESRC.venue)}"><div class="venuehint">พิมพ์แล้วเลือกสถานที่จริงจาก Google</div></div>`;
+    extra.innerHTML=`<div class="venuebox"><input id="t_venue" placeholder="เช่น ริมทะเล, งานวัด, โรงแรมหรู" value="${escHtml(THEMESRC.venue)}"><div class="venuehint">พิมพ์แล้วเลือกสถานที่จริงจาก Google</div><div class="venuehint" id="aiqHint"></div></div>`;
+    refreshAIQ();
     const inp=$('#t_venue');
     if(inp){
       inp.oninput=e=>{ THEMESRC.venue=e.target.value; if(THEMESRC.place && THEMESRC.place.name!==e.target.value) THEMESRC.place=null; };

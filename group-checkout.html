@@ -333,6 +333,14 @@ function dateStr(d){ return new Date(d).toISOString().slice(0,10); }
 // ---- state ----
 let LIVE = false;          // true = Supabase จริง
 let CUSTOMER = null;       // {id,...}
+let AIQ = null;            // โควต้า AI วิเคราะห์สถานที่ (ก้อนเดียวกับ AI สไตลิสต์หน้าแรก)
+async function refreshAIQ(preset){
+  const h=document.getElementById('aiqHint'); if(!h) return;
+  if(!LIVE){ h.textContent='โหมดเดโม · ของจริงนับรวมกับโควต้า AI หน้าแรก'; return; }
+  if(preset!=null){ AIQ=preset; }
+  else { try{ AIQ = await window.API.stylistQuota(); }catch(_e){ AIQ=null; } }
+  h.textContent = (AIQ!=null) ? `AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)` : '';
+}
 let GROUP = null;          // {group_id,name,kind,my_role,members:[...]}
 let THEME = null;          // ผลจาก groupThemeSuggest
 let SEL = {};              // wearer(customer_id) -> code ที่เลือก
@@ -574,7 +582,9 @@ function renderThemeSrc(){
       <input id="ts_venue" type="text" placeholder="เช่น ริมทะเล, งานวัด, โรงแรมหรู" value="${esc(THEMESRC.venue||'')}" oninput="venueInput()" autocomplete="off">
       <div class="venuehint">พิมพ์แล้วเลือกสถานที่จริงจาก Google</div>
       <div class="venuehint">AI จะแนะนำพาเลตสีจากบรรยากาศของสถานที่ แล้วจัดชุดให้เข้ากับพาเลตนั้น</div>
+      <div class="venuehint" id="aiqHint"></div>
     </div>`;
+    refreshAIQ();
     // โหลด Google Places แล้วผูก autocomplete (degrade เป็น free-text ถ้าไม่มี key/google)
     loadGooglePlaces().then(ok=>{ if(ok) attachPlacesAutocomplete(document.getElementById('ts_venue')); });
   } else {
@@ -635,6 +645,10 @@ async function onSuggest(){
       if(LIVE){
         try{
           const s = await window.API.stylist({ venue, place: THEMESRC.place||null, occasion: occ }, 'th');
+          if(s && s.error==='no_quota'){
+            refreshAIQ(0);
+            alert('โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) — จะใช้พาเลตจากชื่อสถานที่แทนนะคะ');
+          } else if(s && typeof s.remaining==='number'){ refreshAIQ(s.remaining); }
           palette = ((s && s.recommended_colors) || []).map(c=>c.hex).filter(Boolean);
           venuePhotoTip = (s && (s.photo_tip || s.aesthetics)) || '';
         }catch(e){ palette = []; }
