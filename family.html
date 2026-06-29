@@ -24,6 +24,8 @@
   .hbar{display:flex;align-items:center;justify-content:space-between;height:56px}
   .logo{font-family:var(--display);font-size:23px;font-weight:700;letter-spacing:1px}
   .hnav{font-size:12px;color:var(--muted)}
+  .back{font-size:12.5px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
 
   /* hero */
   .hero{padding:30px 0 18px}
@@ -50,6 +52,7 @@
   .mcard{border:1px solid var(--line);border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:9px;background:var(--bg);position:relative}
   .ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;color:#fff}
   img.ava{object-fit:cover;background:var(--soft)}
+  .picpriv{background:none;border:none;color:var(--muted);font-size:11px;padding:2px 0;text-align:left;text-decoration:underline;text-underline-offset:2px}
   .mname{font-weight:600;font-size:15px}
   .mrel{font-size:12px;color:var(--muted)}
   .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
@@ -102,6 +105,14 @@
   .seasonchip.on{background:var(--sage-bg);border-color:var(--sage);color:var(--ok);font-weight:600}
   .venuebox{margin-top:11px;max-width:340px}
   .venuebox input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:16px;background:#fff;color:var(--ink)}
+  .venuehint{margin-top:6px;font-size:11.5px;color:#999}
+  .shadehead{margin-top:14px;font-size:12px;color:#777;font-weight:600}
+  .shadegrid{display:flex;flex-wrap:wrap;gap:9px;margin-top:9px}
+  .shadesw{position:relative;width:34px;height:34px;border-radius:50%;border:1px solid rgba(0,0,0,.1);cursor:pointer;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .shadesw.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--sage)}
+  .shadesw .ck{position:absolute;inset:0;display:none;align-items:center;justify-content:center}
+  .shadesw.on .ck{display:flex}
+  .shadesw .ck svg{width:16px;height:16px;stroke:#fff;stroke-width:3;fill:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
   .look{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:var(--bg)}
   .lhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
   .lhead .ava{width:34px;height:34px;font-size:14px}
@@ -142,7 +153,7 @@
 <body>
 <header><div class="contain hbar">
   <div class="logo">LLOOP</div>
-  <div class="hnav">ครอบครัว &amp; กลุ่ม</div>
+  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> หน้าหลัก</a>
 </div></header>
 
 <div class="contain">
@@ -245,16 +256,16 @@
     <div id="themeResult"></div>
   </div>
 
-  <div class="demo">หน้าตัวอย่าง (prototype) · ข้อมูลเป็น <b>mock</b> เพื่อดูดีไซน์ · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> ที่เตรียมไว้แล้ว</div>
+  <div class="demo">หน้าตัวอย่าง · ข้อมูลเป็นตัวอย่างเพื่อดูดีไซน์</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=34"></script>
-<script src="data.js?v=34"></script>
-<script src="liffAuth.js?v=34"></script>
-<script src="me-api.js?v=34"></script>
-<script src="api.js?v=34"></script>
+<script src="config.js?v=38"></script>
+<script src="data.js?v=38"></script>
+<script src="liffAuth.js?v=38"></script>
+<script src="me-api.js?v=38"></script>
+<script src="api.js?v=38"></script>
 <script>
 // ===== MOCK DATA (แทน Supabase ระหว่างพรีวิว) =====
 const PALETTE = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };
@@ -272,8 +283,38 @@ const VENUE_PALETTES = [
   { keys:['หรู','โรงแรม','โรงแรมหรู','luxury','hotel','gala'], palette:['#2E3A52','#1F3B33','#3B4A6B','#5A6B86'] }, // เนวี/มรกตเข้ม
 ];
 const NEUTRAL_PALETTE = ['#15233F','#9FB7AC','#B8A179','#E4D5B7']; // fallback กลาง ๆ
+// เฉดสีให้เลือกเอง (ชื่อ+hex ตรงกับหน้าอื่น) — multi-select ในโหมด "เลือกโทนเอง"
+const SHADES = [
+  ['แดงเชอร์รี่','#B23A48'],['โอลด์โรส','#C98A7A'],['เทอราคอตต้า','#C96F4A'],['คาราเมล','#9C6B45'],
+  ['มัสตาร์ด','#C9A227'],['ครีมเบจ','#E4D5B7'],['แชมเปญทอง','#C9A86A'],['เซจ','#9FB7AC'],
+  ['มรกต','#2E6F5E'],['มะกอก','#7A7A3C'],['ฟ้าอ่อน','#A9C7D8'],['น้ำเงินเนวี','#2B3A55'],
+  ['ลาเวนเดอร์','#9A8AB0'],['เทาหิน','#8C8B86'],['ดำ','#1F1F1F'],['ขาวงาช้าง','#F2EFE6']
+];
 // แหล่งที่มาของโทน: auto = ระบบเลือก, season = เลือกฤดูเอง, venue = ตามสถานที่
-let THEMESRC = { mode:'auto', season:null, venue:'' };
+// season โหมดเลือกได้ทั้ง ฤดู (season) หรือ เฉดสีเอง (shades[]) — เป็นทางเลือกแทนกัน
+let THEMESRC = { mode:'auto', season:null, shades:[], venue:'', place:null };
+
+// ===== lazy-load Google Maps Places (autocomplete สถานที่จริง) =====
+let _gmapsP;
+function loadGooglePlaces(){
+  if(window.google && google.maps && google.maps.places) return Promise.resolve(true);
+  if(_gmapsP) return _gmapsP;
+  const key = window.CONFIG && window.CONFIG.GOOGLE_MAPS_KEY;
+  if(!key) return Promise.resolve(false);
+  _gmapsP = new Promise(res=>{ const s=document.createElement('script');
+    s.src='https://maps.googleapis.com/maps/api/js?key='+key+'&libraries=places&language=th';
+    s.async=true; s.onload=()=>res(true); s.onerror=()=>res(false); document.head.appendChild(s); });
+  return _gmapsP;
+}
+// โควต้า AI วิเคราะห์สถานที่ — ใช้ก้อนเดียวกับ AI สไตลิสต์หน้าแรก (stylist_consume ต่อลูกค้า)
+let AIQ = null;
+async function refreshAIQ(preset){
+  const h=document.querySelector('#aiqHint'); if(!h) return;
+  if(!LIVE){ h.textContent='โหมดเดโม · ของจริงนับรวมกับโควต้า AI หน้าแรก'; return; }
+  if(preset!=null){ AIQ=preset; }
+  else { try{ AIQ = await window.API.stylistQuota(); }catch(_e){ AIQ=null; } }
+  h.textContent = (AIQ!=null) ? `AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)` : '';
+}
 const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
 const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู้ใหญ่', senior:'ผู้ใหญ่ขึ้นวัย' };
 const GEN_TH = { female:'หญิง', male:'ชาย', '':'' };
@@ -322,6 +363,7 @@ let INVITES = [
   { group_id:'inv2', name:'ครอบครัวฝั่งคุณสามี', kind:'family', from:'คุณแม่เปิ้ล' },
 ];
 let active = 'g1', selRel = null;
+let MY_HIDE = false;   // ซ่อนรูปโปรไฟล์ของฉัน (privacy)
 
 // ===== LIVE vs MOCK =====
 // LIVE=true → ต่อ Supabase จริงผ่าน window.API; LIVE=false → ใช้ mock arrays ด้านบน (พรีวิว)
@@ -419,8 +461,20 @@ function memberCard(m){
     ${avaHtml(m.picture, m.id, m.name)}
     <div><div class="mname">${m.name}</div><div class="mrel">${m.rel|| (m.role==='owner'?'ตัวคุณเอง':'สมาชิก')}</div></div>
     <div class="tags">${tags.join('')}</div>
+    ${m.id===ME.id?`<button class="picpriv" onclick="togglePicHide()">${MY_HIDE?'· แสดงรูปฉัน':'· ซ่อนรูปฉันจากกลุ่ม'}</button>`:''}
   </div>`;
 }
+// privacy: เปิด/ปิดการซ่อนรูปโปรไฟล์ของฉัน
+window.togglePicHide = async function(){
+  MY_HIDE = !MY_HIDE;
+  if(LIVE){
+    try{ await window.API.setPictureHidden(ME, MY_HIDE); if(typeof reloadGroups==='function'){ await reloadGroups(); } }catch(e){}
+    render();
+  } else {
+    GROUPS.forEach(g=>(g.members||[]).forEach(m=>{ if(m.id===ME.id){ if(MY_HIDE){ m._pic=m.picture; m.picture=null; } else { m.picture=m._pic||m.picture; } } }));
+    render();
+  }
+};
 
 function renderMembers(){
   const g=curGroup();
@@ -536,9 +590,16 @@ const SEASON_TH = {autumn:'ออทัม',winter:'วินเทอร์',sp
 // ===== โหมดโทนสี → opts สำหรับ groupThemeSuggest + mock =====
 // คืน { mode:'auto'|'season'|'venue', season?, palette?, label, swatches[] }
 function resolveThemeMode(){
-  if(THEMESRC.mode==='season' && THEMESRC.season){
-    const sw=SEASON_PALETTE[THEMESRC.season]||[PALETTE[THEMESRC.season]];
-    return { mode:'season', season:THEMESRC.season, label:'โทนที่เลือก · '+(SEASON_TH[THEMESRC.season]||THEMESRC.season), swatches:sw };
+  if(THEMESRC.mode==='season'){
+    // เฉดสีที่เลือกเองมาก่อน (ถ้ามี) → ใช้เป็น palette; ไม่งั้นใช้ฤดู
+    if(THEMESRC.shades && THEMESRC.shades.length){
+      const sh=THEMESRC.shades.slice();
+      return { mode:'season', palette:sh, label:'เฉดที่เลือก', swatches:sh };
+    }
+    if(THEMESRC.season){
+      const sw=SEASON_PALETTE[THEMESRC.season]||[PALETTE[THEMESRC.season]];
+      return { mode:'season', season:THEMESRC.season, label:'โทนที่เลือก · '+(SEASON_TH[THEMESRC.season]||THEMESRC.season), swatches:sw };
+    }
   }
   if(THEMESRC.mode==='venue' && THEMESRC.venue.trim()){
     const palette=venuePaletteMock(THEMESRC.venue);
@@ -595,7 +656,7 @@ function paintTheme(g, season, members, modeInfo){
   if(checkoutHref){
     html+=`<a class="btn" style="display:inline-block;text-decoration:none" href="${checkoutHref}">เช่าทั้งกลุ่มเข้าตีม →</a>`;
   } else {
-    html+=`<button class="btn" onclick="alert('ตัวอย่าง: ส่งชุดที่เลือกไป book_group_cart — จองทั้งกลุ่มในออเดอร์เดียว ส่งพร้อมกัน บิลรวมที่ผู้จ่าย')">เช่าทั้งกลุ่มเข้าตีม →</button>`;
+    html+=`<button class="btn" onclick="alert('ตัวอย่าง: จองทั้งกลุ่มในออเดอร์เดียว ส่งพร้อมกัน บิลรวมที่ผู้จ่าย')">เช่าทั้งกลุ่มเข้าตีม →</button>`;
   }
   html+=`</div>`;
   box.innerHTML=html;
@@ -615,9 +676,19 @@ async function renderTheme(show){
     try{
       // สร้าง opts ตามโหมด: season → ส่ง season, venue → เรียก AI stylist เอาพาเลต
       const opts={}; let photoTip='';
-      if(modeInfo.mode==='season'){ opts.season=modeInfo.season; }
+      if(modeInfo.mode==='season'){
+        // เฉดสีเลือกเอง → ส่ง palette (backend จับสีใกล้สุด); ไม่งั้นส่ง season
+        if(THEMESRC.shades && THEMESRC.shades.length){ opts.palette=THEMESRC.shades.slice(); }
+        else if(THEMESRC.season){ opts.season=THEMESRC.season; }
+      }
       else if(modeInfo.mode==='venue'){
-        const st=await window.API.stylist({ venue: THEMESRC.venue.trim(), occasion: occ }, 'th');
+        const st=await window.API.stylist({ venue: THEMESRC.venue.trim(), place: THEMESRC.place||null, occasion: occ }, 'th');
+        if(st && st.error==='no_quota'){
+          refreshAIQ(0);
+          box.innerHTML=`<div class="phototip" style="background:#FBF3E9;border-color:var(--gold);color:#8a6d2f"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) — เลือก “เลือกโทนเอง / เฉดสี” แทนได้เลยนะคะ</span></div>`;
+          return;
+        }
+        if(st && typeof st.remaining==='number'){ refreshAIQ(st.remaining); }
         const cols=(st && st.recommended_colors)||[];
         const palette=cols.map(c=>c.hex).filter(Boolean);
         if(palette.length){ opts.palette=palette; modeInfo.swatches=palette; }
@@ -632,8 +703,8 @@ async function renderTheme(show){
       box.innerHTML=`<div class="empty" style="padding:24px"><h4>จัดชุดไม่สำเร็จ</h4><p>${escHtml(e.message||'ลองใหม่อีกครั้ง')}</p></div>`;
     }
   } else {
-    // mock: ฤดูพื้นหลังของพาเลตร่วม = ฤดูที่เลือก (season) หรือ groupSeason (auto/venue)
-    const baseSeason=modeInfo.mode==='season'?modeInfo.season:groupSeason();
+    // mock: ฤดูพื้นหลังของพาเลตร่วม = ฤดูที่เลือก (season) หรือ groupSeason (auto/venue/เฉดสีเอง)
+    const baseSeason=(modeInfo.mode==='season' && modeInfo.season)?modeInfo.season:groupSeason();
     paintTheme(g, baseSeason, mockThemeMembers(g, occ, modeInfo), modeInfo);
     if(modeInfo.mode==='venue' && THEMESRC.venue.trim()){
       box.insertAdjacentHTML('afterbegin',
@@ -652,19 +723,49 @@ function renderThemeSrc(){
   row.innerHTML=SRC_MODES.map(s=>`<button class="srcpill${THEMESRC.mode===s.id?' on':''}" onclick="setThemeMode('${s.id}')">${s.label}</button>`).join('');
   const extra=$('#srcExtra');
   if(THEMESRC.mode==='season'){
-    extra.innerHTML=`<div class="seasonrow">${SEASONS.map(s=>{
+    const seasonRow=`<div class="seasonrow">${SEASONS.map(s=>{
       const dot=SEASON_PALETTE[s]?SEASON_PALETTE[s][0]:(PALETTE[s]||'#B07D4F');
       return `<button class="seasonchip${THEMESRC.season===s?' on':''}" onclick="setThemeSeason('${s}')"><span class="sd" style="background:${dot}"></span>${SEASON_TH[s]||s}</button>`;
     }).join('')}</div>`;
+    const sel=new Set(THEMESRC.shades||[]);
+    const ck='<span class="ck"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>';
+    const shadeGrid=`<div class="shadehead">เฉดสีของตีม · เลือกได้หลายสี</div>
+      <div class="shadegrid">${SHADES.map(([nm,hex])=>
+        `<span class="shadesw${sel.has(hex)?' on':''}" style="background:${hex}" title="${nm}" onclick="toggleThemeShade('${hex}')">${ck}</span>`
+      ).join('')}</div>`;
+    extra.innerHTML=seasonRow+shadeGrid;
   } else if(THEMESRC.mode==='venue'){
-    extra.innerHTML=`<div class="venuebox"><input id="t_venue" placeholder="เช่น ริมทะเล, งานวัด, โรงแรมหรู" value="${escHtml(THEMESRC.venue)}"></div>`;
-    const inp=$('#t_venue'); if(inp) inp.oninput=e=>{ THEMESRC.venue=e.target.value; };
+    extra.innerHTML=`<div class="venuebox"><input id="t_venue" placeholder="เช่น ริมทะเล, งานวัด, โรงแรมหรู" value="${escHtml(THEMESRC.venue)}"><div class="venuehint">พิมพ์แล้วเลือกสถานที่จริงจาก Google</div><div class="venuehint" id="aiqHint"></div></div>`;
+    refreshAIQ();
+    const inp=$('#t_venue');
+    if(inp){
+      inp.oninput=e=>{ THEMESRC.venue=e.target.value; if(THEMESRC.place && THEMESRC.place.name!==e.target.value) THEMESRC.place=null; };
+      // ต่อ Google Places Autocomplete (ถ้าโหลดได้) — ไม่ได้ก็ใช้ free-text + mock เดิม
+      loadGooglePlaces().then(ok=>{
+        if(!ok || !inp || inp._acDone) return;
+        try{
+          const ac=new google.maps.places.Autocomplete(inp, { fields:['name','types','price_level','geometry'], types:['establishment'] });
+          ac.addListener('place_changed', ()=>{ const p=ac.getPlace();
+            THEMESRC.place = { name:p.name, types:p.types||[], price_level:p.price_level,
+              lat:p.geometry&&p.geometry.location&&p.geometry.location.lat(), lng:p.geometry&&p.geometry.location&&p.geometry.location.lng() };
+            THEMESRC.venue = p.name || inp.value; });
+          inp._acDone=true;
+        }catch(_e){}
+      });
+    }
   } else {
     extra.innerHTML='';
   }
 }
-window.setThemeMode=id=>{ THEMESRC.mode=id; if(id!=='season') THEMESRC.season=null; renderThemeSrc(); };
-window.setThemeSeason=s=>{ THEMESRC.season=s; renderThemeSrc(); };
+window.setThemeMode=id=>{ THEMESRC.mode=id; if(id!=='season'){ THEMESRC.season=null; THEMESRC.shades=[]; } renderThemeSrc(); };
+window.setThemeSeason=s=>{ THEMESRC.season=s; THEMESRC.shades=[]; renderThemeSrc(); };
+// เลือกเฉดสีเอง (toggle, หลายสี) → เคลียร์ฤดูที่เลือกไว้
+window.toggleThemeShade=hex=>{
+  const arr=THEMESRC.shades||(THEMESRC.shades=[]);
+  const i=arr.indexOf(hex);
+  if(i>=0) arr.splice(i,1); else { arr.push(hex); THEMESRC.season=null; }
+  renderThemeSrc();
+};
 
 // ===== คำเชิญรอตอบรับ =====
 function renderInvites(){
@@ -706,10 +807,10 @@ window.respondInvite=async (gid,ok)=>{
 
 // ===== ชวนเพื่อน =====
 let inviteUrl = '';  // URL ล่าสุดสำหรับแชร์ทาง LINE
-// ประกอบลิงก์ join แบบ LIFF: https://liff.line.me/<LIFF_ID>?join=<token>
+// ประกอบลิงก์ชวน → หน้า landing ของเพื่อน: https://liff.line.me/<LIFF_ID>/join.html?token=<token>
 function buildJoinUrl(token){
   const lid = (window.CONFIG && window.CONFIG.LIFF_ID) || '';
-  return `https://liff.line.me/${lid}?join=${encodeURIComponent(token)}`;
+  return `https://liff.line.me/${lid}/join.html?token=${encodeURIComponent(token)}`;
 }
 window.openInvite=async ()=>{
   $('#form').classList.remove('show');
@@ -741,7 +842,20 @@ function bindInvite(){
       // เปิด LINE share sheet ถ้าใช้งานได้ ไม่งั้น copy ลงคลิปบอร์ด
       try{
         if(window.liff && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')){
-          liff.shareTargetPicker([{ type:'text', text:'มาเข้ากลุ่ม LLOOP กับเรา แตะลิงก์นี้เลย\n'+inviteUrl }]);
+          const gname=(curGroup() && curGroup().name) || 'กลุ่มของเรา';
+          // การ์ด flex สวย ๆ + ปุ่ม "เข้าร่วมกลุ่ม" ในตัว → เลือกกลุ่ม/เพื่อนใน LINE ส่งได้เลย
+          liff.shareTargetPicker([{ type:'flex', altText:'ชวนเข้ากลุ่ม '+gname+' บน LLOOP', contents:{
+            type:'bubble',
+            body:{ type:'box', layout:'vertical', spacing:'sm', contents:[
+              { type:'text', text:'LLOOP', weight:'bold', size:'lg', color:'#1A1A1A' },
+              { type:'text', text:'ชวนเข้ากลุ่ม · จัดชุดเข้าตีม', size:'xs', color:'#8C8B86' },
+              { type:'text', text:gname, weight:'bold', size:'xl', wrap:true, color:'#1A1A1A', margin:'md' },
+              { type:'text', text:'มาจัดชุดเข้าตีมเดียวกัน แล้วเช่าพร้อมกันในออเดอร์เดียว', size:'sm', color:'#8C8B86', wrap:true }
+            ]},
+            footer:{ type:'box', layout:'vertical', contents:[
+              { type:'button', style:'primary', color:'#6FB3A6',
+                action:{ type:'uri', label:'เข้าร่วมกลุ่ม', uri: inviteUrl } } ]}
+          }}]);
           return;
         }
       }catch(_e){}
