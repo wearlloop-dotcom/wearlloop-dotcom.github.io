@@ -330,18 +330,24 @@ async function askVenue() {
     : '';
   const link = v.occasion?` · <a href="#" onclick="setOccasion('${esc(v.occasion)}');return false">${t('vViewPre')} ${esc(occName(v.occasion))}</a>`:'';
 
+  const dimRow = (k, val) => val ? `<div class="vrow"><span class="vk">${k}</span><span class="vv">${esc(val)}</span></div>` : '';
   el.innerHTML =`
     ${placePhoto}
-    <div class="vhead">${dc}<span class="vtype">${esc(v.venue_type||'')}</span></div>
-    <div class="vrow"><span class="vk">${t('vAppropriate')}</span><span class="vv">${esc(v.appropriateness||'')}</span></div>
-    <div class="vrow"><span class="vk">${t('vAesthetics')}</span><span class="vv">${esc(v.aesthetics||'')}</span></div>
-    <div class="vrow"><span class="vk">${t('vMobility')}</span><span class="vv">${esc(v.mobility||'')}</span></div>
-    <div class="note" style="margin-top:10px">${t('vColors')} ${sw}${v.palette_source==='photo'?` · <span style="color:var(--stone)">${t('vFromPhoto')}</span>`:''}</div>
-    <div class="note"><b style="color:var(--ink)">${t('vPhoto')}</b> ${esc(v.photo_tip||'')}</div>
-    ${v.avoid?`<div class="note">${t('vAvoid')} ${esc(v.avoid)}</div>`:''}
+    <div class="vhead">${dc}${v.venue_type?`<span class="vtype">${esc(v.venue_type)}</span>`:''}</div>
+    <div class="vbasis">${t('vBasis')}</div>
+    <div class="vdims">
+      ${dimRow(t('vAppropriate'), v.appropriateness)}
+      ${dimRow(t('vAesthetics'), v.aesthetics)}
+      ${dimRow(t('vMobility'), v.mobility)}
+    </div>
+    <div class="vcolors">${t('vColors')} ${sw}${v.palette_source==='photo'?`<span class="vphtag">${t('vFromPhoto')}</span>`:''}</div>
     ${picks?`<div class="vpicks"><div class="ph">${t('vPicks')}</div>${picks}</div>`:''}
+    <div class="vtips">
+      ${v.photo_tip?`<div class="tip"><span class="tk">${t('vPhoto')}</span> ${esc(v.photo_tip)}</div>`:''}
+      ${v.avoid?`<div class="tip"><span class="tk">${t('vAvoid')}</span> ${esc(v.avoid)}</div>`:''}
+    </div>
     ${mapEmbed}
-    <div class="note">${t('vTapColor')}${link} · ${t('vBonusHint')}</div>`;
+    <div class="vfoot">${t('vTapColor')}${link} · ${t('vBonusHint')}</div>`;
 
   if (v.occasion) setOccasion(v.occasion);
   if (typeof v.remaining === 'number') { const c = $('#stylistQuota'); if (c) { c.hidden=false; c.innerHTML = `${t('vQuotaLeft')} <b>${v.remaining}</b> ${t('vQuotaTimes')}`; } }
@@ -492,6 +498,7 @@ async function renderAvailCalendar(garmentId) {
     html += `<div class="calmonth"><div class="calhd">${monthName}</div><div class="calgrid">${cells}</div></div>`;
   }
   html += `<div class="callegend"><span><i class="lfree"></i>${lang === 'th' ? 'ว่าง' : 'free'}</span><span><i class="lbk"></i>${lang === 'th' ? 'ไม่ว่าง' : 'booked'}</span></div>`;
+  html += `<div class="calnote">${lang === 'th' ? 'วันไม่ว่างรวมเวลาส่ง+ซัก+รีดของชุดด้วย เพื่อให้คุณได้ชุดสะอาดตรงวัน' : 'Booked days include shipping + cleaning time so your piece arrives fresh on time'}</div>`;
   box.innerHTML = html;
 }
 function pickCalDate(garmentId, ds) {
@@ -605,8 +612,8 @@ async function renderQuote(id, date) {
       <div style="font-size:12px;color:var(--muted,#8C8B86);margin-top:6px">${pay.pay_note || (TH ? 'โอนแล้วแนบสลิปในแชตนี้' : 'Transfer then send slip in chat')}</div>
     </div>`;
   const kyc = q.kyc_required ? `<div class="kycnote">
-      <div class="kt">${TH ? 'ลูกค้าใหม่: ยืนยันตัวตนเพื่อใช้มัดจำปกติ' : 'New customer — verify to lower deposit'}</div>
-      <div class="ks">${TH ? 'แนบบัตรประชาชน + IG/FB สาธารณะ หรือวางมัดจำเพิ่มตามนี้ก็ได้' : 'Attach ID + public IG/FB, or keep the higher deposit'}</div>
+      <div class="kt">${TH ? 'ยืนยันตัวตน ลดมัดจำได้' : 'Verify to lower your deposit'}</div>
+      <div class="ks">${TH ? 'แนบบัตรประชาชน + IG/FB สาธารณะ ครั้งเดียว' : 'Attach ID + public IG/FB, just once'}</div>
       <button class="kbtn" onclick="openKyc('${id}')">${TH ? 'ยืนยันตัวตน' : 'Verify identity'}</button>
     </div>` : '';
   // ป้ายราคาพนักงาน — โชว์เฉพาะพนักงาน (is_staff) ลูกค้าทั่วไปไม่เห็น
@@ -618,8 +625,9 @@ async function renderQuote(id, date) {
     ${q.deposit > 0 ? row(TH ? 'มัดจำ (คืนหลังตรวจชุด)' : 'Deposit (refundable)', baht(q.deposit)) : ''}
     ${row(TH ? 'ค่าส่ง' : 'Shipping', q.shipping > 0 ? baht(q.shipping) : (TH ? 'ส่งฟรี' : 'Free'))}
     ${row(TH ? 'รวมโอน' : 'Total', baht(q.total), true)}
-    <div class="qdates">${TH ? 'จัดส่งราว' : 'Ships ~'} ${fmtDate(q.ship_date)} · ${TH ? 'กำหนดคืน' : 'Return by'} ${fmtDate(q.return_date)}</div>
-    <div class="qdates">${TH ? 'ค่าส่งคืนผู้เช่าออกเอง' : 'Return shipping paid by renter'}</div>
+    <div class="qdates qspan">${TH ? 'วันแรก (วันรับ/ใช้งาน)' : 'Day 1 (pickup/use)'}: <b>${fmtDate(q.use_date)}</b> · ${TH ? `เช่า ${q.days} วัน` : `${q.days} days`}</div>
+    <div class="qdates">${TH ? 'จัดส่งราว' : 'Ships ~'} ${fmtDate(q.ship_date)} · ${TH ? 'กำหนดคืน' : 'Return by'} <b>${fmtDate(q.return_date)}${q.return_by ? (TH ? ` ก่อน ${q.return_by} น.` : ` by ${q.return_by}`) : ''}</b></div>
+    <div class="qdates">${TH ? 'คืนตรงเวลาช่วยให้ชุดพร้อมส่งคิวถัดไปทัน · ค่าส่งคืนผู้เช่าออกเอง' : 'On-time return keeps the next booking on track · return shipping paid by renter'}</div>
     ${kyc}
     ${payBlock}`;
   // วาด QR แบรนด์ LLOOP ฝังยอด (หลัง element อยู่ใน DOM แล้ว)
@@ -1197,16 +1205,22 @@ function renderLoopersClub(c) {
   const progLine = nx
     ? (th ? `เช่าอีก ${nx[1]-r} ครั้ง ขึ้น${nx[2]}` : `${nx[1]-r} more rentals to ${nx[2]}`)
     : (th ? 'คุณอยู่ชั้นสูงสุดแล้ว' : 'Top tier reached');
+  const reward = nx ? ({
+    silver: th?'ชั้นเงิน: ส่งฟรีทุกครั้ง':'Silver: free shipping',
+    gold:   th?'ชั้นทอง: ประกันชุดฟรี + จองก่อนใคร':'Gold: free protection + priority booking',
+    platinum: th?'ชั้นแพลทินัม: สไตลิสต์ส่วนตัว + เปลี่ยนชุดกลางคันฟรี':'Platinum: personal stylist + free swaps'
+  }[nx[0]] || '') : '';
   return `<div class="club">
     <div class="clubrow"><span class="clubkick">LOOPERS CLUB</span><span class="clubtier">${tierTH}</span></div>
     <div class="wallet">
       <div class="wlabel">${th?'กระเป๋า LLOOP':'LLOOP wallet'}</div>
       <div class="wbal">฿${bal.toLocaleString()}</div>
-      <div class="whint">${th?'ใช้ลดค่าเช่าได้ทุกครั้ง — รวมเงินคืน · ชวนเพื่อน · ของขวัญ ไว้ที่เดียว':'Use on any rental — credit, referrals and gifts in one place'}</div>
+      <div class="whint">${th?'พร้อมใช้ลดค่าเช่า':'Ready to use on rentals'}</div>
     </div>
     <div class="clubprog">
       <div class="cptop"><span>${progLine}</span><span class="cpsm">${r}/${nx?nx[1]:r}</span></div>
       <div class="cpbar"><i style="width:${prog}%"></i></div>
+      ${reward?`<div class="creward">${reward}</div>`:''}
     </div>
   </div>`;
 }
