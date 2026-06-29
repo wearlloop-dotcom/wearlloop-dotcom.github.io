@@ -86,6 +86,21 @@
   .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:12px}
   .palette{display:inline-flex;align-items:center;gap:8px;background:var(--sand);border-radius:30px;padding:6px 14px;font-size:12px;color:#7a6433;font-weight:500;margin-top:14px}
   .pdot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+  .phototip{display:flex;gap:9px;align-items:center;background:var(--sage-bg);border:1px solid #cfe6df;border-radius:11px;padding:11px 13px;margin:12px 0 4px;font-size:12.5px;color:var(--ok);line-height:1.45}
+  .phototip svg{width:19px;height:19px;stroke:var(--ok);fill:none;stroke-width:1.6;flex-shrink:0}
+
+  /* theme-color source selector */
+  .srcbar{margin-top:14px}
+  .srclabel{font-size:11px;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+  .srcrow{display:flex;flex-wrap:wrap;gap:8px}
+  .srcpill{background:#fff;border:1px solid var(--line);border-radius:30px;padding:8px 15px;font-size:13px;font-weight:500;color:var(--ink);transition:.15s}
+  .srcpill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .seasonrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+  .seasonchip{background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:7px 14px;font-size:12.5px;color:#555;display:flex;align-items:center;gap:7px;transition:.15s}
+  .seasonchip .sd{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.08)}
+  .seasonchip.on{background:var(--sage-bg);border-color:var(--sage);color:var(--ok);font-weight:600}
+  .venuebox{margin-top:11px;max-width:340px}
+  .venuebox input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
   .look{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:var(--bg)}
   .lhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
   .lhead .ava{width:34px;height:34px;font-size:14px}
@@ -218,6 +233,14 @@
       <div class="fld" style="max-width:160px"><label>วันใช้งาน</label><input id="t_date" type="date"></div>
       <button class="btn" id="suggestBtn">จัดชุดให้เลย</button>
     </div>
+
+    <!-- theme-color source selector -->
+    <div class="srcbar">
+      <div class="srclabel">โทนสีของตีม</div>
+      <div class="srcrow" id="srcRow"></div>
+      <div id="srcExtra"></div>
+    </div>
+
     <div id="themeResult"></div>
   </div>
 
@@ -234,6 +257,22 @@
 <script>
 // ===== MOCK DATA (แทน Supabase ระหว่างพรีวิว) =====
 const PALETTE = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };
+// พาเลตตัวแทนแต่ละฤดู (ใช้โชว์จุดสีบนชิป + จับคู่ระยะสีในโหมดสถานที่)
+const SEASON_PALETTE = {
+  autumn:['#B07D4F','#A85B43','#C98A7A','#7A5C3E'],
+  winter:['#3B4A6B','#2E3A52','#5A6B86','#8E9AB0'],
+  spring:['#E6A57E','#E4C07E','#F0D9A8','#C98A7A'],
+  summer:['#9AA7B0','#7E97A8','#A8C0C4','#D8E0DF'],
+};
+// โหมดสถานที่ (mock): จับคีย์เวิร์ดสถานที่ → พาเลตสี (ของจริงเรียก AI stylist)
+const VENUE_PALETTES = [
+  { keys:['ทะเล','ริมทะเล','ชายหาด','หาด','beach','sea'], palette:['#7E97A8','#A8C0C4','#E4D5B7','#D8E0DF'] }, // ฟ้าทะเล + ทราย
+  { keys:['วัด','งานวัด','ทำบุญ','temple'], palette:['#C9A86A','#B07D4F','#A85B43','#E4C07E'] },                 // ทองอุ่น
+  { keys:['หรู','โรงแรม','โรงแรมหรู','luxury','hotel','gala'], palette:['#2E3A52','#1F3B33','#3B4A6B','#5A6B86'] }, // เนวี/มรกตเข้ม
+];
+const NEUTRAL_PALETTE = ['#15233F','#9FB7AC','#B8A179','#E4D5B7']; // fallback กลาง ๆ
+// แหล่งที่มาของโทน: auto = ระบบเลือก, season = เลือกฤดูเอง, venue = ตามสถานที่
+let THEMESRC = { mode:'auto', season:null, venue:'' };
 const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
 const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู้ใหญ่', senior:'ผู้ใหญ่ขึ้นวัย' };
 const GEN_TH = { female:'หญิง', male:'ชาย', '':'' };
@@ -448,11 +487,21 @@ function bindForm(){
 }
 
 // ===== theme styling (เลียนแบบ group_theme_suggest) =====
-function suggestFor(m, occ){
-  // best-match ที่ว่างจริง: กรองวัย+เพศ, เรียง on-theme ก่อน แล้ว fit
-  const season = groupSeason();
-  return STOCK
-    .filter(s => (s.age===m.age || s.age==='all') && (!m.gen || s.gen===m.gen || s.gen==='unisex'))
+// เลือก best-match สำหรับสมาชิก โดยให้เกียรติโหมดโทนสี:
+//  - season mode → on_theme = สีฤดูตรงกับ season ที่เลือก
+//  - venue/palette mode → on_theme = สีใกล้พาเลต, เรียงตามระยะสีที่ใกล้ที่สุด
+function suggestFor(m, occ, mode){
+  const cand = STOCK
+    .filter(s => (s.age===m.age || s.age==='all') && (!m.gen || s.gen===m.gen || s.gen==='unisex'));
+  if(mode && mode.palette && mode.palette.length){
+    // จับคู่ด้วยระยะสี (RGB euclidean) — ยิ่งใกล้พาเลต ยิ่ง on-theme
+    return cand
+      .map(s => { const d=nearestDist(s.hex, mode.palette); return {...s, dist:d, on:d<=70}; })
+      .sort((a,b)=> (a.dist-b.dist) || (b.fit-a.fit))
+      .slice(0,3);
+  }
+  const season = (mode && mode.season) || groupSeason();
+  return cand
     .map(s => ({...s, on: s.season===season}))
     .sort((a,b)=> (b.on-a.on) || (b.fit-a.fit))
     .slice(0,3);
@@ -463,20 +512,58 @@ function groupSeason(){
   return Object.entries(c).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'autumn';
 }
 
+// ===== hex distance (RGB euclidean) สำหรับจับคู่สีกับพาเลต =====
+function hexToRgb(h){
+  const s=String(h||'').replace('#','');
+  if(s.length!==6) return null;
+  return [parseInt(s.slice(0,2),16), parseInt(s.slice(2,4),16), parseInt(s.slice(4,6),16)];
+}
+function rgbDist(a,b){ if(!a||!b) return 1e9; return Math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2); }
+function nearestDist(hex, palette){
+  const c=hexToRgb(hex); if(!c) return 1e9;
+  return (palette||[]).reduce((min,p)=>Math.min(min, rgbDist(c, hexToRgb(p))), 1e9);
+}
+
 const SEASON_TH = {autumn:'ออทัม',winter:'วินเทอร์',spring:'สปริง',summer:'ซัมเมอร์'};
 
-// คำนวณ picks (mock) → รูปกลางที่ใช้ render
-function mockThemeMembers(g, occ){
+// ===== โหมดโทนสี → opts สำหรับ groupThemeSuggest + mock =====
+// คืน { mode:'auto'|'season'|'venue', season?, palette?, label, swatches[] }
+function resolveThemeMode(){
+  if(THEMESRC.mode==='season' && THEMESRC.season){
+    const sw=SEASON_PALETTE[THEMESRC.season]||[PALETTE[THEMESRC.season]];
+    return { mode:'season', season:THEMESRC.season, label:'โทนที่เลือก · '+(SEASON_TH[THEMESRC.season]||THEMESRC.season), swatches:sw };
+  }
+  if(THEMESRC.mode==='venue' && THEMESRC.venue.trim()){
+    const palette=venuePaletteMock(THEMESRC.venue);
+    return { mode:'venue', palette, label:'พาเลตจากสถานที่: '+THEMESRC.venue.trim(), swatches:palette };
+  }
+  return { mode:'auto', label:null, swatches:null };
+}
+// mock: คีย์เวิร์ดสถานที่ → พาเลต (ของจริงเรียก API.stylist)
+function venuePaletteMock(venue){
+  const q=(venue||'').toLowerCase();
+  const hit=VENUE_PALETTES.find(v=>v.keys.some(k=>q.includes(k.toLowerCase())));
+  return (hit && hit.palette) || NEUTRAL_PALETTE.slice();
+}
+
+// คำนวณ picks (mock) → รูปกลางที่ใช้ render (mode มาจาก resolveThemeMode)
+function mockThemeMembers(g, occ, mode){
   return g.members.map(m=>{
-    const picks=suggestFor(m,occ).map(p=>({ code:p.code, name:p.name, color_name:p.cn, color_hex:p.hex, on_theme:p.on, fit:p.fit }));
+    const picks=suggestFor(m,occ,mode).map(p=>({ code:p.code, name:p.name, color_name:p.cn, color_hex:p.hex, on_theme:p.on, fit:p.fit }));
     return { name:m.name, rel:m.rel, role:m.role, age_band:m.age, id:m.id, picks, needs_sourcing:picks.length===0 };
   });
 }
 
 // วาดผล theme จากรูปกลาง {season, members:[{name,rel,role,age_band,id,picks:[{code,name,color_name,color_hex,on_theme,fit}],needs_sourcing}]}
-function paintTheme(g, season, members){
+function paintTheme(g, season, members, modeInfo){
   const box=$('#themeResult');
-  let html=`<div class="palette"><span class="pdot" style="background:${PALETTE[season]||'#B07D4F'}"></span>พาเลตตีมร่วม · โทน${SEASON_TH[season]||season}</div>`;
+  let html='';
+  // chip โทนที่เลือก + จุดสีจากพาเลต/ฤดู (เมื่อผู้ใช้กำหนดเอง)
+  if(modeInfo && modeInfo.label){
+    const dots=(modeInfo.swatches||[]).map(h=>`<span class="pdot" style="background:${h}"></span>`).join('');
+    html+=`<div class="palette">${dots}${escHtml(modeInfo.label)}</div> `;
+  }
+  html+=`<div class="palette"><span class="pdot" style="background:${PALETTE[season]||'#B07D4F'}"></span>พาเลตตีมร่วม · โทน${SEASON_TH[season]||season}</div>`;
   members.forEach(m=>{
     const ageTh = AGE_TH[m.age_band]||m.age_band||'';
     html+=`<div class="look"><div class="lhead">
@@ -514,20 +601,63 @@ async function renderTheme(show){
     box.innerHTML=`<div class="empty" style="padding:24px"><h4>ยังจัดตีมไม่ได้</h4><p>ต้องมีสมาชิกอย่างน้อย 1 คนก่อน ถึงจะให้สไตลิสต์จัดชุดเข้าตีมให้ทั้งกลุ่มได้</p></div>`;
     return;
   }
+  const modeInfo=resolveThemeMode();
   if(LIVE){
     box.innerHTML=`<div class="empty" style="padding:24px"><p>กำลังให้สไตลิสต์จัดชุด…</p></div>`;
     const fromStr=$('#t_date').value||new Date().toISOString().slice(0,10);
     try{
-      const data=unwrap(await window.API.groupThemeSuggest(g.id, ME, occ, fromStr, fromStr));
+      // สร้าง opts ตามโหมด: season → ส่ง season, venue → เรียก AI stylist เอาพาเลต
+      const opts={}; let photoTip='';
+      if(modeInfo.mode==='season'){ opts.season=modeInfo.season; }
+      else if(modeInfo.mode==='venue'){
+        const st=await window.API.stylist({ venue: THEMESRC.venue.trim(), occasion: occ }, 'th');
+        const cols=(st && st.recommended_colors)||[];
+        const palette=cols.map(c=>c.hex).filter(Boolean);
+        if(palette.length){ opts.palette=palette; modeInfo.swatches=palette; }
+        photoTip=(st && (st.photo_tip || st.aesthetics))||'';
+      }
+      const data=unwrap(await window.API.groupThemeSuggest(g.id, ME, occ, fromStr, fromStr, opts));
       if(!data){ box.innerHTML=`<div class="empty" style="padding:24px"><p>ยังจัดชุดให้ไม่ได้ตอนนี้ ลองใหม่อีกครั้งนะคะ</p></div>`; return; }
-      paintTheme(g, data.season||groupSeason(), data.members||[]);
+      paintTheme(g, data.season||modeInfo.season||groupSeason(), data.members||[], modeInfo);
+      if(photoTip){ box.insertAdjacentHTML('afterbegin',
+        `<div class="phototip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M9 6l1.5-2h3L15 6"/></svg><span>ถ่ายรูปสวยที่นี่ · ${escHtml(photoTip)}</span></div>`); }
     }catch(e){
       box.innerHTML=`<div class="empty" style="padding:24px"><h4>จัดชุดไม่สำเร็จ</h4><p>${escHtml(e.message||'ลองใหม่อีกครั้ง')}</p></div>`;
     }
   } else {
-    paintTheme(g, groupSeason(), mockThemeMembers(g, occ));
+    // mock: ฤดูพื้นหลังของพาเลตร่วม = ฤดูที่เลือก (season) หรือ groupSeason (auto/venue)
+    const baseSeason=modeInfo.mode==='season'?modeInfo.season:groupSeason();
+    paintTheme(g, baseSeason, mockThemeMembers(g, occ, modeInfo), modeInfo);
+    if(modeInfo.mode==='venue' && THEMESRC.venue.trim()){
+      box.insertAdjacentHTML('afterbegin',
+        `<div class="phototip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M9 6l1.5-2h3L15 6"/></svg><span>ถ่ายรูปสวยที่นี่ · โทนสีกลมกลืนกับ${escHtml(THEMESRC.venue.trim())} ขึ้นกล้องสวยทั้งกลุ่ม</span></div>`); }
   }
 }
+
+// ===== theme-color source selector UI =====
+const SRC_MODES=[
+  { id:'auto', label:'ให้ระบบเลือกให้' },
+  { id:'season', label:'เลือกโทนเอง' },
+  { id:'venue', label:'ตามสถานที่' },
+];
+function renderThemeSrc(){
+  const row=$('#srcRow'); if(!row) return;
+  row.innerHTML=SRC_MODES.map(s=>`<button class="srcpill${THEMESRC.mode===s.id?' on':''}" onclick="setThemeMode('${s.id}')">${s.label}</button>`).join('');
+  const extra=$('#srcExtra');
+  if(THEMESRC.mode==='season'){
+    extra.innerHTML=`<div class="seasonrow">${SEASONS.map(s=>{
+      const dot=SEASON_PALETTE[s]?SEASON_PALETTE[s][0]:(PALETTE[s]||'#B07D4F');
+      return `<button class="seasonchip${THEMESRC.season===s?' on':''}" onclick="setThemeSeason('${s}')"><span class="sd" style="background:${dot}"></span>${SEASON_TH[s]||s}</button>`;
+    }).join('')}</div>`;
+  } else if(THEMESRC.mode==='venue'){
+    extra.innerHTML=`<div class="venuebox"><input id="t_venue" placeholder="เช่น ริมทะเล, งานวัด, โรงแรมหรู" value="${escHtml(THEMESRC.venue)}"></div>`;
+    const inp=$('#t_venue'); if(inp) inp.oninput=e=>{ THEMESRC.venue=e.target.value; };
+  } else {
+    extra.innerHTML='';
+  }
+}
+window.setThemeMode=id=>{ THEMESRC.mode=id; if(id!=='season') THEMESRC.season=null; renderThemeSrc(); };
+window.setThemeSeason=s=>{ THEMESRC.season=s; renderThemeSrc(); };
 
 // ===== คำเชิญรอตอบรับ =====
 function renderInvites(){
@@ -646,7 +776,7 @@ function friendlyErr(code){
   return m[code]||code;
 }
 
-function render(){ renderInvites(); renderSwitch(); renderMembers(); renderTheme(false); }
+function render(){ renderInvites(); renderSwitch(); renderMembers(); renderThemeSrc(); renderTheme(false); }
 
 // อ่าน ?join=<token> จาก URL หรือ liff.state → ถ้ามีและ LIVE ให้เข้ากลุ่มแล้วล้าง URL
 function readJoinToken(){

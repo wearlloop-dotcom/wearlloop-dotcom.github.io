@@ -100,6 +100,30 @@
   .vresult .dc{display:inline-block;background:var(--ink);color:#fff;font-size:11px;padding:3px 10px;margin-right:6px}
   .vresult .sw{display:inline-block;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);vertical-align:-3px;margin-left:4px;cursor:pointer}
   .vresult .note{color:var(--muted);font-size:12px;margin-top:6px}
+  /* quota chip + login hint */
+  .stylist .quota{font-size:11px;color:var(--stone);border:1px solid var(--line);border-radius:20px;padding:3px 10px;white-space:nowrap}
+  .stylist .quota b{color:var(--ink)}
+  /* rich analysis */
+  .vresult .vhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .vresult .vtype{font-size:12px;color:var(--stone)}
+  .vresult .vrow{display:flex;gap:8px;margin-top:8px;font-size:13px;line-height:1.5}
+  .vresult .vrow .vk{flex:0 0 86px;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding-top:1px}
+  .vresult .vrow .vv{flex:1;color:var(--ink)}
+  /* embedded map */
+  .vmap{margin-top:12px;border:1px solid var(--line);border-radius:4px;overflow:hidden;line-height:0}
+  .vmap iframe{width:100%;height:170px;border:0;display:block}
+  .vmap .cap{font-size:11px;color:var(--muted);padding:6px 10px;background:#fff;line-height:1.3}
+  /* garment picks */
+  .vpicks{margin-top:14px}
+  .vpicks .ph{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .vpick{display:flex;gap:12px;padding:10px;border:1px solid var(--line);border-radius:4px;background:#fff;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+  .vpick:hover{border-color:var(--ink)}
+  .vpick .pthumb{flex:0 0 54px;height:68px;border-radius:3px;background-size:cover;background-position:center}
+  .vpick .pbody{flex:1;min-width:0}
+  .vpick .pname{font-family:var(--serif);font-size:15px;color:var(--ink)}
+  .vpick .pwhy{font-size:12px;color:var(--stone);margin-top:3px;line-height:1.45}
+  .vpick .pfit{font-size:11px;color:var(--muted);margin-top:3px}
+  .vpick .popen{align-self:center;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--ink);white-space:nowrap}
 
   /* event */
   .event{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);padding:12px 14px;margin:16px 0}
@@ -147,6 +171,10 @@
   .pcolors{display:flex;gap:5px;margin-top:7px}
   .pcolors i{width:13px;height:13px;border-radius:50%;border:1px solid var(--line)}
   .pfit{font-size:11px;color:var(--ok);margin-top:5px}
+  .fitnote{font-size:11px;margin-top:6px;padding:3px 8px;border-radius:6px;line-height:1.3;display:inline-block}
+  .fitnote.true{background:#E9F0EC;color:var(--ok)}
+  .fitnote.small{background:#FBEEE6;color:#9A5B2E}
+  .fitnote.large{background:#EFEBF6;color:#5A3E8C}
   .empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:40px 0}
   /* date bar (home) + card availability */
   .datebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 4px}
@@ -536,8 +564,9 @@
 <div class="stylist">
   <div class="contain in">
     <span class="lbl" id="stylistLabel">จะไปที่ไหนคะ</span>
-    <input id="venueInput" placeholder=""/>
+    <input id="venueInput" placeholder="" autocomplete="off"/>
     <button id="stylistBtn" onclick="askVenue()">แนะนำ</button>
+    <span class="quota" id="stylistQuota" hidden></span>
   </div>
   <div class="contain"><div class="vresult" id="vresult"></div></div>
 </div>
@@ -620,16 +649,16 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=34"></script>
-<script src="analytics.js?v=34"></script>
-<script src="pixel.js?v=34"></script>
-<script src="i18n.js?v=34"></script>
-<script src="data.js?v=34"></script>
-<script src="liffAuth.js?v=34"></script>
-<script src="me-api.js?v=34"></script>
+<script src="config.js?v=36"></script>
+<script src="analytics.js?v=36"></script>
+<script src="pixel.js?v=36"></script>
+<script src="i18n.js?v=36"></script>
+<script src="data.js?v=36"></script>
+<script src="liffAuth.js?v=36"></script>
+<script src="me-api.js?v=36"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
-<script src="promptpay.js?v=34"></script>
-<script src="api.js?v=34"></script>
+<script src="promptpay.js?v=36"></script>
+<script src="api.js?v=36"></script>
 <script>
   /* Spotlight — ดึงชุดที่เช่าน้อยสุดมาโชว์รูปใหญ่ + สลับสไลด์อัตโนมัติ (visual layer) */
   window.renderSpotlight = function(garments){
@@ -667,6 +696,40 @@
     restart();
   };
 </script>
-<script src="app.js?v=34"></script>
+<script>
+  /* Google Places autocomplete สำหรับช่อง "จะไปที่ไหน" — เก็บสถานที่ที่เลือกไว้ใน window.SELECTED_PLACE
+     ไม่มี key ก็ข้ามไป (พิมพ์ชื่อเองได้ตามเดิม) · ดู docs/google-maps-setup.md */
+  window.SELECTED_PLACE = null;
+  window.initVenueAutocomplete = function(){
+    try {
+      var input = document.getElementById('venueInput');
+      if (!input || !window.google || !google.maps || !google.maps.places) return;
+      var ac = new google.maps.places.Autocomplete(input, {
+        fields: ['name','types','price_level','geometry','place_id','photos'],
+      });
+      ac.addListener('place_changed', function(){
+        var p = ac.getPlace() || {};
+        var photoUrl = null;
+        try { if (p.photos && p.photos[0] && p.photos[0].getUrl) photoUrl = p.photos[0].getUrl({ maxWidth: 800, maxHeight: 600 }); } catch (e) {}
+        window.SELECTED_PLACE = (p.name) ? {
+          name: p.name, types: p.types || [], price_level: (p.price_level != null ? p.price_level : null),
+          place_id: p.place_id || null, photo_url: photoUrl,
+          lat: p.geometry && p.geometry.location ? p.geometry.location.lat() : null,
+          lng: p.geometry && p.geometry.location ? p.geometry.location.lng() : null,
+        } : null;
+        if (window.SELECTED_PLACE && typeof askVenue === 'function') askVenue();
+      });
+    } catch (e) { /* ไม่ให้ล้มทั้งหน้าเพราะ maps */ }
+  };
+  (function(){
+    var k = (window.CONFIG && window.CONFIG.GOOGLE_MAPS_KEY) || '';
+    if (!k) return; // ไม่มี key → ไม่โหลด Google, ใช้พิมพ์ชื่อเองได้
+    var s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(k) +
+            '&libraries=places&loading=async&callback=initVenueAutocomplete';
+    s.async = true; document.head.appendChild(s);
+  })();
+</script>
+<script src="app.js?v=36"></script>
 </body>
 </html>

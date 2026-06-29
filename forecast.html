@@ -5,11 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LLOOP · ประมาณการตัวเลข</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{ --navy:#0D2F4F; --teal:#3DC5B7; --ink:#1A2330; --muted:#7C8694; --line:#E6E9ED;
-    --bg:#F6F8FA; --card:#FFFFFF; --gold:#B8975A;
-    --sans:'IBM Plex Sans Thai','Inter',sans-serif; --disp:'Poppins','IBM Plex Sans Thai',sans-serif; }
+  /* โทนแบรนด์ LLOOP (craft sage+ทอง) — ตรงกับ home (เดิมเป็นโทนคลินิก navy/teal ผิดแบรนด์) */
+  :root{ --navy:#1A1A1A; --teal:#6FB3A6; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56;
+    --ink:#1A1A1A; --muted:#8C8B86; --line:#E7E5E1;
+    --bg:#FBFAF7; --card:#FFFFFF; --gold:#C9A86A;
+    --sans:'Inter','Prompt',-apple-system,sans-serif; --disp:'Poppins','Prompt',sans-serif; }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
   .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
@@ -23,16 +25,16 @@
   .tt{display:flex;align-items:center;gap:8px;margin-bottom:14px}
   .ttl{font-size:12px;color:var(--muted)}
   .tt button{font-family:var(--sans);font-size:13px;font-weight:600;padding:7px 16px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:20px;cursor:pointer}
-  .tt button.on{background:var(--teal);color:#06342F;border-color:var(--teal)}
-  .pullbtn{width:100%;margin-bottom:14px;background:#EAF7F4;color:#06342F;border:1px solid var(--teal);padding:10px;font-family:var(--sans);font-size:13px;font-weight:600;border-radius:9px;cursor:pointer}
-  .rbtn{align-self:flex-start;margin-top:5px;background:#fff;border:1px solid var(--teal);color:#0B5F55;font-family:var(--sans);font-size:11px;font-weight:600;padding:3px 9px;border-radius:14px;cursor:pointer}
+  .tt button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .pullbtn{width:100%;margin-bottom:14px;background:var(--sage-bg,#E4F0EC);color:var(--ok,#0F6E56);border:1px solid var(--teal);padding:10px;font-family:var(--sans);font-size:13px;font-weight:600;border-radius:9px;cursor:pointer}
+  .rbtn{align-self:flex-start;margin-top:5px;background:#fff;border:1px solid var(--teal);color:var(--ok,#0F6E56);font-family:var(--sans);font-size:11px;font-weight:600;padding:3px 9px;border-radius:14px;cursor:pointer}
   .rbtn.off{border-color:var(--line);color:var(--muted);cursor:default}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin-bottom:14px}
   .card h2{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
   .f{display:flex;flex-direction:column;gap:4px}
   .f label{font-size:12px;color:var(--muted)}
-  .f input{font-family:var(--sans);font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
+  .f input{font-family:var(--sans);font-size:16px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
   .f input:focus{outline:none;border-color:var(--teal)}
   .res{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 13px}
@@ -270,8 +272,8 @@ function renderPlan(){
     ['ต้นทุนผันแปร', r.variable, '#9AA4B0'],
     ['ค่าส่งที่ร้านออก', r.shipWe, '#C99A5B'],
     ['คงที่ + แอด', r.fixed, '#E8B24A'],
-    ['เงินเดือนทีม', r.team, '#3DC5B7'],
-    ['เงินเดือนเจ้าของ', num('i_owner'), '#0D2F4F'],
+    ['เงินเดือนทีม', r.team, '#6FB3A6'],
+    ['เงินเดือนเจ้าของ', num('i_owner'), '#4A4742'],
     ['เหลือสุทธิ', Math.max(0,r.net), '#0F7B5A'],
   ];
   const tot = parts.reduce((s,p)=>s+p[1],0) || 1;

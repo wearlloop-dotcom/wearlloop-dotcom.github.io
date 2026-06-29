@@ -52,10 +52,25 @@
   .hide{display:none}
   .doc{max-height:320px;overflow:auto;border:1px solid var(--hair);border-radius:2px;padding:14px;font-size:13px;line-height:1.7;background:var(--canvas)}
   .doc h3{font-family:var(--display);font-size:18px;margin:10px 0 4px}
+  .topctl{max-width:560px;margin:14px auto 0;padding:0 14px;display:flex;gap:8px;align-items:center}
+  .topctl select{flex:0 0 auto;width:auto;border:1px solid var(--hair);border-radius:2px;padding:9px 10px;font-size:13px;font-family:var(--sans);background:var(--surface);color:var(--ink)}
+  .howbtn{flex:1;border:1px solid var(--sageDeep);background:var(--surface);color:var(--sageDeep);border-radius:2px;padding:10px 12px;font-size:13px;font-weight:600;font-family:var(--sans);cursor:pointer}
+  .howbtn.on{background:var(--sageDeep);color:#fff}
+  .howpanel{max-width:560px;margin:10px auto 0;padding:0 14px}
+  .guide-h{font-family:var(--display);font-size:18px;margin-bottom:6px}
+  .guide-item{padding:11px 0;border-bottom:1px solid var(--hair)}
+  .guide-item:last-child{border-bottom:none}
+  .guide-item b{display:block;font-size:14px;margin-bottom:3px}
+  .guide-item p{font-size:13px;color:var(--stone);line-height:1.65}
 </style>
 </head>
 <body>
-<div class="bar"><h1>LLOOP</h1><div class="t">STAFF · ทีมงาน</div></div>
+<div class="bar"><h1>LLOOP</h1><div class="t" id="barSub">STAFF · ทีมงาน</div></div>
+<div class="topctl">
+  <select id="langSel" onchange="setLang(this.value)" aria-label="language"></select>
+  <button class="howbtn" id="howBtn" onclick="toggleHow()">วิธีการทำงาน</button>
+</div>
+<div id="howPanel" class="howpanel hide"></div>
 <div class="wrap" id="wrap">
   <div class="card center" id="loading"><p style="color:var(--stone);padding:30px 0">กำลังโหลด…</p></div>
 </div>
@@ -78,6 +93,88 @@
   const ecToken=qs.get('ec');           // สัญญาจ้าง
   const annId=qs.get('ann');            // ประกาศ (เปิดอ่าน+รับทราบ)
   let lineUid=null, lineName=null;
+
+  // ===== i18n — ไทย / อังกฤษ / พม่า / ลาว (พนักงานต่างชาติอ่านวิธีทำงานได้) =====
+  const STAFF_I18N={
+    th:{ langName:'ไทย', barSub:'STAFF · ทีมงาน', howBtn:'วิธีการทำงาน', howClose:'ปิดคู่มือ', guideTitle:'คู่มือการทำงาน',
+      t_kpi:'KPI', t_ann:'ประกาศ', t_sched:'ตารางเวร', t_leave:'ลางาน', t_claim:'เบิกเงิน', t_task:'งาน', t_pay:'เงินเดือน', t_doc:'เอกสาร', t_contract:'สัญญา', t_kyc:'ยืนยันตัวตน',
+      canWork:'เข้าทำงานได้', lblStatus:'สถานะ', lblEmpType:'ประเภทจ้าง', lblStart:'เริ่มงาน', editBtn:'แก้ข้อมูลส่วนตัว (เบอร์/บัญชี)',
+      attLoading:'กำลังโหลดเวลางาน…', workingNow:'กำลังเข้างานอยู่', inAt:'เข้างาน %s น.', clockOut:'ออกงาน / เลิกงาน',
+      todayWorked:'วันนี้ทำงานไปแล้ว %s', notYet:'วันนี้ยังไม่ได้ลงเวลา', clockIn:'เข้างาน / ลงเวลา',
+      mustLine:'ต้องเปิดผ่าน LINE', mustLineSub:'กรุณาเปิดพอร์ทัลนี้จากแอป LINE OA หลังบ้านค่ะ', cantWork:'ยังเข้าทำงานไม่ได้', copyUid:'คัดลอก UID',
+      guide:[
+        {t:'เข้างาน / ออกงาน', s:'กดปุ่ม "เข้างาน / ลงเวลา" เมื่อเริ่มงาน และกด "ออกงาน" เมื่อเลิกงาน ระบบจะนับชั่วโมงทำงานให้อัตโนมัติ'},
+        {t:'KPI — คะแนนการทำงาน', s:'ดูคะแนนการทำงานของคุณในแต่ละงวด เทียบกับเป้าหมาย'},
+        {t:'ประกาศ', s:'อ่านประกาศจากบริษัท เรื่องที่ขึ้นว่า "ยังไม่รับทราบ" ให้กดปุ่ม "กดรับทราบ"'},
+        {t:'ตารางเวร', s:'ดูวันและเวลาเข้างานล่วงหน้า 14 วัน วันหยุดจะขึ้นว่า "หยุด"'},
+        {t:'ลางาน', s:'กด "+ ขอลา" เลือกประเภท (ป่วย/กิจ/พักร้อน) และวันที่ แล้วรอฝ่ายบุคคลอนุมัติ'},
+        {t:'เบิกเงิน', s:'ขอเบิกค่าใช้จ่ายที่มีใบเสร็จ หรือเบิกเงินเดือนล่วงหน้า รอเจ้าของอนุมัติ'},
+        {t:'งาน', s:'ดูงานที่ได้รับมอบหมาย เมื่อทำเสร็จให้กดปุ่ม "เสร็จ"'},
+        {t:'เงินเดือน · เอกสาร · สัญญา · ยืนยันตัวตน', s:'ดูสลิปเงินเดือน อัปโหลดเอกสาร ลงนามสัญญาจ้าง และยืนยันตัวตน (KYC) ได้ในแท็บเหล่านี้'},
+      ] },
+    en:{ langName:'English', barSub:'STAFF · Team', howBtn:'How to work', howClose:'Close guide', guideTitle:'Work guide',
+      t_kpi:'KPI', t_ann:'Announcements', t_sched:'Schedule', t_leave:'Leave', t_claim:'Claims', t_task:'Tasks', t_pay:'Payroll', t_doc:'Documents', t_contract:'Contract', t_kyc:'ID verify',
+      canWork:'Can work', lblStatus:'Status', lblEmpType:'Employment', lblStart:'Start date', editBtn:'Edit my details (phone/bank)',
+      attLoading:'Loading work hours…', workingNow:'Currently clocked in', inAt:'In at %s', clockOut:'Clock out',
+      todayWorked:'Worked %s today', notYet:'Not clocked in yet', clockIn:'Clock in',
+      mustLine:'Open via LINE', mustLineSub:'Please open this portal from the LINE OA app.', cantWork:'Cannot work yet', copyUid:'Copy UID',
+      guide:[
+        {t:'Clock in / Clock out', s:'Tap "Clock in" when you start and "Clock out" when you finish. Your hours are counted automatically.'},
+        {t:'KPI — your score', s:'See your performance score for each period against the target.'},
+        {t:'Announcements', s:'Read company announcements. For items marked "not acknowledged", tap "Acknowledge".'},
+        {t:'Schedule', s:'See your shifts for the next 14 days. Days off show as "Off".'},
+        {t:'Leave', s:'Tap "+ Request leave", choose the type (sick/personal/vacation) and dates, then wait for HR approval.'},
+        {t:'Claims', s:'Claim expenses with a receipt, or request a salary advance. Wait for the owner to approve.'},
+        {t:'Tasks', s:'See your assigned tasks. Tap "Done" when you finish one.'},
+        {t:'Payroll · Documents · Contract · ID verify', s:'View payslips, upload documents, sign your contract, and verify your identity (KYC) in these tabs.'},
+      ] },
+    my:{ langName:'မြန်မာ', barSub:'STAFF · အဖွဲ့သား', howBtn:'အလုပ်လုပ်နည်း', howClose:'လမ်းညွှန် ပိတ်ရန်', guideTitle:'အလုပ်လုပ်နည်း လမ်းညွှန်',
+      t_kpi:'KPI', t_ann:'ကြေညာချက်', t_sched:'အလုပ်ဇယား', t_leave:'ခွင့်ယူ', t_claim:'ငွေတောင်းခံ', t_task:'အလုပ်', t_pay:'လစာ', t_doc:'စာရွက်စာတမ်း', t_contract:'စာချုပ်', t_kyc:'အထောက်အထား',
+      canWork:'အလုပ်ဝင်နိုင်သည်', lblStatus:'အခြေအနေ', lblEmpType:'အလုပ်ခန့်အမျိုးအစား', lblStart:'စတင်သည့်ရက်', editBtn:'ကိုယ်ရေးအချက်အလက် ပြင်ရန် (ဖုန်း/ဘဏ်)',
+      attLoading:'အလုပ်ချိန် ဖွင့်နေသည်…', workingNow:'လက်ရှိ အလုပ်ဝင်နေသည်', inAt:'%s တွင် ဝင်ခဲ့သည်', clockOut:'အလုပ်ဆင်း',
+      todayWorked:'ယနေ့ %s အလုပ်လုပ်ပြီး', notYet:'ယနေ့ အချိန်မှတ် မလုပ်ရသေး', clockIn:'အလုပ်ဝင် / အချိန်မှတ်',
+      mustLine:'LINE မှ ဖွင့်ပါ', mustLineSub:'ဤ portal ကို LINE OA app မှ ဖွင့်ပေးပါ။', cantWork:'အလုပ် မဝင်နိုင်သေးပါ', copyUid:'UID ကူးယူရန်',
+      guide:[
+        {t:'အလုပ်ဝင် / အလုပ်ဆင်း', s:'အလုပ်စတင်ချိန် "အလုပ်ဝင်" ကို၊ ပြီးဆုံးချိန် "အလုပ်ဆင်း" ကို နှိပ်ပါ။ အလုပ်ချိန်ကို အလိုအလျောက် ရေတွက်ပေးပါသည်။'},
+        {t:'KPI — အမှတ်', s:'ကာလတစ်ခုစီအတွက် သင့်လုပ်ဆောင်မှု အမှတ်ကို ပန်းတိုင်နှင့် နှိုင်းယှဉ်ကြည့်ပါ။'},
+        {t:'ကြေညာချက်', s:'ကုမ္ပဏီ ကြေညာချက်များ ဖတ်ပါ။ "အသိအမှတ်မပြုရသေး" ဟု ပြထားသည်များကို "အသိအမှတ်ပြုရန်" နှိပ်ပါ။'},
+        {t:'အလုပ်ဇယား', s:'နောက် ၁၄ ရက်အတွက် သင့်အလုပ်ဆိုင်းကို ကြည့်ပါ။ နားရက်များကို "နား" ဟု ပြသည်။'},
+        {t:'ခွင့်ယူ', s:'"+ ခွင့်တောင်းရန်" နှိပ်၊ အမျိုးအစား (ဖျားနာ/ကိစ္စ/အားလပ်ရက်) နှင့် ရက်စွဲ ရွေး၊ ပြီးလျှင် HR ခွင့်ပြုသည်ကို စောင့်ပါ။'},
+        {t:'ငွေတောင်းခံ', s:'ဘောက်ချာရှိ ကုန်ကျစရိတ် တောင်းခံပါ၊ သို့မဟုတ် လစာ ကြိုတင်တောင်းခံပါ။ ပိုင်ရှင် ခွင့်ပြုသည်ကို စောင့်ပါ။'},
+        {t:'အလုပ်', s:'သင့်အား တာဝန်ပေးထားသော အလုပ်များ ကြည့်ပါ။ ပြီးဆုံးလျှင် "ပြီးပြီ" နှိပ်ပါ။'},
+        {t:'လစာ · စာရွက် · စာချုပ် · အထောက်အထား', s:'ဤ tab များတွင် လစာစလစ် ကြည့်ခြင်း၊ စာရွက်တင်ခြင်း၊ စာချုပ်လက်မှတ်ထိုးခြင်း၊ အထောက်အထားစိစစ်ခြင်း (KYC) ပြုလုပ်နိုင်သည်။'},
+      ] },
+    lo:{ langName:'ລາວ', barSub:'STAFF · ທີມງານ', howBtn:'ວິທີເຮັດວຽກ', howClose:'ປິດຄູ່ມື', guideTitle:'ຄູ່ມືການເຮັດວຽກ',
+      t_kpi:'KPI', t_ann:'ປະກາດ', t_sched:'ຕາຕະລາງເຂົ້າວຽກ', t_leave:'ລາພັກ', t_claim:'ເບີກເງິນ', t_task:'ວຽກ', t_pay:'ເງິນເດືອນ', t_doc:'ເອກະສານ', t_contract:'ສັນຍາ', t_kyc:'ຢືນຢັນຕົວຕົນ',
+      canWork:'ເຂົ້າວຽກໄດ້', lblStatus:'ສະຖານະ', lblEmpType:'ປະເພດການຈ້າງ', lblStart:'ເລີ່ມວຽກ', editBtn:'ແກ້ໄຂຂໍ້ມູນສ່ວນຕົວ (ເບີ/ບັນຊີ)',
+      attLoading:'ກຳລັງໂຫຼດເວລາວຽກ…', workingNow:'ກຳລັງເຂົ້າວຽກຢູ່', inAt:'ເຂົ້າວຽກ %s', clockOut:'ອອກວຽກ / ເລີກວຽກ',
+      todayWorked:'ມື້ນີ້ເຮັດວຽກໄປແລ້ວ %s', notYet:'ມື້ນີ້ຍັງບໍ່ໄດ້ລົງເວລາ', clockIn:'ເຂົ້າວຽກ / ລົງເວລາ',
+      mustLine:'ຕ້ອງເປີດຜ່ານ LINE', mustLineSub:'ກະລຸນາເປີດ portal ນີ້ຈາກແອັບ LINE OA.', cantWork:'ຍັງເຂົ້າວຽກບໍ່ໄດ້', copyUid:'ກັອບປີ້ UID',
+      guide:[
+        {t:'ເຂົ້າວຽກ / ອອກວຽກ', s:'ກົດ "ເຂົ້າວຽກ / ລົງເວລາ" ເມື່ອເລີ່ມວຽກ ແລະ "ອອກວຽກ" ເມື່ອເລີກວຽກ. ລະບົບຈະນັບຊົ່ວໂມງໃຫ້ໂດຍອັດຕະໂນມັດ.'},
+        {t:'KPI — ຄະແນນວຽກ', s:'ເບິ່ງຄະແນນການເຮັດວຽກຂອງທ່ານໃນແຕ່ລະງວດ ທຽບກັບເປົ້າໝາຍ.'},
+        {t:'ປະກາດ', s:'ອ່ານປະກາດຈາກບໍລິສັດ. ລາຍການທີ່ຂຶ້ນວ່າ "ຍັງບໍ່ຮັບຮູ້" ໃຫ້ກົດ "ກົດຮັບຮູ້".'},
+        {t:'ຕາຕະລາງເຂົ້າວຽກ', s:'ເບິ່ງວັນ ແລະ ເວລາເຂົ້າວຽກລ່ວງໜ້າ 14 ມື້. ມື້ພັກຈະສະແດງວ່າ "ພັກ".'},
+        {t:'ລາພັກ', s:'ກົດ "+ ຂໍລາ" ເລືອກປະເພດ (ປ່ວຍ/ກິດ/ພັກຮ້ອນ) ແລະ ວັນທີ ແລ້ວລໍຖ້າຝ່າຍບຸກຄະລາກອນອະນຸມັດ.'},
+        {t:'ເບີກເງິນ', s:'ຂໍເບີກຄ່າໃຊ້ຈ່າຍທີ່ມີໃບຮັບເງິນ ຫຼື ເບີກເງິນເດືອນລ່ວງໜ້າ. ລໍຖ້າເຈົ້າຂອງອະນຸມັດ.'},
+        {t:'ວຽກ', s:'ເບິ່ງວຽກທີ່ໄດ້ຮັບມອບໝາຍ. ເມື່ອເຮັດແລ້ວໃຫ້ກົດ "ສຳເລັດ".'},
+        {t:'ເງິນເດືອນ · ເອກະສານ · ສັນຍາ · ຢືນຢັນຕົວຕົນ', s:'ເບິ່ງສະລິບເງິນເດືອນ, ອັບໂຫຼດເອກະສານ, ເຊັນສັນຍາ ແລະ ຢືນຢັນຕົວຕົນ (KYC) ໄດ້ໃນແທັບເຫຼົ່ານີ້.'},
+      ] },
+  };
+  let LANG=localStorage.getItem('staffLang')||'th'; if(!STAFF_I18N[LANG])LANG='th';
+  let howOpen=false, activeRender=null;
+  function t(k){const d=STAFF_I18N[LANG]||STAFF_I18N.th;return d[k]!=null?d[k]:STAFF_I18N.th[k];}
+  function tf(k){const a=[].slice.call(arguments,1);let s=t(k);a.forEach(x=>{s=s.replace('%s',x);});return s;}
+  function buildLangSel(){const sel=$('langSel');if(!sel)return;sel.innerHTML=Object.keys(STAFF_I18N).map(k=>`<option value="${k}"${k===LANG?' selected':''}>${STAFF_I18N[k].langName}</option>`).join('');}
+  function applyStatic(){
+    document.documentElement.lang=LANG;
+    const bs=$('barSub'); if(bs) bs.textContent=t('barSub');
+    const hb=$('howBtn'); if(hb) hb.textContent=howOpen?t('howClose'):t('howBtn');
+  }
+  function renderHow(){const g=t('guide')||[];$('howPanel').innerHTML=`<div class="card"><div class="guide-h">${t('guideTitle')}</div>${g.map(it=>`<div class="guide-item"><b>${it.t}</b><p>${it.s}</p></div>`).join('')}</div>`;}
+  function toggleHow(){howOpen=!howOpen;const p=$('howPanel'),b=$('howBtn');if(howOpen){p.classList.remove('hide');renderHow();b.classList.add('on');}else{p.classList.add('hide');b.classList.remove('on');}b.textContent=howOpen?t('howClose'):t('howBtn');}
+  function setLang(l){if(!STAFF_I18N[l])return;LANG=l;localStorage.setItem('staffLang',l);applyStatic();if(howOpen)renderHow();if(activeRender)activeRender();}
+
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const KYC_FN=(CONFIG.SUPABASE_URL||'https://rprwilsbjptdnvsibjgi.supabase.co')+'/functions/v1/kyc';
   function fileToDataURL(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(f);});}
@@ -216,7 +313,7 @@
   async function showDashboard(){
     if(!lineUid){
       wrap.innerHTML=`<div class="card gate deny"><div class="icon">!</div>
-        <h2>ต้องเปิดผ่าน LINE</h2><p class="sub">กรุณาเปิดพอร์ทัลนี้จากแอป LINE OA หลังบ้านค่ะ</p></div>`;return;
+        <h2>${t('mustLine')}</h2><p class="sub">${t('mustLineSub')}</p></div>`;return;
     }
     const {data:acc}=await sb.rpc('hr_check_access',{p_line_uid:lineUid});
     if(!acc||!acc.ok){
@@ -226,11 +323,11 @@
         not_verified:'บัญชีของคุณยังไม่ได้ยืนยันตัวตน กรุณาเปิดลิงก์ยืนยันที่ฝ่ายบุคคลส่งให้ค่ะ',
         inactive:'สถานะพนักงานของคุณยังเข้าทำงานไม่ได้ ติดต่อฝ่ายบุคคลค่ะ',no_uid:'อ่าน UID ไม่ได้'}[reason]||reason;
       wrap.innerHTML=`<div class="card gate deny"><div class="icon">✕</div>
-        <h2>ยังเข้าทำงานไม่ได้</h2>
+        <h2>${t('cantWork')}</h2>
         <p class="sub">${msg}</p>
-        ${acc&&acc.name?`<p style="font-size:14px">${acc.name} · สถานะ ${ST_TH[acc.status]||acc.status||'-'}</p>`:''}
+        ${acc&&acc.name?`<p style="font-size:14px">${acc.name} · ${t('lblStatus')} ${ST_TH[acc.status]||acc.status||'-'}</p>`:''}
         <div class="uid">UID: ${lineUid}</div>
-        <button class="btn ghost" onclick="navigator.clipboard.writeText('${lineUid}').then(()=>toast('คัดลอก UID แล้ว'))">คัดลอก UID</button>
+        <button class="btn ghost" onclick="navigator.clipboard.writeText('${lineUid}').then(()=>toast('คัดลอก UID แล้ว'))">${t('copyUid')}</button>
       </div>`;return;
     }
     const {data:e}=await sb.rpc('hr_employee_self',{p_line_uid:lineUid});
@@ -239,25 +336,25 @@
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div><h2>${e.name}${e.nickname?` (${e.nickname})`:''}</h2>
           <div class="sub">${e.emp_no||''} · ${ROLE_TH[e.role]||e.role||'-'}</div></div>
-          <span class="pill ok">เข้าทำงานได้</span>
+          <span class="pill ok">${t('canWork')}</span>
         </div>
-        <div class="kv"><span class="k">สถานะ</span><span>${ST_TH[e.status]||e.status}</span></div>
-        <div class="kv"><span class="k">ประเภทจ้าง</span><span>${{fulltime:'ประจำ',parttime:'พาร์ทไทม์',contract:'สัญญาจ้าง',freelance:'ฟรีแลนซ์'}[e.emp_type]||e.emp_type||'-'}</span></div>
-        <div class="kv"><span class="k">เริ่มงาน</span><span>${e.start_date||'-'}</span></div>
-        <button class="btn ghost" style="margin-top:10px" onclick="editProfile()">แก้ข้อมูลส่วนตัว (เบอร์/บัญชี)</button>
+        <div class="kv"><span class="k">${t('lblStatus')}</span><span>${ST_TH[e.status]||e.status}</span></div>
+        <div class="kv"><span class="k">${t('lblEmpType')}</span><span>${{fulltime:'ประจำ',parttime:'พาร์ทไทม์',contract:'สัญญาจ้าง',freelance:'ฟรีแลนซ์'}[e.emp_type]||e.emp_type||'-'}</span></div>
+        <div class="kv"><span class="k">${t('lblStart')}</span><span>${e.start_date||'-'}</span></div>
+        <button class="btn ghost" style="margin-top:10px" onclick="editProfile()">${t('editBtn')}</button>
       </div>
-      <div class="card" id="attCard"><p style="color:var(--stone);text-align:center">กำลังโหลดเวลางาน…</p></div>
+      <div class="card" id="attCard"><p style="color:var(--stone);text-align:center">${t('attLoading')}</p></div>
       <div class="seg" style="flex-wrap:wrap">
-        <span class="on" onclick="dtab(this,'kpi')">KPI</span>
-        <span onclick="dtab(this,'ann')" id="annTab">ประกาศ</span>
-        <span onclick="dtab(this,'sched')">ตารางเวร</span>
-        <span onclick="dtab(this,'leave')">ลางาน</span>
-        <span onclick="dtab(this,'claim')">เบิกเงิน</span>
-        <span onclick="dtab(this,'task')">งาน</span>
-        <span onclick="dtab(this,'pay')">เงินเดือน</span>
-        <span onclick="dtab(this,'doc')">เอกสาร</span>
-        <span onclick="dtab(this,'contract')">สัญญา</span>
-        <span onclick="dtab(this,'kyc')">ยืนยันตัวตน</span>
+        <span class="on" onclick="dtab(this,'kpi')">${t('t_kpi')}</span>
+        <span onclick="dtab(this,'ann')" id="annTab">${t('t_ann')}</span>
+        <span onclick="dtab(this,'sched')">${t('t_sched')}</span>
+        <span onclick="dtab(this,'leave')">${t('t_leave')}</span>
+        <span onclick="dtab(this,'claim')">${t('t_claim')}</span>
+        <span onclick="dtab(this,'task')">${t('t_task')}</span>
+        <span onclick="dtab(this,'pay')">${t('t_pay')}</span>
+        <span onclick="dtab(this,'doc')">${t('t_doc')}</span>
+        <span onclick="dtab(this,'contract')">${t('t_contract')}</span>
+        <span onclick="dtab(this,'kyc')">${t('t_kyc')}</span>
       </div>
       <div id="tabbody"></div>`;
     curE=e; loadAttendance(); loadKpiTab(); annBadge();
@@ -401,13 +498,13 @@
     const {data}=await sb.rpc('hr_attendance_today',{p_line_uid:lineUid});
     const c=$('attCard'); if(!data||data.error){c.style.display='none';return;}
     if(data.checked_in){
-      c.innerHTML=`<div class="center"><div class="sub">กำลังเข้างานอยู่</div>
-        <div class="big" style="color:var(--sageDeep)">เข้างาน ${hhmm(data.open_since)} น.</div>
-        <button class="btn dark" style="margin-top:14px" id="attBtn" onclick="clockOut()">ออกงาน / เลิกงาน</button></div>`;
+      c.innerHTML=`<div class="center"><div class="sub">${t('workingNow')}</div>
+        <div class="big" style="color:var(--sageDeep)">${tf('inAt',hhmm(data.open_since))}</div>
+        <button class="btn dark" style="margin-top:14px" id="attBtn" onclick="clockOut()">${t('clockOut')}</button></div>`;
     }else{
-      const done=data.today_minutes>0?`<div class="sub">วันนี้ทำงานไปแล้ว ${hmin(data.today_minutes)}</div>`:'<div class="sub">วันนี้ยังไม่ได้ลงเวลา</div>';
+      const done=data.today_minutes>0?`<div class="sub">${tf('todayWorked',hmin(data.today_minutes))}</div>`:`<div class="sub">${t('notYet')}</div>`;
       c.innerHTML=`<div class="center">${done}
-        <button class="btn sage" style="margin-top:10px" id="attBtn" onclick="clockIn()">เข้างาน / ลงเวลา</button></div>`;
+        <button class="btn sage" style="margin-top:10px" id="attBtn" onclick="clockIn()">${t('clockIn')}</button></div>`;
     }
   }
   async function clockIn(){
@@ -517,10 +614,11 @@
       if(liff.isLoggedIn()){const p=await liff.getProfile();lineUid=p.userId;lineName=p.displayName;}
       else if(liff.isInClient()){liff.login();return;}
     }catch(e){/* เบราว์เซอร์ปกติ — lineUid ว่าง */}
-    if(verifyToken) return showVerify();
-    if(ecToken)     return showContract();
-    if(annId)       return showAnnouncement();
-    return showDashboard();
+    buildLangSel(); applyStatic();
+    if(verifyToken){ activeRender=showVerify; return showVerify(); }
+    if(ecToken)    { activeRender=showContract; return showContract(); }
+    if(annId)      { activeRender=showAnnouncement; return showAnnouncement(); }
+    activeRender=showDashboard; return showDashboard();
   }
   // ---------- โหมดประกาศ (เปิดจากการ์ด LINE) ----------
   async function showAnnouncement(){

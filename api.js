@@ -20,6 +20,7 @@ window.API = (function () {
       bust: (r.bust_min_in!= null)? [r.bust_min_in, r.bust_max_in] : null,
       waist: (r.waist_min_in!= null)? [r.waist_min_in, r.waist_max_in] : null,
       hip: r.hip_in, length: r.length_cm,
+      fitAvg: r.fit_avg!= null? Number(r.fit_avg) : null, fitN: r.fit_n || 0, fitLabel: r.fit_label || null,
       colors: r.color_hex? [[r.color_name ||'สี', r.color_hex]] : [['—','#E7E2DA']],
       season: r.color_season, occasion_tags: r.occasion_tags || [],
       bg: r.color_hex ||'#E7E2DA', isNew: false,
@@ -105,29 +106,47 @@ window.API = (function () {
     return { ok:!error, error };
   }
 
-  // AI Stylist — รับชื่อสถานที่ใดก็ได้ dress code + สีที่ถ่ายรูปสวย
-  async function stylist(venue, season, occasion, lang) {
+  // โควต้า AI สไตลิสต์ที่เหลือ (อ่านผ่าน gateway me-rpc — กัน IDOR) · null = ยังไม่ล็อกอิน
+  async function stylistQuota() {
+    if (CONFIG.USE_MOCK) return 5;
+    if (!window.meRpc) return null;
+    const { data } = await window.meRpc('stylist_quota', {});
+    return (typeof data === 'number') ? data : null;
+  }
+
+  // AI Stylist — วิเคราะห์สถานที่ (จาก Google Place) + personal ลูกค้า + คลังจริง → แนะนำชุดเป็นตัว ๆ
+  // payload: { venue, place?:{name,types[],price_level,lat,lng}, occasion? }
+  async function stylist(payload, lang) {
+    const { venue, place, occasion } = payload || {};
     if (!CONFIG.USE_MOCK) {
+      let idToken = null;
+      try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (_e) {}
       const r = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/stylist`, {
         method:'POST',
-        headers: {'Content-Type':'application/json', Authorization:`Bearer ${CONFIG.SUPABASE_ANON_KEY}`},
-        body: JSON.stringify({ venue, season, occasion, lang }),
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ id_token: idToken, venue, place, occasion, lang }),
       });
-      if (r.ok) return await r.json();
+      return await r.json().catch(() => ({ ok:false, error:'network'}));
     }
-    // mock — จับคู่ประเภทที่รู้จัก หรือคืนคำแนะนำกลาง ๆ (ของจริงจะเป็น AI วิเคราะห์ชื่อเจาะจง)
+    // mock — จับคู่ประเภทที่รู้จัก หรือคืนคำแนะนำกลาง ๆ (ของจริงจะเป็น AI วิเคราะห์เจาะจง + เลือกชุดจากคลัง)
     const q = (venue ||'').toLowerCase();
     const v = (window.MOCK.VENUES || []).find(x => x.match.some(m => q.includes(m.toLowerCase())));
+    const picks = (window.MOCK.GARMENTS || []).slice(0, 2).map(g => ({
+      code: g.code, name: g.name, why:'เข้ากับโทนงานและ personal color ของคุณ', fit_note:'ไซซ์ใกล้เคียงกับโปรไฟล์ของคุณ'}));
     if (v) return {
-      venue_type: v.venue_type, dress_code_th: v.dress_code, occasion: v.occasion,
-      recommended_colors: v.colors.map(h => ({ hex: h, name:''})),
+      ok:true, remaining:5, venue_type: v.venue_type, has_dress_code:true, dress_code_th: v.dress_code, occasion: v.occasion,
+      appropriateness:'เหมาะกับกาลเทศะของที่นี่', aesthetics:'เข้ากับ personal color ของคุณ ถ่ายรูปสวย', mobility:'เคลื่อนไหวสบาย',
+      palette_source:'venue_name', recommended_colors: v.colors.map(h => ({ hex: h, name:''})), recommended_garments: picks,
       photo_tip: v.photo_tip, avoid: v.avoid, note: v.note,
     };
     return {
-      venue_type:'สถานที่ของคุณ', dress_code_th:'สมาร์ทแคชชวล', occasion: null,
+      ok:true, remaining:5, venue_type:'สถานที่ของคุณ', has_dress_code:false, dress_code_th:'สมาร์ทแคชชวล', occasion: null,
+      appropriateness:'โทนสุภาพ เข้าได้หลายบรรยากาศ', aesthetics:'สีกลางที่เข้ากับ personal color ได้กว้าง', mobility:'ใส่สบาย เคลื่อนไหวคล่อง',
+      palette_source:'venue_name',
       recommended_colors: [{ hex:'#15233F', name:'navy'}, { hex:'#9FB7AC', name:'sage'}, { hex:'#B8A179', name:'champagne'}],
+      recommended_garments: picks,
       photo_tip:'โทนสุภาพ เข้าได้หลายบรรยากาศ ถ่ายรูปดูดี',
-      avoid:'สีสะท้อนแสงจัด', note:'เปิด AI จริง (deploy) เพื่อวิเคราะห์ชื่อสถานที่แบบเจาะจง',
+      avoid:'สีสะท้อนแสงจัด', note:'เปิด AI จริง (deploy) เพื่อวิเคราะห์สถานที่แบบเจาะจง',
     };
   }
 
@@ -422,9 +441,11 @@ window.API = (function () {
     return { ok: !error, data, error };
   }
   // AI จัดชุดเข้าตีมทั้งกลุ่ม → { season, occasion, members:[{ name, picks:[...] }] }
-  async function groupThemeSuggest(groupId, requester, occasion, fromStr, toStr) {
+  // opts: { season:'autumn'|'winter'|'spring'|'summer', palette:['#hex',...] } — เลือกตีมสีเอง/ตามสถานที่
+  async function groupThemeSuggest(groupId, requester, occasion, fromStr, toStr, opts) {
     if (CONFIG.USE_MOCK || !groupId || !requester?.id) return { ok: true, data: null };
-    const { data, error } = await client().rpc('group_theme_suggest', { p_group: groupId, p_requester: requester.id, p_occasion: occasion || null, p_from: fromStr || null, p_to: toStr || null });
+    const o = opts || {};
+    const { data, error } = await client().rpc('group_theme_suggest', { p_group: groupId, p_requester: requester.id, p_occasion: occasion || null, p_from: fromStr || null, p_to: toStr || null, p_season: o.season || null, p_palette: o.palette || null });
     return { ok: !error, data, error };
   }
   // จองทั้งกลุ่มในออเดอร์เดียว (assignments = [{ code, wearer }]) → { order_group, total, ... }
@@ -560,5 +581,5 @@ window.API = (function () {
     return { ok: true, ...data };
   }
 
-  return { init, reserve, saveProfile, stylist, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, payInfo, birthdayStatus, birthdayReserve };
+  return { init, reserve, saveProfile, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, payInfo, birthdayStatus, birthdayReserve };
 })();

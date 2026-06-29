@@ -60,17 +60,29 @@ function setLang(l) {
   $('#vresult').classList.remove('show');
 }
 
-// Fit confidence — mirror SQL fit_confidence()
+// Fit confidence — mirror SQL fit_confidence() (+ fit feedback loop)
 function fitConfidence(c, g) {
   if (c.bust_in == null ||!g.bust) return null;
   let score = 100;
-  const slack = g.stretch ==='stretchy'? 2 : g.stretch ==='slight'? 1 : 0;
+  let slack = g.stretch ==='stretchy'? 2 : g.stretch ==='slight'? 1 : 0;
+  // ★ ปรับด้วยฟีดแบ็กจริงจากลูกค้า (loop) — เลื่อน slack ตาม fitAvg ถ่วงด้วยจำนวนรีวิว
+  if ((g.fitN||0) >= 3 && g.fitAvg != null) {
+    const adj = g.fitAvg * 0.5 * (Math.min(g.fitN,8)/8);   // ~ -1..+1
+    slack = Math.max(-1, Math.min(2.5, slack + adj));
+  }
   if (c.bust_in < g.bust[0] - slack) score -= (g.bust[0] - slack - c.bust_in) * 12;
   else if (c.bust_in > g.bust[1] + slack) score -= (c.bust_in - g.bust[1] - slack) * 18;
   if (c.waist_in!= null && g.waist) {
     if (c.waist_in > g.waist[1] + slack) score -= (c.waist_in - g.waist[1] - slack) * 15;
   }
   return Math.max(0, Math.min(100, Math.round(score)));
+}
+// โน้ตฟิตจากลูกค้าจริง (โชว์เมื่อมีรีวิวพอ) — คืน {text,cls} หรือ null
+function fitNote(g) {
+  if (!g || (g.fitN||0) < 3 || !g.fitLabel) return null;
+  if (g.fitLabel === 'small') return { text:'ลูกค้าบอกตัวนี้ใส่ค่อนข้างเล็ก — เผื่อไซซ์', cls:'small' };
+  if (g.fitLabel === 'large') return { text:'ลูกค้าบอกตัวนี้ใส่ค่อนข้างหลวม', cls:'large' };
+  return { text:'ลูกค้าส่วนใหญ่บอกว่าใส่พอดี', cls:'true' };
 }
 
 // คะแนน"แนะนำสำหรับคุณ"— รวม fit + โทนสี + สไตล์จากโปรไฟล์/พาร์ทเนอร์ (style_profile)
@@ -181,6 +193,7 @@ function renderGrid() {
   if (!list.length) { $('#grid').innerHTML =`<div class="empty">${t('empty')}</div>`; return; }
   $('#grid').innerHTML = list.map(g => {
     const fit = fitConfidence(CUSTOMER, g);
+    const fn = fitNote(g);
     const match = g.season === CUSTOMER.my_color_season;
     const av = availOf(g);
     const dots = g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
@@ -207,6 +220,7 @@ function renderGrid() {
         <div class="pname">${g.name}</div>
         <div class="pprice">฿${staffPrice(g.price)}${staffTag()} <span style="color:var(--muted);font-weight:400">/ ${t('perTime')}</span></div>
         <div class="pcolors">${dots}</div>
+        ${fn?`<div class="fitnote ${fn.cls}">${fn.text}</div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -232,25 +246,100 @@ async function setHomeDate(d) {
 function clearHomeDate() { gUseDate = null; gAvailSet = null; gOnlyAvail = false; renderDatebar(); renderGrid(); }
 function toggleOnlyAvail() { gOnlyAvail = !gOnlyAvail; renderDatebar(); renderGrid(); }
 
-// ===== AI Stylist: venue name dress code + photo-friendly colours =====
+// ===== AI Stylist ประจำสถานที่: ประเมินความเหมาะสม/สวยงาม/คล่องตัว + แนะนำชุดจากคลัง =====
+function esc(s){ return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); }
+
+// แสดงโควต้าที่เหลือบนแถบสไตลิสต์ (null = ยังไม่ล็อกอิน)
+async function refreshStylistQuota() {
+  const chip = $('#stylistQuota'); if (!chip) return;
+  let n = null;
+  try { n = await window.API.stylistQuota?.(); } catch (_e) {}
+  if (n == null) { chip.hidden = false; chip.innerHTML = `<b>${t('vLoginNeed')}</b>`; return; }
+  chip.hidden = false;
+  chip.innerHTML = `${t('vQuotaLeft')} <b>${n}</b> ${t('vQuotaTimes')}`;
+  chip._n = n;
+}
+
 async function askVenue() {
   const q = ($('#venueInput').value ||'').trim();
+  const place = window.SELECTED_PLACE && (window.SELECTED_PLACE.name === q || !q) ? window.SELECTED_PLACE : null;
   const el = $('#vresult');
-  if (!q) { el.classList.remove('show'); return; }
+  if (!q && !place) { el.classList.remove('show'); return; }
+  // ต้องล็อกอินก่อน (โควต้าผูกกับบัญชี)
+  if (!CUSTOMER.id) {
+    el.className = 'vresult show';
+    el.innerHTML = `<div class="note"><b style="color:var(--ink)">${t('vLoginNeed')}</b></div>`;
+    return;
+  }
+  const name = place ? place.name : q;
   el.className ='vresult show';
-  el.innerHTML =`<span class="note">${t('vAnalyzingPre')} “${q}”…</span>`;
-  const v = await window.API.stylist(q, CUSTOMER.my_color_season, EVENT && EVENT.occasion, lang);
+  el.innerHTML =`<span class="note">${t('vAnalyzingPre')} “${esc(name)}”…</span>`;
+
+  const v = await window.API.stylist({ venue: name, place, occasion: EVENT && EVENT.occasion }, lang);
+
+  if (!v || v.ok === false) {
+    const msg = v && v.error === 'no_quota' ? t('vNoQuota')
+      : v && v.error === 'unauthorized' ? t('vLoginNeed')
+      : (lang === 'th' ? 'ขออภัย ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้ง' : 'Sorry, something went wrong — please try again');
+    el.innerHTML = `<div class="note"><b style="color:var(--ink)">${msg}</b></div>`;
+    if (v && typeof v.remaining === 'number') { const c = $('#stylistQuota'); if (c) { c.hidden=false; c.innerHTML = `${t('vQuotaLeft')} <b>${v.remaining}</b> ${t('vQuotaTimes')}`; } }
+    return;
+  }
+
   const sw = (v.recommended_colors || []).map(c =>
-`<span class="sw" style="background:${c.hex}" title="${c.name ||''}" onclick="setColorFromVenue('${c.hex}')"></span>`).join('');
-  const link = v.occasion?` · <a href="#" onclick="setOccasion('${v.occasion}');return false">${t('vViewPre')} ${occName(v.occasion)}</a>`:'';
+`<span class="sw" style="background:${esc(c.hex)}" title="${esc(c.name||'')}" onclick="setColorFromVenue('${esc(c.hex)}')"></span>`).join('');
+
+  // จับชุดแนะนำเข้ากับ GARMENTS ที่โหลดไว้ (เพื่อรูป + เปิดรายละเอียด)
+  const picks = (v.recommended_garments || []).map(rg => {
+    const g = GARMENTS.find(x => x.code === rg.code);
+    if (!g) return '';
+    const photo = g.photo || (Array.isArray(g.photos) && g.photos[0]);
+    const thumb = photo ? `background-image:url('${esc(photo)}')` : `background:${esc(g.bg||'#E7E2DA')}`;
+    return `<div class="vpick" onclick="openDetail('${esc(g.id)}')">
+      <div class="pthumb" style="${thumb}"></div>
+      <div class="pbody">
+        <div class="pname">${esc(g.name)}</div>
+        <div class="pwhy">${esc(rg.why||'')}</div>
+        ${rg.fit_note?`<div class="pfit">${esc(rg.fit_note)}</div>`:''}
+      </div>
+      <span class="popen">${t('vOpenGarment')}</span>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  const dc = v.has_dress_code ? `<span class="dc">${esc(dressName(v.dress_code_th) || v.dress_code_th || '—')}</span>`
+                             : `<span class="dc" style="background:var(--stone)">${t('vDressCodeOff')}</span>`;
+  const mapEmbed = mapEmbedHtml(place);
+  const link = v.occasion?` · <a href="#" onclick="setOccasion('${esc(v.occasion)}');return false">${t('vViewPre')} ${esc(occName(v.occasion))}</a>`:'';
+
   el.innerHTML =`
-    <span class="dc">${dressName(v.dress_code_th) ||'—'}</span><span style="font-size:12px;color:var(--stone)">${v.venue_type ||''}</span>
-    <div style="margin-top:6px">${t('vColors')} ${sw}</div>
-    <div class="note"><b style="color:var(--ink)">${t('vPhoto')}</b> ${v.photo_tip ||''}</div>
-    ${v.avoid?`<div class="note">${t('vAvoid')} ${v.avoid}</div>`:''}
-    <div class="note">${t('vTapColor')}${link}</div>`;
+    <div class="vhead">${dc}<span class="vtype">${esc(v.venue_type||'')}</span></div>
+    <div class="vrow"><span class="vk">${t('vAppropriate')}</span><span class="vv">${esc(v.appropriateness||'')}</span></div>
+    <div class="vrow"><span class="vk">${t('vAesthetics')}</span><span class="vv">${esc(v.aesthetics||'')}</span></div>
+    <div class="vrow"><span class="vk">${t('vMobility')}</span><span class="vv">${esc(v.mobility||'')}</span></div>
+    <div class="note" style="margin-top:10px">${t('vColors')} ${sw}${v.palette_source==='photo'?` · <span style="color:var(--stone)">${t('vFromPhoto')}</span>`:''}</div>
+    <div class="note"><b style="color:var(--ink)">${t('vPhoto')}</b> ${esc(v.photo_tip||'')}</div>
+    ${v.avoid?`<div class="note">${t('vAvoid')} ${esc(v.avoid)}</div>`:''}
+    ${picks?`<div class="vpicks"><div class="ph">${t('vPicks')}</div>${picks}</div>`:''}
+    ${mapEmbed}
+    <div class="note">${t('vTapColor')}${link} · ${t('vBonusHint')}</div>`;
+
   if (v.occasion) setOccasion(v.occasion);
+  if (typeof v.remaining === 'number') { const c = $('#stylistQuota'); if (c) { c.hidden=false; c.innerHTML = `${t('vQuotaLeft')} <b>${v.remaining}</b> ${t('vQuotaTimes')}`; } }
 }
+
+// แผนที่ฝัง (Maps Embed API) — ต้องมี key + พิกัด/place_id ไม่งั้นไม่โชว์
+function mapEmbedHtml(place) {
+  const key = (window.CONFIG && window.CONFIG.GOOGLE_MAPS_KEY) || '';
+  if (!key || !place) return '';
+  let q = '';
+  if (place.place_id) q = 'place_id:' + place.place_id;
+  else if (place.lat != null && place.lng != null) q = place.lat + ',' + place.lng;
+  else if (place.name) q = encodeURIComponent(place.name);
+  if (!q) return '';
+  const src = `https://www.google.com/maps/embed/v1/place?key=${encodeURIComponent(key)}&q=${q}`;
+  return `<div class="vmap"><iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${src}"></iframe><div class="cap">${t('vMapNote')}: ${esc(place.name||'')}</div></div>`;
+}
+
 function setColorFromVenue(h) { fColor = h; renderFilters(); renderGrid(); window.scrollTo({ top: 380, behavior:'smooth'}); }
 
 // ===== detail =====
@@ -1489,6 +1578,7 @@ async function boot() {
   if (!CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();
   if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
+  refreshStylistQuota();
   await maybeShowTerms();
   maybeOnboard();
   routeDeepLink();
