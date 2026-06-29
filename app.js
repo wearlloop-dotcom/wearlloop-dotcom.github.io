@@ -315,30 +315,31 @@ const MAPS_URL_RE = /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl|maps\.google\.[a-z.
 
 async function askVenue() {
   let q = ($('#venueInput').value ||'').trim();
+  const el = $('#vresult');
+  const hasPlace = !!(window.SELECTED_PLACE && window.SELECTED_PLACE.name);
+  if (!q && !hasPlace) { el.classList.remove('show'); return; }
+  // ต้องล็อกอินก่อน (โควต้าผูกกับบัญชี + กันยิง resolve-place เปลือง Google API) — เช็กก่อนเรียกอะไรที่มีค่าใช้จ่าย
+  if (!CUSTOMER.id) {
+    el.className = 'vresult show';
+    el.innerHTML = `<div class="note"><b style="color:var(--ink)">${t('vLoginNeed')}</b></div>`;
+    return;
+  }
   // วางลิงค์ Google Maps → แปลงเป็นสถานที่จริงก่อน (มิฉะนั้น AI จะได้สตริงลิงค์ดิบ ๆ)
-  if (MAPS_URL_RE.test(q) && !(window.SELECTED_PLACE && window.SELECTED_PLACE.name)) {
-    const el0 = $('#vresult');
-    el0.className = 'vresult show';
-    el0.innerHTML = `<span class="note">${lang==='th'?'กำลังอ่านสถานที่จากลิงค์…':'Reading the place from your link…'}</span>`;
+  if (MAPS_URL_RE.test(q) && !hasPlace) {
+    el.className = 'vresult show';
+    el.innerHTML = `<span class="note">${lang==='th'?'กำลังอ่านสถานที่จากลิงค์…':'Reading the place from your link…'}</span>`;
     const rp = await window.API.resolvePlace({ url: q });
     if (rp && rp.ok && rp.place && rp.place.name) {
       window.SELECTED_PLACE = rp.place;
       const vi = $('#venueInput'); if (vi) vi.value = rp.place.name;
       q = rp.place.name;
     } else {
-      el0.innerHTML = `<div class="note"><b style="color:var(--ink)">${lang==='th'?'อ่านสถานที่จากลิงค์นี้ไม่ได้ ลองพิมพ์ชื่อสถานที่แทนนะคะ':'Could not read that link — try typing the place name instead'}</b></div>`;
+      el.innerHTML = `<div class="note"><b style="color:var(--ink)">${lang==='th'?'อ่านสถานที่จากลิงค์นี้ไม่ได้ ลองพิมพ์ชื่อสถานที่แทนนะคะ':'Could not read that link — try typing the place name instead'}</b></div>`;
       return;
     }
   }
   const place = window.SELECTED_PLACE && (window.SELECTED_PLACE.name === q || !q) ? window.SELECTED_PLACE : null;
-  const el = $('#vresult');
   if (!q && !place) { el.classList.remove('show'); return; }
-  // ต้องล็อกอินก่อน (โควต้าผูกกับบัญชี)
-  if (!CUSTOMER.id) {
-    el.className = 'vresult show';
-    el.innerHTML = `<div class="note"><b style="color:var(--ink)">${t('vLoginNeed')}</b></div>`;
-    return;
-  }
   // บังคับเลือกวันที่ก่อน — เพื่อแนะนำเฉพาะชุดที่ว่างวันนั้น
   if (!gUseDate) {
     gStylistPending = true;
@@ -1372,7 +1373,7 @@ function openPcPaySheet(amount, paymentId, pay) {
     <div class="pcamt">฿${amt}</div>
     <div class="pcback">${th?`จ่ายแล้วได้เครดิต ฿${amt} เต็มจำนวนไว้เลือกชุด · อายุ 90 วัน`:`You get ฿${amt} rental credit · valid 90 days`}</div>
     ${channel}
-    <div class="pcstep">${th?'1) โอนตามยอด  2) แนบสลิปในแชต LLOOP  3) เครดิตเข้าให้หลังยืนยัน':'1) Transfer  2) Send slip in LLOOP chat  3) Credit added after we confirm'}</div>
+    <div class="pcstep">${th?'1) โอนตามยอด  2) แนบสลิปในแชต LLOOP  3) เครดิตเข้าให้หลังยืนยัน  4) ทีมทักนัดวันทำ Personal Color':'1) Transfer  2) Send slip in LLOOP chat  3) Credit added after we confirm  4) Team messages you to schedule the session'}</div>
     <div class="pcref">${th?'อ้างอิง':'Ref'} #${ref}</div>
     <a class="pcoa" href="${oa}" target="_blank" rel="noopener">${th?'เปิดแชต LLOOP เพื่อแนบสลิป':'Open LLOOP chat to send slip'}</a>
   </div>`;

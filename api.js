@@ -148,10 +148,12 @@ window.API = (function () {
       return { ok: true, place: { name: url ? 'สถานที่จากลิงค์ (mock)' : 'สถานที่ (mock)', types: [], price_level: null, place_id: null, photo_url: null, lat: null, lng: null } };
     }
     try {
+      let idToken = null;
+      try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (_e) {}
       const r = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/resolve-place`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(arg || {}),
+        body: JSON.stringify({ ...(arg || {}), id_token: idToken }),
       });
       return await r.json().catch(() => ({ ok: false, error: 'network' }));
     } catch (_e) { return { ok: false, error: 'network' }; }
