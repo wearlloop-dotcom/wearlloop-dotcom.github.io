@@ -136,8 +136,8 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=39"></script>
 <script src="liffAuth.js?v=39"></script>
-<script src="me-api.js?v=40"></script>
-<script src="api.js?v=40"></script>
+<script src="me-api.js?v=46"></script>
+<script src="api.js?v=46"></script>
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
@@ -345,7 +345,11 @@ async function openShare(){
     <textarea id="shCap" placeholder="เล่าเรื่องลุคนี้สั้น ๆ ใส่ไปงานไหน รู้สึกยังไง"></textarea>
     <label class="lbl">โอกาส (ไม่บังคับ)</label>
     <input class="inp" id="shOcc" placeholder="เช่น งานแต่ง, คาเฟ่, ทำงาน">
-    <button class="btn" id="shSubmit" style="margin-top:18px">แชร์ลุค</button>`;
+    <label class="lbl" style="display:flex;align-items:flex-start;gap:9px;font-weight:500;margin-top:14px">
+      <input type="checkbox" id="shCross" style="width:auto;margin-top:3px">
+      <span>ยินยอมให้ LLOOP นำลุคนี้ไปรีโพสต์ในไอจี/เพจของแบรนด์ เพื่อช่วยให้มีคนเห็น (เปิดเผยสู่สาธารณะ)</span>
+    </label>
+    <button class="btn" id="shSubmit" style="margin-top:16px">แชร์ลุค</button>`;
   $('#shSubmit').onclick = submitShare;
 }
 
@@ -356,7 +360,8 @@ async function submitShare(){
   if(!code){ toast('เลือกชุดที่ใส่ในรูปก่อนนะคะ'); return; }
   if(!file){ toast('แนบรูปลุคก่อนนะคะ'); return; }
   const btn=$('#shSubmit'); btn.disabled=true; btn.textContent='กำลังส่ง…';
-  let res=null; try{ res = await window.API.shareLook(code, file, $('#shCap').value, $('#shOcc').value, rental); }catch(e){}
+  const cross = $('#shCross') && $('#shCross').checked;
+  let res=null; try{ res = await window.API.shareLook(code, file, $('#shCap').value, $('#shOcc').value, rental, cross); }catch(e){}
   if(!res || !res.ok){ btn.disabled=false; btn.textContent='แชร์ลุค'; toast('ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะคะ'); return; }
   closeOv('#ovShare');
   toast('ส่งลุคแล้ว — กำลังคัดกรอง ผ่านแล้วจะขึ้นฟีด + แจ้งใน LINE ค่ะ');

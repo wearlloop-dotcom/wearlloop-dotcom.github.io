@@ -707,12 +707,12 @@ window.API = (function () {
     return error ? { ok: false, error } : (data || { ok: false });
   }
   // แชร์ลุค: อัปโหลดรูป → สร้าง look (pending) → ทริกเกอร์ AI moderation (look-audit)
-  async function shareLook(garmentCode, file, caption, occasion, rentalId) {
+  async function shareLook(garmentCode, file, caption, occasion, rentalId, crosspost) {
     if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
     let url = '';
     try { const urls = await uploadPhotos([file]); url = urls[0] || ''; } catch (e) { /**/ }
     if (!url) return { ok: false, error: 'upload_failed' };
-    const { data, error } = await window.meRpc('share_look', { p_garment_code: garmentCode, p_photo_url: url, p_caption: caption || null, p_occasion: occasion || null, p_rental: rentalId || null });
+    const { data, error } = await window.meRpc('share_look', { p_garment_code: garmentCode, p_photo_url: url, p_caption: caption || null, p_occasion: occasion || null, p_rental: rentalId || null, p_crosspost: !!crosspost });
     if (error || !data || !data.look_id) return { ok: false, error: error || 'share_failed' };
     // ตรวจด้วย AI (auto-publish ถ้าผ่าน) — best-effort, ไม่บล็อก UX
     let idToken = null; try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (e) {}
