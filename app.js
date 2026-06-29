@@ -500,7 +500,7 @@ function openDetail(id) {
     </div>
     <div id="quotebox" class="quotebox"></div>`}
     <div class="cta">
-      <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}</span>` : '฿'+staffPrice(g.price)+staffTag()}</span>
+      <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}${subCapLabel(g)}</span>` : '฿'+staffPrice(g.price)+staffTag()}</span>
       ${subCovers(g) ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
       <button id="bookBtn" onclick="reserve('${g.id}')">${t('reserveBtn')}</button>
     </div>
@@ -1528,13 +1528,31 @@ async function openImpact() {
 function closeImpact() { $('#impactOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 
 // ===== สมาชิกรายเดือน (Membership / subscription) =====
-// ลูกค้ามีสิทธิ์สมาชิกเหลือไหม → ชุดนี้ "รวมในแพ็กเกจ"
-function subCovers(g) {
+// ลูกค้ามีสิทธิ์สมาชิกเหลือไหม → ชุดนี้ "รวมในแพ็กเกจ" (เช็คทั้งแพ็กหลัก + แพ็กเสริมที่ถืออยู่)
+// คืน {covered, plan_kind, rent_days_cap, name} — เลือกแพ็กเสริม (tier แคบ) ก่อนแพ็กหลัก
+function subCoverInfo(g) {
   const s = CUSTOMER && CUSTOMER._sub;
-  if (!s || !s.active || (s.remaining || 0) <= 0) return false;
-  // เช็คประเภทชุดว่าอยู่ในสิทธิ์แพ็กไหม (ถ้าไม่ส่งชุดมา = เช็คแค่โควต้า)
-  if (g && g.tier && Array.isArray(s.tiers) && s.tiers.length && !s.tiers.includes(g.tier)) return false;
-  return true;
+  if (!s) return { covered: false };
+  const tier = g && g.tier;
+  const cands = [];
+  if (s.active && (s.remaining || 0) > 0)
+    cands.push({ tiers: s.tiers, remaining: s.remaining, plan_kind: 'base', rent_days_cap: null, name: s.plan_name });
+  (s.addons || []).forEach(a => {
+    if ((a.remaining || 0) > 0 && a.status === 'active')
+      cands.push({ tiers: a.tiers, remaining: a.remaining, plan_kind: 'addon', rent_days_cap: a.rent_days_cap, name: a.plan_name });
+  });
+  const ok = cands.filter(c => !tier || !Array.isArray(c.tiers) || !c.tiers.length || c.tiers.includes(tier));
+  if (!ok.length) return { covered: false };
+  // แพ็กเสริมก่อน (tier แคบกว่า) แล้วค่อยแพ็กหลัก
+  ok.sort((a, b) => (b.plan_kind === 'addon') - (a.plan_kind === 'addon') || ((a.tiers ? a.tiers.length : 99) - (b.tiers ? b.tiers.length : 99)));
+  return Object.assign({ covered: true }, ok[0]);
+}
+function subCovers(g) { return subCoverInfo(g).covered; }
+// ป้ายเพดานวันเช่าของชุดที่คุ้มด้วยแพ็กเสริม (เช่น " · สูงสุด 4 วัน")
+function subCapLabel(g) {
+  const ci = subCoverInfo(g);
+  if (ci.covered && ci.rent_days_cap) return ` · ${lang === 'th' ? 'สูงสุด' : 'up to'} ${ci.rent_days_cap} ${lang === 'th' ? 'วัน' : 'days'}`;
+  return '';
 }
 function fmtThaiDate(s) {
   if (!s) return '—';
@@ -1570,6 +1588,9 @@ function renderMembership(sub, plans) {
   const en = lang === 'en';
   const body = $('#memberBody'); if (!body) return;
   window._memSub = sub; window._memPlans = plans;
+  const baseplans = plans.filter(p => (p.plan_kind || 'base') !== 'addon');
+  const addonplans = plans.filter(p => p.plan_kind === 'addon');
+  const heldAddons = (sub && sub.addons) || [];
   let html = '';
   // การ์ดสถานะปัจจุบัน (ถ้ามีสมาชิก)
   if (sub && sub.plan_code) {
@@ -1592,23 +1613,31 @@ function renderMembership(sub, plans) {
     </div>
     <div style="font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">${en ? 'Change plan' : 'เปลี่ยนแพ็กเกจ'}</div>`;
   }
+  // แพ็กเสริมที่ถืออยู่ (Premium Pass ฯลฯ)
+  if (heldAddons.length) {
+    html += `<div style="font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">${en ? 'Your add-ons' : 'แพ็กเสริมของคุณ'}</div>`
+      + heldAddons.map(a => `<div style="background:var(--sage-bg);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+          <div style="font-size:14px;font-weight:600;color:var(--ink)">${a.plan_name || ''}</div>
+          <div style="font-size:12px;color:#0c3a33;margin-top:2px">${en ? 'left' : 'เหลือ'} ${a.remaining || 0}/${a.rentals_per_cycle || 0} ${en ? 'pcs' : 'ชิ้น'}${a.rent_days_cap ? ` · ${en ? 'up to' : 'สูงสุด'} ${a.rent_days_cap} ${en ? 'days/pc' : 'วัน/ชิ้น'}` : ''} · ${en ? 'renews' : 'รอบต่อไป'} ${fmtThaiDate(a.renews_at)}</div>
+        </div>`).join('');
+  }
   // ฟิลเตอร์รอบบิล — โชว์ทีละรอบ ดูง่าย
   const ORDER = ['week', 'month', 'quarter', 'year'];
   const PL = { week: en ? 'Weekly' : 'รายสัปดาห์', month: en ? 'Monthly' : 'รายเดือน', quarter: en ? '3-month' : 'ราย 3 เดือน', year: en ? 'Yearly' : 'รายปี' };
-  const periods = [...new Set(plans.map(p => p.period || 'month'))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+  const periods = [...new Set(baseplans.map(p => p.period || 'month'))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
   if (!periods.includes(gMemPeriod)) gMemPeriod = periods.includes('month') ? 'month' : periods[0];
   html += `<div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;scrollbar-width:none">` + periods.map(pr =>
     `<button onclick="memSetPeriod('${pr}')" style="white-space:nowrap;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid ${pr === gMemPeriod ? 'var(--ink)' : 'var(--line)'};background:${pr === gMemPeriod ? 'var(--ink)' : '#fff'};color:${pr === gMemPeriod ? '#fff' : 'var(--muted)'}">${PL[pr] || pr}</button>`
   ).join('') + `</div>`;
   // การ์ดแพ็กเกจ (เฉพาะรอบที่เลือก) — ราคา/เดือน + ชุด/เดือน + ครอบคลุม + เก็บเงินยังไง
-  const filtered = plans.filter(p => (p.period || 'month') === gMemPeriod);
+  const filtered = baseplans.filter(p => (p.period || 'month') === gMemPeriod);
   html += filtered.map(p => {
     const current = sub && sub.plan_code === p.code && sub.status !== 'cancelled';
     const pm = Number(p.price_per_month || p.price || p.price_month) || 0;
     const cyclePrice = Number(p.price || p.price_month) || 0;
     const qpm = p.rentals_per_month_equiv || p.rentals_per_cycle || 0;
     const longTerm = (p.period || 'month') !== 'month';
-    const popular = p.code === 'LOOP_PLUS';
+    const popular = (p.code || '').indexOf('PLUS') > -1 && (p.period || 'month') === 'month';
     const perks = (p.perks || []).slice(0, 3).map(x => `<div style="font-size:12.5px;color:var(--ink);padding:2px 0">· ${x}</div>`).join('');
     const billNote = longTerm
       ? `${en ? 'billed' : 'เก็บ'} ฿${cyclePrice.toLocaleString()} ${en ? 'every' : 'ทุก'} ${perWord(p.period)}${p.save_pct ? ` · ${en ? 'save' : 'ประหยัด'} ${p.save_pct}%` : ''}`
@@ -1636,14 +1665,41 @@ function renderMembership(sub, plans) {
         : `<button onclick="subscribeClick('${p.code}','${(p.name || '').replace(/'/g, '')}')" style="width:100%;background:var(--ink);color:#fff;border:none;padding:11px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-top:12px;border-radius:6px;cursor:pointer">${en ? 'Choose this plan' : 'เลือกแพ็กเกจนี้'}</button>`}
     </div>`;
   }).join('');
-  html += `<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.5">${en ? 'Premium/designer dresses are included only in higher plans — others still rent at the normal price.' : 'ชุดพรีเมียม/ดีไซเนอร์รวมเฉพาะแพ็กสูง — ชุดนอกสิทธิ์ยังเช่าได้ในราคาปกติ'}</div>`;
+  // ===== แพ็กเสริม (add-on) — ปลดล็อกชุดพรีเมียม/ดีไซเนอร์ วางซ้อนบนแพ็กหลัก =====
+  if (addonplans.length) {
+    const hasBase = !!(sub && sub.active && sub.plan_code);
+    html += `<div style="font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:20px 0 4px">${en ? 'Add-on passes' : 'แพ็กเสริม'}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${en ? 'Unlock premium / designer pieces on top of your plan' : 'ปลดล็อกชุดพรีเมียม/ดีไซเนอร์ เพิ่มบนแพ็กหลัก'}</div>`;
+    html += addonplans.map(p => {
+      const owned = heldAddons.some(a => a.plan_code === p.code);
+      const price = Number(p.price || p.price_month) || 0;
+      const pcs = p.rentals_per_cycle || 1;
+      const needBase = p.requires_base && !hasBase;
+      const perks = (p.perks || []).slice(0, 3).map(x => `<div style="font-size:12.5px;color:var(--ink);padding:2px 0">· ${x}</div>`).join('');
+      return `<div style="background:#fff;border:${owned ? '2px solid var(--sage)' : '1px solid var(--line)'};border-radius:10px;padding:16px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div><div style="font-size:16px;font-weight:600;color:var(--ink)">${p.name}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">${pcs} ${en ? 'pcs/mo' : 'ชิ้น/เดือน'}${p.rent_days_cap ? ` · ${en ? 'up to' : 'สูงสุด'} ${p.rent_days_cap} ${en ? 'days/pc' : 'วัน/ชิ้น'}` : ''}</div></div>
+          <div style="text-align:right"><div style="font-size:20px;font-weight:700;color:var(--ink);line-height:1.1">฿${price.toLocaleString()}<span style="font-size:11px;font-weight:400;color:var(--muted)">/${en ? 'mo' : 'เดือน'}</span></div></div>
+        </div>
+        <div style="margin-top:8px">${perks}</div>
+        ${owned
+          ? `<div style="text-align:center;font-size:12px;letter-spacing:1px;color:var(--sage);margin-top:12px;text-transform:uppercase">${en ? 'Active add-on' : 'แพ็กเสริมปัจจุบัน'}</div>`
+          : needBase
+            ? `<div style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">${en ? 'Subscribe to a plan first' : 'สมัครแพ็กหลักก่อนนะคะ'}</div>`
+            : `<button onclick="subscribeClick('${p.code}','${(p.name || '').replace(/'/g, '')}')" style="width:100%;background:var(--ink);color:#fff;border:none;padding:11px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-top:12px;border-radius:6px;cursor:pointer">${en ? 'Add this pass' : 'เพิ่มแพ็กเสริมนี้'}</button>`}
+      </div>`;
+    }).join('');
+  }
+  html += `<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.5">${en ? 'Premium / designer pieces use an add-on pass — everyday pieces are included in your base plan; anything else still rents at the normal price.' : 'ชุดพรีเมียม/ดีไซเนอร์ใช้แพ็กเสริม · ชุดทั่วไปรวมในแพ็กหลัก · ชุดนอกสิทธิ์เช่าได้ราคาปกติ'}</div>`;
   body.innerHTML = html;
 }
 async function subscribeClick(code, name) {
   const en = lang === 'en';
   if (!confirm(en ? `Subscribe to ${name}?` : `ยืนยันสมัครแพ็กเกจ ${name}?`)) return;
   try {
-    await window.API.subscribe?.(CUSTOMER, code);
+    const res = await window.API.subscribe?.(CUSTOMER, code);
+    if (res && res.data === 'need_base') { toast(en ? 'Subscribe to a plan first' : 'สมัครแพ็กหลักก่อนนะคะ'); return; }
     CUSTOMER._sub = await window.API.mySubscription?.(CUSTOMER) || { active: false };
     let plans = []; try { plans = await window.API.subPlans?.() || []; } catch (e) { /**/ }
     renderMembership(CUSTOMER._sub, plans);

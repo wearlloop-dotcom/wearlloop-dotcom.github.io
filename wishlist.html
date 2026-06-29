@@ -471,13 +471,12 @@
     <div class="check">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <p>รับทราบแล้ว เราจะพยายามหามาให้คุณ</p>
-    <div class="sub">We'll do our best to source this for you. ขอบคุณที่บอกเรา</div>
+    <p>ขอบคุณที่บอกเรา · เราจะหามาให้</p>
   </div>
 
   <!-- Form -->
   <div class="form-card" id="formCard">
-    <h2>ส่งรูปชุดที่ต้องการ <span style="font-weight:300;color:var(--muted);font-size:14px;">Garment Request</span></h2>
+    <h2>ส่งรูปชุดที่ต้องการ</h2>
 
     <form id="wishForm" novalidate>
 
@@ -494,8 +493,7 @@
                 <polyline points="21 15 16 10 5 21"/>
               </svg>
             </div>
-            <div class="main-text">แตะเพื่อเลือกรูป</div>
-            <div class="sub-text">จากกล้องหรือแกลเลอรี</div>
+            <div class="main-text">แตะเลือกรูป</div>
           </div>
           <img id="imgPreview" alt="preview">
         </div>
@@ -544,7 +542,7 @@
 
       <!-- Budget -->
       <div class="field">
-        <label for="budget">งบ/วัน <span class="hint">optional</span></label>
+        <label for="budget">งบต่อวัน <span class="hint">ไม่บังคับ</span></label>
         <input type="number" id="budget" placeholder="บาท" min="0" step="50">
       </div>
 
@@ -574,7 +572,7 @@ const LIFF_ID = CFG.LIFF_ID;
 const sb = window.supabase.createClient(SB_URL, SB_KEY);
 
 const $ = id => document.getElementById(id);
-const STATUS_TH = { pending:'รอดำเนินการ', sourcing:'กำลังหา', added:'มีแล้ว', rejected:'ไม่สามารถหาได้' };
+const STATUS_TH = { pending:'รอตรวจ', sourcing:'กำลังหา', added:'มีแล้ว', rejected:'หาไม่ได้' };
 
 let uid = null;
 let selectedFile = null;

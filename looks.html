@@ -77,6 +77,10 @@
   .prof .ph4{font-family:var(--display);font-size:18px;font-weight:600}
   .stats{display:flex;gap:18px;margin:12px 0 4px;font-size:12.5px;color:var(--muted)}
   .stats b{display:block;font-size:18px;color:var(--ink);font-family:var(--display)}
+  .occ{display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;scrollbar-width:none}
+  .occ::-webkit-scrollbar{display:none}
+  .ochip{flex-shrink:0;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+  .ochip.on{background:var(--sand);color:var(--ink);border-color:var(--gold)}
   .tabs{display:flex;gap:8px;margin-top:16px;border-bottom:1px solid var(--line)}
   .tab{background:none;border:none;padding:9px 4px;font-size:13.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
   .tab.on{color:var(--ink);border-bottom-color:var(--ink)}
@@ -116,6 +120,7 @@
     <button class="tab" data-tab="following" onclick="switchTab('following')">ที่ตามอยู่</button>
     <button class="tab" data-tab="board" onclick="switchTab('board')">อันดับครีเอเตอร์</button>
   </div>
+  <div class="occ" id="occ"></div>
   <div class="grid" id="feed">
     <div class="empty"><p>กำลังโหลดฟีด…</p></div>
   </div>
@@ -136,14 +141,14 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=39"></script>
 <script src="liffAuth.js?v=39"></script>
-<script src="me-api.js?v=46"></script>
-<script src="api.js?v=46"></script>
+<script src="me-api.js?v=47"></script>
+<script src="api.js?v=47"></script>
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 const baht = n => '฿'+Number(n||0).toLocaleString('th-TH');
 const TIER_TH = { new:'', silver:'Silver', gold:'Gold', platinum:'Platinum' };
-let CUSTOMER=null, LIVE=false, FEED=[], TAB='all';
+let CUSTOMER=null, LIVE=false, FEED=[], TAB='all', OCC=null;
 let LIKED=new Set(), FOLLOWING=new Set();
 
 function toast(t){ const e=$('#toast'); e.textContent=t; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),2600); }
@@ -157,10 +162,27 @@ async function boot(){
       if(r && r.CUSTOMER && r.CUSTOMER.id){ CUSTOMER=r.CUSTOMER; LIVE=true; }
     }
   }catch(e){ /* ดูฟีดได้แม้ไม่ล็อกอิน */ }
-  try{ FEED = await window.API.communityFeed(30, null); }catch(e){ FEED=[]; }
+  try{ FEED = await window.API.communityFeed(30, null, null); }catch(e){ FEED=[]; }
   if(LIVE){ try{ LIKED=new Set(await window.API.myLikes()); FOLLOWING=new Set(await window.API.myFollowing()); }catch(e){} }
   renderFeed();
+  renderOcc();
   $('#shareBtn').onclick = openShare;
+}
+
+async function renderOcc(){
+  let occs=[]; try{ occs = await window.API.lookOccasions(); }catch(e){}
+  const el=$('#occ'); if(!el) return;
+  if(!occs.length){ el.innerHTML=''; return; }
+  el.innerHTML = `<button class="ochip ${OCC?'':'on'}" onclick="filterOcc(null)">ทั้งหมด</button>` +
+    occs.map(o=>`<button class="ochip ${OCC===o?'on':''}" onclick="filterOcc('${esc(o)}')">${esc(o)}</button>`).join('');
+}
+async function filterOcc(o){
+  OCC=o;
+  if(TAB!=='all'){ TAB='all'; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on', b.dataset.tab==='all')); $('#board').classList.add('hide'); $('#feed').classList.remove('hide'); }
+  renderOcc();
+  $('#feed').innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
+  try{ FEED = await window.API.communityFeed(30, null, OCC); }catch(e){ FEED=[]; }
+  renderFeed();
 }
 
 function lookUrl(card){
@@ -201,7 +223,7 @@ function renderFeed(){
     $('#feed').innerHTML = `<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div>
       <h4>ยังไม่มีลุคในชุมชน</h4>
-      <p>เป็นคนแรกที่แชร์ลุค! เช่าชุดเรา ถ่ายรูปสวย ๆ แล้วแชร์ — รับเครดิตเข้ากระเป๋า และมีคนเช่าตามได้</p></div>`;
+      <p>เป็นคนแรกที่แชร์ลุค — เช่า ถ่ายรูป แล้วแชร์ ได้เครดิตเข้ากระเป๋า</p></div>`;
     return;
   }
   $('#feed').innerHTML = FEED.map(cardHtml).join('');
@@ -220,14 +242,16 @@ async function shareOut(o){
 async function switchTab(tab){
   TAB=tab;
   document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
-  const feed=$('#feed'), board=$('#board');
+  const feed=$('#feed'), board=$('#board'), occ=$('#occ');
+  // chips กรองโอกาส โชว์เฉพาะแท็บ "ทั้งหมด"
+  if(occ) occ.style.display = (tab==='all') ? '' : 'none';
   if(tab==='board'){ feed.classList.add('hide'); board.classList.remove('hide'); return renderBoard(); }
   board.classList.add('hide'); feed.classList.remove('hide');
   if(tab==='following'){
-    if(!LIVE){ feed.innerHTML='<div class="empty"><p>เข้าสู่ระบบผ่าน LINE เพื่อดูลุคจากครีเอเตอร์ที่คุณตามค่ะ</p></div>'; return; }
+    if(!LIVE){ feed.innerHTML='<div class="empty"><p>ล็อกอิน LINE เพื่อดูลุคจากคนที่คุณตามค่ะ</p></div>'; return; }
     feed.innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
     let f=[]; try{ f=await window.API.followingFeed(30); }catch(e){}
-    feed.innerHTML = f.length? f.map(cardHtml).join('') : '<div class="empty"><p>ยังไม่มีลุคจากคนที่คุณตาม — กดติดตามครีเอเตอร์ที่ชอบในแท็บ “ทั้งหมด” ได้เลยค่ะ</p></div>';
+    feed.innerHTML = f.length? f.map(cardHtml).join('') : '<div class="empty"><p>ยังไม่มีลุคจากคนที่ตาม — ไปกดติดตามในแท็บ “ทั้งหมด” ได้เลยค่ะ</p></div>';
   } else { renderFeed(); }
 }
 
@@ -247,7 +271,7 @@ async function renderBoard(){
 
 // ---------- like / comment ----------
 async function likeLook(id){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อถูกใจลุคค่ะ'); return; }
+  if(!LIVE){ toast('ล็อกอิน LINE ก่อนกดถูกใจค่ะ'); return; }
   const btn=$('#like-'+id), cnt=$('#likes-'+id);
   const wasOn=btn.classList.contains('on');
   btn.classList.toggle('on'); if(cnt) cnt.textContent=Math.max(0,(+cnt.textContent||0)+(wasOn?-1:1)); // optimistic
@@ -276,7 +300,8 @@ async function loadComments(id){
 async function submitComment(id){
   const inp=$('#cmtIn'); const body=(inp&&inp.value||'').trim(); if(!body) return;
   inp.value=''; let res=null; try{ res=await window.API.addComment(id, body); }catch(e){}
-  if(res&&res.ok){ await loadComments(id); const c=$('#cmt-'+id); if(c) c.textContent=(+c.textContent||0)+1; }
+  if(res&&res.ok&&res.hidden){ toast('คอมเมนต์ถูกซ่อนไว้ตรวจสอบ (พบคำที่ไม่เหมาะสม) ค่ะ'); }
+  else if(res&&res.ok){ await loadComments(id); const c=$('#cmt-'+id); if(c) c.textContent=(+c.textContent||0)+1; }
   else toast('ส่งคอมเมนต์ไม่สำเร็จ ลองใหม่นะคะ');
 }
 
@@ -335,7 +360,7 @@ async function openShare(){
     .map(r=>{ const code=r.code||r.garment_code; return `<option value="${esc(code||'')}" data-rental="${esc(r.id||r.rental_id||'')}">${esc(r.name||code)}</option>`; }).join('');
   $('#shareSheet').innerHTML = `
     <div class="shhd"><div class="shtitle">แชร์ลุคของคุณ</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
-    <p class="muted" style="margin-top:4px">รูปจะผ่านการคัดกรองอัตโนมัติ ผ่านแล้วขึ้นฟีด + รับเครดิตทันที</p>
+    <p class="muted" style="margin-top:4px">รูปผ่านการตรวจแล้วขึ้นฟีด ได้เครดิตทันที</p>
     <label class="lbl">ชุดที่ใส่ในรูป</label>
     ${opts?`<select class="inp" id="shGarment">${opts}</select>`
       :`<input class="inp" id="shGarmentCode" placeholder="ใส่โค้ดชุด เช่น g3">`}
@@ -364,8 +389,8 @@ async function submitShare(){
   let res=null; try{ res = await window.API.shareLook(code, file, $('#shCap').value, $('#shOcc').value, rental, cross); }catch(e){}
   if(!res || !res.ok){ btn.disabled=false; btn.textContent='แชร์ลุค'; toast('ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะคะ'); return; }
   closeOv('#ovShare');
-  toast('ส่งลุคแล้ว — กำลังคัดกรอง ผ่านแล้วจะขึ้นฟีด + แจ้งใน LINE ค่ะ');
-  setTimeout(async()=>{ try{ FEED = await window.API.communityFeed(30,null); renderFeed(); }catch(e){} }, 3500);
+  toast('ส่งลุคแล้ว — ผ่านแล้วจะขึ้นฟีดและแจ้งใน LINE ค่ะ');
+  setTimeout(async()=>{ try{ FEED = await window.API.communityFeed(30,null,OCC); renderFeed(); renderOcc(); }catch(e){} }, 3500);
 }
 
 document.addEventListener('DOMContentLoaded', boot);
