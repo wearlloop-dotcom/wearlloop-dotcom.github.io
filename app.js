@@ -1235,6 +1235,16 @@ async function loadReferralCode() {
   if (code) { CUSTOMER.referral_code = code; el.textContent = code; }
   else el.textContent = lang ==='th'?'—':'—';
 }
+// ใช้โค้ดที่ติดมากับลิงก์ (?ref=) อัตโนมัติเมื่อ login แล้ว — เงียบ ๆ ถ้าใช้ไปแล้ว/เป็นโค้ดตัวเอง
+async function applyPendingReferral() {
+  let code = null;
+  try { code = localStorage.getItem('lloop_ref'); } catch (_e) {}
+  if (!code || !CUSTOMER.id) return;
+  let res = 'not_found';
+  try { res = await window.API.applyReferral(CUSTOMER, code); } catch (e) { return; }
+  if (res === 'ok') toast(lang === 'th' ? 'รับเครดิตเพื่อนชวนแล้ว ฿200 เข้ากระเป๋า LLOOP' : 'Friend credit added — ฿200 in your LLOOP wallet');
+  if (res !== 'not_found') { try { localStorage.removeItem('lloop_ref'); } catch (_e) {} }
+}
 async function applyReferralCode() {
   if (!CUSTOMER.id) { toast(lang ==='th'?'เข้าผ่าน LINE เพื่อใช้โค้ด':'Sign in via LINE to apply a code'); return; }
   const inp = $('#refInput'); const code = (inp && inp.value || '').trim();
@@ -2009,6 +2019,7 @@ async function boot() {
   await maybeShowTerms();
   maybeOnboard();
   routeDeepLink();
+  applyPendingReferral();
 }
 // rich menu deep-link: เปิด LIFF ?go=menu|foryou|orders|impact|profile|stylist แล้วเด้งไปหน้านั้น
 function routeDeepLink() {
@@ -2024,6 +2035,9 @@ function routeDeepLink() {
       const g = GARMENTS.find(x => (x.code || '').toLowerCase() === gcode.toLowerCase());
       if (g) { setTimeout(() => openDetail(g.id), 80); return; }
     }
+    // โค้ดชวนเพื่อนจากลิงก์ (?ref=CODE) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿200 ทั้งคู่ เข้ากระเป๋า LLOOP)
+    const ref = qs.get('ref') || (ls && ls.get('ref'));
+    if (ref) { try { localStorage.setItem('lloop_ref', ref.trim()); } catch (_e) {} applyPendingReferral(); }
     // มาจากการ์ดเกม quiz.html (?occasion=KEY&mood=...) → จำโอกาสไว้ให้ AI สไตลิสต์ใช้ + กรองคลังให้ตรงงาน
     const occ = qs.get('occasion') || (ls && ls.get('occasion'));
     if (occ && OCCASIONS && Object.prototype.hasOwnProperty.call(window.I18N[lang].occ || {}, occ)) {
