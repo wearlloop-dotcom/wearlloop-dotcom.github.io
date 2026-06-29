@@ -155,6 +155,8 @@ var moodName = {effortless:'ดูดีแบบไม่ตั้งใจ',st
 
 var pick = { occasion:null, occName:'', mood:null, moodName:'' };
 var cur = 0;
+// โค้ดชวนเพื่อนที่ติดมากับลิงก์ (เพื่อนแชร์การ์ดเกมจากในแอป) — พาไปต่อให้ครบลูป เครดิตเข้ากระเป๋า LLOOP ทั้งคู่
+var REF = new URLSearchParams(location.search).get('ref') || '';
 
 function go(n){
   cur = n;
@@ -191,11 +193,12 @@ function showResult(){
   document.getElementById('rOcc').textContent = pick.occName;
   document.getElementById('rMood').textContent = pick.moodName;
   var url = 'index.html?go=stylist&occasion='+encodeURIComponent(pick.occasion)+'&mood='+encodeURIComponent(pick.mood);
+  if (REF) url += '&ref='+encodeURIComponent(REF);
   document.getElementById('ctaStylist').setAttribute('href', url);
   go(3);
 }
 function shareGame(){
-  var url = location.origin + location.pathname;
+  var url = location.origin + location.pathname + (REF ? '?ref='+encodeURIComponent(REF) : '');
   var text = 'งานนี้ใส่อะไรดี? ลองเล่นการ์ดสไตลิสต์ของ LLOOP สิ — มันเลือกชุดให้เลย';
   if (navigator.share){ navigator.share({title:'งานนี้ใส่อะไรดี', text:text, url:url}).catch(function(){}); }
   else if (navigator.clipboard){ navigator.clipboard.writeText(text+' '+url); var b=event.target; var o=b.textContent; b.textContent='คัดลอกลิงก์แล้ว'; setTimeout(function(){b.textContent=o;},1600); }

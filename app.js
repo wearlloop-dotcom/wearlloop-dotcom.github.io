@@ -1217,6 +1217,7 @@ function renderReferralCard() {
     <div class="refcode-wrap">
       <div class="reflbl">${lang ==='th'?'โค้ดชวนเพื่อนของคุณ':'your invite code'}</div>
       <div class="refcode" id="refCode">${CUSTOMER.id?'…':(lang ==='th'?'เข้าผ่าน LINE เพื่อรับโค้ด':'sign in via LINE')}</div>
+      ${CUSTOMER.id?`<button class="refshare" onclick="shareQuizInvite()">${lang ==='th'?'ส่งการ์ดเกม “งานนี้ใส่อะไรดี” ให้เพื่อน':'Send the “what to wear” card game'}</button>`:''}
     </div>
     <div class="reffield">
       <div class="reflbl">${lang ==='th'?'ใส่โค้ดเพื่อนที่ชวนคุณ':'enter a friend code'}</div>
@@ -1226,6 +1227,21 @@ function renderReferralCard() {
       </div>
     </div>
   </div>`;
+}
+// แชร์การ์ดเกมพร้อมโค้ดของเรา → เพื่อนเล่นแล้วเช่า เครดิต ฿200 เข้ากระเป๋า LLOOP ทั้งคู่
+async function shareQuizInvite() {
+  let code = CUSTOMER.referral_code;
+  if (!code) { try { code = await window.API.ensureReferralCode(CUSTOMER); CUSTOMER.referral_code = code; } catch (e) { /**/ } }
+  const base = location.origin + location.pathname.replace(/[^/]*$/, '') + 'quiz.html';
+  const url = base + (code ? '?ref=' + encodeURIComponent(code) : '');
+  const text = lang === 'th'
+    ? 'งานนี้ใส่อะไรดี? ลองเล่นการ์ดสไตลิสต์ของ LLOOP — เช่าผ่านลิงก์นี้ได้เครดิตทั้งคู่'
+    : 'What to wear? Try LLOOP’s stylist card game — rent via this link and we both get credit';
+  try {
+    if (navigator.share) { await navigator.share({ title: lang==='th'?'งานนี้ใส่อะไรดี':'What to wear', text, url }); return; }
+  } catch (e) { return; }
+  try { await navigator.clipboard.writeText(text + ' ' + url); toast(lang==='th'?'คัดลอกลิงก์ชวนเพื่อนแล้ว':'Invite link copied'); }
+  catch (e) { toast(url); }
 }
 async function loadReferralCode() {
   const el = $('#refCode'); if (!el) return;
@@ -1560,7 +1576,7 @@ function renderMembership(sub, plans) {
     const cyclePrice = Number(p.price || p.price_month) || 0;
     const qpm = p.rentals_per_month_equiv || p.rentals_per_cycle || 0;
     const longTerm = (p.period || 'month') !== 'month';
-    const popular = p.code === 'LOOPER_PLUS';
+    const popular = p.code === 'LOOP_PLUS';
     const perks = (p.perks || []).slice(0, 3).map(x => `<div style="font-size:12.5px;color:var(--ink);padding:2px 0">· ${x}</div>`).join('');
     const billNote = longTerm
       ? `${en ? 'billed' : 'เก็บ'} ฿${cyclePrice.toLocaleString()} ${en ? 'every' : 'ทุก'} ${perWord(p.period)}${p.save_pct ? ` · ${en ? 'save' : 'ประหยัด'} ${p.save_pct}%` : ''}`
