@@ -1,11 +1,11 @@
 // ===== i18n — ไทย / อังกฤษ (เพิ่มภาษาอื่นได้โดยเติม block ใหม่) =====
 window.I18N = {
   th: {
-    promo:'love + loop · จัดส่งฟรี · ชาว Loopers มีลุคใหม่เข้า loop ทุกเดือน',
+    promo:'love + loop · จัดส่งฟรี · ชาว Loopers รับลุคใหม่หมุนเวียนทุกเดือน',
     login:'เข้าสู่ระบบ',
     creditLabel:'กระเป๋า LLOOP',
     heroKicker:'new season · 2026',
-    heroTitle:'ลุคใหม่<br>ทุกโอกาส',
+    heroTitle:'หมุนเวียนลุคใหม่<br>ทุกโอกาส',
     heroSub:'เช่า · ใส่ · คืน — สวยได้ทุกครั้ง โดยไม่ต้องซื้อเพิ่ม',
     heroCta:'ดูคอลเลกชัน',
     stylistLabel:'จะไปที่ไหนคะ — ให้เราช่วยแนะนำ',
@@ -20,7 +20,7 @@ window.I18N = {
     stretchHelp:'ผ้ายืดช่วยได้', noStretchHelp:'ผ้าไม่ยืด',
     bust:'อก', waist:'เอว', hip:'สะโพก', length:'ความยาว', free:'อิสระ', cm:'ซม.',
     lining:'มีซับใน', sheer:'โปร่ง', notSheer:'ไม่โปร่ง', noStretch:'ไม่ยืด', slight:'ยืดเล็กน้อย', stretchy:'ยืดได้',
-    rotating:'ใน loop',
+    rotating:'หมุนเวียน',
     reserveBtn:'จองชุดนี้', readyDate:'24 มิ.ย.',
     creditPre:'ใช้กระเป๋า LLOOP ฿', creditMid:' · เหลือจ่าย ฿',
     reservedPre:'จอง', reservedPost:'แล้ว · รับวันที่',
