@@ -203,6 +203,12 @@ window.API = (function () {
     const { data } = await client().rpc('my_impact', { p_customer: customer.id });
     return data;
   }
+  // กระเป๋า LLOOP + ชั้น Loopers Club (ยอดเงินใช้จ่าย + ความคืบหน้าชั้น)
+  async function myWallet(customer) {
+    if (CONFIG.USE_MOCK ||!customer.id) return null;
+    const { data } = await client().rpc('my_wallet', { p_customer: customer.id });
+    return data;
+  }
   // AI ครบลุค — ทรงผม/เครื่องประดับที่เข้ากับชุด (prod = Edge Function, ไม่งั้น mock)
   async function hairStyle(garmentCode, occasion) {
     if (!CONFIG.USE_MOCK) {
@@ -589,5 +595,5 @@ window.API = (function () {
     return { ok: true, ...data };
   }
 
-  return { init, reserve, saveProfile, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, payInfo, birthdayStatus, birthdayReserve };
+  return { init, reserve, saveProfile, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, payInfo, birthdayStatus, birthdayReserve };
 })();

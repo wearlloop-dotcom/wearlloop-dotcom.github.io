@@ -1095,6 +1095,7 @@ function openProfile(onboard) {
       ${head}
       <h3>${onboard?(lang==='th'?'ข้อมูลเบื้องต้น':'Quick details'):t('pTitle')}</h3>
       <p class="hint">${t('pHint')}</p>
+      ${renderLoopersClub(c)}
       ${renderStyleCard(c)}
       ${renderImpactCard()}
       ${renderReferralCard()}
@@ -1184,11 +1185,37 @@ function catName(k) {
   const en = { dress:'Dress', set:'Set', top:'Top', skirt:'Skirt', pants:'Pants', jumpsuit:'Jumpsuit', outerwear:'Outerwear'};
   return (lang ==='th'? th : en)[k] || k;
 }
+// Loopers Club — กระเป๋า LLOOP (เงินใช้จ่ายเดียว) + ความคืบหน้าชั้น (ภาษาไทย ลดศัพท์)
+function renderLoopersClub(c) {
+  const th = lang === 'th';
+  const bal = Math.round(c.credit_balance || 0);
+  const r = c.rentals_count || 0;
+  const steps = [['silver', 3, th?'ชั้นเงิน':'Silver'], ['gold', 8, th?'ชั้นทอง':'Gold'], ['platinum', 20, th?'ชั้นแพลทินัม':'Platinum']];
+  const nx = steps.find(s => s[1] > r);
+  const prog = nx ? Math.min(100, Math.round(r / nx[1] * 100)) : 100;
+  const tierTH = { new:(th?'ชั้นเริ่มต้น':'Starter'), silver:(th?'ชั้นเงิน':'Silver'), gold:(th?'ชั้นทอง':'Gold'), platinum:(th?'ชั้นแพลทินัม':'Platinum') }[c.crm_tier || 'new'] || (th?'ชั้นเริ่มต้น':'Starter');
+  const progLine = nx
+    ? (th ? `เช่าอีก ${nx[1]-r} ครั้ง ขึ้น${nx[2]}` : `${nx[1]-r} more rentals to ${nx[2]}`)
+    : (th ? 'คุณอยู่ชั้นสูงสุดแล้ว' : 'Top tier reached');
+  return `<div class="club">
+    <div class="clubrow"><span class="clubkick">LOOPERS CLUB</span><span class="clubtier">${tierTH}</span></div>
+    <div class="wallet">
+      <div class="wlabel">${th?'กระเป๋า LLOOP':'LLOOP wallet'}</div>
+      <div class="wbal">฿${bal.toLocaleString()}</div>
+      <div class="whint">${th?'ใช้ลดค่าเช่าได้ทุกครั้ง — รวมเงินคืน · ชวนเพื่อน · ของขวัญ ไว้ที่เดียว':'Use on any rental — credit, referrals and gifts in one place'}</div>
+    </div>
+    <div class="clubprog">
+      <div class="cptop"><span>${progLine}</span><span class="cpsm">${r}/${nx?nx[1]:r}</span></div>
+      <div class="cpbar"><i style="width:${prog}%"></i></div>
+    </div>
+  </div>`;
+}
 function renderStyleCard(c) {
   const sp = c.style_profile || {};
   const tier = c.crm_tier ||'new';
-  const tierLabel = { new: (lang ==='th'?'สมาชิกใหม่':'New'), silver:'Silver', gold:'Gold', platinum:'Platinum'}[tier] || tier;
-  const pts = c.points?` · ${c.points} pts`:'';
+  const tierLabel = lang==='th'
+    ? ({ new:'ชั้นเริ่มต้น', silver:'ชั้นเงิน', gold:'ชั้นทอง', platinum:'ชั้นแพลทินัม' }[tier] || 'ชั้นเริ่มต้น')
+    : ({ new:'Starter', silver:'Silver', gold:'Gold', platinum:'Platinum' }[tier] || tier);
   let inner;
   if (sp.headline || (sp.palette && sp.palette.length)) {
     const pal = (sp.palette || []).map(h =>`<i style="background:${h}"></i>`).join('');
@@ -1227,7 +1254,7 @@ function renderStyleCard(c) {
       <div class="stylerec">${lang ==='th'?'แสดงรหัสนี้กับสไตลิสต์พาร์ทเนอร์ตอนไปทำ Personal Color':'Show this code to our partner stylist'}</div>`;
   }
   return`<div class="stylecard">
-    <div class="tierbadge"> ${tierLabel}${pts}</div>
+    <div class="tierbadge"> ${tierLabel}</div>
     ${inner}
     ${c.link_code?`<div class="linkcode">${lang ==='th'?'รหัสนัดสไตลิสต์':'Stylist code'} <b>${c.link_code}</b></div>`:''}
   </div>`;
