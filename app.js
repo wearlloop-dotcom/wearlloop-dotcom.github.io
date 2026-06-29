@@ -1296,8 +1296,16 @@ function renderStyleCard(c) {
       ${rec?`<div class="stylerec">${lang ==='th'?'ชุดที่แนะนำ':'For you'}: ${rec}</div>`:''}
       ${guideHtml?`<div class="styleguide" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,.08)">${guideHtml}</div>`:''}`;
   } else {
-    inner =`<div class="stylehead">${lang ==='th'?'ยังไม่มีผลวิเคราะห์สไตล์':'No style analysis yet'}</div>
-      <div class="stylerec">${lang ==='th'?'แสดงรหัสนี้กับสไตลิสต์พาร์ทเนอร์ตอนไปทำ Personal Color':'Show this code to our partner stylist'}</div>`;
+    const th = lang === 'th';
+    inner =`<div class="stylehead">${th?'ยังไม่มีผลวิเคราะห์สไตล์':'No style analysis yet'}</div>
+      <div class="stylerec">${th?'แสดงรหัสนี้กับสไตลิสต์พาร์ทเนอร์ตอนไปทำ Personal Color':'Show this code to our partner stylist'}</div>
+      <div class="claimbox" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">
+        <div class="stylerec" style="margin-bottom:6px">${th?'เคยทำ Personal Color กับสตูดิโอแล้ว? กรอกรหัสที่ได้รับ เพื่อดึงผลเข้าบัญชีนี้':'Already did Personal Color at a studio? Enter the code you got to pull your results into this account'}</div>
+        <div style="display:flex;gap:8px">
+          <input id="claimCodeInput" placeholder="${th?'รหัสจากสตูดิโอ':'Studio code'}" autocomplete="off" style="flex:1;text-transform:uppercase;padding:9px 11px;border:1.5px solid rgba(0,0,0,.15);border-radius:8px;font-size:15px;letter-spacing:1px">
+          <button onclick="claimCode()" style="border:none;border-radius:8px;padding:9px 16px;font-weight:600;background:#1A1A1A;color:#fff;cursor:pointer">${th?'ดึงผล':'Claim'}</button>
+        </div>
+      </div>`;
   }
   return`<div class="stylecard">
     <div class="tierbadge"> ${tierLabel}</div>
@@ -1305,6 +1313,18 @@ function renderStyleCard(c) {
     ${c.link_code?`<div class="linkcode">${lang ==='th'?'รหัสนัดสไตลิสต์':'Stylist code'} <b>${c.link_code}</b></div>`:''}
   </div>`;
 }
+// ลูกค้ากรอกรหัสผลวิเคราะห์ (จากสตูดิโอ/พาร์ทเนอร์) → ผูก/รวมผลเข้าบัญชี LINE ตัวเอง แล้วรีเฟรช
+async function claimCode() {
+  const el = document.getElementById('claimCodeInput');
+  const code = el ? el.value : '';
+  if (!code.trim()) { toast(lang === 'th' ? 'ใส่รหัสก่อนค่ะ' : 'Enter a code'); return; }
+  toast(lang === 'th' ? 'กำลังดึงผล…' : 'Claiming…');
+  const r = await window.API.claimStyleCode(code);
+  if (!r || !r.ok) { toast((r && r.error) || (lang === 'th' ? 'ไม่สำเร็จ' : 'Failed')); return; }
+  toast(lang === 'th' ? 'ดึงผลสำเร็จ — กำลังรีเฟรช' : 'Done — refreshing');
+  setTimeout(() => location.reload(), 900);
+}
+
 // ===== ครอบครัว & กลุ่ม — ไปหน้าจัดการกลุ่ม + เช่าเข้าตีม =====
 function openFamily() { location.href = 'family.html'; }
 // ===== ผลกระทบ + แกลเลอรี charity (wow, interactive) =====

@@ -95,6 +95,20 @@ window.API = (function () {
     return { ok:!error, data, error };
   }
 
+  // ลูกค้าที่เพิ่งลงทะเบียน LINE กรอก "รหัสผลวิเคราะห์" (link_code จากสตูดิโอ) → ผูก/รวมผลเข้าบัญชีตัวเอง
+  async function claimStyleCode(codeRaw) {
+    const code = (codeRaw || '').trim().toUpperCase();
+    if (!code) return { ok: false, error: 'ใส่รหัสก่อนค่ะ' };
+    if (CONFIG.USE_MOCK) return { ok: true, result: 'ok' };
+    if (!window.meRpc) return { ok: false, error: 'ต้องเข้าสู่ระบบด้วย LINE ก่อน' };
+    const { data, error } = await window.meRpc('customer_claim_code', { p_code: code });
+    if (error) return { ok: false, error: error.message };
+    const map = { not_found: 'ไม่พบรหัสนี้ — เช็กกับสตูดิโออีกครั้งนะคะ', taken: 'รหัสนี้ถูกผูกกับบัญชีอื่นแล้ว',
+      no_line: 'ต้องเข้าสู่ระบบด้วย LINE ก่อน', already: 'รหัสนี้อยู่ในบัญชีคุณอยู่แล้ว' };
+    if (data === 'ok' || data === 'already') return { ok: true, result: data };
+    return { ok: false, error: map[data] || ('ไม่สำเร็จ: ' + data) };
+  }
+
   async function saveProfile(customer) {
     if (CONFIG.USE_MOCK ||!lineUid) return { ok: true };
     const c = client();
@@ -640,5 +654,5 @@ window.API = (function () {
     return { ok: true, ...data };
   }
 
-  return { init, reserve, saveProfile, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental };
+  return { init, reserve, saveProfile, claimStyleCode, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental };
 })();
