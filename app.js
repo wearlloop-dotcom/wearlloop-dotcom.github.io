@@ -1151,10 +1151,7 @@ function openProfile(onboard) {
         <div class="field"><label>${lang==='th'?'สีที่เลี่ยง':'Colours to avoid'}</label><input id="pAvoid" value="${pf.avoid_colors ||''}" placeholder="${lang==='th'?'เช่น ส้มสด':'e.g. neon'}"></div>
       </div>
       <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง — ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>
-      <div class="frow">
-        <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
-        <div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>
-      </div>
+      <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
       <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label>
         <textarea id="pAddrDetail" rows="2" autocomplete="shipping street-address" inputmode="text" placeholder="${lang === 'th' ? 'บ้านเลขที่ / หมู่บ้าน-คอนโด / ซอย / ถนน' : 'House no. / building / soi / road'}">${c.address || ''}</textarea>
         <div class="subhint">${lang === 'th' ? 'พิมพ์รหัสไปรษณีย์ 5 หลัก แล้วเลือกตำบล — อำเภอ/จังหวัดเติมให้อัตโนมัติ' : 'Type the 5-digit postal code, pick a subdistrict — district & province auto-fill'}</div>
