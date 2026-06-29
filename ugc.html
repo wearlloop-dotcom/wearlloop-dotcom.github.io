@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · งานถ่าย UGC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--warn:#B5860B;--danger:#A32D2D;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:16px}
+  .bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+  .bar .nav a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:14px}
+  .wrap{max-width:720px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;margin-bottom:4px}
+  .card .desc{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+  .frm{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+  .fld{display:flex;flex-direction:column;gap:4px}
+  .fld label{font-size:12px;color:var(--muted)}
+  .fld input{padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-family:var(--sans);font-size:15px}
+  .btn{background:var(--ink);color:#fff;border:none;border-radius:9px;padding:10px 16px;font-family:var(--sans);font-size:14px;cursor:pointer}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .btn.ok{background:var(--ok)} .btn.dg{background:var(--danger)}
+  .btn:disabled{opacity:.5}
+  .item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .item:last-child{border-bottom:none}
+  .thumb{width:64px;height:80px;flex:none;border-radius:6px;object-fit:cover;background:var(--soft)}
+  .item .info{flex:1;min-width:0}
+  .item .nm{font-weight:600;font-size:15px}
+  .item .meta{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--soft);color:var(--muted)}
+  .tag.open{background:#E4F0EC;color:var(--ok)} .tag.failed{background:#F7E7E7;color:var(--danger)}
+  .tag.pass_unpaid{background:#FBF3DD;color:var(--warn)} .tag.approved{background:#E4F0EC;color:var(--ok)}
+  .acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .status{font-size:13px;text-align:center;min-height:18px;color:var(--muted);padding:2px 0}
+  .status.ok{color:var(--ok)}.status.err{color:var(--danger)}
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:16px}
+  .filt{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .filt button{font-size:12.5px;padding:5px 11px;border:1px solid var(--line);border-radius:20px;background:#fff;cursor:pointer;color:var(--muted)}
+  .filt button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+<div class="bar">
+  <h1>งานถ่าย UGC</h1>
+  <div class="nav"><a href="/influencers.html">อินฟลูเอนเซอร์</a><a href="/marketing.html">การตลาด</a></div>
+</div>
+<div class="wrap">
+  <section class="phead"><div class="eyebrow">creator content</div><h1>เปิดงานให้ลูกค้าถ่าย แล้วได้รูปจริงเข้าคลัง</h1>
+    <div class="sub">ลูกค้ารับงาน → ถ่าย → AI ตรวจ → ผ่าน = จ่ายเครดิตอัตโนมัติ + รูปขึ้นหน้าชุด · ที่นี่เปิดงาน/ดูสถานะ/รีวิวรูปที่ต้องตัดสินเอง</div>
+  </section>
+  <div id="status" class="status"></div>
+
+  <div class="card">
+    <h2>เปิดงานถ่ายใหม่</h2>
+    <div class="desc">ใส่รหัสชุด (code) + เครดิตที่จะให้ creator เมื่อรูปผ่าน</div>
+    <div class="frm">
+      <div class="fld"><label>รหัสชุด (code)</label><input id="gcode" placeholder="เช่น g1" style="width:120px"></div>
+      <div class="fld"><label>เครดิตรางวัล</label><input id="greward" type="number" min="1" value="300" style="width:110px"></div>
+      <div class="fld"><label>ไซซ์ที่ต้องการ</label><input id="gsize" placeholder="M" style="width:80px"></div>
+      <div class="fld"><label>ครบกำหนด (วัน)</label><input id="gdue" type="number" min="1" value="14" style="width:100px"></div>
+      <button class="btn" id="gcreate">เปิดงาน</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>คิวรีวิว <span id="rqn" class="tag"></span></h2>
+    <div class="desc">รูปที่ต้องตัดสินเอง — ผ่านแต่ยังไม่จ่าย (เกินเพดานวัน) ให้กดอนุมัติ · ตกออดิทแต่ของจริงโอเค กดอนุมัติได้ · ไม่เหมาะ กดปฏิเสธ</div>
+    <div id="rqueue"><div class="empty">กำลังโหลด…</div></div>
+  </div>
+
+  <div class="card">
+    <h2>งานถ่ายทั้งหมด</h2>
+    <div class="filt" id="filt">
+      <button data-s="" class="on">ทั้งหมด</button>
+      <button data-s="open">เปิดรับ</button>
+      <button data-s="reserved">รับแล้ว</button>
+      <button data-s="submitted">ส่งรูปแล้ว</button>
+      <button data-s="approved">ผ่าน/จ่ายแล้ว</button>
+    </div>
+    <div id="glist"><div class="empty">กำลังโหลด…</div></div>
+  </div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+let curStatus = '';
+function setStatus(m, c){ const e=$('#status'); e.textContent=m||''; e.className='status'+(c?' '+c:''); if(m) setTimeout(()=>{e.textContent='';e.className='status';},2200); }
+const esc = s => (s||'').toString().replace(/[<>"']/g, x=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+
+async function rpc(fn, args){ return window.opsRpc ? await window.opsRpc(fn, args||{}) : {data:null,error:{message:'no gateway'}}; }
+
+async function loadQueue(){
+  const { data, error } = await rpc('ugc_review_queue', {});
+  const box = $('#rqueue');
+  if (error){ box.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
+  const rows = data || [];
+  $('#rqn').textContent = rows.length ? rows.length+' รายการ' : '';
+  if (!rows.length){ box.innerHTML = `<div class="empty">ไม่มีรูปค้างรีวิว 🎉</div>`; return; }
+  box.innerHTML = rows.map(r => {
+    const reasons = (r.audit && r.audit.reasons || []).join(' · ');
+    const bk = r.bucket==='pass_unpaid' ? 'ผ่าน · รอจ่าย (เกินเพดาน)' : (r.bucket==='failed' ? 'ตกออดิท' : esc(r.bucket));
+    return `<div class="item">
+      <img class="thumb" src="${esc(r.photo_url)}" loading="lazy">
+      <div class="info">
+        <div class="nm">${esc(r.garment_name||r.garment)} · ฿${r.reward_credit}</div>
+        <div class="meta">creator: ${esc(r.creator_handle||r.creator_uid||'-')} · <span class="tag ${esc(r.bucket)}">${bk}</span></div>
+        ${reasons?`<div class="meta">${esc(reasons)}</div>`:''}
+        <div class="acts">
+          <button class="btn ok sm" onclick="approve('${r.asset_id}')">อนุมัติ + จ่าย</button>
+          <button class="btn dg sm" onclick="reject('${r.asset_id}')">ปฏิเสธ</button>
+        </div>
+      </div></div>`;
+  }).join('');
+}
+
+async function loadList(){
+  const { data, error } = await rpc('gig_list', { p_status: curStatus || null });
+  const box = $('#glist');
+  if (error){ box.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
+  const rows = data || [];
+  if (!rows.length){ box.innerHTML = `<div class="empty">ยังไม่มีงานในสถานะนี้</div>`; return; }
+  box.innerHTML = rows.map(g => `<div class="item">
+      ${g.garment_photo?`<img class="thumb" src="${esc(g.garment_photo)}" loading="lazy">`:`<div class="thumb"></div>`}
+      <div class="info">
+        <div class="nm">${esc(g.garment_name||g.garment)} · ฿${g.reward_credit}</div>
+        <div class="meta">ไซซ์ ${esc(g.needed_size||'-')} · <span class="tag ${esc(g.status)}">${esc(g.status)}</span>${g.creator_handle||g.creator_uid?` · ${esc(g.creator_handle||g.creator_uid)}`:''}${g.last_audit?` · ออดิท: ${esc(g.last_audit)}`:''}</div>
+        ${g.status==='open'?`<div class="acts"><button class="btn ghost sm" onclick="cancelGig('${g.gig_id}')">ยกเลิกงาน</button></div>`:''}
+      </div></div>`).join('');
+}
+
+async function approve(asset){ setStatus('กำลังอนุมัติ…'); const {data,error}=await rpc('gig_approve',{p_asset:asset});
+  if(error||data&&data.error){ setStatus((error&&error.message)||data.error,'err'); return; }
+  setStatus(data.capped?'จ่ายแล้ว':'อนุมัติ + จ่ายแล้ว','ok'); loadQueue(); loadList(); }
+async function reject(asset){ if(!confirm('ปฏิเสธรูปนี้? งานจะถูกคืนให้ creator ส่งใหม่')) return;
+  const {data,error}=await rpc('ugc_reject',{p_asset:asset});
+  if(error||data&&data.error){ setStatus((error&&error.message)||data.error,'err'); return; }
+  setStatus('ปฏิเสธแล้ว','ok'); loadQueue(); loadList(); }
+async function cancelGig(gig){ if(!confirm('ยกเลิกงานนี้?')) return;
+  const {data,error}=await rpc('gig_cancel',{p_gig:gig});
+  if(error||data&&data.error){ setStatus((error&&error.message)||(data.error==='not_open'?'งานถูกรับไปแล้ว ยกเลิกไม่ได้':data.error),'err'); return; }
+  setStatus('ยกเลิกแล้ว','ok'); loadList(); }
+
+$('#gcreate').addEventListener('click', async () => {
+  const code=$('#gcode').value.trim(), reward=parseInt($('#greward').value||'0',10);
+  const size=$('#gsize').value.trim(), due=parseInt($('#gdue').value||'14',10);
+  if(!code){ setStatus('ใส่รหัสชุดก่อน','err'); return; }
+  $('#gcreate').disabled=true;
+  const {data,error}=await rpc('gig_create',{p_garment:code,p_reward:reward,p_size:size||null,p_due_days:due});
+  $('#gcreate').disabled=false;
+  if(error||data&&data.error){ setStatus((error&&error.message)||(data.error==='garment_not_found'?'ไม่พบรหัสชุดนี้':data.error),'err'); return; }
+  setStatus('เปิดงานแล้ว','ok'); $('#gcode').value='';
+  loadList();
+});
+
+document.querySelectorAll('#filt button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#filt button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  curStatus=b.dataset.s; loadList();
+}));
+
+loadQueue(); loadList();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
+</body>
+</html>
