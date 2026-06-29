@@ -297,17 +297,13 @@ function applyLoginSignal(){
 // ===== join action =====
 async function doJoin(){
   const btn=$('#joinBtn');
-  // โหมด mock — โชว์หน้าสำเร็จเลย (reviewer ไม่ต้อง login)
-  if(!LIVE){
-    show('doneView');
-    $('#doneMsg').innerHTML='ตัวอย่าง (เดโม): ของจริงจะเรียก join_group แล้วพาเข้ากลุ่ม · <a href="family.html">ไปหน้ากลุ่ม →</a>';
-    return;
-  }
-  // ยังไม่ได้ล็อกอิน LINE (ไม่มี CUSTOMER) → ชวนล็อกอินก่อน แล้วค่อยกลับมา join
+  // บังคับยืนยันด้วย LINE เสมอ — ยังไม่ล็อกอิน → พาไป LINE login (ไม่มีโหมดเดโมข้าม)
   if(!CUSTOMER || !CUSTOMER.id){
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span>กำลังพาไปยืนยันด้วย LINE…';
     try{ await window.LiffAuth.signIn(); }
-    catch(_e){ alert('เข้าสู่ระบบด้วย LINE ไม่สำเร็จ ลองใหม่อีกครั้งนะคะ'); }
-    return; // signIn จะ redirect ไป LINE login แล้วโหลดหน้านี้ใหม่
+    catch(_e){ btn.disabled=false; btn.textContent='เข้าร่วมกลุ่ม';
+      alert('กรุณาเปิดลิงก์นี้ในแอป LINE เพื่อยืนยันตัวตนก่อนเข้าร่วมกลุ่มนะคะ'); }
+    return; // signIn จะ redirect ไป LINE login แล้วโหลดหน้านี้ใหม่ พร้อม CUSTOMER
   }
   btn.disabled=true; btn.innerHTML='<span class="spin"></span>กำลังเข้าร่วม…';
   try{
@@ -349,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   $('#demoNote').innerHTML = LIVE
     ? ''
-    : 'หน้าตัวอย่าง (prototype) · ต่อจริงกับ Supabase ผ่าน <b>liff/api.js</b> (group_invite_preview + join_group)';
+    : 'การเข้าร่วมกลุ่มต้องยืนยันตัวตนด้วย LINE — เปิดลิงก์นี้ในแอป LINE เพื่อเข้าร่วมค่ะ';
 
   // ไม่มี token → empty state เป็นมิตร
   if(!TOKEN){

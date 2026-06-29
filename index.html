@@ -428,7 +428,22 @@
   /* สถานะล็อก + ปุ่มจองคิว 4,900 */
   .stylecard .lockgrid{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 14px}
   .stylecard .lockpill{font-size:11.5px;color:#7C7361;background:rgba(255,255,255,.45);border:1px solid #E2D6BF;border-radius:16px;padding:5px 11px}
-  .stylecard .bookbtn{display:block;width:100%;background:#3B362C;color:#F6EFDD;border:none;border-radius:6px;padding:13px;font-size:14px;font-weight:600;font-family:var(--sans);cursor:pointer}
+  .stylecard .creditback{font-size:12.5px;color:#3B362C;background:#EFE6D2;border:1px solid #D8C7A4;border-radius:8px;padding:9px 12px;margin:0 0 10px;line-height:1.5}
+  .stylecard .bookbtn{display:block;width:100%;background:#3B362C;color:#F6EFDD;border:none;border-radius:6px;padding:12px 13px;font-size:14px;font-weight:600;font-family:var(--sans);cursor:pointer}
+  .stylecard .bookbtn .bsub{display:block;font-size:11px;font-weight:400;color:#D6C7A0;margin-top:2px}
+  /* หน้าจ่าย Personal Color (จ่ายในแอป) */
+  .pcpay{position:fixed;inset:0;background:rgba(26,24,21,.55);z-index:60;display:flex;align-items:flex-end;justify-content:center}
+  .pcpay .pcsheet{background:#fff;width:100%;max-width:460px;border-radius:16px 16px 0 0;padding:22px 20px 26px;position:relative;text-align:center}
+  .pcpay .pcx{position:absolute;top:10px;right:14px;background:none;border:none;font-size:24px;color:#9A8456;cursor:pointer;line-height:1}
+  .pcpay .pchead{font-family:var(--display);font-size:16px;font-weight:600;color:#1A1A1A}
+  .pcpay .pcamt{font-family:var(--display);font-size:32px;font-weight:700;color:#1A1A1A;margin:4px 0 2px}
+  .pcpay .pcback{font-size:12.5px;color:#3B362C;background:#EFE6D2;border:1px solid #D8C7A4;border-radius:8px;padding:8px 12px;margin:8px auto 14px;line-height:1.5;max-width:340px}
+  .pcpay .pcqr{display:flex;justify-content:center;margin:6px 0}
+  .pcpay .pcline{font-size:14px;color:#1A1A1A;margin:4px 0}
+  .pcpay .pcline b{font-family:var(--display);letter-spacing:1px}
+  .pcpay .pcstep{font-size:12.5px;color:#86857F;line-height:1.7;margin:12px auto;max-width:330px}
+  .pcpay .pcref{font-size:11px;color:#B6A988;letter-spacing:1px;margin-bottom:14px}
+  .pcpay .pcoa{display:block;background:#06C755;color:#fff;text-decoration:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600}
   /* เรตติ้ง/รีวิวในหน้ารายละเอียด */
   .ratingline{font-size:13px;color:#5E5746;margin:-8px 0 14px;min-height:1px}
   .ratingline .star{color:#A75F3A}
@@ -645,6 +660,32 @@
   .pbrand{color:var(--gold);letter-spacing:.16em}
   @media(hover:hover){.pcard:hover{transform:translateY(-4px)}.pcard:hover .pphoto{box-shadow:0 14px 30px rgba(120,96,54,.14)}}
   .dname{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:.3px}
+
+  /* ============ HERO VIDEO · แบบ Dior (full-bleed, autoplay/muted/loop) ============ */
+  .hero-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;
+    transition:opacity 1.1s ease;pointer-events:none}
+  .hero-scrim{position:absolute;inset:0;z-index:1;pointer-events:none;display:none;
+    background:linear-gradient(180deg,rgba(20,18,14,.34) 0%,rgba(20,18,14,.10) 34%,rgba(20,18,14,.28) 72%,rgba(20,18,14,.5) 100%)}
+  .hero-inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%}
+  /* when a video is live: cover the whole hero + flip copy to white */
+  .hero.has-video{padding:0;min-height:78vh;justify-content:center;background:#14120E}
+  .hero.has-video .hero-vid{opacity:1}
+  .hero.has-video .hero-scrim{display:block}
+  .hero.has-video .hero-inner{padding:22px}
+  .hero.has-video .hk{color:rgba(255,255,255,.92)}
+  .hero.has-video h2{color:#fff;text-shadow:0 1px 24px rgba(0,0,0,.4)}
+  .hero.has-video p{color:rgba(255,255,255,.92);text-shadow:0 1px 14px rgba(0,0,0,.4)}
+  .hero.has-video .hero-ring{border-color:var(--gold)}
+  .hero.has-video .hbtn{background:#fff;color:#14120E}
+  @media(max-width:679px){.hero.has-video{min-height:66vh}}
+  /* media controls — bottom-left, like Dior */
+  .hero-ctrl{position:absolute;left:14px;bottom:14px;z-index:3;display:flex;gap:8px}
+  .hvbtn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+    background:rgba(20,18,14,.42);border:1px solid rgba(255,255,255,.45);border-radius:50%;
+    backdrop-filter:blur(4px);transition:.18s}
+  .hvbtn:hover{background:rgba(20,18,14,.62)}
+  .hvbtn svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .hvbtn .ic-play,.hvbtn .ic-vol{fill:#fff;stroke:#fff}
 </style>
 </head>
 <body>
@@ -661,7 +702,7 @@
   <button class="enterbtn" id="introEnter" onclick="enterApp()">เข้าสู่คอลเลกชัน</button>
 </div>
 
-<div class="promo" id="promo">love + loop · จัดส่งฟรี · ชาว Loopers มีลุคใหม่เข้า loop ทุกเดือน</div>
+<div class="promo" id="promo">love + loop · จัดส่งฟรี · คนใน loop มีลุคใหม่ทุกเดือน</div>
 
 <header>
   <div class="contain hbar">
@@ -679,13 +720,26 @@
 
 <nav class="catnav"><div class="contain row" id="catnav"></div></nav>
 
-<section class="hero">
-  <div class="hero-ring" aria-hidden="true"></div>
-  <div class="hk" id="heroKicker">new season · 2026</div>
-  <h2 id="heroTitle">LLOOP</h2>
-  <p id="heroSub">เช่า · ใส่ · คืน — สวยได้ทุกครั้ง โดยไม่ต้องซื้อเพิ่ม</p>
-  <button class="hbtn" id="heroCta" onclick="scrollToGrid()">ดูคอลเลกชัน</button>
-  <div class="heronote">* แคมเปญรูปจริงจะมาแทนพื้นหลังนี้ (จากระบบ UGC/อินฟลู)</div>
+<section class="hero" id="hero">
+  <video id="heroVideo" class="hero-vid" playsinline muted autoplay preload="metadata" aria-hidden="true"></video>
+  <div class="hero-scrim" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="hero-ring" aria-hidden="true"></div>
+    <div class="hk" id="heroKicker">new season · 2026</div>
+    <h2 id="heroTitle">LLOOP</h2>
+    <p id="heroSub">เช่า · ใส่ · คืน — สวยได้ทุกครั้ง โดยไม่ต้องซื้อเพิ่ม</p>
+    <button class="hbtn" id="heroCta" onclick="scrollToGrid()">ดูคอลเลกชัน</button>
+  </div>
+  <div class="hero-ctrl" id="heroCtrl" hidden>
+    <button id="heroMute" class="hvbtn" aria-label="เสียง" onclick="toggleHeroMute()">
+      <svg viewBox="0 0 24 24" class="ic-mute"><path d="M11 5 6 9H3v6h3l5 4z"/><line x1="17" y1="9" x2="22" y2="14"/><line x1="22" y1="9" x2="17" y2="14"/></svg>
+      <svg viewBox="0 0 24 24" class="ic-vol" hidden><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8 8 0 0 1 0 12"/></svg>
+    </button>
+    <button id="heroPlay" class="hvbtn" aria-label="เล่น/หยุด" onclick="toggleHeroPlay()">
+      <svg viewBox="0 0 24 24" class="ic-pause"><line x1="9" y1="6" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="18"/></svg>
+      <svg viewBox="0 0 24 24" class="ic-play" hidden><path d="M7 5v14l11-7z"/></svg>
+    </button>
+  </div>
 </section>
 
 <div class="stylist">
@@ -742,7 +796,7 @@
     <div class="ed-tx">
       <div class="ek">coming into the loop · soon</div>
       <h3>The Midnight Edit</h3>
-      <p>คอลเลกชันชุดราตรีลิมิเต็ด กำลังจะเข้าสู่ loop — เปิดให้ชาว Loopers จองก่อนใคร</p>
+      <p>คอลเลกชันชุดราตรีลิมิเต็ด กำลังจะเข้าสู่ loop — เปิดให้คนใน loop จองก่อนใคร</p>
       <button onclick="this.textContent='เราจะส่งข่าวให้ก่อนใคร';this.disabled=true;this.style.opacity=.7">ลงชื่อรอเป็นคนแรก</button>
     </div>
   </div>
@@ -750,7 +804,7 @@
 
 <section class="ed-foot">
   <div class="r" aria-hidden="true"></div>
-  <div class="ft">join the Loopers</div>
+  <div class="ft">join the loop</div>
   <div class="fs">share the look, save the planet · แชร์ลุคสวย ช่วยรักษ์โลก</div>
 </section>
 
@@ -787,10 +841,10 @@
 <script src="i18n.js?v=39"></script>
 <script src="data.js?v=39"></script>
 <script src="liffAuth.js?v=39"></script>
-<script src="me-api.js?v=39"></script>
+<script src="me-api.js?v=40"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=39"></script>
-<script src="api.js?v=39"></script>
+<script src="api.js?v=40"></script>
 <script>
   /* Spotlight — ดึงชุดที่เช่าน้อยสุดมาโชว์รูปใหญ่ + สลับสไลด์อัตโนมัติ (visual layer) */
   window.renderSpotlight = function(garments){

@@ -37,6 +37,36 @@ function scrollToGrid() {
   if (g) g.scrollIntoView({ behavior:'smooth'});
 }
 
+// ----- hero video (แบบ Dior): autoplay/muted/loop + เล่นหลายคลิปต่อเนื่อง -----
+let _heroClips = [], _heroIdx = 0;
+function setupHeroVideo() {
+  const v = $('#heroVideo'), hero = $('#hero'), ctrl = $('#heroCtrl');
+  if (!v || !hero) return;
+  const cfg = (window.CONFIG || {});
+  _heroClips = [].concat(cfg.HERO_VIDEO || []).filter(Boolean);
+  if (cfg.HERO_POSTER) v.poster = cfg.HERO_POSTER;
+  if (!_heroClips.length) return; // ไม่มีวิดีโอ → คงพื้นหลังไล่สีเดิม
+  const playAt = (i) => { _heroIdx = i % _heroClips.length; v.src = _heroClips[_heroIdx]; v.load(); v.play().catch(() => {}); };
+  // คลิปเดียว = ลูปในตัว; หลายคลิป = ต่อคลิปถัดไปเมื่อจบ (montage)
+  if (_heroClips.length === 1) v.loop = true;
+  else v.addEventListener('ended', () => playAt(_heroIdx + 1));
+  v.addEventListener('loadeddata', () => hero.classList.add('has-video'), { once: true });
+  if (ctrl) ctrl.hidden = false;
+  playAt(0);
+}
+function toggleHeroMute() {
+  const v = $('#heroVideo'), b = $('#heroMute'); if (!v || !b) return;
+  v.muted = !v.muted;
+  b.querySelector('.ic-mute').hidden = !v.muted;
+  b.querySelector('.ic-vol').hidden = v.muted;
+}
+function toggleHeroPlay() {
+  const v = $('#heroVideo'), b = $('#heroPlay'); if (!v || !b) return;
+  if (v.paused) { v.play().catch(() => {}); } else { v.pause(); }
+  b.querySelector('.ic-pause').hidden = v.paused;
+  b.querySelector('.ic-play').hidden = !v.paused;
+}
+
 // ----- apply static (non-dynamic) text for current language -----
 function applyStatic() {
   document.documentElement.lang = lang;
@@ -303,7 +333,7 @@ async function askVenue() {
   el.className ='vresult show';
   el.innerHTML =`<span class="note">${t('vAnalyzingPre')} “${esc(name)}”…</span>`;
 
-  const v = await window.API.stylist({ venue: name, place, occasion: EVENT && EVENT.occasion, date: gUseDate }, lang);
+  const v = await window.API.stylist({ venue: name, place, occasion: window.gQuizOccasion || (EVENT && EVENT.occasion), date: gUseDate }, lang);
 
   if (!v || v.ok === false) {
     const msg = v && v.error === 'no_quota' ? t('vNoQuota')
@@ -1052,7 +1082,7 @@ function openMenu() {
       ${item(I.foryou, en ? 'For you' : 'แนะนำเฉพาะคุณ', 'if(!fForYou)toggleForYou()')}
       ${item(I.stylist, en ? 'AI stylist by venue' : 'AI สไตลิสต์ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
-      ${item(I.foryou, en ? 'Community · Looper Looks' : 'ชุมชน · ลุคจากชาว Looper', "location.href='looks.html'")}
+      ${item(I.foryou, en ? 'Community · The Loop Looks' : 'ชุมชน · ลุคจากคนใน loop', "location.href='looks.html'")}
       ${item(I.family, en ? 'Family & groups' : 'ครอบครัว & กลุ่ม', 'openFamily()')}
       ${item(I.gift, en ? 'Shoot & earn credit' : 'ถ่ายชุด · ได้เครดิต', "location.href='creator.html'")}
     </div>
@@ -1125,7 +1155,7 @@ function openProfile(onboard) {
       ${head}
       <h3>${onboard?(lang==='th'?'ข้อมูลเบื้องต้น':'Quick details'):t('pTitle')}</h3>
       <p class="hint">${t('pHint')}</p>
-      ${renderLoopersClub(c)}
+      ${renderTheLoop(c)}
       ${renderStyleCard(c)}
       ${renderImpactCard()}
       ${renderReferralCard()}
@@ -1226,8 +1256,8 @@ function catName(k) {
   const en = { dress:'Dress', set:'Set', top:'Top', skirt:'Skirt', pants:'Pants', jumpsuit:'Jumpsuit', outerwear:'Outerwear'};
   return (lang ==='th'? th : en)[k] || k;
 }
-// Loopers Club — กระเป๋า LLOOP (เงินใช้จ่ายเดียว) + ความคืบหน้าชั้น (ภาษาไทย ลดศัพท์)
-function renderLoopersClub(c) {
+// The Loop — กระเป๋า LLOOP (เงินใช้จ่ายเดียว) + ความคืบหน้าชั้น (ภาษาไทย ลดศัพท์)
+function renderTheLoop(c) {
   const th = lang === 'th';
   const bal = Math.round(c.credit_balance || 0);
   const r = c.rentals_count || 0;
@@ -1244,7 +1274,7 @@ function renderLoopersClub(c) {
     platinum: th?'ชั้นแพลทินัม: สไตลิสต์ส่วนตัว + เปลี่ยนชุดกลางคันฟรี':'Platinum: personal stylist + free swaps'
   }[nx[0]] || '') : '';
   return `<div class="club">
-    <div class="clubrow"><span class="clubkick">LOOPERS CLUB</span><span class="clubtier">${tierTH}</span></div>
+    <div class="clubrow"><span class="clubkick">THE LOOP</span><span class="clubtier">${tierTH}</span></div>
     <div class="wallet">
       <div class="wlabel">${th?'กระเป๋า LLOOP':'LLOOP wallet'}</div>
       <div class="wbal">฿${bal.toLocaleString()}</div>
@@ -1269,12 +1299,44 @@ function gThumb(g) {
   return `<div class="gthumb" onclick="openDetail('${esc(g.id)}')"><div class="gth-img">${img}</div>`
     + `<div class="gth-nm">${esc(g.name || '')}</div><div class="gth-pr">${pr}</div></div>`;
 }
-// จองคิว Personal Color (พาไป LINE OA — ทีมนัดคิวกับสตูดิโอพาร์ทเนอร์ต่อ)
-function bookPersonalColor() {
-  const url = (window.CONFIG && window.CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop';
-  try { if (window.liff && liff.openWindow) { liff.openWindow({ url, external: true }); return; } } catch (e) {}
-  location.href = url;
+// จองคิว Personal Color — จ่ายในแอป (สร้าง topup 4,900 → เปิดหน้าจ่าย PromptPay + แนบสลิป)
+//   ยืนยันแล้ว confirm_payment ออกเครดิตเต็มจำนวน อายุ 90 วัน เข้ากระเป๋า LLOOP อัตโนมัติ
+async function bookPersonalColor() {
+  const th = lang === 'th';
+  toast(th ? 'กำลังเปิดรายการ…' : 'Opening…');
+  const r = await window.API.startPersonalColor();
+  if (!r || !r.ok) { toast((r && r.error) || (th ? 'เริ่มรายการไม่สำเร็จ' : 'Could not start')); return; }
+  let pay = null; try { pay = await window.API.payInfo(); } catch (e) {}
+  openPcPaySheet(r.amount || 4900, r.payment_id, pay);
 }
+function openPcPaySheet(amount, paymentId, pay) {
+  const th = lang === 'th';
+  const amt = Number(amount).toLocaleString();
+  const ref = String(paymentId || '').replace(/-/g, '').slice(0, 8).toUpperCase();
+  const ppId = pay && pay.pay_promptpay_id;
+  const acct = pay && pay.pay_account_no;
+  const bank = pay && (pay.pay_bank || pay.pay_account_name || '');
+  const oa = (window.CONFIG && window.CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop';
+  const channel = ppId ? `<div class="pcqr" id="pcqr"></div><div class="pcline">PromptPay <b>${esc(ppId)}</b></div>`
+    : acct ? `<div class="pcline">${th?'โอนเข้าบัญชี':'Transfer to'} <b>${esc(acct)}</b>${bank?` · ${esc(bank)}`:''}</div>`
+    : `<div class="pcline">${th?'ทักแชต LLOOP เพื่อรับเลขพร้อมเพย์/บัญชี':'Message LLOOP for transfer details'}</div>`;
+  const wrap = document.createElement('div'); wrap.id = 'pcpay'; wrap.className = 'pcpay';
+  wrap.innerHTML = `<div class="pcsheet">
+    <button class="pcx" onclick="closePcPay()" aria-label="close">×</button>
+    <div class="pchead">${th?'จองคิว Personal Color':'Book Personal Color'}</div>
+    <div class="pcamt">฿${amt}</div>
+    <div class="pcback">${th?`จ่ายแล้วได้เครดิต ฿${amt} เต็มจำนวนไว้เลือกชุด · อายุ 90 วัน`:`You get ฿${amt} rental credit · valid 90 days`}</div>
+    ${channel}
+    <div class="pcstep">${th?'1) โอนตามยอด  2) แนบสลิปในแชต LLOOP  3) เครดิตเข้าให้หลังยืนยัน':'1) Transfer  2) Send slip in LLOOP chat  3) Credit added after we confirm'}</div>
+    <div class="pcref">${th?'อ้างอิง':'Ref'} #${ref}</div>
+    <a class="pcoa" href="${oa}" target="_blank" rel="noopener">${th?'เปิดแชต LLOOP เพื่อแนบสลิป':'Open LLOOP chat to send slip'}</a>
+  </div>`;
+  document.body.appendChild(wrap);
+  if (ppId && window.promptpayBrandedQR) {
+    try { window.promptpayBrandedQR(document.getElementById('pcqr'), ppId, amount, pay.pay_promptpay_type); } catch (e) {}
+  }
+}
+function closePcPay() { const el = document.getElementById('pcpay'); if (el) el.remove(); }
 function renderStyleCard(c) {
   const sp = c.style_profile || {};
   const tier = c.crm_tier ||'new';
@@ -1338,7 +1400,8 @@ function renderStyleCard(c) {
     inner =`<div class="stylehead">${th?'ปลดล็อกสไตล์ที่ใช่ของคุณ':'Unlock your signature style'}</div>
       <div class="stylerec">${th?'วิเคราะห์ Personal Color + รูปหน้า + หุ่น โดยสไตลิสต์ แล้วรับสรุป + ชุดเช่าที่แมตช์คุณ':'A stylist Personal Color + face + body analysis, then a summary and rental picks made for you'}</div>
       <div class="lockgrid">${lockGrid}</div>
-      <button class="bookbtn" onclick="bookPersonalColor()">${th?'จองคิว Personal Color · ฿4,900':'Book Personal Color · ฿4,900'}</button>
+      <div class="creditback">${th?'ค่าวิเคราะห์ ฿4,900 กลายเป็นเครดิตเต็มจำนวนไว้เลือกชุด — เหมือนได้วิเคราะห์ฟรี':'Your ฿4,900 becomes ฿4,900 rental credit — the analysis pays for itself'}</div>
+      <button class="bookbtn" onclick="bookPersonalColor()">${th?'จองคิว Personal Color · ฿4,900':'Book Personal Color · ฿4,900'}<span class="bsub">${th?'ได้เครดิต ฿4,900 คืนเต็มไว้เช่าชุด':'฿4,900 back as rental credit'}</span></button>
       <div class="claimbox" style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">
         <div class="stylerec" style="margin-bottom:6px">${th?'ทำกับสตูดิโอมาแล้ว? กรอกรหัสที่ได้รับ เพื่อดึงผลเข้าบัญชีนี้':'Already did it at a studio? Enter your code to pull the results in'}</div>
         <div style="display:flex;gap:8px">
@@ -1428,7 +1491,7 @@ async function openMembership() {
   sh.innerHTML = `<button class="close" onclick="closeMembership()">×</button>
     <div style="text-align:center;padding:18px 0 6px">
       <div style="font-size:11px;letter-spacing:3px;color:var(--muted)">${en ? 'MEMBERSHIP' : 'สมาชิกรายเดือน'}</div>
-      <div style="font-family:var(--display);font-size:24px;font-weight:700;color:var(--ink);margin-top:4px">Looper Membership</div>
+      <div style="font-family:var(--display);font-size:24px;font-weight:700;color:var(--ink);margin-top:4px">Loop Membership</div>
       <div style="font-size:13px;color:var(--muted);margin-top:4px">${en ? 'rotate new looks every month' : 'ได้ลุคใหม่ทุกเดือน คุ้มกว่าเช่ารายชุด'}</div>
     </div>
     <div id="memberBody" style="padding:6px 2px 24px">${en ? 'Loading…' : 'กำลังโหลด…'}</div>`;
@@ -1911,6 +1974,7 @@ async function boot() {
   $('#langTH')?.classList.toggle('on', lang ==='th');
   $('#langEN')?.classList.toggle('on', lang ==='en');
   applyStatic();
+  setupHeroVideo();
   let s;
   try { s = await window.API.init(); }
   catch (e) { console.warn('init failed, fallback to mock', e); s = window.MOCK; }
@@ -1960,6 +2024,13 @@ function routeDeepLink() {
       const g = GARMENTS.find(x => (x.code || '').toLowerCase() === gcode.toLowerCase());
       if (g) { setTimeout(() => openDetail(g.id), 80); return; }
     }
+    // มาจากการ์ดเกม quiz.html (?occasion=KEY&mood=...) → จำโอกาสไว้ให้ AI สไตลิสต์ใช้ + กรองคลังให้ตรงงาน
+    const occ = qs.get('occasion') || (ls && ls.get('occasion'));
+    if (occ && OCCASIONS && Object.prototype.hasOwnProperty.call(window.I18N[lang].occ || {}, occ)) {
+      window.gQuizOccasion = occ;
+      window.gQuizMood = qs.get('mood') || (ls && ls.get('mood')) || '';
+      try { setOccasion(occ); } catch (_e) {}
+    }
     let go = qs.get('go') || (ls && ls.get('go'));
     if (!go) return;
     setTimeout(() => {
@@ -1971,7 +2042,17 @@ function routeDeepLink() {
       else if (go === 'profile') openProfile();
       else if (go === 'cart') openCart();
       else if (go === 'verify' || go === 'kyc') openKyc('');
-      else if (go === 'stylist') { const el = $('#venueInput'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); } }
+      else if (go === 'stylist') {
+        const el = $('#venueInput'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
+        // มาจากการ์ดเกมพร้อมโอกาสแล้ว → ชวนเลือกวันที่ต่อ ให้ลื่นถึงผลลัพธ์เลย
+        if (window.gQuizOccasion) {
+          const r = $('#vresult'); if (r) {
+            r.className = 'vresult show';
+            r.innerHTML = `<div class="note"><b style="color:var(--ink)">${lang==='th'?'เลือกจาก “'+occName(window.gQuizOccasion)+'” แล้ว':'Picked “'+occName(window.gQuizOccasion)+'”'}</b><br>${lang==='th'?'พิมพ์สถานที่ที่จะไป แล้วเลือกวันที่ — สไตลิสต์จะเลือกชุดที่ว่างวันนั้นให้':'Type where you’re headed and pick a date — we’ll style you with what’s free that day'}</div>`;
+          }
+          const di = $('#venueDate'); if (di) di.classList.add('need');
+        }
+      }
     }, 80);
   } catch (_e) { /**/ }
 }
