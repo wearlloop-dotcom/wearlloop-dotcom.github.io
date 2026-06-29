@@ -1151,7 +1151,10 @@ function openProfile(onboard) {
         <div class="field"><label>${lang==='th'?'สีที่เลี่ยง':'Colours to avoid'}</label><input id="pAvoid" value="${pf.avoid_colors ||''}" placeholder="${lang==='th'?'เช่น ส้มสด':'e.g. neon'}"></div>
       </div>
       <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง — ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>
-      <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
+      <div class="frow">
+        <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
+        <div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>
+      </div>
       <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label>
         <textarea id="pAddrDetail" rows="2" autocomplete="shipping street-address" inputmode="text" placeholder="${lang === 'th' ? 'บ้านเลขที่ / หมู่บ้าน-คอนโด / ซอย / ถนน' : 'House no. / building / soi / road'}">${c.address || ''}</textarea>
         <div class="subhint">${lang === 'th' ? 'พิมพ์รหัสไปรษณีย์ 5 หลัก แล้วเลือกตำบล — อำเภอ/จังหวัดเติมให้อัตโนมัติ' : 'Type the 5-digit postal code, pick a subdistrict — district & province auto-fill'}</div>
@@ -1316,15 +1319,15 @@ async function openImpact() {
     <button class="close" onclick="closeImpact()">×</button>
     <div class="impact-hero">
       ${leaf}
-      <div class="ik">${en ? 'the good you keep in the loop' : 'ความดีที่คุณวนต่อ'}</div>
+      <div class="ik">${en ? 'the good you keep in the loop' : 'ความดีที่คุณส่งต่อใน loop'}</div>
       <div class="ihead">${en ? 'wear one look, care for the planet once more' : 'เช่าหนึ่งชุด ดูแลโลกอีกหนึ่งครั้ง'}</div>
-      <div class="iline">${en ? 'every time you choose to rotate instead of buy new, you truly give back to the earth' : 'ทุกครั้งที่คุณเลือกวนใช้ซ้ำแทนซื้อใหม่ คือการคืนบางอย่างให้โลกใบนี้จริง ๆ'}</div>
+      <div class="iline">${en ? 'every time you choose to rotate instead of buy new, you truly give back to the earth' : 'ทุกครั้งที่คุณเลือกเช่าแทนซื้อใหม่ คือการคืนบางอย่างให้โลกใบนี้จริง ๆ'}</div>
       <div class="ibig">
         <div>~<b data-to="${im.water_l || 0}">0</b><span>${en ? 'litres water saved (est.)' : 'ลิตรน้ำที่ช่วยประหยัด (ประมาณ)'}</span></div>
         <div class="div"></div>
         <div>~<b data-to="${im.co2_kg || 0}">0</b><span>${en ? 'kg carbon reduced (est.)' : 'กก. คาร์บอนที่ลด (ประมาณ)'}</span></div>
         <div class="div"></div>
-        <div><b data-to="${im.rentals || 0}">0</b><span>${en ? 'looks rotated' : 'ครั้งที่วนใส่'}</span></div>
+        <div><b data-to="${im.rentals || 0}">0</b><span>${en ? 'looks rotated' : 'รอบใน loop'}</span></div>
       </div>
       <div style="font-size:11px;color:#A39472;margin-top:14px">${en ? '* water & carbon are estimates based on industry averages' : '* ตัวเลขน้ำและคาร์บอนเป็นค่าประมาณจากค่าเฉลี่ยอุตสาหกรรม'}</div>
       <div class="icharity">${en ? 'and you have passed on' : 'และคุณได้ส่งต่อ'} <b data-to="${im.charity_thb || 0}" data-prefix="฿">฿0</b> ${en ? 'to ' + (im.charity_name || 'children in need') : 'ให้' + (im.charity_name || 'เด็กยากไร้')}</div>
@@ -1362,7 +1365,7 @@ async function openMembership() {
     <div style="text-align:center;padding:18px 0 6px">
       <div style="font-size:11px;letter-spacing:3px;color:var(--muted)">${en ? 'MEMBERSHIP' : 'สมาชิกรายเดือน'}</div>
       <div style="font-family:var(--display);font-size:24px;font-weight:700;color:var(--ink);margin-top:4px">Looper Membership</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:4px">${en ? 'rotate new looks every month' : 'วนลุคใหม่ได้ทุกเดือน คุ้มกว่าเช่ารายชุด'}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">${en ? 'rotate new looks every month' : 'ได้ลุคใหม่ทุกเดือน คุ้มกว่าเช่ารายชุด'}</div>
     </div>
     <div id="memberBody" style="padding:6px 2px 24px">${en ? 'Loading…' : 'กำลังโหลด…'}</div>`;
   let sub = CUSTOMER._sub || { active: false };
@@ -1816,7 +1819,7 @@ function renderImpactCard() {
     <div class="ecokick">${lang === 'th' ? 'ทุกการเลือกของคุณ สร้างความเปลี่ยนแปลง' : 'every choice you make matters'}</div>
     <div class="ecohead">${lang === 'th' ? 'สิ่งที่คุณช่วยเซฟไปแล้ว' : 'what you have saved so far'}</div>
     <div class="ecostats">
-      <div><b data-to="${im.rentals}">0</b><span>${lang === 'th' ? 'ครั้งที่วนใส่' : 'rotations'}</span></div>
+      <div><b data-to="${im.rentals}">0</b><span>${lang === 'th' ? 'รอบใน loop' : 'rotations'}</span></div>
       <div>~<b data-to="${im.water_l || 0}">0</b><span>${lang === 'th' ? 'ลิตรน้ำ (ประมาณ)' : 'litres water (est.)'}</span></div>
       <div>~<b data-to="${im.co2_kg || 0}">0</b><span>${lang === 'th' ? 'กก. คาร์บอน (ประมาณ)' : 'kg carbon (est.)'}</span></div>
     </div>
