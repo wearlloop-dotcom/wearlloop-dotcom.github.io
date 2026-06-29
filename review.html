@@ -795,17 +795,27 @@ $('submitBtn').addEventListener('click', async () => {
 
   btn.textContent = 'กำลังบันทึก...';
 
-  const { data, error } = await sb.rpc('submit_review', {
-    p_rental_id:     RENTAL_ID,
-    p_garment_id:    GARMENT_ID,
-    p_uid:           uid,
-    p_score:         score,
-    p_fit_score:     fitScore,
-    p_occasion_tags: Array.from(occasionTags),
-    p_feel_tags:     Array.from(feelTags),
-    p_feel_note:     $('feelNote').value.trim() || null,
-    p_photo_url:     photoUrl
-  });
+  // ส่งรีวิวผ่าน me-rpc gateway (verify LINE idToken → override p_uid + เช็คว่าเป็น rental ของเราจริง)
+  // เดิมยิง sb.rpc ตรงด้วย anon key ซึ่งถูก lockdown (R-1) → submit ไม่ผ่าน รีวิวไม่เข้าระบบ
+  let data = null, error = null;
+  try {
+    const r = await fetch(SB_URL + '/functions/v1/me-rpc', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: liff.getIDToken(), fn: 'submit_review', args: {
+        p_rental_id:     RENTAL_ID,
+        p_garment_id:    GARMENT_ID,
+        p_uid:           uid,
+        p_score:         score,
+        p_fit_score:     fitScore,
+        p_occasion_tags: Array.from(occasionTags),
+        p_feel_tags:     Array.from(feelTags),
+        p_feel_note:     $('feelNote').value.trim() || null,
+        p_photo_url:     photoUrl
+      }}),
+    });
+    const j = await r.json();
+    if (j.ok) data = j.data; else error = { message: j.message || j.error || 'ส่งรีวิวไม่สำเร็จ' };
+  } catch (_e) { error = { message: 'network' }; }
 
   btn.disabled = false;
   btn.textContent = 'ส่งรีวิว';

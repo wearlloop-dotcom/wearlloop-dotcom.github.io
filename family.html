@@ -49,6 +49,7 @@
   .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:14px}
   .mcard{border:1px solid var(--line);border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:9px;background:var(--bg);position:relative}
   .ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:18px;color:#fff}
+  img.ava{object-fit:cover;background:var(--soft)}
   .mname{font-weight:600;font-size:15px}
   .mrel{font-size:12px;color:var(--muted)}
   .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
@@ -77,7 +78,7 @@
   .frow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
   .fld{flex:1;min-width:130px}
   .fld label{display:block;font-size:11px;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px}
-  .fld input,.fld select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
+  .fld input,.fld select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:16px;background:#fff;color:var(--ink)}
   .quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
   .quick button{background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12px;color:#555}
   .quick button.on{background:var(--sage-bg);border-color:var(--sage);color:var(--ok)}
@@ -100,7 +101,7 @@
   .seasonchip .sd{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.08)}
   .seasonchip.on{background:var(--sage-bg);border-color:var(--sage);color:var(--ok);font-weight:600}
   .venuebox{margin-top:11px;max-width:340px}
-  .venuebox input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;background:#fff;color:var(--ink)}
+  .venuebox input{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:16px;background:#fff;color:var(--ink)}
   .look{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:var(--bg)}
   .lhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
   .lhead .ava{width:34px;height:34px;font-size:14px}
@@ -124,7 +125,7 @@
   .invrow .ir-n{font-weight:600;font-size:14px}
   .invrow .ir-f{font-size:11.5px;color:var(--muted)}
   .invrow .ir-k{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:600}
-  .mini{border:none;border-radius:7px;padding:8px 13px;font-size:12.5px;font-weight:600}
+  .mini{border:none;border-radius:7px;padding:11px 15px;font-size:12.5px;font-weight:600}
   .mini.yes{background:var(--sage);color:#fff}
   .mini.no{background:var(--soft);color:#666}
   .pendtag{font-size:10px;letter-spacing:.5px;padding:3px 8px;border-radius:20px;background:#FBF3E9;color:#a07c33}
@@ -365,6 +366,12 @@ async function reloadGroups(){
 const $ = s => document.querySelector(s);
 const initial = n => (n||'?').trim().charAt(0);
 const avaColor = id => AVA[Math.abs([...id].reduce((a,c)=>a+c.charCodeAt(0),0))%AVA.length];
+// avatar: รูปโปรไฟล์ LINE ถ้ามี · ไม่มี = วงกลมอักษรย่อ (เด็ก/คุณยายที่ไม่มี LINE)
+function avaHtml(picture, id, name){
+  return picture
+    ? `<img class="ava" src="${escHtml(picture)}" alt="${escHtml(initial(name))}" referrerpolicy="no-referrer">`
+    : `<div class="ava" style="background:${avaColor(id||name||'?')}">${escHtml(initial(name))}</div>`;
+}
 
 function curGroup(){ return GROUPS.find(g=>g.id===active) || null; }
 function others(g){ return g.members.filter(m=>m.id!==ME.id); }
@@ -409,7 +416,7 @@ function memberCard(m){
   if(m.pend) tags.unshift(`<span class="pendtag">รอตอบรับ</span>`);
   return `<div class="mcard" style="${m.pend?'opacity:.72':''}">
     ${m.role==='owner'?'<span class="badge">หัวหน้ากลุ่ม</span>':''}
-    <div class="ava" style="background:${avaColor(m.id)}">${initial(m.name)}</div>
+    ${avaHtml(m.picture, m.id, m.name)}
     <div><div class="mname">${m.name}</div><div class="mrel">${m.rel|| (m.role==='owner'?'ตัวคุณเอง':'สมาชิก')}</div></div>
     <div class="tags">${tags.join('')}</div>
   </div>`;
@@ -567,7 +574,7 @@ function paintTheme(g, season, members, modeInfo){
   members.forEach(m=>{
     const ageTh = AGE_TH[m.age_band]||m.age_band||'';
     html+=`<div class="look"><div class="lhead">
-      <div class="ava" style="background:${avaColor(m.id||m.name)}">${initial(m.name)}</div>
+      ${avaHtml(m.picture, m.id||m.name, m.name)}
       <div><div class="lname">${escHtml(m.name)}</div><div class="lrel">${escHtml(m.rel||(m.role==='owner'?'ตัวคุณเอง':'สมาชิก'))}${ageTh?(' · '+ageTh):''}</div></div></div>`;
     const picks = m.picks||[];
     if(m.needs_sourcing || picks.length===0){

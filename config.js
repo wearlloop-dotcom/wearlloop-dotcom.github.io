@@ -7,5 +7,5 @@ window.CONFIG = {
   META_PIXEL_ID:'1303659898642811', // LLOOP Pixel — เก็บ PageView / ViewContent / InitiateCheckout
   GA4_ID:'G-XXXXXXXXXX',           // TODO: แทนด้วย Measurement ID จาก GA4 > Admin > Data Streams
   N8N_BASE_URL:'',                 // TODO: ใส่ URL เมื่อ deploy n8n เช่น https://n8n.lloop.app
-  GOOGLE_MAPS_KEY:'',              // วาง API key จาก Google Cloud (ดู docs/google-maps-setup.md) — ว่าง = ไม่มี autocomplete/แผนที่ แต่พิมพ์ชื่อเองได้
+  GOOGLE_MAPS_KEY:'AIzaSyDOz7Ruts01gnasSpgqhDJcHosO-fXhm9w', // Maps key (wearlloop-maps-web) — ล็อก 3 Maps API + โดเมน github.io/lloop.app
 };

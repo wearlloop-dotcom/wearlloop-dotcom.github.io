@@ -93,7 +93,7 @@
   .stylist{background:var(--soft);border-bottom:1px solid var(--line)}
   .stylist .in{display:flex;align-items:center;gap:10px;padding:12px 16px;flex-wrap:wrap}
   .stylist .lbl{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-  .stylist input{flex:1;min-width:180px;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:14px;background:#fff}
+  .stylist input{flex:1;min-width:180px;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:16px;background:#fff}
   .stylist button{background:var(--ink);color:#fff;border:none;padding:0 20px;height:40px;font-size:12px;letter-spacing:1px;text-transform:uppercase}
   .vresult{font-size:13px;display:none;padding:0 0 12px}
   .vresult.show{display:block}
@@ -103,6 +103,12 @@
   /* quota chip + login hint */
   .stylist .quota{font-size:11px;color:var(--stone);border:1px solid var(--line);border-radius:20px;padding:3px 10px;white-space:nowrap}
   .stylist .quota b{color:var(--ink)}
+  /* places autocomplete dropdown (Places API New) */
+  .stylist .in{position:relative}
+  .pacbox{position:absolute;top:100%;left:16px;right:16px;z-index:40;background:#fff;border:1px solid var(--line);border-radius:0 0 4px 4px;box-shadow:0 8px 22px rgba(0,0,0,.10);max-height:260px;overflow:auto}
+  .pacitem{padding:10px 14px;font-size:14px;line-height:1.35;cursor:pointer;border-top:1px solid var(--soft);color:var(--ink)}
+  .pacitem:first-child{border-top:none}
+  .pacitem:hover{background:var(--soft)}
   /* rich analysis */
   .vresult .vhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
   .vresult .vtype{font-size:12px;color:var(--stone)}
@@ -179,7 +185,7 @@
   /* date bar (home) + card availability */
   .datebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 4px}
   .datebar .dblabel{font-size:13px;color:var(--muted);font-weight:500}
-  .datebar input[type=date]{font-family:var(--sans);font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+  .datebar input[type=date]{font-family:var(--sans);font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
   .datebar .dbonly{font-size:12px;border:1px solid var(--sage);color:#0c3a33;background:var(--sage-bg);padding:6px 12px;border-radius:30px}
   .datebar .dbonly.on{background:var(--ink);color:#fff;border-color:var(--ink)}
   .datebar .dbclear{font-size:12px;border:none;background:none;color:var(--muted);text-decoration:underline}
@@ -223,7 +229,7 @@
   .mcell{background:var(--soft);padding:8px 11px;font-size:14px;font-weight:500}.mcell span{display:block;font-size:11px;color:var(--muted);font-weight:400}
   .fabric{display:flex;flex-wrap:wrap;gap:6px}.ftag{font-size:12px;background:var(--soft);color:var(--muted);padding:4px 11px}.ftag.main{background:#EEF2F6;color:#2B5070}
   .colors{display:flex;gap:12px}.swatch{text-align:center}.swatch i{display:block;width:32px;height:32px;border-radius:50%;border:1px solid var(--line)}.swatch span{font-size:10px;color:var(--muted)}
-  .cta{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 18px;display:flex;gap:10px;align-items:center}
+  .cta{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 18px max(14px,calc(14px + env(safe-area-inset-bottom))) 18px;display:flex;gap:10px;align-items:center}
   .cta .price{font-family:var(--display);font-size:19px;font-weight:600}
   .cta button{flex:1;background:var(--ink);color:#fff;border:none;padding:14px;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:600}
   .creditline{font-size:11px;color:var(--muted);text-align:center;padding:0 18px 16px}
@@ -231,7 +237,7 @@
   .bdaybtn:active{opacity:.9}
   .datepick{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px 0}
   .datepick label{font-size:12px;color:var(--muted);font-weight:500}
-  .datepick input[type=date]{font-family:var(--sans);font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;color:var(--ink);background:#fff}
+  .datepick input[type=date]{font-family:var(--sans);font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;color:var(--ink);background:#fff}
   .availmsg{font-size:12px;font-weight:600;flex-basis:100%}
   .availmsg.ok{color:var(--ok)}
   .availmsg.busy{color:#A32D2D}
@@ -259,7 +265,7 @@
   /* ปุ่มตะกร้าในแถบ cta */
   .cta .cartbtn{flex:0 0 auto;background:#fff;color:var(--ink);border:1px solid var(--ink);padding:14px 14px;font-size:12px;letter-spacing:.5px;text-transform:none;font-weight:600}
   /* FAB ตะกร้า */
-  .cartfab{position:fixed;right:16px;bottom:80px;z-index:60;display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border:none;border-radius:30px;padding:12px 18px;font-family:var(--sans);font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.18);cursor:pointer}
+  .cartfab{position:fixed;right:16px;bottom:max(80px,calc(80px + env(safe-area-inset-bottom)));z-index:60;display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border:none;border-radius:30px;padding:12px 18px;font-family:var(--sans);font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.18);cursor:pointer}
   .cartfab i{background:#fff;color:var(--ink);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:700}
   /* KYC / cart sheets */
   .ksheet,.csheet{padding:24px 22px 28px;position:relative}
@@ -267,7 +273,7 @@
   .khd{font-family:var(--display);font-size:20px;font-weight:600;margin-bottom:4px}
   .ksub,.cdesc,.knote{font-size:12px;color:var(--muted);margin-bottom:14px}
   .klabel{display:block;font-size:12px;font-weight:600;color:var(--ink);margin:12px 0 6px}
-  .kinput,.cdate input[type=date],.ksheet input[type=file]{width:100%;font-family:var(--sans);font-size:13px;padding:10px;border:1px solid var(--line);border-radius:6px;background:#fff;box-sizing:border-box}
+  .kinput,.cdate input[type=date],.ksheet input[type=file]{width:100%;font-family:var(--sans);font-size:16px;padding:10px;border:1px solid var(--line);border-radius:6px;background:#fff;box-sizing:border-box}
   .ksubmit{width:100%;margin-top:18px;background:var(--ink);color:#fff;border:none;padding:14px;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:600;cursor:pointer}
   .knote{margin-top:12px;margin-bottom:0;text-align:center}
   .clist{margin:6px 0 4px}
@@ -397,7 +403,7 @@
   .refcard .refcode{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:3px;color:#3B362C;padding:10px;background:#fff;border:1px dashed #CDBFA1;border-radius:6px}
   .refcard .reffield{padding-top:12px;border-top:1px dashed #CDBFA1}
   .refcard .refrow{display:flex;gap:8px}
-  .refcard .refrow input{flex:1;border:1px solid #E2D6BF;border-radius:6px;padding:10px 12px;font-family:var(--sans);font-size:14px;background:#fff;color:#3B362C;text-transform:uppercase}
+  .refcard .refrow input{flex:1;border:1px solid #E2D6BF;border-radius:6px;padding:10px 12px;font-family:var(--sans);font-size:16px;background:#fff;color:#3B362C;text-transform:uppercase}
   .refcard .refrow button{background:var(--ink);color:#fff;border:none;padding:0 16px;border-radius:6px;font-size:12px;letter-spacing:.5px;font-weight:500}
   /* ครบลุค — AI hair/accessories */
   .lookbox{margin-bottom:4px}
@@ -411,7 +417,7 @@
   .lookrow .lv i{font-style:normal;font-size:13px;background:#fff;border:1px solid #EADFCB;border-radius:20px;padding:4px 11px;color:#4A4438}
   .looknote{font-size:11px;color:#A39472;margin-top:10px;font-style:italic;line-height:1.5}
   .pform{padding:18px}.pform h3{font-family:var(--display);font-size:22px;font-weight:600;margin-bottom:2px}.pform .hint{font-size:12px;color:var(--muted);margin-bottom:16px}
-  .field{margin-bottom:14px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:15px;background:#fff}
+  .field{margin-bottom:14px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input,.field select{width:100%;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:16px;background:#fff}
   .frow{display:flex;gap:10px}.frow .field{flex:1}
   .seasons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.seasonbtn{border:1px solid var(--line);padding:8px 4px;text-align:center;background:#fff}.seasonbtn.active{border-color:var(--ink);background:var(--soft)}
   .seasonbtn .sw{display:flex;gap:2px;justify-content:center;margin-bottom:5px}.seasonbtn .sw i{width:11px;height:11px;border-radius:50%}.seasonbtn span{font-size:11px}
@@ -697,28 +703,73 @@
   };
 </script>
 <script>
-  /* Google Places autocomplete สำหรับช่อง "จะไปที่ไหน" — เก็บสถานที่ที่เลือกไว้ใน window.SELECTED_PLACE
-     ไม่มี key ก็ข้ามไป (พิมพ์ชื่อเองได้ตามเดิม) · ดู docs/google-maps-setup.md */
+  /* Google Places autocomplete (Places API New) สำหรับช่อง "จะไปที่ไหน"
+     ใช้ AutocompleteSuggestion + วาด dropdown เอง (widget เก่าใช้กับโปรเจกต์ใหม่ไม่ได้แล้ว มี.ค.2025)
+     เก็บสถานที่ที่เลือกไว้ใน window.SELECTED_PLACE · ไม่มี key/โหลดไม่ได้ = พิมพ์ชื่อเองได้ตามเดิม
+     ⚠ ต้องเปิด "Places API (New)" ใน Google Cloud · ดู docs/google-maps-setup.md */
   window.SELECTED_PLACE = null;
-  window.initVenueAutocomplete = function(){
+  function priceLevelToNum(p){
+    var m = { PRICE_LEVEL_FREE:0, PRICE_LEVEL_INEXPENSIVE:1, PRICE_LEVEL_MODERATE:2, PRICE_LEVEL_EXPENSIVE:3, PRICE_LEVEL_VERY_EXPENSIVE:4,
+              FREE:0, INEXPENSIVE:1, MODERATE:2, EXPENSIVE:3, VERY_EXPENSIVE:4 };
+    return (p != null && m[p] != null) ? m[p] : null;
+  }
+  window.initVenueAutocomplete = async function(){
     try {
       var input = document.getElementById('venueInput');
-      if (!input || !window.google || !google.maps || !google.maps.places) return;
-      var ac = new google.maps.places.Autocomplete(input, {
-        fields: ['name','types','price_level','geometry','place_id','photos'],
+      if (!input || !window.google || !google.maps || !google.maps.importLibrary) return;
+      var lib = await google.maps.importLibrary('places');
+      var AutocompleteSuggestion = lib.AutocompleteSuggestion, AutocompleteSessionToken = lib.AutocompleteSessionToken;
+      if (!AutocompleteSuggestion) return; // ไลบรารีไม่รองรับ → ปล่อยพิมพ์เอง
+      var token = new AutocompleteSessionToken();
+
+      // dropdown ใต้ช่องพิมพ์
+      var box = document.createElement('div');
+      box.className = 'pacbox'; box.style.display = 'none';
+      input.insertAdjacentElement('afterend', box);
+      function clearBox(){ box.style.display = 'none'; box.innerHTML = ''; }
+
+      var timer = null;
+      input.addEventListener('input', function(){
+        window.SELECTED_PLACE = null;            // พิมพ์ใหม่ → ล้าง place ที่เคยเลือก
+        clearTimeout(timer);
+        var q = input.value.trim();
+        if (q.length < 2){ clearBox(); return; }
+        timer = setTimeout(async function(){
+          try {
+            var res = await AutocompleteSuggestion.fetchAutocompleteSuggestions({ input: q, sessionToken: token });
+            var sugg = (res && res.suggestions) || [];
+            if (!sugg.length){ clearBox(); return; }
+            box.innerHTML = '';
+            sugg.slice(0, 5).forEach(function(s){
+              var pred = s.placePrediction; if (!pred) return;
+              var label = (pred.text && pred.text.text) ? pred.text.text : '';
+              var row = document.createElement('div');
+              row.className = 'pacitem'; row.textContent = label;
+              row.addEventListener('mousedown', async function(ev){
+                ev.preventDefault(); clearBox();
+                try {
+                  var place = pred.toPlace();
+                  await place.fetchFields({ fields: ['displayName','types','priceLevel','location','photos','id'] });
+                  token = new AutocompleteSessionToken();   // จบ session หลังเลือก
+                  var photoUrl = null;
+                  try { if (place.photos && place.photos[0] && place.photos[0].getURI) photoUrl = place.photos[0].getURI({ maxWidth: 800, maxHeight: 600 }); } catch (e) {}
+                  input.value = place.displayName || label;
+                  window.SELECTED_PLACE = {
+                    name: place.displayName || label, types: place.types || [],
+                    price_level: priceLevelToNum(place.priceLevel), place_id: place.id || null, photo_url: photoUrl,
+                    lat: place.location ? place.location.lat() : null,
+                    lng: place.location ? place.location.lng() : null,
+                  };
+                } catch (e) { window.SELECTED_PLACE = null; }
+                if (typeof askVenue === 'function') askVenue();
+              });
+              box.appendChild(row);
+            });
+            box.style.display = 'block';
+          } catch (e) { clearBox(); }   // referer block / API ไม่เปิด → เงียบ ปล่อยพิมพ์เอง
+        }, 280);
       });
-      ac.addListener('place_changed', function(){
-        var p = ac.getPlace() || {};
-        var photoUrl = null;
-        try { if (p.photos && p.photos[0] && p.photos[0].getUrl) photoUrl = p.photos[0].getUrl({ maxWidth: 800, maxHeight: 600 }); } catch (e) {}
-        window.SELECTED_PLACE = (p.name) ? {
-          name: p.name, types: p.types || [], price_level: (p.price_level != null ? p.price_level : null),
-          place_id: p.place_id || null, photo_url: photoUrl,
-          lat: p.geometry && p.geometry.location ? p.geometry.location.lat() : null,
-          lng: p.geometry && p.geometry.location ? p.geometry.location.lng() : null,
-        } : null;
-        if (window.SELECTED_PLACE && typeof askVenue === 'function') askVenue();
-      });
+      document.addEventListener('click', function(e){ if (e.target !== input && !box.contains(e.target)) clearBox(); });
     } catch (e) { /* ไม่ให้ล้มทั้งหน้าเพราะ maps */ }
   };
   (function(){
