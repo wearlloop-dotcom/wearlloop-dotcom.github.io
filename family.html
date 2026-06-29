@@ -261,11 +261,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=37"></script>
-<script src="data.js?v=37"></script>
-<script src="liffAuth.js?v=37"></script>
-<script src="me-api.js?v=37"></script>
-<script src="api.js?v=37"></script>
+<script src="config.js?v=38"></script>
+<script src="data.js?v=38"></script>
+<script src="liffAuth.js?v=38"></script>
+<script src="me-api.js?v=38"></script>
+<script src="api.js?v=38"></script>
 <script>
 // ===== MOCK DATA (แทน Supabase ระหว่างพรีวิว) =====
 const PALETTE = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };
@@ -807,10 +807,10 @@ window.respondInvite=async (gid,ok)=>{
 
 // ===== ชวนเพื่อน =====
 let inviteUrl = '';  // URL ล่าสุดสำหรับแชร์ทาง LINE
-// ประกอบลิงก์ join แบบ LIFF: https://liff.line.me/<LIFF_ID>?join=<token>
+// ประกอบลิงก์ชวน → หน้า landing ของเพื่อน: https://liff.line.me/<LIFF_ID>/join.html?token=<token>
 function buildJoinUrl(token){
   const lid = (window.CONFIG && window.CONFIG.LIFF_ID) || '';
-  return `https://liff.line.me/${lid}?join=${encodeURIComponent(token)}`;
+  return `https://liff.line.me/${lid}/join.html?token=${encodeURIComponent(token)}`;
 }
 window.openInvite=async ()=>{
   $('#form').classList.remove('show');
@@ -842,7 +842,20 @@ function bindInvite(){
       // เปิด LINE share sheet ถ้าใช้งานได้ ไม่งั้น copy ลงคลิปบอร์ด
       try{
         if(window.liff && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')){
-          liff.shareTargetPicker([{ type:'text', text:'มาเข้ากลุ่ม LLOOP กับเรา แตะลิงก์นี้เลย\n'+inviteUrl }]);
+          const gname=(curGroup() && curGroup().name) || 'กลุ่มของเรา';
+          // การ์ด flex สวย ๆ + ปุ่ม "เข้าร่วมกลุ่ม" ในตัว → เลือกกลุ่ม/เพื่อนใน LINE ส่งได้เลย
+          liff.shareTargetPicker([{ type:'flex', altText:'ชวนเข้ากลุ่ม '+gname+' บน LLOOP', contents:{
+            type:'bubble',
+            body:{ type:'box', layout:'vertical', spacing:'sm', contents:[
+              { type:'text', text:'LLOOP', weight:'bold', size:'lg', color:'#1A1A1A' },
+              { type:'text', text:'ชวนเข้ากลุ่ม · จัดชุดเข้าตีม', size:'xs', color:'#8C8B86' },
+              { type:'text', text:gname, weight:'bold', size:'xl', wrap:true, color:'#1A1A1A', margin:'md' },
+              { type:'text', text:'มาจัดชุดเข้าตีมเดียวกัน แล้วเช่าพร้อมกันในออเดอร์เดียว', size:'sm', color:'#8C8B86', wrap:true }
+            ]},
+            footer:{ type:'box', layout:'vertical', contents:[
+              { type:'button', style:'primary', color:'#6FB3A6',
+                action:{ type:'uri', label:'เข้าร่วมกลุ่ม', uri: inviteUrl } } ]}
+          }}]);
           return;
         }
       }catch(_e){}

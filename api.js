@@ -573,6 +573,12 @@ window.API = (function () {
     const { data, error } = await client().rpc('set_picture_hidden', { p_customer: customer.id, p_hide: !!hidden });
     return { ok: !error, data, error };
   }
+  // หน้า landing คำเชิญ: ดูข้อมูลกลุ่มจาก token ก่อนเข้าร่วม (ยังไม่ต้องเป็นสมาชิก)
+  async function groupInvitePreview(token) {
+    if (CONFIG.USE_MOCK || !token) return { ok: true, data: null };
+    const { data, error } = await client().rpc('group_invite_preview', { p_token: token });
+    return { ok: !error, data, error };
+  }
 
   // ===== ช่องทางชำระเงิน (โชว์ตอน checkout) — cache ไว้ =====
   let _payInfo;
@@ -598,5 +604,35 @@ window.API = (function () {
     return { ok: true, ...data };
   }
 
-  return { init, reserve, saveProfile, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, payInfo, birthdayStatus, birthdayReserve };
+  // ===== ยกเลิก / เลื่อน / ต่อเวลา — ผ่าน me-rpc gateway เท่านั้น (ownership guard เช็คว่าเป็น rental ของเราจริง) =====
+  async function quoteCancellation(rentalId, asCredit = true) {
+    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return null;
+    const { data } = await window.meRpc('quote_cancellation', { p_rental: rentalId, p_as_credit: asCredit });
+    return data || null;
+  }
+  async function cancelRental(rentalId, asCredit = true, reason) {
+    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return { ok: false };
+    const { data, error } = await window.meRpc('cancel_rental', { p_rental: rentalId, p_as_credit: asCredit, p_reason: reason || null });
+    if (error || (data && data.error)) return { ok: false, error: error || data.error, data };
+    return { ok: true, ...data };
+  }
+  async function quoteExtension(rentalId, newTo) {
+    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return null;
+    const { data } = await window.meRpc('quote_extension', { p_rental: rentalId, p_new_to: newTo });
+    return data || null;
+  }
+  async function extendRental(rentalId, newTo) {
+    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return { ok: false };
+    const { data, error } = await window.meRpc('extend_rental', { p_rental: rentalId, p_new_to: newTo });
+    if (error || (data && data.error)) return { ok: false, error: error || data.error, data };
+    return { ok: true, ...data };
+  }
+  async function rescheduleRental(rentalId, fromStr, toStr, newCode) {
+    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return { ok: false };
+    const { data, error } = await window.meRpc('reschedule_rental', { p_rental: rentalId, p_from: fromStr, p_to: toStr, p_new_code: newCode || null });
+    if (error || (data && data.error)) return { ok: false, error: error || data.error, data };
+    return { ok: true, ...data };
+  }
+
+  return { init, reserve, saveProfile, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental };
 })();
