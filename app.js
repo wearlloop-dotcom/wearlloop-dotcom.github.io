@@ -1098,6 +1098,7 @@ function openMenu() {
     <div class="msec">
       <div class="ml">${en ? 'Discover' : 'ค้นพบ'}</div>
       ${item(I.foryou, en ? 'For you' : 'แนะนำเฉพาะคุณ', 'if(!fForYou)toggleForYou()')}
+      ${item(I.stylist, en ? 'What to wear? — card game' : 'งานนี้ใส่อะไรดี — เพื่อนสาวช่วยเลือก', "location.href='quiz.html'")}
       ${item(I.stylist, en ? 'AI stylist by venue' : 'AI สไตลิสต์ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
       ${item(I.foryou, en ? 'Community · The Loop Looks' : 'ชุมชน · ลุคจากคนใน loop', "location.href='looks.html'")}
@@ -2127,13 +2128,22 @@ function routeDeepLink() {
       else if (go === 'verify' || go === 'kyc') openKyc('');
       else if (go === 'stylist') {
         const el = $('#venueInput'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
-        // มาจากการ์ดเกมพร้อมโอกาสแล้ว → ชวนเลือกวันที่ต่อ ให้ลื่นถึงผลลัพธ์เลย
+        // มาจากการ์ดเกมพร้อมโอกาสแล้ว → ชวนเลือกวันที่ต่อ + เช็ก/โชว์โควต้า AI สไตลิสต์ที่เหลือ
         if (window.gQuizOccasion) {
-          const r = $('#vresult'); if (r) {
-            r.className = 'vresult show';
-            r.innerHTML = `<div class="note"><b style="color:var(--ink)">${lang==='th'?'เลือกจาก “'+occName(window.gQuizOccasion)+'” แล้ว':'Picked “'+occName(window.gQuizOccasion)+'”'}</b><br>${lang==='th'?'พิมพ์สถานที่ที่จะไป แล้วเลือกวันที่ — สไตลิสต์จะเลือกชุดที่ว่างวันนั้นให้':'Type where you’re headed and pick a date — we’ll style you with what’s free that day'}</div>`;
-          }
           const di = $('#venueDate'); if (di) di.classList.add('need');
+          (async () => {
+            const r = $('#vresult'); if (!r) return;
+            let n = null; try { n = await window.API.stylistQuota?.(); } catch (_e) {}
+            const th = lang === 'th';
+            const head = th ? 'เลือกจาก “'+occName(window.gQuizOccasion)+'” แล้ว' : 'Picked “'+occName(window.gQuizOccasion)+'”';
+            const body = th ? 'พิมพ์สถานที่ที่จะไป แล้วเลือกวันที่ — สไตลิสต์จะเลือกชุดที่ว่างวันนั้นให้' : 'Type where you’re headed and pick a date — we’ll style you with what’s free that day';
+            let quota;
+            if (n == null) quota = th ? 'เข้าผ่าน LINE เพื่อใช้สิทธิ์สไตลิสต์' : 'Sign in via LINE to use the stylist';
+            else if (n <= 0) quota = th ? 'สิทธิ์สไตลิสต์รอบนี้หมดแล้ว — ดูชุดในคลังเองได้เลย หรือรอรอบสิทธิ์ถัดไป' : 'No stylist credits left this round — browse freely or wait for the next cycle';
+            else quota = th ? `ขั้นนี้ใช้สิทธิ์สไตลิสต์ 1 ครั้ง · คุณเหลืออีก <b style="color:var(--ok)">${n}</b> ครั้ง` : `This uses 1 stylist credit · you have <b style="color:var(--ok)">${n}</b> left`;
+            r.className = 'vresult show';
+            r.innerHTML = `<div class="note"><b style="color:var(--ink)">${head}</b><br>${body}<br><span style="color:var(--clay,#A75F3A)">${quota}</span></div>`;
+          })();
         }
       }
     }, 80);
