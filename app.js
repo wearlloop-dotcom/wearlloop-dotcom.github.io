@@ -52,8 +52,8 @@ function applyStatic() {
 
 function setLang(l) {
   lang = l; localStorage.setItem('lloop_lang', l);
-  $('#langTH').classList.toggle('on', l ==='th');
-  $('#langEN').classList.toggle('on', l ==='en');
+  $('#langTH')?.classList.toggle('on', l ==='th');
+  $('#langEN')?.classList.toggle('on', l ==='en');
   closeDetail(); closeProfile();
   applyStatic();
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderGrid();
@@ -85,6 +85,21 @@ function fitNote(g) {
   return { text:'ลูกค้าส่วนใหญ่บอกว่าใส่พอดี', cls:'true' };
 }
 
+// ความคุ้ม — ประหยัดกี่ % เทียบมูลค่าชุด (replacement_value)
+function savingsPct(g) {
+  if (!g || !g.retail || !g.price || g.retail <= g.price) return null;
+  return Math.round((1 - g.price / g.retail) * 100);
+}
+// แถบความคุ้ม + ความสะอาด (โชว์ในหน้า detail) — โชว์เฉพาะเมื่อมีข้อมูล
+function valueStrip(g) {
+  const th = lang === 'th';
+  const sv = savingsPct(g);
+  const parts = [];
+  if (sv) parts.push(`<span style="background:#EAF3DE;color:#27500A;padding:4px 10px;border-radius:6px;font-size:12px">${th?'มูลค่าชุด':'Worth'} ฿${Number(g.retail).toLocaleString()} · ${th?'เช่าประหยัด':'save'} ${sv}%</span>`);
+  if (g.grade) parts.push(`<span style="background:#E1F5EE;color:#085041;padding:4px 10px;border-radius:6px;font-size:12px">${th?'ผ่าน QC เกรด':'QC grade'} ${g.grade} · ${th?'ดูแลอย่างดี':'well kept'}</span>`);
+  if (!parts.length) return '';
+  return `<div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0">${parts.join('')}</div>`;
+}
 // คะแนน"แนะนำสำหรับคุณ"— รวม fit + โทนสี + สไตล์จากโปรไฟล์/พาร์ทเนอร์ (style_profile)
 function personalScore(g) {
   const c = CUSTOMER;
@@ -147,12 +162,9 @@ function renderCatnav() {
     { label: occName('wedding_guest'), on: fOccasion ==='wedding_guest', act:`setOccasion('wedding_guest')`},
     { label: occName('work'), on: fOccasion ==='work', act:`setOccasion('work')`},
     { label: occName('cafe'), on: fOccasion ==='cafe', act:`setOccasion('cafe')`},
-    { label: (lang ==='th'?'ครอบครัว & กลุ่ม':'Family & Group'), on: false, act:`openFamily()`},
-    { label: (lang ==='th'?'ออเดอร์ของฉัน':'My Rentals'), on: false, act:`openOrders()`},
-    { label: (lang ==='th'?'สมาชิกรายเดือน':'Membership'), on: false, act:`openMembership()`},
-    { label: (lang ==='th'?'ความดีที่หมุนเวียน':'Impact'), on: false, act:`openImpact()`},
-    { label: (lang ==='th'?'โปรไฟล์':'Profile'), on: false, act:`openProfile()`},
 ];
+  // หมายเหตุ: รายการบัญชี/นำทาง (ครอบครัว/ออเดอร์/สมาชิก/impact/โปรไฟล์) ย้ายไปอยู่ใน
+  // เมนูรวม (☰ openMenu) แล้ว — catnav เหลือเฉพาะ "ฟิลเตอร์สินค้า" เพื่อไม่ให้ปนหน้าที่กัน
   el.innerHTML = items.map(i =>`<a onclick="${i.act}" style="${i.on?'border-bottom:2px solid var(--ink);padding-bottom:2px':''}">${i.label}</a>`).join('');
 }
 function setToneOff() { fToneOnly = false; }
@@ -197,6 +209,7 @@ function renderGrid() {
     const fn = fitNote(g);
     const match = g.season === CUSTOMER.my_color_season;
     const av = availOf(g);
+    const sv = savingsPct(g);
     const dots = g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
     return`<div class="pcard ${gUseDate && !av ? 'busy' : ''}" onclick="openDetail('${g.id}')">
       <div class="pphoto" style="background:${g.bg}">
@@ -206,6 +219,7 @@ function renderGrid() {
           ${gUseDate ? `<span class="bdg ${av ? 'avail' : 'busy'}">${av ? (lang === 'th' ? 'ว่าง ' + fmtDate(gUseDate) : 'free ' + fmtDate(gUseDate)) : (lang === 'th' ? 'ไม่ว่าง' : 'booked')}</span>` : ''}
           ${g.isNew?`<span class="bdg new">NEW</span>`:''}
           ${match?`<span class="bdg tone">${t('toneMatch')}</span>`:''}
+          ${sv?`<span class="bdg" style="background:#27500A;color:#fff">${lang==='th'?'ประหยัด ':'save '}${sv}%</span>`:''}
         </div>
         <div class="hoverbar">
           <div class="try">${lang ==='th'?'ลองดูเลย':'View'} ›</div>
@@ -310,9 +324,14 @@ async function askVenue() {
   const dc = v.has_dress_code ? `<span class="dc">${esc(dressName(v.dress_code_th) || v.dress_code_th || '—')}</span>`
                              : `<span class="dc" style="background:var(--stone)">${t('vDressCodeOff')}</span>`;
   const mapEmbed = mapEmbedHtml(place);
+  // รูปจริงของสถานที่ (จาก Google Place) — โชว์เป็นแบนเนอร์บนสุดของผลลัพธ์
+  const placePhoto = (place && place.photo_url)
+    ? `<div class="vphoto"><img src="${esc(place.photo_url)}" alt="${esc(name)}" loading="lazy" onerror="this.parentNode.remove()"><span class="cap">${esc(name)}</span></div>`
+    : '';
   const link = v.occasion?` · <a href="#" onclick="setOccasion('${esc(v.occasion)}');return false">${t('vViewPre')} ${esc(occName(v.occasion))}</a>`:'';
 
   el.innerHTML =`
+    ${placePhoto}
     <div class="vhead">${dc}<span class="vtype">${esc(v.venue_type||'')}</span></div>
     <div class="vrow"><span class="vk">${t('vAppropriate')}</span><span class="vv">${esc(v.appropriateness||'')}</span></div>
     <div class="vrow"><span class="vk">${t('vAesthetics')}</span><span class="vv">${esc(v.aesthetics||'')}</span></div>
@@ -400,6 +419,7 @@ function openDetail(id) {
       <input type="date" id="useDate" min="${todayStr()}" value="${gUseDate || ''}" onchange="checkAvail('${g.id}')">
       <span id="availMsg" class="availmsg"></span>
     </div>
+    ${valueStrip(g)}
     ${subCovers(g) ? '' : `<div class="durpick">
       <span class="durlbl">${lang==='th'?'ระยะเวลาเช่า':'Duration'}</span>
       <div class="durchips" id="durchips">
@@ -949,6 +969,96 @@ function togglePref(kind, val, el) {
   if (set.has(val)) set.delete(val); else set.add(val);
   el.classList.toggle('on');
 }
+// ===== เมนูรวมของลูกค้า (side drawer) — รวมทุกฟังก์ชันไว้ที่เดียว =====
+function openMenu() {
+  const en = lang === 'en';
+  const c = CUSTOMER || {};
+  const dispName = c.name || c.display_name || '';
+  const signedIn = !!(c.line_uid || c.display_name || c.picture_url);
+  const avatar = c.picture_url
+    ? `<img class="mavimg" src="${c.picture_url}" alt="" referrerpolicy="no-referrer">`
+    : `<div class="mavimg mavx">${(dispName[0] || 'L').toUpperCase()}</div>`;
+  const cartN = gCart.length;
+  // ไอคอนเส้น (craft, ไม่มี emoji)
+  const I = {
+    orders: '<svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>',
+    cart: '<svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 12.4a1 1 0 0 0 1 .8h8.2a1 1 0 0 0 1-.8L20 8H6"/><circle cx="9" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>',
+    member: '<svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 21l-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>',
+    review: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>',
+    foryou: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    stylist: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-5-7-11a7 7 0 0 1 14 0c0 6-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>',
+    wish: '<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>',
+    family: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2.5 19a6.5 6.5 0 0 1 13 0"/><path d="M16 5.3a3 3 0 0 1 0 5.9M21.5 19a6 6 0 0 0-4-5.6"/></svg>',
+    verify: '<svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>',
+    gift: '<svg viewBox="0 0 24 24"><path d="M4 11h16v9H4z"/><path d="M2 7h20v4H2zM12 7v13M12 7S10 3 7.5 4 9 7 12 7zM12 7s2-4 4.5-3S15 7 12 7z"/></svg>',
+    impact: '<svg viewBox="0 0 24 24"><path d="M12 21c0-7 0-11 7-15-1 7-2 12-7 15z"/><path d="M12 21c0-6-1-9-6-12 1 6 2 10 6 12z"/></svg>',
+    about: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>',
+    terms: '<svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 13h5M10 17h5"/></svg>',
+    privacy: '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+  };
+  const item = (icon, label, act, sub) =>
+    `<button class="mitem" onclick="closeMenu();${act}">${icon}<span>${label}</span>${sub ? `<span class="msublab">${sub}</span>` : ''}</button>`;
+
+  $('#menuDrawer').innerHTML = `
+    <div class="mhead">
+      <button class="mclose" onclick="closeMenu()" aria-label="ปิด">×</button>
+      <div class="mav">
+        ${avatar}
+        <div>
+          <div class="mname">${signedIn ? (dispName || (en ? 'Welcome' : 'ยินดีต้อนรับ')) : 'LLOOP'}</div>
+          <div class="msub">${signedIn ? (en ? 'Signed in with LINE' : 'เข้าสู่ระบบด้วย LINE') : (en ? 'share the look, save the planet' : 'แชร์ลุคสวย ช่วยรักษ์โลก')}</div>
+        </div>
+      </div>
+      <span class="medit" onclick="closeMenu();openProfile()">${en ? 'Edit profile & size' : 'แก้ไขโปรไฟล์ & ไซซ์'}</span>
+    </div>
+
+    <div class="msec">
+      <div class="ml">${en ? 'My rentals' : 'การเช่าของฉัน'}</div>
+      ${item(I.orders, en ? 'My orders' : 'ออเดอร์ของฉัน', 'openOrders()')}
+      ${item(I.cart, en ? 'Cart' : 'ตะกร้า', 'openCart()', cartN ? String(cartN) : '')}
+      ${item(I.member, en ? 'Membership & perks' : 'สมาชิก & สิทธิ์', 'openMembership()')}
+    </div>
+
+    <div class="msec">
+      <div class="ml">${en ? 'Discover' : 'ค้นพบ'}</div>
+      ${item(I.foryou, en ? 'For you' : 'แนะนำเฉพาะคุณ', 'if(!fForYou)toggleForYou()')}
+      ${item(I.stylist, en ? 'AI stylist by venue' : 'AI สไตลิสต์ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
+      ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
+      ${item(I.family, en ? 'Family & groups' : 'ครอบครัว & กลุ่ม', 'openFamily()')}
+    </div>
+
+    <div class="msec">
+      <div class="ml">${en ? 'My account' : 'บัญชีของฉัน'}</div>
+      ${item(I.verify, en ? 'Verify identity (KYC)' : 'ยืนยันตัวตน (KYC)', "openKyc('')")}
+      ${item(I.gift, en ? 'Invite friends · get credit' : 'ชวนเพื่อน · รับเครดิต', 'openProfile()')}
+    </div>
+
+    <div class="msec">
+      <div class="ml">${en ? 'The LLOOP world' : 'โลกของ LLOOP'}</div>
+      ${item(I.impact, en ? 'Your impact' : 'ผลกระทบรักษ์โลกของคุณ', 'openImpact()')}
+      ${item(I.about, en ? 'About us' : 'เกี่ยวกับเรา', "location.href='about.html'")}
+    </div>
+
+    <div class="msec">
+      <div class="ml">${en ? 'Help & info' : 'ช่วยเหลือ & ข้อมูล'}</div>
+      ${item(I.terms, en ? 'Rental terms' : 'ข้อตกลงการเช่า', "location.href='rental-terms.html'")}
+      ${item(I.privacy, en ? 'Privacy policy' : 'นโยบายความเป็นส่วนตัว', "location.href='privacy.html'")}
+    </div>
+
+    <div class="mfoot">
+      <div class="mlang">
+        <span>${en ? 'Language' : 'ภาษา'}</span>
+        <button id="langTH" class="${lang === 'th' ? 'on' : ''}" onclick="setLang('th')">TH</button>
+        <button id="langEN" class="${lang === 'en' ? 'on' : ''}" onclick="setLang('en')">EN</button>
+      </div>
+      <div class="mtag">love + loop</div>
+      <div class="mver">${en ? 'share the look, save the planet' : 'แชร์ลุคสวย ช่วยรักษ์โลก'}</div>
+    </div>`;
+  $('#menuOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMenu() { $('#menuOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
 function openProfile(onboard) {
   const c = CUSTOMER;
   pSeason = c.my_color_season ||'winter';
@@ -1549,8 +1659,8 @@ function renderImpactCard() {
 });
 
 async function boot() {
-  $('#langTH').classList.toggle('on', lang ==='th');
-  $('#langEN').classList.toggle('on', lang ==='en');
+  $('#langTH')?.classList.toggle('on', lang ==='th');
+  $('#langEN')?.classList.toggle('on', lang ==='en');
   applyStatic();
   let s;
   try { s = await window.API.init(); }
@@ -1586,7 +1696,7 @@ async function boot() {
   maybeOnboard();
   routeDeepLink();
 }
-// rich menu deep-link: เปิด LIFF ?go=foryou|orders|impact|profile|stylist แล้วเด้งไปหน้านั้น
+// rich menu deep-link: เปิด LIFF ?go=menu|foryou|orders|impact|profile|stylist แล้วเด้งไปหน้านั้น
 function routeDeepLink() {
   try {
     const qs = new URLSearchParams(location.search);
@@ -1600,7 +1710,8 @@ function routeDeepLink() {
     let go = qs.get('go') || (ls && ls.get('go'));
     if (!go) return;
     setTimeout(() => {
-      if (go === 'foryou') { if (!fForYou) toggleForYou(); }
+      if (go === 'menu') openMenu();
+      else if (go === 'foryou') { if (!fForYou) toggleForYou(); }
       else if (go === 'orders') openOrders();
       else if (go === 'membership') openMembership();
       else if (go === 'impact') openImpact();

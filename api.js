@@ -12,6 +12,8 @@ window.API = (function () {
   function mapGarment(r) {
     return {
       id: r.id, code: r.code, name: r.name || r.code, brand: r.brand, tier: r.tier, price: r.rental_price, category: r.category,
+      retail: r.replacement_value != null ? Number(r.replacement_value) : null,  // มูลค่าชุด (โชว์ความคุ้ม)
+      grade: r.condition_grade || null, washCount: r.wash_count ?? null,         // ความสะอาด/ดูแล
       timesRented: r.times_rented ?? 0,
       photo: (Array.isArray(r.photos) && r.photos[0]) || r.photo || null,
       styling_tips: r.styling_tips || [],
