@@ -18,58 +18,108 @@
     --sans:'Inter','Prompt',-apple-system,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
+  body{background:
+      radial-gradient(120% 80% at 50% -10%, #FFFDF8 0%, var(--bg) 55%),
+      var(--bg);
+    color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
   .wrap{max-width:560px;margin:0 auto;padding:22px 18px 48px;min-height:100vh;display:flex;flex-direction:column}
-  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
   .brand{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:2px;color:var(--ink)}
   .step{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
-  /* progress */
-  .prog{display:flex;gap:6px;margin-bottom:24px}
-  .prog i{flex:1;height:3px;border-radius:3px;background:var(--line);transition:background .3s}
-  .prog i.on{background:var(--gold)}
+  /* progress — เม็ดไพ่ที่สะสมทีละใบ */
+  .prog{display:flex;gap:8px;margin-bottom:22px;align-items:center}
+  .prog i{flex:1;height:4px;border-radius:4px;background:var(--line);position:relative;overflow:hidden}
+  .prog i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--gold),#E0C089);transform:scaleX(0);transform-origin:left;transition:transform .45s cubic-bezier(.4,1.2,.5,1)}
+  .prog i.on::after{transform:scaleX(1)}
   /* screens */
-  .screen{display:none;flex:1;flex-direction:column;animation:fade .35s ease}
+  .screen{display:none;flex:1;flex-direction:column}
   .screen.show{display:flex}
-  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .screen.in{animation:slideIn .42s cubic-bezier(.22,1,.36,1)}
+  @keyframes slideIn{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
   .kicker{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-  h1{font-family:var(--display);font-weight:600;font-size:27px;line-height:1.25;margin-bottom:12px}
+  h1{font-family:var(--display);font-weight:600;font-size:28px;line-height:1.22;margin-bottom:12px}
   h2{font-family:var(--display);font-weight:600;font-size:22px;line-height:1.3;margin-bottom:6px}
   .lead{font-size:15px;color:#5C5B57;margin-bottom:8px}
-  .q{font-size:13px;color:var(--muted);margin-bottom:18px}
+  .q{font-size:13px;color:var(--muted);margin-bottom:16px}
+  /* intro hero — สำรับไพ่ซ้อน */
+  .deck{position:relative;height:150px;margin:6px 0 14px}
+  .deck .dc{position:absolute;left:50%;top:10px;width:118px;height:150px;margin-left:-59px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 24px rgba(26,26,26,.08);display:flex;align-items:center;justify-content:center}
+  .deck .dc span{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:2px;color:var(--gold)}
+  .deck .dc.d1{transform:rotate(-9deg) translateY(6px);background:#FCF8F0}
+  .deck .dc.d2{transform:rotate(5deg) translateY(2px);background:#FBF6EC}
+  .deck .dc.d3{transform:rotate(-2deg);animation:bob 3.4s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(-2deg) translateY(-7px)}}
   /* card grid */
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
-  .card{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 16px;cursor:pointer;text-align:left;transition:border-color .15s,transform .12s,box-shadow .15s;min-height:104px;display:flex;flex-direction:column;justify-content:flex-end}
-  .card:hover{border-color:var(--sage);transform:translateY(-2px);box-shadow:0 8px 22px rgba(26,26,26,.06)}
-  .card:active{transform:translateY(0)}
-  .card.sel{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+  .card{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 16px;cursor:pointer;text-align:left;min-height:108px;display:flex;flex-direction:column;justify-content:flex-end;
+    transition:border-color .15s,transform .14s cubic-bezier(.4,1.3,.5,1),box-shadow .15s;
+    opacity:0;transform:translateY(16px) rotate(-1deg);overflow:hidden}
+  .card.dealt{opacity:1;transform:none}
+  .card::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 120% at 100% 0,rgba(201,168,106,.10),transparent 45%);opacity:0;transition:opacity .2s}
+  .card:hover{border-color:var(--sage);transform:translateY(-3px)}
+  .card:hover::before{opacity:1}
+  .card:active{transform:scale(.97)}
+  .card.tap{animation:pressPop .32s ease}
+  @keyframes pressPop{0%{transform:scale(1)}40%{transform:scale(.93)}100%{transform:scale(1)}}
   .card .tag{font-family:var(--display);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:auto}
   .card .name{font-family:var(--display);font-weight:600;font-size:17px;line-height:1.25}
   .card .desc{font-size:12px;color:var(--muted);margin-top:3px}
   .cards.single{grid-template-columns:1fr}
-  .cards.single .card{min-height:0;flex-direction:row;align-items:center;gap:12px;padding:16px}
+  .cards.single .card{min-height:0;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;padding:16px}
   .cards.single .card .name{font-size:16px}
-  /* result */
-  .ticket{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;margin:6px 0 20px}
-  .ticket .head{background:var(--sage-bg);padding:18px 20px;border-bottom:1px dashed var(--sage)}
-  .ticket .head .k{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ok);margin-bottom:6px}
-  .ticket .head .t{font-family:var(--display);font-weight:600;font-size:21px;color:var(--ink)}
-  .ticket .body{padding:18px 20px}
-  .ticket .row{display:flex;justify-content:space-between;padding:7px 0;font-size:14px;border-bottom:1px solid var(--soft)}
-  .ticket .row:last-child{border-bottom:none}
-  .ticket .row span{color:var(--muted)}
-  .ticket .row b{font-weight:600;color:var(--ink)}
+  .swatch{flex:0 0 auto;width:38px;height:38px;border-radius:10px;border:1px solid rgba(0,0,0,.06)}
+  /* stamp reaction overlay */
+  .stamp{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:40;opacity:0}
+  .stamp.go{animation:stampFlash .72s ease forwards}
+  .stamp .seal{border:2px solid var(--clay);color:var(--clay);border-radius:50%;width:128px;height:128px;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--display);font-weight:600;font-size:14px;line-height:1.3;padding:14px;background:rgba(251,250,248,.86);transform:rotate(-12deg)}
+  @keyframes stampFlash{0%{opacity:0;transform:scale(1.5)}22%{opacity:1;transform:scale(.96)}30%{transform:scale(1)}78%{opacity:1}100%{opacity:0;transform:scale(1.02)}}
+  /* result — การ์ดคว่ำ ต้องแตะเปิด */
+  .flip{perspective:1200px;margin:8px 0 18px;cursor:pointer}
+  .flipinner{position:relative;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.4,.9,.3,1);min-height:300px}
+  .flip.open .flipinner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px}
+  /* front (คว่ำ) */
+  .front{background:
+      repeating-linear-gradient(45deg,#FCF8F0,#FCF8F0 8px,#FAF4E9 8px,#FAF4E9 16px);
+    border:1px solid #E6D9BF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;box-shadow:0 14px 30px rgba(26,26,26,.10)}
+  .front .mono{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:3px;color:var(--gold)}
+  .front .tap-h{font-size:13px;color:var(--clay);letter-spacing:.5px;border:1px solid var(--clay);border-radius:30px;padding:8px 16px;animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.05);opacity:1}}
+  .front.hint{animation:wiggle 2.6s ease-in-out infinite}
+  @keyframes wiggle{0%,92%,100%{transform:rotate(0)}94%{transform:rotate(-1.2deg)}97%{transform:rotate(1.2deg)}}
+  /* back (ตั๋วผลลัพธ์) */
+  .back{transform:rotateY(180deg);background:#fff;border:1px solid var(--line);overflow:hidden;box-shadow:0 14px 30px rgba(26,26,26,.10)}
+  .back .head{background:var(--sage-bg);padding:18px 20px;border-bottom:1px dashed var(--sage);position:relative}
+  .back .head .k{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ok);margin-bottom:6px}
+  .back .head .t{font-family:var(--display);font-weight:600;font-size:21px;color:var(--ink)}
+  .back .body{padding:18px 20px}
+  .back .row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px solid var(--soft)}
+  .back .row:last-child{border-bottom:none}
+  .back .row span{color:var(--muted)}
+  .back .row b{font-weight:600;color:var(--ink)}
+  /* ตราครั่งประทับ */
+  .wax{position:absolute;right:16px;top:14px;width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#C56A45,#A75F3A 70%);color:#F6E7D8;font-family:var(--display);font-weight:700;font-size:10px;letter-spacing:1px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(167,95,58,.4);transform:scale(0) rotate(-30deg)}
+  .wax.on{animation:wax .5s cubic-bezier(.3,1.6,.5,1) .25s forwards}
+  @keyframes wax{0%{transform:scale(0) rotate(-30deg)}70%{transform:scale(1.15) rotate(-8deg)}100%{transform:scale(1) rotate(-8deg)}}
   /* buttons */
   .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--ink);color:#fff;border:none;border-radius:12px;padding:15px;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none}
-  .btn:active{opacity:.9}
+  .btn:active{transform:scale(.98)}
   .btn.gold{background:var(--gold)}
+  .btn.gold:hover{background:#BE9A57}
   .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);font-weight:500}
-  .btn.sage{background:var(--ok)}
+  .btn.tiny{background:none;color:var(--muted);font-size:13px;font-weight:500;padding:8px;text-decoration:underline}
   .spacer{flex:1}
   .foot{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+  .foot.reveal{opacity:0;transform:translateY(10px);transition:opacity .4s ease,transform .4s ease}
+  .foot.reveal.on{opacity:1;transform:none}
   .hint{font-size:12px;color:var(--muted);text-align:center;line-height:1.6}
   .hint b{color:var(--ink);font-weight:600}
-  .back{background:none;border:none;color:var(--muted);font-family:var(--sans);font-size:13px;cursor:pointer;padding:6px 0;align-self:flex-start;margin-top:8px}
+  .back-link{background:none;border:none;color:var(--muted);font-family:var(--sans);font-size:13px;cursor:pointer;padding:6px 0;align-self:flex-start;margin-top:8px}
   .tags{font-size:12px;color:var(--gold);letter-spacing:.5px;text-align:center;margin-top:4px}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms!important;transition-duration:.08s!important}
+    .card{opacity:1;transform:none}
+  }
 </style>
 </head>
 <body>
@@ -81,91 +131,127 @@
   <div class="prog" id="prog"><i></i><i></i><i></i></div>
 
   <!-- intro -->
-  <section class="screen show" id="s0">
+  <section class="screen show in" id="s0">
     <div class="kicker">การ์ดสไตลิสต์</div>
     <h1>งานนี้<br>ใส่อะไรดี?</h1>
+    <div class="deck" aria-hidden="true">
+      <div class="dc d1"><span>LLOOP</span></div>
+      <div class="dc d2"><span>LLOOP</span></div>
+      <div class="dc d3"><span>LLOOP</span></div>
+    </div>
     <p class="lead">หยิบการ์ด บอกเราว่าจะไปงานไหน อยากดูเป็นแบบไหน — แล้วให้สไตลิสต์ช่วยเลือกชุดที่ใช่จากคลังจริงให้</p>
     <p class="q">เล่นไม่ถึงนาที · เช่าได้จริง · ไม่ต้องซื้อเพิ่ม</p>
     <div class="spacer"></div>
     <div class="foot">
-      <button class="btn" onclick="go(1)">เริ่มเล่น</button>
-      <p class="hint">ส่งให้เพื่อนที่กำลังไม่รู้จะใส่อะไรเล่นด้วยกันก็ได้</p>
+      <button class="btn" onclick="go(1)">เริ่มจับไพ่</button>
+      <button class="btn tiny" onclick="surprise()">หรือให้เราสุ่มให้เลย</button>
     </div>
   </section>
 
   <!-- occasion -->
   <section class="screen" id="s1">
     <h2>การ์ดใบแรก — จะไปงานไหน?</h2>
-    <p class="q">เลือกงานที่ใกล้ที่สุด</p>
+    <p class="q">แตะการ์ดที่ใกล้ที่สุด</p>
     <div class="cards" id="occGrid"></div>
-    <button class="back" onclick="go(0)">ย้อนกลับ</button>
+    <button class="back-link" onclick="go(0)">ย้อนกลับ</button>
   </section>
 
   <!-- mood -->
   <section class="screen" id="s2">
     <h2>การ์ดใบที่สอง — อยากดูเป็นแบบไหน?</h2>
-    <p class="q">เลือกความรู้สึกที่อยากให้คนจำ</p>
+    <p class="q">แตะความรู้สึกที่อยากให้คนจำ</p>
     <div class="cards single" id="moodGrid"></div>
-    <button class="back" onclick="go(1)">ย้อนกลับ</button>
+    <button class="back-link" onclick="go(1)">ย้อนกลับ</button>
   </section>
 
   <!-- result -->
   <section class="screen" id="s3">
     <div class="kicker">การ์ดของคุณพร้อมแล้ว</div>
-    <div class="ticket">
-      <div class="head">
-        <div class="k">งานนี้ใส่อะไรดี</div>
-        <div class="t" id="rTitle">—</div>
-      </div>
-      <div class="body">
-        <div class="row"><span>โอกาส</span><b id="rOcc">—</b></div>
-        <div class="row"><span>สไตล์ที่อยากได้</span><b id="rMood">—</b></div>
-        <div class="row"><span>ขั้นต่อไป</span><b>สไตลิสต์เลือกชุดจริงให้</b></div>
+    <div class="flip" id="flip" onclick="openCard()">
+      <div class="flipinner">
+        <div class="face front hint" id="frontFace">
+          <div class="mono">LLOOP</div>
+          <div class="tap-h">แตะเพื่อเปิดการ์ด</div>
+        </div>
+        <div class="face back">
+          <div class="head">
+            <div class="k">งานนี้ใส่อะไรดี</div>
+            <div class="t" id="rTitle">—</div>
+            <div class="wax" id="wax">SEALED</div>
+          </div>
+          <div class="body">
+            <div class="row"><span>โอกาส</span><b id="rOcc">—</b></div>
+            <div class="row"><span>สไตล์ที่อยากได้</span><b id="rMood">—</b></div>
+            <div class="row"><span>ขั้นต่อไป</span><b>สไตลิสต์เลือกชุดจริงให้</b></div>
+          </div>
+        </div>
       </div>
     </div>
-    <p class="hint" style="margin-bottom:14px">กดปุ่มแล้วระบบจะพาไปหน้าเช่า พร้อมเปิดสไตลิสต์ให้เลย<br>แค่บอก<b>วันที่จะไป</b> ก็ได้ชุดที่ว่างวันนั้นทันที</p>
     <div class="spacer"></div>
-    <div class="foot">
+    <div class="foot reveal" id="resFoot">
+      <p class="hint" style="margin-bottom:4px">กดปุ่มแล้วระบบจะพาไปหน้าเช่า พร้อมเปิดสไตลิสต์ให้เลย<br>แค่บอก<b>วันที่จะไป</b> ก็ได้ชุดที่ว่างวันนั้นทันที</p>
       <a class="btn gold" id="ctaStylist" href="#">ดูชุดที่สไตลิสต์เลือกให้</a>
       <button class="btn ghost" onclick="shareGame()">ส่งให้เพื่อนเล่น</button>
+      <button class="btn tiny" onclick="resetGame()">สับไพ่ใหม่</button>
       <p class="tags">#LLOOP #งานนี้ใส่อะไรดี #friendsofLLOOP</p>
     </div>
   </section>
 </div>
 
+<!-- stamp reaction -->
+<div class="stamp" id="stamp"><div class="seal" id="stampText"></div></div>
+
 <script>
 // การ์ดเกม → ป้อนค่าเข้า AI สไตลิสต์จริงในหน้า index (?go=stylist&occasion=KEY&mood=...)
 var OCC = [
-  { key:'wedding_guest', tag:'งานสำคัญ',  name:'งานแต่งเพื่อน',  desc:'ไปร่วมยินดี ต้องดูดี' },
-  { key:'graduation',    tag:'วันของเรา', name:'รับปริญญา',       desc:'วันที่รอคอย' },
-  { key:'dinner',        tag:'ค่ำคืน',    name:'ดินเนอร์ / เดต',  desc:'มื้อพิเศษ' },
-  { key:'party',         tag:'สังสรรค์',  name:'งานเลี้ยง / ปาร์ตี้', desc:'อยากเด่นนิด ๆ' },
-  { key:'work',          tag:'ทางการ',    name:'ทำงาน / ประชุม',  desc:'ดูโปร น่าเชื่อถือ' },
-  { key:'cafe',          tag:'สบาย ๆ',    name:'คาเฟ่ / เที่ยวเล่น', desc:'ชิลแต่ถ่ายรูปสวย' },
-  { key:'merit',         tag:'พิธี',      name:'งานบุญ / งานพิธี', desc:'สุภาพ เรียบร้อย' },
-  { key:'trip',          tag:'ออกเดินทาง',name:'ทริป / ทะเล',     desc:'เบา คล่องตัว' },
+  { key:'wedding_guest', tag:'งานสำคัญ',  name:'งานแต่งเพื่อน',  desc:'ไปร่วมยินดี ต้องดูดี', react:'งานสำคัญ เลือกได้ดี' },
+  { key:'graduation',    tag:'วันของเรา', name:'รับปริญญา',       desc:'วันที่รอคอย',       react:'วันของเรา ต้องพิเศษ' },
+  { key:'dinner',        tag:'ค่ำคืน',    name:'ดินเนอร์ / เดต',  desc:'มื้อพิเศษ',          react:'ค่ำคืนนี้มีสไตล์' },
+  { key:'party',         tag:'สังสรรค์',  name:'งานเลี้ยง / ปาร์ตี้', desc:'อยากเด่นนิด ๆ',  react:'คืนนี้คือของคุณ' },
+  { key:'work',          tag:'ทางการ',    name:'ทำงาน / ประชุม',  desc:'ดูโปร น่าเชื่อถือ', react:'มืออาชีพสุด ๆ' },
+  { key:'cafe',          tag:'สบาย ๆ',    name:'คาเฟ่ / เที่ยวเล่น', desc:'ชิลแต่ถ่ายรูปสวย', react:'ชิลอย่างมีรสนิยม' },
+  { key:'merit',         tag:'พิธี',      name:'งานบุญ / งานพิธี', desc:'สุภาพ เรียบร้อย',  react:'สุภาพ งดงาม' },
+  { key:'trip',          tag:'ออกเดินทาง',name:'ทริป / ทะเล',     desc:'เบา คล่องตัว',      react:'ออกเดินทางกัน' },
 ];
 var MOOD = [
-  { key:'effortless', name:'ดูดีแบบไม่ตั้งใจ',   desc:'ดูง่าย ๆ แต่มีรสนิยม' },
-  { key:'statement',  name:'เป็นจุดสนใจของงาน',  desc:'กล้า มั่นใจ จำได้' },
-  { key:'refined',    name:'เรียบหรู สุภาพ',     desc:'คลีน ดูแพง' },
-  { key:'relaxed',    name:'สบาย คล่องตัว',      desc:'ขยับง่าย ใส่ทั้งวัน' },
+  { key:'effortless', name:'ดูดีแบบไม่ตั้งใจ',   desc:'ดูง่าย ๆ แต่มีรสนิยม', sw:'#E4F0EC', react:'ดูดีแบบไม่ต้องพยายาม' },
+  { key:'statement',  name:'เป็นจุดสนใจของงาน',  desc:'กล้า มั่นใจ จำได้',    sw:'#E7C9B8', react:'พร้อมเป็นดาวเด่น' },
+  { key:'refined',    name:'เรียบหรู สุภาพ',     desc:'คลีน ดูแพง',          sw:'#E8E2D4', react:'เรียบแต่ดูแพง' },
+  { key:'relaxed',    name:'สบาย คล่องตัว',      desc:'ขยับง่าย ใส่ทั้งวัน',  sw:'#DDE4DC', react:'สบายแต่เก๋' },
 ];
-var moodName = {effortless:'ดูดีแบบไม่ตั้งใจ',statement:'เป็นจุดสนใจ',refined:'เรียบหรู สุภาพ',relaxed:'สบาย คล่องตัว'};
 
 var pick = { occasion:null, occName:'', mood:null, moodName:'' };
 var cur = 0;
 // โค้ดชวนเพื่อนที่ติดมากับลิงก์ (เพื่อนแชร์การ์ดเกมจากในแอป) — พาไปต่อให้ครบลูป เครดิตเข้ากระเป๋า LLOOP ทั้งคู่
 var REF = new URLSearchParams(location.search).get('ref') || '';
 
+function buzz(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||12); }catch(e){} }
+
 function go(n){
   cur = n;
-  for (var i=0;i<4;i++){ var el=document.getElementById('s'+i); if(el) el.classList.toggle('show', i===n); }
+  for (var i=0;i<4;i++){ var el=document.getElementById('s'+i); if(el){ el.classList.toggle('show', i===n); if(i===n){ el.classList.remove('in'); void el.offsetWidth; el.classList.add('in'); } } }
   var pr = document.querySelectorAll('#prog i');
   for (var j=0;j<pr.length;j++){ pr[j].classList.toggle('on', j < Math.min(n,3)); }
   var lbl = document.getElementById('stepLbl');
   lbl.textContent = n===0?'การ์ดสไตลิสต์': n===3?'พร้อมแล้ว':('ใบที่ '+n+' จาก 2');
+  if (n===1) dealCards('occGrid');
+  if (n===2) dealCards('moodGrid');
   window.scrollTo(0,0);
+}
+
+// ดีลการ์ดเข้าทีละใบ
+function dealCards(id){
+  var cs = document.querySelectorAll('#'+id+' .card');
+  cs.forEach(function(c,i){ c.classList.remove('dealt'); setTimeout(function(){ c.classList.add('dealt'); }, 60 + i*55); });
+}
+
+// แสตมป์ตอบรับ แล้วไปต่อ
+function reactAndGo(text, next){
+  buzz(14);
+  var s=document.getElementById('stamp'), st=document.getElementById('stampText');
+  st.textContent = text;
+  s.classList.remove('go'); void s.offsetWidth; s.classList.add('go');
+  setTimeout(next, 560);
 }
 
 function renderOcc(){
@@ -174,7 +260,7 @@ function renderOcc(){
     var c = document.createElement('button');
     c.className='card';
     c.innerHTML = '<div class="tag">'+o.tag+'</div><div class="name">'+o.name+'</div><div class="desc">'+o.desc+'</div>';
-    c.onclick = function(){ pick.occasion=o.key; pick.occName=o.name; go(2); };
+    c.onclick = function(){ c.classList.add('tap'); pick.occasion=o.key; pick.occName=o.name; reactAndGo(o.react, function(){ go(2); }); };
     g.appendChild(c);
   });
 }
@@ -183,20 +269,45 @@ function renderMood(){
   MOOD.forEach(function(m){
     var c = document.createElement('button');
     c.className='card';
-    c.innerHTML = '<div><div class="name">'+m.name+'</div><div class="desc">'+m.desc+'</div></div>';
-    c.onclick = function(){ pick.mood=m.key; pick.moodName=m.name; showResult(); };
+    c.innerHTML = '<span class="swatch" style="background:'+m.sw+'"></span><div><div class="name">'+m.name+'</div><div class="desc">'+m.desc+'</div></div>';
+    c.onclick = function(){ c.classList.add('tap'); pick.mood=m.key; pick.moodName=m.name; reactAndGo(m.react, function(){ prepResult(); go(3); }); };
     g.appendChild(c);
   });
 }
-function showResult(){
+
+// เตรียมการ์ดผล (ยังคว่ำอยู่ รอแตะเปิด)
+function prepResult(){
   document.getElementById('rTitle').textContent = pick.occName;
   document.getElementById('rOcc').textContent = pick.occName;
   document.getElementById('rMood').textContent = pick.moodName;
   var url = 'index.html?go=stylist&occasion='+encodeURIComponent(pick.occasion)+'&mood='+encodeURIComponent(pick.mood);
   if (REF) url += '&ref='+encodeURIComponent(REF);
   document.getElementById('ctaStylist').setAttribute('href', url);
-  go(3);
+  // reset สถานะการ์ด
+  document.getElementById('flip').classList.remove('open');
+  document.getElementById('frontFace').classList.add('hint');
+  document.getElementById('wax').classList.remove('on');
+  document.getElementById('resFoot').classList.remove('on');
 }
+function openCard(){
+  var f=document.getElementById('flip');
+  if (f.classList.contains('open')) return;
+  buzz(18);
+  f.classList.add('open');
+  document.getElementById('frontFace').classList.remove('hint');
+  setTimeout(function(){ document.getElementById('wax').classList.add('on'); buzz(22); }, 480);
+  setTimeout(function(){ document.getElementById('resFoot').classList.add('on'); }, 760);
+}
+
+// สุ่มให้ — เลือกงาน+สไตล์แบบสุ่ม แล้วเปิดการ์ดเลย
+function surprise(){
+  var o = OCC[Math.floor(Math.random()*OCC.length)];
+  var m = MOOD[Math.floor(Math.random()*MOOD.length)];
+  pick.occasion=o.key; pick.occName=o.name; pick.mood=m.key; pick.moodName=m.name;
+  reactAndGo('ขอจัดให้!', function(){ prepResult(); go(3); });
+}
+function resetGame(){ pick={occasion:null,occName:'',mood:null,moodName:''}; go(0); }
+
 function shareGame(){
   var url = location.origin + location.pathname + (REF ? '?ref='+encodeURIComponent(REF) : '');
   var text = 'งานนี้ใส่อะไรดี? ลองเล่นการ์ดสไตลิสต์ของ LLOOP สิ — มันเลือกชุดให้เลย';

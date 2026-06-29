@@ -310,8 +310,26 @@ async function refreshStylistQuota() {
   chip._n = n;
 }
 
+// ลิงค์ Google Maps (วาง/แชร์มา) — รองรับลิงค์สั้นและลิงค์เต็ม
+const MAPS_URL_RE = /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl|maps\.google\.[a-z.]+|(www\.)?google\.[a-z.]+\/maps)/i;
+
 async function askVenue() {
-  const q = ($('#venueInput').value ||'').trim();
+  let q = ($('#venueInput').value ||'').trim();
+  // วางลิงค์ Google Maps → แปลงเป็นสถานที่จริงก่อน (มิฉะนั้น AI จะได้สตริงลิงค์ดิบ ๆ)
+  if (MAPS_URL_RE.test(q) && !(window.SELECTED_PLACE && window.SELECTED_PLACE.name)) {
+    const el0 = $('#vresult');
+    el0.className = 'vresult show';
+    el0.innerHTML = `<span class="note">${lang==='th'?'กำลังอ่านสถานที่จากลิงค์…':'Reading the place from your link…'}</span>`;
+    const rp = await window.API.resolvePlace({ url: q });
+    if (rp && rp.ok && rp.place && rp.place.name) {
+      window.SELECTED_PLACE = rp.place;
+      const vi = $('#venueInput'); if (vi) vi.value = rp.place.name;
+      q = rp.place.name;
+    } else {
+      el0.innerHTML = `<div class="note"><b style="color:var(--ink)">${lang==='th'?'อ่านสถานที่จากลิงค์นี้ไม่ได้ ลองพิมพ์ชื่อสถานที่แทนนะคะ':'Could not read that link — try typing the place name instead'}</b></div>`;
+      return;
+    }
+  }
   const place = window.SELECTED_PLACE && (window.SELECTED_PLACE.name === q || !q) ? window.SELECTED_PLACE : null;
   const el = $('#vresult');
   if (!q && !place) { el.classList.remove('show'); return; }
@@ -1423,9 +1441,22 @@ function renderStyleCard(c) {
       ? ['โทนสีที่ใช่ของคุณ', 'พาเลตเสื้อผ้า 5 สี', 'ทรง/คอเสื้อ/ความยาวที่เหมาะ', 'ชุดเช่าที่แมตช์คุณโดยเฉพาะ']
       : ['Your season tone', '5-colour wardrobe palette', 'Best silhouettes & necklines', 'Rental picks made for you'];
     const lockGrid = perks.map(p=>`<span class="lockpill">${p}</span>`).join('');
+    const detail = th ? [
+      ['วันนัด','สไตลิสต์วิเคราะห์ Personal Color จริง + อ่านโครงหน้าและรูปร่างของคุณ'],
+      ['สรุปที่เก็บไว้ในแอป','โทนสี (season) ของคุณ · พาเลตเสื้อผ้า 5 สี · ทรง คอเสื้อ ความยาวที่เหมาะ · สีและทรงที่ควรเลี่ยง · โลหะ/เครื่องประดับที่เข้า — เปิดดูซ้ำได้ตลอด'],
+      ['ชุดเช่าที่แมตช์','ระบบคัดชุดในคลังที่เข้ากับผลของคุณมาให้ กดเช่าได้เลย'],
+      ['เครดิตคืนเต็ม','฿4,900 กลายเป็นเครดิตในกระเป๋า LLOOP เต็มจำนวน ใช้ลดค่าเช่าได้ทุกชุด (อายุ 90 วัน)'],
+    ] : [
+      ['On the day','A stylist does a real Personal Color reading + reviews your face & body'],
+      ['Summary saved in-app','Your season tone · 5-colour wardrobe palette · best silhouettes, necklines & lengths · colours to avoid · metals that suit you — revisit anytime'],
+      ['Matched rentals','We pull pieces from our closet that fit your result, ready to rent'],
+      ['Full credit back','฿4,900 becomes ฿4,900 of LLOOP wallet credit, usable on any rental (valid 90 days)'],
+    ];
+    const detailRows = detail.map(([k,v])=>`<div class="pcd-row"><b>${k}</b><span>${v}</span></div>`).join('');
     inner =`<div class="stylehead">${th?'ปลดล็อกสไตล์ที่ใช่ของคุณ':'Unlock your signature style'}</div>
       <div class="stylerec">${th?'วิเคราะห์ Personal Color + รูปหน้า + หุ่น โดยสไตลิสต์ แล้วรับสรุป + ชุดเช่าที่แมตช์คุณ':'A stylist Personal Color + face + body analysis, then a summary and rental picks made for you'}</div>
       <div class="lockgrid">${lockGrid}</div>
+      <details class="pcdetail"><summary>${th?'ดูว่าได้อะไรบ้าง':'See exactly what you get'}</summary><div class="pcd-body">${detailRows}</div></details>
       <div class="creditback">${th?'ค่าวิเคราะห์ ฿4,900 กลายเป็นเครดิตเต็มจำนวนไว้เลือกชุด — เหมือนได้วิเคราะห์ฟรี':'Your ฿4,900 becomes ฿4,900 rental credit — the analysis pays for itself'}</div>
       <button class="bookbtn" onclick="bookPersonalColor()">${th?'จองคิว Personal Color · ฿4,900':'Book Personal Color · ฿4,900'}<span class="bsub">${th?'ได้เครดิต ฿4,900 คืนเต็มไว้เช่าชุด':'฿4,900 back as rental credit'}</span></button>
       <div class="claimbox" style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">
@@ -2037,6 +2068,24 @@ async function boot() {
   routeDeepLink();
   applyPendingReferral();
 }
+// มาจาก flex ที่แชร์ลิงค์สถานที่เข้า LINE → เติมสถานที่ให้ + เปิดสไตลิสต์ทันที
+async function startVenueFromLink(pid, name) {
+  const el = $('#venueInput');
+  if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (name) el.value = name; }
+  const r = $('#vresult'); if (r) { r.className = 'vresult show'; r.innerHTML = `<span class="note">${lang==='th'?'กำลังเตรียมสถานที่ที่คุณแชร์มา…':'Setting up the place you shared…'}</span>`; }
+  try {
+    // pid → ดึงรายละเอียดเต็ม (รูป+โทน) ; ถ้าไม่มี pid ก็ใช้ชื่อค้นต่อ
+    const rp = pid ? await window.API.resolvePlace({ place_id: pid }) : null;
+    if (rp && rp.ok && rp.place && rp.place.name) {
+      window.SELECTED_PLACE = rp.place;
+      if (el) el.value = rp.place.name;
+    } else if (name) {
+      window.SELECTED_PLACE = null;   // ปล่อยให้ askVenue ค้นจากชื่อ
+    }
+  } catch (_e) { /* ปล่อยให้ askVenue จัดการต่อ */ }
+  if (typeof askVenue === 'function') askVenue();
+}
+
 // rich menu deep-link: เปิด LIFF ?go=menu|foryou|orders|impact|profile|stylist แล้วเด้งไปหน้านั้น
 function routeDeepLink() {
   try {
@@ -2063,7 +2112,11 @@ function routeDeepLink() {
     }
     let go = qs.get('go') || (ls && ls.get('go'));
     if (!go) return;
+    // แชร์ลิงค์สถานที่เข้า LINE → flex → ปุ่มพากลับเข้า LIFF พร้อม place id (pid) + ชื่อ (v)
+    const pid = qs.get('pid') || (ls && ls.get('pid'));
+    const pv = qs.get('v') || (ls && ls.get('v'));
     setTimeout(() => {
+      if (go === 'stylist' && (pid || pv)) { startVenueFromLink(pid, pv); return; }
       if (go === 'menu') openMenu();
       else if (go === 'foryou') { if (!fForYou) toggleForYou(); }
       else if (go === 'orders') openOrders();
