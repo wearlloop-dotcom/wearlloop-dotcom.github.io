@@ -95,30 +95,6 @@ window.API = (function () {
     return { ok:!error, data, error };
   }
 
-  // ลูกค้าที่เพิ่งลงทะเบียน LINE กรอก "รหัสผลวิเคราะห์" (link_code จากสตูดิโอ) → ผูก/รวมผลเข้าบัญชีตัวเอง
-  async function claimStyleCode(codeRaw) {
-    const code = (codeRaw || '').trim().toUpperCase();
-    if (!code) return { ok: false, error: 'ใส่รหัสก่อนค่ะ' };
-    if (CONFIG.USE_MOCK) return { ok: true, result: 'ok' };
-    if (!window.meRpc) return { ok: false, error: 'ต้องเข้าสู่ระบบด้วย LINE ก่อน' };
-    const { data, error } = await window.meRpc('customer_claim_code', { p_code: code });
-    if (error) return { ok: false, error: error.message };
-    const map = { not_found: 'ไม่พบรหัสนี้ — เช็กกับสตูดิโออีกครั้งนะคะ', taken: 'รหัสนี้ถูกผูกกับบัญชีอื่นแล้ว',
-      no_line: 'ต้องเข้าสู่ระบบด้วย LINE ก่อน', already: 'รหัสนี้อยู่ในบัญชีคุณอยู่แล้ว' };
-    if (data === 'ok' || data === 'already') return { ok: true, result: data };
-    return { ok: false, error: map[data] || ('ไม่สำเร็จ: ' + data) };
-  }
-
-  // เริ่มซื้อ Personal Color (จ่ายในแอป → เครดิตเต็มจำนวน) — สร้าง topup รอจ่าย คืน payment_id + ยอด
-  async function startPersonalColor() {
-    if (CONFIG.USE_MOCK) return { ok: true, payment_id: 'demo', amount: 4900 };
-    if (!window.meRpc) return { ok: false, error: 'ต้องเข้าสู่ระบบด้วย LINE ก่อน' };
-    const { data, error } = await window.meRpc('pc_purchase_start', {});
-    if (error) return { ok: false, error: error.message };
-    if (!data || data.error) return { ok: false, error: (data && data.error) || 'เริ่มรายการไม่สำเร็จ' };
-    return { ok: true, payment_id: data.payment_id, amount: Number(data.amount) || 4900 };
-  }
-
   async function saveProfile(customer) {
     if (CONFIG.USE_MOCK ||!lineUid) return { ok: true };
     const c = client();
@@ -138,23 +114,6 @@ window.API = (function () {
     if (!window.meRpc) return null;
     const { data } = await window.meRpc('stylist_quota', {});
     return (typeof data === 'number') ? data : null;
-  }
-
-  // แปลงลิงค์ Google Maps (วางในเว็บ/แชร์เข้า LINE) → place object พร้อมรูป
-  // arg: { url } หรือ { place_id }
-  async function resolvePlace(arg) {
-    if (CONFIG.USE_MOCK) {
-      const url = (arg && arg.url) || '';
-      return { ok: true, place: { name: url ? 'สถานที่จากลิงค์ (mock)' : 'สถานที่ (mock)', types: [], price_level: null, place_id: null, photo_url: null, lat: null, lng: null } };
-    }
-    try {
-      const r = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/resolve-place`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(arg || {}),
-      });
-      return await r.json().catch(() => ({ ok: false, error: 'network' }));
-    } catch (_e) { return { ok: false, error: 'network' }; }
   }
 
   // AI Stylist — วิเคราะห์สถานที่ (จาก Google Place) + personal ลูกค้า + คลังจริง → แนะนำชุดเป็นตัว ๆ
@@ -244,7 +203,7 @@ window.API = (function () {
     const { data } = await client().rpc('my_impact', { p_customer: customer.id });
     return data;
   }
-  // กระเป๋า LLOOP + ชั้น The Loop (ยอดเงินใช้จ่าย + ความคืบหน้าชั้น)
+  // กระเป๋า LLOOP + ชั้น Loopers Club (ยอดเงินใช้จ่าย + ความคืบหน้าชั้น)
   async function myWallet(customer) {
     if (CONFIG.USE_MOCK ||!customer.id) return null;
     const { data } = await client().rpc('my_wallet', { p_customer: customer.id });
@@ -309,12 +268,6 @@ window.API = (function () {
     const { data } = await client().rpc('garment_review_photos', { p_garment: garmentId });
     return data || [];
   }
-  // รูปจริงจาก creator (UGC ที่ผ่านออดิท → is_catalog) — โชว์คู่กับรูปรีวิว
-  async function garmentUgcPhotos(garmentId) {
-    if (CONFIG.USE_MOCK || !garmentId) return [];
-    const { data } = await client().rpc('garment_ugc_photos', { p_garment: garmentId });
-    return data || [];
-  }
   // อัปโหลดรูป (รีวิว) ไป Storage 'uploads' → คืน url (fallback ว่างถ้า bucket ยังไม่เปิด)
   async function uploadPhotos(files) {
     if (CONFIG.USE_MOCK || !files || !files.length) return [];
@@ -364,14 +317,12 @@ window.API = (function () {
   // รายการแพ็กเกจ → array {code,name,price_month,rentals_per_month,max_active,perks}
   async function subPlans() {
     if (CONFIG.USE_MOCK) return [
-      { code:'LOOP_WEEK', name:'Loop Week', plan_kind:'base', period:'week', period_label:'รายสัปดาห์', price:390, price_month:390, price_per_month:1560, rentals_per_cycle:1, rentals_per_month:1, rentals_per_month_equiv:4, tiers:['Value','Standard'], tier_label:'ชุดทั่วไป (เดย์ทูเดย์)', save_pct:0, max_active:1, perks:['เช่าได้ 1 ชุดต่อสัปดาห์','เหมาะกับงานเดียว','ส่งฟรี'] },
-      { code:'LOOP_LITE', name:'Loop Lite', plan_kind:'base', period:'month', period_label:'รายเดือน', price:690, price_month:690, price_per_month:690, rentals_per_cycle:2, rentals_per_month:2, rentals_per_month_equiv:2, tiers:['Value','Standard'], tier_label:'ชุดทั่วไป (เดย์ทูเดย์)', save_pct:0, max_active:1, perks:['เช่าได้ 2 ชุด/เดือน','ส่งฟรีทุกชุด'] },
-      { code:'LOOP_PLUS', name:'Loop Plus', plan_kind:'base', period:'month', period_label:'รายเดือน', price:1390, price_month:1390, price_per_month:1390, rentals_per_cycle:4, rentals_per_month:4, rentals_per_month_equiv:4, tiers:['Value','Standard'], tier_label:'ชุดทั่วไป (เดย์ทูเดย์)', save_pct:0, max_active:1, perks:['เช่าได้ 4 ชุด/เดือน','คิวจองก่อนใคร','สไตลิสต์เลือกให้'] },
-      { code:'LOOP_LUXE', name:'Loop Luxe', plan_kind:'base', period:'month', period_label:'รายเดือน', price:2690, price_month:2690, price_per_month:2690, rentals_per_cycle:8, rentals_per_month:8, rentals_per_month_equiv:8, tiers:['Value','Standard'], tier_label:'ชุดทั่วไป + แถม Premium Pass', save_pct:0, max_active:2, perks:['เช่าได้ 8 ชุด/เดือน','ถือพร้อมกัน 2 ชุด','แถม Premium Pass 1 ชิ้น/เดือน'] },
-      { code:'LOOP_PLUS_Q', name:'Loop Plus · ราย 3 เดือน', plan_kind:'base', period:'quarter', period_label:'ราย 3 เดือน', price:3790, price_month:3790, price_per_month:1263, rentals_per_cycle:11, rentals_per_month:11, rentals_per_month_equiv:4, tiers:['Value','Standard'], tier_label:'ชุดทั่วไป (เดย์ทูเดย์)', save_pct:9, max_active:1, perks:['เช่าได้ 12 ชุด ใน 3 เดือน','ประหยัด ~10%','สไตลิสต์เลือกให้'] },
-      { code:'LOOP_PLUS_Y', name:'Loop Plus · รายปี', plan_kind:'base', period:'year', period_label:'รายปี', price:15000, price_month:15000, price_per_month:1250, rentals_per_cycle:44, rentals_per_month:44, rentals_per_month_equiv:4, tiers:['Value','Standard'], tier_label:'ชุดทั่วไป (เดย์ทูเดย์)', save_pct:10, max_active:1, perks:['เช่าได้ 48 ชุดต่อปี','ประหยัด ~17%','สไตลิสต์ส่วนตัว'] },
-      { code:'LOOP_PREMIUM_PASS', name:'Premium Pass', plan_kind:'addon', requires_base:true, rent_days_cap:3, period:'month', period_label:'รายเดือน', price:1990, price_month:1990, price_per_month:1990, rentals_per_cycle:1, rentals_per_month:1, rentals_per_month_equiv:1, tiers:['Premium'], tier_label:'ชุดพรีเมียม/ดีไซเนอร์', save_pct:0, max_active:1, perks:['ปลดล็อกชุด Premium/ดีไซเนอร์ 1 ชิ้น/เดือน','เช่าได้สูงสุด 3 วันต่อชิ้น','ราคาสมาชิก ต่อยอดบนแพ็กหลัก'] },
-      { code:'LOOP_PREMIUM_PASS2', name:'Premium Pass ×2', plan_kind:'addon', requires_base:true, rent_days_cap:3, period:'month', period_label:'รายเดือน', price:3490, price_month:3490, price_per_month:3490, rentals_per_cycle:2, rentals_per_month:2, rentals_per_month_equiv:2, tiers:['Premium'], tier_label:'ชุดพรีเมียม/ดีไซเนอร์', save_pct:0, max_active:1, perks:['ปลดล็อกชุด Premium/ดีไซเนอร์ 2 ชิ้น/เดือน','เช่าได้สูงสุด 3 วันต่อชิ้น','คุ้มกว่าซื้อทีละชิ้น'] },
+      { code:'LOOPER_WEEK', name:'Looper Week', period:'week', period_label:'รายสัปดาห์', price:390, price_month:390, price_per_month:1560, rentals_per_cycle:1, rentals_per_month:1, rentals_per_month_equiv:4, tiers:['Value','Standard'], tier_label:'ชุดทั่วไป (เดย์ทูเดย์)', save_pct:0, max_active:1, perks:['เช่าได้ 1 ชุดต่อสัปดาห์','เหมาะกับงานเดียว','ส่งฟรี'] },
+      { code:'LOOPER_LITE', name:'Looper Lite', period:'month', period_label:'รายเดือน', price:690, price_month:690, price_per_month:690, rentals_per_cycle:2, rentals_per_month:2, rentals_per_month_equiv:2, tiers:['Value','Standard'], tier_label:'ชุดทั่วไป (เดย์ทูเดย์)', save_pct:0, max_active:1, perks:['เช่าได้ 2 ชุด/เดือน','ส่งฟรีทุกชุด'] },
+      { code:'LOOPER_PLUS', name:'Looper Plus', period:'month', period_label:'รายเดือน', price:1390, price_month:1390, price_per_month:1390, rentals_per_cycle:4, rentals_per_month:4, rentals_per_month_equiv:4, tiers:['Value','Standard','Premium'], tier_label:'ทุกประเภท รวมพรีเมียม', save_pct:0, max_active:1, perks:['เช่าได้ 4 ชุด/เดือน','คิวจองก่อนใคร','สไตลิสต์เลือกให้'] },
+      { code:'LOOPER_LUXE', name:'Looper Luxe', period:'month', period_label:'รายเดือน', price:2690, price_month:2690, price_per_month:2690, rentals_per_cycle:8, rentals_per_month:8, rentals_per_month_equiv:8, tiers:['Value','Standard','Premium'], tier_label:'ทุกประเภท รวมดีไซเนอร์', save_pct:0, max_active:2, perks:['เช่าได้ 8 ชุด/เดือน','ถือพร้อมกัน 2 ชุด','ชุดดีไซเนอร์'] },
+      { code:'LOOPER_PLUS_Q', name:'Looper Plus · ราย 3 เดือน', period:'quarter', period_label:'ราย 3 เดือน', price:3790, price_month:3790, price_per_month:1263, rentals_per_cycle:11, rentals_per_month:11, rentals_per_month_equiv:4, tiers:['Value','Standard','Premium'], tier_label:'ทุกประเภท รวมพรีเมียม', save_pct:9, max_active:1, perks:['เช่าได้ 12 ชุด ใน 3 เดือน','ประหยัด ~10%','สไตลิสต์เลือกให้'] },
+      { code:'LOOPER_PLUS_Y', name:'Looper Plus · รายปี', period:'year', period_label:'รายปี', price:15000, price_month:15000, price_per_month:1250, rentals_per_cycle:44, rentals_per_month:44, rentals_per_month_equiv:4, tiers:['Value','Standard','Premium'], tier_label:'ทุกประเภท รวมพรีเมียม', save_pct:10, max_active:1, perks:['เช่าได้ 48 ชุดต่อปี','ประหยัด ~17%','สไตลิสต์ส่วนตัว'] },
     ];
     const { data } = await client().rpc('sub_plans');
     return data || [];
@@ -622,12 +573,6 @@ window.API = (function () {
     const { data, error } = await client().rpc('set_picture_hidden', { p_customer: customer.id, p_hide: !!hidden });
     return { ok: !error, data, error };
   }
-  // หน้า landing คำเชิญ: ดูข้อมูลกลุ่มจาก token ก่อนเข้าร่วม (ยังไม่ต้องเป็นสมาชิก)
-  async function groupInvitePreview(token) {
-    if (CONFIG.USE_MOCK || !token) return { ok: true, data: null };
-    const { data, error } = await client().rpc('group_invite_preview', { p_token: token });
-    return { ok: !error, data, error };
-  }
 
   // ===== ช่องทางชำระเงิน (โชว์ตอน checkout) — cache ไว้ =====
   let _payInfo;
@@ -653,131 +598,5 @@ window.API = (function () {
     return { ok: true, ...data };
   }
 
-  // ===== ยกเลิก / เลื่อน / ต่อเวลา — ผ่าน me-rpc gateway เท่านั้น (ownership guard เช็คว่าเป็น rental ของเราจริง) =====
-  async function quoteCancellation(rentalId, asCredit = true) {
-    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return null;
-    const { data } = await window.meRpc('quote_cancellation', { p_rental: rentalId, p_as_credit: asCredit });
-    return data || null;
-  }
-  async function cancelRental(rentalId, asCredit = true, reason) {
-    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return { ok: false };
-    const { data, error } = await window.meRpc('cancel_rental', { p_rental: rentalId, p_as_credit: asCredit, p_reason: reason || null });
-    if (error || (data && data.error)) return { ok: false, error: error || data.error, data };
-    return { ok: true, ...data };
-  }
-  async function quoteExtension(rentalId, newTo) {
-    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return null;
-    const { data } = await window.meRpc('quote_extension', { p_rental: rentalId, p_new_to: newTo });
-    return data || null;
-  }
-  async function extendRental(rentalId, newTo) {
-    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return { ok: false };
-    const { data, error } = await window.meRpc('extend_rental', { p_rental: rentalId, p_new_to: newTo });
-    if (error || (data && data.error)) return { ok: false, error: error || data.error, data };
-    return { ok: true, ...data };
-  }
-  async function rescheduleRental(rentalId, fromStr, toStr, newCode) {
-    if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return { ok: false };
-    const { data, error } = await window.meRpc('reschedule_rental', { p_rental: rentalId, p_from: fromStr, p_to: toStr, p_new_code: newCode || null });
-    if (error || (data && data.error)) return { ok: false, error: error || data.error, data };
-    return { ok: true, ...data };
-  }
-
-  // ===== ชุมชน The Loop Looks =====
-  // ฟีดชุมชน (อ่านสาธารณะ) — รวมลุคที่แชร์ + รีวิวรูป + UGC · กรองตามโอกาสได้
-  async function communityFeed(limit, before, occasion) {
-    if (CONFIG.USE_MOCK) return [];
-    const { data } = await client().rpc('community_feed', { p_limit: limit || 24, p_before: before || null, p_occasion: occasion || null });
-    return data || [];
-  }
-  // รายการโอกาส (chips กรองฟีด)
-  async function lookOccasions() {
-    if (CONFIG.USE_MOCK) return [];
-    const { data } = await client().rpc('look_occasions', {});
-    return data || [];
-  }
-  // โปรไฟล์ครีเอเตอร์สาธารณะ (ค้นด้วย handle/link_code)
-  async function creatorProfile(handle) {
-    if (CONFIG.USE_MOCK || !handle) return { found: false };
-    const { data } = await client().rpc('creator_profile', { p_handle: handle });
-    return data || { found: false };
-  }
-  // โปรไฟล์ครีเอเตอร์ของฉัน (ผ่าน gateway)
-  async function myCreator() {
-    if (CONFIG.USE_MOCK || !window.meRpc) return null;
-    const { data } = await window.meRpc('my_creator', {});
-    return data || null;
-  }
-  // ตั้ง handle/bio/ความเป็นสาธารณะ
-  async function setHandle(handle, bio, isPublic) {
-    if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
-    const { data, error } = await window.meRpc('set_handle', { p_handle: handle || null, p_bio: bio ?? null, p_public: (typeof isPublic === 'boolean') ? isPublic : null });
-    return error ? { ok: false, error } : (data || { ok: false });
-  }
-  // แชร์ลุค: อัปโหลดรูป → สร้าง look (pending) → ทริกเกอร์ AI moderation (look-audit)
-  async function shareLook(garmentCode, file, caption, occasion, rentalId, crosspost) {
-    if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
-    let url = '';
-    try { const urls = await uploadPhotos([file]); url = urls[0] || ''; } catch (e) { /**/ }
-    if (!url) return { ok: false, error: 'upload_failed' };
-    const { data, error } = await window.meRpc('share_look', { p_garment_code: garmentCode, p_photo_url: url, p_caption: caption || null, p_occasion: occasion || null, p_rental: rentalId || null, p_crosspost: !!crosspost });
-    if (error || !data || !data.look_id) return { ok: false, error: error || 'share_failed' };
-    // ตรวจด้วย AI (auto-publish ถ้าผ่าน) — best-effort, ไม่บล็อก UX
-    let idToken = null; try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (e) {}
-    try {
-      await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/look-audit`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_token: idToken, look_id: data.look_id }),
-      });
-    } catch (e) { /* ฝั่ง server จะตรวจเองตอน cron/owner */ }
-    return { ok: true, look_id: data.look_id };
-  }
-  // log ว่ามาจากลุคไหน (attribution ส่วนแบ่งครีเอเตอร์)
-  async function logLookView(lookId, garmentCode) {
-    if (CONFIG.USE_MOCK || !lineUid || !lookId) return;
-    try { await client().from('customer_touchpoints').insert({ line_uid: lineUid, kind: 'look_view', detail: { look: lookId, garment: garmentCode || null } }); } catch (e) { /**/ }
-  }
-  // ===== Phase 2: like / comment / follow / leaderboard =====
-  async function toggleLike(lookId) {
-    if (CONFIG.USE_MOCK || !window.meRpc) return null;
-    const { data } = await window.meRpc('toggle_like', { p_look: lookId });
-    return data || null;
-  }
-  async function myLikes() {
-    if (CONFIG.USE_MOCK || !window.meRpc) return [];
-    const { data } = await window.meRpc('my_likes', {});
-    return data || [];
-  }
-  async function addComment(lookId, body) {
-    if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
-    const { data, error } = await window.meRpc('add_comment', { p_look: lookId, p_body: body });
-    return error ? { ok: false, error } : (data || { ok: false });
-  }
-  async function lookComments(lookId) {
-    if (CONFIG.USE_MOCK) return [];
-    const { data } = await client().rpc('look_comments', { p_look: lookId, p_limit: 50 });
-    return data || [];
-  }
-  async function toggleFollow(handle) {
-    if (CONFIG.USE_MOCK || !window.meRpc) return null;
-    const { data } = await window.meRpc('toggle_follow', { p_handle: handle });
-    return data || null;
-  }
-  async function myFollowing() {
-    if (CONFIG.USE_MOCK || !window.meRpc) return [];
-    const { data } = await window.meRpc('my_following', {});
-    return data || [];
-  }
-  async function followingFeed(limit) {
-    if (CONFIG.USE_MOCK || !window.meRpc) return [];
-    const { data } = await window.meRpc('following_feed', { p_limit: limit || 24 });
-    return data || [];
-  }
-  async function leaderboard(metric, limit) {
-    if (CONFIG.USE_MOCK) return [];
-    const { data } = await client().rpc('leaderboard', { p_metric: metric || 'rented', p_limit: limit || 20 });
-    return data || [];
-  }
-
-  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, creatorProfile, myCreator, setHandle, shareLook, logLookView, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard };
+  return { init, reserve, saveProfile, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, payInfo, birthdayStatus, birthdayReserve };
 })();
