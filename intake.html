@@ -64,7 +64,10 @@
       <div class="field"><label>โค้ด (เว้นว่าง = สร้างอัตโนมัติ)</label><input id="f_code" oninput="syncPreview()" placeholder="เช่น g7"></div>
       <div class="field"><label>แบรนด์</label><input id="f_brand" oninput="syncPreview()"></div>
     </div>
-    <div class="field"><label>เก็บเข้าช่อง (เก็บที่ไหน — เว้นว่างได้ ค่อยเก็บทีหลัง)</label><input id="f_bin" placeholder="เช่น A-03"></div>
+    <div class="row2">
+      <div class="field"><label>เก็บเข้าช่อง (เก็บที่ไหน — เว้นว่างได้ ค่อยเก็บทีหลัง)</label><input id="f_bin" placeholder="เช่น A-03"></div>
+      <div class="field"><label>แท็ก NFC (แตะ/กรอก UID — ออปชัน)</label><input id="f_nfc" placeholder="เช่น 04:A2:1B:..."></div>
+    </div>
     <div class="field"><label>ชื่อชุด</label><input id="f_name" oninput="syncPreview()"></div>
     <div class="row2">
       <div class="field"><label>หมวด</label><select id="f_category"><option value="dress">เดรส</option><option value="set">เซ็ต</option><option value="top">เสื้อ</option><option value="skirt">กระโปรง</option><option value="pants">กางเกง</option><option value="jumpsuit">จัมพ์สูท</option><option value="outerwear">เอาเตอร์</option></select></div>
@@ -74,6 +77,14 @@
       <div class="field"><label>ค่าเช่า/ครั้ง (บาท)</label><input id="f_price" type="number" placeholder="320"></div>
       <div class="field"><label>ต้นทุนชุด (บาท — ราคาที่ซื้อมา)</label><input id="f_cost" type="number" placeholder="เช่น 1200"></div>
     </div>
+    <details style="margin-bottom:13px">
+      <summary style="font-size:12px;color:var(--muted);cursor:pointer">เรทตามจำนวนวัน (ออปชัน — เว้นว่าง = คิดอัตโนมัติจากค่าเช่า)</summary>
+      <div class="row2" style="margin-top:10px">
+        <div class="field"><label>1 วัน</label><input id="f_r1" type="number" placeholder="auto"></div>
+        <div class="field"><label>3 วัน</label><input id="f_r3" type="number" placeholder="auto"></div>
+        <div class="field"><label>5 วัน+</label><input id="f_r5" type="number" placeholder="auto"></div>
+      </div>
+    </details>
     <div class="row2">
       <div class="field"><label>ไซส์ (size)</label><select id="f_size"><option value="">— ไม่ระบุ —</option><option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option><option value="FREE">FREE SIZE</option></select></div>
       <div class="field"><label>สภาพชุด (condition)</label><select id="f_condition"><option value="new">ใหม่มาก</option><option value="good">ดี</option><option value="fair">พอใช้</option><option value="poor">ต้องซ่อม</option></select></div>
@@ -162,6 +173,7 @@
     const payload={
       code:$('f_code').value||'', name:$('f_name').value, brand:$('f_brand').value,
       tier:$('f_tier').value, rental_price:$('f_price').value, acquisition_cost:$('f_cost').value,
+      rate_1d:$('f_r1').value, rate_3d:$('f_r3').value, rate_5d:$('f_r5').value,
       publish:$('f_publish').checked, category:$('f_category').value,
       occasion_tags:[...sel], color_name:$('f_colorname').value, color_hex:$('f_colorhex').value,
       color_season:$('f_season').value, bust_min_in:$('f_bmin').value, bust_max_in:$('f_bmax').value,
@@ -178,9 +190,14 @@
     let binMsg='';
     const bin=($('f_bin').value||'').trim();
     if(bin){ const r=await sb.rpc('put_away',{p_code:data,p_bin:bin}); if(!r.error&&!r.data?.error) binMsg=` · เก็บเข้าช่อง <b>${bin}</b> แล้ว`; }
+    // ผูกแท็ก NFC ตั้งแต่วันแรก (ออปชัน) — ใช้ tag_register เดิม
+    let nfcMsg='';
+    const nfc=($('f_nfc').value||'').trim();
+    if(nfc){ const r=await sb.rpc('tag_register',{p_tag_uid:nfc,p_code:data,p_type:'nfc'});
+      nfcMsg = (!r.error && r.data?.ok) ? ` · ผูก NFC แล้ว` : ` · <span style="color:#A32D2D">ผูก NFC ไม่ได้</span>`; }
     const ok=$('ok'); ok.style.display='block';
     const stTxt = $('f_publish').checked ? '<b>ready</b> ขึ้นร้านแล้ว' : '<b>needs_review</b> (รออนุมัติ)';
-    ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> · ${stTxt}${binMsg} — <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
+    ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> · ${stTxt}${binMsg}${nfcMsg} — <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
   }
 </script>
 <script src="ops-menu.js"></script>
