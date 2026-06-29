@@ -54,7 +54,7 @@
   <section class="phead">
     <div class="eyebrow">garment intake</div>
     <h1>ต้อนรับทุกชุดเข้าระบบ</h1>
-    <div class="sub">สแกน ถ่ายรูป ตั้งราคา แล้วเก็บเข้าช่อง — เริ่มต้นชีวิตการหมุนเวียนของชุดใหม่</div>
+    <div class="sub">สแกน ถ่ายรูป ตั้งราคา แล้วเก็บเข้าช่อง — เริ่มต้นชีวิตใน loop ของชุดใหม่</div>
   </section>
   <div class="card">
     <h2>ข้อมูลชุด</h2>
@@ -69,7 +69,10 @@
     <div class="row2">
       <div class="field"><label>หมวด</label><select id="f_category"><option value="dress">เดรส</option><option value="set">เซ็ต</option><option value="top">เสื้อ</option><option value="skirt">กระโปรง</option><option value="pants">กางเกง</option><option value="jumpsuit">จัมพ์สูท</option><option value="outerwear">เอาเตอร์</option></select></div>
       <div class="field"><label>ระดับ (tier)</label><select id="f_tier"><option>Standard</option><option>Premium</option><option>Value</option></select></div>
-      <div class="field"><label>ค่าเช่า/ครั้ง</label><input id="f_price" type="number" placeholder="320"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>ค่าเช่า/ครั้ง (บาท)</label><input id="f_price" type="number" placeholder="320"></div>
+      <div class="field"><label>ต้นทุนชุด (บาท — ราคาที่ซื้อมา)</label><input id="f_cost" type="number" placeholder="เช่น 1200"></div>
     </div>
     <div class="row2">
       <div class="field"><label>ไซส์ (size)</label><select id="f_size"><option value="">— ไม่ระบุ —</option><option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option><option value="FREE">FREE SIZE</option></select></div>
@@ -87,9 +90,12 @@
     </div>
     <div class="field"><label>เนื้อผ้า</label><input id="f_fabric" placeholder="ซาตินโพลี 95% สแปนเด็กซ์ 5%"></div>
     <div class="field"><label>วิธีใส่ให้สวย (คั่นด้วย,)</label><textarea id="f_tips" rows="2" placeholder="ใส่บราเกาะอก, ซ่อนสายในได้, แนะนำแผ่นปิดจุก"></textarea></div>
+    <label style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink);margin:4px 0 14px;cursor:pointer">
+      <input type="checkbox" id="f_publish" style="width:auto"> ขึ้นร้านเลย (ข้ามรอตรวจ — ลูกค้าเห็นทันที)
+    </label>
     <button class="savebtn" onclick="save()">บันทึกเข้าระบบ + สร้าง QR</button>
     <div class="ok" id="ok"></div>
-    <div class="note">บันทึกแล้วชุดจะอยู่สถานะ <b>needs_review</b> (ยังไม่ขึ้นหน้าลูกค้า จนกว่าจะตรวจ) — ป้าย QR ปริ้นได้เลยที่หน้า"ปริ้นป้าย QR"</div>
+    <div class="note">ไม่ติ๊ก = ชุดอยู่สถานะ <b>needs_review</b> (รอกดอนุมัติที่หน้า"งานวันนี้" ก่อนขึ้นหน้าลูกค้า) · ติ๊ก = <b>ready</b> ขึ้นร้านทันที — ป้าย QR ปริ้นได้เลยที่หน้า"ปริ้นป้าย QR"</div>
   </div>
 
   <div>
@@ -155,7 +161,8 @@
     const tips=$('f_tips').value.split(',').map(s=>s.trim()).filter(Boolean);
     const payload={
       code:$('f_code').value||'', name:$('f_name').value, brand:$('f_brand').value,
-      tier:$('f_tier').value, rental_price:$('f_price').value, category:$('f_category').value,
+      tier:$('f_tier').value, rental_price:$('f_price').value, acquisition_cost:$('f_cost').value,
+      publish:$('f_publish').checked, category:$('f_category').value,
       occasion_tags:[...sel], color_name:$('f_colorname').value, color_hex:$('f_colorhex').value,
       color_season:$('f_season').value, bust_min_in:$('f_bmin').value, bust_max_in:$('f_bmax').value,
       waist_min_in:$('f_wmin').value, waist_max_in:$('f_wmax').value,
@@ -172,7 +179,8 @@
     const bin=($('f_bin').value||'').trim();
     if(bin){ const r=await sb.rpc('put_away',{p_code:data,p_bin:bin}); if(!r.error&&!r.data?.error) binMsg=` · เก็บเข้าช่อง <b>${bin}</b> แล้ว`; }
     const ok=$('ok'); ok.style.display='block';
-    ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> (needs_review)${binMsg} — <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
+    const stTxt = $('f_publish').checked ? '<b>ready</b> ขึ้นร้านแล้ว' : '<b>needs_review</b> (รออนุมัติ)';
+    ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> · ${stTxt}${binMsg} — <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
   }
 </script>
 <script src="ops-menu.js"></script>

@@ -114,6 +114,35 @@
     </div>
   </div>
 
+  <div class="card" id="premiumCard" style="display:none">
+    <h2>ระบบคุ้มครองชุดออกงาน (ชุดแพง)</h2>
+    <div class="desc">เปิดเมื่อพร้อมเริ่มปล่อยเช่าชุดราคาแพง — พอเปิด ระบบจะ “เตือนเจ้าของอัตโนมัติ” ทุกครั้งที่ชุดแพงถูกจอง ให้ทำขั้นตอนคุ้มครอง (วิดีโอก่อนแพค/ตอนแกะของ ฯลฯ) ลดความผิดพลาดของคน · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก</div>
+
+    <div class="feat">
+      <div class="info">
+        <div class="name">เปิดระบบคุ้มครองชุดแพง</div>
+        <div class="note">สวิตช์หลัก — เปิดทั้งโมดูล เตือนเจ้าของ + บังคับขั้นตอนคุ้มครองสำหรับชุดที่เข้าข่ายแพง</div>
+        <div class="need">ต้องมี: หน้าเก็บวิดีโอแกะของ / มัดจำ pre-auth / ประกันความเสียหาย ก่อนเปิดใช้จริง</div>
+      </div>
+      <label class="sw" data-key="premium_protection_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+
+    <div class="disc">
+      <label>ถือเป็น “ชุดแพง” เมื่อค่าเช่า ≥<div class="sub">ชุดที่ค่าเช่าถึงเกณฑ์นี้ จะถูกคุ้มครองอัตโนมัติ</div></label>
+      <input id="premVal" type="number" min="0" step="100" inputmode="numeric">
+      <span class="unit">บาท</span>
+    </div>
+    <div class="disc">
+      <label>หรือราคาเต็ม (retail) ≥<div class="sub">ราคาป้าย “Shop” ของชุด — เก็บที่ garments.retail_value</div></label>
+      <input id="premRetail" type="number" min="0" step="500" inputmode="numeric">
+      <span class="unit">บาท</span>
+    </div>
+    <div class="disc">
+      <label>หรือ tier เหล่านี้<div class="sub">คั่นด้วยจุลภาค เช่น Premium,Luxury</div></label>
+      <input id="premTiers" type="text" style="width:160px;text-align:left" placeholder="Premium,Luxury">
+    </div>
+  </div>
+
   <div class="hint" id="hint" style="display:none">
     หมายเหตุ: สวิตช์เป็นแค่ “สวิตช์เปิดไฟ” — โค้ดหน้าจอ/edge function/ฮาร์ดแวร์ที่อ่านค่านี้ต้องสร้างก่อนถึงจะเห็นผลจริง
     ค่าทั้งหมดเก็บใน app_settings และอ่านในระบบผ่าน get_setting() · แก้ไขได้เฉพาะเจ้าของ
@@ -139,6 +168,9 @@ function paint(s){
   $('#staffDisc').value = s.staff_discount_pct ?? '20';
   $('#quotaBase').value = s.stylist_quota_base ?? '5';
   $('#quotaBonus').value = s.stylist_quota_bonus ?? '3';
+  $('#premVal').value = s.premium_value_threshold ?? '3000';
+  $('#premRetail').value = s.premium_retail_threshold ?? '8000';
+  $('#premTiers').value = s.premium_tiers ?? 'Premium,Luxury';
 }
 
 async function load(){
@@ -148,6 +180,7 @@ async function load(){
   $('#loading').style.display = 'none';
   $('#panel').style.display = '';
   $('#stylistCard').style.display = '';
+  $('#premiumCard').style.display = '';
   $('#hint').style.display = '';
 }
 
@@ -189,6 +222,16 @@ $('#quotaBase').addEventListener('change', (e) => {
 $('#quotaBonus').addEventListener('change', (e) => {
   const v = String(Math.min(999, Math.max(0, parseInt(e.target.value || '0', 10) || 0)));
   save('stylist_quota_bonus', v);
+});
+// premium thresholds
+$('#premVal').addEventListener('change', (e) => {
+  save('premium_value_threshold', String(Math.max(0, parseFloat(e.target.value || '0') || 0)));
+});
+$('#premRetail').addEventListener('change', (e) => {
+  save('premium_retail_threshold', String(Math.max(0, parseFloat(e.target.value || '0') || 0)));
+});
+$('#premTiers').addEventListener('change', (e) => {
+  save('premium_tiers', (e.target.value || '').trim() || 'Premium,Luxury');
 });
 
 load();
