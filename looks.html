@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ชุมชน Looper Looks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --ink:#1A1A1A; --soft:#F5F4F2; --line:#E7E5E1;
+    --muted:#8C8B86; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56;
+    --gold:#C9A86A; --sand:#F2ECDD; --clay:#A75F3A;
+    --display:'Poppins','Prompt',sans-serif; --sans:'Inter','Prompt',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:88px}
+  .contain{max-width:620px;margin:0 auto;padding:0 16px}
+  button{font-family:inherit;cursor:pointer}
+  a{color:inherit;text-decoration:none}
+  header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
+  .hbar{display:flex;align-items:center;justify-content:space-between;height:56px}
+  .logo{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:1px}
+  .back{font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:5px}
+  .back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .hero{padding:22px 0 6px}
+  .eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .htitle{font-family:var(--display);font-size:24px;font-weight:600;margin-top:7px;letter-spacing:.4px}
+  .hsub{color:var(--muted);margin-top:5px;font-size:13px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  @media(max-width:380px){.grid{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  .card .ph{position:relative;width:100%;aspect-ratio:3/4;background:var(--soft);overflow:hidden}
+  .card .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .feat{position:absolute;top:8px;left:8px;background:rgba(26,26,26,.82);color:#fff;font-size:10.5px;font-weight:600;letter-spacing:.5px;padding:3px 8px;border-radius:20px}
+  .cbody{padding:11px 12px 12px}
+  .crow{display:flex;align-items:center;gap:7px}
+  .av{width:24px;height:24px;border-radius:50%;background:var(--sand);object-fit:cover;flex-shrink:0;border:1px solid rgba(0,0,0,.06)}
+  .cname{font-size:12.5px;font-weight:600;line-height:1.2;cursor:pointer}
+  .tier{font-size:10px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+  .cap{font-size:12.5px;color:#4a4a47;margin-top:7px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .gchip{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;border-top:1px dashed var(--line);padding-top:9px}
+  .gname{font-size:11.5px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gname b{color:var(--ink);font-weight:600}
+  .rentbtn{background:var(--ink);color:#fff;border:none;border-radius:7px;padding:7px 11px;font-size:11.5px;font-weight:600;white-space:nowrap;flex-shrink:0}
+  .shareln{margin-top:8px;font-size:11.5px;color:var(--sage);font-weight:600;display:inline-flex;align-items:center;gap:5px}
+  .shareln svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  .empty{text-align:center;padding:46px 18px;color:var(--muted);grid-column:1/-1}
+  .empty .ei{width:56px;height:56px;margin:0 auto 14px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center}
+  .empty .ei svg{width:27px;height:27px;stroke:var(--sage);fill:none;stroke-width:1.5}
+  .empty h4{font-family:var(--display);font-size:17px;color:var(--ink);font-weight:600;margin-bottom:6px}
+  .empty p{max-width:380px;margin:0 auto}
+
+  .fab{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(to top,var(--bg) 65%,transparent);padding:14px 16px 18px;z-index:30}
+  .fab .inner{max-width:620px;margin:0 auto}
+  .btn{background:var(--ink);color:#fff;border:none;border-radius:10px;padding:14px 20px;font-size:14.5px;font-weight:600;width:100%;letter-spacing:.02em}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn:disabled{opacity:.45}
+
+  .ov{position:fixed;inset:0;background:rgba(20,20,20,.46);display:none;z-index:90;align-items:flex-end}
+  .ov.open{display:flex}
+  .sheet{background:var(--bg);width:100%;max-width:620px;margin:0 auto;border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
+  .shhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .shtitle{font-family:var(--display);font-size:18px;font-weight:600}
+  .x{background:none;border:none;font-size:24px;color:var(--muted);line-height:1}
+  .lbl{font-size:12.5px;font-weight:600;margin:14px 0 6px;display:block}
+  .inp,textarea,select{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px 12px;font-family:inherit;font-size:14px;background:#fff}
+  textarea{resize:vertical;min-height:64px}
+  .muted{color:var(--muted);font-size:12.5px}
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(26,26,26,.94);color:#fff;padding:11px 18px;border-radius:22px;font-size:13px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;max-width:88%;text-align:center}
+  .toast.show{opacity:1}
+  .prof{display:flex;gap:13px;align-items:center;margin-bottom:6px}
+  .prof .pav{width:60px;height:60px;border-radius:50%;background:var(--sand);object-fit:cover;border:1px solid rgba(0,0,0,.07)}
+  .prof .ph4{font-family:var(--display);font-size:18px;font-weight:600}
+  .stats{display:flex;gap:18px;margin:12px 0 4px;font-size:12.5px;color:var(--muted)}
+  .stats b{display:block;font-size:18px;color:var(--ink);font-family:var(--display)}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<header><div class="contain hbar">
+  <div class="logo">LLOOP</div>
+  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> หน้าหลัก</a>
+</div></header>
+
+<div class="contain">
+  <div class="hero">
+    <div class="eyebrow">community</div>
+    <h1 class="htitle">Looper Looks</h1>
+    <p class="hsub">ลุคจริงจากชาว Looper — กดเช่าตามได้เลย · แชร์ลุคของคุณ รับเครดิต</p>
+  </div>
+  <div class="grid" id="feed">
+    <div class="empty"><p>กำลังโหลดฟีด…</p></div>
+  </div>
+</div>
+
+<div class="fab"><div class="inner">
+  <button class="btn" id="shareBtn">แชร์ลุคของฉัน · รับเครดิต</button>
+</div></div>
+
+<!-- share sheet -->
+<div class="ov" id="ovShare"><div class="sheet" id="shareSheet"></div></div>
+<!-- creator profile sheet -->
+<div class="ov" id="ovProf"><div class="sheet" id="profSheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=39"></script>
+<script src="liffAuth.js?v=39"></script>
+<script src="me-api.js?v=39"></script>
+<script src="api.js?v=39"></script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const baht = n => '฿'+Number(n||0).toLocaleString('th-TH');
+const TIER_TH = { new:'', silver:'Silver Looper', gold:'Gold Looper', platinum:'Platinum Looper' };
+let CUSTOMER=null, LIVE=false, FEED=[];
+
+function toast(t){ const e=$('#toast'); e.textContent=t; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),2600); }
+function openOv(id){ $(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeOv(id){ $(id).classList.remove('open'); document.body.style.overflow=''; }
+
+async function boot(){
+  try{
+    if(window.API && window.CONFIG && !window.CONFIG.USE_MOCK){
+      const r = await window.API.init();
+      if(r && r.CUSTOMER && r.CUSTOMER.id){ CUSTOMER=r.CUSTOMER; LIVE=true; }
+    }
+  }catch(e){ /* ดูฟีดได้แม้ไม่ล็อกอิน */ }
+  try{ FEED = await window.API.communityFeed(30, null); }catch(e){ FEED=[]; }
+  renderFeed();
+  $('#shareBtn').onclick = openShare;
+}
+
+function lookUrl(card){
+  const base = location.origin + location.pathname.replace(/looks\.html$/,'index.html');
+  const code = card.garment && card.garment.code;
+  return base + (code?`?garment=${encodeURIComponent(code)}&look=${card.id}`:`?look=${card.id}`);
+}
+
+function cardHtml(c){
+  const cr = c.creator||{}, g = c.garment||{};
+  const av = cr.avatar ? `<img class="av" src="${esc(cr.avatar)}" alt="">` : `<span class="av"></span>`;
+  const tier = TIER_TH[cr.tier]||'';
+  return `<div class="card">
+    <div class="ph">${c.photo?`<img src="${esc(c.photo)}" loading="lazy" alt="">`:''}${c.featured?`<span class="feat">ลุคแห่งสัปดาห์</span>`:''}</div>
+    <div class="cbody">
+      <div class="crow">${av}<div style="min-width:0">
+        <div class="cname" onclick="openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Looper')}</div>
+        ${tier?`<div class="tier">${esc(tier)}</div>`:''}</div></div>
+      ${c.caption?`<div class="cap">${esc(c.caption)}</div>`:''}
+      ${g.code?`<div class="gchip"><div class="gname">ใส่ <b>${esc(g.name||g.code)}</b>${g.price?` · ${baht(g.price)}`:''}</div>
+        <a class="rentbtn" href="${lookUrl(c)}">เช่าลุคนี้</a></div>`:''}
+      <span class="shareln" onclick='shareOut(${JSON.stringify({u:lookUrl(c),n:(g.name||"")}).replace(/'/g,"&#39;")})'>
+        <svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>แชร์ลุคนี้</span>
+    </div></div>`;
+}
+
+function renderFeed(){
+  if(!FEED.length){
+    $('#feed').innerHTML = `<div class="empty">
+      <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div>
+      <h4>ยังไม่มีลุคในชุมชน</h4>
+      <p>เป็นคนแรกที่แชร์ลุค! เช่าชุดเรา ถ่ายรูปสวย ๆ แล้วแชร์ — รับเครดิตเข้ากระเป๋า และมีคนเช่าตามได้</p></div>`;
+    return;
+  }
+  $('#feed').innerHTML = FEED.map(cardHtml).join('');
+}
+
+async function shareOut(o){
+  const url=o.u, text = o.n?`ลุคนี้จาก LLOOP — "${o.n}" เช่าตามได้เลย`:'ลุคสวยจาก LLOOP เช่าตามได้เลย';
+  try{
+    if(navigator.share){ await navigator.share({ title:'LLOOP · Looper Looks', text, url }); return; }
+  }catch(e){ if(e && e.name==='AbortError') return; }
+  try{ await navigator.clipboard.writeText(url); toast('คัดลอกลิงก์แล้ว — แปะลง IG/Facebook ได้เลยค่ะ'); }
+  catch(e){ toast('คัดลอกลิงก์: '+url); }
+}
+
+// ---------- creator profile ----------
+async function openProfile(handle){
+  if(!handle) return;
+  openOv('#ovProf');
+  $('#profSheet').innerHTML = `<div class="shhd"><div class="shtitle">โปรไฟล์ครีเอเตอร์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div><p class="muted" style="margin-top:14px">กำลังโหลด…</p>`;
+  let p=null; try{ p = await window.API.creatorProfile(handle); }catch(e){}
+  if(!p || !p.found){ $('#profSheet').innerHTML = `<div class="shhd"><div class="shtitle">โปรไฟล์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div><p class="muted" style="margin-top:14px">ไม่พบโปรไฟล์นี้ หรือเจ้าของตั้งเป็นส่วนตัวค่ะ</p>`; return; }
+  const cr=p.creator||{}, im=p.impact||{};
+  const av = cr.avatar?`<img class="pav" src="${esc(cr.avatar)}" alt="">`:`<span class="pav"></span>`;
+  const looks = (p.looks||[]).map(l=>{
+    const g=l.garment||{};
+    const u = location.origin + location.pathname.replace(/looks\.html$/,'index.html') + (g.code?`?garment=${encodeURIComponent(g.code)}&look=${l.id}`:'');
+    return `<div class="card"><div class="ph">${l.photo?`<img src="${esc(l.photo)}" loading="lazy">`:''}${l.featured?'<span class="feat">เด่น</span>':''}</div>
+      <div class="cbody">${g.code?`<div class="gchip" style="border-top:none;padding-top:0;margin-top:0"><div class="gname"><b>${esc(g.name||g.code)}</b></div><a class="rentbtn" href="${u}">เช่า</a></div>`:''}</div></div>`;
+  }).join('') || `<p class="muted" style="grid-column:1/-1">ยังไม่มีลุคที่เผยแพร่</p>`;
+  const social = cr.social?`<a href="${esc(cr.social)}" target="_blank" class="shareln" style="margin-top:8px">ดูโซเชียล →</a>`:'';
+  $('#profSheet').innerHTML = `
+    <div class="shhd"><div class="shtitle">ครีเอเตอร์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div>
+    <div class="prof">${av}<div><div class="ph4">${esc(cr.name||'Looper')}</div>
+      <div class="tier" style="color:var(--gold)">${esc(TIER_TH[cr.tier]||'Looper')}</div>${social}</div></div>
+    ${p.bio?`<p class="muted" style="margin-top:4px">${esc(p.bio)}</p>`:''}
+    <div class="stats">
+      <div><b>${p.looks_count||0}</b>ลุคที่แชร์</div>
+      <div><b>${p.rentals||0}</b>ครั้งที่เช่า</div>
+      ${im.water_l!=null?`<div><b>~${Number(im.water_l).toLocaleString()}</b>ลิตรน้ำที่ช่วยประหยัด</div>`:''}
+    </div>
+    <div class="grid" style="margin-top:14px">${looks}</div>`;
+}
+
+// ---------- share a look ----------
+async function openShare(){
+  if(!LIVE || !CUSTOMER){ toast('เข้าสู่ระบบผ่าน LINE ก่อนแชร์ลุคนะคะ'); return; }
+  openOv('#ovShare');
+  $('#shareSheet').innerHTML = `<div class="shhd"><div class="shtitle">แชร์ลุคของคุณ</div><button class="x" onclick="closeOv('#ovShare')">×</button></div><p class="muted" style="margin-top:12px">กำลังโหลดชุดที่คุณเคยเช่า…</p>`;
+  let rentals=[]; try{ rentals = await window.API.myRentals(CUSTOMER); }catch(e){}
+  const opts = (rentals||[]).filter(r=>r.code||r.garment_code||r.name)
+    .map(r=>{ const code=r.code||r.garment_code; return `<option value="${esc(code||'')}" data-rental="${esc(r.id||r.rental_id||'')}">${esc(r.name||code)}</option>`; }).join('');
+  $('#shareSheet').innerHTML = `
+    <div class="shhd"><div class="shtitle">แชร์ลุคของคุณ</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
+    <p class="muted" style="margin-top:4px">รูปจะผ่านการคัดกรองอัตโนมัติ ผ่านแล้วขึ้นฟีด + รับเครดิตทันที</p>
+    <label class="lbl">ชุดที่ใส่ในรูป</label>
+    ${opts?`<select class="inp" id="shGarment">${opts}</select>`
+      :`<input class="inp" id="shGarmentCode" placeholder="ใส่โค้ดชุด เช่น g3">`}
+    <label class="lbl">รูปลุคของคุณ</label>
+    <input class="inp" type="file" id="shPhoto" accept="image/*">
+    <label class="lbl">แคปชั่น (ไม่บังคับ)</label>
+    <textarea id="shCap" placeholder="เล่าเรื่องลุคนี้สั้น ๆ ใส่ไปงานไหน รู้สึกยังไง"></textarea>
+    <label class="lbl">โอกาส (ไม่บังคับ)</label>
+    <input class="inp" id="shOcc" placeholder="เช่น งานแต่ง, คาเฟ่, ทำงาน">
+    <button class="btn" id="shSubmit" style="margin-top:18px">แชร์ลุค</button>`;
+  $('#shSubmit').onclick = submitShare;
+}
+
+async function submitShare(){
+  const sel=$('#shGarment'); const code = sel ? sel.value : ($('#shGarmentCode') && $('#shGarmentCode').value.trim());
+  const rental = sel && sel.selectedOptions[0] ? (sel.selectedOptions[0].dataset.rental||null) : null;
+  const file = $('#shPhoto') && $('#shPhoto').files && $('#shPhoto').files[0];
+  if(!code){ toast('เลือกชุดที่ใส่ในรูปก่อนนะคะ'); return; }
+  if(!file){ toast('แนบรูปลุคก่อนนะคะ'); return; }
+  const btn=$('#shSubmit'); btn.disabled=true; btn.textContent='กำลังส่ง…';
+  let res=null; try{ res = await window.API.shareLook(code, file, $('#shCap').value, $('#shOcc').value, rental); }catch(e){}
+  if(!res || !res.ok){ btn.disabled=false; btn.textContent='แชร์ลุค'; toast('ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะคะ'); return; }
+  closeOv('#ovShare');
+  toast('ส่งลุคแล้ว — กำลังคัดกรอง ผ่านแล้วจะขึ้นฟีด + แจ้งใน LINE ค่ะ');
+  setTimeout(async()=>{ try{ FEED = await window.API.communityFeed(30,null); renderFeed(); }catch(e){} }, 3500);
+}
+
+document.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>

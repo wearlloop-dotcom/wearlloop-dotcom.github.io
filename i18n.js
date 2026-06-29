@@ -5,7 +5,7 @@ window.I18N = {
     login:'เข้าสู่ระบบ',
     creditLabel:'กระเป๋า LLOOP',
     heroKicker:'new season · 2026',
-    heroTitle:'ลุคใหม่<br>every occasion',
+    heroTitle:'A fresh look<br>for every occasion',
     heroSub:'เช่า · ใส่ · คืน — สวยได้ทุกครั้ง โดยไม่ต้องซื้อเพิ่ม',
     heroCta:'ดูคอลเลกชัน',
     stylistLabel:'จะไปที่ไหนคะ — ให้เราช่วยแนะนำ',

@@ -1052,6 +1052,7 @@ function openMenu() {
       ${item(I.foryou, en ? 'For you' : 'แนะนำเฉพาะคุณ', 'if(!fForYou)toggleForYou()')}
       ${item(I.stylist, en ? 'AI stylist by venue' : 'AI สไตลิสต์ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
+      ${item(I.foryou, en ? 'Community · Looper Looks' : 'ชุมชน · ลุคจากชาว Looper', "location.href='looks.html'")}
       ${item(I.family, en ? 'Family & groups' : 'ครอบครัว & กลุ่ม', 'openFamily()')}
       ${item(I.gift, en ? 'Shoot & earn credit' : 'ถ่ายชุด · ได้เครดิต', "location.href='creator.html'")}
     </div>
@@ -1256,6 +1257,24 @@ function renderLoopersClub(c) {
     </div>
   </div>`;
 }
+// ชุดจริงจากคลังที่แมตช์โปรไฟล์มากสุด (เรียงด้วย personalScore — สูตร ไม่ใช่ AI)
+function topMatches(n) {
+  if (!Array.isArray(GARMENTS) || !GARMENTS.length) return [];
+  return [...GARMENTS].sort((a, b) => personalScore(b) - personalScore(a)).slice(0, n);
+}
+function gThumb(g) {
+  const img = g.photo ? `<img src="${g.photo}" loading="lazy" alt="">`
+    : `<span style="display:block;width:100%;height:100%;background:${g.bg || '#E7D9C3'}"></span>`;
+  const pr = g.price != null ? `฿${Number(g.price).toLocaleString()}` : '';
+  return `<div class="gthumb" onclick="openDetail('${esc(g.id)}')"><div class="gth-img">${img}</div>`
+    + `<div class="gth-nm">${esc(g.name || '')}</div><div class="gth-pr">${pr}</div></div>`;
+}
+// จองคิว Personal Color (พาไป LINE OA — ทีมนัดคิวกับสตูดิโอพาร์ทเนอร์ต่อ)
+function bookPersonalColor() {
+  const url = (window.CONFIG && window.CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop';
+  try { if (window.liff && liff.openWindow) { liff.openWindow({ url, external: true }); return; } } catch (e) {}
+  location.href = url;
+}
 function renderStyleCard(c) {
   const sp = c.style_profile || {};
   const tier = c.crm_tier ||'new';
@@ -1290,17 +1309,38 @@ function renderStyleCard(c) {
       ln(th?'โอกาสใช้งาน':'Occasions', g.occasions),
       g.dos_donts ? `<div class="stylerec" style="white-space:pre-line"><b>${th?'ข้อแนะนำ':'Tips'}:</b> ${g.dos_donts}</div>` : ''
     ].filter(Boolean).join('');
+    // แถบชุดจริงจากคลังที่แมตช์ (กดเช่าได้) — รูปหลัก
+    const picks = topMatches(6);
+    const matchHtml = picks.length ? `<div class="styleshop">
+        <div class="ssh">${th?'ชุดที่ใช่กับคุณ — เช่าได้เลย':'Made for you — rent now'}</div>
+        <div class="gstrip">${picks.map(gThumb).join('')}</div>
+        <div class="stylerec" style="margin-top:7px"><a onclick="toggleForYou()" style="color:#A75F3A;font-weight:600;cursor:pointer">${th?'ดูชุดที่แมตช์ทั้งหมด →':'See all matches →'}</a></div>
+      </div>` : '';
+    // แถบ "ลุคของคุณ" จากรูปที่พาร์ทเนอร์อัป (ถ้ามี) — รูปเสริม
+    const looks = Array.isArray(sp.looks) ? sp.looks.filter(Boolean) : [];
+    const looksHtml = looks.length ? `<div class="styleshop">
+        <div class="ssh">${th?'ลุคของคุณ':'Your looks'} <span style="font-weight:400;color:#9a917d;font-size:11px">${th?'จากสตูดิโอ':'from the studio'}</span></div>
+        <div class="lookstrip">${looks.map(u=>`<img src="${u}" loading="lazy" onclick="this.classList.toggle('zoom')" alt="">`).join('')}</div>
+      </div>` : '';
     inner =`<div class="stylehead">${sp.headline || (lang ==='th'?'สรุปสไตล์ของคุณ':'Your style')}</div>
       ${stype}
       ${pal?`<div class="stylepal">${pal}</div>`:''}
       ${rec?`<div class="stylerec">${lang ==='th'?'ชุดที่แนะนำ':'For you'}: ${rec}</div>`:''}
+      ${matchHtml}
+      ${looksHtml}
       ${guideHtml?`<div class="styleguide" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,.08)">${guideHtml}</div>`:''}`;
   } else {
     const th = lang === 'th';
-    inner =`<div class="stylehead">${th?'ยังไม่มีผลวิเคราะห์สไตล์':'No style analysis yet'}</div>
-      <div class="stylerec">${th?'แสดงรหัสนี้กับสไตลิสต์พาร์ทเนอร์ตอนไปทำ Personal Color':'Show this code to our partner stylist'}</div>
-      <div class="claimbox" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">
-        <div class="stylerec" style="margin-bottom:6px">${th?'เคยทำ Personal Color กับสตูดิโอแล้ว? กรอกรหัสที่ได้รับ เพื่อดึงผลเข้าบัญชีนี้':'Already did Personal Color at a studio? Enter the code you got to pull your results into this account'}</div>
+    const perks = th
+      ? ['โทนสีที่ใช่ของคุณ', 'พาเลตเสื้อผ้า 5 สี', 'ทรง/คอเสื้อ/ความยาวที่เหมาะ', 'ชุดเช่าที่แมตช์คุณโดยเฉพาะ']
+      : ['Your season tone', '5-colour wardrobe palette', 'Best silhouettes & necklines', 'Rental picks made for you'];
+    const lockGrid = perks.map(p=>`<span class="lockpill">${p}</span>`).join('');
+    inner =`<div class="stylehead">${th?'ปลดล็อกสไตล์ที่ใช่ของคุณ':'Unlock your signature style'}</div>
+      <div class="stylerec">${th?'วิเคราะห์ Personal Color + รูปหน้า + หุ่น โดยสไตลิสต์ แล้วรับสรุป + ชุดเช่าที่แมตช์คุณ':'A stylist Personal Color + face + body analysis, then a summary and rental picks made for you'}</div>
+      <div class="lockgrid">${lockGrid}</div>
+      <button class="bookbtn" onclick="bookPersonalColor()">${th?'จองคิว Personal Color · ฿4,900':'Book Personal Color · ฿4,900'}</button>
+      <div class="claimbox" style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">
+        <div class="stylerec" style="margin-bottom:6px">${th?'ทำกับสตูดิโอมาแล้ว? กรอกรหัสที่ได้รับ เพื่อดึงผลเข้าบัญชีนี้':'Already did it at a studio? Enter your code to pull the results in'}</div>
         <div style="display:flex;gap:8px">
           <input id="claimCodeInput" placeholder="${th?'รหัสจากสตูดิโอ':'Studio code'}" autocomplete="off" style="flex:1;text-transform:uppercase;padding:9px 11px;border:1.5px solid rgba(0,0,0,.15);border-radius:8px;font-size:15px;letter-spacing:1px">
           <button onclick="claimCode()" style="border:none;border-radius:8px;padding:9px 16px;font-weight:600;background:#1A1A1A;color:#fff;cursor:pointer">${th?'ดึงผล':'Claim'}</button>
@@ -1606,7 +1646,12 @@ async function orderExtend(rentalId) {
   let msg = lang ==='th'?`ต่อเวลาคืนถึง ${to}?`:`Extend to ${to}?`;
   try {
     const q = await window.API.quoteExtension(rentalId, to);
-    if (q && q.error ==='unavailable') { toast(lang ==='th'?'ชุดไม่ว่างช่วงที่ต่อค่ะ':'Not available for those dates'); return; }
+    if (q && q.error ==='unavailable') {
+      toast(q.max_extend_to
+        ? (lang ==='th'?`มีคิวจองต่อแล้ว — ต่อได้ถึง ${fmtDate(q.max_extend_to)} ค่ะ`:`Booked next — extend until ${fmtDate(q.max_extend_to)}`)
+        : (lang ==='th'?'ชุดมีคิวจองต่อทันที ต่อเวลาไม่ได้ค่ะ':'Not available — booked right after'));
+      return;
+    }
     if (q && q.error ==='must_be_later') { toast(lang ==='th'?'วันคืนใหม่ต้องหลังวันคืนเดิมค่ะ':'Must be later than current return'); return; }
     if (q && !q.error) { const c = q.extra_charge||0; msg = lang ==='th'?`ต่อเวลาถึง ${to}\nค่าเช่าเพิ่ม ฿${c}`:`Extend to ${to}\nExtra ฿${c}`; }
   } catch (e) { console.warn(e); }
@@ -1908,6 +1953,9 @@ function routeDeepLink() {
     const ls = (window.liff && liff.state) ? new URLSearchParams((liff.state || '').replace(/^\?/, '')) : null;
     // deep-link จากการ์ด LINE: ?garment=CODE → เปิด detail ของชุดนั้นทันที
     const gcode = qs.get('garment') || (ls && ls.get('garment'));
+    // มาจากฟีดชุมชน (?look=ID) → log attribution ให้ครีเอเตอร์ได้ส่วนแบ่งเมื่อเช่าตาม
+    const lookId = qs.get('look') || (ls && ls.get('look'));
+    if (lookId && window.API && window.API.logLookView) { try { window.API.logLookView(lookId, gcode); } catch (e) {} }
     if (gcode) {
       const g = GARMENTS.find(x => (x.code || '').toLowerCase() === gcode.toLowerCase());
       if (g) { setTimeout(() => openDetail(g.id), 80); return; }

@@ -654,5 +654,54 @@ window.API = (function () {
     return { ok: true, ...data };
   }
 
-  return { init, reserve, saveProfile, claimStyleCode, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental };
+  // ===== ชุมชน Looper Looks =====
+  // ฟีดชุมชน (อ่านสาธารณะ) — รวมลุคที่แชร์ + รีวิวรูป + UGC
+  async function communityFeed(limit, before) {
+    if (CONFIG.USE_MOCK) return [];
+    const { data } = await client().rpc('community_feed', { p_limit: limit || 24, p_before: before || null });
+    return data || [];
+  }
+  // โปรไฟล์ครีเอเตอร์สาธารณะ (ค้นด้วย handle/link_code)
+  async function creatorProfile(handle) {
+    if (CONFIG.USE_MOCK || !handle) return { found: false };
+    const { data } = await client().rpc('creator_profile', { p_handle: handle });
+    return data || { found: false };
+  }
+  // โปรไฟล์ครีเอเตอร์ของฉัน (ผ่าน gateway)
+  async function myCreator() {
+    if (CONFIG.USE_MOCK || !window.meRpc) return null;
+    const { data } = await window.meRpc('my_creator', {});
+    return data || null;
+  }
+  // ตั้ง handle/bio/ความเป็นสาธารณะ
+  async function setHandle(handle, bio, isPublic) {
+    if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
+    const { data, error } = await window.meRpc('set_handle', { p_handle: handle || null, p_bio: bio ?? null, p_public: (typeof isPublic === 'boolean') ? isPublic : null });
+    return error ? { ok: false, error } : (data || { ok: false });
+  }
+  // แชร์ลุค: อัปโหลดรูป → สร้าง look (pending) → ทริกเกอร์ AI moderation (look-audit)
+  async function shareLook(garmentCode, file, caption, occasion, rentalId) {
+    if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
+    let url = '';
+    try { const urls = await uploadPhotos([file]); url = urls[0] || ''; } catch (e) { /**/ }
+    if (!url) return { ok: false, error: 'upload_failed' };
+    const { data, error } = await window.meRpc('share_look', { p_garment_code: garmentCode, p_photo_url: url, p_caption: caption || null, p_occasion: occasion || null, p_rental: rentalId || null });
+    if (error || !data || !data.look_id) return { ok: false, error: error || 'share_failed' };
+    // ตรวจด้วย AI (auto-publish ถ้าผ่าน) — best-effort, ไม่บล็อก UX
+    let idToken = null; try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (e) {}
+    try {
+      await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/look-audit`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_token: idToken, look_id: data.look_id }),
+      });
+    } catch (e) { /* ฝั่ง server จะตรวจเองตอน cron/owner */ }
+    return { ok: true, look_id: data.look_id };
+  }
+  // log ว่ามาจากลุคไหน (attribution ส่วนแบ่งครีเอเตอร์)
+  async function logLookView(lookId, garmentCode) {
+    if (CONFIG.USE_MOCK || !lineUid || !lookId) return;
+    try { await client().from('customer_touchpoints').insert({ line_uid: lineUid, kind: 'look_view', detail: { look: lookId, garment: garmentCode || null } }); } catch (e) { /**/ }
+  }
+
+  return { init, reserve, saveProfile, claimStyleCode, stylist, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, creatorProfile, myCreator, setHandle, shareLook, logLookView };
 })();
