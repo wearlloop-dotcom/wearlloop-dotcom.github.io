@@ -36,8 +36,9 @@
   .trust{display:flex;border-bottom:1px solid var(--line)}
   .trust div{flex:1;text-align:center;padding:13px 4px;border-right:1px solid var(--line)}
   .trust div:last-child{border-right:none}
-  .trust .ic{font-size:18px;color:var(--ok)}
-  .trust .tx{margin-top:4px;font-size:11px;color:var(--muted)}
+  .trust .ic{display:flex;justify-content:center}
+  .trust .ic svg{width:22px;height:22px;stroke:var(--ok);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+  .trust .tx{margin-top:5px;font-size:11px;color:var(--muted)}
 
   section{padding:20px 16px}
   .sh{font-family:var(--display);font-size:17px;font-weight:600;margin-bottom:14px}
@@ -94,9 +95,9 @@
   </div>
 
   <div class="trust">
-    <div><div class="ic">◇</div><div class="tx">มัดจำคืนเต็ม</div></div>
-    <div><div class="ic">✿</div><div class="tx">ส่งทั่วไทย</div></div>
-    <div><div class="ic">✦</div><div class="tx">สไตลิสต์ช่วยเลือก</div></div>
+    <div><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M3 9v6l9 5 9-5V9"/></svg></div><div class="tx">มัดจำคืนเต็ม</div></div>
+    <div><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14V7h11v10H3z"/><path d="M14 10h4l3 3v4h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg></div><div class="tx">ส่งทั่วไทย</div></div>
+    <div><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/></svg></div><div class="tx">สไตลิสต์ช่วยเลือก</div></div>
   </div>
 
   <section>
@@ -115,7 +116,7 @@
   </section>
 
   <section class="steps">
-    <div class="step"><div class="n">1</div><div class="t">จองค่าจอง</div></div>
+    <div class="step"><div class="n">1</div><div class="t">เลือก + วางมัดจำ</div></div>
     <div class="step"><div class="n">2</div><div class="t">ยืนยันใน LINE</div></div>
     <div class="step"><div class="n">3</div><div class="t">รับชุด · คืน · จบ</div></div>
   </section>

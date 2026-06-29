@@ -177,6 +177,12 @@
     <p style="color:var(--stone);font-size:14px">สัญญาเลขที่ <b id="doneNo"></b> มีผลสมบูรณ์แล้ว</p>
     <div class="sig" id="doneSig"></div>
     <p style="font-size:13px;color:var(--stone)" id="doneMeta"></p>
+    <!-- สะพานต่อ: เปิดพอร์ทัลสไตลิสต์ (เฉพาะสัญญาสไตลิสต์) -->
+    <div id="donePortal" class="hide" style="margin:18px auto 0;max-width:340px;padding-top:16px;border-top:1px solid var(--hair)">
+      <p style="font-size:14px;color:var(--ink);margin-bottom:10px">ก้าวต่อไป — เริ่มบันทึกผลวิเคราะห์ให้ลูกค้าได้เลย</p>
+      <a class="btn" id="portalBtn" href="#" style="display:block;background:var(--navy);color:#fff;text-decoration:none;padding:14px;border-radius:2px;font-weight:600">เข้าพอร์ทัลสไตลิสต์</a>
+      <p style="font-size:12px;color:var(--stone);margin-top:8px">บันทึกสี/หน้า/หุ่น/สไตล์ของลูกค้าแต่ละคน ด้วยรหัสจากแอป LLOOP</p>
+    </div>
     <button class="btn ghost" id="printBtn" style="max-width:280px;margin:16px auto 0" onclick="window.print()">บันทึก / พิมพ์สัญญา (PDF)</button>
   </div>
 </div>
@@ -479,6 +485,11 @@
     else if(c.signer_name) $('doneSig').innerHTML=`<div style="font-family:var(--display);font-size:24px;padding:10px 0">${esc(c.signer_name)}</div>`;
     const when=c.signed_at?new Date(c.signed_at).toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'}):'';
     $('doneMeta').textContent=(c.signer_name?('ผู้ลงนาม '+c.signer_name+' · '):'')+(when?('ลงนามเมื่อ '+when):'');
+    // สะพานต่อ → พอร์ทัลสไตลิสต์ (เฉพาะพาร์ทเนอร์ที่ต้องบันทึกข้อมูลลูกค้า: เทมเพลต stylist)
+    if((c.template||'stylist')==='stylist'){
+      $('portalBtn').href='https://liff.line.me/'+LIFF_ID+'/partner.html';
+      $('donePortal').classList.remove('hide');
+    }
   }
 
   // ---------- signature pad ----------
