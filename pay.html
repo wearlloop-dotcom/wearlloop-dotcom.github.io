@@ -25,6 +25,8 @@
   .hbar{display:flex;align-items:center;justify-content:space-between;height:56px}
   .logo{font-family:var(--display);font-size:23px;font-weight:700;letter-spacing:1px}
   .hnav{font-size:12px;color:var(--muted)}
+  .back{font-size:12.5px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
 
   /* hero */
   .hero{padding:28px 0 4px}
@@ -98,7 +100,7 @@
 <body>
 <header><div class="contain hbar">
   <div class="logo">LLOOP</div>
-  <div class="hnav">บิลของคุณ</div>
+  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> หน้าหลัก</a>
 </div></header>
 
 <div class="contain">
@@ -117,11 +119,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=34"></script>
-<script src="liffAuth.js?v=34"></script>
+<script src="config.js?v=38"></script>
+<script src="liffAuth.js?v=38"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
-<script src="promptpay.js?v=34"></script>
-<script src="api.js?v=34"></script>
+<script src="promptpay.js?v=38"></script>
+<script src="api.js?v=38"></script>
 <script>
 // ============================================================
 //  pay.html — บิลรายคนของ split-pay group rental

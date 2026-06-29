@@ -526,7 +526,11 @@ function pickCalDate(garmentId, ds) {
 // รูปจริงจากลูกค้า (UGC) ในหน้าชุด — แตะขยายได้
 async function renderUGC(garmentId) {
   const wrap = $('#ugcWrap'), box = $('#ugcbox'); if (!box) return;
-  let photos = []; try { photos = await window.API.garmentReviewPhotos?.(garmentId) || []; } catch (e) { /**/ }
+  // รูปจริงจากลูกค้า = รูป creator (UGC ผ่านออดิท) + รูปรีวิว
+  let ugc = [], rev = [];
+  try { [ugc, rev] = await Promise.all([
+    window.API.garmentUgcPhotos?.(garmentId) || [], window.API.garmentReviewPhotos?.(garmentId) || []]); } catch (e) { /**/ }
+  const photos = [...ugc, ...rev];
   if (!photos.length) { if (wrap) wrap.style.display = 'none'; return; }
   box.innerHTML = photos.map(p => `<img src="${p.url}" loading="lazy" onclick="this.classList.toggle('zoom')" title="${(p.comment || '').replace(/"/g, '')}">`).join('');
   if (wrap) wrap.style.display = '';
@@ -1049,6 +1053,7 @@ function openMenu() {
       ${item(I.stylist, en ? 'AI stylist by venue' : 'AI สไตลิสต์ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
       ${item(I.family, en ? 'Family & groups' : 'ครอบครัว & กลุ่ม', 'openFamily()')}
+      ${item(I.gift, en ? 'Shoot & earn credit' : 'ถ่ายชุด · ได้เครดิต', "location.href='creator.html'")}
     </div>
 
     <div class="msec">
@@ -1154,7 +1159,18 @@ function openProfile(onboard) {
         <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
         <div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>
       </div>
-      <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label><textarea id="pAddress" rows="3" autocomplete="shipping street-address" inputmode="text" placeholder="${lang === 'th' ? 'บ้านเลขที่ / หมู่บ้าน-คอนโด / ซอย / ถนน\nตำบล/แขวง อำเภอ/เขต\nจังหวัด รหัสไปรษณีย์' : 'House no. / building / soi / road\nsubdistrict, district\nprovince, postal code'}">${c.address || ''}</textarea><div class="subhint">${lang === 'th' ? 'แตะช่องแล้วเลือกที่อยู่ที่บันทึกไว้ในมือถือได้เลย — เด้งขึ้นเหนือคีย์บอร์ด' : 'Tap the field and pick a saved address from your phone — it appears above the keyboard'}</div></div>
+      <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label>
+        <textarea id="pAddrDetail" rows="2" autocomplete="shipping street-address" inputmode="text" placeholder="${lang === 'th' ? 'บ้านเลขที่ / หมู่บ้าน-คอนโด / ซอย / ถนน' : 'House no. / building / soi / road'}">${c.address || ''}</textarea>
+        <div class="subhint">${lang === 'th' ? 'พิมพ์รหัสไปรษณีย์ 5 หลัก แล้วเลือกตำบล — อำเภอ/จังหวัดเติมให้อัตโนมัติ' : 'Type the 5-digit postal code, pick a subdistrict — district & province auto-fill'}</div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>${lang === 'th' ? 'รหัสไปรษณีย์' : 'Postal code'}</label><input id="pZip" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="${lang === 'th' ? 'เช่น 10310' : 'e.g. 10310'}" oninput="onZipInput()"></div>
+        <div class="field"><label>${lang === 'th' ? 'ตำบล/แขวง' : 'Subdistrict'}</label><select id="pTambon" onchange="onTambonPick()"><option value="">${lang === 'th' ? '— ใส่รหัสก่อน —' : '— enter code first —'}</option></select></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>${lang === 'th' ? 'อำเภอ/เขต' : 'District'}</label><input id="pAmphoe" readonly placeholder="${lang === 'th' ? 'เติมอัตโนมัติ' : 'auto'}"></div>
+        <div class="field"><label>${lang === 'th' ? 'จังหวัด' : 'Province'}</label><input id="pProvince" readonly placeholder="${lang === 'th' ? 'เติมอัตโนมัติ' : 'auto'}"></div>
+      </div>
       <div class="field"><label>${t('pNotes')}</label><input id="pNotes" value="${c.notes ||''}"></div>
       <button class="savebtn" onclick="saveProfile()">${t('pSave')}</button>
     </div>`;
@@ -1307,15 +1323,15 @@ async function openImpact() {
     <button class="close" onclick="closeImpact()">×</button>
     <div class="impact-hero">
       ${leaf}
-      <div class="ik">${en ? 'the good you keep in the loop' : 'ความดีที่คุณหมุนเวียน'}</div>
+      <div class="ik">${en ? 'the good you keep in the loop' : 'ความดีที่คุณส่งต่อใน loop'}</div>
       <div class="ihead">${en ? 'wear one look, care for the planet once more' : 'เช่าหนึ่งชุด ดูแลโลกอีกหนึ่งครั้ง'}</div>
-      <div class="iline">${en ? 'every time you choose to rotate instead of buy new, you truly give back to the earth' : 'ทุกครั้งที่คุณเลือกหมุนเวียนแทนซื้อใหม่ คือการคืนบางอย่างให้โลกใบนี้จริง ๆ'}</div>
+      <div class="iline">${en ? 'every time you choose to rotate instead of buy new, you truly give back to the earth' : 'ทุกครั้งที่คุณเลือกเช่าแทนซื้อใหม่ คือการคืนบางอย่างให้โลกใบนี้จริง ๆ'}</div>
       <div class="ibig">
         <div>~<b data-to="${im.water_l || 0}">0</b><span>${en ? 'litres water saved (est.)' : 'ลิตรน้ำที่ช่วยประหยัด (ประมาณ)'}</span></div>
         <div class="div"></div>
         <div>~<b data-to="${im.co2_kg || 0}">0</b><span>${en ? 'kg carbon reduced (est.)' : 'กก. คาร์บอนที่ลด (ประมาณ)'}</span></div>
         <div class="div"></div>
-        <div><b data-to="${im.rentals || 0}">0</b><span>${en ? 'looks rotated' : 'ครั้งที่หมุนเวียน'}</span></div>
+        <div><b data-to="${im.rentals || 0}">0</b><span>${en ? 'looks rotated' : 'รอบใน loop'}</span></div>
       </div>
       <div style="font-size:11px;color:#A39472;margin-top:14px">${en ? '* water & carbon are estimates based on industry averages' : '* ตัวเลขน้ำและคาร์บอนเป็นค่าประมาณจากค่าเฉลี่ยอุตสาหกรรม'}</div>
       <div class="icharity">${en ? 'and you have passed on' : 'และคุณได้ส่งต่อ'} <b data-to="${im.charity_thb || 0}" data-prefix="฿">฿0</b> ${en ? 'to ' + (im.charity_name || 'children in need') : 'ให้' + (im.charity_name || 'เด็กยากไร้')}</div>
@@ -1353,7 +1369,7 @@ async function openMembership() {
     <div style="text-align:center;padding:18px 0 6px">
       <div style="font-size:11px;letter-spacing:3px;color:var(--muted)">${en ? 'MEMBERSHIP' : 'สมาชิกรายเดือน'}</div>
       <div style="font-family:var(--display);font-size:24px;font-weight:700;color:var(--ink);margin-top:4px">Looper Membership</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:4px">${en ? 'rotate new looks every month' : 'หมุนเวียนลุคใหม่ได้ทุกเดือน คุ้มกว่าเช่ารายชุด'}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">${en ? 'rotate new looks every month' : 'ได้ลุคใหม่ทุกเดือน คุ้มกว่าเช่ารายชุด'}</div>
     </div>
     <div id="memberBody" style="padding:6px 2px 24px">${en ? 'Loading…' : 'กำลังโหลด…'}</div>`;
   let sub = CUSTOMER._sub || { active: false };
@@ -1523,6 +1539,12 @@ function renderOrders(rentals) {
     const reRent =`<button class="obtn" onclick="reRentByCode('${(r.code||'').replace(/'/g,"")}')">${lang ==='th'?'เช่าอีก':'Rent again'}</button>`;
     const review = r.status ==='returned'
       ?`<button class="obtn ghost" onclick="openReview('${r.rental_id}','${(r.name||'').replace(/'/g,"")}')">${lang ==='th'?'รีวิว':'Review'}</button>`:'';
+    // ยืดหยุ่นกว่าคู่แข่ง: ลูกค้ายกเลิก/เลื่อน/ต่อเวลาเองได้ (ผ่าน me-rpc gateway)
+    const canCancelResched = (r.status ==='reserved'|| r.status ==='hold');
+    const canExtend = (r.status ==='reserved'|| r.status ==='out');
+    const reschedB = canCancelResched ?`<button class="obtn ghost" onclick="orderReschedule('${r.rental_id}')">${lang ==='th'?'เลื่อนวัน':'Reschedule'}</button>`:'';
+    const extendB = canExtend ?`<button class="obtn ghost" onclick="orderExtend('${r.rental_id}')">${lang ==='th'?'ต่อเวลา':'Extend'}</button>`:'';
+    const cancelB = canCancelResched ?`<button class="obtn ghost" onclick="orderCancel('${r.rental_id}')">${lang ==='th'?'ยกเลิก':'Cancel'}</button>`:'';
     return`<div class="ocard">
       <div class="otop">
         <div class="oname">${r.name ||'—'}</div>
@@ -1531,9 +1553,65 @@ function renderOrders(rentals) {
       <div class="orow"><span>${lang ==='th'?'วันที่ใช้':'Use date'}</span>${r.use_date? fmtDate(r.use_date):'—'}</div>
       <div class="orow"><span>${lang ==='th'?'กำหนดคืน':'Due back'}</span>${r.due_at? fmtDate(r.due_at):'—'}</div>
       ${ship}
-      <div class="oactions">${reRent}${review}</div>
+      <div class="oactions">${reRent}${reschedB}${extendB}${cancelB}${review}</div>
     </div>`;
   }).join('');
+}
+// ===== ยกเลิก / เลื่อน / ต่อเวลา (ลูกค้าทำเอง — ผ่าน gateway ที่เช็ค ownership) =====
+function _isYmd(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s); }
+async function orderCancel(rentalId) {
+  if (!rentalId) return;
+  let msg = lang ==='th'?'ยืนยันยกเลิกการเช่านี้ใช่ไหมคะ':'Cancel this rental?';
+  try {
+    const q = await window.API.quoteCancellation(rentalId, true);
+    if (q && !q.error) {
+      const rf = q.rental_refund||0, df = q.deposit_refund||0;
+      const mth = q.method==='credit'?(lang==='th'?'เครดิต':'credit'):q.method==='cash'?(lang==='th'?'เงินสด':'cash'):'-';
+      msg = lang ==='th'
+        ? `ยกเลิกการเช่านี้?\n• คืนค่าเช่า ฿${rf}${rf>0?` (${mth})`:''}\n• คืนมัดจำ ฿${df}`
+        : `Cancel this rental?\n• Rental refund ฿${rf}${rf>0?` (${mth})`:''}\n• Deposit ฿${df}`;
+    }
+  } catch (e) { console.warn(e); }
+  if (!confirm(msg)) return;
+  const res = await window.API.cancelRental(rentalId, true);
+  if (!res || !res.ok) { toast(lang ==='th'?'ยกเลิกไม่สำเร็จ ลองใหม่อีกครั้งนะคะ':'Cancel failed'); return; }
+  toast(lang ==='th'?'ยกเลิกเรียบร้อย คืนเงินให้ตามนโยบายแล้วค่ะ':'Cancelled — refund on its way');
+  openOrders();
+}
+async function orderExtend(rentalId) {
+  if (!rentalId) return;
+  const to = (prompt(lang ==='th'?'ต่อเวลาคืนถึงวันไหน? (รูปแบบ 2026-08-25)':'Extend until? (YYYY-MM-DD)')||'').trim();
+  if (!to) return;
+  if (!_isYmd(to)) { toast(lang ==='th'?'รูปแบบวันที่ไม่ถูกต้องค่ะ':'Invalid date'); return; }
+  let msg = lang ==='th'?`ต่อเวลาคืนถึง ${to}?`:`Extend to ${to}?`;
+  try {
+    const q = await window.API.quoteExtension(rentalId, to);
+    if (q && q.error ==='unavailable') { toast(lang ==='th'?'ชุดไม่ว่างช่วงที่ต่อค่ะ':'Not available for those dates'); return; }
+    if (q && q.error ==='must_be_later') { toast(lang ==='th'?'วันคืนใหม่ต้องหลังวันคืนเดิมค่ะ':'Must be later than current return'); return; }
+    if (q && !q.error) { const c = q.extra_charge||0; msg = lang ==='th'?`ต่อเวลาถึง ${to}\nค่าเช่าเพิ่ม ฿${c}`:`Extend to ${to}\nExtra ฿${c}`; }
+  } catch (e) { console.warn(e); }
+  if (!confirm(msg)) return;
+  const res = await window.API.extendRental(rentalId, to);
+  if (!res || !res.ok) { toast(lang ==='th'?'ต่อเวลาไม่สำเร็จค่ะ':'Extend failed'); return; }
+  toast(lang ==='th'?'ต่อเวลาเรียบร้อยค่ะ':'Extended'); openOrders();
+}
+async function orderReschedule(rentalId) {
+  if (!rentalId) return;
+  const from = (prompt(lang ==='th'?'วันรับชุดใหม่? (รูปแบบ 2026-08-15)':'New use date? (YYYY-MM-DD)')||'').trim();
+  if (!from) return;
+  const to = (prompt(lang ==='th'?'วันคืนชุดใหม่? (รูปแบบ 2026-08-20)':'New return date? (YYYY-MM-DD)')||'').trim();
+  if (!to) return;
+  if (!_isYmd(from) || !_isYmd(to)) { toast(lang ==='th'?'รูปแบบวันที่ไม่ถูกต้องค่ะ':'Invalid date'); return; }
+  const res = await window.API.rescheduleRental(rentalId, from, to);
+  if (!res || !res.ok) {
+    const er = res && res.error;
+    const m = er ==='limit_reached'?(lang ==='th'?'เลื่อนครบจำนวนครั้งที่กำหนดแล้วค่ะ':'Reschedule limit reached')
+      : (er ==='date_unavailable'|| er ==='new_garment_unavailable')?(lang ==='th'?'ชุดไม่ว่างในวันที่เลือกค่ะ':'Not available')
+      : (lang ==='th'?'เลื่อนไม่สำเร็จค่ะ':'Reschedule failed');
+    toast(m); return;
+  }
+  const xtra = (res.fee||0) + (res.extra_charge||0);
+  toast(lang ==='th'?(xtra>0?`เลื่อนแล้ว · เก็บเพิ่ม ฿${xtra} (รอชำระ)`:'เลื่อนวันให้แล้ว ฟรีค่ะ'):(xtra>0?`Rescheduled · +฿${xtra}`:'Rescheduled')); openOrders();
 }
 function reRentByCode(code) {
   const g = GARMENTS.find(x => (x.code || x.id) === code || x.code === code);
@@ -1624,6 +1702,55 @@ function animateCounts(root) {
   });
 }
 function pickSeason(s) { pSeason = s; document.querySelectorAll('.seasonbtn').forEach(b => b.classList.toggle('active', b.dataset.s === s)); }
+// ── ที่อยู่จัดส่ง: เติม ตำบล/อำเภอ/จังหวัด อัตโนมัติจากรหัสไปรษณีย์ ─────────────
+let _thPostal = null, _thPostalLoading = null, _zipEntries = [];
+function loadThPostal() {
+  if (_thPostal) return Promise.resolve(_thPostal);
+  if (_thPostalLoading) return _thPostalLoading;
+  _thPostalLoading = fetch('th-postal.json')
+    .then(r => r.ok ? r.json() : {})
+    .then(d => { _thPostal = d || {}; return _thPostal; })
+    .catch(() => { _thPostal = {}; return _thPostal; });
+  return _thPostalLoading;
+}
+async function onZipInput() {
+  const zi = $('#pZip'); if (!zi) return;
+  let z = (zi.value || '').replace(/\D/g, '').slice(0, 5);
+  if (zi.value !== z) zi.value = z;
+  const sel = $('#pTambon'), am = $('#pAmphoe'), pv = $('#pProvince');
+  if (z.length < 5) { _zipEntries = []; if (sel) sel.innerHTML = `<option value="">${lang==='th'?'— ใส่รหัสก่อน —':'— enter code first —'}</option>`; if (am) am.value=''; if (pv) pv.value=''; return; }
+  const db = await loadThPostal();
+  _zipEntries = db[z] || [];   // [[province, amphoe, district], ...]
+  if (!_zipEntries.length) {
+    if (sel) sel.innerHTML = `<option value="">${lang==='th'?'ไม่พบรหัสนี้ — พิมพ์ที่อยู่เองได้':'not found — type address above'}</option>`;
+    if (am) am.value=''; if (pv) pv.value=''; return;
+  }
+  const multiAmphoe = new Set(_zipEntries.map(e => e[1])).size > 1;
+  if (sel) {
+    sel.innerHTML = `<option value="">${lang==='th'?'เลือกตำบล/แขวง':'select subdistrict'}</option>` +
+      _zipEntries.map((e, i) => `<option value="${i}">${e[2]}${multiAmphoe ? ' · '+e[1] : ''}</option>`).join('');
+  }
+  if (_zipEntries.length === 1) { sel.value = '0'; onTambonPick(); }
+  else if (!multiAmphoe) { if (am) am.value = _zipEntries[0][1]; if (pv) pv.value = _zipEntries[0][0]; }
+}
+function onTambonPick() {
+  const sel = $('#pTambon'); if (!sel || sel.value === '') return;
+  const e = _zipEntries[+sel.value]; if (!e) return;
+  if ($('#pAmphoe')) $('#pAmphoe').value = e[1];
+  if ($('#pProvince')) $('#pProvince').value = e[0];
+}
+function composeAddress() {
+  const detail = ($('#pAddrDetail') ? $('#pAddrDetail').value : '').trim();
+  const sel = $('#pTambon');
+  const z = $('#pZip') ? ($('#pZip').value || '').trim() : '';
+  let tambon = '';
+  if (sel && sel.value !== '' && _zipEntries[+sel.value]) tambon = _zipEntries[+sel.value][2];
+  const amphoe = $('#pAmphoe') ? $('#pAmphoe').value.trim() : '';
+  const province = $('#pProvince') ? $('#pProvince').value.trim() : '';
+  const loc = [tambon && ('ต.'+tambon), amphoe && ('อ.'+amphoe), province && ('จ.'+province), z]
+    .filter(Boolean).join(' ');
+  return loc ? [detail, loc].filter(Boolean).join('\n') : detail;
+}
 function closeProfile() { $('#pOverlay').classList.remove('open'); document.body.style.overflow =''; }
 async function saveProfile() {
   CUSTOMER.name = $('#pName').value;
@@ -1635,7 +1762,7 @@ async function saveProfile() {
   CUSTOMER.my_color_season = pSeason;
   CUSTOMER.notes = $('#pNotes').value;
   CUSTOMER.phone = $('#pPhone') ? $('#pPhone').value : CUSTOMER.phone;
-  CUSTOMER.address = $('#pAddress') ? $('#pAddress').value : CUSTOMER.address;
+  CUSTOMER.address = composeAddress();
   CUSTOMER.weight_kg = $('#pWeight') ? (+$('#pWeight').value || null) : CUSTOMER.weight_kg;
   CUSTOMER.size = $('#pSize') ? ($('#pSize').value || null) : CUSTOMER.size;
   CUSTOMER.birthday = $('#pBirthday') ? ($('#pBirthday').value || null) : CUSTOMER.birthday;
@@ -1696,7 +1823,7 @@ function renderImpactCard() {
     <div class="ecokick">${lang === 'th' ? 'ทุกการเลือกของคุณ สร้างความเปลี่ยนแปลง' : 'every choice you make matters'}</div>
     <div class="ecohead">${lang === 'th' ? 'สิ่งที่คุณช่วยเซฟไปแล้ว' : 'what you have saved so far'}</div>
     <div class="ecostats">
-      <div><b data-to="${im.rentals}">0</b><span>${lang === 'th' ? 'ครั้งที่หมุนเวียน' : 'rotations'}</span></div>
+      <div><b data-to="${im.rentals}">0</b><span>${lang === 'th' ? 'รอบใน loop' : 'rotations'}</span></div>
       <div>~<b data-to="${im.water_l || 0}">0</b><span>${lang === 'th' ? 'ลิตรน้ำ (ประมาณ)' : 'litres water (est.)'}</span></div>
       <div>~<b data-to="${im.co2_kg || 0}">0</b><span>${lang === 'th' ? 'กก. คาร์บอน (ประมาณ)' : 'kg carbon (est.)'}</span></div>
     </div>

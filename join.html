@@ -26,17 +26,25 @@
   .back{font-size:12.5px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
   .back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
 
-  /* hero (centered welcome) */
-  .hero{padding:40px 0 8px;text-align:center}
-  .crest{width:62px;height:62px;margin:0 auto 18px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center}
-  .crest svg{width:30px;height:30px;stroke:var(--sage);fill:none;stroke-width:1.5}
+  /* hero — inviter as the star */
+  .hero{padding:34px 0 6px;text-align:center}
   .eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:600}
-  .htitle{font-family:var(--display);font-size:27px;font-weight:600;margin-top:10px;letter-spacing:.3px;line-height:1.3}
-  .hsub{color:var(--muted);margin-top:10px}
-  .hsub b{color:var(--ink);font-weight:600}
+
+  /* inviter block (the #1 thing the friend should see) */
+  .inviter{margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:0}
+  .invava-wrap{position:relative;width:96px;height:96px;margin:0 auto}
+  .invava{width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:38px;color:#fff;background:var(--sage);box-shadow:0 4px 18px rgba(111,179,166,.28)}
+  img.invava{object-fit:cover;background:var(--soft)}
+  /* small sparkle/heart badge to signal "invited you" */
+  .invbadge{position:absolute;right:-2px;bottom:-2px;width:32px;height:32px;border-radius:50%;background:var(--gold);border:3px solid var(--bg);display:flex;align-items:center;justify-content:center}
+  .invbadge svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2}
+  .invline{font-family:var(--display);font-size:21px;font-weight:600;margin-top:16px;letter-spacing:.2px;line-height:1.35}
+  .invline b{color:var(--sage)}
+  .invsub{color:var(--muted);margin-top:6px;font-size:13px}
 
   /* section card */
-  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:18px}
+  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:18px}
+  .seclabel{font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:12px}
   .grouprow{display:flex;align-items:center;gap:13px}
   .gava{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:20px;color:#fff;background:var(--sage);flex-shrink:0}
   .grouprow .gname{font-family:var(--display);font-size:17px;font-weight:600}
@@ -46,11 +54,20 @@
   .valueprop{display:flex;gap:11px;align-items:flex-start;background:var(--sage-bg);border:1px solid #cfe6df;border-radius:11px;padding:13px;margin-top:16px;font-size:13px;color:var(--ok);line-height:1.5}
   .valueprop svg{width:20px;height:20px;stroke:var(--ok);fill:none;stroke-width:1.6;flex-shrink:0;margin-top:1px}
 
-  .actions{margin-top:20px;display:flex;flex-direction:column;gap:10px;align-items:center}
-  .btn{background:var(--ink);color:#fff;border:none;border-radius:9px;padding:13px 22px;font-size:14px;font-weight:600;letter-spacing:.02em;width:100%}
+  /* how-it-works steps */
+  .steps{margin-top:14px;display:flex;flex-direction:column;gap:11px}
+  .step{display:flex;align-items:flex-start;gap:12px}
+  .step .num{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--sand);color:#8a6d2f;font-family:var(--display);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .step .st{font-size:13px;line-height:1.45;padding-top:2px}
+  .step .st b{font-weight:600;color:var(--ink)}
+
+  .actions{margin-top:8px;display:flex;flex-direction:column;gap:8px;align-items:center}
+  .btn{background:var(--ink);color:#fff;border:none;border-radius:9px;padding:14px 22px;font-size:14.5px;font-weight:600;letter-spacing:.02em;width:100%}
   .btn.sage{background:var(--sage)}
   .btn:disabled{opacity:.5;cursor:not-allowed}
-  .linkbtn{background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:2px}
+  .btnnote{font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:6px;text-align:center}
+  .btnnote svg{width:13px;height:13px;stroke:var(--sage);fill:none;stroke-width:1.8;flex-shrink:0}
+  .linkbtn{background:none;border:none;color:var(--muted);font-size:13px;text-decoration:underline;text-underline-offset:2px;margin-top:2px}
 
   /* empty / edge states */
   .empty{text-align:center;padding:40px 18px 20px;color:var(--muted)}
@@ -64,8 +81,8 @@
   .doneicon{width:64px;height:64px;margin:0 auto 16px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center}
   .doneicon svg{width:32px;height:32px;stroke:var(--ok);fill:none;stroke-width:2}
 
-  .demo{font-size:11px;color:var(--muted);text-align:center;margin-top:26px;letter-spacing:.3px}
-  .demo b{color:var(--sage)}
+  .demo{font-size:10.5px;color:#b8b6b0;text-align:center;margin-top:26px;letter-spacing:.3px;opacity:.85}
+  .demo b{color:var(--sage);font-weight:600}
   .hide{display:none!important}
   .spin{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px;margin-right:7px}
   @keyframes sp{to{transform:rotate(360deg)}}
@@ -86,14 +103,22 @@
 
   <!-- 1) Welcome / preview -->
   <div id="welcomeView" class="hide">
+    <!-- (a) WHO invited you — the hero -->
     <div class="hero">
-      <div class="crest"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.6"/><path d="M16 19a5 5 0 0 1 5-2.5"/></svg></div>
       <div class="eyebrow">คำเชิญเข้ากลุ่ม</div>
-      <h1 class="htitle" id="welTitle">มาเข้ากลุ่มกับเรา</h1>
-      <p class="hsub" id="welSub"></p>
+      <div class="inviter">
+        <div class="invava-wrap">
+          <div id="invAva" class="invava">L</div>
+          <span class="invbadge"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.5-8.5C.8 9.6 2.5 6 6 6c2 0 3.2 1.2 4 2.3C10.8 7.2 12 6 14 6c3.5 0 5.2 3.6 3.5 6.5C19 16.65 12 21 12 21z"/></svg></span>
+        </div>
+        <div class="invline" id="welInvite">คุณถูกชวนเข้ากลุ่มนี้</div>
+        <p class="invsub" id="welSub"></p>
+      </div>
     </div>
 
+    <!-- (b) WHAT group + what it does -->
     <div class="sec">
+      <div class="seclabel">กลุ่มที่ชวนคุณเข้า</div>
       <div class="grouprow">
         <div class="gava" id="grpAva">L</div>
         <div>
@@ -106,8 +131,19 @@
         <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6l9 4 9-4V7"/></svg>
         <span>จัดชุดเข้าตีมเดียวกัน + เช่าพร้อมกันในออเดอร์เดียว ส่งทีเดียวถึงทุกคน</span>
       </div>
-      <div class="actions">
+    </div>
+
+    <!-- (c) HOW it works + the action -->
+    <div class="sec">
+      <div class="seclabel">ขั้นตอนง่าย ๆ</div>
+      <div class="steps">
+        <div class="step"><span class="num">1</span><span class="st">แตะปุ่ม <b>เข้าร่วมกลุ่ม</b> ด้านล่าง</span></div>
+        <div class="step" id="stepLogin"><span class="num">2</span><span class="st">ยืนยันตัวตนด้วย <b>LINE</b> (ครั้งเดียว)</span></div>
+        <div class="step"><span class="num">3</span><span class="st">เริ่ม <b>จัดชุดเข้าตีม</b> + เช่าพร้อมกันทั้งกลุ่ม</span></div>
+      </div>
+      <div class="actions" style="margin-top:18px">
         <button class="btn sage" id="joinBtn">เข้าร่วมกลุ่ม</button>
+        <div class="btnnote" id="joinNote"></div>
         <a class="linkbtn" href="index.html">ไว้ก่อน</a>
       </div>
     </div>
@@ -148,12 +184,18 @@ let TOKEN = null;            // token จากลิงก์
 let PREVIEW = null;          // ข้อมูลกลุ่มจาก groupInvitePreview
 
 // mock fallback — ให้ reviewer เห็นหน้า welcome โดยไม่ต้อง LINE login
-const MOCK_PREVIEW = { name:'ครอบครัวของฉัน', kind:'family', member_count:3, valid:true };
+const MOCK_PREVIEW = {
+  name:'ครอบครัวของฉัน', kind:'family', member_count:3, valid:true,
+  inviter_name:'น้ำหวาน', inviter_picture:'https://i.pravatar.cc/120?img=32', owner_name:'น้ำหวาน'
+};
 
 const KIND_TH = { family:'ครอบครัว', friends:'แก๊งเพื่อน', couple:'คู่รัก' };
+const AVA_COLORS = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
 const $ = s => document.querySelector(s);
 function escHtml(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
 function initial(n){ return (String(n||'?').trim().charAt(0)||'L').toUpperCase(); }
+// สีวงกลม avatar แบบคงที่ตามชื่อ (เลียนแบบ avaColor ของ family.html)
+function avaColor(seed){ const s=String(seed||'?'); return AVA_COLORS[Math.abs([...s].reduce((a,c)=>a+c.charCodeAt(0),0))%AVA_COLORS.length]; }
 // unwrap { ok, data, error } จาก window.API → คืน data (โยน error แบบนุ่ม)
 function unwrap(res){
   if(!res) return null;
@@ -186,18 +228,70 @@ function showEdge(title, msg){
   show('edgeView');
 }
 
-// ===== render welcome จาก preview {name, kind, member_count, ...} =====
+// ===== render welcome จาก preview {name, kind, member_count, inviter_name, inviter_picture, owner_name} =====
 function renderWelcome(p){
   const kind=p.kind||'family';
   const name=p.name||'กลุ่มของเรา';
-  $('#welTitle').textContent='มาเข้ากลุ่ม “'+name+'” กับเรา';
-  $('#welSub').innerHTML='มีคนชวนคุณเข้า<b>'+escHtml(KIND_TH[kind]||'กลุ่ม')+'</b>นี้';
+
+  // --- (a) inviter เป็นพระเอก: รูปโปรไฟล์ + ชื่อ "{ชื่อ} ชวนคุณเข้ากลุ่ม" ---
+  const inviter=(p.inviter_name||'').trim() || (p.owner_name||'').trim();
+  const ava=$('#invAva');
+  if(p.inviter_picture){
+    // รูปโปรไฟล์ LINE — ถ้าโหลดไม่ขึ้น (privacy/หมดอายุ) fallback เป็นวงกลมอักษรย่อ
+    const img=document.createElement('img');
+    img.className='invava';
+    img.alt=inviter||'inviter';
+    img.referrerPolicy='no-referrer';
+    img.onerror=()=>{ paintInviterInitial(inviter); };
+    img.src=p.inviter_picture;
+    ava.replaceWith(img); img.id='invAva';
+  } else {
+    paintInviterInitial(inviter);
+  }
+  if(inviter){
+    $('#welInvite').innerHTML='<b>'+escHtml(inviter)+'</b> ชวนคุณเข้ากลุ่ม';
+    $('#welSub').innerHTML='ตอบรับเพื่อจัดชุดเข้าตีม + เช่าพร้อมกันได้เลย';
+  } else {
+    $('#welInvite').textContent='คุณถูกชวนเข้ากลุ่มนี้';
+    $('#welSub').innerHTML='ตอบรับเพื่อจัดชุดเข้าตีม + เช่าพร้อมกันได้เลย';
+  }
+
+  // --- (b) group card ---
   $('#grpAva').textContent=initial(name);
+  $('#grpAva').style.background=avaColor(name);
   $('#grpKind').textContent=KIND_TH[kind]||'กลุ่ม';
   $('#grpName').textContent=name;
   const cnt=(p.member_count!=null)?p.member_count:0;
   $('#grpCount').textContent=cnt? (cnt+' คนในกลุ่ม') : 'เริ่มต้นกลุ่มใหม่';
+
+  // --- (c) login signalling: ถ้ายังไม่ได้ล็อกอินจริง บอกชัดว่าจะยืนยันด้วย LINE ---
+  applyLoginSignal();
   show('welcomeView');
+}
+
+// fallback avatar: วงกลมสีตามชื่อ + อักษรย่อ (เลียนแบบ avaHtml ของ family.html)
+function paintInviterInitial(inviter){
+  const cur=$('#invAva');
+  const div=document.createElement('div');
+  div.className='invava';
+  div.id='invAva';
+  div.style.background=avaColor(inviter||'L');
+  div.textContent=initial(inviter||'L');
+  cur.replaceWith(div);
+}
+
+// ปุ่ม + sub-note + ขั้นตอน login ปรับตามสถานะ LIVE/ล็อกอิน
+function applyLoginSignal(){
+  const loggedIn = LIVE && CUSTOMER && CUSTOMER.id;
+  const note=$('#joinNote');
+  if(loggedIn){
+    // ล็อกอินแล้ว — แตะแล้วเข้ากลุ่มทันที ไม่ต้องยืนยันซ้ำ
+    note.innerHTML='';
+    const step=$('#stepLogin'); if(step) step.style.display='none';
+  } else {
+    note.innerHTML='<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>ยืนยันด้วย LINE ครั้งเดียว ปลอดภัย</span>';
+    const step=$('#stepLogin'); if(step) step.style.display='';
+  }
 }
 
 // ===== join action =====
