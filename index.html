@@ -805,7 +805,11 @@
         if (q.length < 2){ clearBox(); return; }
         timer = setTimeout(async function(){
           try {
-            var res = await AutocompleteSuggestion.fetchAutocompleteSuggestions({ input: q, sessionToken: token });
+            var res = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+              input: q, sessionToken: token,
+              includedRegionCodes: ['th'],            // โฟกัสสถานที่ในไทยก่อน (ตปท. ค่อยปลดทีหลัง)
+              language: (window.lang === 'en' ? 'en' : 'th'), region: 'th',
+            });
             var sugg = (res && res.suggestions) || [];
             if (!sugg.length){ clearBox(); return; }
             box.innerHTML = '';
