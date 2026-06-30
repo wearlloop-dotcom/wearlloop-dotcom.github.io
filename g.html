@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · เช่าชุดนี้</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7; --ink:#1A1A1A; --soft:#F5F4F2; --soft2:#EFEDE9; --line:#E7E5E1;
+    --muted:#8C8B86; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56;
+    --gold:#C9A86A; --sand:#F2ECDD; --busy:#B5531F;
+    --display:'Poppins','Prompt',sans-serif;
+    --sans:'Inter','Prompt',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:40px}
+  .contain{max-width:520px;margin:0 auto;padding:0 18px}
+  button{font-family:inherit;cursor:pointer}
+  a{color:inherit}
+
+  header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
+  .hbar{display:flex;align-items:center;justify-content:space-between;height:54px}
+  .logo{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:1px}
+  .shopl{font-size:12.5px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .shopl svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  /* garment hero */
+  .photo{width:100%;aspect-ratio:4/5;border-radius:16px;margin-top:16px;background:var(--soft2);object-fit:cover;display:block;border:1px solid var(--line)}
+  .photo.ph{display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--display);font-size:34px;letter-spacing:2px}
+  .eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-top:16px}
+  .gname{font-family:var(--display);font-size:23px;font-weight:600;margin-top:5px;letter-spacing:.3px;line-height:1.25}
+  .gmeta{color:var(--muted);font-size:13px;margin-top:3px}
+  .priceline{display:flex;align-items:baseline;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .priceline .now{font-family:var(--display);font-size:25px;font-weight:700;color:var(--ink)}
+  .priceline .per{font-size:13px;color:var(--muted)}
+  .priceline .worth{font-size:12.5px;color:var(--muted)}
+  .priceline .worth b{color:var(--ink);font-weight:600}
+  .trust{font-size:12px;color:var(--muted);margin-top:7px}
+
+  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:18px}
+  .sectitle{font-family:var(--display);font-size:15px;font-weight:600;margin-bottom:3px}
+  .seccap{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+
+  label.fl{display:block;font-size:12px;letter-spacing:.4px;color:var(--muted);margin:10px 0 5px}
+  input[type=date]{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 13px;font-family:inherit;font-size:15px;color:var(--ink);background:var(--soft)}
+
+  .durchips{display:flex;gap:8px;margin-top:4px}
+  .durchips button{flex:1;background:var(--soft);color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:10px 0;font-size:13.5px;font-weight:500}
+  .durchips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .availmsg{font-size:12.5px;margin-top:10px;display:none}
+  .availmsg.busy{display:block;color:var(--busy)}
+  .availmsg.free{display:block;color:var(--ok)}
+
+  /* summary */
+  #summary{margin-top:14px}
+  .qhd{font-family:var(--display);font-size:13.5px;font-weight:600;margin-bottom:6px}
+  .qrow{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+  .qrow.hl{font-size:16px;font-weight:700;margin-top:6px;padding-top:9px;border-top:1px dashed var(--line)}
+  .qdates{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .paybox{margin-top:14px;border-top:1px solid var(--line);padding-top:14px;text-align:center}
+  .paybox .qhd{text-align:left}
+  #ppqr canvas{width:200px;max-width:64%;height:auto;border:1px solid var(--line);border-radius:10px;padding:6px;background:#fff}
+  .payamt{font-size:13.5px;margin-top:7px}
+  .paynote{font-size:12px;color:var(--muted);margin-top:6px;text-align:left;line-height:1.5}
+
+  .btn{background:var(--ink);color:#fff;border:none;border-radius:10px;padding:14px 20px;font-size:15px;font-weight:600;letter-spacing:.02em;width:100%;margin-top:16px}
+  .btn.sage{background:var(--sage)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .signhint{font-size:12px;color:var(--muted);text-align:center;margin-top:9px;line-height:1.5}
+
+  /* confirmed */
+  .done{text-align:center;padding:8px 4px 4px}
+  .done .di{width:60px;height:60px;margin:0 auto 14px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center}
+  .done .di .ck{width:27px;height:27px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-2px,-3px);display:block}
+  .done h4{font-family:var(--display);font-size:18px;color:var(--ok);font-weight:600;margin-bottom:6px}
+  .done p{color:var(--muted);max-width:380px;margin:0 auto}
+
+  /* edge state */
+  .edge{text-align:center;padding:48px 18px;color:var(--muted)}
+  .edge .ei{width:54px;height:54px;margin:0 auto 14px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center}
+  .edge .ei svg{width:26px;height:26px;stroke:var(--sage);fill:none;stroke-width:1.6}
+  .edge h4{font-family:var(--display);font-size:17px;color:var(--ink);font-weight:600;margin-bottom:6px}
+  .edge .btn{max-width:260px;margin:16px auto 0}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:11px 18px;border-radius:30px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:50;max-width:90%}
+  .toast.show{opacity:.96}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<header><div class="contain hbar">
+  <div class="logo">LLOOP</div>
+  <a class="shopl" href="index.html"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg> ดูทั้งร้าน</a>
+</div></header>
+
+<div class="contain" id="root">
+  <div class="edge"><p>กำลังโหลดชุด…</p></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=51"></script>
+<script src="data.js?v=51"></script>
+<script src="liffAuth.js?v=51"></script>
+<script src="me-api.js?v=51"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="promptpay.js?v=51"></script>
+<script src="api.js?v=51"></script>
+<script>
+// ============================================================
+//  g.html — สแกน QR ที่ป้ายชุด/บูธ → ดูชุด+ราคา → เลือกวัน → จองในระบบ
+//  QR ที่ป้าย/บูธชี้มาที่  https://lloop.app/g.html?c=<code>
+//  ใช้ window.API จริง (เหมือนหน้า index) — login LINE, quote, bookCart, PromptPay
+// ============================================================
+const $ = s => document.querySelector(s);
+const baht = n => '฿' + Number(n || 0).toLocaleString('th-TH');
+function addDays(s, n){ const d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
+function fmtDate(s){ try { return new Date(s + 'T00:00:00').toLocaleDateString('th-TH', { day:'numeric', month:'short' }); } catch(e){ return s; } }
+function todayStr(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+let _tt; function toast(m){ const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2600); }
+
+let CUSTOMER = null, G = null, PAY = null, BOOKED = [];
+let gDur = 3, lastQuote = null, booked = false;
+
+// อ่านรหัสชุดจาก ?c= หรือ ?code= (เผื่อ path /g/<code> ที่ rewrite มา)
+function readCode(){
+  const u = new URL(location.href);
+  let c = u.searchParams.get('c') || u.searchParams.get('code') || '';
+  if (!c) { const m = location.pathname.match(/\/g\/([^/?#]+)/); if (m) c = decodeURIComponent(m[1]); }
+  return (c || '').trim().toUpperCase();
+}
+
+// ช่วงที่ถูกจองทับกับ [from,to] ไหม (UX hint — ตัวจริง book_cart เป็นคนตัดสิน)
+function rangeBusy(from, to){
+  return (BOOKED || []).some(r => {
+    const rf = r.from || r.from_date || r.start_date || r.start;
+    const rt = r.to || r.to_date || r.end_date || r.end;
+    if (!rf || !rt) return false;
+    return from <= rt && to >= rf;
+  });
+}
+
+(async function init(){
+  const code = readCode();
+  let state = null;
+  try { state = await window.API.init(); } catch (e) { console.warn(e); }
+  if (!state) { return renderEdge('โหลดไม่สำเร็จ', 'ลองสแกนใหม่อีกครั้ง หรือเปิดดูทั้งร้านได้เลยค่ะ'); }
+  CUSTOMER = state.CUSTOMER || {};
+  if (!code) return renderEdge('ไม่พบรหัสชุด', 'สแกน QR ที่ป้ายชุดอีกครั้งนะคะ');
+  G = (state.GARMENTS || []).find(x => String(x.code || '').toUpperCase() === code);
+  if (!G) return renderEdge('ชุดนี้ยังไม่เปิดให้เช่า', 'อาจกำลังซัก/เตรียม หรือรหัสไม่ตรง — เลือกชุดอื่นในร้านได้เลยค่ะ');
+  window.track?.('view_item', G.code, { price: G.price });
+  try { PAY = await window.API.payInfo(); } catch (e) {}
+  try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) { BOOKED = []; }
+  renderItem();
+})();
+
+function renderEdge(title, body){
+  $('#root').innerHTML = `<div class="edge">
+    <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg></div>
+    <h4>${title}</h4><p>${body}</p>
+    <a class="btn sage" href="index.html" style="display:block;text-decoration:none">ดูทั้งร้าน</a>
+  </div>`;
+}
+
+function renderItem(){
+  const signedIn = !!(CUSTOMER && CUSTOMER.id);
+  const photo = G.photo
+    ? `<img class="photo" src="${G.photo}" alt="${G.name}" referrerpolicy="no-referrer">`
+    : `<div class="photo ph" style="background:${G.bg || '#EFEDE9'}">${(G.code || 'LLOOP')}</div>`;
+  const worth = G.retail ? `<span class="worth">มูลค่าชุด <b>${baht(G.retail)}</b></span>` : '';
+  const rented = (G.timesRented > 0) ? `เคยถูกเช่า ${G.timesRented} ครั้ง` : 'ชุดพร้อมเช่า';
+  const cta = signedIn
+    ? `<button class="btn" id="bookBtn" onclick="onBook()" disabled>เลือกวันก่อนนะคะ</button>`
+    : `<button class="btn sage" onclick="window.LiffAuth.signIn()">เข้าสู่ระบบด้วย LINE เพื่อจอง</button>
+       <div class="signhint">เข้าระบบด้วย LINE ครั้งเดียว แล้วเลือกวันจองได้เลย</div>`;
+  $('#root').innerHTML = `
+    ${photo}
+    <div class="eyebrow">เช่าชุดนี้</div>
+    <h1 class="gname">${G.name || G.code}</h1>
+    <div class="gmeta">${[G.brand, G.code].filter(Boolean).join(' · ')}</div>
+    <div class="priceline">
+      <span class="now">${baht(G.price)}</span><span class="per">/วัน เริ่มต้น</span>
+      ${worth}
+    </div>
+    <div class="trust">${rented} · มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
+
+    <div class="sec">
+      <div class="sectitle">เลือกวันที่จะใช้</div>
+      <div class="seccap">วันแรกคือวันรับ/วันใช้งาน — เราเช็กให้ทันทีว่าว่างไหม</div>
+      <label class="fl">วันที่ใช้งาน</label>
+      <input type="date" id="useDate" min="${todayStr()}" onchange="onPick()">
+      <label class="fl">เช่ากี่วัน</label>
+      <div class="durchips" id="durchips">
+        <button data-d="1" onclick="setDur(1)">1 วัน</button>
+        <button data-d="3" class="on" onclick="setDur(3)">3 วัน</button>
+        <button data-d="5" onclick="setDur(5)">5 วัน</button>
+      </div>
+      <div class="availmsg" id="availMsg"></div>
+      <div id="summary"></div>
+      ${cta}
+    </div>`;
+}
+
+function setDur(d){
+  gDur = d;
+  document.querySelectorAll('#durchips button').forEach(b => b.classList.toggle('on', +b.dataset.d === d));
+  onPick();
+}
+
+async function onPick(){
+  const from = $('#useDate') && $('#useDate').value;
+  const sum = $('#summary'), msg = $('#availMsg'), btn = $('#bookBtn');
+  if (!from){ sum.innerHTML = ''; if (msg) msg.className = 'availmsg'; if (btn){ btn.disabled = true; btn.textContent = 'เลือกวันก่อนนะคะ'; } return; }
+  const to = addDays(from, gDur - 1);
+  if (rangeBusy(from, to)){
+    sum.innerHTML = '';
+    msg.className = 'availmsg busy';
+    msg.textContent = 'ช่วงวันนี้มีคนจองอยู่ — ลองเลื่อนวัน หรือดูชุดคล้ายกันในร้านนะคะ';
+    if (btn){ btn.disabled = true; btn.textContent = 'ช่วงนี้ไม่ว่าง'; }
+    return;
+  }
+  msg.className = 'availmsg free';
+  msg.textContent = 'ว่างช่วงวันนี้ — จองได้เลย';
+  let q = null;
+  try { q = await window.API.quote(G.code, CUSTOMER, from, to); } catch (e) {}
+  lastQuote = q;
+  if (q && !q.error){
+    const row = (k, v, hl) => `<div class="qrow${hl ? ' hl' : ''}"><span>${k}</span><b>${v}</b></div>`;
+    const hasPP = PAY && (PAY.pay_promptpay_id || PAY.pay_promptpay_qr);
+    const payBlock = !hasPP ? '' : `
+      <div class="paybox">
+        <div class="qhd">ช่องทางชำระ</div>
+        ${PAY.pay_promptpay_id ? `<div id="ppqr"></div>`
+          : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
+        <div class="payamt">สแกนแล้วโอน <b>${baht(q.total)}</b></div>
+        <div class="paynote">${PAY.pay_note || 'จองก่อนเพื่อล็อกชุด แล้วโอน + แนบสลิปในแชต LLOOP ได้เลยค่ะ'}</div>
+      </div>`;
+    sum.innerHTML = `
+      <div class="qhd">สรุปยอด · ${q.days} วัน</div>
+      ${row('ค่าเช่า', baht(q.rate))}
+      ${q.deposit > 0 ? row('มัดจำ (คืนหลังตรวจชุด)', baht(q.deposit)) : ''}
+      ${row('ค่าส่ง', q.shipping > 0 ? baht(q.shipping) : 'ส่งฟรี')}
+      ${row('รวมโอน', baht(q.total), true)}
+      <div class="qdates">วันแรก (วันรับ/ใช้งาน): <b>${fmtDate(q.use_date)}</b> · เช่า ${q.days} วัน</div>
+      <div class="qdates">จัดส่งราว ${fmtDate(q.ship_date)} · กำหนดคืน <b>${fmtDate(q.return_date)}</b></div>
+      ${q.kyc_required ? `<div class="qdates">ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว (แนบบัตร + IG/FB) ช่วยลดมัดจำได้ — ทำในแชตหลังจองได้เลย</div>` : ''}
+      ${payBlock}`;
+    if (PAY && PAY.pay_promptpay_id && window.promptpayBrandedQR){
+      const el = document.getElementById('ppqr');
+      if (el) window.promptpayBrandedQR(el, PAY.pay_promptpay_id, q.total, PAY.pay_promptpay_type);
+    }
+  } else { sum.innerHTML = ''; }
+  if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
+}
+
+async function onBook(){
+  const from = $('#useDate') && $('#useDate').value;
+  if (!from){ toast('เลือกวันก่อนนะคะ'); return; }
+  if (!(CUSTOMER && CUSTOMER.id)){ window.LiffAuth.signIn(); return; }
+  const to = addDays(from, gDur - 1);
+  const btn = $('#bookBtn'); if (btn){ btn.disabled = true; btn.textContent = 'กำลังจอง…'; }
+  // เช็กว่างวันแรกอีกชั้น (กันชนนาทีสุดท้าย) — book_cart เป็นคนตัดสินจริง
+  let free = true; try { free = await window.API.availableOn(G.id, from); } catch (e) {}
+  if (free === false){
+    if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
+    try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) {}
+    onPick();
+    return;
+  }
+  let res = null;
+  try { res = await window.API.bookCart(CUSTOMER, [G.code], from, to); } catch (e) {}
+  const data = res && res.data;
+  const okBooked = res && !res.error && data && !data.error && !((data.unavailable || []).length);
+  if (okBooked){
+    booked = true;
+    window.track?.('booked', G.code, { total: lastQuote && lastQuote.total });
+    renderDone(from, to);
+  } else {
+    if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
+    toast('ชุดนี้เพิ่งถูกจองช่วงนั้นพอดี ลองวันอื่นนะคะ');
+    try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) {}
+    onPick();
+  }
+}
+
+function renderDone(from, to){
+  const q = lastQuote;
+  const hasPP = PAY && (PAY.pay_promptpay_id || PAY.pay_promptpay_qr);
+  const total = q ? q.total : null;
+  const payBlock = !(hasPP && total) ? '' : `
+    <div class="paybox">
+      <div class="qhd">โอนเพื่อยืนยัน</div>
+      ${PAY.pay_promptpay_id ? `<div id="ppqr2"></div>`
+        : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
+      <div class="payamt">สแกนแล้วโอน <b>${baht(total)}</b></div>
+      <div class="paynote">โอนแล้วแนบสลิปในแชต LLOOP — ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ</div>
+    </div>`;
+  $('#root').innerHTML = `
+    <div class="sec">
+      <div class="done">
+        <div class="di"><span class="ck"></span></div>
+        <h4>ล็อกชุดไว้ให้แล้ว</h4>
+        <p>${G.name || G.code} · ใช้วันที่ ${fmtDate(from)}${gDur > 1 ? ` ถึง ${fmtDate(to)}` : ''}</p>
+      </div>
+      ${payBlock}
+      <a class="btn" href="index.html?tab=orders" style="display:block;text-decoration:none;text-align:center">ดูออเดอร์ของฉัน</a>
+    </div>`;
+  if (PAY && PAY.pay_promptpay_id && total && window.promptpayBrandedQR){
+    const el = document.getElementById('ppqr2');
+    if (el) window.promptpayBrandedQR(el, PAY.pay_promptpay_id, total, PAY.pay_promptpay_type);
+  }
+}
+</script>
+</body>
+</html>

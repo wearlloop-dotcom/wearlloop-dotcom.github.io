@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -293,10 +293,32 @@ body::before{
   letter-spacing:.2px;
 }
 .closing-sub{font-size:12px;color:var(--line);margin-top:12px;letter-spacing:.5px}
+
+/* ── LANG TOGGLE ── */
+.lang-toggle{
+  position:fixed;top:14px;right:14px;z-index:100;
+  display:flex;align-items:center;gap:2px;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:20px;padding:2px;
+  font-family:var(--display);box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+.lang-toggle button{
+  font-family:inherit;font-size:10.5px;font-weight:600;letter-spacing:.06em;
+  border:0;background:transparent;color:var(--muted);
+  padding:5px 11px;border-radius:18px;cursor:pointer;
+  transition:background .2s ease,color .2s ease;-webkit-tap-highlight-color:transparent;
+}
+.lang-toggle button.active{background:var(--ink);color:var(--card)}
 </style>
 </head>
 <body>
 <div id="pbar"></div>
+
+<div class="lang-toggle" id="langToggle">
+  <button data-lang="en">EN</button>
+  <button data-lang="th">ไทย</button>
+</div>
+
 <div class="wrap">
 
   <!-- HERO -->
@@ -320,7 +342,7 @@ body::before{
       <div class="carousel-slide">
         <div class="slide-placeholder">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>รูปที่ 1</span>
+          <span data-i18n="photo.1">Photo 1</span>
         </div>
       </div>
 
@@ -328,7 +350,7 @@ body::before{
       <div class="carousel-slide">
         <div class="slide-placeholder">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>รูปที่ 2</span>
+          <span data-i18n="photo.2">Photo 2</span>
         </div>
       </div>
 
@@ -336,7 +358,7 @@ body::before{
       <div class="carousel-slide">
         <div class="slide-placeholder">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>รูปที่ 3</span>
+          <span data-i18n="photo.3">Photo 3</span>
         </div>
       </div>
 
@@ -351,12 +373,12 @@ body::before{
 
   <!-- STORY 1: WHY -->
   <div class="story" data-reveal>
-    <div class="story-label">เรื่องของเรา</div>
-    <div class="story-head">ชุดสวยไม่ต้องเป็นเจ้าของ</div>
-    <div class="story-body">
-      เราเชื่อว่าตู้เสื้อผ้าที่ดีที่สุดคือตู้ที่ <em>เราแชร์กัน</em><br>
-      เช่าชุดที่ใช่สำหรับวันนั้น ใส่ดี คืนง่าย<br>
-      แล้วปล่อยให้ชุดนั้นไปสร้างความสุขให้คนต่อไป
+    <div class="story-label" data-i18n="s1.label">Our story</div>
+    <div class="story-head" data-i18n="s1.head">Beautiful clothes you don't have to own</div>
+    <div class="story-body" data-i18n="s1.body">
+      We believe the best wardrobe is one <em>we share</em><br>
+      Rent the right piece for the day — easy to wear, easy to return<br>
+      then let it go bring joy to the next person
     </div>
 
     <div class="cards" style="margin-top:20px">
@@ -367,10 +389,10 @@ body::before{
           </svg>
         </div>
         <div class="card-text">
-          <div class="card-platform">เริ่มเลย</div>
-          <div class="card-desc">จองชุด · ให้ AI สไตลิสต์ช่วยเลือก</div>
+          <div class="card-platform" data-i18n="s1.cta.platform">Start now</div>
+          <div class="card-desc" data-i18n="s1.cta.desc">Book a piece · let the AI stylist help you choose</div>
         </div>
-        <span class="pill">ลองฟรี</span>
+        <span class="pill" data-i18n="s1.cta.pill">Try free</span>
         <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
       </a>
     </div>
@@ -378,11 +400,11 @@ body::before{
 
   <!-- STORY 2: FOLLOW -->
   <div class="story" data-reveal>
-    <div class="story-label">ติดตามลุค</div>
-    <div class="story-head">แรงบันดาลใจใหม่ทุกวัน</div>
-    <div class="story-body">
-      ดูลุคจริงจากลูกค้าจริง ไม่มีกรอง ไม่มีโฆษณา<br>
-      แค่เสื้อผ้าดีๆ บนคนจริงๆ ที่รักโลกเหมือนกัน
+    <div class="story-label" data-i18n="s2.label">Follow the looks</div>
+    <div class="story-head" data-i18n="s2.head">New inspiration every day</div>
+    <div class="story-body" data-i18n="s2.body">
+      Real looks from real customers — no filters, no ads<br>
+      Just good clothes on real people who love the planet too
     </div>
 
     <div class="cards">
@@ -435,7 +457,7 @@ body::before{
         </div>
         <div class="card-text">
           <div class="card-platform">LINE Official</div>
-          <div class="card-desc">พูดคุย · สอบถาม · รับโปรพิเศษ</div>
+          <div class="card-desc" data-i18n="line.desc">Chat · ask · get special offers</div>
         </div>
         <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
       </a>
@@ -444,12 +466,12 @@ body::before{
 
   <!-- STORY 3: COMMUNITY -->
   <div class="story" data-reveal>
-    <div class="story-label">เข้าวง</div>
-    <div class="story-head">The Loop — คนที่รักโลกเหมือนกัน</div>
-    <div class="story-body">
-      ชุมชนของคนที่มั่นใจ สวยที่สุดในเวอร์ชั่นตัวเอง <em>โดยไม่ต้องแพง</em><br>
-      แชร์ลุค รับเครดิต พูดคุยเรื่องแฟชั่นยั่งยืน<br>
-      เข้ามาฟรี ออกไปพร้อมไอเดียใหม่
+    <div class="story-label" data-i18n="s3.label">Join the circle</div>
+    <div class="story-head" data-i18n="s3.head">The Loop — people who love the planet</div>
+    <div class="story-body" data-i18n="s3.body">
+      A community of people who feel confident, the best version of themselves <em>without paying a fortune</em><br>
+      Share looks, earn credit, talk sustainable fashion<br>
+      Free to join, leave with fresh ideas
     </div>
 
     <!-- MEDIA: community video — swap src เป็นวิดีโอจริงได้เลย -->
@@ -462,7 +484,7 @@ body::before{
       -->
       <div class="media-placeholder">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-        <span>วางวิดีโอที่นี่</span>
+        <span data-i18n="comm.media">Drop a video here</span>
       </div>
     </div>
 
@@ -477,9 +499,9 @@ body::before{
         </div>
         <div class="card-text">
           <div class="card-platform">LINE OpenChat</div>
-          <div class="card-desc">The Loop — ชุมชน LLOOP</div>
+          <div class="card-desc" data-i18n="openchat.desc">The Loop — the LLOOP community</div>
         </div>
-        <span class="pill">ฟรี</span>
+        <span class="pill" data-i18n="openchat.pill">Free</span>
         <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
       </a>
     </div>
@@ -487,11 +509,11 @@ body::before{
 
   <!-- STORY 4: SHOP -->
   <div class="story" data-reveal>
-    <div class="story-label">หาเราได้ที่</div>
-    <div class="story-head">สะดวกที่ไหนก็ได้เลย</div>
-    <div class="story-body">
-      ช้อปผ่านแพลตฟอร์มที่คุ้นเคย<br>
-      สินค้าเดียวกัน คลังเดียวกัน บริการเดียวกัน
+    <div class="story-label" data-i18n="s4.label">Find us on</div>
+    <div class="story-head" data-i18n="s4.head">Shop wherever's easy</div>
+    <div class="story-body" data-i18n="s4.body">
+      Shop on the platforms you already know<br>
+      Same products, same inventory, same service
     </div>
 
     <div class="cards">
@@ -533,7 +555,7 @@ body::before{
         </div>
         <div class="card-text">
           <div class="card-platform">LINE My Shop</div>
-          <div class="card-desc">ซื้อผ่าน LINE ได้เลย</div>
+          <div class="card-desc" data-i18n="lineshop.desc">Buy right through LINE</div>
         </div>
         <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
       </a>
@@ -542,8 +564,8 @@ body::before{
 
   <!-- CLOSING -->
   <div class="closing" data-reveal>
-    <div class="closing-quote">
-      "แชร์ลุคสวย ช่วยรักษ์โลก"
+    <div class="closing-quote" data-i18n="closing.quote">
+      "Share your look, help the planet"
     </div>
     <div class="closing-sub">— lloop.th —</div>
   </div>
@@ -551,6 +573,59 @@ body::before{
 </div>
 
 <script>
+// ── i18n: English default, Thai switchable ──
+const I18N = {
+  th: {
+    's1.label':'เรื่องของเรา',
+    's1.head':'ชุดสวยไม่ต้องเป็นเจ้าของ',
+    's1.body':'เราเชื่อว่าตู้เสื้อผ้าที่ดีที่สุดคือตู้ที่ <em>เราแชร์กัน</em><br>เช่าชุดที่ใช่สำหรับวันนั้น ใส่ดี คืนง่าย<br>แล้วปล่อยให้ชุดนั้นไปสร้างความสุขให้คนต่อไป',
+    's1.cta.platform':'เริ่มเลย',
+    's1.cta.desc':'จองชุด · ให้ AI สไตลิสต์ช่วยเลือก',
+    's1.cta.pill':'ลองฟรี',
+    's2.label':'ติดตามลุค',
+    's2.head':'แรงบันดาลใจใหม่ทุกวัน',
+    's2.body':'ดูลุคจริงจากลูกค้าจริง ไม่มีกรอง ไม่มีโฆษณา<br>แค่เสื้อผ้าดีๆ บนคนจริงๆ ที่รักโลกเหมือนกัน',
+    'line.desc':'พูดคุย · สอบถาม · รับโปรพิเศษ',
+    's3.label':'เข้าวง',
+    's3.head':'The Loop — คนที่รักโลกเหมือนกัน',
+    's3.body':'ชุมชนของคนที่มั่นใจ สวยที่สุดในเวอร์ชั่นตัวเอง <em>โดยไม่ต้องแพง</em><br>แชร์ลุค รับเครดิต พูดคุยเรื่องแฟชั่นยั่งยืน<br>เข้ามาฟรี ออกไปพร้อมไอเดียใหม่',
+    'comm.media':'วางวิดีโอที่นี่',
+    'openchat.desc':'The Loop — ชุมชน LLOOP',
+    'openchat.pill':'ฟรี',
+    's4.label':'หาเราได้ที่',
+    's4.head':'สะดวกที่ไหนก็ได้เลย',
+    's4.body':'ช้อปผ่านแพลตฟอร์มที่คุ้นเคย<br>สินค้าเดียวกัน คลังเดียวกัน บริการเดียวกัน',
+    'lineshop.desc':'ซื้อผ่าน LINE ได้เลย',
+    'closing.quote':'"แชร์ลุคสวย ช่วยรักษ์โลก"',
+    'photo.1':'รูปที่ 1','photo.2':'รูปที่ 2','photo.3':'รูปที่ 3'
+  }
+};
+// snapshot the EN strings already in the markup so we can switch back
+const EN = {};
+document.querySelectorAll('[data-i18n]').forEach(el => { EN[el.dataset.i18n] = el.innerHTML.trim(); });
+
+function setLang(lang){
+  const dict = lang === 'th' ? I18N.th : EN;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = dict[el.dataset.i18n];
+    if (v != null) el.innerHTML = v;
+  });
+  document.documentElement.lang = lang;
+  document.querySelectorAll('#langToggle button').forEach(b =>
+    b.classList.toggle('active', b.dataset.lang === lang));
+  try { localStorage.setItem('lloop_lang', lang); } catch(e){}
+}
+
+(function initLang(){
+  let saved = 'en';
+  try { saved = localStorage.getItem('lloop_lang') || 'en'; } catch(e){}
+  setLang(saved);
+  document.getElementById('langToggle').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-lang]');
+    if (btn) setLang(btn.dataset.lang);
+  });
+})();
+
 // scroll progress
 const pbar = document.getElementById('pbar');
 window.addEventListener('scroll', () => {

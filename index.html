@@ -79,6 +79,18 @@
   .sp-chip{font-size:11px;color:#6B5B3E;background:#F3ECDC;border-radius:20px;padding:3px 10px}
   .sp-chip b{color:#3D2600}
   .sp-chip.hot{background:#F5E0D5;color:#A4421E}
+  .sp-chip.live{background:#E7F0EA;color:#1F6B43;display:inline-flex;align-items:center;gap:5px}
+  .sp-chip.live .lvdot{width:6px;height:6px;border-radius:50%;background:#2B934E;display:inline-block;animation:lvpulse 1.6s ease-in-out infinite}
+  @keyframes lvpulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .recowith{margin-top:4px}
+  .recorow{display:flex;gap:10px;overflow-x:auto;padding:4px 0 2px;-webkit-overflow-scrolling:touch}
+  .recorow .gthumb{flex:0 0 116px;cursor:pointer}
+  .recorow .gth-img{width:116px;height:150px;border-radius:8px;overflow:hidden;background:#EadFce}
+  .recorow .gth-img img{width:100%;height:100%;object-fit:cover}
+  .recorow .gth-nm{font-size:12px;margin-top:5px;color:var(--ink)}
+  .recorow .gth-pr{font-size:11px;color:var(--muted)}
+  .streakrow{margin-top:10px;font-size:11.5px;color:#9A7B3C;display:flex;align-items:center;gap:6px}
+  .streakrow .streakdot{color:#C0892B;font-size:9px}
 
   /* ===== header ===== */
   header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
@@ -333,6 +345,8 @@
   .availmsg.ok{color:var(--ok)}
   .availmsg.busy{color:#A32D2D}
   .availmsg.checking{color:var(--muted);font-weight:500}
+  .queuebtn{margin-left:8px;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--sage,#6FB3A6);background:transparent;border:1px solid var(--sage,#6FB3A6);border-radius:14px;padding:3px 12px;cursor:pointer;white-space:nowrap}
+  .queuebtn:hover{background:var(--sage,#6FB3A6);color:#fff}
 
   /* ระยะเวลาเช่า */
   .durpick{display:flex;align-items:center;gap:10px;padding:12px 18px 0;flex-wrap:wrap}
@@ -911,10 +925,10 @@
 <script src="i18n.js?v=49"></script>
 <script src="data.js?v=45"></script>
 <script src="liffAuth.js?v=45"></script>
-<script src="me-api.js?v=51"></script>
+<script src="me-api.js?v=52"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=45"></script>
-<script src="api.js?v=51"></script>
+<script src="api.js?v=52"></script>
 <script>
   /* Spotlight — ดึงชุดที่เช่าน้อยสุดมาโชว์รูปใหญ่ + สลับสไลด์อัตโนมัติ (visual layer) */
   window.renderSpotlight = function(garments){

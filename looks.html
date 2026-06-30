@@ -81,6 +81,17 @@
   .occ::-webkit-scrollbar{display:none}
   .ochip{flex-shrink:0;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
   .ochip.on{background:var(--sand);color:var(--ink);border-color:var(--gold)}
+  .phtag{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.94);color:#1A1A1A;font-size:11px;font-weight:600;padding:6px 11px;border-radius:20px;text-decoration:none;max-width:88%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .phtag .dot{width:7px;height:7px;border-radius:50%;background:var(--clay);flex-shrink:0}
+  .fitchip{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:var(--sage-bg);color:var(--ok);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:600}
+  .fitchip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .hubs{display:flex;gap:10px;overflow-x:auto;padding:14px 0 4px;scrollbar-width:none}
+  .hubs::-webkit-scrollbar{display:none}
+  .hub{flex-shrink:0;width:96px;cursor:pointer}
+  .hub .hc{width:96px;height:120px;border-radius:12px;overflow:hidden;background:var(--soft);position:relative;border:1px solid var(--line)}
+  .hub .hc img{width:100%;height:100%;object-fit:cover}
+  .hub .hl{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 7px;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);color:#fff;font-size:12px;font-weight:600}
+  .hub .hn{font-size:9.5px;opacity:.85;font-weight:500}
   .tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
   .tagln{font-size:11.5px;color:var(--sage);font-weight:600;cursor:pointer}
   .tagclr{display:inline-flex;align-items:center;gap:6px;background:var(--sand);border:1px solid var(--gold);border-radius:20px;padding:5px 12px;font-size:12.5px;font-weight:600;margin-top:12px;cursor:pointer}
@@ -146,6 +157,7 @@
     <h1 class="htitle">The Loop Looks</h1>
     <p class="hsub">ลุคจริงจากคนใน loop — กดเช่าตามได้เลย · แชร์ลุคของคุณ รับเครดิต</p>
   </div>
+  <div class="hubs" id="hubs"></div>
   <div class="tabs" id="tabs">
     <button class="tab on" data-tab="all" onclick="switchTab('all')">ทั้งหมด</button>
     <button class="tab" data-tab="following" onclick="switchTab('following')">ที่ตามอยู่</button>
@@ -175,8 +187,8 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=49"></script>
 <script src="liffAuth.js?v=49"></script>
-<script src="me-api.js?v=51"></script>
-<script src="api.js?v=51"></script>
+<script src="me-api.js?v=52"></script>
+<script src="api.js?v=52"></script>
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
@@ -202,9 +214,19 @@ async function boot(){
   if(LIVE){ try{ LIKED=new Set(await window.API.myLikes()); FOLLOWING=new Set(await window.API.myFollowing()); SAVED=new Set(await window.API.mySaves()); }catch(e){} }
   renderFeed();
   renderOcc();
+  renderHubs();
   $('#shareBtn').onclick = openShare;
 }
 
+async function renderHubs(){
+  let hubs=[]; try{ hubs = await window.API.occasionHubs(); }catch(e){}
+  const el=$('#hubs'); if(!el) return;
+  if(!hubs.length){ el.style.display='none'; return; }
+  el.style.display='flex';
+  el.innerHTML = hubs.map(h=>`<div class="hub" onclick="filterOcc('${esc(h.occasion)}')">
+    <div class="hc">${h.cover?`<img src="${esc(h.cover)}" loading="lazy">`:''}
+      <div class="hl">${esc(h.occasion)}<div class="hn">${h.count} ลุค</div></div></div></div>`).join('');
+}
 async function renderOcc(){
   let occs=[]; try{ occs = await window.API.lookOccasions(); }catch(e){}
   const el=$('#occ'); if(!el) return;
@@ -236,19 +258,27 @@ function myRefUrl(){
   return location.origin + location.pathname.replace(/looks\.html$/,'index.html') + (h?`?ref=${encodeURIComponent(h)}`:'');
 }
 
+const FIT_TH={true:'พอดีตัว',large:'เผื่อ/ใหญ่นิด',small:'ฟิต/เล็กนิด'};
+function fitStr(c){
+  const p=[]; if(c.wearer_height_cm) p.push('สูง '+c.wearer_height_cm); if(c.wearer_size) p.push('ไซซ์ '+esc(c.wearer_size));
+  if(FIT_TH[c.fit_note]) p.push(FIT_TH[c.fit_note]); return p.join(' · ');
+}
 function cardHtml(c){
   const cr = c.creator||{}, g = c.garment||{};
   const av = cr.avatar ? `<img class="av" src="${esc(cr.avatar)}" alt="">` : `<span class="av"></span>`;
   const tier = TIER_TH[cr.tier]||'';
   const tags = (Array.isArray(c.tags)&&c.tags.length)
     ? `<div class="tagrow">${c.tags.slice(0,4).map(t=>`<span class="tagln" onclick="filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>` : '';
+  const fit = fitStr(c);
+  const phtag = g.code ? `<a class="phtag" href="${lookUrl(c)}" onclick="event.stopPropagation()"><span class="dot"></span>เช่าชุดนี้ · ${esc(g.name||g.code)}</a>` : '';
   return `<div class="card">
-    <div class="ph" onclick="openStory('${c.id}')">${c.photo?`<img src="${esc(c.photo)}" loading="lazy" alt="">`:''}${c.featured?`<span class="feat">ลุคแห่งสัปดาห์</span>`:''}</div>
+    <div class="ph" onclick="openStory('${c.id}')">${c.photo?`<img src="${esc(c.photo)}" loading="lazy" alt="">`:''}${c.featured?`<span class="feat">ลุคแห่งสัปดาห์</span>`:''}${phtag}</div>
     <div class="cbody">
       <div class="crow">${av}<div style="min-width:0">
         <div class="cname" onclick="openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}</div>
         ${tier?`<div class="tier">${esc(tier)}</div>`:''}</div></div>
       ${c.caption?`<div class="cap">${esc(c.caption)}</div>`:''}
+      ${fit?`<div class="fitchip"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>${fit}</div>`:''}
       ${tags}
       ${g.code?`<div class="gchip"><div class="gname">ใส่ <b>${esc(g.name||g.code)}</b>${g.price?` · ${baht(g.price)}`:''}</div>
         <a class="rentbtn" href="${lookUrl(c)}">เช่าลุคนี้</a></div>`:''}
@@ -338,6 +368,7 @@ function renderStory(){
     </div>
     <div class="info">
       ${c.caption?`<div class="scap">${esc(c.caption)}</div>`:''}
+      ${fitStr(c)?`<div class="scap" style="color:#E4C98A;font-size:12.5px">${fitStr(c)}</div>`:''}
       ${tags}
       ${canLike?`<div class="reacts" id="reacts-${c.id}">
         ${[['love','รัก'],['wow','ว้าว'],['want','อยากได้'],['fire','แรง']].map(([k,l])=>`<button class="react" data-k="${k}" onclick="reactLook('${c.id}','${k}')">${l}</button>`).join('')}
@@ -391,6 +422,7 @@ async function switchTab(tab){
   const feed=$('#feed'), board=$('#board'), occ=$('#occ');
   // chips กรองโอกาส โชว์เฉพาะแท็บ "ทั้งหมด"
   if(occ) occ.style.display = (tab==='all') ? '' : 'none';
+  const hb=$('#hubs'); if(hb) hb.style.display = (tab==='all' && hb.innerHTML) ? 'flex' : 'none';
   if(tab==='board'){ feed.classList.add('hide'); board.classList.remove('hide'); return renderBoard(); }
   board.classList.add('hide'); feed.classList.remove('hide');
   if(tab==='following'){
@@ -559,7 +591,15 @@ async function openShare(){
     <label class="lbl">แคปชั่น (ไม่บังคับ)</label>
     <textarea id="shCap" placeholder="เล่าเรื่องลุคนี้สั้น ๆ ใส่ไปงานไหน รู้สึกยังไง"></textarea>
     <label class="lbl">โอกาส (ไม่บังคับ)</label>
-    <input class="inp" id="shOcc" placeholder="เช่น งานแต่ง, คาเฟ่, ทำงาน">
+    <select class="inp" id="shOcc"><option value="">— เลือกโอกาส —</option>
+      ${['งานแต่ง','รับปริญญา','ทำงาน','คาเฟ่','เดท','ปาร์ตี้','งานบุญ','สงกรานต์','ลำลอง','ทริป'].map(o=>`<option>${o}</option>`).join('')}</select>
+    <div class="lbl" style="margin-top:14px">ฟิต/ไซซ์ (ช่วยคนอื่นตัดสินใจ — ไม่บังคับ)</div>
+    <div style="display:flex;gap:8px">
+      <input class="inp" id="shHeight" inputmode="numeric" placeholder="สูง (ซม.)" style="flex:1">
+      <input class="inp" id="shSize" placeholder="ไซซ์ที่เช่า" style="flex:1">
+    </div>
+    <select class="inp" id="shFit" style="margin-top:8px"><option value="">ใส่แล้วรู้สึก…</option>
+      <option value="true">พอดีตัว</option><option value="large">เผื่อ/ใหญ่นิดหน่อย</option><option value="small">ฟิต/เล็กนิดหน่อย</option></select>
     <label class="lbl" style="display:flex;align-items:flex-start;gap:9px;font-weight:500;margin-top:14px">
       <input type="checkbox" id="shCross" style="width:auto;margin-top:3px">
       <span>ยินยอมให้ LLOOP นำลุคนี้ไปรีโพสต์ในไอจี/เพจของแบรนด์ เพื่อช่วยให้มีคนเห็น (เปิดเผยสู่สาธารณะ)</span>
@@ -576,7 +616,8 @@ async function submitShare(){
   if(!file){ toast('แนบรูปลุคก่อนนะคะ'); return; }
   const btn=$('#shSubmit'); btn.disabled=true; btn.textContent='กำลังส่ง…';
   const cross = $('#shCross') && $('#shCross').checked;
-  let res=null; try{ res = await window.API.shareLook(code, file, $('#shCap').value, $('#shOcc').value, rental, cross); }catch(e){}
+  const fit = { height: parseInt($('#shHeight')&&$('#shHeight').value)||null, size: ($('#shSize')&&$('#shSize').value||'').trim()||null, fit: $('#shFit')&&$('#shFit').value||null };
+  let res=null; try{ res = await window.API.shareLook(code, file, $('#shCap').value, $('#shOcc').value, rental, cross, fit); }catch(e){}
   if(!res || !res.ok){ btn.disabled=false; btn.textContent='แชร์ลุค'; toast('ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะคะ'); return; }
   closeOv('#ovShare');
   toast('ส่งลุคแล้ว — ผ่านแล้วจะขึ้นฟีดและแจ้งใน LINE ค่ะ');

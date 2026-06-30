@@ -486,6 +486,7 @@ function openDetail(id) {
       <div class="fabric">${fabricTags}</div>
       <div class="sec">${t('secColor')}</div>
       <div class="colors">${swatches}</div>
+      <div id="recoWith" class="recowith"></div>
       <div class="sec">${lang ==='th'?'ปฏิทินว่าง':'Availability'}</div>
       <div id="availcal" class="availcal"></div>
     </div>
@@ -523,6 +524,7 @@ function openDetail(id) {
   renderUGC(g.id);
   loadRating(g.id);  // เรตติ้ง/รีวิวของชุด (async inject)
   loadSocialProof(g.code || g.id);  // มีคนเช่า/ดู/หมายตา (social proof)
+  loadRecommendWith(g.code || g.id);  // ใส่คู่กับชุดนี้บ่อย (collaborative)
   if (gUseDate) checkAvail(g.id);  // โชว์สถานะวันที่เลือกจากหน้าแรกทันที
   $('#overlay').scrollTop = 0; const sh = $('#sheet'); if (sh) sh.scrollTop = 0;
 }
@@ -539,17 +541,30 @@ async function loadRating(garmentId) {
   el.innerHTML =`<span class="star">★</span> ${avg} <span class="rcount">(${r.count} ${reviewWord})</span>`;
 }
 
-// Social proof: "มีคนเช่าไปแล้ว X ครั้ง · กำลังมาแรง" — สร้าง urgency + ความน่าเชื่อ
+// Social proof: "มีคนเช่าไปแล้ว X ครั้ง · กำลังมาแรง · กำลังดูอยู่ N คน" — urgency + ความน่าเชื่อ
 async function loadSocialProof(code) {
   const el = $('#socialproof'); if (!el) return;
-  let s = null; try { s = await window.API.socialProof?.(code); } catch (e) { /**/ }
-  if (!s) { el.innerHTML = ''; return; }
   const th = lang === 'th';
+  let s = null, live = 0;
+  try { [s, live] = await Promise.all([window.API.socialProof?.(code), window.API.liveViewers?.(code)]); } catch (e) { /**/ }
   const chips = [];
-  if (s.rented_30d > 0) chips.push(`<span class="sp-chip"><b>${s.rented_30d}</b> ${th ? 'คนเช่าใน 30 วัน' : 'rented · 30d'}</span>`);
-  if (s.views_7d >= 8) chips.push(`<span class="sp-chip hot">${th ? 'กำลังมาแรง' : 'trending'}</span>`);
-  if (s.wishlisted > 0) chips.push(`<span class="sp-chip"><b>${s.wishlisted}</b> ${th ? 'คนหมายตา' : 'saved'}</span>`);
+  if (live >= 2) chips.push(`<span class="sp-chip live"><i class="lvdot"></i>${th ? `มีคนกำลังดู ${live} คน` : `${live} viewing now`}</span>`);
+  if (s) {
+    if (s.rented_30d > 0) chips.push(`<span class="sp-chip"><b>${s.rented_30d}</b> ${th ? 'คนเช่าใน 30 วัน' : 'rented · 30d'}</span>`);
+    if (s.views_7d >= 8) chips.push(`<span class="sp-chip hot">${th ? 'กำลังมาแรง' : 'trending'}</span>`);
+    if (s.wishlisted > 0) chips.push(`<span class="sp-chip"><b>${s.wishlisted}</b> ${th ? 'คนหมายตา' : 'saved'}</span>`);
+  }
   el.innerHTML = chips.join('');
+}
+// "ใส่คู่กับชุดนี้บ่อย" — collaborative recommendations (เช่า/ดูด้วยกันบ่อย)
+async function loadRecommendWith(code) {
+  const el = $('#recoWith'); if (!el) return;
+  let recs = []; try { recs = await window.API.recommendWith?.(code, 4) || []; } catch (e) { /**/ }
+  const items = recs.map(r => GARMENTS.find(g => (g.code || '') === r.code)).filter(Boolean);
+  if (!items.length) { el.innerHTML = ''; return; }
+  const th = lang === 'th';
+  el.innerHTML = `<div class="sec">${th ? 'ใส่คู่กับชุดนี้บ่อย' : 'Often rented together'}</div>`
+    + `<div class="recorow">${items.map(gThumb).join('')}</div>`;
 }
 
 // ปฏิทินว่าง/ไม่ว่างของชุด (2 เดือน) — แตะวันว่างเพื่อเลือก
@@ -655,10 +670,26 @@ async function checkAvail(id) {
     msg.textContent = lang ==='th'?`✓ ว่าง ${fmtDate(date)} จองได้เลย`:`✓ Free on ${fmtDate(date)}`;
   } else {
     msg.className ='availmsg busy';
-    msg.textContent = lang ==='th'?`✕ ไม่ว่าง ${fmtDate(date)} ลองวันอื่น`:`✕ Booked on ${fmtDate(date)}`;
+    const lbl = lang ==='th'?`✕ ไม่ว่าง ${fmtDate(date)} ลองวันอื่น`:`✕ Booked on ${fmtDate(date)}`;
+    // ต่อคิว: ถ้าชุดกลับมาว่าง จะแจ้งให้เลือกวันก่อนใคร
+    msg.innerHTML = `${lbl} <button class="queuebtn" onclick="joinQueue('${id}')">${lang==='th'?'ต่อคิว · แจ้งเมื่อว่าง':'Join waitlist'}</button>`;
   }
   renderQuote(id, date);
   return free;
+}
+
+// ต่อคิวชุด — ของกลับมาว่างเมื่อไร ได้สิทธิ์เลือกวันก่อนใคร
+async function joinQueue(id) {
+  if (!CUSTOMER || !CUSTOMER.id) { toast(lang==='th'?'เข้าสู่ระบบก่อนนะคะ':'Please sign in first'); return; }
+  const r = await window.API.joinWaitlist?.(id);
+  if (!r || r.ok !== true) { toast(lang==='th'?'ต่อคิวไม่สำเร็จ ลองใหม่นะคะ':'Could not join — try again'); return; }
+  window.track?.('waitlist_join', (GARMENTS.find(x=>x.id===id)||{}).code || id);
+  const msg = $('#availMsg'); if (msg) {
+    msg.className = 'availmsg ok';
+    msg.textContent = r.already
+      ? (lang==='th'?`อยู่ในคิวแล้ว · คุณคิวที่ ${r.position} จาก ${r.total}`:`Already queued · #${r.position} of ${r.total}`)
+      : (lang==='th'?`ต่อคิวแล้ว · คุณคิวที่ ${r.position} — ของว่างเมื่อไรเราแจ้งให้เลือกวันก่อนใครค่ะ`:`Queued · you're #${r.position} — we'll notify you first when it opens`);
+  }
 }
 
 // เลือกระยะเวลาเช่า → คำนวณยอดใหม่
@@ -1350,6 +1381,7 @@ function renderTheLoop(c) {
       <div class="cpbar"><i style="width:${prog}%"></i></div>
       ${reward?`<div class="creward">${reward}</div>`:''}
     </div>
+    ${(c._streak >= 2) ? `<div class="streakrow"><span class="streakdot">●</span>${th?`กลับมาต่อเนื่อง ${c._streak} สัปดาห์`:`${c._streak}-week loop streak`}</div>` : ''}
   </div>`;
 }
 // ชุดจริงจากคลังที่แมตช์โปรไฟล์มากสุด (เรียงด้วย personalScore — สูตร ไม่ใช่ AI)
@@ -2240,6 +2272,7 @@ async function boot() {
   }
   window.track?.('session_start', null, { logged_in: loggedIn, tier: CUSTOMER.crm_tier || 'guest' });
   setupScrollTracking();
+  if (loggedIn) { try { await window.flushEvents?.(); CUSTOMER._streak = await window.API.myStreak?.() || 0; } catch (e) { /**/ } }
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();
   if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
   const vd = $('#venueDate'); if (vd) { vd.min = todayStr(); vd.value = gUseDate || ''; }

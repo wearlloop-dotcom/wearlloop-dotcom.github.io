@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
+<script src="me-api.js"></script>
 <script src="analytics.js"></script>
 <style>
   :root {
@@ -412,6 +413,43 @@
     padding: 24px 0;
   }
 
+  /* queue position pill */
+  .pos-pill {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sage);
+    background: var(--sage-light);
+    border-radius: 20px;
+    padding: 4px 12px;
+    white-space: nowrap;
+  }
+  .pos-pill.open { color: #fff; background: var(--sage); }
+
+  /* vote button */
+  .vote-btn {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    min-width: 52px;
+    padding: 6px 4px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--cream);
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .vote-btn .vc { font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1; }
+  .vote-btn .vl { font-size: 10px; letter-spacing: 0.3px; }
+  .vote-btn.voted { border-color: var(--sage); background: var(--sage-light); }
+  .vote-btn.voted .vc, .vote-btn.voted .vl { color: var(--sage); }
+  .vote-btn:active { transform: scale(0.94); }
+  .vote-btn:disabled { opacity: 0.55; cursor: default; }
+
   .empty-msg {
     text-align: center;
     color: var(--muted);
@@ -550,6 +588,18 @@
 
       <button type="submit" class="btn-submit" id="submitBtn">ส่งคำขอ</button>
     </form>
+  </div>
+
+  <!-- My queue (waitlist) -->
+  <div class="prev-section" id="queueSection" style="display:none;margin-bottom:40px">
+    <h2>ชุดที่คุณต่อคิวไว้</h2>
+    <div id="queueList"></div>
+  </div>
+
+  <!-- Trending requests — vote -->
+  <div class="prev-section" id="trendSection" style="display:none;margin-bottom:40px">
+    <h2>คนอื่นก็อยากได้ · โหวตให้เราหามาก่อน</h2>
+    <div id="trendList"></div>
   </div>
 
   <!-- Previous requests -->
@@ -744,6 +794,96 @@ $('wishForm').addEventListener('submit', async e => {
   await loadPrevRequests();
 });
 
+// ===== คิวของฉัน (waitlist) =====
+async function loadMyQueue() {
+  if (!window.meRpc) return;
+  let rows = [];
+  try { const { data } = await window.meRpc('my_waitlist', {}); rows = Array.isArray(data) ? data : []; }
+  catch (e) { return; }
+  if (!rows.length) { $('queueSection').style.display = 'none'; return; }
+  $('queueSection').style.display = 'block';
+  $('queueList').innerHTML = rows.map(r => {
+    const open = r.status === 'notified' || r.available_now;
+    const pill = open
+      ? `<span class="pos-pill open">${r.status === 'notified' ? 'ถึงคิวคุณ · เลือกวันได้เลย' : 'ว่างแล้ว'}</span>`
+      : `<span class="pos-pill">คิวที่ ${r.position}/${r.total}</span>`;
+    const thumb = r.photo
+      ? `<img class="rc-thumb" src="${esc(r.photo)}" alt="" loading="lazy">`
+      : `<div class="rc-thumb"></div>`;
+    return `<div class="request-card">
+      ${thumb}
+      <div class="rc-body">
+        <div class="rc-top">
+          <div>
+            ${r.brand ? `<div class="rc-brand">${esc(r.brand)}</div>` : ''}
+            <div class="rc-desc">${esc(r.name || r.code || '')}</div>
+          </div>
+          ${pill}
+        </div>
+        <div class="rc-meta">
+          ${r.price != null ? `<span>฿${Number(r.price).toLocaleString()}/วัน</span>` : ''}
+          <span style="cursor:pointer;color:var(--sage)" onclick="leaveQueue('${r.garment_id}')">ออกจากคิว</span>
+          ${open ? `<a href="index.html?garment=${esc(r.code||'')}" style="color:var(--sage);text-decoration:none;font-weight:600">จองเลย →</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function leaveQueue(garmentId) {
+  if (!window.meRpc) return;
+  try { await window.meRpc('leave_waitlist', { p_garment: garmentId }); } catch (e) {}
+  await loadMyQueue();
+}
+
+// ===== คนอื่นก็อยากได้ · โหวต =====
+async function loadTrending() {
+  if (!window.meRpc) return;
+  let rows = [];
+  try { const { data } = await window.meRpc('trending_requests', { p_limit: 24 }); rows = Array.isArray(data) ? data : []; }
+  catch (e) { return; }
+  // เก็บเฉพาะที่มีคนอยากได้จริง (votes>1) หรือมีรูป — ให้ดูน่าโหวต
+  rows = rows.filter(r => (r.votes || 0) >= 1);
+  if (!rows.length) { $('trendSection').style.display = 'none'; return; }
+  $('trendSection').style.display = 'block';
+  $('trendList').innerHTML = rows.map(r => {
+    const thumb = r.reference_image_url
+      ? `<img class="rc-thumb" src="${esc(r.reference_image_url)}" alt="" loading="lazy">`
+      : `<div class="rc-thumb"></div>`;
+    const meta = [r.size ? 'ไซส์ ' + r.size : null, r.occasion || null].filter(Boolean);
+    const btn = r.mine
+      ? `<button class="vote-btn voted" disabled title="คำขอของคุณ"><span class="vc">${r.votes}</span><span class="vl">ของคุณ</span></button>`
+      : `<button class="vote-btn ${r.voted ? 'voted' : ''}" id="vb_${r.id}" onclick="doVote('${r.id}')"><span class="vc">${r.votes}</span><span class="vl">อยากได้</span></button>`;
+    return `<div class="request-card">
+      ${thumb}
+      <div class="rc-body">
+        <div class="rc-top">
+          <div>
+            ${r.brand ? `<div class="rc-brand">${esc(r.brand)}</div>` : ''}
+            <div class="rc-desc">${esc(r.item_description || '(ดูจากรูป)')}</div>
+          </div>
+          ${btn}
+        </div>
+        ${meta.length ? `<div class="rc-meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function doVote(requestId) {
+  const btn = $('vb_' + requestId);
+  if (!window.meRpc || !btn) return;
+  btn.disabled = true;
+  try {
+    const { data } = await window.meRpc('vote_request', { p_request: requestId });
+    if (data && !data.error) {
+      btn.classList.toggle('voted', !!data.voted);
+      btn.querySelector('.vc').textContent = data.votes;
+    }
+  } catch (e) {}
+  btn.disabled = false;
+}
+
 async function init() {
   if (!LIFF_ID) { showErr('ยังไม่ได้ตั้งค่า LIFF_ID'); return; }
   try {
@@ -755,6 +895,8 @@ async function init() {
     const profile = await liff.getProfile();
     uid = profile.userId;
     await loadPrevRequests();
+    loadMyQueue();
+    loadTrending();
   } catch (err) {
     showErr('LINE login ไม่สำเร็จ: ' + (err.message || err));
   }
