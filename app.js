@@ -1134,7 +1134,11 @@ async function renderQuote(id, date) {
   const to = durEnd(date);
   let q = null;
   try { q = await window.API.quote(g.code || g.id, CUSTOMER, date, to); } catch (e) { /**/ }
-  if (!q || q.error) { box.innerHTML = ''; return; }
+  if (!q || q.error) {
+    // โหลดสรุปยอดไม่สำเร็จ (เช่น เซสชัน LINE หมดอายุ) — อย่าให้หน้าจอว่างเงียบ ๆ
+    box.innerHTML = `<div class="qdates" style="color:var(--muted,#8C8B86);text-align:center;padding:6px 0">${lang === 'th' ? 'โหลดสรุปยอดไม่สำเร็จ — แตะวันที่อีกครั้ง หรือเข้าสู่ระบบใหม่' : "Couldn't load the summary — tap the date again or sign in"}</div>`;
+    return;
+  }
   const TH = lang === 'th';
   const row = (k, v, hl) => `<div class="qrow${hl ? ' hl' : ''}"><span>${k}</span><b>${v}</b></div>`;
   const baht = n => '฿' + n;
