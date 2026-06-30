@@ -238,7 +238,7 @@ window.API = (function () {
     const q = (venue ||'').toLowerCase();
     const v = (window.MOCK.VENUES || []).find(x => x.match.some(m => q.includes(m.toLowerCase())));
     const picks = (window.MOCK.GARMENTS || []).slice(0, 2).map(g => ({
-      code: g.code, name: g.name, why:'เข้ากับโทนงานและ personal color ของคุณ', fit_note:'ไซซ์ใกล้เคียงกับโปรไฟล์ของคุณ'}));
+      code: g.code, name: g.name, why:'เข้ากับโทนงานและ personal color ของคุณ', fit_note:'ไซส์ใกล้เคียงกับโปรไฟล์ของคุณ'}));
     if (v) return {
       ok:true, remaining:5, venue_type: v.venue_type, has_dress_code:true, dress_code_th: v.dress_code, occasion: v.occasion,
       appropriateness:'เหมาะกับกาลเทศะของที่นี่', aesthetics:'เข้ากับ personal color ของคุณ ถ่ายรูปสวย', mobility:'เคลื่อนไหวสบาย',
@@ -613,7 +613,7 @@ window.API = (function () {
     const { data, error } = await window.meRpc('my_groups', { p_customer: customer.id });
     return { ok: !error, data: data || [], error };
   }
-  // สมาชิก + ไซซ์/ซีซันสี (ไว้จัดสไตล์) — ต้องเป็นสมาชิกกลุ่มจริงถึงดูได้ (PDPA)
+  // สมาชิก + ไซส์/ซีซันสี (ไว้จัดสไตล์) — ต้องเป็นสมาชิกกลุ่มจริงถึงดูได้ (PDPA)
   async function groupMembers(groupId, requester) {
     if (CONFIG.USE_MOCK || !groupId || !requester?.id) return { ok: true, data: [] };
     const { data, error } = await window.meRpc('group_members_detail', { p_group: groupId, p_requester: requester.id });

@@ -140,7 +140,7 @@ function fitConfidence(c, g) {
 // โน้ตฟิตจากลูกค้าจริง (โชว์เมื่อมีรีวิวพอ) — คืน {text,cls} หรือ null
 function fitNote(g) {
   if (!g || (g.fitN||0) < 3 || !g.fitLabel) return null;
-  if (g.fitLabel === 'small') return { text:'ลูกค้าบอกตัวนี้ใส่ค่อนข้างเล็ก — เผื่อไซซ์', cls:'small' };
+  if (g.fitLabel === 'small') return { text:'ลูกค้าบอกตัวนี้ใส่ค่อนข้างเล็ก — เผื่อไซส์', cls:'small' };
   if (g.fitLabel === 'large') return { text:'ลูกค้าบอกตัวนี้ใส่ค่อนข้างหลวม', cls:'large' };
   return { text:'ลูกค้าส่วนใหญ่บอกว่าใส่พอดี', cls:'true' };
 }
@@ -211,6 +211,8 @@ const MOOD_ORDER = ['minimal','feminine','statement','party','korean','outer','s
 function garmentGroup(g){ const m = window.LLOOP_BRANDS && window.LLOOP_BRANDS.lookup(g.brand); return m ? m.group : null; }
 // ชื่อแบรนด์มาตรฐานของชุด (กันสะกด/ตัวพิมพ์เพี้ยนตอน intake → ชิป/ฟิลเตอร์ไม่แตกเป็นหลายแบรนด์)
 function gbrand(g){ return window.LLOOP_BRANDS ? window.LLOOP_BRANDS.canon(g.brand) : (g.brand || ''); }
+// เมื่อมีหลายแบบสะกด (lookbook/Lookbook) เลือกตัวที่ดูดีกว่า (มีพิมพ์ใหญ่)
+function nicerBrand(cur, cand){ return (!cur || (/[A-Z]/.test(cand) && !/[A-Z]/.test(cur))) ? cand : cur; }
 const OCC_SUB = {
   th:{ wedding_guest:'ค็อกเทล · สุภาพ', dinner:'หรู · โรแมนติก', party:'เด่น · สนุก', cafe:'ลำลองมีสไตล์', work:'สมาร์ทแคชชวล', trip:'เบา พลิ้ว สดใส', graduation:'ทางการ · ถ่ายรูป', festival:'สดใส · สนุก', merit:'สุภาพเรียบร้อย', date:'หวาน · มั่นใจ' },
   en:{ wedding_guest:'Cocktail · polished', dinner:'Refined · romantic', party:'Bold · fun', cafe:'Casual, with style', work:'Smart casual', trip:'Light & breezy', graduation:'Formal · photo-ready', festival:'Bright · fun', merit:'Modest · neat', date:'Sweet · confident' }
@@ -255,14 +257,16 @@ function renderFilters() {
 function renderBrandChips() {
   const el = $('#brandRow'); if (!el) return;
   const meta = window.LLOOP_BRANDS;
-  const inStock = [...new Set(GARMENTS.map(gbrand).filter(Boolean))];
+  const disp = new Map();  // dedup ไม่สนตัวพิมพ์: lowerKey → ชื่อแสดงที่ดูดีสุด
+  GARMENTS.forEach(g => { const c = gbrand(g); if (!c) return; const k = c.toLowerCase(); disp.set(k, nicerBrand(disp.get(k), c)); });
+  const inStock = [...disp.values()];
   if (!inStock.length) { el.innerHTML = ''; return; }
   const hotRank = b => { const m = meta && meta.lookup(b); return m && m.hot ? 0 : 1; };
   const top = inStock.slice().sort((a, b) => hotRank(a) - hotRank(b) || a.localeCompare(b)).slice(0, 8);
   const TH = lang === 'th';
   let html = `<div class="brandrow-h">${TH ? 'แบรนด์ยอดนิยม' : 'Shop by brand'}</div><div class="bchips">`;
   html += `<button class="bchip ${!fBrand ? 'on' : ''}" onclick="setBrand('')">${t('allBrands')}</button>`;
-  html += top.map(b => `<button class="bchip ${fBrand === b ? 'on' : ''}" data-b="${esc(b)}" onclick="setBrand(this.dataset.b)">${esc(b)}</button>`).join('');
+  html += top.map(b => `<button class="bchip ${String(fBrand).toLowerCase() === b.toLowerCase() ? 'on' : ''}" data-b="${esc(b)}" onclick="setBrand(this.dataset.b)">${esc(b)}</button>`).join('');
   html += `<button class="bchip more" onclick="openBrandDir()">${TH ? 'ดูทั้งหมด ›' : 'All ›'}</button></div>`;
   el.innerHTML = html;
 }
@@ -271,12 +275,12 @@ function renderBrandChips() {
 function openBrandDir() {
   const meta = window.LLOOP_BRANDS; if (!meta) { setBrand(''); return; }
   const TH = lang === 'th';
-  const cnt = {}, extras = {};
+  const cnt = {}, extras = new Map();  // extras dedup ไม่สนตัวพิมพ์: lowerKey → {d:ชื่อแสดง, n:จำนวน}
   GARMENTS.forEach(g => {
     const bn = g.brand; if (!bn) return;
     const m = meta.lookup(bn);
     if (m) { cnt[m.key] = (cnt[m.key] || 0) + 1; }
-    else { const c = meta.canon(bn); extras[c] = (extras[c] || 0) + 1; }
+    else { const c = meta.canon(bn), k = c.toLowerCase(), e = extras.get(k); if (e) { e.n++; e.d = nicerBrand(e.d, c); } else extras.set(k, { d: c, n: 1 }); }
   });
   let html = `<div class="bdir"><button class="bd-x" onclick="closeBrandDir()" aria-label="close">×</button><div class="bd-h">${TH ? 'รวมแบรนด์' : 'All brands'}</div>`;
   meta.GROUPS.forEach(gr => {
@@ -291,10 +295,9 @@ function openBrandDir() {
     }).join('');
     html += `</div></div>`;
   });
-  const ex = Object.keys(extras);
-  if (ex.length) {
+  if (extras.size) {
     html += `<div class="bd-g"><div class="bd-gt">${TH ? 'อื่น ๆ' : 'More'}</div><div class="bd-row">`;
-    html += ex.map(b => `<button class="bd-b have" data-b="${esc(b)}" onclick="pickBrand(this.dataset.b)"><span class="bd-n">${esc(b)}<span class="bd-c">${extras[b]}</span></span></button>`).join('');
+    html += [...extras.values()].map(e => `<button class="bd-b have" data-b="${esc(e.d)}" onclick="pickBrand(this.dataset.b)"><span class="bd-n">${esc(e.d)}<span class="bd-c">${e.n}</span></span></button>`).join('');
     html += `</div></div>`;
   }
   html += `<div class="bd-note">${TH ? 'มีตัวเลข = เช่าได้เลย · กดแบรนด์อื่นเพื่อบอก “อยากให้มี” เราจะหาเข้ามาให้' : 'Number = available now · tap others to request them'}</div></div>`;
@@ -359,7 +362,7 @@ function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
     (!fColor || g.colors.some(c => c[1] === fColor)) &&
-    (!fBrand || gbrand(g) === fBrand) &&
+    (!fBrand || gbrand(g).toLowerCase() === String(fBrand).toLowerCase()) &&
     (!fMood || garmentGroup(g) === fMood) &&
     (!fToneOnly || g.season === CUSTOMER.my_color_season) &&
     (!fWishOnly || gWish.has(g.id)) &&
@@ -732,7 +735,7 @@ async function loadRating(garmentId) {
   el.innerHTML =`<span class="star">★</span> ${avg} <span class="rcount">(${r.count} ${reviewWord})</span>`;
 }
 
-// สรุปฟิต/ไซซ์ จาก "ลุคจริง" ในชุมชน (คนเคยใส่บอกสูง/ไซซ์/ความพอดี) — ลดลังเล ลดคืนผิดไซซ์
+// สรุปฟิต/ไซส์ จาก "ลุคจริง" ในชุมชน (คนเคยใส่บอกสูง/ไซส์/ความพอดี) — ลดลังเล ลดคืนผิดไซส์
 async function loadFit(code) {
   const el = $('#fitsummary'); if (!el) return;
   let f = null; try { f = await window.API.garmentFit?.(code); } catch (e) { /**/ }
@@ -743,13 +746,13 @@ async function loadFit(code) {
   const cs = 'display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #cfe6da;border-radius:8px;padding:5px 10px;font-size:12px;color:#0F6E56;font-weight:500';
   const chips = [];
   if (f.avg_height) chips.push(`<span style="${cs}">${th?'สูงเฉลี่ย':'avg height'} <b>${f.avg_height}</b> ${th?'ซม.':'cm'}</span>`);
-  if (f.common_size) chips.push(`<span style="${cs}">${th?'ไซซ์ที่เช่าบ่อย':'common size'} <b>${esc(f.common_size)}</b></span>`);
+  if (f.common_size) chips.push(`<span style="${cs}">${th?'ไซส์ที่เช่าบ่อย':'common size'} <b>${esc(f.common_size)}</b></span>`);
   let verdict = '';
   if (tot >= 2) {
     const top = (fit.true>=fit.large && fit.true>=fit.small) ? 'true' : (fit.large>=fit.small ? 'large' : 'small');
     verdict = top==='true' ? (th?'ส่วนใหญ่บอกใส่พอดีตัว':'most say true to size')
-            : top==='large' ? (th?'หลายคนบอกเผื่อ/ใหญ่นิด — แนะนำลดไซซ์':'runs large — size down')
-            : (th?'หลายคนบอกฟิต/เล็กนิด — แนะนำเผื่อไซซ์':'runs small — size up');
+            : top==='large' ? (th?'หลายคนบอกเผื่อ/ใหญ่นิด — แนะนำลดไซส์':'runs large — size down')
+            : (th?'หลายคนบอกฟิต/เล็กนิด — แนะนำเผื่อไซส์':'runs small — size up');
   }
   el.innerHTML = `<div style="background:#E4F0EC;border:1px solid #cfe6df;border-radius:12px;padding:12px 13px;margin-top:10px">
     <div style="font-size:13px;font-weight:600;color:#04342C;margin-bottom:8px">${th?'ฟิตจริงจากคนใน loop':'Fit from real renters'} <span style="color:#0F6E56;font-weight:500">· ${f.n} ${th?'ลุค':'looks'}</span></div>
@@ -1586,7 +1589,7 @@ function openMenu() {
           <div class="msub">${signedIn ? (en ? 'Signed in with LINE' : 'เข้าสู่ระบบด้วย LINE') : (en ? 'share the look, save the planet' : 'แชร์ลุคสวย ช่วยรักษ์โลก')}</div>
         </div>
       </div>
-      <span class="medit" onclick="closeMenu();openProfile()">${en ? 'Edit profile & size' : 'แก้ไขโปรไฟล์ & ไซซ์'}</span>
+      <span class="medit" onclick="closeMenu();openProfile()">${en ? 'Edit profile & size' : 'แก้ไขโปรไฟล์ & ไซส์'}</span>
     </div>
 
     <div class="msec">
@@ -1647,7 +1650,7 @@ function openProfile(onboard) {
   const avatar = c.picture_url ?`<img class="pavatar" src="${c.picture_url}" alt="" referrerpolicy="no-referrer">`
     :`<div class="pavatar pavatar-x">${(dispName[0]||'L').toUpperCase()}</div>`;
   const head = onboard
-    ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'ยินดีต้อนรับ':'Welcome'}${dispName?' '+dispName:''}</div><div class="onbsub">${lang==='th'?'ใส่ชื่อ เบอร์ และที่อยู่จัดส่ง — แค่นี้ก็เริ่มเช่าได้เลย (ไซซ์/สไตล์ค่อยเพิ่มทีหลังได้)':'Name, phone, and address — that’s all you need to start (sizes & style later)'}</div></div></div>`
+    ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'ยินดีต้อนรับ':'Welcome'}${dispName?' '+dispName:''}</div><div class="onbsub">${lang==='th'?'ใส่ชื่อ เบอร์ และที่อยู่จัดส่ง — แค่นี้ก็เริ่มเช่าได้เลย (ไซส์/สไตล์ค่อยเพิ่มทีหลังได้)':'Name, phone, and address — that’s all you need to start (sizes & style later)'}</div></div></div>`
     : (c.line_uid || c.display_name || c.picture_url
       ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'สวัสดีคุณ':'Hi'} ${dispName||''}</div><div class="onbsub">${lang==='th'?'เข้าสู่ระบบด้วย LINE แล้ว':'Signed in with LINE'}</div></div></div>`
       :'');
@@ -1688,7 +1691,7 @@ function openProfile(onboard) {
       </div>
       <div class="frow">
         <div class="field"><label>${lang==='th'?'น้ำหนัก (กก.)':'Weight (kg)'}</label><input id="pWeight" type="number" value="${c.weight_kg ||''}"></div>
-        <div class="field"><label>${lang==='th'?'ไซซ์ที่ใส่ประจำ':'Usual size'}</label><select id="pSize">${sizeOpts}</select></div>
+        <div class="field"><label>${lang==='th'?'ไซส์ที่ใส่ประจำ':'Usual size'}</label><select id="pSize">${sizeOpts}</select></div>
       </div>
       <div class="frow">
         <div class="field"><label>${t('pBustL')}</label><input id="pBust" type="number" value="${c.bust_in ||''}"></div>
@@ -3191,7 +3194,7 @@ async function boot() {
   OCCASIONS = s.OCCASIONS; CUSTOMER = s.CUSTOMER; EVENT = s.EVENT; GARMENTS = s.GARMENTS;
   STAFF_PCT = Number(s.staff_pct) || 0;   // พนักงาน → โชว์ราคาลด + ป้าย
   VENUES = window.MOCK.VENUES;
-  // มีโปรไฟล์ (ไซซ์/โทนสี/สไตล์จากพาร์ทเนอร์) เปิด"แนะนำสำหรับคุณ"เป็นค่าเริ่มต้น
+  // มีโปรไฟล์ (ไซส์/โทนสี/สไตล์จากพาร์ทเนอร์) เปิด"แนะนำสำหรับคุณ"เป็นค่าเริ่มต้น
   fForYou =!!(CUSTOMER.bust_in!= null || CUSTOMER.my_color_season || (CUSTOMER.style_profile && Object.keys(CUSTOMER.style_profile).length));
   // สถานะล็อกอิน: มี lineUid = ล็อกอินผ่าน LINE แล้ว → โชว์เครดิตจริง; ไม่มี = guest → โชว์ปุ่มเข้าสู่ระบบ
   const loggedIn =!!s.lineUid;

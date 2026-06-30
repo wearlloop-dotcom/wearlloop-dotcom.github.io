@@ -16,7 +16,7 @@ window.I18N = {
     perTime:'ครั้ง', fitGood:'พอดี', toneMatch:'เข้าโทนคุณ',
     eventLbl:'มีงานในปฏิทิน', eventView:'ดูชุด', eventChosenPre:'เราเลือก', eventChosenPost:'ที่เข้าโทนคุณไว้ให้แล้ว',
     secWear:'วิธีใส่ให้สวย', secSize:'ขนาดชุด (วัดจริงทุกตัว)', secFabric:'เนื้อผ้า', secColor:'สีที่มี',
-    fitTitle:'น่าจะพอดีตัวคุณ', fitFromPre:'เทียบจากไซซ์ที่คุณบันทึก · ',
+    fitTitle:'น่าจะพอดีตัวคุณ', fitFromPre:'เทียบจากไซส์ที่คุณบันทึก · ',
     stretchHelp:'ผ้ายืดช่วยได้', noStretchHelp:'ผ้าไม่ยืด',
     bust:'อก', waist:'เอว', hip:'สะโพก', length:'ความยาว', free:'อิสระ', cm:'ซม.',
     lining:'มีซับใน', sheer:'โปร่ง', notSheer:'ไม่โปร่ง', noStretch:'ไม่ยืด', slight:'ยืดเล็กน้อย', stretchy:'ยืดได้',

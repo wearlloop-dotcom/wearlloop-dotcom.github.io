@@ -277,7 +277,7 @@ function tplBadge(c){
   return `<span class="tplb">${t?esc(t):''}${(t&&n>1?' · ':'')}${n>1?n+' รูป':''}</span>`;
 }
 function fitStr(c){
-  const p=[]; if(c.wearer_height_cm) p.push('สูง '+c.wearer_height_cm); if(c.wearer_size) p.push('ไซซ์ '+esc(c.wearer_size));
+  const p=[]; if(c.wearer_height_cm) p.push('สูง '+c.wearer_height_cm); if(c.wearer_size) p.push('ไซส์ '+esc(c.wearer_size));
   if(FIT_TH[c.fit_note]) p.push(FIT_TH[c.fit_note]); return p.join(' · ');
 }
 function cardHtml(c){
@@ -652,10 +652,10 @@ async function openShare(){
     <label class="lbl">โอกาส (ไม่บังคับ)</label>
     <select class="inp" id="shOcc"><option value="">— เลือกโอกาส —</option>
       ${['งานแต่ง','รับปริญญา','ทำงาน','คาเฟ่','เดท','ปาร์ตี้','งานบุญ','สงกรานต์','ลำลอง','ทริป'].map(o=>`<option>${o}</option>`).join('')}</select>
-    <div class="lbl" style="margin-top:14px">ฟิต/ไซซ์ (ช่วยคนอื่นตัดสินใจ — ไม่บังคับ)</div>
+    <div class="lbl" style="margin-top:14px">ฟิต/ไซส์ (ช่วยคนอื่นตัดสินใจ — ไม่บังคับ)</div>
     <div style="display:flex;gap:8px">
       <input class="inp" id="shHeight" inputmode="numeric" placeholder="สูง (ซม.)" style="flex:1">
-      <input class="inp" id="shSize" placeholder="ไซซ์ที่เช่า" style="flex:1">
+      <input class="inp" id="shSize" placeholder="ไซส์ที่เช่า" style="flex:1">
     </div>
     <select class="inp" id="shFit" style="margin-top:8px"><option value="">ใส่แล้วรู้สึก…</option>
       <option value="true">พอดีตัว</option><option value="large">เผื่อ/ใหญ่นิดหน่อย</option><option value="small">ฟิต/เล็กนิดหน่อย</option></select>

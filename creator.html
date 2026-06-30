@@ -102,7 +102,7 @@ function render(){
       <div class="ph" style="${g.photo?`background-image:url('${g.photo}')`:''}">${g.photo?'':g.name||g.garment}</div>
       <div class="body">
         <div class="name">${g.name || g.garment}</div>
-        <div class="meta">ต้องการรูปหุ่นไซซ์ ${g.needed_size || '-'}</div>
+        <div class="meta">ต้องการรูปหุ่นไซส์ ${g.needed_size || '-'}</div>
         <span class="reward">ได้เครดิต ฿${g.reward}</span><br>
         <button class="btn" ${BOARD.can_claim?'':'disabled'} onclick="claim('${g.gig_id}','${(g.name||g.garment||'').replace(/'/g,'')}')">รับงานนี้</button>
       </div>
