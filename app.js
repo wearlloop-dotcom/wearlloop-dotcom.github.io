@@ -4,7 +4,7 @@ let OCCASIONS = {}, CUSTOMER = {}, EVENT = null, GARMENTS = [], VENUES = [];
 let STAFF_PCT = 0;
 const staffPrice = (p) => STAFF_PCT > 0 ? Math.round(Number(p || 0) * (1 - STAFF_PCT / 100)) : Number(p || 0);
 const staffTag = () => STAFF_PCT > 0 ? `<span style="display:inline-block;font-size:11px;font-weight:600;color:#0F6E56;background:#E4F0EC;border:1px solid #cfe6da;border-radius:20px;padding:1px 8px;margin-left:6px">${lang==='th'?'พนักงาน':'Staff'} −${STAFF_PCT}%</span>` : '';
-let fOccasion = null, fColor = null, fBrand ='', fMood = null, fToneOnly = false, fForYou = false, fWishOnly = false;
+let fOccasion = null, fColors = [], fBrand ='', fMood = null, fToneOnly = false, fForYou = false, fWishOnly = false;
 let gPersonalRecs = [];  // โค้ดชุดแนะนำเฉพาะบุคคล (collaborative) — เรียงตามความเกี่ยวข้อง
 let gQuery = '';  // คำค้นหา catalog (ชื่อ/แบรนด์/โอกาส/สี)
 let _searchTimer = null;
@@ -49,6 +49,36 @@ function addDays(dateStr, n) {
 function durEnd(fromStr) { return addDays(fromStr, gDur - 1); }
 let lang = (localStorage.getItem('lloop_lang') ||'th');
 const $ = s => document.querySelector(s);
+
+// ===== สกุลเงิน (แสดงผลเท่านั้น — ชำระจริงเป็นเงินบาทผ่าน PromptPay) =====
+// rate = จำนวนเงินต่างประเทศต่อ 1 บาท (อัปเดตเป็นค่าประมาณได้ที่นี่จุดเดียว)
+const CUR = {
+  THB: { sym:'฿',   rate:1,     round:1,  approx:false },
+  USD: { sym:'$',   rate:0.028, round:1,  approx:true  },
+  JPY: { sym:'¥',   rate:4.4,   round:10, approx:true  },
+  CNY: { sym:'元',  rate:0.20,  round:1,  approx:true, suf:true },
+};
+let cur = (localStorage.getItem('lloop_cur') || 'THB');
+if (!CUR[cur]) cur = 'THB';
+// แปลงบาท → สกุลที่เลือก + จัดรูปแบบ (มี "≈" นำหน้าถ้าเป็นค่าประมาณ)
+function money(thb) {
+  const n = Number(thb || 0);
+  const c = CUR[cur] || CUR.THB;
+  const v = Math.round(n * c.rate / c.round) * c.round;
+  const num = v.toLocaleString('en-US');
+  const body = c.suf ? `${num}${c.sym}` : `${c.sym}${num}`;
+  return (c.approx ? '≈' : '') + body;
+}
+function setCur(c) {
+  if (!CUR[c]) return;
+  cur = c; localStorage.setItem('lloop_cur', c);
+  document.querySelectorAll('.curbtn').forEach(b => b.classList.toggle('on', b.dataset.cur === c));
+  // re-render ทุกจุดที่โชว์ราคา browse
+  renderGrid(); renderQuickFilters && renderQuickFilters();
+  if ($('#overlay')?.classList.contains('open') && window._detailId) openDetail(window._detailId);
+  if (c !== 'THB' && typeof toast === 'function')
+    toast(lang === 'th' ? 'ราคาโดยประมาณ · ชำระจริงเป็นเงินบาท (THB)' : 'Approx prices · you pay in Thai Baht (THB)');
+}
 
 // ----- i18n helpers -----
 const t = k => (window.I18N[lang][k]?? k);
@@ -116,6 +146,7 @@ function setLang(l) {
   lang = l; localStorage.setItem('lloop_lang', l);
   $('#langTH')?.classList.toggle('on', l ==='th');
   $('#langEN')?.classList.toggle('on', l ==='en');
+  document.querySelectorAll('.langbtn').forEach(b => b.classList.toggle('on', b.dataset.l === l));
   closeDetail(); closeProfile();
   applyStatic();
   renderEvent(); renderCatnav(); renderChips(); renderDiscover(); renderFilters(); renderGrid();
@@ -159,7 +190,7 @@ function valueStrip(g) {
   const th = lang === 'th';
   const sv = savingsPct(g);
   const parts = [];
-  if (sv) parts.push(`<span style="background:#EAF3DE;color:#27500A;padding:4px 10px;border-radius:6px;font-size:12px">${th?'มูลค่าชุด':'Worth'} ฿${Number(g.retail).toLocaleString()} · ${th?'เช่าประหยัด':'save'} ${sv}%</span>`);
+  if (sv) parts.push(`<span style="background:#EAF3DE;color:#27500A;padding:4px 10px;border-radius:6px;font-size:12px">${th?'มูลค่าชุด':'Worth'} ${money(g.retail)} · ${th?'เช่าประหยัด':'save'} ${sv}%</span>`);
   if (g.grade) parts.push(`<span style="background:#E1F5EE;color:#085041;padding:4px 10px;border-radius:6px;font-size:12px">${th?'ผ่าน QC เกรด':'QC grade'} ${g.grade} · ${th?'ดูแลอย่างดี':'well kept'}</span>`);
   if (!parts.length) return '';
   return `<div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0">${parts.join('')}</div>`;
@@ -311,8 +342,8 @@ function familiesOf(g){ const fams=new Set();
 function renderFilters() {
   // ปุ่มสีเดียว (rainbow) → เปิด modal เลือกสี/ดูดสีจากรูป
   const brands = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
-  const af = fColor ? COLOR_FAMILIES.find(f => f.key === fColor) : null;
-  const colorBtn = `<button class="colorpick ${fColor?'on':''}" onclick="openColorModal()"><i class="rainbow"${af?` style="background:${af.hex}"`:''}></i>${af?(lang==='th'?af.th:af.en):(lang==='th'?'เลือกสี':'Colour')}</button>`;
+  const selFams = fColors.map(k => COLOR_FAMILIES.find(f => f.key === k)).filter(Boolean);
+  const colorBtn = `<button class="colorpick ${fColors.length?'on':''}" onclick="openColorModal()">${selFams.length ? `<span class="cpdots">${selFams.slice(0,6).map(f=>`<i style="background:${f.hex}"></i>`).join('')}</span>${lang==='th'?`${selFams.length} สี`:`${selFams.length}`}` : `<i class="rainbow"></i>${lang==='th'?'เลือกสี':'Colour'}`}</button>`;
   const opts = [`<option value="">${t('allBrands')}</option>`].concat(brands.map(b =>`<option value="${b}"${fBrand === b?'selected':''}>${b}</option>`)).join('');
   $('#filters').innerHTML =`
     <button class="tone ${fToneOnly?'':'off'}" onclick="toggleTone()">● ${t('myTone')}</button>
@@ -327,7 +358,7 @@ function priceOk(g){ if(!fPrice) return true; const p=Number(g.price||0); return
 function renderQuickFilters(){
   const el=$('#quickRow'); if(!el) return;
   const TH=lang==='th';
-  const PL={lo:'≤฿300',mid:'฿300–500',hi:'฿500+'};
+  const PL={lo:'≤'+money(300),mid:money(300)+'–'+money(500).replace(/^≈/,''),hi:money(500)+'+'};
   const priceLabel=fPrice?PL[fPrice]:(TH?'ทุกราคา':'Any');
   const availOn=!!(gUseDate&&gOnlyAvail);
   el.innerHTML =
@@ -407,11 +438,12 @@ function notifyBrand(key, name) {
 }
 
 function setOccasion(t2) { fOccasion = t2; renderCatnav(); renderChips(); renderDiscover(); renderGrid(); }
-function setColor(h) { fColor = (fColor === h? null : h); renderFilters(); renderGrid(); }
+function setColor(h){ const i=fColors.indexOf(h); if(i<0) fColors.push(h); else fColors.splice(i,1); renderFilters(); renderGrid(); }
 // ===== Modal เลือกสี + ดูดสีจากรูป (การ์ดงานแต่ง) =====
 let _cardCtx=null,_cardCanvas=null;
-function pickColor(key){ fColor=(fColor===key?null:key); closeColorModal(); renderFilters(); renderGrid(); }
-function famChip(f,extra){ return `<button class="cfam ${fColor===f.key?'on':''} ${extra||''}" onclick="pickColor('${f.key}')" title="${lang==='th'?f.th:f.en}"><i style="background:${f.hex}"></i><span>${lang==='th'?f.th:f.en}</span></button>`; }
+function pickColor(key){ const i=fColors.indexOf(key); if(i<0) fColors.push(key); else fColors.splice(i,1); document.querySelectorAll('#cmodal .cfam').forEach(b=>b.classList.toggle('on', fColors.includes(b.dataset.fk))); renderFilters(); renderGrid(); }
+function clearColors(){ fColors=[]; document.querySelectorAll('#cmodal .cfam').forEach(b=>b.classList.remove('on')); renderFilters(); renderGrid(); }
+function famChip(f,extra){ return `<button class="cfam ${fColors.includes(f.key)?'on':''} ${extra||''}" data-fk="${f.key}" onclick="pickColor('${f.key}')" title="${lang==='th'?f.th:f.en}"><i style="background:${f.hex}"></i><span>${lang==='th'?f.th:f.en}</span></button>`; }
 function openColorModal(){
   const present=new Set(); GARMENTS.forEach(g=>familiesOf(g).forEach(f=>present.add(f)));
   const pal=COLOR_FAMILIES.map(f=>famChip(f, present.has(f.key)?'':'dim')).join('');
@@ -422,7 +454,7 @@ function openColorModal(){
     <div class="cmor">${lang==='th'?'หรือดูดสีจากรูป — เช่น การ์ดงานแต่ง / ธีมงาน':'or pick from a photo — e.g. a wedding card'}</div>
     <label class="cmupload">${lang==='th'?'＋ อัปโหลดรูป':'＋ Upload image'}<input type="file" accept="image/*" onchange="onCardImage(this)" hidden></label>
     <div id="cmcanvaswrap" style="display:none"><div class="cmhint">${lang==='th'?'แตะที่รูปเพื่อดูดสี 🖌️':'Tap the image to pick a colour 🖌️'}</div><canvas id="cmcanvas" onclick="onCanvasClick(event)"></canvas><div id="cmsugg" class="cmsugg"></div></div>
-    ${fColor?`<button class="cmclear" onclick="pickColor('${fColor}')">${lang==='th'?'✕ ล้างตัวกรองสี':'✕ Clear colour'}</button>`:''}
+    <div class="cmfoot"><button class="cmclear" onclick="clearColors()">${lang==='th'?'ล้างสี':'Clear'}</button><button class="cmdone" onclick="closeColorModal()">${lang==='th'?'ดูชุด':'Show dresses'}</button></div>
   </div>`;
   document.body.appendChild(m);
 }
@@ -503,7 +535,7 @@ function galleryPhotos(g){ const p = Array.isArray(g.photos)? g.photos : []; con
 function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
-    (!fColor || familiesOf(g).has(fColor)) &&
+    (!fColors.length || [...familiesOf(g)].some(fam => fColors.includes(fam))) &&
     (!fBrand || gbrand(g).toLowerCase() === String(fBrand).toLowerCase()) &&
     (!fMood || garmentGroup(g) === fMood) &&
     (!fToneOnly || g.season === CUSTOMER.my_color_season) &&
@@ -561,14 +593,14 @@ function gridCardHtml(g) {
           <div class="sizes">
             ${fit!= null?`<span>${t('fitGood')} ${fit}%</span>`:''}
             <span>${occName(g.occasion_tags[0])}</span>
-            <span>฿${staffPrice(g.price)}</span>
+            <span>${money(staffPrice(g.price))}</span>
           </div>
         </div>
       </div>
       <div class="pmeta">
         <div class="pbrand">${g.brand ||''}</div>
         <div class="pname">${g.name}</div>
-        <div class="pprice">฿${staffPrice(g.price)}${staffTag()} <span style="color:var(--muted);font-weight:400">/ ${t('perTime')}</span></div>
+        <div class="pprice">${money(staffPrice(g.price))}${staffTag()} <span style="color:var(--muted);font-weight:400">/ ${t('perTime')}</span></div>
         ${sizeLbl}
         <div class="pcolors">${dots}</div>
         ${fn?`<div class="fitnote ${fn.cls}">${fn.text}</div>`:''}
@@ -764,11 +796,12 @@ function mapEmbedHtml(place) {
   return `<div class="vmap"><iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${src}"></iframe><div class="cap">${t('vMapNote')}: ${esc(place.name||'')}</div></div>`;
 }
 
-function setColorFromVenue(h) { fColor = classifyHex(h); renderFilters(); renderGrid(); window.scrollTo({ top: 380, behavior:'smooth'}); }
+function setColorFromVenue(h) { fColors = [classifyHex(h)]; renderFilters(); renderGrid(); window.scrollTo({ top: 380, behavior:'smooth'}); }
 
 // ===== detail =====
 function openDetail(id) {
   const g = GARMENTS.find(x => x.id === id);
+  window._detailId = id;   // เก็บไว้ให้ setCur re-render ราคาเมื่อสลับสกุลเงิน
   _backupPicks = [];   // ล้างชุดสำรองที่เลือกไว้จากชุดก่อนหน้า
   fbTrack('ViewContent', { content_ids:[g.code || g.id], content_name: g.name, content_type:'product', value: g.price, currency:'THB' });
   window.track?.('view_item', g.code || g.id, { name: g.name, price: g.price, occasion: (g.occasion_tags||[])[0] || null });
@@ -873,7 +906,7 @@ function openDetail(id) {
     </label>
     <div id="backupPicker" class="backuppick" hidden></div>
     <div class="cta">
-      <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}${subCapLabel(g)}</span>` : '฿'+staffPrice(g.price)+staffTag()}</span>
+      <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}${subCapLabel(g)}</span>` : money(staffPrice(g.price))+staffTag()}</span>
       ${subCovers(g) ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
       <button id="bookBtn" onclick="reserve('${g.id}')">${t('reserveBtn')}</button>
     </div>
@@ -3643,6 +3676,8 @@ function setupScrollTracking() {
 async function boot() {
   $('#langTH')?.classList.toggle('on', lang ==='th');
   $('#langEN')?.classList.toggle('on', lang ==='en');
+  document.querySelectorAll('.langbtn').forEach(b => b.classList.toggle('on', b.dataset.l === lang));
+  document.querySelectorAll('.curbtn').forEach(b => b.classList.toggle('on', b.dataset.cur === cur));
   applyStatic();
   setupHeroVideo();
   let s;

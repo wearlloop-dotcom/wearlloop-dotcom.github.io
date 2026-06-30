@@ -141,6 +141,16 @@
   .prefchip:hover{border-color:var(--ink)}
   .prefchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
   .optnote{font-size:11px;color:var(--muted);font-weight:400}
+  /* preference bar — สลับภาษา + สกุลเงิน (อยู่หน้าหลัก ไม่ต้องเข้าเมนู) */
+  .prefbar{background:#fff;border-bottom:1px solid var(--line)}
+  .prefrow{display:flex;justify-content:flex-end;align-items:center;gap:10px;height:40px}
+  .segpill{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--soft,#F5F4F2)}
+  .segpill button{border:none;background:none;cursor:pointer;font-family:inherit;
+    font-size:12px;font-weight:600;color:var(--muted);padding:5px 11px;line-height:1.4;transition:.15s}
+  .segpill button:hover{color:var(--ink)}
+  .segpill button.on{background:var(--ink);color:#fff}
+  .curbtn{min-width:30px}
+  @media(max-width:679px){.prefrow{justify-content:center;gap:8px}.segpill button{padding:5px 10px}}
   .catnav{border-bottom:1px solid var(--line);background:#fff}
   .catnav .row{display:flex;gap:26px;justify-content:center;align-items:center;height:42px;overflow-x:auto;scrollbar-width:none}
   .catnav .row::-webkit-scrollbar{display:none}
@@ -437,7 +447,10 @@
   #cmcanvas{max-width:100%;border-radius:10px;border:1px solid var(--line);cursor:crosshair;display:block}
   .cmsugg{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:12px}
   .cmsugglbl{width:100%;font-size:12px;color:var(--muted)}
-  .cmclear{margin-top:16px;width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px;cursor:pointer;color:var(--muted)}
+  .cpdots{display:inline-flex;gap:2px;margin-right:2px}.cpdots i{width:13px;height:13px;border-radius:50%;display:inline-block;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+  .cmfoot{display:flex;gap:10px;margin-top:18px}
+  .cmclear{flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;cursor:pointer;color:var(--muted)}
+  .cmdone{flex:2;border:none;background:#1a1a1a;color:#fff;border-radius:12px;padding:11px;cursor:pointer;font-weight:600}
   .measure{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .mcell{background:var(--soft);padding:8px 11px;font-size:14px;font-weight:500}.mcell span{display:block;font-size:11px;color:var(--muted);font-weight:400}
   .fabric{display:flex;flex-wrap:wrap;gap:6px}.ftag{font-size:12px;background:var(--soft);color:var(--muted);padding:4px 11px}.ftag.main{background:#EEF2F6;color:#2B5070}
@@ -1055,6 +1068,19 @@
   </div>
 </header>
 
+<div class="prefbar"><div class="contain prefrow">
+  <div class="segpill" role="group" aria-label="language">
+    <button class="langbtn" data-l="th" onclick="setLang('th')">ไทย</button>
+    <button class="langbtn" data-l="en" onclick="setLang('en')">EN</button>
+  </div>
+  <div class="segpill" role="group" aria-label="currency">
+    <button class="curbtn" data-cur="THB" onclick="setCur('THB')" title="บาท">฿</button>
+    <button class="curbtn" data-cur="USD" onclick="setCur('USD')" title="US Dollar">$</button>
+    <button class="curbtn" data-cur="JPY" onclick="setCur('JPY')" title="Japanese Yen">¥</button>
+    <button class="curbtn" data-cur="CNY" onclick="setCur('CNY')" title="Chinese Yuan">元</button>
+  </div>
+</div></div>
+
 <nav class="catnav"><div class="contain row" id="catnav"></div></nav>
 
 <section class="hero" id="hero">
@@ -1343,6 +1369,6 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=74"></script>
+<script src="app.js?v=75"></script>
 </body>
 </html>
