@@ -14,7 +14,7 @@ window.MOCK = {
     title:'งานแต่งเพื่อน', day:'12', month:'ก.ค.',
     occasion:'wedding_guest', dress_code:'ค็อกเทล',
   },
-  // สถานที่ dress code + สีที่เหมาะ (mock; production = AI Stylist บน Claude)
+  // สถานที่ dress code + สีที่เหมาะ (mock; production = LLOOP Atelier บน Claude)
   VENUES: [
     { match:['โรงแรม','hotel','บอลรูม','ballroom','รูฟท็อป','rooftop'], venue_type:'โรงแรม/รูฟท็อป โทนหรู', dress_code:'ค็อกเทล', occasion:'party',
       colors:['#15233F','#0E8A5F','#F3C6D3'], photo_tip:'แสงวอร์มของโรงแรมรับโทนเข้ม-อัญมณี ทำให้ผิวดูสว่าง ถ่ายออกมาหรู',

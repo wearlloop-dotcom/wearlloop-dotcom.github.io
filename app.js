@@ -433,7 +433,7 @@ function renderGrid() {
   if (!list.length) {
     $('#gridEnd') && ($('#gridEnd').textContent = '');
     if (gQuery) {
-      $('#grid').innerHTML = `<div class="empty">${lang==='th'?`ยังไม่มี "${gQuery}" ในคลังตอนนี้`:`No "${gQuery}" in the collection yet`}<br><span style="font-size:12px;color:var(--muted)">${lang==='th'?'ลองใช้ AI สไตลิสต์ช่วยหา หรือบอกโอกาสที่จะไป':'Try the AI stylist, or tell us the occasion'}</span></div>`;
+      $('#grid').innerHTML = `<div class="empty">${lang==='th'?`ยังไม่มี "${gQuery}" ในคลังตอนนี้`:`No "${gQuery}" in the collection yet`}<br><span style="font-size:12px;color:var(--muted)">${lang==='th'?'ลองใช้ LLOOP Atelier ช่วยหา หรือบอกโอกาสที่จะไป':'Try LLOOP Atelier, or tell us the occasion'}</span></div>`;
     } else { $('#grid').innerHTML = `<div class="empty">${t('empty')}</div>`; }
     return;
   }
@@ -537,7 +537,7 @@ async function setHomeDate(d) {
 function clearHomeDate() { gUseDate = null; gAvailSet = null; gOnlyAvail = false; renderDatebar(); renderGrid(); }
 function toggleOnlyAvail() { gOnlyAvail = !gOnlyAvail; renderDatebar(); renderGrid(); }
 
-// ===== AI Stylist ประจำสถานที่: ประเมินความเหมาะสม/สวยงาม/คล่องตัว + แนะนำชุดจากคลัง =====
+// ===== LLOOP Atelier ประจำสถานที่: ประเมินความเหมาะสม/สวยงาม/คล่องตัว + แนะนำชุดจากคลัง =====
 function esc(s){ return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); }
 
 // แสดงโควต้าที่เหลือบนแถบสไตลิสต์ (null = ยังไม่ล็อกอิน)
@@ -965,7 +965,7 @@ function mockLook(g) {
   const jewelry = formal ? ['ต่างหูระย้า', 'สร้อยเส้นเล็กแนบคอ'] : ['ต่างหูห่วงเล็ก', 'สร้อยข้อมือบาง'];
   const accessories = (cat === 'dress' || cat === 'set') ? ['กระเป๋าคลัตช์', 'เข็มขัดเส้นเล็กเน้นเอว'] : ['กระเป๋าสะพายทรงสวย'];
   const shoes = formal ? 'รองเท้าส้นสูงสีนู้ด ช่วยยืดขา' : 'รองเท้าส้นเตี้ย/รัดส้นโทนเดียวกับชุด';
-  return { hair, jewelry, accessories, shoes, note: 'แนะนำเบื้องต้น — เปิด AI จริง (deploy) จะวิเคราะห์ละเอียดตามรูปหน้า/หุ่นของคุณ' };
+  return { hair, jewelry, accessories, shoes, note: 'แนะนำเบื้องต้น — LLOOP Atelier ตัวเต็มจะวิเคราะห์ละเอียดตามรูปหน้า/หุ่นของคุณ' };
 }
 async function loadLook(code, occasion) {
   const box = $('#lookbox'); if (!box) return;
@@ -1159,7 +1159,7 @@ let _backupPicks = [];          // โค้ดชุดที่ลูกค้
 let _bpPool = [];               // ชุดที่ว่างวันนั้น เรียงตามความใกล้ชุดหลักแล้ว
 let _bpPrimary = null;          // ชุดหลักที่กำลังจอง (ใช้คิดคะแนนความใกล้)
 let _bpQuery = '';              // คำค้นในตัวเลือกชุดสำรอง
-let _bpWhy = {};                // code → เหตุผลที่ AI สไตลิสต์ให้ (ทำไมสลับแทนได้เนียน)
+let _bpWhy = {};                // code → เหตุผลที่ LLOOP Atelier ให้ (ทำไมสลับแทนได้เนียน)
 let _bpRanked = false;          // AI จัดอันดับให้แล้วหรือยัง
 let _bpRanking = false;         // กันกดซ้ำระหว่างรอ AI
 const BACKUP_MAX = 2;           // เลือกได้สูงสุดกี่ตัว
@@ -1220,12 +1220,12 @@ function renderBackupPicker() {
   const canAI = !(window.CONFIG && CONFIG.USE_MOCK) && _bpPool.length >= 3;
   box.innerHTML = `
     <div class="bp-head">${_bpRanked
-      ? (lang ==='th'?`สไตลิสต์ AI เรียงให้แล้ว · เลือกได้สูงสุด ${BACKUP_MAX} ตัว`:`Stylist-ranked · up to ${BACKUP_MAX}`)
+      ? (lang ==='th'?`LLOOP Atelier เรียงให้แล้ว · เลือกได้สูงสุด ${BACKUP_MAX} ตัว`:`Ranked by LLOOP Atelier · up to ${BACKUP_MAX}`)
       : (lang ==='th'?`แนะนำชุดที่เข้ากับชุดหลัก · เลือกได้สูงสุด ${BACKUP_MAX} ตัว`:`Closest matches to your pick · up to ${BACKUP_MAX}`)}</div>
     <div class="bp-search"><input type="text" id="bpSearch" inputmode="search" placeholder="${lang ==='th'?'ค้นหาชุดอื่นที่ว่างวันนั้น…':'search other free pieces…'}" value="${esc(_bpQuery)}" oninput="onBackupSearch(this.value)"></div>
     ${canAI ? `<button type="button" class="bp-ai${_bpRanked?' done':''}" id="bpAiBtn"${_bpRanked?' disabled':''} onclick="aiRankBackups()">${_bpRanked
-        ? (lang ==='th'?'✦ สไตลิสต์ AI จัดอันดับให้แล้ว':'✦ Ranked by the AI stylist')
-        : (lang ==='th'?'✦ ให้สไตลิสต์ AI ช่วยเรียงให้':'✦ Let the AI stylist rank these')}</button>` : ''}
+        ? (lang ==='th'?'✦ LLOOP Atelier จัดอันดับให้แล้ว':'✦ Ranked by LLOOP Atelier')
+        : (lang ==='th'?'✦ ให้ LLOOP Atelier ช่วยเรียงให้':'✦ Let LLOOP Atelier rank these')}</button>` : ''}
     <div id="bpGridWrap"></div>`;
   renderBackupGrid();
 }
@@ -1255,7 +1255,7 @@ function renderBackupGrid() {
   }).join('')}</div>`;
 }
 function onBackupSearch(v) { _bpQuery = v; renderBackupGrid(); }
-// ลูกค้ากด → ส่งชุดหลัก + ชุดที่เลือกได้ ไปให้ AI สไตลิสต์เรียง "สลับแทนได้เนียนสุด" ก่อน
+// ลูกค้ากด → ส่งชุดหลัก + ชุดที่เลือกได้ ไปให้ LLOOP Atelier เรียง "สลับแทนได้เนียนสุด" ก่อน
 async function aiRankBackups() {
   if (_bpRanking || !_bpPrimary || !_bpPool.length) return;
   const btn = $('#bpAiBtn');
@@ -1282,11 +1282,11 @@ async function aiRankBackups() {
       renderBackupPicker();
     } else {
       toast(lang ==='th'?'สไตลิสต์ยังเรียงให้ไม่ได้ ลองใหม่อีกครั้งนะคะ':'Could not rank right now — please try again');
-      if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้สไตลิสต์ AI ช่วยเรียงให้':'✦ Let the AI stylist rank these'; }
+      if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้ LLOOP Atelier ช่วยเรียงให้':'✦ Let LLOOP Atelier rank these'; }
     }
   } catch (e) {
     toast(lang ==='th'?'เชื่อมต่อสไตลิสต์ไม่ได้ ลองใหม่นะคะ':'Stylist unavailable — please try again');
-    if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้สไตลิสต์ AI ช่วยเรียงให้':'✦ Let the AI stylist rank these'; }
+    if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้ LLOOP Atelier ช่วยเรียงให้':'✦ Let LLOOP Atelier rank these'; }
   }
   _bpRanking = false;
 }
@@ -1824,7 +1824,7 @@ function openMenu() {
       ${item(I.foryou, en ? 'For you' : 'แนะนำเฉพาะคุณ', 'if(!fForYou)toggleForYou()')}
       ${signedIn ? item(I.foryou, en ? 'What you love' : 'สิ่งที่คุณชอบ', 'openTaste()') : ''}
       ${item(I.stylist, en ? 'What to wear? — card game' : 'งานนี้ใส่อะไรดี — เพื่อนสาวช่วยเลือก', "location.href='quiz.html'")}
-      ${item(I.stylist, en ? 'AI stylist by venue' : 'AI สไตลิสต์ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
+      ${item(I.stylist, en ? 'LLOOP Atelier by venue' : 'LLOOP Atelier ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
       ${item(I.findwish, en ? 'Wish for a piece — tell us' : 'อยากได้ชุดไหน บอกเราได้', "location.href='wishlist.html'")}
       ${item(I.foryou, en ? 'Community · The Loop Looks' : 'ชุมชน · ลุคจากคนใน loop', "location.href='looks.html'")}
@@ -3598,7 +3598,7 @@ function routeDeepLink() {
     }
     // โค้ดชวนเพื่อนจากลิงก์ (?ref=CODE) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿200 ทั้งคู่ เข้ากระเป๋า LLOOP)
     if (ref) { try { localStorage.setItem('lloop_ref', ref.trim()); } catch (_e) {} applyPendingReferral(); }
-    // มาจากการ์ดเกม quiz.html (?occasion=KEY&mood=...) → จำโอกาสไว้ให้ AI สไตลิสต์ใช้ + กรองคลังให้ตรงงาน
+    // มาจากการ์ดเกม quiz.html (?occasion=KEY&mood=...) → จำโอกาสไว้ให้ LLOOP Atelier ใช้ + กรองคลังให้ตรงงาน
     const occ = qs.get('occasion') || (ls && ls.get('occasion'));
     if (occ && OCCASIONS && Object.prototype.hasOwnProperty.call(window.I18N[lang].occ || {}, occ)) {
       window.gQuizOccasion = occ;
@@ -3622,7 +3622,7 @@ function routeDeepLink() {
       else if (go === 'verify' || go === 'kyc') openKyc('');
       else if (go === 'stylist') {
         const el = $('#venueInput'); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
-        // มาจากการ์ดเกมพร้อมโอกาสแล้ว → ชวนเลือกวันที่ต่อ + เช็ก/โชว์โควต้า AI สไตลิสต์ที่เหลือ
+        // มาจากการ์ดเกมพร้อมโอกาสแล้ว → ชวนเลือกวันที่ต่อ + เช็ก/โชว์โควต้า LLOOP Atelier ที่เหลือ
         if (window.gQuizOccasion) {
           const di = $('#venueDate'); if (di) di.classList.add('need');
           (async () => {

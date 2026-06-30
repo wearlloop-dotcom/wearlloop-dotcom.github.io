@@ -94,7 +94,10 @@
     { key:'ononmade',    name:'Ononmade',     group:'feminine', origin:'vn', tier:'mid', hot:false, aliases:['ononmad','on on made'],         types:['เดรส','ชุดเซ็ต'], note:'เฟมินีนมินิมอล (เวียดนาม)' },
     { key:'redbean',     name:'Redbean',      group:'party',    origin:'vn', tier:'mid', hot:false, aliases:['red bean','redbean beachclub'], types:['เดรส','ชุดทะเล'], note:'สดใส beachclub วันหยุด (เวียดนาม)' },
     { key:'ibiboss',     name:'Ibiboss',      group:'statement',origin:'vn', tier:'mid', hot:false, aliases:['ibi boss'],                     types:['เดรส'],          note:'ป้ายแซ่บ ลุคมั่นใจ (เวียดนาม)' },
-    { key:'lanchy',      name:'Lanchy',       group:'feminine', origin:'vn', tier:'mid', hot:false, aliases:['lanchi'],                       types:['เดรส','เสื้อ'],   note:'เฟมินีนเวียดนาม' }
+    { key:'lanchy',      name:'Lanchy',       group:'feminine', origin:'vn', tier:'mid', hot:false, aliases:['lanchi'],                       types:['เดรส','เสื้อ'],   note:'เฟมินีนเวียดนาม' },
+
+    // — แบรนด์ไทย (house/อินดี้) —
+    { key:'lookbook',    name:'Lookbook',     group:'feminine', origin:'th', tier:'budget', hot:true, aliases:['lookbook'],                   types:['เดรส','เสื้อ','กางเกง'], note:'แบรนด์ไทย ลุคเฟมินีน-แคชวล (vibe แก้ได้)' }
   ];
 
   // map ชื่อแบรนด์ (lowercase) + alias → entry  สำหรับค้นหา/จับคู่กับ g.brand

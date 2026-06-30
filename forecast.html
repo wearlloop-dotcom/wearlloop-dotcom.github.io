@@ -308,13 +308,13 @@ async function loadPlanMargin(){
     const inst = p.installment_per_month ? `฿${NF.format(p.installment_per_month)}/ด ×${p.installment_months}` : '—';
     return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)">
       <div style="flex:1"><div style="color:var(--ink);font-weight:500">${below?'🔴 ':''}${p.name}</div>
-        <div style="font-size:11px">฿${NF.format(p.price_per_month)}/เดือน · ${p.rentals_per_cycle} ชุด/รอบ · ค่าส่ง ฿${NF.format(Math.round(p.rentals_per_cycle*ship))} · เผื่อเสีย ฿${NF.format(Math.round(reserve))}</div></div>
-      <div style="text-align:right;min-width:96px"><div style="color:${color};font-weight:600">฿${NF.format(marginMo)}/ด</div>
-        <div style="font-size:11px;color:${color}">มาร์จิ้น ${pct}%</div></div>
-      <div style="text-align:right;min-width:84px;font-size:11px;color:var(--muted)">ผ่อน<br>${inst}</div>
+        <div style="font-size:11px">฿${NF.format(p.price_per_month)}${NAV.t('/เดือน','/mo')} · ${p.rentals_per_cycle} ${NAV.t('ชุด/รอบ','pieces/cycle')} · ${NAV.t('ค่าส่ง','shipping')} ฿${NF.format(Math.round(p.rentals_per_cycle*ship))} · ${NAV.t('เผื่อเสีย','buffer')} ฿${NF.format(Math.round(reserve))}</div></div>
+      <div style="text-align:right;min-width:96px"><div style="color:${color};font-weight:600">฿${NF.format(marginMo)}${NAV.t('/ด','/mo')}</div>
+        <div style="font-size:11px;color:${color}">${NAV.t('มาร์จิ้น','margin')} ${pct}%</div></div>
+      <div style="text-align:right;min-width:84px;font-size:11px;color:var(--muted)">${NAV.t('ผ่อน','Instalment')}<br>${inst}</div>
     </div>`;
   }).join('') +
-    `<div style="margin-top:10px;font-size:12px;font-weight:600;color:${belowCount?'#B4543A':'#0F7B5A'}">${belowCount ? `🔴 ${belowCount} แพ็กต่ำกว่าเกณฑ์ ${minMargin}% — ควรขึ้นราคา/ลดส่วนลด/จำกัดชุดพรีเมียม` : `ทุกแพ็กผ่านเกณฑ์มาร์จิ้น ≥ ${minMargin}%`}</div>`;
+    `<div style="margin-top:10px;font-size:12px;font-weight:600;color:${belowCount?'#B4543A':'#0F7B5A'}">${belowCount ? NAV.t(`🔴 ${belowCount} แพ็กต่ำกว่าเกณฑ์ ${minMargin}% — ควรขึ้นราคา/ลดส่วนลด/จำกัดชุดพรีเมียม`,`🔴 ${belowCount} pack(s) below the ${minMargin}% threshold — raise prices / cut discounts / limit premium pieces`) : NAV.t(`ทุกแพ็กผ่านเกณฑ์มาร์จิ้น ≥ ${minMargin}%`,`All packs meet the ≥ ${minMargin}% margin threshold`)}</div>`;
   populatePpSelect();
 }
 function populatePpSelect(){
@@ -335,28 +335,28 @@ async function savePlanPrice(){
   const code = document.getElementById('ppPlan').value;
   const price = Number(document.getElementById('ppPrice').value) || 0;
   const rentals = Number(document.getElementById('ppRentals').value) || null;
-  if(!code || price <= 0){ msg.style.color='#B4543A'; msg.textContent='ใส่ราคาให้ถูกต้องก่อนนะคะ'; return; }
-  msg.style.color='var(--color-text-secondary)'; msg.style.color='#7C8694'; msg.textContent='กำลังบันทึก…';
+  if(!code || price <= 0){ msg.style.color='#B4543A'; msg.textContent=NAV.t('ใส่ราคาให้ถูกต้องก่อนนะคะ','Please enter a valid price first'); return; }
+  msg.style.color='var(--color-text-secondary)'; msg.style.color='#7C8694'; msg.textContent=NAV.t('กำลังบันทึก…','Saving…');
   const { data, error } = await client().rpc('update_plan_price', { p_uid: OWNER_UID, p_code: code, p_price: price, p_rentals: rentals });
-  if(error || !data || data.error){ msg.style.color='#B4543A'; msg.textContent='บันทึกไม่สำเร็จ' + (data&&data.error?(' ('+data.error+')'):''); return; }
+  if(error || !data || data.error){ msg.style.color='#B4543A'; msg.textContent=NAV.t('บันทึกไม่สำเร็จ','Save failed') + (data&&data.error?(' ('+data.error+')'):''); return; }
   _planEcon = null;                                  // refetch ราคาใหม่
   await loadPlanMargin();
-  msg.style.color='#0F7B5A'; msg.textContent=`บันทึกแล้ว — ${code} ฿${NF.format(price)}${data.save_pct?` · ส่วนลด ${data.save_pct}%`:''} (หน้าลูกค้าอัปเดตทันที)`;
+  msg.style.color='#0F7B5A'; msg.textContent=NAV.t(`บันทึกแล้ว — ${code} ฿${NF.format(price)}${data.save_pct?` · ส่วนลด ${data.save_pct}%`:''} (หน้าลูกค้าอัปเดตทันที)`,`Saved — ${code} ฿${NF.format(price)}${data.save_pct?` · ${data.save_pct}% off`:''} (customer side updated instantly)`);
 }
 
 // ---------- actuals ----------
 function renderReal(){
   if(!ACT){ return; }
   const a = ACT;
-  document.getElementById('realHd').textContent = `เดือนนี้ · ${a.month} (ของจริงจากระบบ)`;
+  document.getElementById('realHd').textContent = NAV.t(`เดือนนี้ · ${a.month} (ของจริงจากระบบ)`,`This month · ${a.month} (actuals from the system)`);
   document.getElementById('realStats').innerHTML =
-    statHTML('รายได้เดือนนี้', baht(a.revenue||0), 'จากบัญชีจริง')
-  + statHTML('ครั้งเช่า', NF.format(a.rentals||0)+' ครั้ง', (a.customers||0)+' ลูกค้า')
-  + statHTML('ชุดพร้อมเช่า', NF.format(a.dresses_ready||0)+' ตัว', 'ทั้งหมด '+NF.format(a.dresses_total||0))
-  + statHTML('รายได้/การเช่า', a.avg_rev_per_rental? baht(a.avg_rev_per_rental):'—', 'เฉลี่ยจริง')
-  + statHTML('เช่า/ชุด (util)', (a.util!=null? a.util:'—'), 'รอบเช่าต่อชุด')
-  + statHTML('ลูกค้า', NF.format(a.customers||0)+' คน', 'เดือนนี้')
-  + statHTML('กันชนชุดเสีย (กองทุน)', baht((a.reserve&&a.reserve.balance)||0), `ตั้งสำรอง ${(a.reserve&&a.reserve.pct)||5}% ของค่าเช่า`, 'good');
+    statHTML(NAV.t('รายได้เดือนนี้','Revenue this month'), baht(a.revenue||0), NAV.t('จากบัญชีจริง','from real books'))
+  + statHTML(NAV.t('ครั้งเช่า','Rentals'), NF.format(a.rentals||0)+NAV.t(' ครั้ง',''), (a.customers||0)+NAV.t(' ลูกค้า',' customers'))
+  + statHTML(NAV.t('ชุดพร้อมเช่า','Pieces ready'), NF.format(a.dresses_ready||0)+NAV.t(' ตัว',''), NAV.t('ทั้งหมด ','total ')+NF.format(a.dresses_total||0))
+  + statHTML(NAV.t('รายได้/การเช่า','Revenue/rental'), a.avg_rev_per_rental? baht(a.avg_rev_per_rental):'—', NAV.t('เฉลี่ยจริง','actual average'))
+  + statHTML(NAV.t('เช่า/ชุด (util)','Rentals/piece (util)'), (a.util!=null? a.util:'—'), NAV.t('รอบเช่าต่อชุด','rental cycles per piece'))
+  + statHTML(NAV.t('ลูกค้า','Customers'), NF.format(a.customers||0)+NAV.t(' คน',''), NAV.t('เดือนนี้','this month'))
+  + statHTML(NAV.t('กันชนชุดเสีย (กองทุน)','Damage buffer (fund)'), baht((a.reserve&&a.reserve.balance)||0), NAV.t(`ตั้งสำรอง ${(a.reserve&&a.reserve.pct)||5}% ของค่าเช่า`,`reserves ${(a.reserve&&a.reserve.pct)||5}% of rental`), 'good');
 
   const series = a.series||[];
   const max = Math.max(1, ...series.map(s=>s.revenue||0));
@@ -378,18 +378,18 @@ function renderGap(){
   const prog = Math.min(100, (a.revenue||0)/Math.max(1,denom)*100);
   document.getElementById('rProg').style.width = prog.toFixed(0)+'%';
   document.getElementById('rProgTxt').textContent = inp.type==='net'
-    ? `ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของยอดขายที่ต้องทำ ${baht(need.revenue)} (เพื่อกำไรสุทธิ ${baht(T)})`
-    : `ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของเป้า ${baht(T)}`;
+    ? NAV.t(`ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของยอดขายที่ต้องทำ ${baht(need.revenue)} (เพื่อกำไรสุทธิ ${baht(T)})`,`Now ${baht(a.revenue||0)} = ${prog.toFixed(0)}% of the ${baht(need.revenue)} revenue needed (for net profit ${baht(T)})`)
+    : NAV.t(`ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของเป้า ${baht(T)}`,`Now ${baht(a.revenue||0)} = ${prog.toFixed(0)}% of the ${baht(T)} target`);
   const gC = Math.max(0, Math.round(need.customers) - (a.customers||0));
   const gD = Math.max(0, Math.round(need.dresses) - (a.dresses_ready||0));
   const gR = Math.max(0, Math.round(need.rentals) - (a.rentals||0));
   document.getElementById('gapRows').innerHTML =
-    `<div class="gaprow"><span>ลูกค้า/เดือน</span><span>${a.customers||0} → <b>${Math.round(need.customers)}</b> (+${gC})</span></div>`
-  + `<div class="gaprow"><span>ครั้งเช่า/เดือน</span><span>${a.rentals||0} → <b>${Math.round(need.rentals)}</b> (+${gR})</span></div>`
-  + `<div class="gaprow"><span>ชุดพร้อมเช่า</span><span>${a.dresses_ready||0} → <b>${Math.round(need.dresses)}</b> (+${gD})</span></div>`
-  + `<div class="gaprow"><span>ทีมจับชุด</span><span><b>${need.ops}</b> คน</span></div>`
-  + `<div class="gaprow"><span>ทุนสต็อกเพิ่ม</span><span><b>${baht(gD*num('i_stock'))}</b></span></div>`
-  + `<div class="gaprow"><span>เหลือสุทธิที่เป้านี้</span><span><b style="color:${need.net>=0?'#0F7B5A':'#B4543A'}">${baht(need.net)}</b>/เดือน</span></div>`;
+    `<div class="gaprow"><span>${NAV.t('ลูกค้า/เดือน','Customers/month')}</span><span>${a.customers||0} → <b>${Math.round(need.customers)}</b> (+${gC})</span></div>`
+  + `<div class="gaprow"><span>${NAV.t('ครั้งเช่า/เดือน','Rentals/month')}</span><span>${a.rentals||0} → <b>${Math.round(need.rentals)}</b> (+${gR})</span></div>`
+  + `<div class="gaprow"><span>${NAV.t('ชุดพร้อมเช่า','Pieces ready')}</span><span>${a.dresses_ready||0} → <b>${Math.round(need.dresses)}</b> (+${gD})</span></div>`
+  + `<div class="gaprow"><span>${NAV.t('ทีมจับชุด','Handling team')}</span><span><b>${need.ops}</b> ${NAV.t('คน','ppl')}</span></div>`
+  + `<div class="gaprow"><span>${NAV.t('ทุนสต็อกเพิ่ม','Extra stock cost')}</span><span><b>${baht(gD*num('i_stock'))}</b></span></div>`
+  + `<div class="gaprow"><span>${NAV.t('เหลือสุทธิที่เป้านี้','Net left at this target')}</span><span><b style="color:${need.net>=0?'#0F7B5A':'#B4543A'}">${baht(need.net)}</b>${NAV.t('/เดือน','/mo')}</span></div>`;
 }
 
 // ---------- mode + boot ----------
@@ -427,9 +427,9 @@ async function tryUid(uid){
 }
 async function unlock(){
   const uid = (document.getElementById('uidin').value||'').trim();
-  showLock('กำลังตรวจสอบ…', false);
+  showLock(NAV.t('กำลังตรวจสอบ…','Checking…'), false);
   if(await tryUid(uid)) showMain();
-  else showLock('UID นี้ไม่ใช่เจ้าของ ลองใหม่อีกครั้ง', true);
+  else showLock(NAV.t('UID นี้ไม่ใช่เจ้าของ ลองใหม่อีกครั้ง','That UID isn’t an owner — try again'), true);
 }
 async function boot(){
   let uid = null;
@@ -440,9 +440,21 @@ async function boot(){
   }catch(e){ /* นอก LINE */ }
   if(!uid) uid = localStorage.getItem('lloop_owner_uid');
   if(uid && await tryUid(uid)){ showMain(); return; }
-  showLock('เปิดผ่าน LINE ด้วยบัญชีเจ้าของ หรือใส่ UID เจ้าของด้านล่าง', true);
+  showLock(NAV.t('เปิดผ่าน LINE ด้วยบัญชีเจ้าของ หรือใส่ UID เจ้าของด้านล่าง','Open via LINE with an owner account, or paste the owner UID below'), true);
 }
 boot();
+
+// re-render dynamic content when the language toggle flips
+window.addEventListener('lloop:lang', function(){
+  refreshRealChips();
+  if (document.getElementById('main') && !document.getElementById('main').classList.contains('hidden')) {
+    renderPlan(); loadPlanMargin(); if (ACT) { renderReal(); }
+  } else {
+    // lock screen still showing — refresh the status line
+    const lm = document.getElementById('lockmsg');
+    if (lm) showLock(NAV.t('เปิดผ่าน LINE ด้วยบัญชีเจ้าของ หรือใส่ UID เจ้าของด้านล่าง','Open via LINE with an owner account, or paste the owner UID below'), !document.getElementById('uidbox').classList.contains('hidden'));
+  }
+});
 </script>
 </body>
 </html>

@@ -89,23 +89,20 @@
 </style>
 </head>
 <body>
-<header><div class="contain hbar">
-  <div class="logo">LLOOP</div>
-  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> หน้าหลัก</a>
-</div></header>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 
 <div class="contain">
   <!-- โหลด preview -->
   <div id="loadingView" class="empty">
     <div class="ei"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-    <p>กำลังเปิดคำเชิญ…</p>
+    <p data-i18n="Opening invitation…">กำลังเปิดคำเชิญ…</p>
   </div>
 
   <!-- 1) Welcome / preview -->
   <div id="welcomeView" class="hide">
     <!-- (a) WHO invited you — the hero -->
     <div class="hero">
-      <div class="eyebrow">คำเชิญเข้ากลุ่ม</div>
+      <div class="eyebrow" data-i18n="Group invitation">คำเชิญเข้ากลุ่ม</div>
       <div class="inviter">
         <div class="invava-wrap">
           <div id="invAva" class="invava">L</div>
@@ -118,33 +115,33 @@
 
     <!-- (b) WHAT group + what it does -->
     <div class="sec">
-      <div class="seclabel">กลุ่มที่ชวนคุณเข้า</div>
+      <div class="seclabel" data-i18n="The group inviting you">กลุ่มที่ชวนคุณเข้า</div>
       <div class="grouprow">
         <div class="gava" id="grpAva">L</div>
         <div>
-          <span class="kindtag" id="grpKind">ครอบครัว</span>
+          <span class="kindtag" id="grpKind" data-i18n="Family">ครอบครัว</span>
           <div class="gname" id="grpName">—</div>
           <div class="gmeta" id="grpCount"></div>
         </div>
       </div>
       <div class="valueprop">
         <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v6l9 4 9-4V7"/></svg>
-        <span>จัดชุดเข้าตีมเดียวกัน + เช่าพร้อมกันในออเดอร์เดียว ส่งทีเดียวถึงทุกคน</span>
+        <span data-i18n="Dress in one shared theme and rent together in a single order — one delivery to everyone.">จัดชุดเข้าตีมเดียวกัน + เช่าพร้อมกันในออเดอร์เดียว ส่งทีเดียวถึงทุกคน</span>
       </div>
     </div>
 
     <!-- (c) HOW it works + the action -->
     <div class="sec">
-      <div class="seclabel">ขั้นตอนง่าย ๆ</div>
+      <div class="seclabel" data-i18n="Simple steps">ขั้นตอนง่าย ๆ</div>
       <div class="steps">
-        <div class="step"><span class="num">1</span><span class="st">แตะปุ่ม <b>เข้าร่วมกลุ่ม</b> ด้านล่าง</span></div>
-        <div class="step" id="stepLogin"><span class="num">2</span><span class="st">ยืนยันตัวตนด้วย <b>LINE</b> (ครั้งเดียว)</span></div>
-        <div class="step"><span class="num">3</span><span class="st">เริ่ม <b>จัดชุดเข้าตีม</b> + เช่าพร้อมกันทั้งกลุ่ม</span></div>
+        <div class="step"><span class="num">1</span><span class="st" data-i18n="Tap &lt;b&gt;Join group&lt;/b&gt; below">แตะปุ่ม <b>เข้าร่วมกลุ่ม</b> ด้านล่าง</span></div>
+        <div class="step" id="stepLogin"><span class="num">2</span><span class="st" data-i18n="Verify with &lt;b&gt;LINE&lt;/b&gt; (just once)">ยืนยันตัวตนด้วย <b>LINE</b> (ครั้งเดียว)</span></div>
+        <div class="step"><span class="num">3</span><span class="st" data-i18n="Start &lt;b&gt;styling the theme&lt;/b&gt; and rent together as a group">เริ่ม <b>จัดชุดเข้าตีม</b> + เช่าพร้อมกันทั้งกลุ่ม</span></div>
       </div>
       <div class="actions" style="margin-top:18px">
-        <button class="btn sage" id="joinBtn">เข้าร่วมกลุ่ม</button>
+        <button class="btn sage" id="joinBtn" data-i18n="Join group">เข้าร่วมกลุ่ม</button>
         <div class="btnnote" id="joinNote"></div>
-        <a class="linkbtn" href="index.html">ไว้ก่อน</a>
+        <a class="linkbtn" href="index.html" data-i18n="Maybe later">ไว้ก่อน</a>
       </div>
     </div>
   </div>
@@ -153,8 +150,8 @@
   <div id="doneView" class="hide">
     <div class="empty">
       <div class="doneicon"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
-      <h4>เข้าร่วมแล้ว!</h4>
-      <p id="doneMsg">กำลังพาเข้ากลุ่ม…</p>
+      <h4 data-i18n="You're in!">เข้าร่วมแล้ว!</h4>
+      <p id="doneMsg" data-i18n="Taking you to the group…">กำลังพาเข้ากลุ่ม…</p>
     </div>
   </div>
 
@@ -162,9 +159,9 @@
   <div id="edgeView" class="hide">
     <div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
-      <h4 id="edgeTitle">ลิงก์คำเชิญไม่ถูกต้อง</h4>
-      <p id="edgeMsg">ลิงก์คำเชิญไม่ถูกต้องหรือถูกยกเลิกแล้ว ลองขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ</p>
-      <a class="btn" style="display:inline-block;text-decoration:none;max-width:280px" href="index.html">ไปหน้าหลัก</a>
+      <h4 id="edgeTitle" data-i18n="Invalid invitation link">ลิงก์คำเชิญไม่ถูกต้อง</h4>
+      <p id="edgeMsg" data-i18n="This invitation link is invalid or has been cancelled. Ask the friend who invited you for a new link.">ลิงก์คำเชิญไม่ถูกต้องหรือถูกยกเลิกแล้ว ลองขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ</p>
+      <a class="btn" style="display:inline-block;text-decoration:none;max-width:280px" href="index.html" data-i18n="Go to home">ไปหน้าหลัก</a>
     </div>
   </div>
 
@@ -177,6 +174,7 @@
 <script src="liffAuth.js?v=38"></script>
 <script src="me-api.js?v=54"></script>
 <script src="api.js?v=54"></script>
+<script src="nav.js?v=1"></script>
 <script>
 // ===== state =====
 let LIVE = false;            // LIVE=true → Supabase จริง (CUSTOMER จาก LINE login) · false → mock พรีวิว
@@ -190,7 +188,7 @@ const MOCK_PREVIEW = {
   inviter_name:'น้ำหวาน', inviter_picture:'https://i.pravatar.cc/120?img=32', owner_name:'น้ำหวาน'
 };
 
-const KIND_TH = { family:'ครอบครัว', friends:'แก๊งเพื่อน', couple:'คู่รัก' };
+const KIND_TH = { family:NAV.t('ครอบครัว','Family'), friends:NAV.t('แก๊งเพื่อน','Friends'), couple:NAV.t('คู่รัก','Couple') };
 const AVA_COLORS = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
 const $ = s => document.querySelector(s);
 function escHtml(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
@@ -232,7 +230,7 @@ function showEdge(title, msg){
 // ===== render welcome จาก preview {name, kind, member_count, inviter_name, inviter_picture, owner_name} =====
 function renderWelcome(p){
   const kind=p.kind||'family';
-  const name=p.name||'กลุ่มของเรา';
+  const name=p.name||NAV.t('กลุ่มของเรา','Our group');
 
   // --- (a) inviter เป็นพระเอก: รูปโปรไฟล์ + ชื่อ "{ชื่อ} ชวนคุณเข้ากลุ่ม" ---
   const inviter=(p.inviter_name||'').trim() || (p.owner_name||'').trim();
@@ -250,20 +248,20 @@ function renderWelcome(p){
     paintInviterInitial(inviter);
   }
   if(inviter){
-    $('#welInvite').innerHTML='<b>'+escHtml(inviter)+'</b> ชวนคุณเข้ากลุ่ม';
-    $('#welSub').innerHTML='ตอบรับเพื่อจัดชุดเข้าตีม + เช่าพร้อมกันได้เลย';
+    $('#welInvite').innerHTML='<b>'+escHtml(inviter)+'</b> '+NAV.t('ชวนคุณเข้ากลุ่ม','invited you to a group');
+    $('#welSub').innerHTML=NAV.t('ตอบรับเพื่อจัดชุดเข้าตีม + เช่าพร้อมกันได้เลย','Accept to style a shared theme and rent together');
   } else {
-    $('#welInvite').textContent='คุณถูกชวนเข้ากลุ่มนี้';
-    $('#welSub').innerHTML='ตอบรับเพื่อจัดชุดเข้าตีม + เช่าพร้อมกันได้เลย';
+    $('#welInvite').textContent=NAV.t('คุณถูกชวนเข้ากลุ่มนี้','You\'ve been invited to this group');
+    $('#welSub').innerHTML=NAV.t('ตอบรับเพื่อจัดชุดเข้าตีม + เช่าพร้อมกันได้เลย','Accept to style a shared theme and rent together');
   }
 
   // --- (b) group card ---
   $('#grpAva').textContent=initial(name);
   $('#grpAva').style.background=avaColor(name);
-  $('#grpKind').textContent=KIND_TH[kind]||'กลุ่ม';
+  $('#grpKind').textContent=KIND_TH[kind]||NAV.t('กลุ่ม','Group');
   $('#grpName').textContent=name;
   const cnt=(p.member_count!=null)?p.member_count:0;
-  $('#grpCount').textContent=cnt? (cnt+' คนในกลุ่ม') : 'เริ่มต้นกลุ่มใหม่';
+  $('#grpCount').textContent=cnt? (cnt+NAV.t(' คนในกลุ่ม',' people in the group')) : NAV.t('เริ่มต้นกลุ่มใหม่','Starting a new group');
 
   // --- (c) login signalling: ถ้ายังไม่ได้ล็อกอินจริง บอกชัดว่าจะยืนยันด้วย LINE ---
   applyLoginSignal();
@@ -290,7 +288,7 @@ function applyLoginSignal(){
     note.innerHTML='';
     const step=$('#stepLogin'); if(step) step.style.display='none';
   } else {
-    note.innerHTML='<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>ยืนยันด้วย LINE ครั้งเดียว ปลอดภัย</span>';
+    note.innerHTML='<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>'+NAV.t('ยืนยันด้วย LINE ครั้งเดียว ปลอดภัย','Verify with LINE once · secure')+'</span>';
     const step=$('#stepLogin'); if(step) step.style.display='';
   }
 }
@@ -300,31 +298,31 @@ async function doJoin(){
   const btn=$('#joinBtn');
   // บังคับยืนยันด้วย LINE เสมอ — ยังไม่ล็อกอิน → พาไป LINE login (ไม่มีโหมดเดโมข้าม)
   if(!CUSTOMER || !CUSTOMER.id){
-    btn.disabled=true; btn.innerHTML='<span class="spin"></span>กำลังพาไปยืนยันด้วย LINE…';
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span>'+NAV.t('กำลังพาไปยืนยันด้วย LINE…','Taking you to verify with LINE…');
     try{ await window.LiffAuth.signIn(); }
-    catch(_e){ btn.disabled=false; btn.textContent='เข้าร่วมกลุ่ม';
-      alert('กรุณาเปิดลิงก์นี้ในแอป LINE เพื่อยืนยันตัวตนก่อนเข้าร่วมกลุ่มนะคะ'); }
+    catch(_e){ btn.disabled=false; btn.textContent=NAV.t('เข้าร่วมกลุ่ม','Join group');
+      alert(NAV.t('กรุณาเปิดลิงก์นี้ในแอป LINE เพื่อยืนยันตัวตนก่อนเข้าร่วมกลุ่มนะคะ','Please open this link in the LINE app to verify your identity before joining the group.')); }
     return; // signIn จะ redirect ไป LINE login แล้วโหลดหน้านี้ใหม่ พร้อม CUSTOMER
   }
-  btn.disabled=true; btn.innerHTML='<span class="spin"></span>กำลังเข้าร่วม…';
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>'+NAV.t('กำลังเข้าร่วม…','Joining…');
   try{
     const r=unwrap(await window.API.joinGroup(TOKEN, CUSTOMER));
     if(r && r.error) throw { message:r.error };
     show('doneView');
-    const gname=(r && r.group_name) || (PREVIEW && PREVIEW.name) || 'กลุ่ม';
-    $('#doneMsg').textContent='ยินดีต้อนรับสู่ “'+gname+'” · กำลังพาเข้ากลุ่ม…';
+    const gname=(r && r.group_name) || (PREVIEW && PREVIEW.name) || NAV.t('กลุ่ม','the group');
+    $('#doneMsg').textContent=NAV.t('ยินดีต้อนรับสู่ “'+gname+'” · กำลังพาเข้ากลุ่ม…','Welcome to "'+gname+'" · taking you to the group…');
     setTimeout(()=>{ location.href='family.html'; }, 1200);
   }catch(e){
-    btn.disabled=false; btn.textContent='เข้าร่วมกลุ่ม';
+    btn.disabled=false; btn.textContent=NAV.t('เข้าร่วมกลุ่ม','Join group');
     const code=(e && e.message) || '';
     if(code==='link_expired' || code==='expired'){
-      showEdge('ลิงก์หมดอายุแล้ว','ลิงก์คำเชิญนี้หมดอายุแล้ว — ขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ');
+      showEdge(NAV.t('ลิงก์หมดอายุแล้ว','Link expired'),NAV.t('ลิงก์คำเชิญนี้หมดอายุแล้ว — ขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ','This invitation link has expired — ask the friend who invited you for a new one.'));
     } else if(code==='bad_token'){
-      showEdge('ลิงก์คำเชิญไม่ถูกต้อง','ลิงก์คำเชิญไม่ถูกต้องหรือถูกยกเลิกแล้ว ลองขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ');
+      showEdge(NAV.t('ลิงก์คำเชิญไม่ถูกต้อง','Invalid invitation link'),NAV.t('ลิงก์คำเชิญไม่ถูกต้องหรือถูกยกเลิกแล้ว ลองขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ','This invitation link is invalid or has been cancelled. Ask the friend who invited you for a new link.'));
     } else if(code==='guardian_not_member'){
-      showEdge('เข้าร่วมยังไม่ได้','ต้องให้ผู้ปกครองอยู่ในกลุ่มนี้ก่อนถึงจะเพิ่มได้ ลองทักเพื่อนที่ชวนนะคะ');
+      showEdge(NAV.t('เข้าร่วมยังไม่ได้','Can\'t join yet'),NAV.t('ต้องให้ผู้ปกครองอยู่ในกลุ่มนี้ก่อนถึงจะเพิ่มได้ ลองทักเพื่อนที่ชวนนะคะ','A guardian needs to be in this group first before you can be added — reach out to the friend who invited you.'));
     } else {
-      alert('เข้าร่วมกลุ่มไม่สำเร็จ ลองใหม่อีกครั้งนะคะ');
+      alert(NAV.t('เข้าร่วมกลุ่มไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Couldn\'t join the group — please try again.'));
     }
   }
 }
@@ -338,7 +336,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     if(window.API && window.CONFIG && !window.CONFIG.USE_MOCK){
       const s=await window.API.init();
       if(s && s.CUSTOMER && s.CUSTOMER.id){
-        CUSTOMER={ id:s.CUSTOMER.id, name:s.CUSTOMER.displayName||s.CUSTOMER.name||s.CUSTOMER.display_name||'ฉัน' };
+        CUSTOMER={ id:s.CUSTOMER.id, name:s.CUSTOMER.displayName||s.CUSTOMER.name||s.CUSTOMER.display_name||NAV.t('ฉัน','Me') };
         LIVE=true;
       }
     }

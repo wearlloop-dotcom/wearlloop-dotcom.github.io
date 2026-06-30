@@ -274,7 +274,7 @@ const SEASON_PALETTE = {
   spring:['#E6A57E','#E4C07E','#F0D9A8','#C98A7A'],
   summer:['#9AA7B0','#7E97A8','#A8C0C4','#D8E0DF'],
 };
-// โหมดสถานที่ (mock): จับคีย์เวิร์ดสถานที่ → พาเลตสี (ของจริงเรียก AI stylist)
+// โหมดสถานที่ (mock): จับคีย์เวิร์ดสถานที่ → พาเลตสี (ของจริงเรียก LLOOP Atelier)
 const VENUE_PALETTES = [
   { keys:['ทะเล','ริมทะเล','ชายหาด','หาด','beach','sea'], palette:['#7E97A8','#A8C0C4','#E4D5B7','#D8E0DF'] }, // ฟ้าทะเล + ทราย
   { keys:['วัด','งานวัด','ทำบุญ','temple'], palette:['#C9A86A','#B07D4F','#A85B43','#E4C07E'] },                 // ทองอุ่น
@@ -304,14 +304,14 @@ function loadGooglePlaces(){
     s.async=true; s.onload=()=>res(true); s.onerror=()=>res(false); document.head.appendChild(s); });
   return _gmapsP;
 }
-// โควต้า AI วิเคราะห์สถานที่ — ใช้ก้อนเดียวกับ AI สไตลิสต์หน้าแรก (stylist_consume ต่อลูกค้า)
+// โควต้า LLOOP Atelier — ใช้ก้อนเดียวกับ LLOOP Atelier หน้าแรก (stylist_consume ต่อลูกค้า)
 let AIQ = null;
 async function refreshAIQ(preset){
   const h=document.querySelector('#aiqHint'); if(!h) return;
-  if(!LIVE){ h.textContent=NAV.t('โหมดเดโม · ของจริงนับรวมกับโควต้า AI หน้าแรก','Demo mode · live usage counts toward your home-page AI quota'); return; }
+  if(!LIVE){ h.textContent=NAV.t('โหมดเดโม · ของจริงนับรวมกับโควต้า LLOOP Atelier','Demo mode · live usage counts toward your home-page LLOOP Atelier quota'); return; }
   if(preset!=null){ AIQ=preset; }
   else { try{ AIQ = await window.API.stylistQuota(); }catch(_e){ AIQ=null; } }
-  h.textContent = (AIQ!=null) ? NAV.t(`AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)`,`Venue AI · ${AIQ} left (shared with your home-page stylist quota)`) : '';
+  h.textContent = (AIQ!=null) ? NAV.t(`LLOOP Atelier · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ LLOOP Atelier หน้าแรก)`,`LLOOP Atelier · ${AIQ} left (shared with your home-page stylist quota)`) : '';
 }
 const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
 const AGE_TH = { kid:NAV.t('เด็ก','Child'), teen:NAV.t('วัยรุ่น','Teen'), adult:NAV.t('ผู้ใหญ่','Adult'), senior:NAV.t('ผู้ใหญ่ขึ้นวัย','Senior') };
@@ -672,7 +672,7 @@ async function renderTheme(show){
     box.innerHTML=`<div class="empty" style="padding:24px"><p>${NAV.t('กำลังให้สไตลิสต์จัดชุด…','Our stylist is putting looks together…')}</p></div>`;
     const fromStr=$('#t_date').value||new Date().toISOString().slice(0,10);
     try{
-      // สร้าง opts ตามโหมด: season → ส่ง season, venue → เรียก AI stylist เอาพาเลต
+      // สร้าง opts ตามโหมด: season → ส่ง season, venue → เรียก LLOOP Atelier เอาพาเลต
       const opts={}; let photoTip='';
       if(modeInfo.mode==='season'){
         // เฉดสีเลือกเอง → ส่ง palette (backend จับสีใกล้สุด); ไม่งั้นส่ง season
@@ -683,7 +683,7 @@ async function renderTheme(show){
         const st=await window.API.stylist({ venue: THEMESRC.venue.trim(), place: THEMESRC.place||null, occasion: occ }, 'th');
         if(st && st.error==='no_quota'){
           refreshAIQ(0);
-          box.innerHTML=`<div class="phototip" style="background:#FBF3E9;border-color:var(--gold);color:#8a6d2f"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>${NAV.t('โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) — เลือก “เลือกโทนเอง / เฉดสี” แทนได้เลยนะคะ','Your venue-AI quota is used up (shared with the home-page stylist) — try “Pick your own tone / shade” instead.')}</span></div>`;
+          box.innerHTML=`<div class="phototip" style="background:#FBF3E9;border-color:var(--gold);color:#8a6d2f"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>${NAV.t('โควต้า LLOOP Atelier หมดแล้ว (รวมกับ LLOOP Atelier หน้าแรก) — เลือก “เลือกโทนเอง / เฉดสี” แทนได้เลยนะคะ','Your LLOOP Atelier quota is used up (shared with the home-page stylist) — try “Pick your own tone / shade” instead.')}</span></div>`;
           return;
         }
         if(st && typeof st.remaining==='number'){ refreshAIQ(st.remaining); }
