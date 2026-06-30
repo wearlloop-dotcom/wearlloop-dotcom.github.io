@@ -17,7 +17,10 @@ function onSearch(v) {
 }
 function matchQuery(g) {
   if (!gQuery) return true;
-  const hay = [g.name, g.brand, g.category, (g.occasion_tags || []).map(occName).join(' '),
+  // brand alias/positioning → ค้นหา "มิตร", "celeb", "ราตรี", สะกดต่าง ก็เจอ
+  const bm = window.LLOOP_BRANDS && window.LLOOP_BRANDS.lookup(g.brand);
+  const bx = bm ? (bm.aliases.join(' ') + ' ' + bm.note) : '';
+  const hay = [g.name, g.brand, bx, g.category, (g.occasion_tags || []).map(occName).join(' '),
     g.colors.map(c => c[0]).join(' ')].join(' ').toLowerCase();
   return hay.includes(gQuery);
 }
@@ -205,11 +208,68 @@ function renderFilters() {
     <button class="tone ${fToneOnly?'':'off'}" onclick="toggleTone()">● ${t('myTone')}</button>
     <div class="swrow">${sw}</div>
     <select class="brandsel" onchange="setBrand(this.value)">${opts}</select>`;
+  renderBrandChips();
+}
+
+// Shop by Brand — ชิปแบรนด์ในสต็อก (hot ก่อน) + ปุ่มเปิดหน้ารวมแบรนด์
+function renderBrandChips() {
+  const el = $('#brandRow'); if (!el) return;
+  const meta = window.LLOOP_BRANDS;
+  const inStock = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
+  if (!inStock.length) { el.innerHTML = ''; return; }
+  const hotRank = b => { const m = meta && meta.lookup(b); return m && m.hot ? 0 : 1; };
+  const top = inStock.slice().sort((a, b) => hotRank(a) - hotRank(b) || a.localeCompare(b)).slice(0, 8);
+  const TH = lang === 'th';
+  let html = `<div class="brandrow-h">${TH ? 'แบรนด์ยอดนิยม' : 'Shop by brand'}</div><div class="bchips">`;
+  html += `<button class="bchip ${!fBrand ? 'on' : ''}" onclick="setBrand('')">${t('allBrands')}</button>`;
+  html += top.map(b => `<button class="bchip ${fBrand === b ? 'on' : ''}" data-b="${esc(b)}" onclick="setBrand(this.dataset.b)">${esc(b)}</button>`).join('');
+  html += `<button class="bchip more" onclick="openBrandDir()">${TH ? 'ดูทั้งหมด ›' : 'All ›'}</button></div>`;
+  el.innerHTML = html;
+}
+
+// หน้ารวมแบรนด์ — จัดกลุ่มตามสไตล์ · มีของ = กดเช่า · ยังไม่มี = บอก "อยากให้มี"
+function openBrandDir() {
+  const meta = window.LLOOP_BRANDS; if (!meta) { setBrand(''); return; }
+  const TH = lang === 'th';
+  const cnt = {}, actual = {}, extras = {};
+  GARMENTS.forEach(g => {
+    const bn = g.brand; if (!bn) return;
+    const m = meta.lookup(bn);
+    if (m) { cnt[m.key] = (cnt[m.key] || 0) + 1; if (!actual[m.key]) actual[m.key] = bn; }
+    else { extras[bn] = (extras[bn] || 0) + 1; }
+  });
+  let html = `<div class="bdir"><button class="bd-x" onclick="closeBrandDir()" aria-label="close">×</button><div class="bd-h">${TH ? 'รวมแบรนด์' : 'All brands'}</div>`;
+  meta.GROUPS.forEach(gr => {
+    const items = meta.BRANDS.filter(b => b.group === gr.key);
+    if (!items.length) return;
+    html += `<div class="bd-g"><div class="bd-gt">${gr.label}</div><div class="bd-row">`;
+    html += items.map(b => {
+      const n = cnt[b.key] || 0;
+      if (n > 0) return `<button class="bd-b have" data-b="${esc(actual[b.key])}" onclick="pickBrand(this.dataset.b)">${esc(b.name)}<span class="bd-c">${n}</span></button>`;
+      return `<button class="bd-b soon" data-k="${esc(b.key)}" data-n="${esc(b.name)}" onclick="notifyBrand(this.dataset.k,this.dataset.n)">${esc(b.name)}</button>`;
+    }).join('');
+    html += `</div></div>`;
+  });
+  const ex = Object.keys(extras);
+  if (ex.length) {
+    html += `<div class="bd-g"><div class="bd-gt">${TH ? 'อื่น ๆ' : 'More'}</div><div class="bd-row">`;
+    html += ex.map(b => `<button class="bd-b have" data-b="${esc(b)}" onclick="pickBrand(this.dataset.b)">${esc(b)}<span class="bd-c">${extras[b]}</span></button>`).join('');
+    html += `</div></div>`;
+  }
+  html += `<div class="bd-note">${TH ? 'มีตัวเลข = เช่าได้เลย · กดแบรนด์อื่นเพื่อบอก “อยากให้มี” เราจะหาเข้ามาให้' : 'Number = available now · tap others to request them'}</div></div>`;
+  $('#brandDirSheet').innerHTML = html;
+  $('#brandDirOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
+}
+function closeBrandDir() { $('#brandDirOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function pickBrand(b) { closeBrandDir(); setBrand(b); window.scrollTo({ top: 380, behavior: 'smooth' }); }
+function notifyBrand(key, name) {
+  window.track?.('brand_demand', key);
+  toast(lang === 'th' ? `บันทึกแล้ว — จะแจ้งเมื่อ ${name} เข้าคลัง` : `Saved — we'll tell you when ${name} arrives`);
 }
 
 function setOccasion(t2) { fOccasion = t2; renderCatnav(); renderChips(); renderGrid(); }
 function setColor(h) { fColor = (fColor === h? null : h); renderFilters(); renderGrid(); }
-function setBrand(b) { fBrand = b; renderGrid(); }
+function setBrand(b) { fBrand = b; renderBrandChips(); renderGrid(); }
 function toggleTone() { fToneOnly =!fToneOnly; renderCatnav(); renderFilters(); renderGrid(); }
 
 // top text category nav (Pomelo-style)
@@ -293,8 +353,8 @@ function gridCardHtml(g) {
   const sv = savingsPct(g);
   const dots = g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
   return`<div class="pcard ${gUseDate && !av ? 'busy' : ''}" onclick="openDetail('${g.id}')">
-      <div class="pphoto" style="background:${g.bg}">
-        <span class="ph">${g.name}</span>
+      <div class="pphoto" style="${g.photo?`background-image:url('${g.photo}');background-size:cover;background-position:center`:`background:${g.bg}`}">
+        ${g.photo?'':`<span class="ph">${g.name}</span>`}
         <button class="wish ${gWish.has(g.id)?'on':''}" onclick="toggleWish('${g.id}',event)" aria-label="wishlist">♥</button>
         <div class="badges">
           ${gUseDate ? `<span class="bdg ${av ? 'avail' : 'busy'}">${av ? (lang === 'th' ? 'ว่าง ' + fmtDate(gUseDate) : 'free ' + fmtDate(gUseDate)) : (lang === 'th' ? 'ไม่ว่าง' : 'booked')}</span>` : ''}
@@ -512,6 +572,7 @@ function setColorFromVenue(h) { fColor = h; renderFilters(); renderGrid(); windo
 // ===== detail =====
 function openDetail(id) {
   const g = GARMENTS.find(x => x.id === id);
+  _backupPicks = [];   // ล้างชุดสำรองที่เลือกไว้จากชุดก่อนหน้า
   fbTrack('ViewContent', { content_ids:[g.code || g.id], content_name: g.name, content_type:'product', value: g.price, currency:'THB' });
   window.track?.('view_item', g.code || g.id, { name: g.name, price: g.price, occasion: (g.occasion_tags||[])[0] || null });
   const fit = fitConfidence(CUSTOMER, g);
@@ -536,8 +597,8 @@ function openDetail(id) {
   const tips = tipList.map(x =>`<div class="trow"><i></i>${x}</div>`).join('');
 
   $('#sheet').innerHTML =`
-    <div class="dphoto" style="background:${g.bg}">
-      <span class="ph" style="font-family:var(--serif);font-style:italic;color:rgba(0,0,0,.28)">${g.name}</span>
+    <div class="dphoto" style="${g.photo?`background-image:url('${g.photo}');background-size:cover;background-position:center`:`background:${g.bg}`}">
+      ${g.photo?'':`<span class="ph" style="font-family:var(--serif);font-style:italic;color:rgba(0,0,0,.28)">${g.name}</span>`}
       <button class="close" onclick="closeDetail()">×</button>
       ${match?`<span class="season" style="position:absolute;top:14px;left:14px">${t('toneMatch')}</span>`:''}
     </div>
@@ -581,14 +642,15 @@ function openDetail(id) {
     </div>
     <div id="quotebox" class="quotebox"></div>`}
     <label class="backupopt" for="wantBackup">
-      <input type="checkbox" id="wantBackup">
+      <input type="checkbox" id="wantBackup" onchange="toggleBackupPick('${g.id}')">
       <span class="bo-txt">
-        <span class="bo-title">${lang==='th'?'เตรียมชุดสำรองเผื่อไว้ให้ฉัน':'Keep a spare on standby'}</span>
+        <span class="bo-title">${lang==='th'?'เลือกชุดสำรองเผื่อไว้เอง':'Choose your own spare'}</span>
         <span class="bo-why">${lang==='th'
-          ? 'เผื่อชุดหลักมีเหตุไม่พร้อมจริง ๆ เช่น ผู้เช่าก่อนหน้าทำชุดเสียหาย เราจะสลับชุดสำรองที่เข้ากันให้ทันที — ไม่มีค่าใช้จ่ายเพิ่ม'
-          : 'If your main piece truly can’t make it (e.g. a prior renter damaged it), we swap in a matching spare right away — no extra charge.'}</span>
+          ? 'เผื่อชุดหลักมีเหตุไม่พร้อมจริง ๆ เช่น ผู้เช่าก่อนหน้าทำชุดเสียหาย เลือกชุดที่อยากให้สลับให้เองได้เลย — ไม่มีค่าใช้จ่ายเพิ่ม'
+          : 'If your main piece truly can’t make it (e.g. a prior renter damaged it), pick the spares you’d want us to swap in — no extra charge.'}</span>
       </span>
     </label>
+    <div id="backupPicker" class="backuppick" hidden></div>
     <div class="cta">
       <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}${subCapLabel(g)}</span>` : '฿'+staffPrice(g.price)+staffTag()}</span>
       ${subCovers(g) ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
@@ -600,7 +662,7 @@ function openDetail(id) {
           : (g.price<=window.BDAY.voucher.value_cap?'Use birthday gift · free':`Use birthday gift · pay ฿${g.price-window.BDAY.voucher.value_cap}`)}</button>`
       : ''}
     ${subCovers(g)
-      ? `<div class="creditline">${lang==='th'?`ใช้สิทธิ์สมาชิก ${CUSTOMER._sub.plan_name} · เหลือ ${CUSTOMER._sub.remaining} ชุดรอบนี้ · ส่งฟรีขาไป (ค่าส่งคืนผู้เช่าออกเอง)`:`Using ${CUSTOMER._sub.plan_name} · ${CUSTOMER._sub.remaining} left · free outbound (return shipping on you)`}</div>`
+      ? `<div class="creditline">${lang==='th'?`ใช้สิทธิ์สมาชิก ${CUSTOMER._sub.plan_name} · เหลือ ${CUSTOMER._sub.remaining} ชุดรอบนี้ · ส่งฟรีขาไป`:`Using ${CUSTOMER._sub.plan_name} · ${CUSTOMER._sub.remaining} left · free outbound`}</div>`
       : `<div class="creditline">${t('creditPre')}${credit}${t('creditMid')}${g.price - credit}</div>`}`;
   $('#overlay').classList.add('open');
   document.body.style.overflow ='hidden';
@@ -785,6 +847,8 @@ async function checkAvail(id) {
     msg.innerHTML = `${lbl} <button class="queuebtn" onclick="joinQueue('${id}','${date}')">${lang==='th'?`ต่อคิววันนี้ · แจ้งเมื่อว่าง`:'Notify me for this date'}</button>`;
   }
   renderQuote(id, date);
+  // เปลี่ยนวัน → ชุดที่ว่างเปลี่ยนตาม รีเฟรช picker ชุดสำรองถ้าเปิดอยู่
+  if ($('#wantBackup') && $('#wantBackup').checked) toggleBackupPick(id);
   return free;
 }
 
@@ -824,6 +888,10 @@ async function renderQuote(id, date) {
   const TH = lang === 'th';
   const row = (k, v, hl) => `<div class="qrow${hl ? ' hl' : ''}"><span>${k}</span><b>${v}</b></div>`;
   const baht = n => '฿' + n;
+  // เครดิตในกระเป๋าหักอัตโนมัติ (เฉพาะค่าเช่า+ค่าส่ง ไม่แตะมัดจำ) → ยอดโอนสุทธิ
+  const walletBal = Math.round(CUSTOMER.credit_balance || 0);
+  const creditApplied = Math.max(0, Math.min(walletBal, Math.round((q.rate || 0) + (q.shipping || 0))));
+  const netTotal = Math.max(0, Math.round((q.total || 0) - creditApplied));
   // ช่องทางชำระ (บัญชี/พร้อมเพย์ QR) — โชว์ใต้ยอดรวม
   let pay = null; try { pay = await window.API.payInfo(); } catch (e) { /**/ }
   const hasPay = pay && (pay.pay_account_no || pay.pay_promptpay_qr || pay.pay_promptpay_id);
@@ -834,10 +902,10 @@ async function renderQuote(id, date) {
         ${pay.pay_account_name ? `<div style="font-size:12px;color:var(--muted,#8C8B86);text-align:right">${pay.pay_account_name}</div>` : ''}` : ''}
       ${pay.pay_promptpay_id ? `<div style="text-align:center;margin:10px 0">
         <div id="ppqr"></div>
-        <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(q.total)}</b></div></div>`
+        <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(netTotal)}</b></div></div>`
       : pay.pay_promptpay_qr ? `<div style="text-align:center;margin:10px 0">
         <img src="${pay.pay_promptpay_qr}" alt="PromptPay QR" style="display:block;margin:0 auto;width:200px;max-width:70%;border:1px solid var(--line,#E7E5E1);border-radius:6px">
-        <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(q.total)}</b></div></div>` : ''}
+        <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(netTotal)}</b></div></div>` : ''}
       <div style="font-size:12px;color:var(--muted,#8C8B86);margin-top:6px">${pay.pay_note || (TH ? 'โอนแล้วแนบสลิปในแชตนี้ ระบบตรวจให้อัตโนมัติค่ะ' : 'Transfer then send slip in chat — we verify it automatically')}</div>
       <div style="font-size:12px;margin-top:6px;text-align:center"><a href="#" onclick="closeDetail();openOrders();return false" style="color:var(--ink,#1A1A1A);text-decoration:underline">${TH ? 'เช็กสถานะออเดอร์ของฉัน' : 'Track my order status'}</a></div>
     </div>`;
@@ -855,34 +923,125 @@ async function renderQuote(id, date) {
   const creditBtn = !canCredit ? '' : `
     <button onclick="reserve('${id}', true)" style="width:100%;margin-top:12px;border:1px solid #C9A227;background:#FBF6E9;color:#7A5C00;border-radius:12px;padding:11px 14px;font-weight:600;cursor:pointer;text-align:left">
       ${TH ? 'จ่ายด้วยเครดิตในกระเป๋า' : 'Pay with wallet credit'} <b>${baht(creditCover)}</b>
-      <div style="font-size:12px;font-weight:400;color:#9A7B1E;margin-top:3px">${TH ? `ในกระเป๋ามี ฿${creditBal} · เหลือ ฿${creditBal - creditCover}` : `Wallet ฿${creditBal} · ฿${creditBal - creditCover} left`}${q.deposit > 0 ? (TH ? ` · มัดจำ ฿${q.deposit} เก็บตอนรับชุด` : ` · deposit ฿${q.deposit} at pickup`) : ''}</div>
+      <div style="font-size:12px;font-weight:400;color:#9A7B1E;margin-top:3px">${TH ? `ตัดจากกระเป๋า ฿${creditCover} (เหลือ ฿${creditBal - creditCover})` : `From wallet ฿${creditCover} (฿${creditBal - creditCover} left)`}${q.deposit > 0 ? (TH ? ` · มัดจำ ฿${q.deposit} วางตอนรับชุด คืนเต็มหลังตรวจ` : ` · ฿${q.deposit} deposit at pickup, fully refunded`) : ''}</div>
     </button>`;
   box.innerHTML = `
     <div class="qhd">${TH ? 'สรุปยอด' : 'Summary'} · ${q.days} ${TH ? 'วัน' : 'days'}</div>
     ${staffBadge}
     ${row(TH ? 'ค่าเช่า' : 'Rental', baht(q.rate))}
-    ${q.deposit > 0 ? row(TH ? 'มัดจำ (คืนหลังตรวจชุด)' : 'Deposit (refundable)', baht(q.deposit)) : ''}
+    ${q.deposit > 0 ? row(TH ? 'มัดจำ (คืนเข้ากระเป๋าหลังตรวจชุด)' : 'Deposit (back to wallet)', baht(q.deposit)) : ''}
     ${row(TH ? 'ค่าส่ง' : 'Shipping', q.shipping > 0 ? baht(q.shipping) : (TH ? 'ส่งฟรี' : 'Free'))}
-    ${row(TH ? 'รวมโอน' : 'Total', baht(q.total), true)}
+    ${creditApplied > 0 ? row(TH ? 'ใช้เครดิตในกระเป๋า' : 'Wallet credit', '−' + baht(creditApplied)) : ''}
+    ${row(TH ? 'รวมโอน' : 'Total', netTotal > 0 ? baht(netTotal) : (TH ? 'ใช้เครดิตครบ' : 'Fully covered'), true)}
+    ${q.deposit > 0 ? `<div class="qdates" style="color:var(--muted,#8C8B86)">${TH ? `ยอดนี้รวมมัดจำ ฿${q.deposit} แล้ว · มัดจำคืนเข้ากระเป๋า LLOOP หลังเราตรวจชุด` : `Total includes a ฿${q.deposit} deposit · returned to your LLOOP wallet after we inspect the dress`}</div>` : ''}
     <div class="qdates qspan">${TH ? 'วันรับชุด (นับเป็นวันแรก)' : 'Day 1 (you receive it)'}: <b>${fmtDate(q.use_date)}</b> · ${TH ? `เช่า ${q.days} วัน` : `${q.days} days`}</div>
     <div class="qdates">${TH ? 'กำหนดคืน' : 'Return by'} <b>${fmtDate(q.return_date)}${q.return_by ? (TH ? ` ก่อน ${q.return_by} น.` : ` by ${q.return_by}`) : ''}</b> ${TH ? `(วันที่ ${q.days} ของการเช่า)` : `(day ${q.days})`}</div>
-    <div class="qdates">${TH ? 'เราจัดส่งให้ของถึงมือคุณตรงวันรับ · คืนตรงเวลาช่วยให้ชุดพร้อมคิวถัดไปทัน · ค่าส่งคืนผู้เช่าออกเอง' : 'We ship so it arrives on your Day 1 · on-time return keeps the next booking on track · return shipping paid by renter'}</div>
+    <div class="qdates">${TH ? 'เราจัดส่งให้ของถึงมือคุณตรงวันรับ · คืนตรงเวลาช่วยให้ชุดพร้อมคิวถัดไปทัน' : 'We ship so it arrives on your Day 1 · on-time return keeps the next booking on track'}</div>
     ${kyc}
     ${creditBtn}
     ${payBlock}`;
   // วาด QR แบรนด์ LLOOP ฝังยอด (หลัง element อยู่ใน DOM แล้ว)
   if (pay && pay.pay_promptpay_id && window.promptpayBrandedQR) {
     const ppEl = document.getElementById('ppqr');
-    if (ppEl) window.promptpayBrandedQR(ppEl, pay.pay_promptpay_id, q.total, pay.pay_promptpay_type);
+    if (ppEl) window.promptpayBrandedQR(ppEl, pay.pay_promptpay_id, netTotal, pay.pay_promptpay_type);
   }
 }
 
+// แผงยืนยันหลังจอง — คง QR + ยอด + คำสั่ง "แนบสลิปในแชต" + ลิงก์ดูออเดอร์ ไว้ให้ลูกค้าไม่ค้างกลางทาง
+function closePayConfirm() { const o = document.getElementById('payConfirmOverlay'); if (o) o.remove(); document.body.style.overflow = ''; }
+function showPayConfirm({ g, date, total, pay, backups }) {
+  const TH = lang === 'th';
+  closePayConfirm();
+  const bk = (backups && backups.length) ? (TH ? `เตรียมชุดสำรองให้ ${backups.length} ตัว` : `${backups.length} spare(s) on standby`) : '';
+  const hasPay = pay && (pay.pay_account_no || pay.pay_promptpay_id || pay.pay_promptpay_qr);
+  const ov = document.createElement('div');
+  ov.id = 'payConfirmOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(26,26,26,.55);display:flex;align-items:flex-end;justify-content:center';
+  ov.onclick = (e) => { if (e.target === ov) closePayConfirm(); };
+  ov.innerHTML = `
+    <div style="background:#fff;width:100%;max-width:440px;border-radius:18px 18px 0 0;padding:22px 20px 26px;max-height:92vh;overflow:auto">
+      <div style="text-align:center">
+        <div style="font-size:15px;font-weight:600;color:#0F6E56">${TH ? 'จองสำเร็จ — อีกขั้นเดียว' : 'Reserved — one step left'}</div>
+        <div style="font-size:13px;color:var(--muted,#8C8B86);margin-top:3px">${g.name} · ${TH ? 'วันรับ' : 'pickup'} ${fmtDate(date)}${bk ? ` · ${bk}` : ''}</div>
+      </div>
+      ${hasPay ? `
+      <div style="text-align:center;margin-top:14px">
+        ${pay.pay_promptpay_id ? `<div id="pcfqr"></div>` : pay.pay_promptpay_qr ? `<img src="${pay.pay_promptpay_qr}" alt="PromptPay QR" style="display:block;margin:0 auto;width:200px;max-width:70%;border:1px solid var(--line,#E7E5E1);border-radius:6px">` : ''}
+        ${pay.pay_account_no ? `<div style="font-size:13px;margin-top:8px">${pay.pay_bank_name || ''} <b>${pay.pay_account_no}</b>${pay.pay_account_name ? ` · ${pay.pay_account_name}` : ''}</div>` : ''}
+        ${total != null ? `<div style="font-size:15px;font-weight:600;margin-top:10px">${TH ? 'โอน' : 'Transfer'} ฿${total}</div>` : ''}
+      </div>
+      <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center;font-weight:600">
+        ${TH ? 'โอนแล้ว แนบสลิปในแชต LINE นี้' : 'After paying, send the slip in this LINE chat'}
+        <div style="font-weight:400;font-size:12px;margin-top:3px">${TH ? 'ระบบตรวจสลิปและยืนยันออเดอร์ให้อัตโนมัติ' : 'We verify the slip and confirm your order automatically'}</div>
+      </div>` : `
+      <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center">${TH ? 'จองไว้ให้แล้ว · ทีมงานจะส่งวิธีชำระเงินให้ในแชต LINE นี้ค่ะ' : 'Reserved — we’ll send payment details in this LINE chat'}</div>`}
+      <button onclick="closePayConfirm();openOrders()" style="width:100%;margin-top:16px;border:1px solid var(--ink,#1A1A1A);background:#fff;border-radius:12px;padding:11px;font-weight:600;cursor:pointer">${TH ? 'ดูออเดอร์ของฉัน' : 'View my order'}</button>
+      <button onclick="closePayConfirm()" style="width:100%;margin-top:8px;border:none;background:none;color:var(--muted,#8C8B86);padding:8px;cursor:pointer">${TH ? 'ปิด' : 'Close'}</button>
+    </div>`;
+  document.body.appendChild(ov);
+  document.body.style.overflow = 'hidden';
+  if (pay && pay.pay_promptpay_id && window.promptpayBrandedQR && total != null) {
+    const el = ov.querySelector('#pcfqr');
+    if (el) try { window.promptpayBrandedQR(el, pay.pay_promptpay_id, total, pay.pay_promptpay_type); } catch (e) { /**/ }
+  }
+}
+
+// ===== ชุดสำรอง — ลูกค้าเลือกเอง =====
+let _backupPicks = [];          // โค้ดชุดที่ลูกค้าเลือกเป็นสำรอง
+const BACKUP_MAX = 2;           // เลือกได้สูงสุดกี่ตัว
+// เปิด/ปิด picker เมื่อกดเช็กบ็อกซ์ + โหลดเฉพาะชุดที่ "ว่างจริง" ในวันที่เลือก
+async function toggleBackupPick(primaryId) {
+  const cb = $('#wantBackup'), box = $('#backupPicker');
+  if (!cb || !box) return;
+  if (!cb.checked) { box.hidden = true; box.innerHTML = ''; _backupPicks = []; return; }
+  const date = $('#useDate') && $('#useDate').value;
+  if (!date) {
+    toast(lang ==='th'?'เลือกวันที่ต้องใช้ก่อน แล้วค่อยเลือกชุดสำรองนะคะ':'Pick your date first, then choose spares');
+    cb.checked = false; return;
+  }
+  box.hidden = false;
+  box.innerHTML = `<div class="bp-load">${lang ==='th'?'กำลังเช็กชุดที่ว่างวันนั้น…':'checking what’s free that day…'}</div>`;
+  // เฉพาะชุดที่ว่างในวันนั้น (Set ของ id) — ไม่ให้เลือกชุดที่ติดคิว
+  let availSet = null;
+  try { availSet = await window.API.availableSetOn(date, CUSTOMER.id); } catch (e) { /**/ }
+  const pool = GARMENTS.filter(x => x.id !== primaryId && (x.code || x.id) !== primaryId && (!availSet || availSet.has(x.id)));
+  // ถ้าลูกค้าปิดแล้วเปิดใหม่/เปลี่ยนวัน → ตัดที่เลือกค้างซึ่งไม่อยู่ใน pool ออก
+  _backupPicks = _backupPicks.filter(c => pool.some(p => (p.code || p.id) === c));
+  if (!pool.length) {
+    box.innerHTML = `<div class="bp-empty">${lang ==='th'?'วันนั้นยังไม่มีชุดอื่นว่างให้เลือกเป็นสำรองค่ะ':'No other pieces are free that day to set as a spare'}</div>`;
+    return;
+  }
+  box.innerHTML = `
+    <div class="bp-head">${lang ==='th'?`เลือกชุดสำรองได้สูงสุด ${BACKUP_MAX} ตัว`:`Pick up to ${BACKUP_MAX} spare(s)`}</div>
+    <div class="bp-grid">${pool.map(p => {
+      const code = p.code || p.id;
+      const photo = p.photo || (Array.isArray(p.photos) && p.photos[0]);
+      const on = _backupPicks.includes(code);
+      return `<button type="button" class="bp-chip${on?' on':''}" data-code="${esc(code)}" onclick="pickBackup('${esc(code)}')">
+        <span class="bp-thumb" style="${photo?`background-image:url('${esc(photo)}')`:`background:${esc(p.bg||'#E7E2DA')}`}"></span>
+        <span class="bp-nm">${esc(p.name||'—')}</span>
+        <span class="bp-tick">✓</span>
+      </button>`;
+    }).join('')}</div>`;
+}
+function pickBackup(code) {
+  const i = _backupPicks.indexOf(code);
+  if (i >= 0) _backupPicks.splice(i, 1);
+  else {
+    if (_backupPicks.length >= BACKUP_MAX) { toast(lang ==='th'?`เลือกชุดสำรองได้สูงสุด ${BACKUP_MAX} ตัวค่ะ`:`Up to ${BACKUP_MAX} spares`); return; }
+    _backupPicks.push(code);
+  }
+  document.querySelectorAll('#backupPicker .bp-chip').forEach(b => b.classList.toggle('on', _backupPicks.includes(b.dataset.code)));
+}
 async function reserve(id, useCredit) {
   const g = GARMENTS.find(x => x.id === id);
   const date = $('#useDate') && $('#useDate').value;
   if (!date) {
     const msg = $('#availMsg');
     if (msg) { msg.className ='availmsg busy'; msg.textContent = lang ==='th'?'เลือกวันที่ต้องใช้ก่อนนะคะ':'Pick a date first'; }
+    const dp = document.querySelector('.datepick');
+    if (dp) dp.scrollIntoView({ behavior:'smooth', block:'center' });
+    const di = $('#useDate'); if (di) try { di.focus(); } catch (e) { /**/ }
     return;
   }
   // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
@@ -893,9 +1052,16 @@ async function reserve(id, useCredit) {
   if (free === false) return;
   const toDate = durEnd(date);
   const wantBackup = !!($('#wantBackup') && $('#wantBackup').checked);
+  // ชุดสำรอง = ลูกค้าเลือกเอง (ส่งเฉพาะโค้ดที่เลือก) · ไม่เลือก = ไม่มีสำรอง
+  if (wantBackup && !_backupPicks.length) {
+    toast(lang ==='th'?'เลือกชุดสำรองอย่างน้อย 1 ตัว หรือเอาเครื่องหมายออกค่ะ':'Pick at least one spare, or uncheck the box');
+    const bp = $('#backupPicker'); if (bp) bp.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  const backupCodes = wantBackup ? _backupPicks.slice() : [];
   let ok = true, backups = [], rentalId = null;
   try {
-    const res = await window.API.bookWithBackups(CUSTOMER, g.code || g.id, date, toDate, wantBackup);
+    const res = await window.API.bookWithBackups(CUSTOMER, g.code || g.id, date, toDate, backupCodes);
     ok =!res.error && res.data &&!res.data.error;
     backups = (res.data && res.data.backups) || [];
     rentalId = res.data && res.data.rental;
@@ -921,11 +1087,12 @@ async function reserve(id, useCredit) {
       : (lang ==='th'?'จ่ายด้วยเครดิตไม่สำเร็จ ลองจ่าย QR นะคะ':'Credit payment failed — try QR'));
   }
   fbTrack('InitiateCheckout', { content_ids:[g.code || g.id], content_name: g.name, value: g.price, currency:'THB' });
+  // ดึงยอด + ช่องทางจ่าย เพื่อโชว์แผงยืนยัน (คง QR + คำสั่งแนบสลิปไว้ ไม่ปล่อยให้ค้างกลางทาง)
+  let total = null, pay = null;
+  try { const tq = await window.API.quote(g.code || g.id, CUSTOMER, date, toDate); if (tq && !tq.error) { const applied = Math.max(0, Math.min(Math.round(CUSTOMER.credit_balance || 0), Math.round((tq.rate || 0) + (tq.shipping || 0)))); total = Math.max(0, Math.round(tq.total - applied)); } } catch (e) { /**/ }
+  try { pay = await window.API.payInfo(); } catch (e) { /**/ }
   closeDetail();
-  const bk = backups.length
-? (lang ==='th'?` · เตรียมชุดสำรองเผื่อให้ ${backups.length} ตัว`:` · ${backups.length} spare(s) on standby`)
-    :'';
-  toast(`${t('reservedPre')} ${g.name} ${t('reservedPost')} ${fmtDate(date)}${bk}`);
+  showPayConfirm({ g, date, total, pay, backups });
 }
 
 // จองด้วยสิทธิ์วันเกิด (ฟรีถึงเพดาน · เกินจ่ายส่วนต่าง · มัดจำตามปกติ)
@@ -1195,9 +1362,10 @@ async function addToCart(id) {
 }
 function removeFromCart(id) { gCart = gCart.filter(x => x.id !== id); saveCart(); renderCartBtn(); if (gCart.length) openCart(); else closeCart(); }
 function renderCartBtn() {
-  const b = $('#cartFab'); if (!b) return;
-  b.style.display = gCart.length ? 'flex' : 'none';
-  const c = $('#cartCount'); if (c) c.textContent = gCart.length;
+  const b = $('#cartFab');
+  if (b) { b.style.display = gCart.length ? 'flex' : 'none'; const c = $('#cartCount'); if (c) c.textContent = gCart.length; }
+  // ไอคอนตะกร้าถาวรบนหัวจอ — เห็นได้เสมอเพื่อให้รู้ว่ามีตะกร้า (badge ซ่อนเมื่อว่าง)
+  const hb = $('#cartHdrBadge'); if (hb) { hb.textContent = gCart.length; hb.hidden = !gCart.length; }
 }
 function openCart() {
   const TH = lang === 'th';
@@ -1323,6 +1491,7 @@ function openMenu() {
   const I = {
     orders: '<svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>',
     cart: '<svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 12.4a1 1 0 0 0 1 .8h8.2a1 1 0 0 0 1-.8L20 8H6"/><circle cx="9" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>',
+    wallet: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14h2"/></svg>',
     member: '<svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 21l-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>',
     review: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>',
     foryou: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
@@ -1355,6 +1524,7 @@ function openMenu() {
     <div class="msec">
       <div class="ml">${en ? 'My rentals' : 'การเช่าของฉัน'}</div>
       ${item(I.orders, en ? 'My orders' : 'ออเดอร์ของฉัน', 'openOrders()')}
+      ${item(I.wallet, en ? 'LLOOP wallet' : 'กระเป๋า LLOOP', 'openWallet()', signedIn && c.credit_balance ? '฿' + Math.round(c.credit_balance) : '')}
       ${item(I.cart, en ? 'Cart' : 'ตะกร้า', 'openCart()', cartN ? String(cartN) : '')}
       ${item(I.member, en ? 'Membership & perks' : 'สมาชิก & สิทธิ์', 'openMembership()')}
     </div>
@@ -1373,7 +1543,7 @@ function openMenu() {
     <div class="msec">
       <div class="ml">${en ? 'My account' : 'บัญชีของฉัน'}</div>
       ${item(I.verify, en ? 'Verify identity (KYC)' : 'ยืนยันตัวตน (KYC)', "openKyc('')")}
-      ${item(I.gift, en ? 'Invite friends · get credit' : 'ชวนเพื่อน · รับเครดิต', 'openProfile()')}
+      ${item(I.gift, en ? 'Invite friends · get credit' : 'ชวนเพื่อน · รับเครดิต', 'openWallet()')}
     </div>
 
     <div class="msec">
@@ -1878,6 +2048,25 @@ async function cancelMyAppointment(id) {
 // ===== ครอบครัว & กลุ่ม — ไปหน้าจัดการกลุ่ม + เช่าเข้าตีม =====
 function openFamily() { location.href = 'family.html'; }
 // ===== ผลกระทบ + แกลเลอรี charity (wow, interactive) =====
+// กระเป๋า LLOOP — เครดิต + ระดับสมาชิก + ชวนเพื่อน รวมไว้ที่เดียว (ไม่ต้องมุดเข้าฟอร์มแก้โปรไฟล์)
+function closeWallet() { $('#walletOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function openWallet() {
+  const c = CUSTOMER;
+  const en = lang === 'en';
+  $('#walletSheet').innerHTML = `
+    <div class="pform">
+      <button class="close" style="position:static;float:right" onclick="closeWallet()">×</button>
+      <h3>${en ? 'LLOOP wallet' : 'กระเป๋า LLOOP'}</h3>
+      <p class="hint">${en ? 'your credit, tier and invites — all in one place' : 'เครดิต ระดับสมาชิก และชวนเพื่อน รวมไว้ที่เดียว'}</p>
+      ${renderTheLoop(c)}
+      ${renderReferralCard()}
+    </div>`;
+  $('#walletOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => animateCounts($('#walletSheet')), 80);
+  loadReferralCode();
+}
+
 async function openImpact() {
   const im = CUSTOMER._impact || { rentals: 0, water_l: 0, co2_kg: 0, charity_thb: 0, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   let posts = []; try { posts = await window.API.recentCharity?.() || []; } catch (e) { /**/ }
@@ -2260,7 +2449,12 @@ function ordersRail() {
 function ordersJump(key) {
   document.querySelectorAll('.orail-chip').forEach(c => c.classList.toggle('on', c.dataset.key === key));
   const el = document.getElementById('day-' + key); if (!el) return;
-  el.scrollIntoView({ behavior:'smooth', block:'start' });
+  // เลื่อน container ของชีตเอง (scrollIntoView ไม่เสถียรใน overlay fixed/LIFF webview)
+  const cont = el.closest('.sheet') || el.parentElement;
+  if (cont) {
+    const top = el.getBoundingClientRect().top - cont.getBoundingClientRect().top + cont.scrollTop - 8;
+    cont.scrollTo({ top, behavior:'smooth' });
+  }
   el.classList.add('oday-flash'); setTimeout(() => el.classList.remove('oday-flash'), 1500);
 }
 // บล็อกรายวัน: หัววันที่ + ลุคของวันนั้น (ชุดหลัก พร้อมชุดสำรองแบบเปิด/ปิด)
@@ -2295,6 +2489,9 @@ function orderCard(r, spareList) {
     : (r.price != null ? `<div class="orow"><span>${lang==='th'?'ค่าเช่า':'Rental'}</span>฿${Math.round(r.price)}${r.deposit>0?` <i class="oeta">+${lang==='th'?'มัดจำ':'deposit'} ฿${Math.round(r.deposit)}</i>`:''}</div>` : '');
   const durLine = r.rent_days ? `<div class="orow"><span>${lang==='th'?'ระยะเวลา':'Duration'}</span>${r.rent_days} ${lang==='th'?'วัน':'days'}</div>` : '';
   const reRent =`<button class="obtn" onclick="reRentByCode('${(r.code||'').replace(/'/g,"")}')">${lang ==='th'?'เช่าอีก':'Rent again'}</button>`;
+  // ออเดอร์ที่ยังรอชำระ — ปุ่มหลักคือกลับไปจ่าย/ส่งสลิป (กันลูกค้าค้างสถานะ hold)
+  const payB = (!isSpare && r.status ==='hold')
+    ?`<button class="obtn" onclick="orderPay('${(r.code||'').replace(/'/g,"")}','${r.use_date}',${r.rent_days||1},'${(r.name||'').replace(/'/g,"")}')">${lang ==='th'?'ชำระเงิน / ส่งสลิป':'Pay / send slip'}</button>`:'';
   const review = (!isSpare && r.status ==='returned')
     ?`<button class="obtn ghost" onclick="openReview('${r.rental_id}','${(r.name||'').replace(/'/g,"")}')">${lang ==='th'?'รีวิว':'Review'}</button>`:'';
   // ยืดหยุ่นกว่าคู่แข่ง: ลูกค้ายกเลิก/เลื่อน/ต่อเวลาเองได้ (ผ่าน me-rpc gateway) — เฉพาะชุดหลัก
@@ -2303,7 +2500,7 @@ function orderCard(r, spareList) {
   const reschedB = canCancelResched ?`<button class="obtn ghost" onclick="orderReschedule('${r.rental_id}')">${lang ==='th'?'เลื่อนวัน':'Reschedule'}</button>`:'';
   const extendB = canExtend ?`<button class="obtn ghost" onclick="orderExtend('${r.rental_id}')">${lang ==='th'?'ต่อเวลา':'Extend'}</button>`:'';
   const cancelB = canCancelResched ?`<button class="obtn ghost" onclick="orderCancel('${r.rental_id}')">${lang ==='th'?'ยกเลิก':'Cancel'}</button>`:'';
-  const actions = isSpare ? '' : `<div class="oactions">${reRent}${reschedB}${extendB}${cancelB}${review}</div>`;
+  const actions = isSpare ? '' : `<div class="oactions">${payB}${r.status==='hold'?'':reRent}${reschedB}${extendB}${cancelB}${review}</div>`;
   // ชุดสำรองของวันนี้ — เปิด/ปิดเรียกดูได้ (ไม่รก แต่กดดูได้ว่าเตรียมตัวไหนไว้)
   const spId = 'sp-' + r.rental_id;
   const sparesBox = (spareList && spareList.length) ? `
@@ -2364,26 +2561,89 @@ async function orderCancel(rentalId) {
   toast(lang ==='th'?'ยกเลิกเรียบร้อย คืนเงินให้ตามนโยบายแล้วค่ะ':'Cancelled — refund on its way');
   openOrders();
 }
+// ===== ต่อเวลา — เลือกวันคืนใหม่จากปฏิทินว่าง (แทนการพิมพ์วันเอง) =====
+let _extend = null;  // { rentalId, name, dueAt, booked:Set, pick, charge }
 async function orderExtend(rentalId) {
   if (!rentalId) return;
-  const to = (prompt(lang ==='th'?'ต่อเวลาคืนถึงวันไหน? (รูปแบบ 2026-08-25)':'Extend until? (YYYY-MM-DD)')||'').trim();
-  if (!to) return;
-  if (!_isYmd(to)) { toast(lang ==='th'?'รูปแบบวันที่ไม่ถูกต้องค่ะ':'Invalid date'); return; }
-  let msg = lang ==='th'?`ต่อเวลาคืนถึง ${to}?`:`Extend to ${to}?`;
-  try {
-    const q = await window.API.quoteExtension(rentalId, to);
-    if (q && q.error ==='unavailable') {
-      toast(q.max_extend_to
-        ? (lang ==='th'?`มีคิวจองต่อแล้ว — ต่อได้ถึง ${fmtDate(q.max_extend_to)} ค่ะ`:`Booked next — extend until ${fmtDate(q.max_extend_to)}`)
-        : (lang ==='th'?'ชุดมีคิวจองต่อทันที ต่อเวลาไม่ได้ค่ะ':'Not available — booked right after'));
-      return;
+  const r = _myRentals.find(x => x.rental_id === rentalId);
+  if (!r || !r.garment_id || !r.due_at) { toast(lang ==='th'?'เปิดข้อมูลชุดไม่ได้ ลองรีเฟรชนะคะ':'Cannot load this piece'); return; }
+  let ranges = [];
+  try { ranges = await window.API.bookedRanges(r.garment_id, rentalId) || []; } catch (e) { /**/ }
+  const booked = new Set();
+  ranges.forEach(x => { let d = new Date(x.from_date+'T00:00:00'); const end = new Date(x.to_date+'T00:00:00');
+    for (; d <= end; d.setDate(d.getDate()+1)) booked.add(_ymdLocal(d)); });
+  _extend = { rentalId, name: r.name, dueAt: r.due_at, booked, pick: null, charge: null };
+  _renderExtend();
+  $('#reschedOverlay').classList.add('open'); document.body.style.overflow ='hidden';
+  $('#reschedSheet').scrollTop = 0;
+}
+// ต่อจากวันคืนเดิม+1 ถึง to ต้องว่างต่อเนื่อง (ชุดอยู่กับเราต่อได้จริง)
+function _extFree(to) {
+  let d = _addDays(_extend.dueAt, 1);
+  while (d <= to) { if (_extend.booked.has(d)) return false; d = _addDays(d, 1); }
+  return true;
+}
+function _renderExtend() {
+  const th = lang ==='th', S = _extend;
+  const today = new Date(todayStr()+'T00:00:00');
+  const minDate = _addDays(S.dueAt, 1);
+  const dow = th ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['S','M','T','W','T','F','S'];
+  let cal = '';
+  for (let mo = 0; mo < 3; mo++) {
+    const base = new Date(today.getFullYear(), today.getMonth()+mo, 1);
+    const monthName = base.toLocaleDateString(th?'th-TH':'en-US', { month:'long', year:'2-digit' });
+    const first = base.getDay(), days = new Date(base.getFullYear(), base.getMonth()+1, 0).getDate();
+    let cells = dow.map(d => `<span class="cdow">${d}</span>`).join('');
+    for (let i = 0; i < first; i++) cells += `<span></span>`;
+    for (let dn = 1; dn <= days; dn++) {
+      const ds = `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-${String(dn).padStart(2,'0')}`;
+      const ok = ds >= minDate && _extFree(ds);            // วันคืนใหม่ที่ต่อได้จริง
+      const inSel = S.pick && ds > S.dueAt && ds <= S.pick;
+      const cls = ds < minDate ? 'past' : ok ? 'free' : 'bk';
+      const onclick = ok ? ` onclick="pickExtendDate('${ds}')"` : '';
+      cells += `<span class="cday ${cls} ${inSel?'sel':''}"${onclick}>${dn}</span>`;
     }
-    if (q && q.error ==='must_be_later') { toast(lang ==='th'?'วันคืนใหม่ต้องหลังวันคืนเดิมค่ะ':'Must be later than current return'); return; }
-    if (q && !q.error) { const c = q.extra_charge||0; msg = lang ==='th'?`ต่อเวลาถึง ${to}\nค่าเช่าเพิ่ม ฿${c}`:`Extend to ${to}\nExtra ฿${c}`; }
-  } catch (e) { console.warn(e); }
-  if (!confirm(msg)) return;
-  const res = await window.API.extendRental(rentalId, to);
-  if (!res || !res.ok) { toast(lang ==='th'?'ต่อเวลาไม่สำเร็จค่ะ':'Extend failed'); return; }
+    cal += `<div class="calmonth"><div class="calhd">${monthName}</div><div class="calgrid">${cells}</div></div>`;
+  }
+  let summary = '';
+  if (S.pick) {
+    const extraDays = Math.round((new Date(S.pick+'T00:00:00') - new Date(S.dueAt+'T00:00:00'))/86400000);
+    const charge = S.charge == null ? (th?'กำลังคำนวณ…':'calculating…') : (S.charge > 0 ? `฿${S.charge}` : (th?'ฟรี':'free'));
+    summary = `<div class="rsd-sum">${th?'คืนใหม่':'New return'} <b>${fmtDate(S.pick)}</b> <i>(+${extraDays} ${th?'วัน':'days'})</i> · ${th?'ค่าเช่าเพิ่ม':'extra'} <b>${charge}</b></div>`;
+  }
+  $('#reschedSheet').innerHTML = `
+    <button class="close" onclick="closeExtend()">×</button>
+    <div class="rsd-head">${th?'ต่อเวลาเช่า':'Extend rental'}</div>
+    <div class="rsd-name">${S.name||''}</div>
+    <div class="rsd-hint">${th?`คืนเดิม ${fmtDate(S.dueAt)} · เลือกวันคืนใหม่จากวันที่ว่าง`:`Currently due ${fmtDate(S.dueAt)} · pick a new return date`}</div>
+    <div class="rsd-cal">${cal}</div>
+    <div class="callegend"><span><i class="lfree"></i>${th?'ว่าง':'free'}</span><span><i class="lbk"></i>${th?'ไม่ว่าง':'booked'}</span></div>
+    <div class="calnote">${th?'ต่อได้ถึงก่อนวันที่ชุดมีคิวจองถัดไปเท่านั้น':'You can extend up to the next booking'}</div>
+    ${summary}
+    <button class="rvsubmit" id="extGo" ${S.pick && S.charge!=null?'':'disabled'} onclick="confirmExtend()">${th?'ยืนยันต่อเวลา':'Confirm extension'}</button>`;
+}
+async function pickExtendDate(ds) {
+  _extend.pick = ds; _extend.charge = null; _renderExtend();
+  try {
+    const q = await window.API.quoteExtension(_extend.rentalId, ds);
+    if (q && q.error) {
+      toast(q.error ==='unavailable'
+        ? (lang ==='th'?'ชุดมีคิวจองต่อ ต่อถึงวันนี้ไม่ได้ค่ะ':'Not available — booked after this')
+        : q.error ==='must_be_later' ? (lang ==='th'?'ต้องเป็นวันหลังวันคืนเดิมค่ะ':'Must be after current return')
+        : (lang ==='th'?'ต่อเวลาวันนี้ไม่ได้ค่ะ':'Cannot extend to this date'));
+      _extend.pick = null; _renderExtend(); return;
+    }
+    if (q && !q.error) { _extend.charge = q.extra_charge || 0; _renderExtend(); }
+  } catch (e) { _extend.charge = 0; _renderExtend(); }
+}
+function closeExtend() { $('#reschedOverlay').classList.remove('open'); document.body.style.overflow =''; _extend = null; }
+async function confirmExtend() {
+  if (!_extend || !_extend.pick) return;
+  const { rentalId, pick } = _extend;
+  const btn = $('#extGo'); if (btn) { btn.disabled = true; btn.textContent = lang ==='th'?'กำลังต่อเวลา…':'Extending…'; }
+  const res = await window.API.extendRental(rentalId, pick);
+  if (!res || !res.ok) { toast(lang ==='th'?'ต่อเวลาไม่สำเร็จค่ะ':'Extend failed'); closeExtend(); return; }
+  closeExtend();
   toast(lang ==='th'?'ต่อเวลาเรียบร้อยค่ะ':'Extended'); openOrders();
 }
 // ===== เลื่อนวัน — เลือกจากปฏิทินว่าง/ไม่ว่าง (แทนการพิมพ์วันเอง) =====
@@ -2477,6 +2737,17 @@ function reRentByCode(code) {
   if (!g) { toast(lang ==='th'?'ชุดนี้ยังไม่เปิดให้เช่าในตอนนี้':'This piece is not available right now'); return; }
   closeOrders();
   openDetail(g.id);
+}
+
+// กลับไปจ่าย/ส่งสลิปสำหรับออเดอร์ที่ยังค้าง (hold) — เปิดแผงยืนยันเดิมพร้อม QR + ยอดที่ถูกต้อง
+async function orderPay(code, useDate, days, name) {
+  const g = GARMENTS.find(x => x.code === code) || { name: name || code, code, photo: null };
+  const to = addDays(useDate, Math.max(0, (days || 1) - 1));
+  let total = null, pay = null;
+  try { const tq = await window.API.quote(code, CUSTOMER, useDate, to); if (tq && !tq.error) { const applied = Math.max(0, Math.min(Math.round(CUSTOMER.credit_balance || 0), Math.round((tq.rate || 0) + (tq.shipping || 0)))); total = Math.max(0, Math.round(tq.total - applied)); } } catch (e) { /**/ }
+  try { pay = await window.API.payInfo(); } catch (e) { /**/ }
+  closeOrders();
+  showPayConfirm({ g, date: useDate, total, pay, backups: [] });
 }
 
 // ===== ฟอร์มรีวิว (หลังคืนชุด) =====

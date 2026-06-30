@@ -312,11 +312,12 @@ window.API = (function () {
   }
   // จอง — ชุดสำรองเป็นทางเลือกของลูกค้า:
   //   wantBackup=false → p_backups:[] (ไม่เตรียมสำรอง)  ·  true → null (ระบบเลือกชุดสำรองที่เข้ากันให้)
-  async function bookWithBackups(customer, primaryCode, fromStr, toStr, wantBackup) {
-    if (CONFIG.USE_MOCK) return { data: { primary: { code: primaryCode }, backups: [] } };
+  // backupCodes = อาเรย์โค้ดชุดสำรองที่ "ลูกค้าเลือกเอง" ([] = ไม่เอาสำรอง)
+  async function bookWithBackups(customer, primaryCode, fromStr, toStr, backupCodes) {
+    const p_backups = Array.isArray(backupCodes) ? backupCodes : [];
+    if (CONFIG.USE_MOCK) return { data: { primary: { code: primaryCode }, backups: p_backups.map(c => ({ code: c, name: c })) } };
     const c = client();
     if (lineUid) await c.from('customer_touchpoints').insert({ line_uid: lineUid, kind:'reserve', detail: { garment: primaryCode } });
-    const p_backups = wantBackup ? null : [];
     const { data, error } = await window.meRpc('book_with_backups', { p_customer: customer.id || null, p_primary_code: primaryCode, p_from: fromStr, p_to: toStr, p_backups });
     return { data, error };
   }
