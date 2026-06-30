@@ -77,7 +77,7 @@ window.API = (function () {
       if (data) customer = data;
       // สร้าง/ดึงรหัสนัดสไตลิสต์ (ให้พาร์ทเนอร์ค้นเจอ)
       if (customer.id &&!customer.link_code) {
-        const { data: code } = await c.rpc('ensure_link_code', { p_customer: customer.id });
+        const { data: code } = await window.meRpc('ensure_link_code', { p_customer: customer.id });
         if (code) customer.link_code = code;
       }
     }
@@ -102,7 +102,7 @@ window.API = (function () {
     // 5) ส่วนลดพนักงาน (ถ้า line_uid ตรงกับพนักงาน → % > 0) — ใช้โชว์ราคาพนักงานตอนไถดู
     let staff_pct = 0;
     if (customer.id) {
-      try { const { data: sp } = await c.rpc('staff_discount_pct', { p_customer: customer.id });
+      try { const { data: sp } = await window.meRpc('staff_discount_pct', { p_customer: customer.id });
             staff_pct = Number(sp) || 0; } catch (_e) {}
     }
     return { OCCASIONS: window.MOCK.OCCASIONS, CUSTOMER: customer, EVENT: event, GARMENTS: garments, lineUid, staff_pct };
@@ -115,7 +115,7 @@ window.API = (function () {
     if (lineUid) await c.from('customer_touchpoints').insert(
       { line_uid: lineUid, kind:'reserve', detail: { garment_id: garmentId } });
     // จองจริงควรทำใน Edge Function (transaction กันจองชน) — ที่นี่เรียกผ่าน RPC
-    const { data, error } = await c.rpc('reserve_garment', { p_garment: garmentId, p_customer: customer.id });
+    const { data, error } = await window.meRpc('reserve_garment', { p_garment: garmentId, p_customer: customer.id });
     return { ok:!error, data, error };
   }
 
@@ -284,7 +284,7 @@ window.API = (function () {
     if (CONFIG.USE_MOCK) return { ok: true };
     const c = client();
     if (lineUid) await c.from('customer_touchpoints').insert({ line_uid: lineUid, kind:'reserve', detail: { garment_id: garmentId, from: fromStr } });
-    const { data, error } = await c.rpc('reserve_garment_dates', { p_garment: garmentId, p_customer: customer.id || null, p_from: fromStr, p_to: toStr });
+    const { data, error } = await window.meRpc('reserve_garment_dates', { p_garment: garmentId, p_customer: customer.id || null, p_from: fromStr, p_to: toStr });
     return { ok:!error, data, error };
   }
 
@@ -296,26 +296,26 @@ window.API = (function () {
   }
   async function acceptTerms(customer, version) {
     if (CONFIG.USE_MOCK ||!customer.id) return;
-    await client().rpc('accept_terms', { p_customer: customer.id, p_version: version });
+    await window.meRpc('accept_terms', { p_customer: customer.id, p_version: version });
   }
   // จองพร้อมชุดสำรอง 2 ตัว
   async function bookWithBackups(customer, primaryCode, fromStr, toStr) {
     if (CONFIG.USE_MOCK) return { data: { primary: { code: primaryCode }, backups: [] } };
     const c = client();
     if (lineUid) await c.from('customer_touchpoints').insert({ line_uid: lineUid, kind:'reserve', detail: { garment: primaryCode } });
-    const { data, error } = await c.rpc('book_with_backups', { p_customer: customer.id || null, p_primary_code: primaryCode, p_from: fromStr, p_to: toStr, p_backups: null });
+    const { data, error } = await window.meRpc('book_with_backups', { p_customer: customer.id || null, p_primary_code: primaryCode, p_from: fromStr, p_to: toStr, p_backups: null });
     return { data, error };
   }
   // อิมแพกต์รักษ์โลกของฉัน
   async function myImpact(customer) {
     if (CONFIG.USE_MOCK ||!customer.id) return null;
-    const { data } = await client().rpc('my_impact', { p_customer: customer.id });
+    const { data } = await window.meRpc('my_impact', { p_customer: customer.id });
     return data;
   }
   // กระเป๋า LLOOP + ชั้น The Loop (ยอดเงินใช้จ่าย + ความคืบหน้าชั้น)
   async function myWallet(customer) {
     if (CONFIG.USE_MOCK ||!customer.id) return null;
-    const { data } = await client().rpc('my_wallet', { p_customer: customer.id });
+    const { data } = await window.meRpc('my_wallet', { p_customer: customer.id });
     return data;
   }
   // AI ครบลุค — ทรงผม/เครื่องประดับที่เข้ากับชุด (prod = Edge Function, ไม่งั้น mock)
@@ -343,19 +343,19 @@ window.API = (function () {
   // ออเดอร์ของฉัน → array ของ {rental_id, code, name, status, role, use_date, due_at, courier, tracking_no, eta, price}
   async function myRentals(customer) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return [];
-    const { data } = await client().rpc('my_rentals', { p_customer: customer.id });
+    const { data } = await window.meRpc('my_rentals', { p_customer: customer.id });
     return data || [];
   }
   // กดหัวใจ — สลับสถานะ wishlist (true = เพิ่งเพิ่ม)
   async function toggleWishlist(customer, garmentId) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return null;
-    const { data } = await client().rpc('toggle_wishlist', { p_customer: customer.id, p_garment: garmentId });
+    const { data } = await window.meRpc('toggle_wishlist', { p_customer: customer.id, p_garment: garmentId });
     return data === true;
   }
   // รายการ wishlist ของฉัน → Set ของ garment id
   async function myWishlist(customer) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return new Set();
-    const { data } = await client().rpc('my_wishlist', { p_customer: customer.id });
+    const { data } = await window.meRpc('my_wishlist', { p_customer: customer.id });
     return new Set((data || []).map(x => (x && x.id) ? x.id : x));
   }
 
@@ -439,13 +439,13 @@ window.API = (function () {
   // โค้ดชวนเพื่อนของฉัน (สร้างถ้ายังไม่มี)
   async function ensureReferralCode(customer) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return null;
-    const { data } = await client().rpc('ensure_referral_code', { p_customer: customer.id });
+    const { data } = await window.meRpc('ensure_referral_code', { p_customer: customer.id });
     return data || null;
   }
   // ใส่โค้ดเพื่อนที่ชวนเรา → 'ok' | 'self' | 'used' | 'not_found'
   async function applyReferral(customer, code) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return 'not_found';
-    const { data } = await client().rpc('apply_referral', { p_customer: customer.id, p_code: code });
+    const { data } = await window.meRpc('apply_referral', { p_customer: customer.id, p_code: code });
     return data || 'not_found';
   }
   // คลิปรีวิว → บันทึก + ส่งให้ AI เช็ก (ได้เครดิตเมื่อรีวิวเป็นบวก)
@@ -485,19 +485,19 @@ window.API = (function () {
   // สถานะสมาชิกของฉัน → {active, plan_name, remaining, rentals_per_month, renews_at, ...}
   async function mySubscription(customer) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return { active: false };
-    const { data } = await client().rpc('my_subscription', { p_customer: customer.id });
+    const { data } = await window.meRpc('my_subscription', { p_customer: customer.id });
     return data || { active: false };
   }
   // สมัคร/เปลี่ยนแพ็กเกจ
   async function subscribe(customer, planCode) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true };
-    const { data, error } = await client().rpc('subscribe', { p_customer: customer.id, p_plan: planCode });
+    const { data, error } = await window.meRpc('subscribe', { p_customer: customer.id, p_plan: planCode });
     return { ok: !error, data, error };
   }
   // พัก/กลับมา/ยกเลิก  (p_action = pause|resume|cancel)
   async function subSetStatus(customer, action) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true };
-    const { data, error } = await client().rpc('sub_set_status', { p_customer: customer.id, p_action: action });
+    const { data, error } = await window.meRpc('sub_set_status', { p_customer: customer.id, p_action: action });
     return { ok: !error, data, error };
   }
 
@@ -515,7 +515,7 @@ window.API = (function () {
         ship_date: fromStr, use_date: fromStr, return_date: toStr,
         kyc_required: !(customer && customer.kyc_verified), free_shipping: ship===0 };
     }
-    const { data } = await client().rpc('quote_rental', {
+    const { data } = await window.meRpc('quote_rental', {
       p_code: code, p_customer: (customer && customer.id) || null,
       p_from: fromStr, p_to: toStr, p_courier: courier || 'flash', p_remote: !!remote });
     return data || null;
@@ -552,7 +552,7 @@ window.API = (function () {
     if (CONFIG.USE_MOCK) return { data: { items: codes.map(c => ({ code: c })) } };
     const c = client();
     if (lineUid) await c.from('customer_touchpoints').insert({ line_uid: lineUid, kind:'reserve', detail: { cart: codes } });
-    const { data, error } = await c.rpc('book_cart', { p_customer: (customer && customer.id) || null, p_codes: codes, p_from: fromStr, p_to: toStr, p_courier: courier || 'flash', p_remote: !!remote });
+    const { data, error } = await window.meRpc('book_cart', { p_customer: (customer && customer.id) || null, p_codes: codes, p_from: fromStr, p_to: toStr, p_courier: courier || 'flash', p_remote: !!remote });
     return { data, error };
   }
   // ขอแก้ไซส์
@@ -565,7 +565,7 @@ window.API = (function () {
   // สอบถามเช่ากลุ่มใหญ่
   async function groupInquiry(customer, count, budget, eventDate, note) {
     if (CONFIG.USE_MOCK || !customer || !customer.id) return { ok: true };
-    const { data, error } = await client().rpc('group_inquiry', { p_customer: customer.id, p_count: count, p_budget: budget || null, p_event_date: eventDate || null, p_note: note || null });
+    const { data, error } = await window.meRpc('group_inquiry', { p_customer: customer.id, p_count: count, p_budget: budget || null, p_event_date: eventDate || null, p_note: note || null });
     return { ok: !error, data, error };
   }
 
@@ -573,37 +573,37 @@ window.API = (function () {
   // สร้างกลุ่ม (kind: 'family' | 'friends') → { group_id }
   async function createGroup(customer, name, kind) {
     if (CONFIG.USE_MOCK || !customer?.id) return { ok: true };
-    const { data, error } = await client().rpc('create_group', { p_creator: customer.id, p_name: name || '', p_kind: kind || 'family' });
+    const { data, error } = await window.meRpc('create_group', { p_creator: customer.id, p_name: name || '', p_kind: kind || 'family' });
     return { ok: !error, data, error };
   }
   // กลุ่มทั้งหมดของฉัน + สมาชิก
   async function myGroups(customer) {
     if (CONFIG.USE_MOCK || !customer?.id) return { ok: true, data: [] };
-    const { data, error } = await client().rpc('my_groups', { p_customer: customer.id });
+    const { data, error } = await window.meRpc('my_groups', { p_customer: customer.id });
     return { ok: !error, data: data || [], error };
   }
   // สมาชิก + ไซซ์/ซีซันสี (ไว้จัดสไตล์) — ต้องเป็นสมาชิกกลุ่มจริงถึงดูได้ (PDPA)
   async function groupMembers(groupId, requester) {
     if (CONFIG.USE_MOCK || !groupId || !requester?.id) return { ok: true, data: [] };
-    const { data, error } = await client().rpc('group_members_detail', { p_group: groupId, p_requester: requester.id });
+    const { data, error } = await window.meRpc('group_members_detail', { p_group: groupId, p_requester: requester.id });
     return { ok: !error, data: data || [], error };
   }
   // ผู้ปกครองสร้างโปรไฟล์เด็ก/ทุกวัย (profile = { name, relation, age_band, birth_year, bust_in, waist_in, hip_in, height_cm, color_season })
   async function addManagedProfile(guardian, groupId, profile) {
     if (CONFIG.USE_MOCK || !guardian?.id || !groupId) return { ok: true };
-    const { data, error } = await client().rpc('add_managed_profile', { p: { guardian: guardian.id, group_id: groupId, ...(profile || {}) } });
+    const { data, error } = await window.meRpc('add_managed_profile', { p: { guardian: guardian.id, group_id: groupId, ...(profile || {}) } });
     return { ok: !error, data, error };
   }
   // เชิญสมาชิกที่มี LINE เองด้วย link_code (ขอความยินยอม → invited)
   async function groupInvite(groupId, inviter, linkCode, relation) {
     if (CONFIG.USE_MOCK || !groupId || !inviter?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_invite', { p_group: groupId, p_inviter: inviter.id, p_link_code: linkCode, p_relation: relation || null });
+    const { data, error } = await window.meRpc('group_invite', { p_group: groupId, p_inviter: inviter.id, p_link_code: linkCode, p_relation: relation || null });
     return { ok: !error, data, error };
   }
   // รับ/ปฏิเสธคำเชิญเข้ากลุ่ม
   async function groupRespond(groupId, customer, accept) {
     if (CONFIG.USE_MOCK || !groupId || !customer?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_respond', { p_group: groupId, p_customer: customer.id, p_accept: !!accept });
+    const { data, error } = await window.meRpc('group_respond', { p_group: groupId, p_customer: customer.id, p_accept: !!accept });
     return { ok: !error, data, error };
   }
   // AI จัดชุดเข้าตีมทั้งกลุ่ม → { season, occasion, members:[{ name, picks:[...] }] }
@@ -611,14 +611,14 @@ window.API = (function () {
   async function groupThemeSuggest(groupId, requester, occasion, fromStr, toStr, opts) {
     if (CONFIG.USE_MOCK || !groupId || !requester?.id) return { ok: true, data: null };
     const o = opts || {};
-    const { data, error } = await client().rpc('group_theme_suggest', { p_group: groupId, p_requester: requester.id, p_occasion: occasion || null, p_from: fromStr || null, p_to: toStr || null, p_season: o.season || null, p_palette: o.palette || null });
+    const { data, error } = await window.meRpc('group_theme_suggest', { p_group: groupId, p_requester: requester.id, p_occasion: occasion || null, p_from: fromStr || null, p_to: toStr || null, p_season: o.season || null, p_palette: o.palette || null });
     return { ok: !error, data, error };
   }
   // จองทั้งกลุ่มในออเดอร์เดียว (assignments = [{ code, wearer }]) → { order_group, total, ... }
   async function bookGroupCart(groupId, assignments, fromStr, toStr, opts) {
     if (CONFIG.USE_MOCK || !groupId) return { ok: true };
     const o = opts || {};
-    const { data, error } = await client().rpc('book_group_cart', { p: {
+    const { data, error } = await window.meRpc('book_group_cart', { p: {
       group_id: groupId, from: fromStr, to: toStr, assignments: assignments || [],
       courier: o.courier || 'flash', remote: !!o.remote, theme: o.theme || null,
       occasion: o.occasion || null, payer: o.payer || null,
@@ -631,7 +631,7 @@ window.API = (function () {
   async function bookGroupSplit(groupId, assignments, fromStr, toStr, opts) {
     if (CONFIG.USE_MOCK || !groupId) return { ok: true };
     const o = opts || {};
-    const { data, error } = await client().rpc('book_group_split', { p: {
+    const { data, error } = await window.meRpc('book_group_split', { p: {
       group_id: groupId, from: fromStr, to: toStr, assignments: assignments || [],
       courier: o.courier || 'flash', remote: !!o.remote, theme: o.theme || null,
       occasion: o.occasion || null, recipients: o.recipients || null
@@ -641,61 +641,61 @@ window.API = (function () {
   // จัดการสมาชิกกลุ่ม (lifecycle)
   async function groupLeave(groupId, customer) {
     if (CONFIG.USE_MOCK || !groupId || !customer?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_leave', { p_group: groupId, p_customer: customer.id });
+    const { data, error } = await window.meRpc('group_leave', { p_group: groupId, p_customer: customer.id });
     return { ok: !error, data, error };
   }
   async function groupRemoveMember(groupId, actor, targetId) {
     if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_remove_member', { p_group: groupId, p_actor: actor.id, p_target: targetId });
+    const { data, error } = await window.meRpc('group_remove_member', { p_group: groupId, p_actor: actor.id, p_target: targetId });
     return { ok: !error, data, error };
   }
   async function groupTransferOwner(groupId, actor, newOwnerId) {
     if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_transfer_owner', { p_group: groupId, p_actor: actor.id, p_new_owner: newOwnerId });
+    const { data, error } = await window.meRpc('group_transfer_owner', { p_group: groupId, p_actor: actor.id, p_new_owner: newOwnerId });
     return { ok: !error, data, error };
   }
   async function groupDelete(groupId, actor) {
     if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_delete', { p_group: groupId, p_actor: actor.id });
+    const { data, error } = await window.meRpc('group_delete', { p_group: groupId, p_actor: actor.id });
     return { ok: !error, data, error };
   }
   async function groupUpdateMember(groupId, actor, targetId, relation) {
     if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_update_member', { p_group: groupId, p_actor: actor.id, p_target: targetId, p_relation: relation || null });
+    const { data, error } = await window.meRpc('group_update_member', { p_group: groupId, p_actor: actor.id, p_target: targetId, p_relation: relation || null });
     return { ok: !error, data, error };
   }
   async function groupRename(groupId, actor, name) {
     if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_rename', { p_group: groupId, p_actor: actor.id, p_name: name || '' });
+    const { data, error } = await window.meRpc('group_rename', { p_group: groupId, p_actor: actor.id, p_name: name || '' });
     return { ok: !error, data, error };
   }
   // ย้ายโปรไฟล์เด็ก → แอคเคานต์จริง / รวมแอคเคานต์
   async function claimManagedProfile(guardian, managedId, lineUid, displayName) {
     if (CONFIG.USE_MOCK || !guardian?.id || !managedId) return { ok: true };
-    const { data, error } = await client().rpc('claim_managed_profile', { p: { guardian: guardian.id, managed_id: managedId, line_uid: lineUid, display_name: displayName || null } });
+    const { data, error } = await window.meRpc('claim_managed_profile', { p: { guardian: guardian.id, managed_id: managedId, line_uid: lineUid, display_name: displayName || null } });
     return { ok: !error, data, error };
   }
   async function mergeCustomers(keepId, dropId, actor) {
     if (CONFIG.USE_MOCK || !keepId || !dropId || !actor?.id) return { ok: true };
-    const { data, error } = await client().rpc('merge_customers', { p: { keep: keepId, drop: dropId, actor: actor.id } });
+    const { data, error } = await window.meRpc('merge_customers', { p: { keep: keepId, drop: dropId, actor: actor.id } });
     return { ok: !error, data, error };
   }
   // ลิงก์ชวนเข้ากลุ่ม (แบบ LINE) — ขอ token แล้วประกอบเป็น URL
   async function groupJoinToken(groupId, actor) {
     if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true, data: { token: 'demo' } };
-    const { data, error } = await client().rpc('group_join_token', { p_group: groupId, p_actor: actor.id });
+    const { data, error } = await window.meRpc('group_join_token', { p_group: groupId, p_actor: actor.id });
     return { ok: !error, data, error };
   }
   // เข้ากลุ่มผ่านลิงก์ (แตะเอง = ยินยอม → active ทันที)
   async function joinGroup(token, customer, relation) {
     if (CONFIG.USE_MOCK || !token || !customer?.id) return { ok: true };
-    const { data, error } = await client().rpc('join_group', { p_token: token, p_customer: customer.id, p_relation: relation || null });
+    const { data, error } = await window.meRpc('join_group', { p_token: token, p_customer: customer.id, p_relation: relation || null });
     return { ok: !error, data, error };
   }
   // เพิกถอนลิงก์ชวน (ลิงก์เก่าใช้ไม่ได้อีก)
   async function groupRevokeLink(groupId, actor) {
     if (CONFIG.USE_MOCK || !groupId || !actor?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_revoke_link', { p_group: groupId, p_actor: actor.id });
+    const { data, error } = await window.meRpc('group_revoke_link', { p_group: groupId, p_actor: actor.id });
     return { ok: !error, data, error };
   }
   // % ส่วนลดแพคเกจครอบครัวตามจำนวนชุด (ไว้พรีวิวก่อนจอง)
@@ -707,25 +707,25 @@ window.API = (function () {
   // บิลของออเดอร์ตัวเอง (หน้าจ่ายเงินเพื่อน) — requester ต้องเป็นเจ้าของออเดอร์
   async function groupOrderSummary(orderGroup, requester) {
     if (CONFIG.USE_MOCK || !orderGroup || !requester?.id) return { ok: true, data: null };
-    const { data, error } = await client().rpc('group_order_summary', { p_order: orderGroup, p_requester: requester.id });
+    const { data, error } = await window.meRpc('group_order_summary', { p_order: orderGroup, p_requester: requester.id });
     return { ok: !error, data, error };
   }
   // เจ้าของออเดอร์กด "โอนแล้ว" → ปลด hold เป็น reserved
   async function groupPayConfirm(orderGroup, requester) {
     if (CONFIG.USE_MOCK || !orderGroup || !requester?.id) return { ok: true };
-    const { data, error } = await client().rpc('group_pay_confirm', { p_order: orderGroup, p_requester: requester.id });
+    const { data, error } = await window.meRpc('group_pay_confirm', { p_order: orderGroup, p_requester: requester.id });
     return { ok: !error, data, error };
   }
   // สถานะการจ่ายของทั้งอีเวนต์ (dashboard หัวหน้า)
   async function groupEventStatus(eventGroup, requester) {
     if (CONFIG.USE_MOCK || !eventGroup || !requester?.id) return { ok: true, data: null };
-    const { data, error } = await client().rpc('group_event_status', { p_event: eventGroup, p_requester: requester.id });
+    const { data, error } = await window.meRpc('group_event_status', { p_event: eventGroup, p_requester: requester.id });
     return { ok: !error, data, error };
   }
   // privacy: ซ่อน/แสดงรูปโปรไฟล์ของตัวเองในกลุ่ม
   async function setPictureHidden(customer, hidden) {
     if (CONFIG.USE_MOCK || !customer?.id) return { ok: true };
-    const { data, error } = await client().rpc('set_picture_hidden', { p_customer: customer.id, p_hide: !!hidden });
+    const { data, error } = await window.meRpc('set_picture_hidden', { p_customer: customer.id, p_hide: !!hidden });
     return { ok: !error, data, error };
   }
   // หน้า landing คำเชิญ: ดูข้อมูลกลุ่มจาก token ก่อนเข้าร่วม (ยังไม่ต้องเป็นสมาชิก)
@@ -748,12 +748,12 @@ window.API = (function () {
   // ===== ของขวัญวันเกิด =====
   async function birthdayStatus(customer) {
     if (CONFIG.USE_MOCK || !customer?.id) return null;
-    try { const { data } = await client().rpc('birthday_status', { p_customer: customer.id }); return data || null; }
+    try { const { data } = await window.meRpc('birthday_status', { p_customer: customer.id }); return data || null; }
     catch (_e) { return null; }
   }
   async function birthdayReserve(garmentId, customer, fromStr, toStr) {
     if (CONFIG.USE_MOCK) return { ok: true, free: 0, pay: 0 };
-    const { data, error } = await client().rpc('birthday_reserve_dates', { p_customer: customer.id, p_garment: garmentId, p_from: fromStr, p_to: toStr });
+    const { data, error } = await window.meRpc('birthday_reserve_dates', { p_customer: customer.id, p_garment: garmentId, p_from: fromStr, p_to: toStr });
     if (error) return { ok: false, error: error.message };
     if (data?.error) return { ok: false, error: data.error };
     return { ok: true, ...data };

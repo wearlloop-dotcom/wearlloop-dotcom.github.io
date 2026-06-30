@@ -6,6 +6,21 @@ const staffPrice = (p) => STAFF_PCT > 0 ? Math.round(Number(p || 0) * (1 - STAFF
 const staffTag = () => STAFF_PCT > 0 ? `<span style="display:inline-block;font-size:11px;font-weight:600;color:#0F6E56;background:#E4F0EC;border:1px solid #cfe6da;border-radius:20px;padding:1px 8px;margin-left:6px">${lang==='th'?'พนักงาน':'Staff'} −${STAFF_PCT}%</span>` : '';
 let fOccasion = null, fColor = null, fBrand ='', fToneOnly = false, fForYou = false, fWishOnly = false;
 let gPersonalRecs = [];  // โค้ดชุดแนะนำเฉพาะบุคคล (collaborative) — เรียงตามความเกี่ยวข้อง
+let gQuery = '';  // คำค้นหา catalog (ชื่อ/แบรนด์/โอกาส/สี)
+let _searchTimer = null;
+function onSearch(v) {
+  gQuery = (v || '').trim().toLowerCase();
+  renderGrid();
+  // เก็บคำค้นเพื่อปิด demand gap (ops เห็นว่าคนหาอะไรไม่เจอ → ออก v_search_terms_30d)
+  clearTimeout(_searchTimer);
+  if (gQuery.length >= 2) _searchTimer = setTimeout(() => window.track?.('search', gQuery), 800);
+}
+function matchQuery(g) {
+  if (!gQuery) return true;
+  const hay = [g.name, g.brand, g.category, (g.occasion_tags || []).map(occName).join(' '),
+    g.colors.map(c => c[0]).join(' ')].join(' ').toLowerCase();
+  return hay.includes(gQuery);
+}
 let gUseDate = null, gAvailSet = null, gOnlyAvail = false;  // เลือกวันใช้ตั้งแต่หน้าแรก
 let gStylistPending = false;  // กดแนะนำแต่ยังไม่เลือกวัน → พอเลือกแล้วยิงต่อให้เอง
 let gWish = new Set();  // garment id ที่หมายตา (wishlist)
@@ -238,7 +253,8 @@ function renderGrid() {
     (!fColor || g.colors.some(c => c[1] === fColor)) &&
     (!fBrand || g.brand === fBrand) &&
     (!fToneOnly || g.season === CUSTOMER.my_color_season) &&
-    (!fWishOnly || gWish.has(g.id)));
+    (!fWishOnly || gWish.has(g.id)) &&
+    matchQuery(g));
   if (fWishOnly && !list.length) { $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา — แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
   if (fForYou) {
     // ดันชุดที่ "คนเหมือนคุณเช่า" (collaborative จาก behavior data) ขึ้นบนสุด แล้วตามด้วย personalScore
@@ -247,15 +263,29 @@ function renderGrid() {
   }
   const availOf = g => !gUseDate || !gAvailSet || gAvailSet.has(g.id);  // null set = ว่างหมด (mock)
   if (gUseDate && gOnlyAvail) list = list.filter(availOf);
-  if (!list.length) { $('#grid').innerHTML =`<div class="empty">${t('empty')}</div>`; return; }
-  $('#grid').innerHTML = list.map(g => {
-    const fit = fitConfidence(CUSTOMER, g);
-    const fn = fitNote(g);
-    const match = g.season === CUSTOMER.my_color_season;
-    const av = availOf(g);
-    const sv = savingsPct(g);
-    const dots = g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
-    return`<div class="pcard ${gUseDate && !av ? 'busy' : ''}" onclick="openDetail('${g.id}')">
+  if (!list.length) {
+    $('#gridEnd') && ($('#gridEnd').textContent = '');
+    if (gQuery) {
+      $('#grid').innerHTML = `<div class="empty">${lang==='th'?`ยังไม่มี "${gQuery}" ในคลังตอนนี้`:`No "${gQuery}" in the collection yet`}<br><span style="font-size:12px;color:var(--muted)">${lang==='th'?'ลองใช้ AI สไตลิสต์ช่วยหา หรือบอกโอกาสที่จะไป':'Try the AI stylist, or tell us the occasion'}</span></div>`;
+    } else { $('#grid').innerHTML = `<div class="empty">${t('empty')}</div>`; }
+    return;
+  }
+  // continuous feed: เก็บลิสต์เต็ม แล้วโหลดทีละหน้า (มีจุดหยุดพอดี — ไม่ใช่ infinite loop เสพติด)
+  gGridList = list;
+  gGridShown = 0;
+  $('#grid').innerHTML = '';
+  renderGridPage();
+}
+const GRID_PAGE = 12;
+let gGridList = [], gGridShown = 0;
+function gridCardHtml(g) {
+  const fit = fitConfidence(CUSTOMER, g);
+  const fn = fitNote(g);
+  const match = g.season === CUSTOMER.my_color_season;
+  const av = !gUseDate || !gAvailSet || gAvailSet.has(g.id);
+  const sv = savingsPct(g);
+  const dots = g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
+  return`<div class="pcard ${gUseDate && !av ? 'busy' : ''}" onclick="openDetail('${g.id}')">
       <div class="pphoto" style="background:${g.bg}">
         <span class="ph">${g.name}</span>
         <button class="wish ${gWish.has(g.id)?'on':''}" onclick="toggleWish('${g.id}',event)" aria-label="wishlist">♥</button>
@@ -283,7 +313,31 @@ function renderGrid() {
         ${fn?`<div class="fitnote ${fn.cls}">${fn.text}</div>`:''}
       </div>
     </div>`;
-  }).join('');
+}
+function renderGridPage() {
+  const next = gGridList.slice(gGridShown, gGridShown + GRID_PAGE);
+  $('#grid').insertAdjacentHTML('beforeend', next.map(gridCardHtml).join(''));
+  gGridShown += next.length;
+  const end = $('#gridEnd');
+  if (end) {
+    if (gGridShown >= gGridList.length) {
+      // จุดหยุดพอดี: บอกชัดว่าดูครบแล้ว (ไม่หลอกให้เลื่อนต่อไม่จบ)
+      end.textContent = gGridList.length > GRID_PAGE
+        ? (lang === 'th' ? `ดูครบทั้ง ${gGridList.length} ชุดแล้ว` : `That's all ${gGridList.length} pieces`)
+        : '';
+    } else {
+      end.textContent = '';
+    }
+  }
+}
+// โหลดหน้าถัดไปเมื่อเลื่อนใกล้ท้าย grid (lazy — แต่จบเมื่อหมดจริง)
+function setupGridLazyLoad() {
+  window.addEventListener('scroll', () => {
+    if (gGridShown >= gGridList.length) return;
+    const grid = $('#grid'); if (!grid) return;
+    const rect = grid.getBoundingClientRect();
+    if (rect.bottom < window.innerHeight + 600) renderGridPage();
+  }, { passive: true });
 }
 
 // ===== เลือกวันใช้ตั้งแต่หน้าแรก =====
@@ -2437,6 +2491,8 @@ async function boot() {
   }
   window.track?.('session_start', null, { logged_in: loggedIn, tier: CUSTOMER.crm_tier || 'guest' });
   setupScrollTracking();
+  setupGridLazyLoad();
+  const si = $('#searchInput'); if (si) si.placeholder = lang === 'th' ? 'ค้นหาชุด แบรนด์ หรือโอกาส…' : 'Search dresses, brands, occasions…';
   if (loggedIn) { try {
     await window.flushEvents?.();
     CUSTOMER._streak = await window.API.myStreak?.() || 0;
