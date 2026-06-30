@@ -50,6 +50,36 @@
   .expiry-banner .eb-msg b{color:#3D2600}
   .expiry-banner .eb-cta{background:#3D2600;color:#F5ECD5;border:none;border-radius:3px;padding:5px 14px;font-size:11px;letter-spacing:.6px;white-space:nowrap;cursor:pointer;flex-shrink:0}
 
+  /* ===== notification bell + inbox ===== */
+  .bellbtn{position:relative;background:none;border:none;padding:0;cursor:pointer;display:inline-flex;align-items:center}
+  .bell-badge{position:absolute;top:-6px;right:-7px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#C0392B;color:#fff;font-size:10px;font-weight:600;line-height:16px;text-align:center}
+  .inbox-mask{position:fixed;inset:0;background:rgba(20,19,15,.45);z-index:60;display:none}
+  .inbox-mask.open{display:block}
+  .inbox-panel{position:fixed;top:0;right:0;height:100%;width:min(360px,86vw);background:var(--bg,#fff);z-index:61;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
+  .inbox-mask.open .inbox-panel{transform:none}
+  .inbox-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line,#eee)}
+  .inbox-hd b{font-size:15px}
+  .inbox-hd .ix-clear{background:none;border:none;color:var(--muted,#999);font-size:12px;cursor:pointer}
+  .inbox-hd .ix-x{background:none;border:none;font-size:22px;line-height:1;cursor:pointer;color:var(--ink)}
+  .inbox-list{flex:1;overflow-y:auto;padding:6px 0}
+  .ix-item{padding:13px 18px;border-bottom:1px solid var(--line,#f2f2f2);display:flex;gap:11px;align-items:flex-start}
+  .ix-item.unread{background:#FBF6EA}
+  .ix-dot{width:7px;height:7px;border-radius:50%;background:#C0892B;margin-top:6px;flex-shrink:0}
+  .ix-dot.read{background:transparent}
+  .ix-body{flex:1;min-width:0}
+  .ix-title{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:2px}
+  .ix-sub{font-size:12px;color:var(--muted,#888);line-height:1.4}
+  .ix-time{font-size:10px;color:#bbb;margin-top:3px}
+  .ix-empty{text-align:center;color:var(--muted,#aaa);font-size:13px;padding:48px 20px}
+  .ix-pref{padding:14px 18px;border-top:1px solid var(--line,#eee);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted,#777)}
+  .ix-pref input{width:16px;height:16px}
+
+  /* ===== social proof chips ===== */
+  .socialproof{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+  .sp-chip{font-size:11px;color:#6B5B3E;background:#F3ECDC;border-radius:20px;padding:3px 10px}
+  .sp-chip b{color:#3D2600}
+  .sp-chip.hot{background:#F5E0D5;color:#A4421E}
+
   /* ===== header ===== */
   header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
   .hbar{display:flex;align-items:center;justify-content:space-between;height:58px;gap:12px}
@@ -731,6 +761,10 @@
     </div>
     <div class="logo">LLOOP</div>
     <div class="hright">
+      <button id="bellBtn" class="bellbtn" onclick="openInbox()" aria-label="การแจ้งเตือน" hidden>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span class="bell-badge" id="bellBadge" hidden>0</span>
+      </button>
       <svg class="icon" viewBox="0 0 24 24" onclick="openProfile()" aria-label="โปรไฟล์"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
       <button id="loginBtn" class="loginbtn" onclick="LiffAuth.signIn()" hidden><svg class="lico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.9-5a8.38 8.38 0 0 1-.9-4 8.5 8.5 0 0 1 8.5-8.5 8.38 8.38 0 0 1 8.5 8.5z"/></svg><span id="loginLabel">เข้าสู่ระบบ</span></button>
       <span class="credit"><span id="creditLabel">เครดิต</span> <b id="credit">฿160</b></span>
@@ -851,6 +885,22 @@
     </div>
   </div>
 </div>
+<div class="inbox-mask" id="inboxMask" onclick="if(event.target===this)closeInbox()">
+  <div class="inbox-panel">
+    <div class="inbox-hd">
+      <b id="inboxTitle">การแจ้งเตือน</b>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="ix-clear" id="inboxClear" onclick="markAllRead()">อ่านทั้งหมด</button>
+        <button class="ix-x" onclick="closeInbox()" aria-label="ปิด">×</button>
+      </div>
+    </div>
+    <div class="inbox-list" id="inboxList"></div>
+    <label class="ix-pref">
+      <span id="prefLabel">รับข่าวสาร & โปรโมชัน</span>
+      <input type="checkbox" id="prefMarketing" onchange="setNotifPref(this.checked)">
+    </label>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -861,10 +911,10 @@
 <script src="i18n.js?v=49"></script>
 <script src="data.js?v=45"></script>
 <script src="liffAuth.js?v=45"></script>
-<script src="me-api.js?v=50"></script>
+<script src="me-api.js?v=51"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=45"></script>
-<script src="api.js?v=50"></script>
+<script src="api.js?v=51"></script>
 <script>
   /* Spotlight — ดึงชุดที่เช่าน้อยสุดมาโชว์รูปใหญ่ + สลับสไลด์อัตโนมัติ (visual layer) */
   window.renderSpotlight = function(garments){

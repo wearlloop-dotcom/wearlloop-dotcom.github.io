@@ -8,6 +8,29 @@ window.API = (function () {
     return sb;
   }
 
+  // ===== Behavioral event tracking (เก็บพฤติกรรมแบบ FB/IG/TikTok) =====
+  // buffer ฝั่ง client → flush เป็นแบตช์ (ลด round-trip) ผ่าน log_events RPC
+  const _sid = 's_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  let _evBuf = [];
+  function track(event, target, meta) {
+    if (CONFIG.USE_MOCK || !event) return;
+    _evBuf.push({ s: _sid, u: lineUid || '', e: event, t: target || '', m: meta || null });
+    if (_evBuf.length >= 12) flushEvents();
+  }
+  async function flushEvents() {
+    if (CONFIG.USE_MOCK || !_evBuf.length) return;
+    const batch = _evBuf.splice(0, 50);
+    try { await client().rpc('log_events', { p_events: batch }); }
+    catch (_e) { /* เงียบ — analytics ไม่ควรกระทบ UX */ }
+  }
+  // flush เป็นระยะ + ตอนซ่อนหน้า/ปิด (จับ dwell ครบ)
+  if (!CONFIG.USE_MOCK) {
+    setInterval(flushEvents, 5000);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) flushEvents(); });
+    window.addEventListener('pagehide', flushEvents);
+  }
+  window.track = track;
+
   // map garment row (DB) รูปการ์ดหน้าเว็บ
   function mapGarment(r) {
     return {
@@ -661,6 +684,33 @@ window.API = (function () {
     catch (_e) { return null; }
   }
 
+  // ===== กล่องแจ้งเตือนในแอป (ผ่าน me-rpc gateway) =====
+  async function notifInbox() {
+    if (CONFIG.USE_MOCK || !window.meRpc) return [];
+    try { const { data } = await window.meRpc('notif_inbox', {}); return Array.isArray(data) ? data : []; }
+    catch (_e) { return []; }
+  }
+  async function notifUnread() {
+    if (CONFIG.USE_MOCK || !window.meRpc) return 0;
+    try { const { data } = await window.meRpc('notif_unread_count', {}); return Number(data) || 0; }
+    catch (_e) { return 0; }
+  }
+  async function notifMarkRead(id) {
+    if (CONFIG.USE_MOCK || !window.meRpc) return;
+    try { await window.meRpc('notif_mark_read', id != null ? { p_id: id } : {}); } catch (_e) {}
+  }
+  async function notifSetPref(marketing) {
+    if (CONFIG.USE_MOCK || !window.meRpc) return null;
+    try { const { data } = await window.meRpc('notif_set_pref', { p_marketing: !!marketing }); return data || null; }
+    catch (_e) { return null; }
+  }
+  // social proof ต่อชุด (anon อ่านได้ตรง — ไม่มี PII)
+  async function socialProof(code) {
+    if (CONFIG.USE_MOCK || !code) return null;
+    try { const { data } = await client().rpc('garment_social_proof', { p_code: code }); return data || null; }
+    catch (_e) { return null; }
+  }
+
   // ===== ยกเลิก / เลื่อน / ต่อเวลา — ผ่าน me-rpc gateway เท่านั้น (ownership guard เช็คว่าเป็น rental ของเราจริง) =====
   async function quoteCancellation(rentalId, asCredit = true) {
     if (CONFIG.USE_MOCK || !rentalId || !window.meRpc) return null;
@@ -824,6 +874,21 @@ window.API = (function () {
     const { data } = await window.meRpc('saved_feed', { p_limit: limit || 30 });
     return data || [];
   }
+  async function reportLook(lookId, reason) {
+    if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
+    const { data, error } = await window.meRpc('report_look', { p_look: lookId, p_reason: reason || null });
+    return error ? { ok: false, error } : (data || { ok: false });
+  }
+  async function reactLook(lookId, reaction) {
+    if (CONFIG.USE_MOCK || !window.meRpc) return null;
+    const { data } = await window.meRpc('react_look', { p_look: lookId, p_reaction: reaction });
+    return data || null;
+  }
+  async function lookReactions(lookId) {
+    if (CONFIG.USE_MOCK) return {};
+    const { data } = await client().rpc('look_reaction_counts', { p_look: lookId });
+    return data || {};
+  }
 
-  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed };
+  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, notifInbox, notifUnread, notifMarkRead, notifSetPref, socialProof, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed, reportLook, reactLook, lookReactions };
 })();

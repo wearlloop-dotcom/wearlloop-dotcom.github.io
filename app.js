@@ -217,7 +217,8 @@ async function toggleWish(garmentId, event) {
   if (btn) btn.classList.toggle('on', !wasOn);
   try {
     const added = await window.API.toggleWishlist(CUSTOMER, garmentId);
-    if (added === true) gWish.add(garmentId); else if (added === false) gWish.delete(garmentId);
+    if (added === true) { gWish.add(garmentId); const gg = GARMENTS.find(x => x.id === garmentId); window.track?.('wishlist_add', gg?.code || garmentId); }
+    else if (added === false) gWish.delete(garmentId);
     if (btn) btn.classList.toggle('on', gWish.has(garmentId));
   } catch (e) { console.warn(e); }
   if (fWishOnly) renderGrid();
@@ -318,6 +319,7 @@ async function askVenue() {
   const el = $('#vresult');
   const hasPlace = !!(window.SELECTED_PLACE && window.SELECTED_PLACE.name);
   if (!q && !hasPlace) { el.classList.remove('show'); return; }
+  if (q) window.track?.('stylist_ask', q, { occasion: window.gQuizOccasion || (EVENT && EVENT.occasion) || null, date: gUseDate || null });
   // ต้องล็อกอินก่อน (โควต้าผูกกับบัญชี + กันยิง resolve-place เปลือง Google API) — เช็กก่อนเรียกอะไรที่มีค่าใช้จ่าย
   if (!CUSTOMER.id) {
     el.className = 'vresult show';
@@ -437,6 +439,7 @@ function setColorFromVenue(h) { fColor = h; renderFilters(); renderGrid(); windo
 function openDetail(id) {
   const g = GARMENTS.find(x => x.id === id);
   fbTrack('ViewContent', { content_ids:[g.code || g.id], content_name: g.name, content_type:'product', value: g.price, currency:'THB' });
+  window.track?.('view_item', g.code || g.id, { name: g.name, price: g.price, occasion: (g.occasion_tags||[])[0] || null });
   const fit = fitConfidence(CUSTOMER, g);
   const match = g.season === CUSTOMER.my_color_season;
   const credit = Math.min(CUSTOMER.credit_balance || 0, Math.round(g.price * 0.5));
@@ -469,6 +472,7 @@ function openDetail(id) {
       <div class="dname">${g.name}</div>
       <div class="dmeta">${g.tier} · ${t('rotating')}</div>
       <div id="ratingline" class="ratingline"></div>
+      <div id="socialproof" class="socialproof"></div>
       ${fit!= null?`<div class="fitbox"><div class="pct">${fit}%</div>
         <div><div style="font-size:13px;font-weight:500;color:#04342C">${t('fitTitle')}</div>
         <div style="font-size:11px;color:var(--ok)">${t('fitFromPre')} ${g.stretch!=='none'? t('stretchHelp') : t('noStretchHelp')}</div></div></div>`:''}
@@ -518,6 +522,7 @@ function openDetail(id) {
   renderAvailCalendar(g.id);
   renderUGC(g.id);
   loadRating(g.id);  // เรตติ้ง/รีวิวของชุด (async inject)
+  loadSocialProof(g.code || g.id);  // มีคนเช่า/ดู/หมายตา (social proof)
   if (gUseDate) checkAvail(g.id);  // โชว์สถานะวันที่เลือกจากหน้าแรกทันที
   $('#overlay').scrollTop = 0; const sh = $('#sheet'); if (sh) sh.scrollTop = 0;
 }
@@ -532,6 +537,19 @@ async function loadRating(garmentId) {
   const avg = (Math.round(r.avg * 10) / 10).toFixed(1);
   const reviewWord = lang ==='th'?'รีวิว':(r.count > 1?'reviews':'review');
   el.innerHTML =`<span class="star">★</span> ${avg} <span class="rcount">(${r.count} ${reviewWord})</span>`;
+}
+
+// Social proof: "มีคนเช่าไปแล้ว X ครั้ง · กำลังมาแรง" — สร้าง urgency + ความน่าเชื่อ
+async function loadSocialProof(code) {
+  const el = $('#socialproof'); if (!el) return;
+  let s = null; try { s = await window.API.socialProof?.(code); } catch (e) { /**/ }
+  if (!s) { el.innerHTML = ''; return; }
+  const th = lang === 'th';
+  const chips = [];
+  if (s.rented_30d > 0) chips.push(`<span class="sp-chip"><b>${s.rented_30d}</b> ${th ? 'คนเช่าใน 30 วัน' : 'rented · 30d'}</span>`);
+  if (s.views_7d >= 8) chips.push(`<span class="sp-chip hot">${th ? 'กำลังมาแรง' : 'trending'}</span>`);
+  if (s.wishlisted > 0) chips.push(`<span class="sp-chip"><b>${s.wishlisted}</b> ${th ? 'คนหมายตา' : 'saved'}</span>`);
+  el.innerHTML = chips.join('');
 }
 
 // ปฏิทินว่าง/ไม่ว่างของชุด (2 เดือน) — แตะวันว่างเพื่อเลือก
@@ -716,6 +734,7 @@ async function reserve(id) {
   }
   // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
   if (!(await kycGate())) return;
+  window.track?.('begin_checkout', g.code || g.id, { price: g.price, date });
   // กันจองชน — เช็กว่างก่อน
   const free = await checkAvail(id);
   if (free === false) return;
@@ -2085,6 +2104,89 @@ function renderImpactCard() {
   const o = $(sel); if (o) o.addEventListener('click', e => { if (e.target === o) fn(); });
 });
 
+// ===== กล่องแจ้งเตือนในแอป (habit loop — ดึงคนกลับมาเปิดแอป) =====
+// map kind + payload → หัวข้อ/รายละเอียดอ่านง่าย (ไทย/อังกฤษ)
+function notifText(n) {
+  const th = lang === 'th';
+  const p = n.payload || {};
+  const M = {
+    due_soon:        [th?'ใกล้ถึงกำหนดคืน':'Return coming up', th?`"${p.garment||p.name||''}" คืนพรุ่งนี้`:`"${p.garment||p.name||''}" due tomorrow`],
+    late:            [th?'เลยกำหนดคืนแล้ว':'Overdue', th?'รบกวนส่งคืนโดยเร็วนะคะ':'Please return soon'],
+    credit_expiring: [th?'เครดิตใกล้หมดอายุ':'Credit expiring', th?`เครดิต ฿${p.credit||''} ใช้เช่าได้เลย`:`฿${p.credit||''} credit — use it soon`],
+    abandon_checkout:[th?'ชุดรอคุณอยู่':'Your pick is waiting', th?`"${p.name||p.garment||''}" ยังล็อกไว้ให้ — ชำระเพื่อยืนยัน`:`"${p.name||p.garment||''}" still held — pay to confirm`],
+    reengagement:    [th?'มีของขวัญรอ ฿30':'฿30 gift inside', th?'นานไม่เจอกัน — เพิ่มเครดิตให้แล้ว':'We missed you — credit added'],
+    winback:         [th?'คิดถึงคุณนะคะ':'We miss you', th?'กลับเข้า loop กับ LLOOP':'Come back to the loop'],
+    event_suggest:   [th?'แนะนำชุดก่อนงาน':'Outfit ideas for your event', th?'เลือกชุดให้คุณแล้ว เปิดดูได้เลย':'We picked looks for you'],
+    review_request:  [th?'ชุดเป็นยังไงบ้างคะ':'How was it?', th?`รีวิว "${p.name||''}" รับเครดิต`:`Review "${p.name||''}" for credit`],
+    referral_credit: [th?'ได้เครดิตจากการชวนเพื่อน':'Referral credit', th?`฿${p.amount||''} เข้ากระเป๋าแล้ว`:`฿${p.amount||''} added`],
+    birthday:        [th?'ของขวัญวันเกิด':'Birthday gift', th?`เช่าฟรี 1 ชุด มูลค่าถึง ฿${p.value_cap||''}`:`1 free rental up to ฿${p.value_cap||''}`],
+    wishlist_available:[th?'ชุดที่หมายตาว่างแล้ว':'Wishlist item available', th?`"${p.name||''}" รีบจองก่อนใคร`:`"${p.name||''}" — book now`],
+    style_ready:     [th?'สไตลิสต์พร้อมแล้ว':'Your stylist is ready', th?'เลือกชุดที่ใช่ให้คุณแล้ว':'We styled looks for you'],
+    charity_update:  [th?'ความสวยที่มีความหมาย':'Beauty that gives back', p.caption||(th?'ขอบคุณที่เป็นส่วนหนึ่งของการให้':'Thank you for giving back')],
+  };
+  return M[n.kind] || [th?'การแจ้งเตือน':'Notification', ''];
+}
+function relTime(ts) {
+  const th = lang === 'th';
+  const diff = (Date.now() - new Date(ts)) / 1000;
+  if (diff < 3600) return th ? `${Math.max(1,Math.round(diff/60))} นาทีที่แล้ว` : `${Math.max(1,Math.round(diff/60))}m ago`;
+  if (diff < 86400) return th ? `${Math.round(diff/3600)} ชม.ที่แล้ว` : `${Math.round(diff/3600)}h ago`;
+  return th ? `${Math.round(diff/86400)} วันที่แล้ว` : `${Math.round(diff/86400)}d ago`;
+}
+async function refreshUnread() {
+  if (!CUSTOMER.id) return;
+  const n = await window.API.notifUnread?.() || 0;
+  const badge = $('#bellBadge');
+  if (badge) { badge.hidden = n <= 0; badge.textContent = n > 9 ? '9+' : String(n); }
+}
+async function openInbox() {
+  const mask = $('#inboxMask'); if (!mask) return;
+  mask.classList.add('open');
+  const list = $('#inboxList');
+  if (list) list.innerHTML = `<div class="ix-empty">${lang==='th'?'กำลังโหลด…':'Loading…'}</div>`;
+  // โหลด prefs toggle ให้ตรงสถานะจริง
+  const pref = $('#prefMarketing'); if (pref) pref.checked = CUSTOMER.marketing_opt_in !== false;
+  const items = await window.API.notifInbox?.() || [];
+  if (!items.length) {
+    if (list) list.innerHTML = `<div class="ix-empty">${lang==='th'?'ยังไม่มีการแจ้งเตือน':'No notifications yet'}</div>`;
+  } else if (list) {
+    list.innerHTML = items.map(n => {
+      const [title, sub] = notifText(n);
+      const unread = !n.read_at;
+      return `<div class="ix-item ${unread?'unread':''}"><i class="ix-dot ${unread?'':'read'}"></i>`
+        + `<div class="ix-body"><div class="ix-title">${title}</div>`
+        + `${sub?`<div class="ix-sub">${sub}</div>`:''}<div class="ix-time">${relTime(n.created_at)}</div></div></div>`;
+    }).join('');
+  }
+  // เปิดกล่อง = ถือว่าอ่านแล้วทั้งหมด
+  await window.API.notifMarkRead?.(null);
+  refreshUnread();
+}
+function closeInbox() { $('#inboxMask')?.classList.remove('open'); }
+async function markAllRead() { await window.API.notifMarkRead?.(null); refreshUnread(); $('#inboxList')?.querySelectorAll('.ix-item.unread').forEach(el => { el.classList.remove('unread'); el.querySelector('.ix-dot')?.classList.add('read'); }); }
+async function setNotifPref(on) {
+  await window.API.notifSetPref?.(on);
+  CUSTOMER.marketing_opt_in = on;
+  toast(lang==='th' ? (on?'เปิดรับข่าวสารแล้วค่ะ':'ปิดรับข่าวสารแล้ว — ยังได้รับแจ้งเตือนสำคัญอยู่') : (on?'Marketing on':'Marketing off — you still get important alerts'));
+}
+
+// scroll depth (25/50/75/100%) + dwell time — สัญญาณ engagement แบบ FB/IG
+function setupScrollTracking() {
+  const t0 = Date.now();
+  let maxDepth = 0;
+  const marks = { 25: false, 50: false, 75: false, 100: false };
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    if (h <= 0) return;
+    const pct = Math.min(100, Math.round(window.scrollY / h * 100));
+    if (pct > maxDepth) maxDepth = pct;
+    [25, 50, 75, 100].forEach(m => { if (pct >= m && !marks[m]) { marks[m] = true; window.track?.('scroll_depth', null, { depth: m }); } });
+  }, { passive: true });
+  const sendDwell = () => { window.track?.('dwell', null, { ms: Date.now() - t0, max_depth: maxDepth }); };
+  document.addEventListener('visibilitychange', () => { if (document.hidden) sendDwell(); });
+  window.addEventListener('pagehide', sendDwell);
+}
+
 async function boot() {
   $('#langTH')?.classList.toggle('on', lang ==='th');
   $('#langEN')?.classList.toggle('on', lang ==='en');
@@ -2103,6 +2205,8 @@ async function boot() {
   const loginBtn = $('#loginBtn'); const creditEl = document.querySelector('.credit');
   if (loginBtn) loginBtn.hidden = loggedIn;
   if (creditEl) creditEl.hidden =!loggedIn;
+  const bellBtn = $('#bellBtn'); if (bellBtn) bellBtn.hidden = !loggedIn;
+  if (loggedIn) refreshUnread();
   $('#credit').textContent ='฿'+ (CUSTOMER.credit_balance || 0);
   try { CUSTOMER._impact = await window.API.myImpact?.(CUSTOMER); } catch (e) { /**/ }
   // โหลดรายการที่หมายตา (wishlist) — guard กรณีไม่ได้ล็อกอิน
@@ -2134,6 +2238,8 @@ async function boot() {
       }
     } catch (e) { /* ไม่มีเครดิตใกล้หมด หรือ RPC error — ไม่แสดง banner */ }
   }
+  window.track?.('session_start', null, { logged_in: loggedIn, tier: CUSTOMER.crm_tier || 'guest' });
+  setupScrollTracking();
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();
   if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
   const vd = $('#venueDate'); if (vd) { vd.min = todayStr(); vd.value = gUseDate || ''; }
@@ -2179,7 +2285,6 @@ function routeDeepLink() {
       if (g) { setTimeout(() => openDetail(g.id), 80); return; }
     }
     // โค้ดชวนเพื่อนจากลิงก์ (?ref=CODE) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿200 ทั้งคู่ เข้ากระเป๋า LLOOP)
-    const ref = qs.get('ref') || (ls && ls.get('ref'));
     if (ref) { try { localStorage.setItem('lloop_ref', ref.trim()); } catch (_e) {} applyPendingReferral(); }
     // มาจากการ์ดเกม quiz.html (?occasion=KEY&mood=...) → จำโอกาสไว้ให้ AI สไตลิสต์ใช้ + กรองคลังให้ตรงงาน
     const occ = qs.get('occasion') || (ls && ls.get('occasion'));

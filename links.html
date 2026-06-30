@@ -145,7 +145,7 @@ body::before{
 .feat .icon{background:rgba(255,255,255,.1)}
 .feat .icon svg{color:#fff}
 .feat .card-platform{color:rgba(255,255,255,.45)}
-.feat .card-desc{color:#fff;font-size:14px;font-weight:500}
+.feat .card-desc{color:#fff;font-size:14px;font-weight:500;white-space:normal}
 .feat .arrow{color:rgba(255,255,255,.4)}
 .feat:hover .arrow{color:var(--gold)}
 .feat::before{background:linear-gradient(90deg,rgba(201,168,106,.12),transparent 70%)}
@@ -170,6 +170,61 @@ body::before{
   animation:rout .6s ease-out forwards;
 }
 @keyframes rout{to{transform:scale(4);opacity:0}}
+
+/* ── MEDIA SLOT ── */
+.media-slot{
+  margin-top:20px;border-radius:3px;overflow:hidden;
+  position:relative;background:var(--cream);
+  opacity:0;transform:translateY(12px);
+  transition:opacity .6s ease,transform .6s ease;
+}
+.media-slot.in{opacity:1;transform:none}
+
+/* portrait 4:5 — good for IG */
+.media-slot.portrait{aspect-ratio:4/5}
+/* landscape 16:9 — good for video cover */
+.media-slot.landscape{aspect-ratio:16/9}
+/* square */
+.media-slot.square{aspect-ratio:1/1}
+
+.media-slot img,.media-slot video{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+.media-slot video{background:#000}
+
+/* placeholder shown when no real media */
+.media-placeholder{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;
+  color:var(--muted);
+}
+.media-placeholder svg{width:28px;height:28px;opacity:.4}
+.media-placeholder span{
+  font-family:var(--display);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;opacity:.5;
+}
+/* hide placeholder once src loaded */
+.media-slot.has-media .media-placeholder{display:none}
+
+/* play button overlay for video */
+.play-btn{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:opacity .2s;
+}
+.play-btn svg{
+  width:48px;height:48px;
+  background:rgba(255,255,255,.85);border-radius:50%;padding:12px;
+  color:var(--ink);box-shadow:0 4px 16px rgba(0,0,0,.15);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+.play-btn:hover svg{transform:scale(1.12)}
+.media-slot.playing .play-btn{opacity:0;pointer-events:none}
+
+/* caption under media */
+.media-caption{
+  font-size:11.5px;color:var(--muted);text-align:center;
+  margin-top:8px;letter-spacing:.2px;
+}
 
 /* ── CLOSING LINE ── */
 .closing{
@@ -203,12 +258,21 @@ body::before{
     <div class="hero-line">circular fashion house</div>
   </div>
 
+  <!-- MEDIA: hero image — swap src เป็นรูปจริงได้เลย -->
+  <div class="media-slot portrait" data-reveal id="heroMedia">
+    <!-- ถ้ามีรูป: <img src="your-photo.jpg" alt="LLOOP look"> -->
+    <div class="media-placeholder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <span>วางรูปที่นี่</span>
+    </div>
+  </div>
+
   <!-- STORY 1: WHY -->
   <div class="story" data-reveal>
     <div class="story-label">เรื่องของเรา</div>
     <div class="story-head">ชุดสวยไม่ต้องเป็นเจ้าของ</div>
     <div class="story-body">
-      เราเชื่อว่าตู้เสื้อผ้าที่ดีที่สุดคือตู้ที่ <em>หมุนเวียน</em><br>
+      เราเชื่อว่าตู้เสื้อผ้าที่ดีที่สุดคือตู้ที่ <em>เราแชร์กัน</em><br>
       เช่าชุดที่ใช่สำหรับวันนั้น ใส่ดี คืนง่าย<br>
       แล้วปล่อยให้ชุดนั้นไปสร้างความสุขให้คนต่อไป
     </div>
@@ -301,9 +365,23 @@ body::before{
     <div class="story-label">เข้าวง</div>
     <div class="story-head">The Loop — คนที่รักโลกเหมือนกัน</div>
     <div class="story-body">
-      ชุมชนของคนที่เลือกใส่สวย <em>โดยไม่ต้องซื้อ</em><br>
+      ชุมชนของคนที่มั่นใจ สวยที่สุดในเวอร์ชั่นตัวเอง <em>โดยไม่ต้องแพง</em><br>
       แชร์ลุค รับเครดิต พูดคุยเรื่องแฟชั่นยั่งยืน<br>
       เข้ามาฟรี ออกไปพร้อมไอเดียใหม่
+    </div>
+
+    <!-- MEDIA: community video — swap src เป็นวิดีโอจริงได้เลย -->
+    <div class="media-slot landscape" data-reveal id="commVideo">
+      <!-- ถ้ามีวิดีโอ:
+      <video src="your-video.mp4" playsinline loop muted poster="your-thumb.jpg"></video>
+      <div class="play-btn" onclick="togglePlay(this)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </div>
+      -->
+      <div class="media-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        <span>วางวิดีโอที่นี่</span>
+      </div>
     </div>
 
     <div class="cards">
@@ -441,6 +519,25 @@ if (rw) {
     });
   });
 }
+
+// video play toggle
+function togglePlay(btn) {
+  const slot = btn.closest('.media-slot');
+  const vid = slot.querySelector('video');
+  if (!vid) return;
+  if (vid.paused) { vid.play(); slot.classList.add('playing'); }
+  else { vid.pause(); slot.classList.remove('playing'); }
+}
+
+// reveal media slots via same IO (data-reveal already handles .story,
+// but media-slot also needs .in — just add them to reveals list)
+document.querySelectorAll('.media-slot[data-reveal]').forEach(el => io.observe(el));
+
+// if no src set, add placeholder class; if src set, add has-media
+document.querySelectorAll('.media-slot').forEach(slot => {
+  const hasContent = slot.querySelector('img[src], video[src]');
+  if (hasContent) slot.classList.add('has-media');
+});
 
 // magnetic tilt desktop
 if (matchMedia('(hover:hover)').matches) {
