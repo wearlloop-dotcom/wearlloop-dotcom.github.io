@@ -27,7 +27,7 @@
       { href: 'live.html',       label: 'ไลฟ์',          icon: '▷', roles: ['marketing','manager'] },
       { href: 'influencers.html',label: 'อินฟลูเอนเซอร์', icon: '☆', roles: ['marketing','manager'] },
       { href: 'ugc.html',        label: 'งานถ่าย UGC',   icon: '◰', roles: ['marketing','manager'] },
-      { href: 'looks.html',      label: 'ชุมชน Loop Looks', icon: '❤', roles: ['marketing','manager'] },
+      { href: 'ops-looks.html',  label: 'ชุมชน Loop Looks', icon: '❤', roles: ['marketing','manager'] },
       { href: 'market.html',     label: 'เฝ้าตลาด',      icon: '◴', roles: ['marketing','manager'] },
       { href: 'requests.html',   label: 'คำขอชุดลูกค้า',  icon: '⌕', roles: ['marketing','manager'] },
     ] },
@@ -42,7 +42,7 @@
     ] },
     { section: 'เจ้าของ', items: [
       { href: 'hr.html',        label: 'บุคคล (HR)',    icon: '☗', roles: ['owner'] },
-      { href: 'partner.html',   label: 'พาร์ทเนอร์',     icon: '⚭', roles: ['owner'] },
+      { href: 'ops-partner.html', label: 'พาร์ทเนอร์',    icon: '⚭', roles: ['owner'] },
       { href: 'stylist-bookings.html', label: 'คิวสไตลิสต์', icon: '◷', roles: ['owner','manager'] },
       { href: 'disputes.html',  label: 'ทะเบียนคดี',     icon: '⚖', roles: ['owner','manager'] },
       { href: 'case-file.html', label: 'แฟ้มหลักฐาน',    icon: '☰', roles: ['owner','manager'] },

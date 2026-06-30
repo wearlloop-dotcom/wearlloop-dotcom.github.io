@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loop Looks · คัดเลือกลุคเด่น</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  .wrap{max-width:920px;margin:16px auto;padding:0 14px}
+  .filt{display:flex;gap:8px;margin:14px 0}
+  .filt button{border:1.5px solid var(--hair,#E0DED9);background:#fff;border-radius:20px;padding:8px 16px;font-family:var(--sans,'Prompt');font-size:14px;font-weight:600;color:var(--muted,#86857F);cursor:pointer}
+  .filt button.on{background:var(--forest,#2A4D43);color:#fff;border-color:var(--forest,#2A4D43)}
+  .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+  .lk{background:#fff;border:1px solid var(--hair,#E0DED9);border-radius:12px;overflow:hidden}
+  .lk.feat{outline:2px solid var(--gold,#C9A86A)}
+  .lk .ph{width:100%;aspect-ratio:3/4;background:var(--soft,#F5F4F2);position:relative}
+  .lk .ph img{width:100%;height:100%;object-fit:cover}
+  .lk .fg{position:absolute;top:8px;left:8px;background:var(--gold,#C9A86A);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:14px}
+  .lk .bd{padding:11px 12px}
+  .lk .who{font-size:13px;font-weight:600}
+  .lk .meta{font-size:11.5px;color:var(--muted,#86857F);margin-top:3px}
+  .lk .cap{font-size:12px;color:#444;margin-top:6px;max-height:2.6em;overflow:hidden}
+  .lk .acts{display:flex;gap:8px;margin-top:10px}
+  .lk button{flex:1;border:1px solid var(--hair,#E0DED9);background:#fff;border-radius:8px;padding:8px;font-family:var(--sans,'Prompt');font-size:12.5px;font-weight:600;cursor:pointer}
+  .lk button.pri{background:var(--forest,#2A4D43);color:#fff;border-color:var(--forest,#2A4D43)}
+  .lk button.danger{color:#B4543A}
+  .empty{text-align:center;color:var(--muted,#86857F);padding:40px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--forest,#2A4D43);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:50}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="bar"><h1>Loop Looks — คัดเลือกลุคเด่น</h1></div>
+<div class="wrap">
+  <p style="color:var(--muted,#86857F);font-size:13.5px">เลือก “ชูเป็นลุคแห่งสัปดาห์/แนะนำ” เพื่อดันลุคขึ้นต้นฟีดชุมชน + แจ้งครีเอเตอร์ · ระบบเลือกอัตโนมัติทุกจันทร์ แต่กดเองทับได้</p>
+  <div class="filt" id="filt">
+    <button class="on" data-s="published" onclick="load('published')">เผยแพร่แล้ว</button>
+    <button data-s="pending" onclick="load('pending')">รอตรวจ</button>
+    <button data-s="all" onclick="load('all')">ทั้งหมด</button>
+    <button data-s="reports" onclick="loadReports()" style="margin-left:auto">รายงาน</button>
+    <button data-s="comments" onclick="loadComments()">คอมเมนต์</button>
+  </div>
+  <div class="lgrid" id="grid"><div class="empty">กำลังโหลด…</div></div>
+  <div id="cmts" style="display:none"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2300);};
+  let STATUS='published';
+
+  async function load(status){
+    STATUS=status;
+    $('cmts').style.display='none'; $('grid').style.display='';
+    document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on', b.dataset.s===status));
+    $('grid').innerHTML='<div class="empty">กำลังโหลด…</div>';
+    const { data, error } = await sb.rpc('ops_looks_recent', { p_limit:60, p_status:status });
+    if(error){ $('grid').innerHTML=`<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
+    const rows=data||[];
+    if(!rows.length){ $('grid').innerHTML='<div class="empty">ยังไม่มีลุคในสถานะนี้</div>'; return; }
+    $('grid').innerHTML = rows.map(card).join('');
+  }
+  function card(l){
+    return `<div class="lk ${l.featured?'feat':''}">
+      <div class="ph">${l.photo?`<img src="${esc(l.photo)}">`:''}${l.featured?'<span class="fg">ลุคเด่น</span>':''}</div>
+      <div class="bd">
+        <div class="who">${esc(l.creator||'Loop')}</div>
+        <div class="meta">${esc(l.garment||'-')} · ♥ ${l.likes||0} · 💬 ${l.comments||0} · เช่าตาม ${l.rented||0}${l.status!=='published'?` · <b>${esc(l.status)}</b>`:''}</div>
+        ${l.caption?`<div class="cap">${esc(l.caption)}</div>`:''}
+        <div class="acts">
+          <button class="${l.featured?'':'pri'}" onclick="feature('${l.id}', ${l.featured?'false':'true'})">${l.featured?'เลิกชู':'ชูเป็นลุคเด่น'}</button>
+          ${l.status==='published'?`<button class="danger" onclick="reject('${l.id}')">ซ่อน</button>`:''}
+        </div>
+      </div></div>`;
+  }
+  async function feature(id, on){
+    const { error } = await sb.rpc('feature_look', { p_look:id, p_on:on });
+    if(error){ toast('ไม่สำเร็จ: '+error.message); return; }
+    toast(on?'ชูเป็นลุคเด่นแล้ว — แจ้งครีเอเตอร์ให้ค่ะ':'เลิกชูแล้ว'); load(STATUS);
+  }
+  async function loadComments(){
+    document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on', b.dataset.s==='comments'));
+    $('grid').style.display='none'; const el=$('cmts'); el.style.display=''; el.innerHTML='<div class="empty">กำลังโหลด…</div>';
+    const { data, error } = await sb.rpc('ops_comments_recent', { p_limit:100, p_only_hidden:false });
+    if(error){ el.innerHTML=`<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
+    const rows=data||[];
+    if(!rows.length){ el.innerHTML='<div class="empty">ยังไม่มีคอมเมนต์</div>'; return; }
+    el.innerHTML = rows.map(c=>`<div class="lbrow" style="${c.hidden?'opacity:.6':''}">
+      ${c.photo?`<img class="lav" src="${esc(c.photo)}">`:'<span class="lav"></span>'}
+      <div class="lnm">${esc(c.by)} <small>${esc(c.body)}</small></div>
+      <button onclick="hideC('${c.id}', ${c.hidden?'false':'true'})">${c.hidden?'ปลดซ่อน':'ซ่อน'}</button>
+    </div>`).join('');
+  }
+  async function hideC(id, on){
+    const { error } = await sb.rpc('hide_comment', { p_id:id, p_on:on });
+    if(error){ toast('ไม่สำเร็จ: '+error.message); return; }
+    toast(on?'ซ่อนคอมเมนต์แล้ว':'ปลดซ่อนแล้ว'); loadComments();
+  }
+  async function loadReports(){
+    document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on', b.dataset.s==='reports'));
+    $('grid').style.display='none'; const el=$('cmts'); el.style.display=''; el.innerHTML='<div class="empty">กำลังโหลด…</div>';
+    const { data, error } = await sb.rpc('ops_reports', { p_limit:80 });
+    if(error){ el.innerHTML=`<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
+    const rows=data||[];
+    if(!rows.length){ el.innerHTML='<div class="empty">ยังไม่มีลุคที่ถูกรายงาน</div>'; return; }
+    el.innerHTML = rows.map(r=>`<div class="lbrow">
+      ${r.photo?`<img class="lav" src="${esc(r.photo)}">`:'<span class="lav"></span>'}
+      <div class="lnm">${esc(r.creator)} <small>ถูกรายงาน ${r.reports} ครั้ง · ${esc((r.reasons||[]).join(', ')||'-')} · สถานะ ${esc(r.status)}</small></div>
+      <button class="danger" onclick="rep('${r.look}','hide')">ซ่อน</button>
+      <button onclick="rep('${r.look}','restore')">คืน</button>
+    </div>`).join('');
+  }
+  async function rep(look, act){
+    const { error } = act==='hide'
+      ? await sb.rpc('reject_look', { p_look:look, p_audit:{by:'ops_report'} })
+      : await sb.rpc('publish_look', { p_look:look });
+    if(error){ toast('ไม่สำเร็จ: '+error.message); return; }
+    toast(act==='hide'?'ซ่อนลุคแล้ว':'คืนลุคแล้ว'); loadReports();
+  }
+  async function reject(id){
+    if(!confirm('ซ่อนลุคนี้ออกจากฟีด?')) return;
+    const { error } = await sb.rpc('reject_look', { p_look:id, p_audit:{by:'ops'} });
+    if(error){ toast('ไม่สำเร็จ: '+error.message); return; }
+    toast('ซ่อนแล้ว'); load(STATUS);
+  }
+  document.addEventListener('DOMContentLoaded', ()=>load('published'));
+</script>
+<script src="ops-menu.js"></script>
+</body>
+</html>
