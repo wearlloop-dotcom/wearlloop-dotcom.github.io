@@ -121,6 +121,17 @@
   @media(max-width:400px){
     .kpis{grid-template-columns:1fr}
   }
+  /* รสนิยมลูกค้า */
+  .trend-g{margin:10px 0}
+  .trend-h{font-size:12px;letter-spacing:.5px;color:var(--muted);margin-bottom:6px}
+  .tchips{display:flex;flex-wrap:wrap;gap:6px}
+  .tchip{display:inline-flex;align-items:center;gap:6px;background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:4px 10px;font-size:13px}
+  .tchip i{display:inline-block;height:6px;border-radius:4px;background:var(--ink);opacity:.55}
+  .tchip .tn{color:var(--muted);font-size:12px}
+  .ct{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .ct-h{font-size:15px;margin-bottom:6px}
+  .ct-r{font-size:13px;margin:3px 0}
+  .ct-r b{display:inline-block;min-width:54px;color:var(--muted);font-weight:600}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
 <style>
@@ -236,6 +247,18 @@
   </div>
 
   <!-- setup guide -->
+  <div class="card">
+    <h2>รสนิยมลูกค้า · จากพฤติกรรมจริง</h2>
+    <p class="muted" style="font-size:14px;margin-bottom:10px">ลูกค้ากำลังสนใจอะไร (60 วัน) — ใช้วางแผนซื้อเข้า/จัดหน้าร้าน · ค้นหาลูกค้าเพื่อดู “คนนี้ชอบอะไร” ก่อนปิดการขาย</p>
+    <div id="tasteTrends"><div class="loading">กำลังโหลด…</div></div>
+    <div style="margin-top:16px">
+      <div class="field"><label for="cq">ค้นหาลูกค้า (ชื่อ / LINE UID / รหัสลิงก์)</label>
+        <input type="search" id="cq" placeholder="พิมพ์ชื่อหรือรหัส…" oninput="custSearch(this.value)" autocomplete="off"></div>
+      <div id="custResults" style="margin-top:8px"></div>
+      <div id="custTaste" style="margin-top:12px"></div>
+    </div>
+  </div>
+
   <div class="card">
     <h2>เชื่อมต่อบัญชีโฆษณา (ขั้นถัดไป)</h2>
     <p class="muted" style="font-size:14px;margin-bottom:8px">ตอนนี้กรอกตัวเลขด้วยมือไปก่อนได้ เมื่อทำตามขั้นตอนด้านล่างครบ ระบบจะดึงตัวเลขเข้ามาให้อัตโนมัติ</p>
@@ -522,6 +545,63 @@
     $('ai').innerHTML='';
   }
 
+  // ---- รสนิยมลูกค้า (preference_profile.sql ผ่าน ops-rpc) ----
+  const OCC_TH={wedding_guest:'งานแต่ง',work:'ทำงาน',cafe:'คาเฟ่',party:'ปาร์ตี้',dinner:'ดินเนอร์',
+    cocktail:'ค็อกเทล',graduation:'รับปริญญา',songkran:'สงกรานต์',newyear:'ปีใหม่',casual:'ลำลอง',
+    beach:'ทะเล',formal:'ทางการ',temple:'ทำบุญ',birthday:'วันเกิด'};
+  const occLbl=k=>OCC_TH[k]||String(k||'').replace(/_/g,' ');
+  const PB={entry:'คุ้มราคา',mid:'ระดับกลาง',premium:'พรีเมียม'};
+  function chipRow(title, arr, lblFn){
+    if(!arr||!arr.length) return '';
+    const max=arr[0].n||1;
+    const chips=arr.map(x=>`<span class="tchip"><b>${esc(lblFn?lblFn(x.k):x.k)}</b><i style="width:${Math.max(14,Math.round(x.n/max*60))}px"></i><span class="tn">${x.n}</span></span>`).join('');
+    return `<div class="trend-g"><div class="trend-h">${title}</div><div class="tchips">${chips}</div></div>`;
+  }
+  async function loadTasteTrends(){
+    const el=$('tasteTrends');
+    const { data, error } = await sb.rpc('taste_trends',{p_days:60});
+    if(error){ el.innerHTML='<div class="muted">โหลดไม่สำเร็จ (สิทธิ์ marketing/manager เท่านั้น)</div>'; return; }
+    const d=data||{};
+    if(!(d.n_events>0)){ el.innerHTML='<div class="muted">ยังไม่มีข้อมูลพฤติกรรมในช่วงนี้</div>'; return; }
+    el.innerHTML = chipRow('โอกาสที่สนใจ', d.occasions, occLbl)
+      + chipRow('แบรนด์', d.brands)
+      + chipRow('ประเภท', d.categories)
+      + chipRow('โทนสี', d.colors);
+  }
+  let _cqTimer=null;
+  function custSearch(q){
+    clearTimeout(_cqTimer);
+    const el=$('custResults');
+    if(!q||q.trim().length<2){ el.innerHTML=''; return; }
+    _cqTimer=setTimeout(async()=>{
+      const { data, error } = await sb.rpc('crm_customer_search',{p_q:q.trim(),p_limit:12});
+      if(error){ el.innerHTML='<div class="muted">ค้นไม่สำเร็จ</div>'; return; }
+      const rows=data||[];
+      if(!rows.length){ el.innerHTML='<div class="muted">ไม่พบลูกค้า</div>'; return; }
+      el.innerHTML=rows.map(r=>`<button class="btn ghost sm" style="margin:3px 4px 0 0" onclick="custTaste('${r.id}')">${esc(r.name)} · ${esc(r.tier||'')} · ${r.rentals||0} ครั้ง</button>`).join('');
+    },280);
+  }
+  async function custTaste(id){
+    const el=$('custTaste');
+    el.innerHTML='<div class="loading">กำลังโหลด…</div>';
+    const { data, error } = await sb.rpc('customer_taste_admin',{p_customer:id});
+    if(error||!data){ el.innerHTML='<div class="muted">โหลดโปรไฟล์ไม่สำเร็จ</div>'; return; }
+    const p=data.profile||{}, tt=data.taste||{};
+    const top=(dict,lblFn,n)=>Object.entries(dict||{}).sort((a,b)=>b[1]-a[1]).slice(0,n||4)
+      .map(([k])=>esc(lblFn?lblFn(k):k)).join(' · ')||'—';
+    const recent=(data.recent||[]).map(r=>esc(r.code)).slice(0,8).join(' · ')||'—';
+    el.innerHTML=`<div class="ct">
+      <div class="ct-h">${esc(p.name||'ลูกค้า')} <span class="muted">· ${esc(p.tier||'')} · เช่า ${p.rentals||0} ครั้ง · ดู 30 วัน ${data.views_30d||0} ครั้ง</span></div>
+      <div class="ct-r"><b>โอกาส</b> ${top(tt.occasions,occLbl)}</div>
+      <div class="ct-r"><b>แบรนด์</b> ${top(tt.brands)}</div>
+      <div class="ct-r"><b>ประเภท</b> ${top(tt.categories)}</div>
+      <div class="ct-r"><b>โทนสี</b> ${top(tt.colors)}</div>
+      <div class="ct-r"><b>ราคา</b> ${top(tt.price_bands,k=>PB[k]||k)}</div>
+      <div class="ct-r"><b>ดูล่าสุด</b> <span class="muted">${recent}</span></div>
+      ${(tt.n||0)<5?'<div class="muted" style="margin-top:6px">* ข้อมูลยังน้อย รสนิยมอาจยังไม่นิ่ง</div>':''}
+    </div>`;
+  }
+
   // init
   (function init(){
     $('f_date').value=isoToday();
@@ -531,6 +611,7 @@
     loadStrip();
     loadSummary();
     loadRows();
+    loadTasteTrends();
   })();
 </script>
 <script src="ops-menu.js"></script>
