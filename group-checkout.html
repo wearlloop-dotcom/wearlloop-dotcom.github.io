@@ -203,25 +203,22 @@
 </style>
 </head>
 <body>
-<header><div class="contain hbar">
-  <div class="logo">LLOOP</div>
-  <a class="back" href="family.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> ครอบครัว &amp; กลุ่ม</a>
-</div></header>
+<header class="lloop-topbar" data-back="family.html" data-back-th="ครอบครัว &amp; กลุ่ม" data-back-en="Family &amp; groups"></header>
 
 <div class="contain">
   <div class="hero">
     <div class="eyebrow">group booking</div>
-    <h1 class="htitle">จองชุดทั้งกลุ่ม</h1>
-    <p class="hsub">เลือกชุดเข้าตีมให้ทุกคนในกลุ่ม แล้วจองพร้อมกันในออเดอร์เดียว — ส่งกล่องเดียว บิลรวมที่หัวหน้ากลุ่ม</p>
+    <h1 class="htitle" data-i18n="Book the whole group">จองชุดทั้งกลุ่ม</h1>
+    <p class="hsub" data-i18n="Pick on-theme outfits for everyone in the group and book together in one order — one box, one bill to the group lead.">เลือกชุดเข้าตีมให้ทุกคนในกลุ่ม แล้วจองพร้อมกันในออเดอร์เดียว — ส่งกล่องเดียว บิลรวมที่หัวหน้ากลุ่ม</p>
   </div>
 
   <!-- step indicator -->
   <div class="steps" id="steps">
-    <div class="step on" data-s="1"><span class="sdot">1</span>เลือกโอกาส</div>
+    <div class="step on" data-s="1"><span class="sdot">1</span><span data-i18n="Choose occasion">เลือกโอกาส</span></div>
     <span class="sline"></span>
-    <div class="step" data-s="2"><span class="sdot">2</span>จัดชุดให้แต่ละคน</div>
+    <div class="step" data-s="2"><span class="sdot">2</span><span data-i18n="Style each person">จัดชุดให้แต่ละคน</span></div>
     <span class="sline"></span>
-    <div class="step" data-s="3"><span class="sdot">3</span>ยืนยัน &amp; ชำระ</div>
+    <div class="step" data-s="3"><span class="sdot">3</span><span data-i18n="Confirm &amp; pay">ยืนยัน &amp; ชำระ</span></div>
   </div>
 
   <!-- STEP 1: occasion / date -->
@@ -231,24 +228,24 @@
       <div class="seccap" id="grpCap"></div></div>
     </div>
     <div class="toolbar">
-      <div class="fld" style="max-width:210px"><label>งาน / โอกาส</label>
+      <div class="fld" style="max-width:210px"><label data-i18n="Occasion">งาน / โอกาส</label>
         <select id="t_occ">
-          <option value="wedding_guest">ไปงานแต่ง</option>
-          <option value="family_portrait">ถ่ายรูปครอบครัว</option>
-          <option value="songkran">สงกรานต์</option>
-          <option value="dinner">ดินเนอร์</option>
+          <option value="wedding_guest" data-i18n="Wedding guest">ไปงานแต่ง</option>
+          <option value="family_portrait" data-i18n="Family portrait">ถ่ายรูปครอบครัว</option>
+          <option value="songkran" data-i18n="Songkran">สงกรานต์</option>
+          <option value="dinner" data-i18n="Dinner">ดินเนอร์</option>
         </select></div>
-      <div class="fld" style="max-width:160px"><label>วันใช้งาน</label><input id="t_date" type="date"></div>
-      <button class="btn" id="suggestBtn">จัดชุดเข้าตีม</button>
+      <div class="fld" style="max-width:160px"><label data-i18n="Date">วันใช้งาน</label><input id="t_date" type="date"></div>
+      <button class="btn" id="suggestBtn" data-i18n="Style the theme">จัดชุดเข้าตีม</button>
     </div>
 
     <!-- theme-color source selector -->
     <div class="themesrc">
-      <div class="tslabel">โทนสีของตีม</div>
+      <div class="tslabel" data-i18n="Theme colour">โทนสีของตีม</div>
       <div class="tsmodes">
-        <button class="tsmode" id="tsm-auto" onclick="setThemeSrc('auto')"><b>ให้ระบบเลือกให้</b><span>คัดจาก personal color ของกลุ่ม</span></button>
-        <button class="tsmode" id="tsm-season" onclick="setThemeSrc('season')"><b>เลือกโทนเอง</b><span>เลือกฤดูที่ใช่ของกลุ่ม</span></button>
-        <button class="tsmode" id="tsm-venue" onclick="setThemeSrc('venue')"><b>ตามสถานที่</b><span>AI แนะนำสีจากบรรยากาศงาน</span></button>
+        <button class="tsmode" id="tsm-auto" onclick="setThemeSrc('auto')"><b data-i18n="Let us choose">ให้ระบบเลือกให้</b><span data-i18n="Picked from the group's personal colours">คัดจาก personal color ของกลุ่ม</span></button>
+        <button class="tsmode" id="tsm-season" onclick="setThemeSrc('season')"><b data-i18n="Choose the tone">เลือกโทนเอง</b><span data-i18n="Pick the season that suits the group">เลือกฤดูที่ใช่ของกลุ่ม</span></button>
+        <button class="tsmode" id="tsm-venue" onclick="setThemeSrc('venue')"><b data-i18n="By venue">ตามสถานที่</b><span data-i18n="AI suggests colours from the setting">AI แนะนำสีจากบรรยากาศงาน</span></button>
       </div>
       <div class="tsdetail" id="tsDetail"></div>
     </div>
@@ -257,8 +254,8 @@
   <!-- STEP 2: assign looks -->
   <div class="sec hide" id="assignSec">
     <div class="sechead">
-      <div><div class="sectitle">เลือกชุดให้แต่ละคน</div>
-      <div class="seccap">แตะเลือก 1 ชุดต่อคน — สไตลิสต์คัด “ตัวที่เข้าตีม + พอดีตัว ที่ว่างจริงในวันนั้น” มาให้</div></div>
+      <div><div class="sectitle" data-i18n="Choose an outfit for each person">เลือกชุดให้แต่ละคน</div>
+      <div class="seccap" data-i18n="Tap to pick one outfit per person — the stylist curates the on-theme, best-fitting piece that's actually free that day.">แตะเลือก 1 ชุดต่อคน — สไตลิสต์คัด “ตัวที่เข้าตีม + พอดีตัว ที่ว่างจริงในวันนั้น” มาให้</div></div>
     </div>
     <div id="assignBody"></div>
   </div>
@@ -266,13 +263,13 @@
   <!-- STEP 3 / result -->
   <div class="sec hide" id="resultSec"><div id="resultBody"></div></div>
 
-  <div class="demo">หน้าตัวอย่างการจองกลุ่ม</div>
+  <div class="demo" data-i18n="Sample group-booking page">หน้าตัวอย่างการจองกลุ่ม</div>
 </div>
 
 <!-- sticky summary -->
 <div class="summary" id="summary"><div class="inner">
-  <div class="scount" id="scount">เลือกแล้ว <b>0</b> ชุด</div>
-  <button class="btn sage sbtn" id="bookBtn" disabled>ยืนยันจองทั้งกลุ่ม</button>
+  <div class="scount" id="scount"><span data-i18n="Selected">เลือกแล้ว</span> <b>0</b> <span data-i18n="pcs">ชุด</span></div>
+  <button class="btn sage sbtn" id="bookBtn" disabled data-i18n="Confirm group booking">ยืนยันจองทั้งกลุ่ม</button>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -284,6 +281,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=38"></script>
 <script src="api.js?v=54"></script>
+<script src="nav.js?v=1"></script>
 <script>
 // ============================================================
 //  group-checkout.html — จองชุดทั้งกลุ่มในออเดอร์เดียว
@@ -291,8 +289,8 @@
 // ============================================================
 const $ = s => document.querySelector(s);
 const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
-const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู้ใหญ่', senior:'ผู้ใหญ่ขึ้นวัย' };
-const SEASON_TH = { autumn:'ออทัม', winter:'วินเทอร์', spring:'สปริง', summer:'ซัมเมอร์' };
+const AGE_TH = { kid:NAV.t('เด็ก','Child'), teen:NAV.t('วัยรุ่น','Teen'), adult:NAV.t('ผู้ใหญ่','Adult'), senior:NAV.t('ผู้ใหญ่ขึ้นวัย','Senior') };
+const SEASON_TH = { autumn:NAV.t('ออทัม','Autumn'), winter:NAV.t('วินเทอร์','Winter'), spring:NAV.t('สปริง','Spring'), summer:NAV.t('ซัมเมอร์','Summer') };
 const SEASON_HEX = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };
 const SEASON_ORDER = ['autumn','winter','spring','summer'];
 // เฉดสีของตีม (เลือกได้หลายสี) — ต้องตรงกับ family.html ทุกประการ
@@ -336,10 +334,10 @@ let CUSTOMER = null;       // {id,...}
 let AIQ = null;            // โควต้า AI วิเคราะห์สถานที่ (ก้อนเดียวกับ AI สไตลิสต์หน้าแรก)
 async function refreshAIQ(preset){
   const h=document.getElementById('aiqHint'); if(!h) return;
-  if(!LIVE){ h.textContent='โหมดเดโม · ของจริงนับรวมกับโควต้า AI หน้าแรก'; return; }
+  if(!LIVE){ h.textContent=NAV.t('โหมดเดโม · ของจริงนับรวมกับโควต้า AI หน้าแรก','Demo mode · live usage counts against the home-page AI quota'); return; }
   if(preset!=null){ AIQ=preset; }
   else { try{ AIQ = await window.API.stylistQuota(); }catch(_e){ AIQ=null; } }
-  h.textContent = (AIQ!=null) ? `AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)` : '';
+  h.textContent = (AIQ!=null) ? NAV.t(`AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)`,`AI venue analysis · ${AIQ} left (shares the home-page AI stylist quota)`) : '';
 }
 let GROUP = null;          // {group_id,name,kind,my_role,members:[...]}
 let THEME = null;          // ผลจาก groupThemeSuggest
@@ -461,9 +459,9 @@ async function boot(){
 
   // ไม่มี group id ใน URL → empty/edge
   if(!GROUP_ID){
-    edgeState('ยังไม่ได้เลือกกลุ่ม',
-      'เปิดหน้านี้จากหน้า “ครอบครัว & กลุ่ม” โดยเลือกกลุ่มที่อยากจองให้ทั้งกลุ่มก่อนนะคะ',
-      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    edgeState(NAV.t('ยังไม่ได้เลือกกลุ่ม','No group selected yet'),
+      NAV.t('เปิดหน้านี้จากหน้า “ครอบครัว & กลุ่ม” โดยเลือกกลุ่มที่อยากจองให้ทั้งกลุ่มก่อนนะคะ','Open this page from "Family & groups" and choose the group you want to book for first.'),
+      NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
     return;
   }
 
@@ -484,23 +482,23 @@ async function boot(){
     try{ const g = await window.API.myGroups(CUSTOMER); groups = (g && g.data) || []; }catch(e){}
     GROUP = groups.find(x => String(x.group_id)===String(GROUP_ID)) || null;
     if(!GROUP){
-      edgeState('ไม่พบกลุ่มนี้',
-        'อาจเป็นเพราะคุณยังไม่ได้เป็นสมาชิกกลุ่มนี้ หรือกลุ่มถูกลบไปแล้ว',
-        'ไปหน้าครอบครัว & กลุ่ม','family.html');
+      edgeState(NAV.t('ไม่พบกลุ่มนี้','Group not found'),
+        NAV.t('อาจเป็นเพราะคุณยังไม่ได้เป็นสมาชิกกลุ่มนี้ หรือกลุ่มถูกลบไปแล้ว','You may not be a member of this group yet, or the group has been deleted.'),
+        NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
       return;
     }
   } else {
     // โหมดพรีวิว / mock
     GROUP = JSON.parse(JSON.stringify(MOCK_GROUP));
-    $('.demo').innerHTML = 'โหมดตัวอย่าง · เข้าผ่าน LINE เพื่อจองจริง';
+    $('.demo').innerHTML = NAV.t('โหมดตัวอย่าง · เข้าผ่าน LINE เพื่อจองจริง','Sample mode · open via LINE to book for real');
   }
 
   // กลุ่มไม่มีสมาชิกอื่น
   const active = (GROUP.members||[]).filter(m => (m.status||'active')==='active');
   if(active.length<2){
-    edgeState('กลุ่มนี้ยังมีสมาชิกไม่พอ',
-      'การจองทั้งกลุ่มต้องมีสมาชิกอย่างน้อย 2 คน — กลับไปเพิ่มคนในครอบครัวหรือชวนเพื่อนเข้ากลุ่มก่อนได้เลยค่ะ',
-      'ไปเพิ่มสมาชิก','family.html');
+    edgeState(NAV.t('กลุ่มนี้ยังมีสมาชิกไม่พอ','Not enough members in this group'),
+      NAV.t('การจองทั้งกลุ่มต้องมีสมาชิกอย่างน้อย 2 คน — กลับไปเพิ่มคนในครอบครัวหรือชวนเพื่อนเข้ากลุ่มก่อนได้เลยค่ะ','Group booking needs at least 2 members — go back to add family members or invite friends into the group first.'),
+      NAV.t('ไปเพิ่มสมาชิก','Add members'),'family.html');
     return;
   }
 
@@ -571,7 +569,7 @@ function renderThemeSrc(){
       <button class="schip ${THEMESRC.season===s?'on':''}" onclick="setSeason('${s}')">
         <span class="sdotc" style="background:${SEASON_HEX[s]}"></span>${SEASON_TH[s]}</button>`).join('')}</div>
       <div class="shadewrap">
-        <div class="shadehd">เฉดสีของตีม · เลือกได้หลายสี</div>
+        <div class="shadehd">${NAV.t('เฉดสีของตีม · เลือกได้หลายสี','Theme shades · pick more than one')}</div>
         <div class="shadegrid">${SHADES.map(([nm,hex])=>`
           <button class="swatch ${sel.indexOf(hex)>=0?'on':''}" style="background:${hex}" title="${esc(nm)}" aria-label="${esc(nm)}" onclick="toggleShade('${hex}')">
             <span class="chk"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>
@@ -579,9 +577,9 @@ function renderThemeSrc(){
       </div>`;
   } else if(THEMESRC.mode==='venue'){
     d.innerHTML = `<div class="venuefld">
-      <input id="ts_venue" type="text" placeholder="เช่น ริมทะเล, งานวัด, โรงแรมหรู" value="${esc(THEMESRC.venue||'')}" oninput="venueInput()" autocomplete="off">
-      <div class="venuehint">พิมพ์แล้วเลือกสถานที่จริงจาก Google</div>
-      <div class="venuehint">AI จะแนะนำพาเลตสีจากบรรยากาศของสถานที่ แล้วจัดชุดให้เข้ากับพาเลตนั้น</div>
+      <input id="ts_venue" type="text" placeholder="${NAV.t('เช่น ริมทะเล, งานวัด, โรงแรมหรู','e.g. seaside, temple fair, luxury hotel')}" value="${esc(THEMESRC.venue||'')}" oninput="venueInput()" autocomplete="off">
+      <div class="venuehint">${NAV.t('พิมพ์แล้วเลือกสถานที่จริงจาก Google','Type and pick a real place from Google')}</div>
+      <div class="venuehint">${NAV.t('AI จะแนะนำพาเลตสีจากบรรยากาศของสถานที่ แล้วจัดชุดให้เข้ากับพาเลตนั้น','AI suggests a colour palette from the setting, then styles outfits to match it')}</div>
       <div class="venuehint" id="aiqHint"></div>
     </div>`;
     refreshAIQ();
@@ -593,10 +591,10 @@ function renderThemeSrc(){
 }
 
 function renderHeader(){
-  $('#grpName').textContent = GROUP.name || 'กลุ่มของฉัน';
+  $('#grpName').textContent = GROUP.name || NAV.t('กลุ่มของฉัน','My group');
   const active = (GROUP.members||[]).filter(m=>(m.status||'active')==='active');
-  const role = GROUP.my_role==='owner' ? 'คุณเป็นหัวหน้ากลุ่ม (เป็นผู้ชำระ)' : 'หัวหน้ากลุ่มจะเป็นผู้ชำระ';
-  $('#grpCap').textContent = `${active.length} คน · ${role}`;
+  const role = GROUP.my_role==='owner' ? NAV.t('คุณเป็นหัวหน้ากลุ่ม (เป็นผู้ชำระ)','You are the group lead (the payer)') : NAV.t('หัวหน้ากลุ่มจะเป็นผู้ชำระ','The group lead will pay');
+  $('#grpCap').textContent = `${active.length} ${NAV.t('คน','people')} · ${role}`;
 }
 
 function setStep(n){
@@ -622,14 +620,14 @@ function edgeState(title, body, btnLabel, href){
 //  STEP 2 — ขอ AI จัดตีม แล้วให้เลือก 1 ชุด/คน
 // ============================================================
 async function onSuggest(){
-  const btn = $('#suggestBtn'); btn.disabled = true; btn.textContent = 'กำลังจัดชุด…';
+  const btn = $('#suggestBtn'); btn.disabled = true; btn.textContent = NAV.t('กำลังจัดชุด…','Styling…');
   const occ = $('#t_occ').value, from = $('#t_date').value, to = $('#t_date').value;
   const mode = THEMESRC.mode;
   const venue = (THEMESRC.venue||'').trim();
   // venue mode ต้องกรอกสถานที่ก่อน
   if(mode==='venue' && !venue){
-    btn.disabled=false; btn.textContent='จัดชุดเข้าตีม';
-    alert('พิมพ์สถานที่/บรรยากาศงานก่อนนะคะ เช่น ริมทะเล, งานวัด, โรงแรมหรู');
+    btn.disabled=false; btn.textContent=NAV.t('จัดชุดเข้าตีม','Style the theme');
+    alert(NAV.t('พิมพ์สถานที่/บรรยากาศงานก่อนนะคะ เช่น ริมทะเล, งานวัด, โรงแรมหรู','Please enter a venue or setting first — e.g. seaside, temple fair, luxury hotel.'));
     return;
   }
   try{
@@ -647,7 +645,7 @@ async function onSuggest(){
           const s = await window.API.stylist({ venue, place: THEMESRC.place||null, occasion: occ }, 'th');
           if(s && s.error==='no_quota'){
             refreshAIQ(0);
-            alert('โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) — จะใช้พาเลตจากชื่อสถานที่แทนนะคะ');
+            alert(NAV.t('โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) — จะใช้พาเลตจากชื่อสถานที่แทนนะคะ','AI venue-analysis quota is used up (shared with the home-page AI stylist) — we\'ll use a palette from the venue name instead.'));
           } else if(s && typeof s.remaining==='number'){ refreshAIQ(s.remaining); }
           palette = ((s && s.recommended_colors) || []).map(c=>c.hex).filter(Boolean);
           venuePhotoTip = (s && (s.photo_tip || s.aesthetics)) || '';
@@ -655,7 +653,7 @@ async function onSuggest(){
         if(!palette.length) palette = mockVenuePalette(venue); // กันพลาด
       } else {
         palette = mockVenuePalette(venue);
-        venuePhotoTip = 'โทนสีกลมกลืนกับ'+venue+' ขึ้นกล้องสวยทั้งกลุ่ม';
+        venuePhotoTip = NAV.t('โทนสีกลมกลืนกับ'+venue+' ขึ้นกล้องสวยทั้งกลุ่ม','Tones that blend with '+venue+' — the whole group photographs beautifully');
       }
       opts = { palette };
     }
@@ -663,7 +661,7 @@ async function onSuggest(){
     if(LIVE){
       const r = await window.API.groupThemeSuggest(GROUP_ID, CUSTOMER, occ, from, to, opts);
       THEME = (r && r.data) || null;
-      if(!THEME){ alert('ยังจัดชุดให้ไม่ได้ในตอนนี้ ลองใหม่อีกครั้งนะคะ'); return; }
+      if(!THEME){ alert(NAV.t('ยังจัดชุดให้ไม่ได้ในตอนนี้ ลองใหม่อีกครั้งนะคะ','Can\'t style outfits right now — please try again.')); return; }
       // ผูก mode/venue ที่ผู้ใช้เลือกไว้เพื่อแสดงผล label (กรณี backend ไม่คืนมา)
       THEME.mode = THEME.mode || mode;
       if(mode==='venue' && !THEME.venue) THEME.venue = venue;
@@ -675,8 +673,8 @@ async function onSuggest(){
     }
     // โหมด season ที่เลือกเฉดเอง (palette แต่ไม่ได้เลือกฤดู) → ล้าง season เพื่อให้ป้ายแสดง "เฉดที่เลือก"
     if(THEME && mode==='season' && opts && opts.palette) THEME.season = null;
-  }catch(e){ alert('เกิดข้อผิดพลาด ลองใหม่อีกครั้งนะคะ'); return; }
-  finally{ btn.disabled=false; btn.textContent='จัดชุดเข้าตีม'; }
+  }catch(e){ alert(NAV.t('เกิดข้อผิดพลาด ลองใหม่อีกครั้งนะคะ','Something went wrong — please try again.')); return; }
+  finally{ btn.disabled=false; btn.textContent=NAV.t('จัดชุดเข้าตีม','Style the theme'); }
 
   SEL = {};
   renderAssign();
@@ -691,14 +689,14 @@ function themeChip(season){
   const palette = (THEME && THEME.palette && THEME.palette.length) ? THEME.palette : null;
   let label, dots;
   if(mode==='venue'){
-    label = `พาเลตจาก: ${esc(THEME.venue||'สถานที่')}`;
+    label = `${NAV.t('พาเลตจาก: ','Palette from: ')}${esc(THEME.venue||NAV.t('สถานที่','venue'))}`;
     dots = (palette || [SEASON_HEX[season]]).slice(0,5);
   } else if(mode==='season'){
     // ถ้าเลือกเฉดเอง (มีพาเลต แต่ไม่มีฤดู) → ป้าย "เฉดที่เลือก"
-    label = (palette && !THEME.season) ? `เฉดที่เลือก · ${palette.length} สี` : `โทนที่เลือก · ${SEASON_TH[season]||season}`;
+    label = (palette && !THEME.season) ? `${NAV.t('เฉดที่เลือก · ','Chosen shades · ')}${palette.length} ${NAV.t('สี','colours')}` : `${NAV.t('โทนที่เลือก · ','Chosen tone · ')}${SEASON_TH[season]||season}`;
     dots = (palette || [SEASON_HEX[season]||'#B07D4F']).slice(0,5);
   } else {
-    label = `พาเลตตีมร่วม · โทน${SEASON_TH[season]||season}`;
+    label = `${NAV.t('พาเลตตีมร่วม · โทน','Shared theme palette · ')}${SEASON_TH[season]||season}`;
     dots = palette || [SEASON_HEX[season]||'#B07D4F'];
   }
   const dotHtml = dots.map(h=>`<span class="pdot" style="background:${esc(h)}"></span>`).join('');
@@ -714,18 +712,18 @@ function renderAssign(){
   const anyPicks = mems.some(m => (m.picks||[]).length>0 && !m.needs_sourcing);
   if(!anyPicks){
     body.innerHTML = `<div class="empty" style="padding:26px">
-      <h4>ยังไม่มีชุดที่ว่างในวันนี้</h4>
-      <p>ยังไม่มีชุดเข้าตีมที่ว่างในวันที่เลือก — ลองเปลี่ยนวัน หรือทีมจะช่วยจัดหาเพิ่มให้</p></div>`;
+      <h4>${NAV.t('ยังไม่มีชุดที่ว่างในวันนี้','No outfits free on this date')}</h4>
+      <p>${NAV.t('ยังไม่มีชุดเข้าตีมที่ว่างในวันที่เลือก — ลองเปลี่ยนวัน หรือทีมจะช่วยจัดหาเพิ่มให้','No on-theme outfits are free on the chosen date — try another date, or the team can help source more.')}</p></div>`;
     $('#summary').classList.remove('show');
     return;
   }
 
   let html = `<div class="paymode">
-      <button class="pm ${PAYMODE==='host'?'on':''}" onclick="setPayMode('host')"><b>หัวหน้ากลุ่มจ่ายรวม</b><span>บิลเดียว ส่งรวม/แยกได้</span></button>
-      <button class="pm ${PAYMODE==='split'?'on':''}" onclick="setPayMode('split')"><b>ต่างคนต่างจ่าย</b><span>เพื่อนจ่ายเอง · ส่งที่ตัวเอง</span></button>
+      <button class="pm ${PAYMODE==='host'?'on':''}" onclick="setPayMode('host')"><b>${NAV.t('หัวหน้ากลุ่มจ่ายรวม','Group lead pays all')}</b><span>${NAV.t('บิลเดียว ส่งรวม/แยกได้','One bill · ship together or separately')}</span></button>
+      <button class="pm ${PAYMODE==='split'?'on':''}" onclick="setPayMode('split')"><b>${NAV.t('ต่างคนต่างจ่าย','Everyone pays their own')}</b><span>${NAV.t('เพื่อนจ่ายเอง · ส่งที่ตัวเอง','Friends pay themselves · ship to each')}</span></button>
     </div>
     ${themeChip(season)}
-    ${(THEME&&THEME.photo_tip)?`<div class="phototip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M9 6l1.5-2h3L15 6"/></svg><span>ถ่ายรูปสวยที่นี่ · ${esc(THEME.photo_tip)}</span></div>`:''}`;
+    ${(THEME&&THEME.photo_tip)?`<div class="phototip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M9 6l1.5-2h3L15 6"/></svg><span>${NAV.t('ถ่ายรูปสวยที่นี่ · ','Great photo spot · ')}${esc(THEME.photo_tip)}</span></div>`:''}`;
   mems.forEach(m=>{
     const id = m.customer_id;
     const sub = `${m.relation || ''}${m.relation?' · ':''}${AGE_TH[m.age_band]||m.age_band||''}`;
@@ -738,13 +736,13 @@ function renderAssign(){
     const picks = m.picks || [];
     if(m.needs_sourcing || picks.length===0){
       html += `<div class="sourcing"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>
-        ยังไม่มีชุด${AGE_TH[m.age_band]||''}ที่ว่างในวันนี้ — ทีมจะช่วย <b>จัดหาเพิ่ม</b>ให้เข้าตีมเดียวกัน (ไม่รวมในออเดอร์นี้)</div>`;
+        ${NAV.t('ยังไม่มีชุด'+(AGE_TH[m.age_band]||'')+'ที่ว่างในวันนี้ — ทีมจะช่วย ','No '+(AGE_TH[m.age_band]||'')+' outfit free on this date — the team can ')}<b>${NAV.t('จัดหาเพิ่ม','source more')}</b>${NAV.t('ให้เข้าตีมเดียวกัน (ไม่รวมในออเดอร์นี้)',' to match the same theme (not included in this order)')}</div>`;
     } else {
       html += `<div class="picks">${picks.map(p=>`
         <div class="pick" data-w="${esc(id)}" data-code="${esc(p.code)}" onclick="pickOne('${esc(id)}','${esc(p.code)}')">
           <div class="swatch" style="background:${esc(p.color_hex||'#E7E2DA')}">
-            ${p.on_theme?'<span class="ontheme">เข้าตีม</span>':'<span></span>'}
-            ${p.fit!=null?`<span class="fitpill">พอดี ${p.fit}%</span>`:'<span></span>'}
+            ${p.on_theme?'<span class="ontheme">'+NAV.t('เข้าตีม','On theme')+'</span>':'<span></span>'}
+            ${p.fit!=null?`<span class="fitpill">${NAV.t('พอดี ','Fit ')}${p.fit}%</span>`:'<span></span>'}
           </div>
           <div class="pmeta"><div class="pn">${esc(p.name)}</div><div class="pc">${esc(p.color_name||'')}${p.color_name?' · ':''}${esc(p.code)}</div></div>
         </div>`).join('')}</div>`;
@@ -753,15 +751,15 @@ function renderAssign(){
       if(PAYMODE==='split'){
         html += `<div class="shipctl" id="ship-${esc(id)}">
           <div class="selfnote"><svg viewBox="0 0 24 24"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
-            ส่งไปที่อยู่ของ <b>${esc(m.name)}</b> · ${esc(m.name)} จ่ายเอง</div>
+            ${NAV.t('ส่งไปที่อยู่ของ ','Ships to ')}<b>${esc(m.name)}</b>${NAV.t('','\'s address')} · ${esc(m.name)} ${NAV.t('จ่ายเอง','pays')}</div>
         </div>`;
       } else {
         html += `<div class="shipctl" id="ship-${esc(id)}">
           <div class="shiprow">
             <div class="shipopt ${sp.separate?'':'on'}" id="shopt0-${esc(id)}" onclick="setShip('${esc(id)}',false)">
-              <span class="dot"></span><span><b>ส่งรวมกล่องหลัก</b><span>ไปพร้อมชุดอื่น ประหยัดค่าส่ง</span></span></div>
+              <span class="dot"></span><span><b>${NAV.t('ส่งรวมกล่องหลัก','In the main box')}</b><span>${NAV.t('ไปพร้อมชุดอื่น ประหยัดค่าส่ง','Ships with the others · saves on delivery')}</span></span></div>
             <div class="shipopt ${sp.separate?'on':''}" id="shopt1-${esc(id)}" onclick="setShip('${esc(id)}',true)">
-              <span class="dot"></span><span><b>ส่งแยก</b><span>เลือกกล่อง/ที่อยู่ปลายทางได้</span></span></div>
+              <span class="dot"></span><span><b>${NAV.t('ส่งแยก','Ship separately')}</b><span>${NAV.t('เลือกกล่อง/ที่อยู่ปลายทางได้','Choose box / delivery address')}</span></span></div>
           </div>
           <div class="boxsel" id="boxsel-${esc(id)}"></div>
         </div>`;
@@ -786,7 +784,7 @@ window.pickOne = function(wearer, code){
     });
     look.classList.toggle('has', !!SEL[wearer]);
     const lp = document.getElementById('lpick-'+wearer);
-    if(lp) lp.textContent = SEL[wearer] ? 'เลือกแล้ว' : '';
+    if(lp) lp.textContent = SEL[wearer] ? NAV.t('เลือกแล้ว','Selected') : '';
     // โชว์ตัวเลือกวิธีส่งเมื่อเลือกชุดแล้ว
     const sc = document.getElementById('ship-'+wearer);
     if(sc) sc.classList.toggle('show', !!SEL[wearer]);
@@ -823,7 +821,7 @@ window.destInput = function(n){
 window.setPayMode = function(mode){
   if(PAYMODE===mode) return;
   PAYMODE = mode;
-  if(mode==='split'){ SHIP={}; DEST={}; }   // โหมดแยกจ่าย = แต่ละคนส่งที่ตัวเอง ไม่ใช้กล่องรวม
+  // โหมดแยกจ่าย = แต่ละคนส่งที่ตัวเอง · ซ่อนการตั้งค่ากล่องรวมไว้เฉย ๆ (ไม่ลบ SHIP/DEST ทิ้ง สลับกลับมาได้เหมือนเดิม)
   renderAssign();
 };
 
@@ -838,22 +836,22 @@ function renderShipping(){
     if(!SEL[id] || !sp || !sp.separate){ host.innerHTML=''; return; }
     const chips = boxes.map(n=>{
       const rc = DEST[n] && DEST[n].recipient;
-      return `<button class="boxchip ${sp.box===n?'on':''}" onclick="setBox('${esc(id)}',${n})">กล่อง ${n}${rc?(' · '+esc(rc)):''}</button>`;
+      return `<button class="boxchip ${sp.box===n?'on':''}" onclick="setBox('${esc(id)}',${n})">${NAV.t('กล่อง ','Box ')}${n}${rc?(' · '+esc(rc)):''}</button>`;
     }).join('');
-    host.innerHTML = `<div class="boxlabel">ส่งไปกล่อง:</div><div class="boxchips">${chips}
-      <button class="boxchip add" onclick="addBox('${esc(id)}')">+ กล่องใหม่</button></div>`;
+    host.innerHTML = `<div class="boxlabel">${NAV.t('ส่งไปกล่อง:','Ship to box:')}</div><div class="boxchips">${chips}
+      <button class="boxchip add" onclick="addBox('${esc(id)}')">${NAV.t('+ กล่องใหม่','+ New box')}</button></div>`;
   });
   // แผงปลายทาง: 1 การ์ดต่อกล่องที่ใช้งาน (ที่อยู่ใช้ร่วมทั้งกล่อง)
   const dp = document.getElementById('destPanel');
   if(dp){
     const nameOf = id => { const x=mems.find(z=>String(z.customer_id)===String(id)); return x?x.name:id; };
     dp.innerHTML = boxes.length===0 ? '' : `<div class="destwrap">
-      <div class="desthd">ที่อยู่ปลายทางของกล่องส่งแยก</div>
+      <div class="desthd">${NAV.t('ที่อยู่ปลายทางของกล่องส่งแยก','Delivery address for separate boxes')}</div>
       ${boxes.map(n=>{
         const d = DEST[n]||{}; const who = boxMembers(n).map(nameOf).join(', ');
-        return `<div class="destcard"><div class="dn">กล่องที่ ${n} <span class="dwho">${esc(who)}</span></div>
-          <input id="drcpt-${n}" placeholder="ชื่อผู้รับ" value="${esc(d.recipient||'')}" oninput="destInput(${n})">
-          <textarea id="daddr-${n}" rows="2" placeholder="ที่อยู่จัดส่ง" oninput="destInput(${n})">${esc(d.address||'')}</textarea>
+        return `<div class="destcard"><div class="dn">${NAV.t('กล่องที่ ','Box ')}${n} <span class="dwho">${esc(who)}</span></div>
+          <input id="drcpt-${n}" placeholder="${NAV.t('ชื่อผู้รับ','Recipient name')}" value="${esc(d.recipient||'')}" oninput="destInput(${n})">
+          <textarea id="daddr-${n}" rows="2" placeholder="${NAV.t('ที่อยู่จัดส่ง','Delivery address')}" oninput="destInput(${n})">${esc(d.address||'')}</textarea>
         </div>`;
       }).join('')}</div>`;
   }
@@ -862,7 +860,7 @@ function renderShipping(){
 function refreshSummary(){
   const n = Object.keys(SEL).length;
   const p = discPct(n);
-  $('#scount').innerHTML = `เลือกแล้ว <b>${n}</b> ชุด${p>0?` · <span style="color:var(--sage)">ลดแพคเกจ ${p}%</span>`:''} · ${PAYMODE==='split'?'ต่างคนต่างจ่าย':'ออเดอร์เดียว'}`;
+  $('#scount').innerHTML = `${NAV.t('เลือกแล้ว ','Selected ')}<b>${n}</b> ${NAV.t('ชุด','pcs')}${p>0?` · <span style="color:var(--sage)">${NAV.t('ลดแพคเกจ ','Package discount ')}${p}%</span>`:''} · ${PAYMODE==='split'?NAV.t('ต่างคนต่างจ่าย','split pay'):NAV.t('ออเดอร์เดียว','one order')}`;
   $('#bookBtn').disabled = n===0;
   $('#summary').classList.toggle('show', true);
 }
@@ -880,7 +878,7 @@ async function onBook(){
     parcel:'box_'+n, recipient:(DEST[n]&&DEST[n].recipient)||'', address:(DEST[n]&&DEST[n].address)||'', remote:false
   }));
   if(!assignments.length) return;
-  const btn = $('#bookBtn'); btn.disabled=true; btn.textContent='กำลังจอง…';
+  const btn = $('#bookBtn'); btn.disabled=true; btn.textContent=NAV.t('กำลังจอง…','Booking…');
   const from = $('#t_date').value, to = $('#t_date').value;
 
   let res = null;
@@ -902,9 +900,9 @@ async function onBook(){
       } else { res = mockBook(assignments, from, to, shipments); }
     }
   }catch(e){ res = { error:'network' }; }
-  finally{ btn.disabled=false; btn.textContent='ยืนยันจองทั้งกลุ่ม'; }
+  finally{ btn.disabled=false; btn.textContent=NAV.t('ยืนยันจองทั้งกลุ่ม','Confirm group booking'); }
 
-  if(!res){ alert('จองไม่สำเร็จ ลองใหม่อีกครั้งนะคะ'); return; }
+  if(!res){ alert(NAV.t('จองไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Booking failed — please try again.')); return; }
   await renderResult(res, from, to);
 }
 
@@ -919,27 +917,27 @@ async function renderResult(res, from, to){
   // --- error: ต้องยืนยันตัวตนก่อน ---
   if(res.error==='kyc_required'){
     box.innerHTML = `<div class="kycbox">
-      <h4>ยืนยันตัวตนก่อนจองนะคะ</h4>
-      <p>การจองทั้งกลุ่มจะบิลรวมที่หัวหน้ากลุ่ม (ผู้จ่าย) — ระบบขอให้ผู้จ่ายยืนยันตัวตน (บัตรประชาชน + โซเชียลสาธารณะ) ครั้งเดียวเพื่อความปลอดภัยก่อนค่ะ</p>
-      <a class="btn" href="index.html">ไปยืนยันตัวตน</a></div>`;
+      <h4>${NAV.t('ยืนยันตัวตนก่อนจองนะคะ','Verify your identity before booking')}</h4>
+      <p>${NAV.t('การจองทั้งกลุ่มจะบิลรวมที่หัวหน้ากลุ่ม (ผู้จ่าย) — ระบบขอให้ผู้จ่ายยืนยันตัวตน (บัตรประชาชน + โซเชียลสาธารณะ) ครั้งเดียวเพื่อความปลอดภัยก่อนค่ะ','Group bookings bill the group lead (the payer) — for safety, the payer verifies their identity once (ID card + public social) before booking.')}</p>
+      <a class="btn" href="index.html">${NAV.t('ไปยืนยันตัวตน','Go to verify')}</a></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
   if(res.error==='no_payer'){
-    box.innerHTML = `<div class="kycbox"><h4>ยังไม่มีผู้ชำระ</h4>
-      <p>ต้องให้หัวหน้ากลุ่มเป็นผู้ชำระเงิน — ขอให้หัวหน้ากลุ่มเป็นคนกดจอง หรือโอนสิทธิ์ให้คุณก่อนค่ะ</p>
-      <a class="btn ghost" href="family.html">กลับหน้ากลุ่ม</a></div>`;
+    box.innerHTML = `<div class="kycbox"><h4>${NAV.t('ยังไม่มีผู้ชำระ','No payer yet')}</h4>
+      <p>${NAV.t('ต้องให้หัวหน้ากลุ่มเป็นผู้ชำระเงิน — ขอให้หัวหน้ากลุ่มเป็นคนกดจอง หรือโอนสิทธิ์ให้คุณก่อนค่ะ','The group lead must be the payer — ask the lead to book, or to transfer that role to you first.')}</p>
+      <a class="btn ghost" href="family.html">${NAV.t('กลับหน้ากลุ่ม','Back to group')}</a></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
   if(res.error==='all_unavailable'){
-    box.innerHTML = `<div class="empty" style="padding:24px"><h4>ชุดที่เลือกเต็มแล้ว</h4>
-      <p>ชุดทั้งหมดที่เลือกไว้ไม่ว่างในวันนี้ — กลับไปเลือกใหม่ หรือลองเปลี่ยนวันใช้งานนะคะ</p>
-      <button class="btn ghost" onclick="backToAssign()">เลือกชุดใหม่</button></div>`;
+    box.innerHTML = `<div class="empty" style="padding:24px"><h4>${NAV.t('ชุดที่เลือกเต็มแล้ว','The selected outfits are taken')}</h4>
+      <p>${NAV.t('ชุดทั้งหมดที่เลือกไว้ไม่ว่างในวันนี้ — กลับไปเลือกใหม่ หรือลองเปลี่ยนวันใช้งานนะคะ','None of the chosen outfits are free on this date — go back and reselect, or try another date.')}</p>
+      <button class="btn ghost" onclick="backToAssign()">${NAV.t('เลือกชุดใหม่','Reselect outfits')}</button></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
   if(res.error){
-    box.innerHTML = `<div class="empty" style="padding:24px"><h4>จองไม่สำเร็จ</h4>
-      <p>เกิดข้อผิดพลาด (${esc(res.error)}) — ลองใหม่อีกครั้ง หรือกลับไปเลือกชุดใหม่ค่ะ</p>
-      <button class="btn ghost" onclick="backToAssign()">กลับไปเลือกชุด</button></div>`;
+    box.innerHTML = `<div class="empty" style="padding:24px"><h4>${NAV.t('จองไม่สำเร็จ','Booking failed')}</h4>
+      <p>${NAV.t('เกิดข้อผิดพลาด ','An error occurred ')}(${esc(res.error)})${NAV.t(' — ลองใหม่อีกครั้ง หรือกลับไปเลือกชุดใหม่ค่ะ',' — please try again, or go back and reselect.')}</p>
+      <button class="btn ghost" onclick="backToAssign()">${NAV.t('กลับไปเลือกชุด','Back to outfits')}</button></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
 

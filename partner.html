@@ -102,9 +102,15 @@
   .bkrow .bact button{flex:1;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-size:13px;background:#fff;cursor:pointer;font-family:var(--sans)}
   .bkrow .bact .done{background:var(--ok);color:#fff;border-color:var(--ok)}
   .bkrow.is-done{opacity:.6}
+  /* ค่าตอบแทน */
+  .earn{display:flex;gap:10px;margin-top:6px}
+  .earn .erow{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px;text-align:center;background:#fff}
+  .earn .ev{display:block;font-family:var(--display,inherit);font-size:20px;font-weight:700;color:var(--ink)}
+  .earn .el{display:block;font-size:11px;color:var(--muted);margin-top:2px}
 </style>
 </head>
 <body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="bar"><h1>พอร์ทัลสไตลิสต์</h1><span class="tag">พาร์ทเนอร์ LLOOP</span>
   <span class="langtog"><button id="thBtn" class="on" onclick="setPLang('th')">TH</button><button id="enBtn" onclick="setPLang('en')">EN</button></span></div>
 
@@ -270,7 +276,7 @@
     <div class="g3">
       <div><label>ส่วนสูง (ซม.)</label><input id="height_cm" type="number"></div>
       <div><label>น้ำหนัก (กก.)</label><input id="weight_kg" type="number"></div>
-      <div><label>ไซซ์เดรส</label><input id="dress_size" placeholder="S/M/L"></div>
+      <div><label>ไซส์เดรส</label><input id="dress_size" placeholder="S/M/L"></div>
       <div><label>รอบอก</label><input id="bust_in" type="number"></div>
       <div><label>ใต้อก</label><input id="underbust_in" type="number"></div>
       <div><label>คัพ</label><input id="cup"></div>
@@ -387,6 +393,11 @@
 
   <!-- ===== คิวที่ถูกจอง ===== -->
   <div class="view" id="view-bookings">
+    <div class="card" id="earnCard" style="display:none">
+      <h2>ค่าตอบแทนของฉัน</h2>
+      <div class="sub">฿1,000 ต่อการวิเคราะห์ 1 ครั้ง — บันทึกเมื่อกด “เสร็จงาน”</div>
+      <div class="earn" id="earn"></div>
+    </div>
     <div class="card">
       <h2>คิวที่ถูกจอง</h2>
       <div class="sub">ลูกค้าที่จองเข้ามา — เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ</div>
@@ -400,6 +411,7 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="./config.js"></script>
 <script src="./me-api.js"></script>
+<script src="nav.js?v=1"></script>
 <script>
   // publishable client — ใช้เฉพาะ Storage (อัปโหลดรูป/ไฟล์) · ส่วน RPC วิ่งผ่าน me-rpc gateway
   const SUPABASE_URL=(window.CONFIG&&window.CONFIG.SUPABASE_URL)||'https://rprwilsbjptdnvsibjgi.supabase.co';
@@ -559,8 +571,22 @@
     toast('ลบช่องแล้ว'); loadCalendar();
   }
 
+  // ---------- ค่าตอบแทนของฉัน ----------
+  async function loadEarnings(){
+    try{
+      const { data } = await window.meRpc('partner_earnings_self', {});
+      if(!data || data.error){ return; }
+      const fmt=n=>'฿'+Number(n||0).toLocaleString();
+      $('earn').innerHTML =
+        '<div class="erow"><span class="ev">'+fmt(data.accrued)+'</span><span class="el">รอจ่าย</span></div>'+
+        '<div class="erow"><span class="ev">'+fmt(data.paid)+'</span><span class="el">จ่ายแล้ว</span></div>'+
+        '<div class="erow"><span class="ev">'+(data.sessions||0)+'</span><span class="el">ครั้ง</span></div>';
+      $('earnCard').style.display = (data.sessions>0)?'block':'none';
+    }catch(e){}
+  }
   // ---------- คิวที่ถูกจอง ----------
   async function loadBookings(){
+    loadEarnings();
     const box=$('bookList');
     try{
       const { data } = await window.meRpc('partner_bookings_self', {});
@@ -881,7 +907,7 @@
     'เสื้อผ้า/ทรงที่ควรเลี่ยง':'Clothing/shapes to avoid', 'คอปาด, กระโปรงบานช่วงสะโพก':'boat neck, skirts flaring at hips',
     'ไฟล์งาน Face & Body (PDF/รูป/เอกสาร)':'Face & Body files (PDF/image/doc)',
     'วัดตัว (ละเอียด)':'Measurements (detailed)', 'หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก':'Inches, except height/weight',
-    'ส่วนสูง (ซม.)':'Height (cm)', 'น้ำหนัก (กก.)':'Weight (kg)', 'ไซซ์เดรส':'Dress size', 'รอบอก':'Bust', 'ใต้อก':'Underbust',
+    'ส่วนสูง (ซม.)':'Height (cm)', 'น้ำหนัก (กก.)':'Weight (kg)', 'ไซส์เดรส':'Dress size', 'รอบอก':'Bust', 'ใต้อก':'Underbust',
     'คัพ':'Cup', 'รอบเอว':'Waist', 'สะโพก':'Hip', 'สะโพกบน':'High hip', 'ไหล่':'Shoulder', 'ไหล่ถึงเอว':'Shoulder to waist',
     'ความยาวหลัง':'Back length', 'ความยาวแขน':'Arm length', 'รอบต้นแขน':'Bicep', 'รอบคอ':'Neck', 'ต้นขา':'Thigh',
     'เป้า (inseam)':'Inseam', 'เบอร์รองเท้า':'Shoe size',
@@ -900,9 +926,31 @@
     'ประโยคสรุป (แสดงให้ลูกค้า — เว้นว่าง=ใช้ 12-season type อัตโนมัติ)':'Summary line (shown to client — blank = auto 12-season type)',
     'คุณคือ Warm Autumn โทนอุ่นละมุน':'You are a soft, warm Warm Autumn',
     'ชื่อสไตลิสต์':'Stylist name', 'ทีม/พาร์ทเนอร์':'Team/partner', 'บันทึกโปรไฟล์ลูกค้า':'Save client profile',
+    // แท็บพอร์ทัล
+    'ลูกค้า':'Clients', 'โปรไฟล์':'Profile', 'เวลาว่าง':'Availability', 'คิวจอง':'Bookings',
+    // โปรไฟล์สไตลิสต์
+    'โปรไฟล์สไตลิสต์ของฉัน':'My stylist profile',
+    'ข้อมูลนี้จะแสดงให้ลูกค้าเห็นบนแอป LLOOP เมื่อเปิด "เผยแพร่" — เป็นหน้าที่ลูกค้าใช้เลือกคุณตอนจอง Personal Color':'This appears to clients in the LLOOP app once "Published" — the page they use to choose you when booking Personal Color.',
+    'ชื่อที่แสดง':'Display name', 'ชื่อสตูดิโอ':'Studio name', 'พาดหัวสั้น ๆ':'Short headline', 'แนะนำตัว':'About you',
+    'พื้นที่ให้บริการ':'Service area', 'ความเชี่ยวชาญ (คั่นด้วย ,)':'Specialties (comma-separated)',
+    'รายละเอียดบริการ / สิ่งที่ลูกค้าจะได้':'Session details / what the client gets',
+    'รูปโปรไฟล์':'Profile photo', 'เผยแพร่ให้ลูกค้าเห็น':'Publish to clients', 'บันทึกโปรไฟล์':'Save profile',
+    // เวลาว่าง
+    'เปิดเวลาว่าง':'Open availability',
+    'ตั้งช่วงเวลาในแต่ละวัน ระบบจะแบ่งเป็นช่อง ๆ ให้ลูกค้าจองเองได้เลย':'Set a time range per day; the system splits it into slots clients can book themselves.',
+    'วันที่':'Date', 'เริ่ม':'Start', 'ถึง':'End', 'ความยาวต่อคิว (นาที)':'Slot length (min)', 'เพิ่มช่องเวลา':'Add slots',
+    'ปฏิทินของฉัน':'My calendar',
+    'ช่องที่ว่าง = ลูกค้ายังจองได้ · ลบได้เฉพาะช่องที่ยังไม่มีคนจอง':'Open slots can still be booked · only unbooked slots can be removed',
+    'ยังไม่มีช่องเวลา':'No slots yet',
+    // คิวจอง
+    'ค่าตอบแทนของฉัน':'My earnings', '฿1,000 ต่อการวิเคราะห์ 1 ครั้ง — บันทึกเมื่อกด “เสร็จงาน”':'฿1,000 per analysis — recorded when you tap "Done"',
+    'คิวที่ถูกจอง':'Booked queue',
+    'ลูกค้าที่จองเข้ามา — เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ':'Clients who booked — open the note, search the code to record the analysis, then tap Done when finished.',
+    'ยังไม่มีคิว':'No bookings yet',
   };
-  const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.card h2,.card .sub,.jump button,.empty,label,button.btn,option';
-  let plang=localStorage.getItem('partnerLang')||'th', collected=false;
+  const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.pnav button,.card h2,.card .sub,.jump button,.empty,label,button.btn,option';
+  // ภาษาให้ตรงกับแถบ topbar ร่วม (nav.js เก็บใน lloop_lang) — ใช้เป็นแหล่งความจริงเดียว
+  let plang=localStorage.getItem('lloop_lang')||localStorage.getItem('partnerLang')||'th', collected=false, _syncingLang=false;
   function collectI18n(){
     if(collected)return; collected=true;
     document.querySelectorAll(I18N_SEL).forEach(el=>{
@@ -932,7 +980,11 @@
     document.documentElement.lang=plang;
     const th=$('thBtn'), en=$('enBtn'); if(th)th.classList.toggle('on',plang!=='en'); if(en)en.classList.toggle('on',plang==='en');
   }
-  function setPLang(l){ plang=l; localStorage.setItem('partnerLang',l); applyLang(); }
+  function setPLang(l){ plang=l; localStorage.setItem('partnerLang',l); applyLang();
+    // sync แถบ topbar ร่วม (กัน recursion ผ่าน _syncingLang)
+    if(!_syncingLang && window.NAV && NAV.lang!==l){ _syncingLang=true; try{ NAV.setLang(l); }catch(e){} _syncingLang=false; } }
+  // แถบ topbar ร่วมสลับภาษา → ขับเครื่องแปลเดิม (ไม่ reload เพราะ partner แปลสด)
+  window.addEventListener('lloop:lang', function(e){ if(_syncingLang) return; const l=(e.detail&&e.detail.lang)||'th'; if(l!==plang){ _syncingLang=true; setPLang(l); _syncingLang=false; } });
   collectI18n(); applyLang();
   initGate();
 </script>

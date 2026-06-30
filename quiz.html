@@ -123,6 +123,7 @@
 </style>
 </head>
 <body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="wrap">
   <div class="top">
     <span class="brand">LLOOP</span>
@@ -132,67 +133,67 @@
 
   <!-- intro -->
   <section class="screen show in" id="s0">
-    <div class="kicker">เพื่อนสาวช่วยเลือก</div>
-    <h1>งานนี้<br>ใส่อะไรดี?</h1>
+    <div class="kicker" data-i18n="Your girl’s got you">เพื่อนสาวช่วยเลือก</div>
+    <h1 data-i18n="What should<br>I wear?">งานนี้<br>ใส่อะไรดี?</h1>
     <div class="deck" aria-hidden="true">
       <div class="dc d1"><span>LLOOP</span></div>
       <div class="dc d2"><span>LLOOP</span></div>
       <div class="dc d3"><span>LLOOP</span></div>
     </div>
-    <p class="lead">เล่าให้ฟังหน่อยสิ จะไปงานไหน อยากดูเป็นยังไง — เดี๋ยวเราช่วยจัดลุคให้ เลือกจากชุดจริงในคลัง เช่าได้เลย</p>
-    <p class="q">ตอบแค่ 2 ข้อ · ไม่ถึงนาที · ขั้นเลือกการ์ดฟรีไม่มีหักอะไร</p>
+    <p class="lead" data-i18n="Tell us where you’re headed and the look you’re after — we’ll style you from real pieces in stock, ready to rent.">เล่าให้ฟังหน่อยสิ จะไปงานไหน อยากดูเป็นยังไง — เดี๋ยวเราช่วยจัดลุคให้ เลือกจากชุดจริงในคลัง เช่าได้เลย</p>
+    <p class="q" data-i18n="Just 2 questions · under a minute · picking cards is free, nothing charged">ตอบแค่ 2 ข้อ · ไม่ถึงนาที · ขั้นเลือกการ์ดฟรีไม่มีหักอะไร</p>
     <div class="spacer"></div>
     <div class="foot">
-      <button class="btn" onclick="go(1)">เริ่มเลย บอกมาสิ</button>
-      <button class="btn tiny" onclick="surprise()">ขี้เกียจคิด ให้เราจัดให้เลย</button>
+      <button class="btn" onclick="go(1)" data-i18n="Let’s go, tell me">เริ่มเลย บอกมาสิ</button>
+      <button class="btn tiny" onclick="surprise()" data-i18n="Can’t decide? Style me">ขี้เกียจคิด ให้เราจัดให้เลย</button>
     </div>
   </section>
 
   <!-- occasion -->
   <section class="screen" id="s1">
-    <h2>จะไปงานไหนอ่ะ?</h2>
-    <p class="q">บอกมาเลย งานไหนใกล้เคียงสุด</p>
+    <h2 data-i18n="Where are you headed?">จะไปงานไหนอ่ะ?</h2>
+    <p class="q" data-i18n="Pick the one that’s closest">บอกมาเลย งานไหนใกล้เคียงสุด</p>
     <div class="cards" id="occGrid"></div>
-    <button class="back-link" onclick="go(0)">ย้อนกลับ</button>
+    <button class="back-link" onclick="go(0)" data-i18n="Back">ย้อนกลับ</button>
   </section>
 
   <!-- mood -->
   <section class="screen" id="s2">
-    <h2>อยากให้เขามองว่าเป็นยังไงดี?</h2>
-    <p class="q">เลือกฟีลที่อยากได้ เดี๋ยวจัดให้ตรงเลย</p>
+    <h2 data-i18n="How do you want to come across?">อยากให้เขามองว่าเป็นยังไงดี?</h2>
+    <p class="q" data-i18n="Pick the feel you want — we’ll match it">เลือกฟีลที่อยากได้ เดี๋ยวจัดให้ตรงเลย</p>
     <div class="cards single" id="moodGrid"></div>
-    <button class="back-link" onclick="go(1)">ย้อนกลับ</button>
+    <button class="back-link" onclick="go(1)" data-i18n="Back">ย้อนกลับ</button>
   </section>
 
   <!-- result -->
   <section class="screen" id="s3">
-    <div class="kicker">จัดให้แล้ว เปิดดูสิ</div>
+    <div class="kicker" data-i18n="It’s ready — take a look">จัดให้แล้ว เปิดดูสิ</div>
     <div class="flip" id="flip" onclick="openCard()">
       <div class="flipinner">
         <div class="face front hint" id="frontFace">
           <div class="mono">LLOOP</div>
-          <div class="tap-h">แตะดูสิ เราเลือกให้แล้ว</div>
+          <div class="tap-h" data-i18n="Tap to see — we’ve picked for you">แตะดูสิ เราเลือกให้แล้ว</div>
         </div>
         <div class="face back">
           <div class="head">
-            <div class="k">งานนี้ใส่อะไรดี</div>
+            <div class="k" data-i18n="What to wear">งานนี้ใส่อะไรดี</div>
             <div class="t" id="rTitle">—</div>
             <div class="wax" id="wax">SEALED</div>
           </div>
           <div class="body">
-            <div class="row"><span>โอกาส</span><b id="rOcc">—</b></div>
-            <div class="row"><span>สไตล์ที่อยากได้</span><b id="rMood">—</b></div>
-            <div class="row"><span>ขั้นต่อไป</span><b>สไตลิสต์เลือกชุดจริงให้</b></div>
+            <div class="row"><span data-i18n="Occasion">โอกาส</span><b id="rOcc">—</b></div>
+            <div class="row"><span data-i18n="The vibe you want">สไตล์ที่อยากได้</span><b id="rMood">—</b></div>
+            <div class="row"><span data-i18n="Next">ขั้นต่อไป</span><b data-i18n="The stylist picks real pieces for you">สไตลิสต์เลือกชุดจริงให้</b></div>
           </div>
         </div>
       </div>
     </div>
     <div class="spacer"></div>
     <div class="foot reveal" id="resFoot">
-      <p class="hint" style="margin-bottom:4px">กดแล้วไปหน้าเช่า บอก<b>วันที่จะไป</b> เดี๋ยวเลือกชุดที่ว่างวันนั้นให้<br><span style="color:var(--clay)">ขั้นนี้ฟรี · ตอนเลือกชุดจริงใช้สิทธิ์สไตลิสต์ 1 ครั้ง (ดูสิทธิ์ที่เหลือหน้าถัดไป)</span></p>
-      <a class="btn gold" id="ctaStylist" href="#">ไปดูชุดที่เราเลือกให้เลย</a>
-      <button class="btn ghost" onclick="shareGame()">ชวนเพื่อนมาเล่นบ้าง</button>
-      <button class="btn tiny" onclick="resetGame()">เลือกใหม่อีกที</button>
+      <p class="hint" style="margin-bottom:4px" data-i18n="Tap through to booking, tell us <b>your date</b>, and we’ll show pieces free that day<br><span style=&quot;color:var(--clay)&quot;>This step is free · choosing a real piece uses 1 stylist credit (see what’s left on the next page)</span>">กดแล้วไปหน้าเช่า บอก<b>วันที่จะไป</b> เดี๋ยวเลือกชุดที่ว่างวันนั้นให้<br><span style="color:var(--clay)">ขั้นนี้ฟรี · ตอนเลือกชุดจริงใช้สิทธิ์สไตลิสต์ 1 ครั้ง (ดูสิทธิ์ที่เหลือหน้าถัดไป)</span></p>
+      <a class="btn gold" id="ctaStylist" href="#" data-i18n="See the pieces we picked">ไปดูชุดที่เราเลือกให้เลย</a>
+      <button class="btn ghost" onclick="shareGame()" data-i18n="Invite a friend to play">ชวนเพื่อนมาเล่นบ้าง</button>
+      <button class="btn tiny" onclick="resetGame()" data-i18n="Start over">เลือกใหม่อีกที</button>
       <p class="tags">#LLOOP #งานนี้ใส่อะไรดี #friendsofLLOOP</p>
     </div>
   </section>
@@ -201,24 +202,27 @@
 <!-- stamp reaction -->
 <div class="stamp" id="stamp"><div class="seal" id="stampText"></div></div>
 
+<script src="nav.js?v=1"></script>
 <script>
 // การ์ดเกม → ป้อนค่าเข้า AI สไตลิสต์จริงในหน้า index (?go=stylist&occasion=KEY&mood=...)
 var OCC = [
-  { key:'wedding_guest', tag:'งานสำคัญ',  name:'งานแต่งเพื่อน',  desc:'ไปร่วมยินดี ต้องดูดี', react:'งานเพื่อนต้องสวยอยู่แล้ว!' },
-  { key:'graduation',    tag:'วันของเรา', name:'รับปริญญา',       desc:'วันที่รอคอย',       react:'วันสำคัญของเรา จัดเต็ม!' },
-  { key:'dinner',        tag:'ค่ำคืน',    name:'ดินเนอร์ / เดต',  desc:'มื้อพิเศษ',          react:'ดินเนอร์นี้ต้องปัง' },
-  { key:'party',         tag:'สังสรรค์',  name:'งานเลี้ยง / ปาร์ตี้', desc:'อยากเด่นนิด ๆ',  react:'คืนนี้เป็นของเธอเลย' },
-  { key:'work',          tag:'ทางการ',    name:'ทำงาน / ประชุม',  desc:'ดูโปร น่าเชื่อถือ', react:'ลุคเป๊ะ ดูโปรสุด' },
-  { key:'cafe',          tag:'สบาย ๆ',    name:'คาเฟ่ / เที่ยวเล่น', desc:'ชิลแต่ถ่ายรูปสวย', react:'ชิล ๆ แต่รูปต้องสวยนะ' },
-  { key:'merit',         tag:'พิธี',      name:'งานบุญ / งานพิธี', desc:'สุภาพ เรียบร้อย',  react:'เรียบร้อยน่ารักไปเลย' },
-  { key:'trip',          tag:'ออกเดินทาง',name:'ทริป / ทะเล',     desc:'เบา คล่องตัว',      react:'เที่ยวให้สนุก เดี๋ยวจัดลุคให้' },
+  { key:'wedding_guest', tag:'งานสำคัญ',  name:'งานแต่งเพื่อน',  desc:'ไปร่วมยินดี ต้องดูดี', react:'งานเพื่อนต้องสวยอยู่แล้ว!', tag_en:'Big day', name_en:'A friend’s wedding', desc_en:'Celebrate · look lovely', react_en:'A friend’s wedding — you’ll shine!' },
+  { key:'graduation',    tag:'วันของเรา', name:'รับปริญญา',       desc:'วันที่รอคอย',       react:'วันสำคัญของเรา จัดเต็ม!', tag_en:'Our day', name_en:'Graduation', desc_en:'The day you waited for', react_en:'Your big day — let’s go all out!' },
+  { key:'dinner',        tag:'ค่ำคืน',    name:'ดินเนอร์ / เดต',  desc:'มื้อพิเศษ',          react:'ดินเนอร์นี้ต้องปัง', tag_en:'Evening', name_en:'Dinner / date', desc_en:'A special meal', react_en:'This dinner’s going to be stunning' },
+  { key:'party',         tag:'สังสรรค์',  name:'งานเลี้ยง / ปาร์ตี้', desc:'อยากเด่นนิด ๆ',  react:'คืนนี้เป็นของเธอเลย', tag_en:'Social', name_en:'Party', desc_en:'Stand out a little', react_en:'Tonight is all yours' },
+  { key:'work',          tag:'ทางการ',    name:'ทำงาน / ประชุม',  desc:'ดูโปร น่าเชื่อถือ', react:'ลุคเป๊ะ ดูโปรสุด', tag_en:'Formal', name_en:'Work / meeting', desc_en:'Polished, credible', react_en:'On point — looking pro' },
+  { key:'cafe',          tag:'สบาย ๆ',    name:'คาเฟ่ / เที่ยวเล่น', desc:'ชิลแต่ถ่ายรูปสวย', react:'ชิล ๆ แต่รูปต้องสวยนะ', tag_en:'Easy', name_en:'Café / day out', desc_en:'Relaxed but photo-ready', react_en:'Chill — but the photos have to be good' },
+  { key:'merit',         tag:'พิธี',      name:'งานบุญ / งานพิธี', desc:'สุภาพ เรียบร้อย',  react:'เรียบร้อยน่ารักไปเลย', tag_en:'Ceremony', name_en:'Merit / ceremony', desc_en:'Modest, graceful', react_en:'So graceful and sweet' },
+  { key:'trip',          tag:'ออกเดินทาง',name:'ทริป / ทะเล',     desc:'เบา คล่องตัว',      react:'เที่ยวให้สนุก เดี๋ยวจัดลุคให้', tag_en:'Away', name_en:'Trip / beach', desc_en:'Light, easy to move in', react_en:'Have fun — we’ll sort the look' },
 ];
 var MOOD = [
-  { key:'effortless', name:'ดูดีแบบไม่ตั้งใจ',   desc:'ดูง่าย ๆ แต่มีรสนิยม', sw:'#E4F0EC', react:'ดูดีแบบไม่ต้องพยายาม ชอบ!' },
-  { key:'statement',  name:'เป็นจุดสนใจของงาน',  desc:'กล้า มั่นใจ จำได้',    sw:'#E7C9B8', react:'เอาให้ทุกคนหันมามอง' },
-  { key:'refined',    name:'เรียบหรู สุภาพ',     desc:'คลีน ดูแพง',          sw:'#E8E2D4', react:'เรียบหรู ดูแพง ปังมาก' },
-  { key:'relaxed',    name:'สบาย คล่องตัว',      desc:'ขยับง่าย ใส่ทั้งวัน',  sw:'#DDE4DC', react:'สบายตัวแต่ยังเก๋' },
+  { key:'effortless', name:'ดูดีแบบไม่ตั้งใจ',   desc:'ดูง่าย ๆ แต่มีรสนิยม', sw:'#E4F0EC', react:'ดูดีแบบไม่ต้องพยายาม ชอบ!', name_en:'Effortless', desc_en:'Easy, with taste', react_en:'Effortless and lovely — yes!' },
+  { key:'statement',  name:'เป็นจุดสนใจของงาน',  desc:'กล้า มั่นใจ จำได้',    sw:'#E7C9B8', react:'เอาให้ทุกคนหันมามอง', name_en:'The centre of attention', desc_en:'Bold, confident, memorable', react_en:'Let’s turn every head' },
+  { key:'refined',    name:'เรียบหรู สุภาพ',     desc:'คลีน ดูแพง',          sw:'#E8E2D4', react:'เรียบหรู ดูแพง ปังมาก', name_en:'Refined', desc_en:'Clean, looks expensive', react_en:'Refined and luxe — stunning' },
+  { key:'relaxed',    name:'สบาย คล่องตัว',      desc:'ขยับง่าย ใส่ทั้งวัน',  sw:'#DDE4DC', react:'สบายตัวแต่ยังเก๋', name_en:'Relaxed', desc_en:'Easy to move, all-day', react_en:'Comfy but still chic' },
 ];
+// helper: เลือกฟิลด์ตามภาษา (เติม _en เมื่อ EN)
+function L(o, f){ return (NAV.lang==='en' && o[f+'_en']!=null) ? o[f+'_en'] : o[f]; }
 
 var pick = { occasion:null, occName:'', mood:null, moodName:'' };
 var cur = 0;
@@ -233,7 +237,7 @@ function go(n){
   var pr = document.querySelectorAll('#prog i');
   for (var j=0;j<pr.length;j++){ pr[j].classList.toggle('on', j < Math.min(n,3)); }
   var lbl = document.getElementById('stepLbl');
-  lbl.textContent = n===0?'เพื่อนสาวช่วยเลือก': n===3?'จัดให้แล้ว':('ข้อ '+n+' จาก 2');
+  lbl.textContent = n===0?NAV.t('เพื่อนสาวช่วยเลือก','Your girl’s got you'): n===3?NAV.t('จัดให้แล้ว','All set'):NAV.t('ข้อ '+n+' จาก 2','Step '+n+' of 2');
   if (n===1) dealCards('occGrid');
   if (n===2) dealCards('moodGrid');
   window.scrollTo(0,0);
@@ -259,8 +263,8 @@ function renderOcc(){
   OCC.forEach(function(o){
     var c = document.createElement('button');
     c.className='card';
-    c.innerHTML = '<div class="tag">'+o.tag+'</div><div class="name">'+o.name+'</div><div class="desc">'+o.desc+'</div>';
-    c.onclick = function(){ c.classList.add('tap'); pick.occasion=o.key; pick.occName=o.name; reactAndGo(o.react, function(){ go(2); }); };
+    c.innerHTML = '<div class="tag">'+L(o,'tag')+'</div><div class="name">'+L(o,'name')+'</div><div class="desc">'+L(o,'desc')+'</div>';
+    c.onclick = function(){ c.classList.add('tap'); pick.occasion=o.key; pick.occName=L(o,'name'); reactAndGo(L(o,'react'), function(){ go(2); }); };
     g.appendChild(c);
   });
 }
@@ -269,8 +273,8 @@ function renderMood(){
   MOOD.forEach(function(m){
     var c = document.createElement('button');
     c.className='card';
-    c.innerHTML = '<span class="swatch" style="background:'+m.sw+'"></span><div><div class="name">'+m.name+'</div><div class="desc">'+m.desc+'</div></div>';
-    c.onclick = function(){ c.classList.add('tap'); pick.mood=m.key; pick.moodName=m.name; reactAndGo(m.react, function(){ prepResult(); go(3); }); };
+    c.innerHTML = '<span class="swatch" style="background:'+m.sw+'"></span><div><div class="name">'+L(m,'name')+'</div><div class="desc">'+L(m,'desc')+'</div></div>';
+    c.onclick = function(){ c.classList.add('tap'); pick.mood=m.key; pick.moodName=L(m,'name'); reactAndGo(L(m,'react'), function(){ prepResult(); go(3); }); };
     g.appendChild(c);
   });
 }
@@ -303,19 +307,22 @@ function openCard(){
 function surprise(){
   var o = OCC[Math.floor(Math.random()*OCC.length)];
   var m = MOOD[Math.floor(Math.random()*MOOD.length)];
-  pick.occasion=o.key; pick.occName=o.name; pick.mood=m.key; pick.moodName=m.name;
-  reactAndGo('เดี๋ยวจัดให้เอง!', function(){ prepResult(); go(3); });
+  pick.occasion=o.key; pick.occName=L(o,'name'); pick.mood=m.key; pick.moodName=L(m,'name');
+  reactAndGo(NAV.t('เดี๋ยวจัดให้เอง!','Leave it to us!'), function(){ prepResult(); go(3); });
 }
 function resetGame(){ pick={occasion:null,occName:'',mood:null,moodName:''}; go(0); }
 
 function shareGame(){
   var url = location.origin + location.pathname + (REF ? '?ref='+encodeURIComponent(REF) : '');
-  var text = 'งานนี้ใส่อะไรดี? ลองเล่นการ์ดสไตลิสต์ของ LLOOP สิ — มันเลือกชุดให้เลย';
-  if (navigator.share){ navigator.share({title:'งานนี้ใส่อะไรดี', text:text, url:url}).catch(function(){}); }
-  else if (navigator.clipboard){ navigator.clipboard.writeText(text+' '+url); var b=event.target; var o=b.textContent; b.textContent='คัดลอกลิงก์แล้ว'; setTimeout(function(){b.textContent=o;},1600); }
+  var text = NAV.t('งานนี้ใส่อะไรดี? ลองเล่นการ์ดสไตลิสต์ของ LLOOP สิ — มันเลือกชุดให้เลย','What should I wear? Try LLOOP’s stylist cards — it picks your look for you');
+  if (navigator.share){ navigator.share({title:NAV.t('งานนี้ใส่อะไรดี','What should I wear?'), text:text, url:url}).catch(function(){}); }
+  else if (navigator.clipboard){ navigator.clipboard.writeText(text+' '+url); var b=event.target; var o=b.textContent; b.textContent=NAV.t('คัดลอกลิงก์แล้ว','Link copied'); setTimeout(function(){b.textContent=o;},1600); }
 }
 
 renderOcc(); renderMood(); go(0);
+
+// re-render dynamic content when language flips
+window.addEventListener('lloop:lang', function(){ location.reload(); });
 </script>
 </body>
 </html>

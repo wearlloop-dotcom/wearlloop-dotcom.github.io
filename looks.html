@@ -156,33 +156,30 @@
 </style>
 </head>
 <body>
-<header><div class="contain hbar">
-  <div class="logo">LLOOP</div>
-  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> หน้าหลัก</a>
-</div></header>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 
 <div class="contain">
   <div class="hero">
     <div class="eyebrow">community</div>
     <h1 class="htitle">The Loop Looks</h1>
-    <p class="hsub">ลุคจริงจากคนใน loop — กดเช่าตามได้เลย · แชร์ลุคของคุณ รับเครดิต</p>
+    <p class="hsub" data-i18n="Real looks from the loop — rent them in a tap · share your look, earn credit">ลุคจริงจากคนใน loop — กดเช่าตามได้เลย · แชร์ลุคของคุณ รับเครดิต</p>
   </div>
   <div class="hubs" id="hubs"></div>
   <div class="tabs" id="tabs">
-    <button class="tab on" data-tab="all" onclick="switchTab('all')">ทั้งหมด</button>
-    <button class="tab" data-tab="following" onclick="switchTab('following')">ที่ตามอยู่</button>
-    <button class="tab" data-tab="saved" onclick="switchTab('saved')">บันทึกไว้</button>
-    <button class="tab" data-tab="board" onclick="switchTab('board')">อันดับ</button>
+    <button class="tab on" data-tab="all" onclick="switchTab('all')" data-i18n="All">ทั้งหมด</button>
+    <button class="tab" data-tab="following" onclick="switchTab('following')" data-i18n="Following">ที่ตามอยู่</button>
+    <button class="tab" data-tab="saved" onclick="switchTab('saved')" data-i18n="Saved">บันทึกไว้</button>
+    <button class="tab" data-tab="board" onclick="switchTab('board')" data-i18n="Ranking">อันดับ</button>
   </div>
   <div class="occ" id="occ"></div>
   <div class="grid" id="feed">
-    <div class="empty"><p>กำลังโหลดฟีด…</p></div>
+    <div class="empty"><p data-i18n="Loading feed…">กำลังโหลดฟีด…</p></div>
   </div>
   <div id="board" class="hide"></div>
 </div>
 
 <div class="fab"><div class="inner">
-  <button class="btn" id="shareBtn">แชร์ลุคของฉัน · รับเครดิต</button>
+  <button class="btn" id="shareBtn" data-i18n="Share your look · earn credit">แชร์ลุคของฉัน · รับเครดิต</button>
 </div></div>
 
 <!-- share sheet -->
@@ -199,8 +196,10 @@
 <script src="liffAuth.js?v=49"></script>
 <script src="me-api.js?v=54"></script>
 <script src="api.js?v=54"></script>
+<script src="nav.js?v=1"></script>
 <script>
 const $ = s => document.querySelector(s);
+const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 const baht = n => '฿'+Number(n||0).toLocaleString('th-TH');
 const TIER_TH = { new:'', silver:'Silver', gold:'Gold', platinum:'Platinum' };
@@ -235,20 +234,20 @@ async function renderHubs(){
   el.style.display='flex';
   el.innerHTML = hubs.map(h=>`<div class="hub" onclick="filterOcc('${esc(h.occasion)}')">
     <div class="hc">${h.cover?`<img src="${esc(h.cover)}" loading="lazy">`:''}
-      <div class="hl">${esc(h.occasion)}<div class="hn">${h.count} ลุค</div></div></div></div>`).join('');
+      <div class="hl">${esc(h.occasion)}<div class="hn">${h.count} ${T('ลุค','looks')}</div></div></div></div>`).join('');
 }
 async function renderOcc(){
   let occs=[]; try{ occs = await window.API.lookOccasions(); }catch(e){}
   const el=$('#occ'); if(!el) return;
   if(!occs.length){ el.innerHTML=''; return; }
-  el.innerHTML = `<button class="ochip ${OCC?'':'on'}" onclick="filterOcc(null)">ทั้งหมด</button>` +
+  el.innerHTML = `<button class="ochip ${OCC?'':'on'}" onclick="filterOcc(null)">${T('ทั้งหมด','All')}</button>` +
     occs.map(o=>`<button class="ochip ${OCC===o?'on':''}" onclick="filterOcc('${esc(o)}')">${esc(o)}</button>`).join('');
 }
 function backToAllTab(){
   if(TAB!=='all'){ TAB='all'; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on', b.dataset.tab==='all')); $('#board').classList.add('hide'); $('#feed').classList.remove('hide'); const o=$('#occ'); if(o) o.style.display=''; }
 }
 async function reloadFeed(){
-  $('#feed').innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
+  $('#feed').innerHTML=`<div class="empty"><p>${T('กำลังโหลด…','Loading…')}</p></div>`;
   try{ FEED = await window.API.communityFeed(30, null, OCC, TAG); }catch(e){ FEED=[]; }
   renderFeed();
 }
@@ -268,16 +267,20 @@ function myRefUrl(){
   return location.origin + location.pathname.replace(/looks\.html$/,'index.html') + (h?`?ref=${encodeURIComponent(h)}`:'');
 }
 
-const FIT_TH={true:'พอดีตัว',large:'เผื่อ/ใหญ่นิด',small:'ฟิต/เล็กนิด'};
-const TPL_TH={before_after:'Before / After',styles:'3 วิธีแมตช์'};
+const FIT_TH = (window.NAV && window.NAV.lang==='en')
+  ? {true:'True to size',large:'Roomy / slightly big',small:'Fitted / slightly small'}
+  : {true:'พอดีตัว',large:'เผื่อ/ใหญ่นิด',small:'ฟิต/เล็กนิด'};
+const TPL_TH = (window.NAV && window.NAV.lang==='en')
+  ? {before_after:'Before / After',styles:'3 ways to style'}
+  : {before_after:'Before / After',styles:'3 วิธีแมตช์'};
 function lookPhotos(c){ return [c.photo].concat(Array.isArray(c.extra_photos)?c.extra_photos:[]).filter(Boolean); }
 function tplBadge(c){
   const n=lookPhotos(c).length, t=TPL_TH[c.template];
   if(!t && n<2) return '';
-  return `<span class="tplb">${t?esc(t):''}${(t&&n>1?' · ':'')}${n>1?n+' รูป':''}</span>`;
+  return `<span class="tplb">${t?esc(t):''}${(t&&n>1?' · ':'')}${n>1?n+' '+T('รูป','photos'):''}</span>`;
 }
 function fitStr(c){
-  const p=[]; if(c.wearer_height_cm) p.push('สูง '+c.wearer_height_cm); if(c.wearer_size) p.push('ไซซ์ '+esc(c.wearer_size));
+  const p=[]; if(c.wearer_height_cm) p.push(T('สูง ','Height ')+c.wearer_height_cm); if(c.wearer_size) p.push(T('ไซส์ ','Size ')+esc(c.wearer_size));
   if(FIT_TH[c.fit_note]) p.push(FIT_TH[c.fit_note]); return p.join(' · ');
 }
 function cardHtml(c){
@@ -287,9 +290,9 @@ function cardHtml(c){
   const tags = (Array.isArray(c.tags)&&c.tags.length)
     ? `<div class="tagrow">${c.tags.slice(0,4).map(t=>`<span class="tagln" onclick="filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>` : '';
   const fit = fitStr(c);
-  const phtag = g.code ? `<a class="phtag" href="${lookUrl(c)}" onclick="event.stopPropagation()"><span class="dot"></span>เช่าชุดนี้ · ${esc(g.name||g.code)}</a>` : '';
+  const phtag = g.code ? `<a class="phtag" href="${lookUrl(c)}" onclick="event.stopPropagation()"><span class="dot"></span>${T('เช่าชุดนี้','Rent this piece')} · ${esc(g.name||g.code)}</a>` : '';
   return `<div class="card">
-    <div class="ph" onclick="openStory('${c.id}')">${c.photo?`<img src="${esc(c.photo)}" loading="lazy" alt="">`:''}${c.featured?`<span class="feat">ลุคแห่งสัปดาห์</span>`:''}${tplBadge(c)}${phtag}</div>
+    <div class="ph" onclick="openStory('${c.id}')">${c.photo?`<img src="${esc(c.photo)}" loading="lazy" alt="">`:''}${c.featured?`<span class="feat">${T('ลุคแห่งสัปดาห์','Look of the week')}</span>`:''}${tplBadge(c)}${phtag}</div>
     <div class="cbody">
       <div class="crow">${av}<div style="min-width:0">
         <div class="cname" onclick="openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}</div>
@@ -297,8 +300,8 @@ function cardHtml(c){
       ${c.caption?`<div class="cap">${esc(c.caption)}</div>`:''}
       ${fit?`<div class="fitchip"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>${fit}</div>`:''}
       ${tags}
-      ${g.code?`<div class="gchip"><div class="gname">ใส่ <b>${esc(g.name||g.code)}</b>${g.price?` · ${baht(g.price)}`:''}</div>
-        <a class="rentbtn" href="${lookUrl(c)}">เช่าลุคนี้</a></div>`:''}
+      ${g.code?`<div class="gchip"><div class="gname">${T('ใส่','Wearing')} <b>${esc(g.name||g.code)}</b>${g.price?` · ${baht(g.price)}`:''}</div>
+        <a class="rentbtn" href="${lookUrl(c)}">${T('เช่าลุคนี้','Rent this look')}</a></div>`:''}
       ${c.source==='look'?`<div class="acts">
         <button class="act ${LIKED.has(c.id)?'on':''}" id="like-${c.id}" onclick="likeLook('${c.id}')">
           <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg>
@@ -309,19 +312,19 @@ function cardHtml(c){
         <button class="act ${SAVED.has(c.id)?'on':''}" id="save-${c.id}" onclick="saveLook('${c.id}')" style="margin-left:auto">
           <svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z"/></svg></button>
         <span class="act" onclick='shareOut(${JSON.stringify({u:lookUrl(c),n:(g.name||"")}).replace(/'/g,"&#39;")})'>
-          <svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>แชร์</span>
+          <svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>${T('แชร์','Share')}</span>
       </div>`:`<span class="shareln" onclick='shareOut(${JSON.stringify({u:lookUrl(c),n:(g.name||"")}).replace(/'/g,"&#39;")})'>
-        <svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>แชร์ลุคนี้</span>`}
+        <svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>${T('แชร์ลุคนี้','Share this look')}</span>`}
     </div></div>`;
 }
 
 function renderFeed(){
-  const clr = TAG ? `<div style="grid-column:1/-1"><span class="tagclr" onclick="clearTag()">#${esc(TAG)} · ล้างตัวกรอง ×</span></div>` : '';
+  const clr = TAG ? `<div style="grid-column:1/-1"><span class="tagclr" onclick="clearTag()">#${esc(TAG)} · ${T('ล้างตัวกรอง','Clear filter')} ×</span></div>` : '';
   if(!FEED.length){
     $('#feed').innerHTML = `<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div>
-      <h4>ยังไม่มีลุคในชุมชน</h4>
-      <p>เป็นคนแรกที่แชร์ลุค — เช่า ถ่ายรูป แล้วแชร์ ได้เครดิตเข้ากระเป๋า</p></div>`;
+      <h4>${T('ยังไม่มีลุคในชุมชน','No looks yet')}</h4>
+      <p>${T('เป็นคนแรกที่แชร์ลุค — เช่า ถ่ายรูป แล้วแชร์ ได้เครดิตเข้ากระเป๋า','Be the first to share — rent, snap a photo, and earn credit to your wallet')}</p></div>`;
     if(TAG) $('#feed').innerHTML = clr + $('#feed').innerHTML;
     return;
   }
@@ -329,12 +332,12 @@ function renderFeed(){
 }
 
 async function shareOut(o){
-  const url=o.u, text = o.n?`ลุคนี้จาก LLOOP — "${o.n}" เช่าตามได้เลย`:'ลุคสวยจาก LLOOP เช่าตามได้เลย';
+  const url=o.u, text = o.n?T(`ลุคนี้จาก LLOOP — "${o.n}" เช่าตามได้เลย`,`This look from LLOOP — "${o.n}" — rent it too`):T('ลุคสวยจาก LLOOP เช่าตามได้เลย','A lovely look from LLOOP — rent it too');
   try{
     if(navigator.share){ await navigator.share({ title:'LLOOP · The Loop Looks', text, url }); return; }
   }catch(e){ if(e && e.name==='AbortError') return; }
-  try{ await navigator.clipboard.writeText(url); toast('คัดลอกลิงก์แล้ว — แปะลง IG/Facebook ได้เลยค่ะ'); }
-  catch(e){ toast('คัดลอกลิงก์: '+url); }
+  try{ await navigator.clipboard.writeText(url); toast(T('คัดลอกลิงก์แล้ว — แปะลง IG/Facebook ได้เลยค่ะ','Link copied — paste it on IG/Facebook')); }
+  catch(e){ toast(T('คัดลอกลิงก์: ','Copy link: ')+url); }
 }
 
 // ---------- story viewer (เต็มจอแบบ IG) ----------
@@ -384,7 +387,7 @@ function renderStory(){
   $('#story').innerHTML=`
     <div class="bars">${bars}</div>
     <div class="top">${av}<div class="snm" onclick="closeStory();openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}</div>
-      ${canLike?`<button class="sx" style="font-size:18px" onclick="reportLook('${c.id}')" aria-label="รายงาน"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.8"><path d="M4 21V4h11l-1 3h6l-2 5 2 5H5"/></svg></button>`:''}
+      ${canLike?`<button class="sx" style="font-size:18px" onclick="reportLook('${c.id}')" aria-label="${T('รายงาน','Report')}"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.8"><path d="M4 21V4h11l-1 3h6l-2 5 2 5H5"/></svg></button>`:''}
       <button class="sx" onclick="closeStory()">×</button></div>
     <div class="img" onpointerdown="storyPress()" onpointerup="storyRelease()" onpointercancel="storyRelease()">
       <div class="zone l" onclick="storyTap(-1)"></div>
@@ -396,7 +399,7 @@ function renderStory(){
       ${fitStr(c)?`<div class="scap" style="color:#E4C98A;font-size:12.5px">${fitStr(c)}</div>`:''}
       ${tags}
       ${canLike?`<div class="reacts" id="reacts-${c.id}">
-        ${[['love','รัก'],['wow','ว้าว'],['want','อยากได้'],['fire','แรง']].map(([k,l])=>`<button class="react" data-k="${k}" onclick="reactLook('${c.id}','${k}')">${l}</button>`).join('')}
+        ${[['love',T('รัก','Love')],['wow',T('ว้าว','Wow')],['want',T('อยากได้','Want')],['fire',T('แรง','Fire')]].map(([k,l])=>`<button class="react" data-k="${k}" onclick="reactLook('${c.id}','${k}')">${l}</button>`).join('')}
       </div>`:''}
       <div class="srow">
         ${canLike?`<button class="slike ${LIKED.has(c.id)?'on':''}" id="slike-${c.id}" onclick="storyLike('${c.id}')">
@@ -404,34 +407,34 @@ function renderStory(){
           <span id="slikes-${c.id}">${c.likes||0}</span></button>`:''}
         ${canLike?`<button class="slike ${SAVED.has(c.id)?'on':''}" id="ssave-${c.id}" onclick="storySave('${c.id}')">
           <svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z"/></svg></button>`:''}
-        ${g.code?`<a class="srent" href="${lookUrl(c)}">เช่าลุคนี้${g.price?` · ${baht(g.price)}`:''}</a>`:''}
+        ${g.code?`<a class="srent" href="${lookUrl(c)}">${T('เช่าลุคนี้','Rent this look')}${g.price?` · ${baht(g.price)}`:''}</a>`:''}
       </div>
     </div>`;
   startStoryTimer();
 }
 async function storySave(id){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อบันทึกค่ะ'); return; }
+  if(!LIVE){ toast(T('เข้าสู่ระบบผ่าน LINE เพื่อบันทึกค่ะ','Sign in with LINE to save')); return; }
   const btn=$('#ssave-'+id); if(btn) btn.classList.toggle('on');
   let res=null; try{ res=await window.API.toggleSave(id); }catch(e){}
   if(res){ if(btn) btn.classList.toggle('on', !!res.saved); if(res.saved) SAVED.add(id); else SAVED.delete(id);
     const fb=$('#save-'+id); if(fb) fb.classList.toggle('on', !!res.saved); }
 }
 async function reactLook(id, key){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อรีแอคชั่นค่ะ'); return; }
+  if(!LIVE){ toast(T('เข้าสู่ระบบผ่าน LINE เพื่อรีแอคชั่นค่ะ','Sign in with LINE to react')); return; }
   const wrap=$('#reacts-'+id);
   if(wrap) wrap.querySelectorAll('.react').forEach(b=>b.classList.toggle('on', b.dataset.k===key));
   try{ await window.API.reactLook(id, key); }catch(e){}
 }
 async function reportLook(id){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อรายงานค่ะ'); return; }
-  const reason = prompt('รายงานลุคนี้เพราะอะไร? (เช่น เนื้อหาไม่เหมาะสม, สแปม, ละเมิดลิขสิทธิ์)');
+  if(!LIVE){ toast(T('เข้าสู่ระบบผ่าน LINE เพื่อรายงานค่ะ','Sign in with LINE to report')); return; }
+  const reason = prompt(T('รายงานลุคนี้เพราะอะไร? (เช่น เนื้อหาไม่เหมาะสม, สแปม, ละเมิดลิขสิทธิ์)','Why are you reporting this look? (e.g. inappropriate content, spam, copyright)'));
   if(reason===null) return;
   let res=null; try{ res=await window.API.reportLook(id, reason); }catch(e){}
-  if(res&&res.ok){ toast(res.hidden?'ขอบคุณค่ะ — ลุคนี้ถูกซ่อนเพื่อตรวจสอบแล้ว':'รับเรื่องแล้ว ทีมงานจะตรวจสอบให้ค่ะ'); }
-  else toast('รายงานไม่สำเร็จ ลองใหม่นะคะ');
+  if(res&&res.ok){ toast(res.hidden?T('ขอบคุณค่ะ — ลุคนี้ถูกซ่อนเพื่อตรวจสอบแล้ว','Thank you — this look has been hidden for review'):T('รับเรื่องแล้ว ทีมงานจะตรวจสอบให้ค่ะ','Received — our team will review it')); }
+  else toast(T('รายงานไม่สำเร็จ ลองใหม่นะคะ','Could not report — please try again'));
 }
 async function storyLike(id){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อถูกใจค่ะ'); return; }
+  if(!LIVE){ toast(T('เข้าสู่ระบบผ่าน LINE เพื่อถูกใจค่ะ','Sign in with LINE to like')); return; }
   const btn=$('#slike-'+id), cnt=$('#slikes-'+id), was=btn&&btn.classList.contains('on');
   if(btn) btn.classList.toggle('on'); if(cnt) cnt.textContent=Math.max(0,(+cnt.textContent||0)+(was?-1:1));
   let res=null; try{ res=await window.API.toggleLike(id); }catch(e){}
@@ -451,46 +454,46 @@ async function switchTab(tab){
   if(tab==='board'){ feed.classList.add('hide'); board.classList.remove('hide'); return renderBoard(); }
   board.classList.add('hide'); feed.classList.remove('hide');
   if(tab==='following'){
-    if(!LIVE){ feed.innerHTML='<div class="empty"><p>ล็อกอิน LINE เพื่อดูลุคจากคนที่คุณตามค่ะ</p></div>'; return; }
-    feed.innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
+    if(!LIVE){ feed.innerHTML=`<div class="empty"><p>${T('ล็อกอิน LINE เพื่อดูลุคจากคนที่คุณตามค่ะ','Sign in with LINE to see looks from people you follow')}</p></div>`; return; }
+    feed.innerHTML=`<div class="empty"><p>${T('กำลังโหลด…','Loading…')}</p></div>`;
     let f=[]; try{ f=await window.API.followingFeed(30); }catch(e){}
-    FEED=f; feed.innerHTML = f.length? f.map(cardHtml).join('') : '<div class="empty"><p>ยังไม่มีลุคจากคนที่ตาม — ไปกดติดตามในแท็บ “ทั้งหมด” ได้เลยค่ะ</p></div>';
+    FEED=f; feed.innerHTML = f.length? f.map(cardHtml).join('') : `<div class="empty"><p>${T('ยังไม่มีลุคจากคนที่ตาม — ไปกดติดตามในแท็บ “ทั้งหมด” ได้เลยค่ะ','No looks from people you follow yet — follow creators in the “All” tab')}</p></div>`;
   } else if(tab==='saved'){
-    if(!LIVE){ feed.innerHTML='<div class="empty"><p>ล็อกอิน LINE เพื่อดูลุคที่บันทึกไว้ค่ะ</p></div>'; return; }
-    feed.innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
+    if(!LIVE){ feed.innerHTML=`<div class="empty"><p>${T('ล็อกอิน LINE เพื่อดูลุคที่บันทึกไว้ค่ะ','Sign in with LINE to see your saved looks')}</p></div>`; return; }
+    feed.innerHTML=`<div class="empty"><p>${T('กำลังโหลด…','Loading…')}</p></div>`;
     let f=[]; try{ f=await window.API.savedFeed(40); }catch(e){}
-    FEED=f; feed.innerHTML = f.length? f.map(cardHtml).join('') : '<div class="empty"><p>ยังไม่มีลุคที่บันทึก — กดไอคอนคั่นหน้าบนการ์ดเพื่อเก็บไว้ดูทีหลังค่ะ</p></div>';
+    FEED=f; feed.innerHTML = f.length? f.map(cardHtml).join('') : `<div class="empty"><p>${T('ยังไม่มีลุคที่บันทึก — กดไอคอนคั่นหน้าบนการ์ดเพื่อเก็บไว้ดูทีหลังค่ะ','No saved looks yet — tap the bookmark on a card to keep it for later')}</p></div>`;
   } else { renderFeed(); }
 }
 
 async function saveLook(id){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อบันทึกลุคค่ะ'); return; }
+  if(!LIVE){ toast(T('เข้าสู่ระบบผ่าน LINE เพื่อบันทึกลุคค่ะ','Sign in with LINE to save looks')); return; }
   const btn=$('#save-'+id), was=btn&&btn.classList.contains('on');
   if(btn) btn.classList.toggle('on');
   let res=null; try{ res=await window.API.toggleSave(id); }catch(e){}
   if(res){ if(btn) btn.classList.toggle('on', !!res.saved); if(res.saved) SAVED.add(id); else SAVED.delete(id);
-    toast(res.saved?'บันทึกลุคไว้แล้ว':'นำออกจากที่บันทึกแล้ว');
+    toast(res.saved?T('บันทึกลุคไว้แล้ว','Saved'):T('นำออกจากที่บันทึกแล้ว','Removed from saved'));
     if(TAB==='saved' && !res.saved) switchTab('saved'); }
   else if(btn) btn.classList.toggle('on', was);
 }
 
 async function renderBoard(){
   const board=$('#board');
-  board.innerHTML='<div class="empty"><p>กำลังจัดอันดับ…</p></div>';
+  board.innerHTML=`<div class="empty"><p>${T('กำลังจัดอันดับ…','Ranking…')}</p></div>`;
   let rows=[]; try{ rows=await window.API.leaderboard('rented',20); }catch(e){}
-  if(!rows.length){ board.innerHTML='<div class="empty"><p>ยังไม่มีครีเอเตอร์ในอันดับ — เริ่มแชร์ลุคเพื่อเป็นคนแรกค่ะ</p></div>'; return; }
-  board.innerHTML = `<p class="muted" style="margin:12px 0">จัดอันดับจาก “มีคนเช่าตามลุค” มากสุด</p>` + rows.map(r=>{
+  if(!rows.length){ board.innerHTML=`<div class="empty"><p>${T('ยังไม่มีครีเอเตอร์ในอันดับ — เริ่มแชร์ลุคเพื่อเป็นคนแรกค่ะ','No creators ranked yet — share a look to be the first')}</p></div>`; return; }
+  board.innerHTML = `<p class="muted" style="margin:12px 0">${T('จัดอันดับจาก “มีคนเช่าตามลุค” มากสุด','Ranked by most looks rented by others')}</p>` + rows.map(r=>{
     const cr=r.creator||{}; const av=cr.avatar?`<img class="lav" src="${esc(cr.avatar)}">`:`<span class="lav"></span>`;
     return `<div class="lbrow"><div class="rk">${r.rank}</div>${av}
       <div class="lnm" onclick="openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}
-        <small>${r.looks||0} ลุค · ${r.likes||0} ถูกใจ · เช่าตาม ${r.rented||0}</small></div>
+        <small>${r.looks||0} ${T('ลุค','looks')} · ${r.likes||0} ${T('ถูกใจ','likes')} · ${T('เช่าตาม','rented')} ${r.rented||0}</small></div>
       <div class="lsc">${r.rented||0}</div></div>`;
   }).join('');
 }
 
 // ---------- like / comment ----------
 async function likeLook(id){
-  if(!LIVE){ toast('ล็อกอิน LINE ก่อนกดถูกใจค่ะ'); return; }
+  if(!LIVE){ toast(T('ล็อกอิน LINE ก่อนกดถูกใจค่ะ','Sign in with LINE to like')); return; }
   const btn=$('#like-'+id), cnt=$('#likes-'+id);
   const wasOn=btn.classList.contains('on');
   btn.classList.toggle('on'); if(cnt) cnt.textContent=Math.max(0,(+cnt.textContent||0)+(wasOn?-1:1)); // optimistic
@@ -501,14 +504,14 @@ async function likeLook(id){
 async function openComments(id){
   REPLY_TO=null;
   openOv('#ovShare');
-  $('#shareSheet').innerHTML = `<div class="shhd"><div class="shtitle">คอมเมนต์</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
-    <div id="cmtList" style="margin-top:8px"><p class="muted">กำลังโหลด…</p></div>
+  $('#shareSheet').innerHTML = `<div class="shhd"><div class="shtitle">${T('คอมเมนต์','Comments')}</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
+    <div id="cmtList" style="margin-top:8px"><p class="muted">${T('กำลังโหลด…','Loading…')}</p></div>
     ${LIVE?`<div id="replyBar" class="hide" style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--muted)">
         <span id="replyTxt"></span><button class="x" style="font-size:18px" onclick="clearReply()">×</button></div>
       <div style="display:flex;gap:8px;margin-top:8px">
-      <input class="inp" id="cmtIn" placeholder="พิมพ์คอมเมนต์…" style="flex:1">
-      <button class="btn" style="width:auto;padding:11px 18px" onclick="submitComment('${id}')">ส่ง</button></div>`
-      :`<p class="muted" style="margin-top:12px">เข้าสู่ระบบผ่าน LINE เพื่อคอมเมนต์ค่ะ</p>`}`;
+      <input class="inp" id="cmtIn" placeholder="${T('พิมพ์คอมเมนต์…','Write a comment…')}" style="flex:1">
+      <button class="btn" style="width:auto;padding:11px 18px" onclick="submitComment('${id}')">${T('ส่ง','Send')}</button></div>`
+      :`<p class="muted" style="margin-top:12px">${T('เข้าสู่ระบบผ่าน LINE เพื่อคอมเมนต์ค่ะ','Sign in with LINE to comment')}</p>`}`;
   await loadComments(id);
 }
 function linkifyMentions(body){
@@ -518,27 +521,27 @@ function cmtHtml(c, reply){
   const av=c.avatar?`<img class="cav" src="${esc(c.avatar)}">`:`<span class="cav"></span>`;
   return `<div class="cmt" style="${reply?'margin-left:38px':''}">${av}<div class="cb">
     <div class="cby">${esc(c.by||'Loop')}</div>${linkifyMentions(c.body)}
-    ${(LIVE && !reply)?`<span class="rpl" onclick="setReply('${c.id}','${esc((c.by||'').replace(/'/g,''))}')">ตอบกลับ</span>`:''}
+    ${(LIVE && !reply)?`<span class="rpl" onclick="setReply('${c.id}','${esc((c.by||'').replace(/'/g,''))}')">${T('ตอบกลับ','Reply')}</span>`:''}
     </div></div>`;
 }
 async function loadComments(id){
   let list=[]; try{ list=await window.API.lookComments(id); }catch(e){}
   const el=$('#cmtList'); if(!el) return;
-  if(!list.length){ el.innerHTML='<p class="muted">ยังไม่มีคอมเมนต์ — เป็นคนแรกที่ชมลุคนี้ค่ะ</p>'; return; }
+  if(!list.length){ el.innerHTML=`<p class="muted">${T('ยังไม่มีคอมเมนต์ — เป็นคนแรกที่ชมลุคนี้ค่ะ','No comments yet — be the first to admire this look')}</p>`; return; }
   const tops=list.filter(c=>!c.parent), byParent={};
   list.filter(c=>c.parent).forEach(c=>{ (byParent[c.parent]=byParent[c.parent]||[]).push(c); });
   el.innerHTML = tops.map(c=> cmtHtml(c,false) + (byParent[c.id]||[]).map(r=>cmtHtml(r,true)).join('')).join('');
 }
-function setReply(cid, name){ REPLY_TO=cid; const b=$('#replyBar'),t=$('#replyTxt'); if(t)t.textContent='กำลังตอบ '+name; if(b)b.classList.remove('hide'); const i=$('#cmtIn'); if(i)i.focus(); }
+function setReply(cid, name){ REPLY_TO=cid; const b=$('#replyBar'),t=$('#replyTxt'); if(t)t.textContent=T('กำลังตอบ ','Replying to ')+name; if(b)b.classList.remove('hide'); const i=$('#cmtIn'); if(i)i.focus(); }
 function clearReply(){ REPLY_TO=null; const b=$('#replyBar'); if(b)b.classList.add('hide'); }
 async function submitComment(id){
   const inp=$('#cmtIn'); const body=(inp&&inp.value||'').trim(); if(!body) return;
   const parent=REPLY_TO; inp.value='';
   let res=null; try{ res=await window.API.addComment(id, body, parent); }catch(e){}
   clearReply();
-  if(res&&res.ok&&res.hidden){ toast('คอมเมนต์ถูกซ่อนไว้ตรวจสอบ (พบคำที่ไม่เหมาะสม) ค่ะ'); }
+  if(res&&res.ok&&res.hidden){ toast(T('คอมเมนต์ถูกซ่อนไว้ตรวจสอบ (พบคำที่ไม่เหมาะสม) ค่ะ','Comment hidden for review (flagged language)')); }
   else if(res&&res.ok){ await loadComments(id); const c=$('#cmt-'+id); if(c) c.textContent=(+c.textContent||0)+1; }
-  else toast('ส่งคอมเมนต์ไม่สำเร็จ ลองใหม่นะคะ');
+  else toast(T('ส่งคอมเมนต์ไม่สำเร็จ ลองใหม่นะคะ','Could not post comment — please try again'));
 }
 
 // ---------- creator profile ----------
@@ -652,10 +655,10 @@ async function openShare(){
     <label class="lbl">โอกาส (ไม่บังคับ)</label>
     <select class="inp" id="shOcc"><option value="">— เลือกโอกาส —</option>
       ${['งานแต่ง','รับปริญญา','ทำงาน','คาเฟ่','เดท','ปาร์ตี้','งานบุญ','สงกรานต์','ลำลอง','ทริป'].map(o=>`<option>${o}</option>`).join('')}</select>
-    <div class="lbl" style="margin-top:14px">ฟิต/ไซซ์ (ช่วยคนอื่นตัดสินใจ — ไม่บังคับ)</div>
+    <div class="lbl" style="margin-top:14px">ฟิต/ไซส์ (ช่วยคนอื่นตัดสินใจ — ไม่บังคับ)</div>
     <div style="display:flex;gap:8px">
       <input class="inp" id="shHeight" inputmode="numeric" placeholder="สูง (ซม.)" style="flex:1">
-      <input class="inp" id="shSize" placeholder="ไซซ์ที่เช่า" style="flex:1">
+      <input class="inp" id="shSize" placeholder="ไซส์ที่เช่า" style="flex:1">
     </div>
     <select class="inp" id="shFit" style="margin-top:8px"><option value="">ใส่แล้วรู้สึก…</option>
       <option value="true">พอดีตัว</option><option value="large">เผื่อ/ใหญ่นิดหน่อย</option><option value="small">ฟิต/เล็กนิดหน่อย</option></select>
