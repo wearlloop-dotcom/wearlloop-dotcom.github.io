@@ -119,8 +119,8 @@
     </div>
     <div class="progwrap">
       <div class="progtop">
-        <div class="pt-x" data-i18n="Paid &lt;b id=&quot;paidX&quot;&gt;0&lt;/b&gt; / &lt;span id=&quot;memY&quot;&gt;0&lt;/span&gt; people">จ่ายแล้ว <b id="paidX">0</b> / <span id="memY">0</span> คน</div>
-        <div class="pt-g" data-i18n="Group total &lt;b id=&quot;grandTot&quot;&gt;฿0&lt;/b&gt;">ยอดรวมทั้งกลุ่ม <b id="grandTot">฿0</b></div>
+        <div class="pt-x"><span data-i18n="Paid">จ่ายแล้ว</span> <b id="paidX">0</b> / <span id="memY">0</span> <span data-i18n="people">คน</span></div>
+        <div class="pt-g"><span data-i18n="Group total">ยอดรวมทั้งกลุ่ม</span> <b id="grandTot">฿0</b></div>
       </div>
       <div class="bar"><i id="barFill" style="width:0%"></i></div>
       <div class="progmeta"><span id="pctTxt">0%</span><span id="leftTxt"></span></div>
@@ -130,26 +130,26 @@
   <!-- roster -->
   <div class="sec hide" id="rosterSec">
     <div class="sechead">
-      <div><div class="sectitle">รายชื่อในตีม</div>
-      <div class="seccap">คนที่ยังค้างชำระอยู่บนสุด</div></div>
+      <div><div class="sectitle" data-i18n="People in the theme">รายชื่อในตีม</div>
+      <div class="seccap" data-i18n="Still-pending members appear at the top">คนที่ยังค้างชำระอยู่บนสุด</div></div>
     </div>
     <div id="rosterBody"></div>
 
     <!-- gentle footer note -->
     <div class="selfnote">
       <svg viewBox="0 0 24 24"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
-      <div>แต่ละคนจ่ายส่วนของตัวเอง ระบบเตือนให้อัตโนมัติ — คุณช่วยทักเตือนใน LINE กลุ่มได้อีกแรงค่ะ</div>
+      <div data-i18n="Everyone pays their own share and reminders go out automatically — a nudge in the group's LINE chat helps too.">แต่ละคนจ่ายส่วนของตัวเอง ระบบเตือนให้อัตโนมัติ — คุณช่วยทักเตือนใน LINE กลุ่มได้อีกแรงค่ะ</div>
     </div>
     <div class="remindrow">
-      <button class="btn ghost sm" id="remindBtn" disabled title="ระบบส่งคำเตือนให้เพื่อนที่ยังไม่จ่ายโดยอัตโนมัติอยู่แล้ว">เตือนเพื่อนที่ยังไม่จ่าย</button>
-      <span class="hint" id="remindHint">ระบบส่งคำเตือนอัตโนมัติให้อยู่แล้ว</span>
+      <button class="btn ghost sm" id="remindBtn" disabled title="ระบบส่งคำเตือนให้เพื่อนที่ยังไม่จ่ายโดยอัตโนมัติอยู่แล้ว" data-i18n="Remind friends who haven't paid">เตือนเพื่อนที่ยังไม่จ่าย</button>
+      <span class="hint" id="remindHint" data-i18n="Reminders already go out automatically">ระบบส่งคำเตือนอัตโนมัติให้อยู่แล้ว</span>
     </div>
   </div>
 
   <!-- edge / empty state -->
   <div class="sec hide" id="edgeSec"><div id="edgeBody"></div></div>
 
-  <div class="demo" id="demoNote">หน้าสถานะการจ่าย LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (group_event_status คืนสถานะจ่ายของทั้งอีเวนต์)</div>
+  <div class="demo" id="demoNote" data-i18n="LLOOP payment-status page · production connects to Supabase via &lt;b&gt;liff/api.js&lt;/b&gt; (group_event_status returns the whole event's payment state)">หน้าสถานะการจ่าย LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (group_event_status คืนสถานะจ่ายของทั้งอีเวนต์)</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -158,6 +158,7 @@
 <script src="liffAuth.js?v=38"></script>
 <script src="me-api.js?v=54"></script>
 <script src="api.js?v=54"></script>
+<script src="nav.js?v=1"></script>
 <script>
 // ============================================================
 //  event.html — Dashboard หัวหน้ากลุ่ม (split pay)
@@ -199,12 +200,12 @@ let POLL = null;        // ตัวจับเวลา auto-refresh
 //  MOCK (พรีวิวได้โดยไม่ต้องล็อกอิน LINE)
 // ============================================================
 const MOCK_STATUS = {
-  event_group:'EVT-204517', theme:'ทริปทะเลโทนซัมเมอร์',
+  event_group:'EVT-204517', theme:NAV.t('ทริปทะเลโทนซัมเมอร์','Summer-toned beach trip'),
   paid_count:2, member_count:3, grand_total:1151,
   members:[
-    { name:'พลอย',        order_group:'OG-9001', items:1, total:430, paid:true,  shipped:true  },
-    { name:'น้องเป่าเปา',  order_group:'OG-9002', items:1, total:291, paid:false, shipped:false },
-    { name:'คุณยายสมร',    order_group:'OG-9003', items:1, total:430, paid:true,  shipped:false },
+    { name:NAV.t('พลอย','Ploy'),        order_group:'OG-9001', items:1, total:430, paid:true,  shipped:true  },
+    { name:NAV.t('น้องเป่าเปา','Bao'),  order_group:'OG-9002', items:1, total:291, paid:false, shipped:false },
+    { name:NAV.t('คุณยายสมร','Grandma Samorn'),    order_group:'OG-9003', items:1, total:430, paid:true,  shipped:false },
   ]
 };
 
@@ -216,9 +217,9 @@ async function boot(){
 
   // ไม่มี event id ใน URL → empty/edge
   if(!EVENT_GROUP){
-    edgeState('ยังไม่ได้เลือกอีเวนต์',
-      'เปิดหน้านี้จากลิงก์ “จองตีมกับเพื่อน” ที่ส่งให้หัวหน้ากลุ่ม เพื่อดูสถานะการจ่ายของทุกคนในตีมค่ะ',
-      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    edgeState(NAV.t('ยังไม่ได้เลือกอีเวนต์','No event selected yet'),
+      NAV.t('เปิดหน้านี้จากลิงก์ “จองตีมกับเพื่อน” ที่ส่งให้หัวหน้ากลุ่ม เพื่อดูสถานะการจ่ายของทุกคนในตีมค่ะ','Open this page from the "Book a theme together" link sent to the group lead to see everyone\'s payment status.'),
+      NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
     return;
   }
 
@@ -232,7 +233,7 @@ async function boot(){
   }catch(e){ /* ตกไป mock */ }
 
   if(!LIVE){
-    $('#demoNote').innerHTML = 'โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อดึงสถานะจาก Supabase';
+    $('#demoNote').innerHTML = NAV.t('โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อดึงสถานะจาก Supabase','Preview mode (mock) · open via real LINE to pull live status from Supabase');
   }
 
   await load(false);
@@ -249,7 +250,7 @@ async function boot(){
 // ============================================================
 async function load(isRefresh){
   const btn = $('#refreshBtn');
-  if(isRefresh){ btn.disabled = true; btn.textContent = 'กำลังโหลด…'; }
+  if(isRefresh){ btn.disabled = true; btn.textContent = NAV.t('กำลังโหลด…','Loading…'); }
 
   let st = null;
   try{
@@ -261,7 +262,7 @@ async function load(isRefresh){
       st = JSON.parse(JSON.stringify(MOCK_STATUS));
     }
   }catch(e){ st = { error:'network' }; }
-  finally{ if(isRefresh){ btn.disabled=false; btn.textContent='รีเฟรช'; } }
+  finally{ if(isRefresh){ btn.disabled=false; btn.textContent=NAV.t('รีเฟรช','Refresh'); } }
 
   renderStatus(st);
 }
@@ -273,33 +274,33 @@ function showDash(on){
 }
 
 function renderStatus(st){
-  if(!st){ edgeState('โหลดข้อมูลไม่สำเร็จ','ลองกดรีเฟรชอีกครั้งนะคะ'); return; }
+  if(!st){ edgeState(NAV.t('โหลดข้อมูลไม่สำเร็จ','Couldn\'t load data'),NAV.t('ลองกดรีเฟรชอีกครั้งนะคะ','Please tap refresh and try again.')); return; }
 
   // ---- errors ----
   if(st.error==='denied'){
-    edgeState('ดูได้เฉพาะสมาชิกกลุ่ม',
-      'หน้านี้สำหรับหัวหน้ากลุ่มและสมาชิกในตีมเท่านั้น — ขอให้คนที่จัดตีมเปิดลิงก์นี้ให้ หรือชวนคุณเข้ากลุ่มก่อนค่ะ',
-      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    edgeState(NAV.t('ดูได้เฉพาะสมาชิกกลุ่ม','Group members only'),
+      NAV.t('หน้านี้สำหรับหัวหน้ากลุ่มและสมาชิกในตีมเท่านั้น — ขอให้คนที่จัดตีมเปิดลิงก์นี้ให้ หรือชวนคุณเข้ากลุ่มก่อนค่ะ','This page is for the group lead and theme members only — ask whoever set up the theme to open this link for you, or to invite you into the group first.'),
+      NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
     return;
   }
   if(st.error==='not_found'){
-    edgeState('ไม่พบอีเวนต์นี้',
-      'อาจเป็นเพราะลิงก์ไม่ถูกต้อง หรืออีเวนต์ถูกยกเลิกไปแล้ว',
-      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    edgeState(NAV.t('ไม่พบอีเวนต์นี้','Event not found'),
+      NAV.t('อาจเป็นเพราะลิงก์ไม่ถูกต้อง หรืออีเวนต์ถูกยกเลิกไปแล้ว','The link may be incorrect, or the event has been cancelled.'),
+      NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
     return;
   }
   if(st.error){
-    edgeState('โหลดสถานะไม่สำเร็จ',
-      'เกิดข้อผิดพลาด ('+esc(st.error)+') — ลองกดรีเฟรชอีกครั้งนะคะ');
+    edgeState(NAV.t('โหลดสถานะไม่สำเร็จ','Couldn\'t load status'),
+      NAV.t('เกิดข้อผิดพลาด ','An error occurred ')+'('+esc(st.error)+')'+NAV.t(' — ลองกดรีเฟรชอีกครั้งนะคะ',' — please tap refresh and try again.'));
     return;
   }
 
   const members = (st.members || []).slice();
   // ไม่มีสมาชิกเลย
   if(members.length===0){
-    edgeState('ยังไม่มีคนในตีมนี้',
-      'อีเวนต์นี้ยังไม่มีใครจองชุด — เมื่อเพื่อนเริ่มจองในตีม รายชื่อและสถานะการจ่ายจะปรากฏที่นี่ค่ะ',
-      'ไปหน้าครอบครัว & กลุ่ม','family.html');
+    edgeState(NAV.t('ยังไม่มีคนในตีมนี้','No one in this theme yet'),
+      NAV.t('อีเวนต์นี้ยังไม่มีใครจองชุด — เมื่อเพื่อนเริ่มจองในตีม รายชื่อและสถานะการจ่ายจะปรากฏที่นี่ค่ะ','No one has booked an outfit for this event yet — once friends start booking in the theme, their names and payment status will show here.'),
+      NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
     return;
   }
 
@@ -316,23 +317,23 @@ function renderStatus(st){
   const pct = memCount>0 ? Math.round(paidCount/memCount*100) : 0;
   const unpaid = Math.max(0, memCount - paidCount);
 
-  $('#evCap').textContent = 'อีเวนต์ ' + (st.event_group || EVENT_GROUP) + ' · ต่างคนต่างจ่าย';
+  $('#evCap').textContent = NAV.t('อีเวนต์ ','Event ') + (st.event_group || EVENT_GROUP) + NAV.t(' · ต่างคนต่างจ่าย',' · everyone pays their own');
   $('#paidX').textContent = paidCount;
   $('#memY').textContent = memCount;
   $('#grandTot').textContent = baht(grand);
   $('#barFill').style.width = pct + '%';
-  $('#pctTxt').textContent = pct + '% ชำระแล้ว';
-  $('#leftTxt').textContent = unpaid>0 ? ('เหลืออีก ' + unpaid + ' คนที่ยังไม่จ่าย') : 'ทุกคนจ่ายครบแล้ว';
+  $('#pctTxt').textContent = pct + NAV.t('% ชำระแล้ว','% paid');
+  $('#leftTxt').textContent = unpaid>0 ? (NAV.t('เหลืออีก ','') + unpaid + NAV.t(' คนที่ยังไม่จ่าย',' still to pay')) : NAV.t('ทุกคนจ่ายครบแล้ว','Everyone has paid');
 
   // ปุ่มเตือน: เปิดให้กดได้ (เป็น affordance อธิบาย) เมื่อยังมีคนค้างจ่าย
   const rb = $('#remindBtn'), rh = $('#remindHint');
   if(unpaid>0){
     rb.disabled = false;
-    rb.onclick = () => alert('ระบบเตือนอัตโนมัติให้แล้วค่ะ — คุณช่วยทักเพื่อนใน LINE กลุ่มได้อีกแรงค่ะ');
-    rh.textContent = 'ยังเหลือ ' + unpaid + ' คนที่รอชำระ · ระบบเตือนอัตโนมัติให้อยู่แล้ว';
+    rb.onclick = () => alert(NAV.t('ระบบเตือนอัตโนมัติให้แล้วค่ะ — คุณช่วยทักเพื่อนใน LINE กลุ่มได้อีกแรงค่ะ','Automatic reminders are already sent — a nudge to friends in the group LINE chat helps too.'));
+    rh.textContent = NAV.t('ยังเหลือ ','') + unpaid + NAV.t(' คนที่รอชำระ · ระบบเตือนอัตโนมัติให้อยู่แล้ว',' still pending · reminders go out automatically');
   } else {
     rb.disabled = true;
-    rh.textContent = 'ทุกคนจ่ายครบแล้ว ไม่ต้องเตือนเพิ่ม';
+    rh.textContent = NAV.t('ทุกคนจ่ายครบแล้ว ไม่ต้องเตือนเพิ่ม','Everyone has paid — no more reminders needed');
   }
 
   // ---- roster: เรียงคนที่ยังไม่จ่ายขึ้นก่อน, แล้วยอดมากก่อน ----

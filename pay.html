@@ -216,7 +216,7 @@ async function boot(){
   } else {
     // โหมดพรีวิว / mock
     SUMMARY = JSON.parse(JSON.stringify(MOCK_SUMMARY));
-    $('#demo').innerHTML = 'โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อจ่ายกับ Supabase';
+    $('#demo').innerHTML = NAV.t('โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อจ่ายกับ Supabase','Preview mode (mock) · open via LINE to pay through Supabase');
   }
 
   // โหลดช่องทางชำระ (payInfo คืน data ตรง ไม่ห่อ ok/data)
@@ -245,30 +245,30 @@ function billHtml(s){
     return `<div class="orow">
       <div class="osw" style="background:${hex}"></div>
       <div class="ot"><div class="on">${esc(it.name||it.code)}</div>
-        <div class="ow">${esc(it.wearer||'')}${it.wearer?' ใส่ · ':''}${esc(it.code||'')}</div></div>
-      <div class="op"><b>${baht(it.rate)}</b>${it.deposit>0?`<div class="od">มัดจำ ${baht(it.deposit)}</div>`:''}</div>
+        <div class="ow">${esc(it.wearer||'')}${it.wearer?NAV.t(' ใส่ · ',' wears · '):''}${esc(it.code||'')}</div></div>
+      <div class="op"><b>${baht(it.rate)}</b>${it.deposit>0?`<div class="od">${NAV.t('มัดจำ','Deposit')} ${baht(it.deposit)}</div>`:''}</div>
     </div>`;
-  }).join('') || '<div class="seccap">ไม่มีรายการ</div>';
+  }).join('') || `<div class="seccap">${NAV.t('ไม่มีรายการ','No items')}</div>`;
 
   const shipTo = (s.recipient || s.address) ? `<div class="shipto">
-      <div class="sl">ส่งไปที่</div>
+      <div class="sl">${NAV.t('ส่งไปที่','Deliver to')}</div>
       <div class="sn">${esc(s.recipient||'-')}</div>
       ${s.address?`<div class="sa">${esc(s.address)}</div>`:''}
     </div>` : '';
 
   const holdNote = !s.paid ? `<div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      เรากันชุดให้ 30 นาที — โอนก่อนหมดเวลานะคะ</div>` : '';
+      ${NAV.t('เรากันชุดให้ 30 นาที — โอนก่อนหมดเวลานะคะ','We’re holding your pieces for 30 minutes — please transfer before time runs out.')}</div>` : '';
 
   return `<div class="sec">
-    <div class="sechead"><div><div class="sectitle">บิลของคุณ · จองตีมกับเพื่อน</div>
-      <div class="seccap">ชุดที่คุณรับผิดชอบในออเดอร์กลุ่มนี้</div></div></div>
+    <div class="sechead"><div><div class="sectitle">${NAV.t('บิลของคุณ · จองตีมกับเพื่อน','Your bill · group theme booking')}</div>
+      <div class="seccap">${NAV.t('ชุดที่คุณรับผิดชอบในออเดอร์กลุ่มนี้','The pieces you’re covering in this group order')}</div></div></div>
     <div style="margin-top:10px">${itemHtml}</div>
     <div class="totbox">
-      <div class="trow"><span class="muted">ค่าเช่ารวม</span><span>${baht(s.rate_sum)}</span></div>
-      ${s.discount>0?`<div class="trow"><span class="muted">ส่วนลดแพคเกจกลุ่ม${s.discount_pct?` (-${s.discount_pct}%)`:''}</span><span style="color:var(--ok)">−${baht(s.discount)}</span></div>`:''}
-      ${s.deposit_sum>0?`<div class="trow"><span class="muted">มัดจำ (คืนหลังตรวจชุด)</span><span>${baht(s.deposit_sum)}</span></div>`:''}
-      <div class="trow"><span class="muted">ค่าส่ง</span><span>${s.shipping>0?baht(s.shipping):'ส่งฟรี'}</span></div>
-      <div class="trow hl"><span>รวมโอน</span><span>${baht(s.total)}</span></div>
+      <div class="trow"><span class="muted">${NAV.t('ค่าเช่ารวม','Rental total')}</span><span>${baht(s.rate_sum)}</span></div>
+      ${s.discount>0?`<div class="trow"><span class="muted">${NAV.t('ส่วนลดแพคเกจกลุ่ม','Group package discount')}${s.discount_pct?` (-${s.discount_pct}%)`:''}</span><span style="color:var(--ok)">−${baht(s.discount)}</span></div>`:''}
+      ${s.deposit_sum>0?`<div class="trow"><span class="muted">${NAV.t('มัดจำ (คืนหลังตรวจชุด)','Deposit (refunded after inspection)')}</span><span>${baht(s.deposit_sum)}</span></div>`:''}
+      <div class="trow"><span class="muted">${NAV.t('ค่าส่ง','Shipping')}</span><span>${s.shipping>0?baht(s.shipping):NAV.t('ส่งฟรี','Free')}</span></div>
+      <div class="trow hl"><span>${NAV.t('รวมโอน','Total')}</span><span>${baht(s.total)}</span></div>
     </div>
     ${shipTo}
     ${holdNote}
@@ -278,20 +278,20 @@ function billHtml(s){
 function payHtml(s, pay){
   const hasPay = pay && (pay.pay_account_no || pay.pay_promptpay_qr || pay.pay_promptpay_id);
   const payInner = !hasPay
-    ? `<div class="seccap" style="text-align:left">ช่องทางชำระจะแสดงในแชต LINE — โอนแล้วแนบสลิปได้เลยค่ะ</div>`
-    : `<div class="qhd">ช่องทางชำระ</div>
-      ${pay.pay_account_no?`<div class="qrow"><span>${esc(pay.pay_bank_name||'โอนเข้าบัญชี')}</span><b>${esc(pay.pay_account_no)}</b></div>
+    ? `<div class="seccap" style="text-align:left">${NAV.t('ช่องทางชำระจะแสดงในแชต LINE — โอนแล้วแนบสลิปได้เลยค่ะ','Payment details will appear in the LINE chat — transfer and attach the slip there.')}</div>`
+    : `<div class="qhd">${NAV.t('ช่องทางชำระ','Payment details')}</div>
+      ${pay.pay_account_no?`<div class="qrow"><span>${esc(pay.pay_bank_name||NAV.t('โอนเข้าบัญชี','Bank transfer'))}</span><b>${esc(pay.pay_account_no)}</b></div>
         ${pay.pay_account_name?`<div style="font-size:12px;color:var(--muted);text-align:right">${esc(pay.pay_account_name)}</div>`:''}`:''}
       ${pay.pay_promptpay_id?`<div class="ppwrap"><div id="ppqr"></div>
-        <div class="payamt">สแกนแล้วโอน <b>${baht(s.total)}</b></div></div>`
+        <div class="payamt">${NAV.t('สแกนแล้วโอน','Scan and transfer')} <b>${baht(s.total)}</b></div></div>`
       : pay.pay_promptpay_qr?`<div class="ppwrap">
         <img src="${esc(pay.pay_promptpay_qr)}" alt="PromptPay QR" style="width:210px;max-width:72%;border:1px solid var(--line);border-radius:8px">
-        <div class="payamt">สแกนแล้วโอน <b>${baht(s.total)}</b></div></div>`:''}
-      <div class="paynote">${esc(pay.pay_note||'โอนแล้วแนบสลิปในแชตนี้ได้เลยค่ะ')}</div>`;
+        <div class="payamt">${NAV.t('สแกนแล้วโอน','Scan and transfer')} <b>${baht(s.total)}</b></div></div>`:''}
+      <div class="paynote">${esc(pay.pay_note||NAV.t('โอนแล้วแนบสลิปในแชตนี้ได้เลยค่ะ','Once transferred, attach the slip in this chat.'))}</div>`;
 
   return `<div class="sec paybox">
     ${payInner}
-    <button class="btn sage" id="paidBtn" style="margin-top:14px">ฉันโอนแล้ว</button>
+    <button class="btn sage" id="paidBtn" style="margin-top:14px">${NAV.t('ฉันโอนแล้ว','I’ve transferred')}</button>
   </div>`;
 }
 
@@ -309,7 +309,7 @@ function renderBill(){
 }
 
 async function onPaid(){
-  const btn = $('#paidBtn'); btn.disabled = true; btn.textContent = 'กำลังยืนยัน…';
+  const btn = $('#paidBtn'); btn.disabled = true; btn.textContent = NAV.t('กำลังยืนยัน…','Confirming…');
   let ok = false;
   try{
     if(LIVE){
@@ -321,8 +321,8 @@ async function onPaid(){
   }catch(e){ ok = false; }
 
   if(!ok){
-    btn.disabled = false; btn.textContent = 'ฉันโอนแล้ว';
-    alert('ยืนยันไม่สำเร็จ ลองใหม่อีกครั้งนะคะ');
+    btn.disabled = false; btn.textContent = NAV.t('ฉันโอนแล้ว','I’ve transferred');
+    alert(NAV.t('ยืนยันไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Couldn’t confirm — please try again.'));
     return;
   }
   SUMMARY.paid = true;
@@ -338,19 +338,20 @@ function renderPaid(){
     <div class="sec">
       <div class="done">
         <div class="di"><span class="ck"></span></div>
-        <h4>จ่ายแล้ว</h4>
-        <p>ขอบคุณค่ะ — เราเห็นการโอนแล้ว เดี๋ยวตรวจสลิปและส่งยืนยันให้ทาง LINE ค่ะ</p>
+        <h4>${NAV.t('จ่ายแล้ว','Paid')}</h4>
+        <p>${NAV.t('ขอบคุณค่ะ — เราเห็นการโอนแล้ว เดี๋ยวตรวจสลิปและส่งยืนยันให้ทาง LINE ค่ะ','Thank you — we’ve seen your transfer. We’ll check the slip and send confirmation via LINE.')}</p>
       </div>
       <div class="totbox" style="border-top:1px dashed var(--line)">
-        <div class="trow hl" style="border-top:none;margin-top:0;padding-top:0"><span>ยอดที่โอน</span><span>${baht(s.total)}</span></div>
+        <div class="trow hl" style="border-top:none;margin-top:0;padding-top:0"><span>${NAV.t('ยอดที่โอน','Amount paid')}</span><span>${baht(s.total)}</span></div>
       </div>
       ${(s.recipient||s.address)?`<div class="shipto">
-        <div class="sl">ส่งไปที่</div>
+        <div class="sl">${NAV.t('ส่งไปที่','Deliver to')}</div>
         <div class="sn">${esc(s.recipient||'-')}</div>
         ${s.address?`<div class="sa">${esc(s.address)}</div>`:''}</div>`:''}
     </div>`;
 }
 
+window.addEventListener('lloop:lang', function(){ location.reload(); });
 document.addEventListener('DOMContentLoaded', boot);
 </script>
 </body>

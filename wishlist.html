@@ -12,6 +12,7 @@
 <script src="config.js"></script>
 <script src="me-api.js"></script>
 <script src="analytics.js"></script>
+<script src="nav.js?v=1"></script>
 <style>
   :root {
     --cream: #FBFAF7;
@@ -491,15 +492,12 @@
 </head>
 <body>
 
-<header>
-  <a href="index.html" class="back-link">กลับหน้าหลัก</a>
-  <a href="index.html" class="logo">LLOOP</a>
-</header>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 
 <div class="page-hero">
   <div class="label">Wishlist</div>
-  <h1>บอกให้เรารู้ว่าคุณอยากใส่อะไร</h1>
-  <p class="sub">ส่งรูปชุดที่ชอบมา — เราจะพยายามหามาให้</p>
+  <h1 data-i18n="Tell us what you'd love to wear">บอกให้เรารู้ว่าคุณอยากใส่อะไร</h1>
+  <p class="sub" data-i18n="Send a photo of a piece you love — we'll try to find it">ส่งรูปชุดที่ชอบมา — เราจะพยายามหามาให้</p>
 </div>
 
 <div class="wrap">
@@ -509,18 +507,18 @@
     <div class="check">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <p>ขอบคุณที่บอกเรา · เราจะหามาให้</p>
+    <p data-i18n="Thank you for telling us · we'll find it for you">ขอบคุณที่บอกเรา · เราจะหามาให้</p>
   </div>
 
   <!-- Form -->
   <div class="form-card" id="formCard">
-    <h2>ส่งรูปชุดที่ต้องการ</h2>
+    <h2 data-i18n="Send a photo of the piece you want">ส่งรูปชุดที่ต้องการ</h2>
 
     <form id="wishForm" novalidate>
 
       <!-- Image upload -->
       <div class="field">
-        <label>รูปชุดที่ต้องการ <span class="req">*</span> <span class="hint">ถ่ายหรือเลือกจากกล้อง/แกลเลอรี</span></label>
+        <label><span data-i18n="Photo of the piece you want">รูปชุดที่ต้องการ</span> <span class="req">*</span> <span class="hint" data-i18n="Take a photo or choose from your gallery">ถ่ายหรือเลือกจากกล้อง/แกลเลอรี</span></label>
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="imgFile" accept="image/*" capture="environment">
           <div class="upload-placeholder" id="uploadPlaceholder">
@@ -531,7 +529,7 @@
                 <polyline points="21 15 16 10 5 21"/>
               </svg>
             </div>
-            <div class="main-text">แตะเลือกรูป</div>
+            <div class="main-text" data-i18n="Tap to choose a photo">แตะเลือกรูป</div>
           </div>
           <img id="imgPreview" alt="preview">
         </div>

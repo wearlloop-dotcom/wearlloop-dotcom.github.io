@@ -693,12 +693,7 @@ function openDetail(id) {
     g.weight?`<span class="ftag">${weightName(g.weight)}</span>`:'',
     g.sheer?`<span class="ftag">${t('sheer')}</span>`:`<span class="ftag">${t('notSheer')}</span>`,
 ].join('');
-  const measures = [
-    [t('bust'), g.bust?`${g.bust[0]}–${g.bust[1]}"`: t('free')],
-    [t('waist'), g.waist?`${g.waist[0]}–${g.waist[1]}"`: t('free')],
-    [t('hip'), g.hip?`${g.hip}"`: t('free')],
-    [t('length'), g.length?`${Math.round(g.length/2.54*2)/2}"`:'—'],
-].map(m =>`<div class="mcell"><span>${m[0]}</span>${m[1]}</div>`).join('');
+  window._curDetailId = g.id;  // ให้ปุ่มสลับหน่วยเรียก measureCells ใหม่ได้
   const swatches = g.colors.map(c =>`<div class="swatch"><i style="background:${c[1]}"></i><span>${c[0]}</span></div>`).join('');
   const tips = tipList.map(x =>`<div class="trow"><i></i>${x}</div>`).join('');
 
@@ -745,8 +740,8 @@ function openDetail(id) {
       <div class="sec">${lang ==='th'?'ครบลุค — ทรงผม & เครื่องประดับ':'Complete the look'}</div>
       <div id="lookbox" class="lookbox"><button class="lookbtn" onclick="loadLook('${g.code || g.id}','${(g.occasion_tags||[])[0]||''}')">${lang ==='th'?'ดูทรงผม & เครื่องประดับที่เข้ากับชุดนี้':'See hair & accessories for this look'}</button></div>
       <div id="ugcWrap" style="display:none"><div class="sec">${lang ==='th'?'รูปจริงจากลูกค้า':'Real customer photos'}</div><div id="ugcbox" class="ugcbox"></div></div>
-      <div class="sec">${t('secSize')}</div>
-      <div class="measure">${measures}</div>
+      <div class="sec secrow">${t('secSize')}<span class="munit">${['in','cm'].map(u=>`<button data-u="${u}" class="${gMUnit===u?'on':''}" onclick="setMUnit('${u}')">${u==='in'?(lang==='th'?'นิ้ว':'inch'):(lang==='th'?'ซม.':'cm')}</button>`).join('')}</span></div>
+      <div class="measure" id="measureBox">${measureCells(g)}</div>
       ${chart ? `<div class="sec">${lang==='th'?'ตารางไซส์':'Size chart'}</div><div class="dsizechart"><img src="${chart}" alt="size chart" loading="lazy">${ourSizesLabel ? `<div class="dscnote">${lang==='th'?`ตารางอ้างอิงจากแบรนด์ — <b>ไซส์ที่เรามีให้เช่า: ${ourSizesLabel}</b>`:`Brand reference — <b>we rent: ${ourSizesLabel}</b>`}</div>` : ''}</div>` : ''}
       <div id="fitsummary"></div>
       <div class="sec">${t('secFabric')}</div>
@@ -806,6 +801,16 @@ function openDetail(id) {
   if (gUseDate) checkAvail(g.id);  // โชว์สถานะวันที่เลือกจากหน้าแรกทันที
   $('#overlay').scrollTop = 0; const sh = $('#sheet'); if (sh) sh.scrollTop = 0;
 }
+let gMUnit = 'in';  // หน่วยตารางวัดตัว: นิ้ว / ซม.
+function measureCells(g){
+  const u = gMUnit;
+  const rng = a => a ? (u==='cm' ? `${Math.round(a[0]*2.54)}–${Math.round(a[1]*2.54)} ${t('cm')}` : `${a[0]}–${a[1]}"`) : t('free');
+  const one = v => v ? (u==='cm' ? `${Math.round(v*2.54)} ${t('cm')}` : `${v}"`) : t('free');
+  const len = g.length ? (u==='cm' ? `${Math.round(g.length)} ${t('cm')}` : `${Math.round(g.length/2.54*2)/2}"`) : '—';
+  return [[t('bust'),rng(g.bust)],[t('waist'),rng(g.waist)],[t('hip'),one(g.hip)],[t('length'),len]]
+    .map(m=>`<div class="mcell"><span>${m[0]}</span>${m[1]}</div>`).join('');
+}
+function setMUnit(u){ gMUnit=u; const box=document.getElementById('measureBox'); const g=GARMENTS.find(x=>x.id===window._curDetailId); if(box&&g) box.innerHTML=measureCells(g); document.querySelectorAll('.munit button').forEach(b=>b.classList.toggle('on', b.dataset.u===u)); }
 function closeDetail() { $('#overlay').classList.remove('open'); document.body.style.overflow =''; }
 // เลื่อนแกลเลอรีด้วยปุ่มลูกศร + อัปเดตตัวนับรูป
 function galNav(dir){ const g=document.getElementById('dgal'); if(!g) return; g.scrollBy({left: dir*g.clientWidth, behavior:'smooth'}); }

@@ -77,8 +77,8 @@
 </style>
 </head>
 <body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="wrap">
-  <header><div class="logo">LLOOP</div></header>
 
   <div class="hero">
     <svg class="heroart" viewBox="0 0 480 320" preserveAspectRatio="xMidYMid slice" fill="none">
@@ -87,26 +87,26 @@
     </svg>
 
     <div class="inner">
-      <h1>เช่าชุดสวย<br>ใส่ไป</h1>
+      <h1 data-i18n="Rent something beautiful<br>to wear">เช่าชุดสวย<br>ใส่ไป</h1>
       <div class="rotline"><span class="rotw" id="rotw">งานแต่ง</span></div>
-      <p>ไม่ต้องซื้อ ไม่ต้องเก็บ ส่งคืนแล้วเราซักให้</p>
-      <a class="hbtn" id="ctaLine">ทักไลน์ให้สไตลิสต์ช่วยเลือก</a>
+      <p data-i18n="No buying, no storing — return it and we’ll handle the laundry.">ไม่ต้องซื้อ ไม่ต้องเก็บ ส่งคืนแล้วเราซักให้</p>
+      <a class="hbtn" id="ctaLine" data-i18n="Chat with a stylist on LINE">ทักไลน์ให้สไตลิสต์ช่วยเลือก</a>
     </div>
   </div>
 
   <div class="trust">
-    <div><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M3 9v6l9 5 9-5V9"/></svg></div><div class="tx">มัดจำคืนเต็ม</div></div>
-    <div><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14V7h11v10H3z"/><path d="M14 10h4l3 3v4h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg></div><div class="tx">ส่งทั่วไทย</div></div>
-    <div><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/></svg></div><div class="tx">สไตลิสต์ช่วยเลือก</div></div>
+    <div><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M3 9v6l9 5 9-5V9"/></svg></div><div class="tx" data-i18n="Full deposit back">มัดจำคืนเต็ม</div></div>
+    <div><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14V7h11v10H3z"/><path d="M14 10h4l3 3v4h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg></div><div class="tx" data-i18n="Nationwide delivery">ส่งทั่วไทย</div></div>
+    <div><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/></svg></div><div class="tx" data-i18n="Stylist helps you choose">สไตลิสต์ช่วยเลือก</div></div>
   </div>
 
   <section>
-    <div class="sh">เลือกตามงาน</div>
+    <div class="sh" data-i18n="Shop by occasion">เลือกตามงาน</div>
     <div class="cols">
-      <div class="col" style="background:#F0D9CE;color:#7A4A33">งานแต่ง</div>
-      <div class="col" style="background:#F2E2C0;color:#7A5A1E">รับปริญญา</div>
-      <div class="col" style="background:#D8ECE4;color:#1E5347">ปาร์ตี้ค่ำคืน</div>
-      <div class="col" style="background:#E0DCEF;color:#463A6E">ออกงานกลางวัน</div>
+      <div class="col" style="background:#F0D9CE;color:#7A4A33" data-i18n="Weddings">งานแต่ง</div>
+      <div class="col" style="background:#F2E2C0;color:#7A5A1E" data-i18n="Graduation">รับปริญญา</div>
+      <div class="col" style="background:#D8ECE4;color:#1E5347" data-i18n="Evening parties">ปาร์ตี้ค่ำคืน</div>
+      <div class="col" style="background:#E0DCEF;color:#463A6E" data-i18n="Daytime events">ออกงานกลางวัน</div>
     </div>
   </section>
 
@@ -126,6 +126,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="nav.js?v=1"></script>
 <script>
 (async function(){
   const C = window.CONFIG || {};

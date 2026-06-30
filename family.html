@@ -283,10 +283,10 @@ const VENUE_PALETTES = [
 const NEUTRAL_PALETTE = ['#15233F','#9FB7AC','#B8A179','#E4D5B7']; // fallback กลาง ๆ
 // เฉดสีให้เลือกเอง (ชื่อ+hex ตรงกับหน้าอื่น) — multi-select ในโหมด "เลือกโทนเอง"
 const SHADES = [
-  ['แดงเชอร์รี่','#B23A48'],['โอลด์โรส','#C98A7A'],['เทอราคอตต้า','#C96F4A'],['คาราเมล','#9C6B45'],
-  ['มัสตาร์ด','#C9A227'],['ครีมเบจ','#E4D5B7'],['แชมเปญทอง','#C9A86A'],['เซจ','#9FB7AC'],
-  ['มรกต','#2E6F5E'],['มะกอก','#7A7A3C'],['ฟ้าอ่อน','#A9C7D8'],['น้ำเงินเนวี','#2B3A55'],
-  ['ลาเวนเดอร์','#9A8AB0'],['เทาหิน','#8C8B86'],['ดำ','#1F1F1F'],['ขาวงาช้าง','#F2EFE6']
+  [NAV.t('แดงเชอร์รี่','Cherry red'),'#B23A48'],[NAV.t('โอลด์โรส','Old rose'),'#C98A7A'],[NAV.t('เทอราคอตต้า','Terracotta'),'#C96F4A'],[NAV.t('คาราเมล','Caramel'),'#9C6B45'],
+  [NAV.t('มัสตาร์ด','Mustard'),'#C9A227'],[NAV.t('ครีมเบจ','Cream beige'),'#E4D5B7'],[NAV.t('แชมเปญทอง','Champagne gold'),'#C9A86A'],[NAV.t('เซจ','Sage'),'#9FB7AC'],
+  [NAV.t('มรกต','Emerald'),'#2E6F5E'],[NAV.t('มะกอก','Olive'),'#7A7A3C'],[NAV.t('ฟ้าอ่อน','Soft blue'),'#A9C7D8'],[NAV.t('น้ำเงินเนวี','Navy'),'#2B3A55'],
+  [NAV.t('ลาเวนเดอร์','Lavender'),'#9A8AB0'],[NAV.t('เทาหิน','Stone grey'),'#8C8B86'],[NAV.t('ดำ','Black'),'#1F1F1F'],[NAV.t('ขาวงาช้าง','Ivory'),'#F2EFE6']
 ];
 // แหล่งที่มาของโทน: auto = ระบบเลือก, season = เลือกฤดูเอง, venue = ตามสถานที่
 // season โหมดเลือกได้ทั้ง ฤดู (season) หรือ เฉดสีเอง (shades[]) — เป็นทางเลือกแทนกัน
@@ -308,57 +308,57 @@ function loadGooglePlaces(){
 let AIQ = null;
 async function refreshAIQ(preset){
   const h=document.querySelector('#aiqHint'); if(!h) return;
-  if(!LIVE){ h.textContent='โหมดเดโม · ของจริงนับรวมกับโควต้า AI หน้าแรก'; return; }
+  if(!LIVE){ h.textContent=NAV.t('โหมดเดโม · ของจริงนับรวมกับโควต้า AI หน้าแรก','Demo mode · live usage counts toward your home-page AI quota'); return; }
   if(preset!=null){ AIQ=preset; }
   else { try{ AIQ = await window.API.stylistQuota(); }catch(_e){ AIQ=null; } }
-  h.textContent = (AIQ!=null) ? `AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)` : '';
+  h.textContent = (AIQ!=null) ? NAV.t(`AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)`,`Venue AI · ${AIQ} left (shared with your home-page stylist quota)`) : '';
 }
 const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
-const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู้ใหญ่', senior:'ผู้ใหญ่ขึ้นวัย' };
-const GEN_TH = { female:'หญิง', male:'ชาย', '':'' };
-const REL_QUICK = ['คุณแม่','คุณพ่อ','ลูกสาว','ลูกชาย','คุณยาย','คุณย่า','คุณตา','คุณปู่','ป้า','น้า','หลาน','เพื่อน'];
+const AGE_TH = { kid:NAV.t('เด็ก','Child'), teen:NAV.t('วัยรุ่น','Teen'), adult:NAV.t('ผู้ใหญ่','Adult'), senior:NAV.t('ผู้ใหญ่ขึ้นวัย','Senior') };
+const GEN_TH = { female:NAV.t('หญิง','Female'), male:NAV.t('ชาย','Male'), '':'' };
+const REL_QUICK = [NAV.t('คุณแม่','Mum'),NAV.t('คุณพ่อ','Dad'),NAV.t('ลูกสาว','Daughter'),NAV.t('ลูกชาย','Son'),NAV.t('คุณยาย','Grandma'),NAV.t('คุณย่า','Grandma'),NAV.t('คุณตา','Grandpa'),NAV.t('คุณปู่','Grandpa'),NAV.t('ป้า','Aunt'),NAV.t('น้า','Aunt'),NAV.t('หลาน','Niece/Nephew'),NAV.t('เพื่อน','Friend')];
 
 // ชุดตัวอย่าง (สต็อก) — มี age_band/gender/สี/ฤดูสี
 const STOCK = [
-  {code:'D21',name:'ชุดเดรสลินินโอลด์โรส',age:'adult',gen:'female',hex:'#C98A7A',cn:'โอลด์โรส',season:'autumn',fit:92},
-  {code:'D08',name:'เดรสผ้าไหมสีน้ำตาลทอง',age:'adult',gen:'female',hex:'#B07D4F',cn:'น้ำตาลทอง',season:'autumn',fit:88},
-  {code:'D33',name:'เดรสคอวีสีอิฐ',age:'adult',gen:'female',hex:'#A85B43',cn:'สีอิฐ',season:'autumn',fit:81},
-  {code:'K12',name:'เดรสเด็กระบายสีพีช',age:'kid',gen:'female',hex:'#E6A57E',cn:'พีช',season:'autumn',fit:90},
-  {code:'K05',name:'ชุดกระโปรงเด็กสีครีม',age:'kid',gen:'female',hex:'#E4D5B7',cn:'ครีม',season:'autumn',fit:84},
-  {code:'B07',name:'เสื้อเชิ้ตเด็กชายสีน้ำตาล',age:'kid',gen:'male',hex:'#9C6B45',cn:'น้ำตาล',season:'autumn',fit:86},
-  {code:'M03',name:'สูทผู้ชายโทนเอิร์ธ',age:'adult',gen:'male',hex:'#7A5C3E',cn:'เอิร์ธโทน',season:'autumn',fit:79},
+  {code:'D21',name:NAV.t('ชุดเดรสลินินโอลด์โรส','Old-rose linen dress'),age:'adult',gen:'female',hex:'#C98A7A',cn:NAV.t('โอลด์โรส','Old rose'),season:'autumn',fit:92},
+  {code:'D08',name:NAV.t('เดรสผ้าไหมสีน้ำตาลทอง','Golden-brown silk dress'),age:'adult',gen:'female',hex:'#B07D4F',cn:NAV.t('น้ำตาลทอง','Golden brown'),season:'autumn',fit:88},
+  {code:'D33',name:NAV.t('เดรสคอวีสีอิฐ','Brick V-neck dress'),age:'adult',gen:'female',hex:'#A85B43',cn:NAV.t('สีอิฐ','Brick'),season:'autumn',fit:81},
+  {code:'K12',name:NAV.t('เดรสเด็กระบายสีพีช','Peach ruffle dress for kids'),age:'kid',gen:'female',hex:'#E6A57E',cn:NAV.t('พีช','Peach'),season:'autumn',fit:90},
+  {code:'K05',name:NAV.t('ชุดกระโปรงเด็กสีครีม','Cream skirt set for kids'),age:'kid',gen:'female',hex:'#E4D5B7',cn:NAV.t('ครีม','Cream'),season:'autumn',fit:84},
+  {code:'B07',name:NAV.t('เสื้อเชิ้ตเด็กชายสีน้ำตาล','Brown shirt for boys'),age:'kid',gen:'male',hex:'#9C6B45',cn:NAV.t('น้ำตาล','Brown'),season:'autumn',fit:86},
+  {code:'M03',name:NAV.t('สูทผู้ชายโทนเอิร์ธ','Earth-tone suit for men'),age:'adult',gen:'male',hex:'#7A5C3E',cn:NAV.t('เอิร์ธโทน','Earth tone'),season:'autumn',fit:79},
 ];
 
 // กลุ่มตัวอย่าง — รวมเคส "คุณยาย" และเคส "ยังไม่มีสมาชิก"
-let ME = { id:'me', name:'พลอย' };
+let ME = { id:'me', name:NAV.t('พลอย','Ploy') };
 let GROUPS = [
-  { id:'g1', name:'ครอบครัวของฉัน', kind:'family', members:[
-      {id:'me', name:'พลอย', rel:null, role:'owner', age:'adult', gen:'female', managed:false, bust:33,waist:26,hip:36, season:'autumn'},
-      {id:'c1', name:'น้องเป่าเปา', rel:'ลูกสาว', role:'member', age:'kid', gen:'female', managed:true, bust:24,waist:22,hip:25, season:'autumn'},
-      {id:'c2', name:'คุณยายสมร', rel:'คุณยาย', role:'member', age:'senior', gen:'female', managed:true, bust:38,waist:34,hip:40, season:'winter'},
+  { id:'g1', name:NAV.t('ครอบครัวของฉัน','My family'), kind:'family', members:[
+      {id:'me', name:NAV.t('พลอย','Ploy'), rel:null, role:'owner', age:'adult', gen:'female', managed:false, bust:33,waist:26,hip:36, season:'autumn'},
+      {id:'c1', name:NAV.t('น้องเป่าเปา','Bao'), rel:NAV.t('ลูกสาว','Daughter'), role:'member', age:'kid', gen:'female', managed:true, bust:24,waist:22,hip:25, season:'autumn'},
+      {id:'c2', name:NAV.t('คุณยายสมร','Grandma Samorn'), rel:NAV.t('คุณยาย','Grandma'), role:'member', age:'senior', gen:'female', managed:true, bust:38,waist:34,hip:40, season:'winter'},
   ]},
-  { id:'g2', name:'เพื่อนมหา’ลัย', kind:'friends', members:[
-      {id:'me', name:'พลอย', rel:null, role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
-      {id:'f1', name:'มิ้นต์', rel:'เพื่อน', role:'member', age:'adult', gen:'female', managed:false, season:'autumn'},
-      {id:'f2', name:'ใบเฟิร์น', rel:'เพื่อน', role:'member', age:'adult', gen:'female', managed:false, season:'summer', pend:true},
+  { id:'g2', name:NAV.t('เพื่อนมหา’ลัย','Uni friends'), kind:'friends', members:[
+      {id:'me', name:NAV.t('พลอย','Ploy'), rel:null, role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'f1', name:NAV.t('มิ้นต์','Mint'), rel:NAV.t('เพื่อน','Friend'), role:'member', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'f2', name:NAV.t('ใบเฟิร์น','Fern'), rel:NAV.t('เพื่อน','Friend'), role:'member', age:'adult', gen:'female', managed:false, season:'summer', pend:true},
   ]},
-  { id:'g4', name:'เพื่อนที่ทำงาน', kind:'friends', members:[
-      {id:'me', name:'พลอย', rel:null, role:'member', age:'adult', gen:'female', managed:false, season:'autumn'},
-      {id:'w1', name:'พี่กิ๊ฟ', rel:'เพื่อน', role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
-      {id:'w2', name:'ตูน', rel:'เพื่อน', role:'member', age:'adult', gen:'female', managed:false, season:'winter'},
+  { id:'g4', name:NAV.t('เพื่อนที่ทำงาน','Work friends'), kind:'friends', members:[
+      {id:'me', name:NAV.t('พลอย','Ploy'), rel:null, role:'member', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'w1', name:NAV.t('พี่กิ๊ฟ','Gift'), rel:NAV.t('เพื่อน','Friend'), role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'w2', name:NAV.t('ตูน','Toon'), rel:NAV.t('เพื่อน','Friend'), role:'member', age:'adult', gen:'female', managed:false, season:'winter'},
   ]},
-  { id:'g5', name:'แก๊งทริปทะเล', kind:'friends', members:[
-      {id:'me', name:'พลอย', rel:null, role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
-      {id:'t1', name:'ฟ้า', rel:'เพื่อน', role:'member', age:'adult', gen:'female', managed:false, season:'spring'},
+  { id:'g5', name:NAV.t('แก๊งทริปทะเล','Beach trip crew'), kind:'friends', members:[
+      {id:'me', name:NAV.t('พลอย','Ploy'), rel:null, role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
+      {id:'t1', name:NAV.t('ฟ้า','Fah'), rel:NAV.t('เพื่อน','Friend'), role:'member', age:'adult', gen:'female', managed:false, season:'spring'},
   ]},
-  { id:'g3', name:'ครอบครัวใหม่', kind:'family', members:[
-      {id:'me', name:'พลอย', rel:null, role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
+  { id:'g3', name:NAV.t('ครอบครัวใหม่','New family'), kind:'family', members:[
+      {id:'me', name:NAV.t('พลอย','Ploy'), rel:null, role:'owner', age:'adult', gen:'female', managed:false, season:'autumn'},
   ]},
 ];
 // คำเชิญที่ "พลอย" ถูกชวน รอกดรับ
 let INVITES = [
-  { group_id:'inv1', name:'ทริปเชียงใหม่ปีใหม่', kind:'friends', from:'น้ำหวาน' },
-  { group_id:'inv2', name:'ครอบครัวฝั่งคุณสามี', kind:'family', from:'คุณแม่เปิ้ล' },
+  { group_id:'inv1', name:NAV.t('ทริปเชียงใหม่ปีใหม่','Chiang Mai New Year trip'), kind:'friends', from:NAV.t('น้ำหวาน','Namwan') },
+  { group_id:'inv2', name:NAV.t('ครอบครัวฝั่งคุณสามี','Husband\'s side of the family'), kind:'family', from:NAV.t('คุณแม่เปิ้ล','Mum Pearl') },
 ];
 let active = 'g1', selRel = null;
 let MY_HIDE = false;   // ซ่อนรูปโปรไฟล์ของฉัน (privacy)
@@ -379,7 +379,7 @@ function unwrap(res){
 // map row จาก my_groups → รูป GROUPS ที่หน้าเว็บใช้
 function mapGroup(g){
   return {
-    id: g.group_id, name: g.name||'กลุ่ม', kind: g.kind||'family',
+    id: g.group_id, name: g.name||NAV.t('กลุ่ม','Group'), kind: g.kind||'family',
     my_role: g.my_role, my_status: g.my_status,
     members: (g.members||[]).map(m=>({
       id: m.customer_id, name: m.name||'สมาชิก', rel: m.relation||null,

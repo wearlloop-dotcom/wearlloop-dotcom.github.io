@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
+<script src="nav.js?v=1"></script>
 <style>
   :root {
     --cream: #FDFAF6;
@@ -549,35 +550,35 @@
 
     <!-- 3. Occasion -->
     <div class="section">
-      <div class="section-title">ใส่โอกาสไหน</div>
+      <div class="section-title" data-i18n="Where did you wear it?">ใส่โอกาสไหน</div>
       <div class="chips" id="occasionChips">
-        <div class="chip" data-v="ออกงาน">ออกงาน</div>
-        <div class="chip" data-v="งานแต่ง">งานแต่ง</div>
-        <div class="chip" data-v="ถ่ายรูป">ถ่ายรูป</div>
-        <div class="chip" data-v="ดินเนอร์">ดินเนอร์</div>
-        <div class="chip" data-v="ทุกวัน">ทุกวัน</div>
-        <div class="chip" data-v="ปาร์ตี้">ปาร์ตี้</div>
+        <div class="chip" data-v="ออกงาน" data-i18n="Event">ออกงาน</div>
+        <div class="chip" data-v="งานแต่ง" data-i18n="Wedding">งานแต่ง</div>
+        <div class="chip" data-v="ถ่ายรูป" data-i18n="Photoshoot">ถ่ายรูป</div>
+        <div class="chip" data-v="ดินเนอร์" data-i18n="Dinner">ดินเนอร์</div>
+        <div class="chip" data-v="ทุกวัน" data-i18n="Everyday">ทุกวัน</div>
+        <div class="chip" data-v="ปาร์ตี้" data-i18n="Party">ปาร์ตี้</div>
       </div>
     </div>
 
     <!-- 4. Feel -->
     <div class="section">
-      <div class="section-title">รู้สึกยังไง</div>
+      <div class="section-title" data-i18n="How did it feel?">รู้สึกยังไง</div>
       <div class="chips" id="feelChips">
-        <div class="chip" data-v="มั่นใจมาก">มั่นใจมาก</div>
-        <div class="chip" data-v="สบายใส่ง่าย">สบายใส่ง่าย</div>
-        <div class="chip" data-v="สวยแต่อึดอัด">สวยแต่อึดอัด</div>
-        <div class="chip" data-v="ไม่ตรงสไตล์">ไม่ตรงสไตล์</div>
-        <div class="chip" data-v="จะเช่าซ้ำ">จะเช่าซ้ำ</div>
-        <div class="chip" data-v="แนะนำเพื่อน">แนะนำเพื่อน</div>
+        <div class="chip" data-v="มั่นใจมาก" data-i18n="So confident">มั่นใจมาก</div>
+        <div class="chip" data-v="สบายใส่ง่าย" data-i18n="Easy to wear">สบายใส่ง่าย</div>
+        <div class="chip" data-v="สวยแต่อึดอัด" data-i18n="Pretty but tight">สวยแต่อึดอัด</div>
+        <div class="chip" data-v="ไม่ตรงสไตล์" data-i18n="Not my style">ไม่ตรงสไตล์</div>
+        <div class="chip" data-v="จะเช่าซ้ำ" data-i18n="Would rent again">จะเช่าซ้ำ</div>
+        <div class="chip" data-v="แนะนำเพื่อน" data-i18n="Would recommend">แนะนำเพื่อน</div>
       </div>
-      <textarea id="feelNote" placeholder="อยากบอกอะไรเพิ่ม (ไม่บังคับ)" rows="3"></textarea>
+      <textarea id="feelNote" placeholder="อยากบอกอะไรเพิ่ม (ไม่บังคับ)" data-i18n-ph="Anything else to add (optional)" rows="3"></textarea>
     </div>
 
     <!-- 5. Photo upload -->
     <div class="section">
       <div class="upload-label">
-        แชร์รูปที่ใส่จริง
+        <span data-i18n="Share a photo of you wearing it">แชร์รูปที่ใส่จริง</span>
         <span class="credit-badge">+10 CREDIT</span>
       </div>
       <div class="upload-zone" id="uploadZone">
@@ -589,8 +590,8 @@
               <circle cx="12" cy="13" r="4"/>
             </svg>
           </div>
-          <div class="up-text">แตะเพื่อถ่ายหรือเลือกรูป</div>
-          <div class="up-sub">แนบรูป +10 เครดิต (ไม่บังคับ)</div>
+          <div class="up-text" data-i18n="Tap to take or choose a photo">แตะเพื่อถ่ายหรือเลือกรูป</div>
+          <div class="up-sub" data-i18n="Add a photo for +10 credit (optional)">แนบรูป +10 เครดิต (ไม่บังคับ)</div>
         </div>
         <img id="imgPreview" alt="preview">
       </div>
@@ -598,7 +599,7 @@
 
     <div class="err-msg" id="errMsg"></div>
 
-    <button class="btn-submit" id="submitBtn">ส่งรีวิว</button>
+    <button class="btn-submit" id="submitBtn" data-i18n="Submit review">ส่งรีวิว</button>
 
   </div><!-- /formState -->
 
@@ -631,9 +632,10 @@ const occasionTags = new Set();
 const feelTags = new Set();
 
 // --- Populate garment bar ---
+const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
 function populateGarmentBar() {
-  $('garmentName').textContent = GARMENT_NAME || 'ชุดที่เช่า';
-  if (SIZE) $('garmentSize').textContent = 'ไซส์ ' + SIZE;
+  $('garmentName').textContent = GARMENT_NAME || T('ชุดที่เช่า', 'Your rental');
+  if (SIZE) $('garmentSize').textContent = T('ไซส์ ', 'Size ') + SIZE;
   if (DATE_RANGE) $('garmentDate').textContent = DATE_RANGE;
 }
 
@@ -758,9 +760,9 @@ async function loadProfile() {
   if (!data) return;
   const bar = $('profileBar');
   bar.style.display = 'flex';
-  $('pbName').textContent = data.display_name || 'ลูกค้า';
+  $('pbName').textContent = data.display_name || T('ลูกค้า', 'Customer');
   const meta = [];
-  if (data.size) meta.push('ไซส์ ' + data.size);
+  if (data.size) meta.push(T('ไซส์ ', 'Size ') + data.size);
   if (data.height_cm) meta.push(data.height_cm + ' cm');
   if (data.color_season) meta.push(data.color_season);
   $('pbMeta').textContent = meta.join('  ·  ');
@@ -770,27 +772,27 @@ async function loadProfile() {
 $('submitBtn').addEventListener('click', async () => {
   showErr('');
 
-  if (!uid) { showErr('กรุณาเข้าสู่ระบบก่อน'); return; }
-  if (!score) { showErr('กรุณาให้คะแนนชุดก่อน'); return; }
+  if (!uid) { showErr(T('กรุณาเข้าสู่ระบบก่อน', 'Please sign in first')); return; }
+  if (!score) { showErr(T('กรุณาให้คะแนนชุดก่อน', 'Please rate the piece first')); return; }
 
   const btn = $('submitBtn');
   btn.disabled = true;
-  btn.textContent = 'กำลังส่ง...';
+  btn.textContent = T('กำลังส่ง...', 'Sending...');
 
   let photoUrl = null;
   if (selectedFile) {
-    btn.textContent = 'กำลัง upload รูป...';
+    btn.textContent = T('กำลัง upload รูป...', 'Uploading photo...');
     try {
       photoUrl = await uploadPhoto(selectedFile);
     } catch (err) {
       showErr(err.message);
       btn.disabled = false;
-      btn.textContent = 'ส่งรีวิว';
+      btn.textContent = T('ส่งรีวิว', 'Submit review');
       return;
     }
   }
 
-  btn.textContent = 'กำลังบันทึก...';
+  btn.textContent = T('กำลังบันทึก...', 'Saving...');
 
   // ส่งรีวิวผ่าน me-rpc gateway (verify LINE idToken → override p_uid + เช็คว่าเป็น rental ของเราจริง)
   // เดิมยิง sb.rpc ตรงด้วย anon key ซึ่งถูก lockdown (R-1) → submit ไม่ผ่าน รีวิวไม่เข้าระบบ
@@ -811,27 +813,27 @@ $('submitBtn').addEventListener('click', async () => {
       }}),
     });
     const j = await r.json();
-    if (j.ok) data = j.data; else error = { message: j.message || j.error || 'ส่งรีวิวไม่สำเร็จ' };
+    if (j.ok) data = j.data; else error = { message: j.message || j.error || T('ส่งรีวิวไม่สำเร็จ', 'Could not submit review') };
   } catch (_e) { error = { message: 'network' }; }
 
   btn.disabled = false;
-  btn.textContent = 'ส่งรีวิว';
+  btn.textContent = T('ส่งรีวิว', 'Submit review');
 
   if (error) {
-    showErr('เกิดข้อผิดพลาด: ' + error.message);
+    showErr(T('เกิดข้อผิดพลาด: ', 'Something went wrong: ') + error.message);
     return;
   }
 
   // Success
   if (photoUrl) {
-    showToast('ได้รับ +10 เครดิต', 'gold');
+    showToast(T('ได้รับ +10 เครดิต', '+10 credit added'), 'gold');
   } else {
-    showToast('ส่งรีวิวสำเร็จ');
+    showToast(T('ส่งรีวิวสำเร็จ', 'Review submitted'));
   }
 
   $('successSub').textContent = photoUrl
-    ? '+10 เครดิตเข้ากระเป๋าแล้ว ขอบคุณที่แชร์รูป'
-    : 'ขอบคุณที่บอกเรา ความเห็นของคุณมีค่ามากค่ะ';
+    ? T('+10 เครดิตเข้ากระเป๋าแล้ว ขอบคุณที่แชร์รูป', '+10 credit added to your wallet — thank you for sharing')
+    : T('ขอบคุณที่บอกเรา ความเห็นของคุณมีค่ามากค่ะ', 'Thank you — your feedback means a lot');
 
   setTimeout(() => {
     $('formState').style.display = 'none';
@@ -843,7 +845,7 @@ $('submitBtn').addEventListener('click', async () => {
 // --- Init ---
 async function init() {
   populateGarmentBar();
-  if (!LIFF_ID) { showErr('ยังไม่ได้ตั้งค่า LIFF_ID'); return; }
+  if (!LIFF_ID) { showErr(T('ยังไม่ได้ตั้งค่า LIFF_ID', 'LIFF_ID is not configured')); return; }
   try {
     await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
     if (!liff.isLoggedIn()) {
@@ -862,9 +864,12 @@ async function init() {
 
     await loadProfile();
   } catch (err) {
-    showErr('LINE login ไม่สำเร็จ: ' + (err.message || err));
+    showErr(T('LINE login ไม่สำเร็จ: ', 'LINE login failed: ') + (err.message || err));
   }
 }
+
+// Re-render JS-built text on language toggle
+window.addEventListener('lloop:lang', function(){ location.reload(); });
 
 init();
 </script>
