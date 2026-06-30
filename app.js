@@ -1094,8 +1094,8 @@ async function reserve(id, useCredit) {
   }
   // ต้องมีที่อยู่จัดส่งก่อนจอง — กันจ่ายเงินแล้วไม่มีที่ส่งของ
   if (!requireAddress()) return;
-  // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
-  if (!(await kycGate())) return;
+  // ด่าน KYC — เต็มเฉพาะชุดพรีเมียม/ดีไซเนอร์
+  if (!(await kycGate(g.tier))) return;
   window.track?.('begin_checkout', g.code || g.id, { price: g.price, date });
   // กันจองชน — เช็กว่างก่อน
   const free = await checkAvail(id);
@@ -1154,8 +1154,10 @@ async function bdayBook(id) {
     if (msg) { msg.className = 'availmsg busy'; msg.textContent = lang === 'th' ? 'เลือกวันที่ต้องใช้ก่อนนะคะ' : 'Pick a date first'; }
     return;
   }
-  // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
-  if (!(await kycGate())) return;
+  // ต้องมีที่อยู่จัดส่งก่อนจอง
+  if (!requireAddress()) return;
+  // ด่าน KYC — เต็มเฉพาะชุดพรีเมียม/ดีไซเนอร์
+  if (!(await kycGate(g.tier))) return;
   const res = await window.API.birthdayReserve(id, CUSTOMER, date, durEnd(date));
   if (!res.ok) {
     toast(res.error === 'unavailable' ? (lang === 'th' ? 'ชุดนี้ไม่ว่างวันนั้นค่ะ ลองวันอื่นนะคะ' : 'Unavailable that date')
@@ -1244,12 +1246,16 @@ function requireAddress() {
   return false;
 }
 
-async function kycGate() {
+// ชุดพรีเมียม/ดีไซเนอร์ = มูลค่าสูง ต้องยืนยันตัวตนเต็มก่อนเช่า
+function isPremiumTier(tier) { return /premium|designer|luxe|couture|ดีไซเนอร์|พรีเมียม/i.test(String(tier || '')); }
+// ด่าน KYC — บังคับยืนยันเต็มเฉพาะชุดพรีเมียม/ดีไซเนอร์; ชุดทั่วไปเช่าได้เลย (วางมัดจำสูงขึ้นแทน ตาม deposit_for ฝั่ง backend)
+async function kycGate(tier) {
+  if (!isPremiumTier(tier)) return true;
   const ok = await customerCanRent();
   if (!ok) {
     toast(lang === 'th'
-      ? 'ลูกค้าใหม่ต้องยืนยันตัวตนด้วยบัตรประชาชนก่อนเช่าค่ะ'
-      : 'Please verify your identity with your ID card before renting');
+      ? 'ชุดพรีเมียม/ดีไซเนอร์ ต้องยืนยันตัวตนด้วยบัตรประชาชนก่อนเช่าค่ะ'
+      : 'Premium / designer pieces need ID verification before renting');
     openKycRequired();
   }
   return ok;
@@ -1505,8 +1511,9 @@ async function bookCartNow() {
   if (!date) { toast(TH ? 'เลือกวันที่ก่อนนะคะ' : 'Pick a date'); return; }
   // ต้องมีที่อยู่จัดส่งก่อนจอง
   if (!requireAddress()) { closeCart(); return; }
-  // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
-  if (!(await kycGate())) return;
+  // ด่าน KYC — เต็มเฉพาะถ้ามีชุดพรีเมียม/ดีไซเนอร์ในตะกร้า
+  const cartPremium = gCart.some(it => isPremiumTier(it.tier || (GARMENTS.find(g => g.code === it.code) || {}).tier));
+  if (!(await kycGate(cartPremium ? 'Premium' : ''))) return;
   const btn = $('#cartSheet .ksubmit'); if (btn) { btn.disabled = true; btn.textContent = TH ? 'กำลังจอง…' : 'Booking…'; }
   const codes = gCart.map(x => x.code);
   const res = await window.API.bookCart(CUSTOMER, codes, date, durEnd(date));
@@ -2594,17 +2601,32 @@ function orderCard(r, spareList) {
           : 'If your main piece can’t make it (e.g. damaged by a prior renter), we swap in a spare right away at no extra cost.'}</div>
       </div>
     </div>` : '';
+  // ลิงก์ครอบครัว/แก๊ง — ถ้าออเดอร์นี้จองมาผ่านกลุ่ม โชว์ชื่อกลุ่ม + คนใส่จริง
+  const th = lang === 'th';
+  const kindLabel = r.group_kind === 'friends' ? (th ? 'แก๊งเพื่อน' : 'Friends') : (th ? 'ครอบครัว' : 'Family');
+  const famBadge = r.group_name ? `<div class="ofam">
+      <span class="ofam-tag">${kindLabel}</span>
+      <span class="ofam-name">${esc(r.group_name)}</span>
+      ${r.wearer_name ? `<span class="ofam-wear">${th ? 'ผู้ใส่' : 'wears'} · ${esc(r.wearer_name)}</span>` : ''}
+    </div>` : '';
+  // บันทึก "งานอะไร" — ลูกค้าจดเองได้ (ออเดอร์กลุ่ม default เป็นตีมงานของกลุ่ม แต่แก้ทับเองได้)
+  const occInner = r.occasion
+    ? `<span class="oocc-val">${esc(r.occasion)}</span><button class="oocc-edit" onclick="editOrderOccasion('${r.rental_id}')">${th ? 'แก้ไข' : 'Edit'}</button>`
+    : `<button class="oocc-add" onclick="editOrderOccasion('${r.rental_id}')">${th ? '+ บันทึกว่าใส่ไปงานอะไร' : '+ Add the occasion'}</button>`;
+  const occLine = isSpare ? '' : `<div class="orow oocc"><span>${th ? 'งาน' : 'Occasion'}</span><span class="oocc-wrap">${occInner}</span></div>`;
   return`<div class="ocard${isSpare?' ocard-spare':''}">
     <div class="otop">
       <span class="othumb" style="${orderThumb(r)}"></span>
       <div class="oname-wrap">
         <div class="oname">${r.name ||'—'}</div>
         <span class="ost ${stClass}">${status}</span>
+        ${famBadge}
       </div>
     </div>
     ${durLine}
     <div class="orow"><span>${lang ==='th'?'วันที่ใช้':'Use date'}</span>${r.use_date? fmtDate(r.use_date):'—'}</div>
     <div class="orow"><span>${lang ==='th'?'กำหนดคืน':'Due back'}</span>${r.due_at? fmtDate(r.due_at):'—'}</div>
+    ${occLine}
     ${priceLine}
     ${ship}
     ${sparesBox}
@@ -2617,6 +2639,19 @@ function toggleSpares(id) {
   const opening = el.hasAttribute('hidden');
   if (opening) { el.removeAttribute('hidden'); if (caret) caret.style.transform = 'rotate(180deg)'; }
   else { el.setAttribute('hidden', ''); if (caret) caret.style.transform = ''; }
+}
+// บันทึก "งานอะไร" ของออเดอร์ (occasion) — แตะเพื่อพิมพ์/แก้ แล้วเซฟผ่าน gateway
+async function editOrderOccasion(rentalId) {
+  const r = _myRentals.find(x => x.rental_id === rentalId); if (!r) return;
+  const th = lang === 'th';
+  const v = prompt(th ? 'ใส่ชุดนี้ไปงานอะไรคะ? (เช่น งานแต่งเพื่อน, รับปริญญา)' : 'What event is this look for?', r.occasion || '');
+  if (v === null) return;                         // กดยกเลิก
+  const occ = v.trim().slice(0, 80);
+  const res = await window.API.setRentalOccasion(rentalId, occ);
+  if (!res || !res.ok) { toast(th ? 'บันทึกไม่สำเร็จ ลองใหม่นะคะ' : 'Save failed'); return; }
+  r.occasion = occ || null; r.occasion_own = occ || null;   // อัปเดต state ในมือ แล้ววาดใหม่
+  drawOrders();
+  toast(occ ? (th ? 'บันทึกงานแล้วค่ะ' : 'Saved') : (th ? 'ลบบันทึกแล้วค่ะ' : 'Cleared'));
 }
 // ===== ยกเลิก / เลื่อน / ต่อเวลา (ลูกค้าทำเอง — ผ่าน gateway ที่เช็ค ownership) =====
 function _isYmd(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s); }
