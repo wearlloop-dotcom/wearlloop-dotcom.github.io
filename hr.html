@@ -546,7 +546,7 @@
     if(s==='resigned'&&!confirm('ยืนยันให้พนักงานคนนี้ลาออก/พ้นสภาพ?'))return;
     const {data,error}=await sb.rpc('hr_set_status',{p_id:id,p_status:s});
     if(error){toast('ไม่สำเร็จ: '+error.message);return;}
-    if(data&&data.error){toast('ไม่สำเร็จ: '+data.error);return;}
+    if(data&&data.error){toast(data.hint||('ไม่สำเร็จ: '+data.error));return;}
     toast('เปลี่ยนสถานะเป็น '+(ST_TH[s]||s)+(data.emp_no?(' · รหัส '+data.emp_no):''));
     await openEmp(id); loadStats(); load();
   }

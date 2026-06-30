@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · คอกพิตเจ้าของ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--warn:#B5860B;--danger:#A32D2D;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:16px}
+  .bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+  .bar .nav a{font-size:14px;color:var(--muted);text-decoration:none;margin-left:14px}
+  .wrap{max-width:680px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .toolrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .toolrow .when{font-size:13px;color:var(--muted)}
+  .btn{border:none;border-radius:9px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff;width:auto}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:15px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .card h2 .hint{font-size:12px;color:var(--muted);font-weight:400;font-family:var(--sans)}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .kpis.two{grid-template-columns:repeat(2,1fr)}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 12px;text-align:center}
+  .kpi .n{font-family:var(--display);font-size:23px;font-weight:700;line-height:1.05}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:5px}
+  .kpi .s{font-size:11px;color:var(--muted);margin-top:3px}
+  .kpi.hot{border-color:#EAC4C4;background:#FCF1F1}.kpi.hot .n{color:var(--danger)}
+  .kpi.good{border-color:#BFE0D4;background:#F0F7F4}.kpi.good .n{color:var(--ok)}
+  .kpi.warn .n{color:var(--warn)}.kpi.zero .n{color:var(--muted)}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .row .code{font-weight:600}
+  .row .meta{font-size:13px;color:var(--muted);margin-top:2px}
+  .tag{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--soft);color:var(--ink);white-space:nowrap}
+  .tag.ok{background:#E4F0EC;color:var(--ok)}.tag.bad{background:#FBE3E3;color:var(--danger)}.tag.warn{background:#FDF2D6;color:#8A6D08}
+  .seg{display:flex;gap:8px;margin-bottom:12px}
+  .seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px;font-family:var(--sans);font-size:13px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .empty{color:var(--muted);padding:10px 0;font-size:15px}
+  .loading{color:var(--muted);text-align:center;padding:30px}
+  .barline{height:8px;border-radius:6px;background:var(--soft);overflow:hidden;margin-top:8px}
+  .barline > i{display:block;height:100%;background:var(--ok)}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+<div class="bar">
+  <h1>คอกพิตเจ้าของ</h1>
+  <div class="nav"><a href="/today.html">งานวันนี้</a><a href="/accounting.html">บัญชี</a><a href="/analytics.html">โฆษณา</a></div>
+</div>
+<div class="wrap">
+  <section class="phead">
+    <div class="eyebrow">owner cockpit</div>
+    <h1>ภาพรวมร้าน ในจอเดียว</h1>
+    <div class="sub">เงินเข้า-ออกวันนี้/เดือนนี้ · อัตราหมุนของคลัง · ของค้าง · สมาชิก — ดูครบ ตัดสินใจไว</div>
+  </section>
+  <div class="toolrow">
+    <div class="when" id="when"></div>
+    <button class="btn" onclick="load()">รีเฟรช</button>
+  </div>
+  <div id="out"><div class="loading">กำลังโหลด…</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;            // RPC ผ่าน gateway (LINE idToken + owner-only)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+  const baht=n=>'฿'+Math.round(Number(n)||0).toLocaleString('th-TH');
+  const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'—';
+
+  let ROI=[];          // เก็บ fleet_roi ไว้สลับมุมมอง
+  let roiView='idle';  // idle = ทุนยังไม่คืน/ชุดนิ่ง · top = ทำเงินสูงสุด
+
+  function kpi(n,l,s,cls){ return `<div class="kpi ${cls||''}"><div class="n">${n}</div><div class="l">${l}</div>${s?`<div class="s">${s}</div>`:''}</div>`; }
+
+  function moneyCard(c){
+    const tNet=(c.today.income||0)-(c.today.expense||0);
+    const mNet=(c.month.income||0)-(c.month.expense||0);
+    return `<div class="card"><h2>เงินสด <span class="hint">เกณฑ์เงินสด · จาก ledger</span></h2>
+      <div class="kpis">
+        ${kpi(baht(tNet), 'สุทธิวันนี้', `รับ ${baht(c.today.income)} · จ่าย ${baht(c.today.expense)}`, tNet>=0?'good':'hot')}
+        ${kpi(baht(mNet), 'สุทธิเดือนนี้', `รับ ${baht(c.month.income)} · จ่าย ${baht(c.month.expense)}`, mNet>=0?'good':'hot')}
+        ${kpi(baht(c.pending.amount), 'รอยืนยันจ่าย', `${c.pending.count} รายการ`, c.pending.count>0?'warn':'zero')}
+      </div></div>`;
+  }
+
+  function fleetCard(c){
+    const f=c.fleet||{}, util=f.util_30d_pct||0;
+    return `<div class="card"><h2>คลัง &amp; อัตราหมุน <span class="hint">30 วันล่าสุด</span></h2>
+      <div class="kpis">
+        ${kpi(util+'%', 'หมุนใน 30 วัน', `${f.total||0} ตัวในคลัง`, util>=50?'good':(util>=25?'warn':'hot'))}
+        ${kpi(f.idle_30d||0, 'ชุดนิ่ง', 'ว่างแต่ไม่ถูกเช่า', (f.idle_30d>0)?'warn':'zero')}
+        ${kpi(c.rentals.out_now||0, 'ออกไปอยู่', (c.rentals.overdue>0?`เลยกำหนด ${c.rentals.overdue}`:'ตรงเวลา'), c.rentals.overdue>0?'hot':'')}
+      </div>
+      <div class="barline"><i style="width:${Math.min(util,100)}%"></i></div>
+      <div class="kpis" style="margin-top:12px">
+        ${kpi(f.available||0,'ว่างพร้อมเช่า','','good')}
+        ${kpi(f.cleaning||0,'ซัก/ซ่อม','',f.cleaning>0?'warn':'zero')}
+        ${kpi(c.needs_review||0,'รอตรวจขึ้นร้าน','',c.needs_review>0?'warn':'zero')}
+      </div></div>`;
+  }
+
+  function bizCard(c){
+    const ab=c.acq_budget||{};
+    return `<div class="card"><h2>สมาชิก · หนี้สิน · งบซื้อ</h2>
+      <div class="kpis">
+        ${kpi(c.subs.active||0,'สมาชิก active', c.subs.mrr?`MRR ${baht(c.subs.mrr)}`:'', 'good')}
+        ${kpi(baht(c.credit_liability),'เครดิตลูกค้าค้าง','หนี้สินที่ต้องส่งมอบ', c.credit_liability>0?'warn':'zero')}
+        ${kpi(baht(ab.remaining),'งบซื้อเหลือเดือนนี้', `ใช้ไป ${baht((ab.paid||0)+(ab.committed||0))}`, '')}
+      </div></div>`;
+  }
+
+  function roiCard(){
+    let rows=ROI.slice();
+    if(roiView==='top') rows=rows.slice().reverse();
+    rows=rows.slice(0,12);
+    const body = rows.length ? rows.map(r=>{
+      const roi=r.roi==null?null:Number(r.roi);
+      const tag = roi==null ? '<span class="tag bad">ยังไม่เคยเช่า</span>'
+        : roi>=1 ? `<span class="tag ok">คืนทุน ${roi}x</span>`
+        : `<span class="tag warn">${roi}x</span>`;
+      return `<div class="row"><div><div class="code">${esc(r.code)} · ${esc(r.name||'')}</div>
+        <div class="meta">${esc(r.tier||'-')} · เช่า ${r.times_rented||0} ครั้ง · ล่าสุด ${dt(r.last_rented)}</div></div>
+        <div style="text-align:right"><div style="font-weight:600">${baht(r.revenue)}</div>${tag}</div></div>`;
+    }).join('') : '<div class="empty">ไม่มีข้อมูล</div>';
+    return `<div class="card"><h2>ROI ต่อตัว <span class="hint">รายได้สะสม ÷ ต้นทุนซื้อ</span></h2>
+      <div class="seg">
+        <button class="${roiView==='idle'?'on':''}" onclick="setRoi('idle')">ทุนยังไม่คืน / ชุดนิ่ง</button>
+        <button class="${roiView==='top'?'on':''}" onclick="setRoi('top')">ทำเงินสูงสุด</button>
+      </div>${body}</div>`;
+  }
+  function setRoi(v){ roiView=v; $('roi').outerHTML=`<div id="roi">${roiCard()}</div>`; }
+
+  async function load(){
+    $('out').innerHTML='<div class="loading">กำลังโหลด…</div>';
+    try{
+      const [{data:c,error:e1},{data:roi,error:e2}] = await Promise.all([
+        sb.rpc('owner_cockpit'),
+        sb.rpc('fleet_roi',{p_limit:60})
+      ]);
+      if(e1) throw e1;
+      ROI = Array.isArray(roi)?roi:[];
+      $('when').textContent='อัปเดต '+new Date().toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      $('out').innerHTML = moneyCard(c)+fleetCard(c)+bizCard(c)+`<div id="roi">${roiCard()}</div>`;
+    }catch(err){
+      $('out').innerHTML=`<div class="card"><div class="empty">โหลดไม่ได้: ${esc(err.message||err)}<br>เข้าได้เฉพาะเจ้าของ (owner) — ลองล็อกอินใหม่ผ่าน LINE</div></div>`;
+    }
+  }
+  load();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
+</body>
+</html>

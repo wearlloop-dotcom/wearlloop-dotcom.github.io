@@ -39,6 +39,7 @@
   .bk .who b{color:var(--clay)}
   .bk .meta{font-size:12.5px;color:var(--stone);margin-top:4px;line-height:1.6}
   .bk .note{font-size:13px;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:3px;padding:8px 10px;margin-top:8px}
+  .payb{border:none;border-radius:4px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ok);color:#fff;width:100%}
   .empty{font-size:13px;color:var(--stone);padding:18px 2px;text-align:center}
   .gate{font-size:14px;color:var(--stone);padding:24px;text-align:center}
 </style>
@@ -52,6 +53,12 @@
     <div class="kpi"><div class="n" id="k_confirmed">–</div><div class="l">รอทำ</div></div>
     <div class="kpi"><div class="n" id="k_done">–</div><div class="l">เสร็จแล้ว</div></div>
     <div class="kpi"><div class="n" id="k_cancelled">–</div><div class="l">ยกเลิก</div></div>
+  </div>
+
+  <div class="card">
+    <h2>ค่าตอบแทนสไตลิสต์</h2>
+    <div class="sub">฿1,000 ต่อการวิเคราะห์ที่ทำเสร็จ — กด “จ่าย” เพื่อล้างยอดค้างและลงบัญชี (เจ้าของเท่านั้น)</div>
+    <div class="list" id="payouts"><div class="empty">กำลังโหลด…</div></div>
   </div>
 
   <div class="card">
@@ -93,6 +100,35 @@
       return;
     }
     ALL=rows; renderKpis(); render();
+    loadPayouts();
+  }
+  async function loadPayouts(){
+    const box=$('payouts');
+    let rows=[];
+    try{ const { data, error } = await sb.rpc('ops_partner_payouts', {}); if(error) throw error; rows=Array.isArray(data)?data:[]; }
+    catch(e){ box.innerHTML='<div class="empty">โหลดยอดค่าตอบแทนไม่ได้</div>'; return; }
+    if(!rows.length){ box.innerHTML='<div class="empty">ยังไม่มีค่าตอบแทน</div>'; return; }
+    box.innerHTML='';
+    rows.forEach(p=>{
+      const accrued=Number(p.accrued||0), paid=Number(p.paid||0);
+      const div=document.createElement('div'); div.className='bk';
+      let html=`<div class="top"><span class="when">${esc(p.partner||'สไตลิสต์')}</span>`+
+        `<span class="badge ${accrued>0?'confirmed':'done'}">ค้างจ่าย ฿${accrued.toLocaleString()}</span></div>`;
+      html+=`<div class="meta">ทำเสร็จ ${p.sessions||0} ครั้ง · จ่ายแล้ว ฿${paid.toLocaleString()}</div>`;
+      if(accrued>0){
+        html+=`<div style="margin-top:10px"><button class="payb" onclick="settlePayout('${esc(p.partner_uid)}',${accrued})">จ่าย ฿${accrued.toLocaleString()}</button></div>`;
+      }
+      div.innerHTML=html; box.appendChild(div);
+    });
+  }
+  async function settlePayout(uid, amount){
+    if(!confirm(`ยืนยันจ่ายค่าตอบแทน ฿${Number(amount).toLocaleString()}? ระบบจะลงบัญชีและล้างยอดค้าง`)) return;
+    try{
+      const { data, error } = await sb.rpc('ops_partner_payout_settle', { p_partner_uid: uid });
+      if(error) throw error;
+      alert('จ่ายแล้ว ฿'+Number((data&&data.paid)||0).toLocaleString());
+      loadPayouts();
+    }catch(e){ alert('จ่ายไม่สำเร็จ — ต้องเป็นสิทธิ์เจ้าของ'); }
   }
   function renderKpis(){
     const by=s=>ALL.filter(a=>a.status===s).length;

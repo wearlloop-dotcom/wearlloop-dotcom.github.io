@@ -31,6 +31,7 @@
       { href: 'market.html',     label: 'เฝ้าตลาด',      icon: '◴', roles: ['marketing','manager'] },
     ] },
     { section: 'ธุรกิจ', items: [
+      { href: 'cockpit.html',    label: 'คอกพิตเจ้าของ', icon: '◉', roles: ['owner','manager'] },
       { href: 'analytics.html',  label: 'วิเคราะห์',     icon: '▲', roles: ['manager','owner'] },
       { href: 'accounting.html', label: 'บัญชี',         icon: '฿', roles: ['owner','manager'] },
       { href: 'slips.html',      label: 'สลิปโอน',       icon: '⊞', roles: ['owner','manager'] },

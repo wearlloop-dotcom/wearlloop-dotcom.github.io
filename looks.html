@@ -3,697 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LLOOP · ชุมชน The Loop Looks</title>
+<title>Loop Looks · คัดเลือกลุคเด่น</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ops-ui.css">
 <style>
-  :root{
-    --bg:#FBFAF7; --ink:#1A1A1A; --soft:#F5F4F2; --line:#E7E5E1;
-    --muted:#8C8B86; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56;
-    --gold:#C9A86A; --sand:#F2ECDD; --clay:#A75F3A;
-    --display:'Poppins','Prompt',sans-serif; --sans:'Inter','Prompt',-apple-system,sans-serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:88px}
-  .contain{max-width:620px;margin:0 auto;padding:0 16px}
-  button{font-family:inherit;cursor:pointer}
-  a{color:inherit;text-decoration:none}
-  header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
-  .hbar{display:flex;align-items:center;justify-content:space-between;height:56px}
-  .logo{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:1px}
-  .back{font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:5px}
-  .back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
-  .hero{padding:22px 0 6px}
-  .eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:600}
-  .htitle{font-family:var(--display);font-size:24px;font-weight:600;margin-top:7px;letter-spacing:.4px}
-  .hsub{color:var(--muted);margin-top:5px;font-size:13px}
-
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-  @media(max-width:380px){.grid{grid-template-columns:1fr}}
-  .card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-  .card .ph{position:relative;width:100%;aspect-ratio:3/4;background:var(--soft);overflow:hidden}
-  .card .ph img{width:100%;height:100%;object-fit:cover;display:block}
-  .feat{position:absolute;top:8px;left:8px;background:rgba(26,26,26,.82);color:#fff;font-size:10.5px;font-weight:600;letter-spacing:.5px;padding:3px 8px;border-radius:20px}
-  .cbody{padding:11px 12px 12px}
-  .crow{display:flex;align-items:center;gap:7px}
-  .av{width:24px;height:24px;border-radius:50%;background:var(--sand);object-fit:cover;flex-shrink:0;border:1px solid rgba(0,0,0,.06)}
-  .cname{font-size:12.5px;font-weight:600;line-height:1.2;cursor:pointer}
-  .tier{font-size:10px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-  .cap{font-size:12.5px;color:#4a4a47;margin-top:7px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .gchip{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;border-top:1px dashed var(--line);padding-top:9px}
-  .gname{font-size:11.5px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .gname b{color:var(--ink);font-weight:600}
-  .rentbtn{background:var(--ink);color:#fff;border:none;border-radius:7px;padding:7px 11px;font-size:11.5px;font-weight:600;white-space:nowrap;flex-shrink:0}
-  .shareln{margin-top:8px;font-size:11.5px;color:var(--sage);font-weight:600;display:inline-flex;align-items:center;gap:5px}
-  .shareln svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
-
-  .empty{text-align:center;padding:46px 18px;color:var(--muted);grid-column:1/-1}
-  .empty .ei{width:56px;height:56px;margin:0 auto 14px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center}
-  .empty .ei svg{width:27px;height:27px;stroke:var(--sage);fill:none;stroke-width:1.5}
-  .empty h4{font-family:var(--display);font-size:17px;color:var(--ink);font-weight:600;margin-bottom:6px}
-  .empty p{max-width:380px;margin:0 auto}
-
-  .fab{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(to top,var(--bg) 65%,transparent);padding:14px 16px 18px;z-index:30}
-  .fab .inner{max-width:620px;margin:0 auto}
-  .btn{background:var(--ink);color:#fff;border:none;border-radius:10px;padding:14px 20px;font-size:14.5px;font-weight:600;width:100%;letter-spacing:.02em}
-  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
-  .btn:disabled{opacity:.45}
-
-  .ov{position:fixed;inset:0;background:rgba(20,20,20,.46);display:none;z-index:90;align-items:flex-end}
-  .ov.open{display:flex}
-  .sheet{background:var(--bg);width:100%;max-width:620px;margin:0 auto;border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
-  .shhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-  .shtitle{font-family:var(--display);font-size:18px;font-weight:600}
-  .x{background:none;border:none;font-size:24px;color:var(--muted);line-height:1}
-  .lbl{font-size:12.5px;font-weight:600;margin:14px 0 6px;display:block}
-  .inp,textarea,select{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px 12px;font-family:inherit;font-size:14px;background:#fff}
-  textarea{resize:vertical;min-height:64px}
-  .muted{color:var(--muted);font-size:12.5px}
-  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(26,26,26,.94);color:#fff;padding:11px 18px;border-radius:22px;font-size:13px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;max-width:88%;text-align:center}
+  .wrap{max-width:920px;margin:16px auto;padding:0 14px}
+  .filt{display:flex;gap:8px;margin:14px 0}
+  .filt button{border:1.5px solid var(--hair,#E0DED9);background:#fff;border-radius:20px;padding:8px 16px;font-family:var(--sans,'Prompt');font-size:14px;font-weight:600;color:var(--muted,#86857F);cursor:pointer}
+  .filt button.on{background:var(--forest,#2A4D43);color:#fff;border-color:var(--forest,#2A4D43)}
+  .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+  .lk{background:#fff;border:1px solid var(--hair,#E0DED9);border-radius:12px;overflow:hidden}
+  .lk.feat{outline:2px solid var(--gold,#C9A86A)}
+  .lk .ph{width:100%;aspect-ratio:3/4;background:var(--soft,#F5F4F2);position:relative}
+  .lk .ph img{width:100%;height:100%;object-fit:cover}
+  .lk .fg{position:absolute;top:8px;left:8px;background:var(--gold,#C9A86A);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:14px}
+  .lk .bd{padding:11px 12px}
+  .lk .who{font-size:13px;font-weight:600}
+  .lk .meta{font-size:11.5px;color:var(--muted,#86857F);margin-top:3px}
+  .lk .cap{font-size:12px;color:#444;margin-top:6px;max-height:2.6em;overflow:hidden}
+  .lk .acts{display:flex;gap:8px;margin-top:10px}
+  .lk button{flex:1;border:1px solid var(--hair,#E0DED9);background:#fff;border-radius:8px;padding:8px;font-family:var(--sans,'Prompt');font-size:12.5px;font-weight:600;cursor:pointer}
+  .lk button.pri{background:var(--forest,#2A4D43);color:#fff;border-color:var(--forest,#2A4D43)}
+  .lk button.danger{color:#B4543A}
+  .empty{text-align:center;color:var(--muted,#86857F);padding:40px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--forest,#2A4D43);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:50}
   .toast.show{opacity:1}
-  .prof{display:flex;gap:13px;align-items:center;margin-bottom:6px}
-  .prof .pav{width:60px;height:60px;border-radius:50%;background:var(--sand);object-fit:cover;border:1px solid rgba(0,0,0,.07)}
-  .prof .ph4{font-family:var(--display);font-size:18px;font-weight:600}
-  .stats{display:flex;gap:18px;margin:12px 0 4px;font-size:12.5px;color:var(--muted)}
-  .stats b{display:block;font-size:18px;color:var(--ink);font-family:var(--display)}
-  .occ{display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;scrollbar-width:none}
-  .occ::-webkit-scrollbar{display:none}
-  .ochip{flex-shrink:0;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
-  .ochip.on{background:var(--sand);color:var(--ink);border-color:var(--gold)}
-  .phtag{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.94);color:#1A1A1A;font-size:11px;font-weight:600;padding:6px 11px;border-radius:20px;text-decoration:none;max-width:88%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .phtag .dot{width:7px;height:7px;border-radius:50%;background:var(--clay);flex-shrink:0}
-  .tplb{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.92);color:#1A1A1A;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px}
-  .fitchip{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:var(--sage-bg);color:var(--ok);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:600}
-  .fitchip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
-  .hubs{display:flex;gap:10px;overflow-x:auto;padding:14px 0 4px;scrollbar-width:none}
-  .hubs::-webkit-scrollbar{display:none}
-  .hub{flex-shrink:0;width:96px;cursor:pointer}
-  .hub .hc{width:96px;height:120px;border-radius:12px;overflow:hidden;background:var(--soft);position:relative;border:1px solid var(--line)}
-  .hub .hc img{width:100%;height:100%;object-fit:cover}
-  .hub .hl{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 7px;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);color:#fff;font-size:12px;font-weight:600}
-  .hub .hn{font-size:9.5px;opacity:.85;font-weight:500}
-  .tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
-  .tagln{font-size:11.5px;color:var(--sage);font-weight:600;cursor:pointer}
-  .tagclr{display:inline-flex;align-items:center;gap:6px;background:var(--sand);border:1px solid var(--gold);border-radius:20px;padding:5px 12px;font-size:12.5px;font-weight:600;margin-top:12px;cursor:pointer}
-  /* story viewer (เต็มจอแบบ IG) */
-  .story{position:fixed;inset:0;background:#000;z-index:300;display:none;flex-direction:column}
-  .story.open{display:flex}
-  .story .bars{display:flex;gap:4px;padding:10px 12px 6px}
-  .story .bar{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3);overflow:hidden}
-  .story .bar i{display:block;height:100%;width:0;background:#fff;border-radius:3px}
-  .story .top{display:flex;align-items:center;gap:9px;padding:4px 14px 8px;color:#fff}
-  .story .top .sav{width:32px;height:32px;border-radius:50%;background:#555;object-fit:cover}
-  .story .top .snm{font-size:14px;font-weight:600;flex:1;min-width:0}
-  .story .top .sx{background:none;border:none;color:#fff;font-size:26px;line-height:1}
-  .story .img{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .story .img img{max-width:100%;max-height:100%;object-fit:contain}
-  .story .subdots{position:absolute;top:10px;left:0;right:0;display:flex;justify-content:center;gap:6px;z-index:3}
-  .story .subdots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45)}
-  .story .subdots span.on{background:#fff}
-  .ernrow{display:flex;gap:10px;margin:12px 0}
-  .erncard{flex:1;background:var(--sand);border-radius:12px;padding:13px;text-align:center}
-  .erncard b{display:block;font-family:var(--display);font-size:22px}
-  .erncard small{font-size:11px;color:var(--muted)}
-  .ernitem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
-  .ernitem img{width:38px;height:46px;border-radius:7px;object-fit:cover;background:var(--soft)}
-  .story .zone{position:absolute;top:0;bottom:0;width:38%;z-index:2}
-  .story .zone.l{left:0}.story .zone.r{right:0}
-  .story .info{padding:14px 16px calc(18px + env(safe-area-inset-bottom));color:#fff;background:linear-gradient(to top,rgba(0,0,0,.78),transparent)}
-  .story .scap{font-size:14px;line-height:1.5;margin-bottom:8px}
-  .story .stags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-  .story .stags span{font-size:12.5px;color:#E4C98A;font-weight:600}
-  .story .srow{display:flex;align-items:center;gap:14px}
-  .story .slike{display:inline-flex;align-items:center;gap:6px;color:#fff;background:none;border:none;font-size:14px;font-weight:600}
-  .story .slike svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8}
-  .story .slike.on svg{fill:#FF5A7A;stroke:#FF5A7A}
-  .story .srent{margin-left:auto;background:#fff;color:#1A1A1A;border:none;border-radius:8px;padding:11px 18px;font-size:13.5px;font-weight:700;text-decoration:none}
-  .story .reacts{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-  .story .react{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:600}
-  .story .react.on{background:#fff;color:#1A1A1A;border-color:#fff}
-  .tabs{display:flex;gap:8px;margin-top:16px;border-bottom:1px solid var(--line)}
-  .tab{background:none;border:none;padding:9px 4px;font-size:13.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
-  .tab.on{color:var(--ink);border-bottom-color:var(--ink)}
-  .acts{display:flex;align-items:center;gap:14px;margin-top:9px;border-top:1px dashed var(--line);padding-top:9px}
-  .act{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);font-weight:600;cursor:pointer;background:none;border:none;padding:0}
-  .act svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7}
-  .act.on{color:var(--clay)}
-  .act.on svg{fill:var(--clay);stroke:var(--clay)}
-  .lbrow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:9px}
-  .lbrow .rk{font-family:var(--display);font-size:16px;font-weight:700;width:24px;text-align:center;color:var(--gold)}
-  .lbrow .lav{width:38px;height:38px;border-radius:50%;background:var(--sand);object-fit:cover;border:1px solid rgba(0,0,0,.06)}
-  .lbrow .lnm{flex:1;min-width:0;font-size:13.5px;font-weight:600}
-  .lbrow .lnm small{display:block;font-size:11px;color:var(--muted);font-weight:500}
-  .lbrow .lsc{font-family:var(--display);font-size:15px;font-weight:700}
-  .cmt{display:flex;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}
-  .cmt .cav{width:30px;height:30px;border-radius:50%;background:var(--sand);object-fit:cover;flex-shrink:0}
-  .cmt .cb{font-size:13px}.cmt .cby{font-weight:600;font-size:12px}
-  .cmt .rpl{display:inline-block;margin-top:3px;font-size:11.5px;color:var(--sage);font-weight:600;cursor:pointer}
-  .cmt .mention{color:var(--sage);font-weight:600;cursor:pointer}
-  .followbtn{background:var(--ink);color:#fff;border:none;border-radius:20px;padding:7px 18px;font-size:12.5px;font-weight:600;margin-top:8px}
-  .followbtn.on{background:#fff;color:var(--ink);border:1px solid var(--line)}
-  .hide{display:none}
 </style>
 </head>
 <body>
-<header><div class="contain hbar">
-  <div class="logo">LLOOP</div>
-  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> หน้าหลัก</a>
-</div></header>
-
-<div class="contain">
-  <div class="hero">
-    <div class="eyebrow">community</div>
-    <h1 class="htitle">The Loop Looks</h1>
-    <p class="hsub">ลุคจริงจากคนใน loop — กดเช่าตามได้เลย · แชร์ลุคของคุณ รับเครดิต</p>
+<div class="bar"><h1>Loop Looks — คัดเลือกลุคเด่น</h1></div>
+<div class="wrap">
+  <p style="color:var(--muted,#86857F);font-size:13.5px">เลือก “ชูเป็นลุคแห่งสัปดาห์/แนะนำ” เพื่อดันลุคขึ้นต้นฟีดชุมชน + แจ้งครีเอเตอร์ · ระบบเลือกอัตโนมัติทุกจันทร์ แต่กดเองทับได้</p>
+  <div class="filt" id="filt">
+    <button class="on" data-s="published" onclick="load('published')">เผยแพร่แล้ว</button>
+    <button data-s="pending" onclick="load('pending')">รอตรวจ</button>
+    <button data-s="all" onclick="load('all')">ทั้งหมด</button>
+    <button data-s="reports" onclick="loadReports()" style="margin-left:auto">รายงาน</button>
+    <button data-s="comments" onclick="loadComments()">คอมเมนต์</button>
   </div>
-  <div class="hubs" id="hubs"></div>
-  <div class="tabs" id="tabs">
-    <button class="tab on" data-tab="all" onclick="switchTab('all')">ทั้งหมด</button>
-    <button class="tab" data-tab="following" onclick="switchTab('following')">ที่ตามอยู่</button>
-    <button class="tab" data-tab="saved" onclick="switchTab('saved')">บันทึกไว้</button>
-    <button class="tab" data-tab="board" onclick="switchTab('board')">อันดับ</button>
-  </div>
-  <div class="occ" id="occ"></div>
-  <div class="grid" id="feed">
-    <div class="empty"><p>กำลังโหลดฟีด…</p></div>
-  </div>
-  <div id="board" class="hide"></div>
+  <div class="lgrid" id="grid"><div class="empty">กำลังโหลด…</div></div>
+  <div id="cmts" style="display:none"></div>
 </div>
-
-<div class="fab"><div class="inner">
-  <button class="btn" id="shareBtn">แชร์ลุคของฉัน · รับเครดิต</button>
-</div></div>
-
-<!-- share sheet -->
-<div class="ov" id="ovShare"><div class="sheet" id="shareSheet"></div></div>
-<!-- creator profile sheet -->
-<div class="ov" id="ovProf"><div class="sheet" id="profSheet"></div></div>
-<!-- story viewer -->
-<div class="story" id="story"></div>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=49"></script>
-<script src="liffAuth.js?v=49"></script>
-<script src="me-api.js?v=54"></script>
-<script src="api.js?v=54"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
 <script>
-const $ = s => document.querySelector(s);
-const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
-const baht = n => '฿'+Number(n||0).toLocaleString('th-TH');
-const TIER_TH = { new:'', silver:'Silver', gold:'Gold', platinum:'Platinum' };
-let CUSTOMER=null, LIVE=false, FEED=[], TAB='all', OCC=null, TAG=null, STORY_I=-1;
-let LIKED=new Set(), FOLLOWING=new Set(), SAVED=new Set();
-let STORY_TIMER=null, STORY_T0=0, STORY_PAUSED=0, REPLY_TO=null, STORY_SUB=0;
-const STORY_MS=5000, REF_PCT=10;
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2300);};
+  let STATUS='published';
 
-function toast(t){ const e=$('#toast'); e.textContent=t; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),2600); }
-function openOv(id){ $(id).classList.add('open'); document.body.style.overflow='hidden'; }
-function closeOv(id){ $(id).classList.remove('open'); document.body.style.overflow=''; }
-
-async function boot(){
-  try{
-    if(window.API && window.CONFIG && !window.CONFIG.USE_MOCK){
-      const r = await window.API.init();
-      if(r && r.CUSTOMER && r.CUSTOMER.id){ CUSTOMER=r.CUSTOMER; LIVE=true; }
-    }
-  }catch(e){ /* ดูฟีดได้แม้ไม่ล็อกอิน */ }
-  try{ FEED = await window.API.communityFeed(30, null, null); }catch(e){ FEED=[]; }
-  if(LIVE){ try{ LIKED=new Set(await window.API.myLikes()); FOLLOWING=new Set(await window.API.myFollowing()); SAVED=new Set(await window.API.mySaves()); }catch(e){} }
-  renderFeed();
-  renderOcc();
-  renderHubs();
-  $('#shareBtn').onclick = openShare;
-}
-
-async function renderHubs(){
-  let hubs=[]; try{ hubs = await window.API.occasionHubs(); }catch(e){}
-  const el=$('#hubs'); if(!el) return;
-  if(!hubs.length){ el.style.display='none'; return; }
-  el.style.display='flex';
-  el.innerHTML = hubs.map(h=>`<div class="hub" onclick="filterOcc('${esc(h.occasion)}')">
-    <div class="hc">${h.cover?`<img src="${esc(h.cover)}" loading="lazy">`:''}
-      <div class="hl">${esc(h.occasion)}<div class="hn">${h.count} ลุค</div></div></div></div>`).join('');
-}
-async function renderOcc(){
-  let occs=[]; try{ occs = await window.API.lookOccasions(); }catch(e){}
-  const el=$('#occ'); if(!el) return;
-  if(!occs.length){ el.innerHTML=''; return; }
-  el.innerHTML = `<button class="ochip ${OCC?'':'on'}" onclick="filterOcc(null)">ทั้งหมด</button>` +
-    occs.map(o=>`<button class="ochip ${OCC===o?'on':''}" onclick="filterOcc('${esc(o)}')">${esc(o)}</button>`).join('');
-}
-function backToAllTab(){
-  if(TAB!=='all'){ TAB='all'; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on', b.dataset.tab==='all')); $('#board').classList.add('hide'); $('#feed').classList.remove('hide'); const o=$('#occ'); if(o) o.style.display=''; }
-}
-async function reloadFeed(){
-  $('#feed').innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
-  try{ FEED = await window.API.communityFeed(30, null, OCC, TAG); }catch(e){ FEED=[]; }
-  renderFeed();
-}
-async function filterOcc(o){ OCC=o; TAG=null; backToAllTab(); renderOcc(); reloadFeed(); }
-async function filterTag(t){ TAG=t; OCC=null; backToAllTab(); renderOcc(); reloadFeed(); }
-function clearTag(){ TAG=null; reloadFeed(); }
-
-function lookUrl(card){
-  const base = location.origin + location.pathname.replace(/looks\.html$/,'index.html');
-  const code = card.garment && card.garment.code;
-  const ref = card.creator && card.creator.handle;
-  return base + (code?`?garment=${encodeURIComponent(code)}&look=${card.id}`:`?look=${card.id}`)
-    + (ref?`&ref=${encodeURIComponent(ref)}`:'');
-}
-function myRefUrl(){
-  const h = CUSTOMER && (CUSTOMER.handle || CUSTOMER.link_code);
-  return location.origin + location.pathname.replace(/looks\.html$/,'index.html') + (h?`?ref=${encodeURIComponent(h)}`:'');
-}
-
-const FIT_TH={true:'พอดีตัว',large:'เผื่อ/ใหญ่นิด',small:'ฟิต/เล็กนิด'};
-const TPL_TH={before_after:'Before / After',styles:'3 วิธีแมตช์'};
-function lookPhotos(c){ return [c.photo].concat(Array.isArray(c.extra_photos)?c.extra_photos:[]).filter(Boolean); }
-function tplBadge(c){
-  const n=lookPhotos(c).length, t=TPL_TH[c.template];
-  if(!t && n<2) return '';
-  return `<span class="tplb">${t?esc(t):''}${(t&&n>1?' · ':'')}${n>1?n+' รูป':''}</span>`;
-}
-function fitStr(c){
-  const p=[]; if(c.wearer_height_cm) p.push('สูง '+c.wearer_height_cm); if(c.wearer_size) p.push('ไซซ์ '+esc(c.wearer_size));
-  if(FIT_TH[c.fit_note]) p.push(FIT_TH[c.fit_note]); return p.join(' · ');
-}
-function cardHtml(c){
-  const cr = c.creator||{}, g = c.garment||{};
-  const av = cr.avatar ? `<img class="av" src="${esc(cr.avatar)}" alt="">` : `<span class="av"></span>`;
-  const tier = TIER_TH[cr.tier]||'';
-  const tags = (Array.isArray(c.tags)&&c.tags.length)
-    ? `<div class="tagrow">${c.tags.slice(0,4).map(t=>`<span class="tagln" onclick="filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>` : '';
-  const fit = fitStr(c);
-  const phtag = g.code ? `<a class="phtag" href="${lookUrl(c)}" onclick="event.stopPropagation()"><span class="dot"></span>เช่าชุดนี้ · ${esc(g.name||g.code)}</a>` : '';
-  return `<div class="card">
-    <div class="ph" onclick="openStory('${c.id}')">${c.photo?`<img src="${esc(c.photo)}" loading="lazy" alt="">`:''}${c.featured?`<span class="feat">ลุคแห่งสัปดาห์</span>`:''}${tplBadge(c)}${phtag}</div>
-    <div class="cbody">
-      <div class="crow">${av}<div style="min-width:0">
-        <div class="cname" onclick="openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}</div>
-        ${tier?`<div class="tier">${esc(tier)}</div>`:''}</div></div>
-      ${c.caption?`<div class="cap">${esc(c.caption)}</div>`:''}
-      ${fit?`<div class="fitchip"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>${fit}</div>`:''}
-      ${tags}
-      ${g.code?`<div class="gchip"><div class="gname">ใส่ <b>${esc(g.name||g.code)}</b>${g.price?` · ${baht(g.price)}`:''}</div>
-        <a class="rentbtn" href="${lookUrl(c)}">เช่าลุคนี้</a></div>`:''}
-      ${c.source==='look'?`<div class="acts">
-        <button class="act ${LIKED.has(c.id)?'on':''}" id="like-${c.id}" onclick="likeLook('${c.id}')">
-          <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg>
-          <span id="likes-${c.id}">${c.likes||0}</span></button>
-        <button class="act" onclick="openComments('${c.id}')">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          <span id="cmt-${c.id}">${c.comments||0}</span></button>
-        <button class="act ${SAVED.has(c.id)?'on':''}" id="save-${c.id}" onclick="saveLook('${c.id}')" style="margin-left:auto">
-          <svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z"/></svg></button>
-        <span class="act" onclick='shareOut(${JSON.stringify({u:lookUrl(c),n:(g.name||"")}).replace(/'/g,"&#39;")})'>
-          <svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>แชร์</span>
-      </div>`:`<span class="shareln" onclick='shareOut(${JSON.stringify({u:lookUrl(c),n:(g.name||"")}).replace(/'/g,"&#39;")})'>
-        <svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>แชร์ลุคนี้</span>`}
-    </div></div>`;
-}
-
-function renderFeed(){
-  const clr = TAG ? `<div style="grid-column:1/-1"><span class="tagclr" onclick="clearTag()">#${esc(TAG)} · ล้างตัวกรอง ×</span></div>` : '';
-  if(!FEED.length){
-    $('#feed').innerHTML = `<div class="empty">
-      <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div>
-      <h4>ยังไม่มีลุคในชุมชน</h4>
-      <p>เป็นคนแรกที่แชร์ลุค — เช่า ถ่ายรูป แล้วแชร์ ได้เครดิตเข้ากระเป๋า</p></div>`;
-    if(TAG) $('#feed').innerHTML = clr + $('#feed').innerHTML;
-    return;
+  async function load(status){
+    STATUS=status;
+    $('cmts').style.display='none'; $('grid').style.display='';
+    document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on', b.dataset.s===status));
+    $('grid').innerHTML='<div class="empty">กำลังโหลด…</div>';
+    const { data, error } = await sb.rpc('ops_looks_recent', { p_limit:60, p_status:status });
+    if(error){ $('grid').innerHTML=`<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
+    const rows=data||[];
+    if(!rows.length){ $('grid').innerHTML='<div class="empty">ยังไม่มีลุคในสถานะนี้</div>'; return; }
+    $('grid').innerHTML = rows.map(card).join('');
   }
-  $('#feed').innerHTML = clr + FEED.map(cardHtml).join('');
-}
-
-async function shareOut(o){
-  const url=o.u, text = o.n?`ลุคนี้จาก LLOOP — "${o.n}" เช่าตามได้เลย`:'ลุคสวยจาก LLOOP เช่าตามได้เลย';
-  try{
-    if(navigator.share){ await navigator.share({ title:'LLOOP · The Loop Looks', text, url }); return; }
-  }catch(e){ if(e && e.name==='AbortError') return; }
-  try{ await navigator.clipboard.writeText(url); toast('คัดลอกลิงก์แล้ว — แปะลง IG/Facebook ได้เลยค่ะ'); }
-  catch(e){ toast('คัดลอกลิงก์: '+url); }
-}
-
-// ---------- story viewer (เต็มจอแบบ IG) ----------
-function openStory(id){
-  STORY_I = FEED.findIndex(x=>String(x.id)===String(id));
-  if(STORY_I<0) return;
-  STORY_SUB=0;
-  $('#story').classList.add('open'); document.body.style.overflow='hidden';
-  renderStory();
-}
-function clearStoryTimer(){ if(STORY_TIMER){ cancelAnimationFrame(STORY_TIMER); STORY_TIMER=null; } }
-function closeStory(){ clearStoryTimer(); $('#story').classList.remove('open'); document.body.style.overflow=''; STORY_I=-1; STORY_SUB=0; }
-function storyNav(d){
-  clearStoryTimer();
-  const c=FEED[STORY_I], ph=c?lookPhotos(c):[];
-  // เลื่อนรูปย่อยภายในลุคก่อน (carousel)
-  if(d>0 && STORY_SUB < ph.length-1){ STORY_SUB++; return renderStory(); }
-  if(d<0 && STORY_SUB > 0){ STORY_SUB--; return renderStory(); }
-  const n=STORY_I+d;
-  if(n<0){ STORY_SUB=0; return renderStory(); } if(n>=FEED.length){ closeStory(); return; }
-  STORY_I=n; STORY_SUB=0; renderStory();
-}
-function startStoryTimer(){
-  clearStoryTimer(); STORY_T0=performance.now(); STORY_PAUSED=0;
-  const fill=$('#sbar-'+STORY_I);
-  (function step(t){
-    if(STORY_PAUSED){ STORY_TIMER=requestAnimationFrame(step); return; }
-    const r=Math.min(1,(t-STORY_T0)/STORY_MS);
-    if(fill) fill.style.width=(r*100)+'%';
-    if(r>=1){ storyNav(1); return; }
-    STORY_TIMER=requestAnimationFrame(step);
-  })(performance.now());
-}
-function storyPress(){ STORY_PRESS=performance.now(); STORY_PAUSED=performance.now(); }
-function storyRelease(){ if(STORY_PAUSED){ STORY_T0+=performance.now()-STORY_PAUSED; STORY_PAUSED=0; } }
-function storyTap(d){ if(performance.now()-STORY_PRESS>260) return; storyNav(d); } // กดค้าง=หยุดอ่าน ไม่เลื่อน
-function renderStory(){
-  const c=FEED[STORY_I]; if(!c){ closeStory(); return; }
-  const cr=c.creator||{}, g=c.garment||{};
-  const bars=FEED.map((_,i)=>`<div class="bar"><i id="sbar-${i}" style="width:${i<STORY_I?'100%':'0'}"></i></div>`).join('');
-  const av=cr.avatar?`<img class="sav" src="${esc(cr.avatar)}">`:`<span class="sav"></span>`;
-  const tags=(Array.isArray(c.tags)&&c.tags.length)?`<div class="stags">${c.tags.map(t=>`<span onclick="closeStory();filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>`:'';
-  const canLike=c.source==='look';
-  const ph=lookPhotos(c); const cur=ph[STORY_SUB]||c.photo;
-  const dots = ph.length>1 ? `<div class="subdots">${ph.map((_,i)=>`<span class="${i===STORY_SUB?'on':''}"></span>`).join('')}</div>` : '';
-  const tb = TPL_TH[c.template] ? `<span class="tplb" style="top:auto;bottom:10px;right:10px">${esc(TPL_TH[c.template])}</span>` : '';
-  $('#story').innerHTML=`
-    <div class="bars">${bars}</div>
-    <div class="top">${av}<div class="snm" onclick="closeStory();openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}</div>
-      ${canLike?`<button class="sx" style="font-size:18px" onclick="reportLook('${c.id}')" aria-label="รายงาน"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.8"><path d="M4 21V4h11l-1 3h6l-2 5 2 5H5"/></svg></button>`:''}
-      <button class="sx" onclick="closeStory()">×</button></div>
-    <div class="img" onpointerdown="storyPress()" onpointerup="storyRelease()" onpointercancel="storyRelease()">
-      <div class="zone l" onclick="storyTap(-1)"></div>
-      <div class="zone r" onclick="storyTap(1)"></div>
-      ${cur?`<img src="${esc(cur)}">`:''}${dots}${tb}
-    </div>
-    <div class="info">
-      ${c.caption?`<div class="scap">${esc(c.caption)}</div>`:''}
-      ${fitStr(c)?`<div class="scap" style="color:#E4C98A;font-size:12.5px">${fitStr(c)}</div>`:''}
-      ${tags}
-      ${canLike?`<div class="reacts" id="reacts-${c.id}">
-        ${[['love','รัก'],['wow','ว้าว'],['want','อยากได้'],['fire','แรง']].map(([k,l])=>`<button class="react" data-k="${k}" onclick="reactLook('${c.id}','${k}')">${l}</button>`).join('')}
-      </div>`:''}
-      <div class="srow">
-        ${canLike?`<button class="slike ${LIKED.has(c.id)?'on':''}" id="slike-${c.id}" onclick="storyLike('${c.id}')">
-          <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg>
-          <span id="slikes-${c.id}">${c.likes||0}</span></button>`:''}
-        ${canLike?`<button class="slike ${SAVED.has(c.id)?'on':''}" id="ssave-${c.id}" onclick="storySave('${c.id}')">
-          <svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z"/></svg></button>`:''}
-        ${g.code?`<a class="srent" href="${lookUrl(c)}">เช่าลุคนี้${g.price?` · ${baht(g.price)}`:''}</a>`:''}
-      </div>
-    </div>`;
-  startStoryTimer();
-}
-async function storySave(id){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อบันทึกค่ะ'); return; }
-  const btn=$('#ssave-'+id); if(btn) btn.classList.toggle('on');
-  let res=null; try{ res=await window.API.toggleSave(id); }catch(e){}
-  if(res){ if(btn) btn.classList.toggle('on', !!res.saved); if(res.saved) SAVED.add(id); else SAVED.delete(id);
-    const fb=$('#save-'+id); if(fb) fb.classList.toggle('on', !!res.saved); }
-}
-async function reactLook(id, key){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อรีแอคชั่นค่ะ'); return; }
-  const wrap=$('#reacts-'+id);
-  if(wrap) wrap.querySelectorAll('.react').forEach(b=>b.classList.toggle('on', b.dataset.k===key));
-  try{ await window.API.reactLook(id, key); }catch(e){}
-}
-async function reportLook(id){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อรายงานค่ะ'); return; }
-  const reason = prompt('รายงานลุคนี้เพราะอะไร? (เช่น เนื้อหาไม่เหมาะสม, สแปม, ละเมิดลิขสิทธิ์)');
-  if(reason===null) return;
-  let res=null; try{ res=await window.API.reportLook(id, reason); }catch(e){}
-  if(res&&res.ok){ toast(res.hidden?'ขอบคุณค่ะ — ลุคนี้ถูกซ่อนเพื่อตรวจสอบแล้ว':'รับเรื่องแล้ว ทีมงานจะตรวจสอบให้ค่ะ'); }
-  else toast('รายงานไม่สำเร็จ ลองใหม่นะคะ');
-}
-async function storyLike(id){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อถูกใจค่ะ'); return; }
-  const btn=$('#slike-'+id), cnt=$('#slikes-'+id), was=btn&&btn.classList.contains('on');
-  if(btn) btn.classList.toggle('on'); if(cnt) cnt.textContent=Math.max(0,(+cnt.textContent||0)+(was?-1:1));
-  let res=null; try{ res=await window.API.toggleLike(id); }catch(e){}
-  if(res){ if(btn) btn.classList.toggle('on', !!res.liked); if(cnt) cnt.textContent=res.likes;
-    if(res.liked) LIKED.add(id); else LIKED.delete(id);
-    const it=FEED.find(x=>String(x.id)===String(id)); if(it) it.likes=res.likes; }
-}
-
-// ---------- tabs ----------
-async function switchTab(tab){
-  TAB=tab;
-  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
-  const feed=$('#feed'), board=$('#board'), occ=$('#occ');
-  // chips กรองโอกาส โชว์เฉพาะแท็บ "ทั้งหมด"
-  if(occ) occ.style.display = (tab==='all') ? '' : 'none';
-  const hb=$('#hubs'); if(hb) hb.style.display = (tab==='all' && hb.innerHTML) ? 'flex' : 'none';
-  if(tab==='board'){ feed.classList.add('hide'); board.classList.remove('hide'); return renderBoard(); }
-  board.classList.add('hide'); feed.classList.remove('hide');
-  if(tab==='following'){
-    if(!LIVE){ feed.innerHTML='<div class="empty"><p>ล็อกอิน LINE เพื่อดูลุคจากคนที่คุณตามค่ะ</p></div>'; return; }
-    feed.innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
-    let f=[]; try{ f=await window.API.followingFeed(30); }catch(e){}
-    FEED=f; feed.innerHTML = f.length? f.map(cardHtml).join('') : '<div class="empty"><p>ยังไม่มีลุคจากคนที่ตาม — ไปกดติดตามในแท็บ “ทั้งหมด” ได้เลยค่ะ</p></div>';
-  } else if(tab==='saved'){
-    if(!LIVE){ feed.innerHTML='<div class="empty"><p>ล็อกอิน LINE เพื่อดูลุคที่บันทึกไว้ค่ะ</p></div>'; return; }
-    feed.innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
-    let f=[]; try{ f=await window.API.savedFeed(40); }catch(e){}
-    FEED=f; feed.innerHTML = f.length? f.map(cardHtml).join('') : '<div class="empty"><p>ยังไม่มีลุคที่บันทึก — กดไอคอนคั่นหน้าบนการ์ดเพื่อเก็บไว้ดูทีหลังค่ะ</p></div>';
-  } else { renderFeed(); }
-}
-
-async function saveLook(id){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อบันทึกลุคค่ะ'); return; }
-  const btn=$('#save-'+id), was=btn&&btn.classList.contains('on');
-  if(btn) btn.classList.toggle('on');
-  let res=null; try{ res=await window.API.toggleSave(id); }catch(e){}
-  if(res){ if(btn) btn.classList.toggle('on', !!res.saved); if(res.saved) SAVED.add(id); else SAVED.delete(id);
-    toast(res.saved?'บันทึกลุคไว้แล้ว':'นำออกจากที่บันทึกแล้ว');
-    if(TAB==='saved' && !res.saved) switchTab('saved'); }
-  else if(btn) btn.classList.toggle('on', was);
-}
-
-async function renderBoard(){
-  const board=$('#board');
-  board.innerHTML='<div class="empty"><p>กำลังจัดอันดับ…</p></div>';
-  let rows=[]; try{ rows=await window.API.leaderboard('rented',20); }catch(e){}
-  if(!rows.length){ board.innerHTML='<div class="empty"><p>ยังไม่มีครีเอเตอร์ในอันดับ — เริ่มแชร์ลุคเพื่อเป็นคนแรกค่ะ</p></div>'; return; }
-  board.innerHTML = `<p class="muted" style="margin:12px 0">จัดอันดับจาก “มีคนเช่าตามลุค” มากสุด</p>` + rows.map(r=>{
-    const cr=r.creator||{}; const av=cr.avatar?`<img class="lav" src="${esc(cr.avatar)}">`:`<span class="lav"></span>`;
-    return `<div class="lbrow"><div class="rk">${r.rank}</div>${av}
-      <div class="lnm" onclick="openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}
-        <small>${r.looks||0} ลุค · ${r.likes||0} ถูกใจ · เช่าตาม ${r.rented||0}</small></div>
-      <div class="lsc">${r.rented||0}</div></div>`;
-  }).join('');
-}
-
-// ---------- like / comment ----------
-async function likeLook(id){
-  if(!LIVE){ toast('ล็อกอิน LINE ก่อนกดถูกใจค่ะ'); return; }
-  const btn=$('#like-'+id), cnt=$('#likes-'+id);
-  const wasOn=btn.classList.contains('on');
-  btn.classList.toggle('on'); if(cnt) cnt.textContent=Math.max(0,(+cnt.textContent||0)+(wasOn?-1:1)); // optimistic
-  let res=null; try{ res=await window.API.toggleLike(id); }catch(e){}
-  if(res){ btn.classList.toggle('on', !!res.liked); if(cnt) cnt.textContent=res.likes; if(res.liked) LIKED.add(id); else LIKED.delete(id); }
-}
-
-async function openComments(id){
-  REPLY_TO=null;
-  openOv('#ovShare');
-  $('#shareSheet').innerHTML = `<div class="shhd"><div class="shtitle">คอมเมนต์</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
-    <div id="cmtList" style="margin-top:8px"><p class="muted">กำลังโหลด…</p></div>
-    ${LIVE?`<div id="replyBar" class="hide" style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--muted)">
-        <span id="replyTxt"></span><button class="x" style="font-size:18px" onclick="clearReply()">×</button></div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-      <input class="inp" id="cmtIn" placeholder="พิมพ์คอมเมนต์…" style="flex:1">
-      <button class="btn" style="width:auto;padding:11px 18px" onclick="submitComment('${id}')">ส่ง</button></div>`
-      :`<p class="muted" style="margin-top:12px">เข้าสู่ระบบผ่าน LINE เพื่อคอมเมนต์ค่ะ</p>`}`;
-  await loadComments(id);
-}
-function linkifyMentions(body){
-  return esc(body||'').replace(/@([a-z0-9_.]{2,30})/gi, (m,h)=>`<span class="mention" onclick="closeOv('#ovShare');openProfile('${h}')">@${h}</span>`);
-}
-function cmtHtml(c, reply){
-  const av=c.avatar?`<img class="cav" src="${esc(c.avatar)}">`:`<span class="cav"></span>`;
-  return `<div class="cmt" style="${reply?'margin-left:38px':''}">${av}<div class="cb">
-    <div class="cby">${esc(c.by||'Loop')}</div>${linkifyMentions(c.body)}
-    ${(LIVE && !reply)?`<span class="rpl" onclick="setReply('${c.id}','${esc((c.by||'').replace(/'/g,''))}')">ตอบกลับ</span>`:''}
-    </div></div>`;
-}
-async function loadComments(id){
-  let list=[]; try{ list=await window.API.lookComments(id); }catch(e){}
-  const el=$('#cmtList'); if(!el) return;
-  if(!list.length){ el.innerHTML='<p class="muted">ยังไม่มีคอมเมนต์ — เป็นคนแรกที่ชมลุคนี้ค่ะ</p>'; return; }
-  const tops=list.filter(c=>!c.parent), byParent={};
-  list.filter(c=>c.parent).forEach(c=>{ (byParent[c.parent]=byParent[c.parent]||[]).push(c); });
-  el.innerHTML = tops.map(c=> cmtHtml(c,false) + (byParent[c.id]||[]).map(r=>cmtHtml(r,true)).join('')).join('');
-}
-function setReply(cid, name){ REPLY_TO=cid; const b=$('#replyBar'),t=$('#replyTxt'); if(t)t.textContent='กำลังตอบ '+name; if(b)b.classList.remove('hide'); const i=$('#cmtIn'); if(i)i.focus(); }
-function clearReply(){ REPLY_TO=null; const b=$('#replyBar'); if(b)b.classList.add('hide'); }
-async function submitComment(id){
-  const inp=$('#cmtIn'); const body=(inp&&inp.value||'').trim(); if(!body) return;
-  const parent=REPLY_TO; inp.value='';
-  let res=null; try{ res=await window.API.addComment(id, body, parent); }catch(e){}
-  clearReply();
-  if(res&&res.ok&&res.hidden){ toast('คอมเมนต์ถูกซ่อนไว้ตรวจสอบ (พบคำที่ไม่เหมาะสม) ค่ะ'); }
-  else if(res&&res.ok){ await loadComments(id); const c=$('#cmt-'+id); if(c) c.textContent=(+c.textContent||0)+1; }
-  else toast('ส่งคอมเมนต์ไม่สำเร็จ ลองใหม่นะคะ');
-}
-
-// ---------- creator profile ----------
-async function openProfile(handle){
-  if(!handle) return;
-  openOv('#ovProf');
-  $('#profSheet').innerHTML = `<div class="shhd"><div class="shtitle">โปรไฟล์ครีเอเตอร์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div><p class="muted" style="margin-top:14px">กำลังโหลด…</p>`;
-  let p=null; try{ p = await window.API.creatorProfile(handle); }catch(e){}
-  if(!p || !p.found){ $('#profSheet').innerHTML = `<div class="shhd"><div class="shtitle">โปรไฟล์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div><p class="muted" style="margin-top:14px">ไม่พบโปรไฟล์นี้ หรือเจ้าของตั้งเป็นส่วนตัวค่ะ</p>`; return; }
-  const cr=p.creator||{}, im=p.impact||{};
-  const av = cr.avatar?`<img class="pav" src="${esc(cr.avatar)}" alt="">`:`<span class="pav"></span>`;
-  const looks = (p.looks||[]).map(l=>{
-    const g=l.garment||{};
-    const u = location.origin + location.pathname.replace(/looks\.html$/,'index.html') + (g.code?`?garment=${encodeURIComponent(g.code)}&look=${l.id}`:'');
-    return `<div class="card"><div class="ph">${l.photo?`<img src="${esc(l.photo)}" loading="lazy">`:''}${l.featured?'<span class="feat">เด่น</span>':''}</div>
-      <div class="cbody">${g.code?`<div class="gchip" style="border-top:none;padding-top:0;margin-top:0"><div class="gname"><b>${esc(g.name||g.code)}</b></div><a class="rentbtn" href="${u}">เช่า</a></div>`:''}</div></div>`;
-  }).join('') || `<p class="muted" style="grid-column:1/-1">ยังไม่มีลุคที่เผยแพร่</p>`;
-  const social = cr.social?`<a href="${esc(cr.social)}" target="_blank" class="shareln" style="margin-top:8px">ดูโซเชียล →</a>`:'';
-  const h = cr.handle||handle;
-  const isMe = CUSTOMER && (String(cr.handle||'').toLowerCase()===String((CUSTOMER.handle||CUSTOMER.link_code||'')).toLowerCase());
-  const following = FOLLOWING.has(String(h||'').toLowerCase());
-  const followBtn = (LIVE && !isMe) ? `<button class="followbtn ${following?'on':''}" id="followBtn" onclick="doFollow('${esc(h)}')">${following?'กำลังติดตาม':'ติดตาม'}</button>` : '';
-  $('#profSheet').innerHTML = `
-    <div class="shhd"><div class="shtitle">ครีเอเตอร์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div>
-    <div class="prof">${av}<div><div class="ph4">${esc(cr.name||'Loop')}</div>
-      <div class="tier" style="color:var(--gold)">${esc(TIER_TH[cr.tier]||'')}</div>${social}</div></div>
-    ${followBtn}
-    ${p.bio?`<p class="muted" style="margin-top:8px">${esc(p.bio)}</p>`:''}
-    <div class="stats">
-      <div><b id="folCnt">${p.followers||0}</b>ผู้ติดตาม</div>
-      <div><b>${p.looks_count||0}</b>ลุคที่แชร์</div>
-      ${im.water_l!=null?`<div><b>~${Number(im.water_l).toLocaleString()}</b>ลิตรน้ำที่ช่วยประหยัด</div>`:''}
-    </div>
-    <div class="grid" style="margin-top:14px">${looks}</div>`;
-}
-async function doFollow(handle){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อติดตามค่ะ'); return; }
-  const btn=$('#followBtn'), cnt=$('#folCnt');
-  let res=null; try{ res=await window.API.toggleFollow(handle); }catch(e){}
-  if(res && !res.error){
-    const f=!!res.following;
-    if(btn){ btn.classList.toggle('on', f); btn.textContent=f?'กำลังติดตาม':'ติดตาม'; }
-    if(cnt && res.followers!=null) cnt.textContent=res.followers;
-    if(f) FOLLOWING.add(String(handle).toLowerCase()); else FOLLOWING.delete(String(handle).toLowerCase());
+  function card(l){
+    return `<div class="lk ${l.featured?'feat':''}">
+      <div class="ph">${l.photo?`<img src="${esc(l.photo)}">`:''}${l.featured?'<span class="fg">ลุคเด่น</span>':''}</div>
+      <div class="bd">
+        <div class="who">${esc(l.creator||'Loop')}</div>
+        <div class="meta">${esc(l.garment||'-')} · ♥ ${l.likes||0} · 💬 ${l.comments||0} · เช่าตาม ${l.rented||0}${l.status!=='published'?` · <b>${esc(l.status)}</b>`:''}</div>
+        ${l.caption?`<div class="cap">${esc(l.caption)}</div>`:''}
+        <div class="acts">
+          <button class="${l.featured?'':'pri'}" onclick="feature('${l.id}', ${l.featured?'false':'true'})">${l.featured?'เลิกชู':'ชูเป็นลุคเด่น'}</button>
+          ${l.status==='published'?`<button class="danger" onclick="reject('${l.id}')">ซ่อน</button>`:''}
+        </div>
+      </div></div>`;
   }
-}
-
-async function openEarnings(){
-  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE ก่อนนะคะ'); return; }
-  openOv('#ovProf');
-  $('#profSheet').innerHTML = `<div class="shhd"><div class="shtitle">รายได้ครีเอเตอร์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div><p class="muted" style="margin-top:14px">กำลังโหลด…</p>`;
-  let e=null; try{ e=await window.API.myCreatorEarnings(); }catch(err){}
-  if(!e){ $('#profSheet').innerHTML=`<div class="shhd"><div class="shtitle">รายได้</div><button class="x" onclick="closeOv('#ovProf')">×</button></div><p class="muted" style="margin-top:14px">ยังไม่มีข้อมูลค่ะ</p>`; return; }
-  const recent=(e.recent||[]).map(r=>`<div class="ernitem">
-    ${r.photo?`<img src="${esc(r.photo)}">`:'<span style="width:38px;height:46px;border-radius:7px;background:var(--soft);display:inline-block"></span>'}
-    <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${esc(r.garment||'มีคนเช่าตามลุค')}</div>
-      <div class="muted">${new Date(r.at).toLocaleDateString('th-TH',{day:'numeric',month:'short'})} · ${r.kind==='creator_ref'?'ผ่านลิงก์ชวนเช่า':'เช่าตามลุค'}</div></div>
-    <div style="font-weight:700;color:var(--ok)">+${baht(r.amount)}</div></div>`).join('') || '<p class="muted" style="margin-top:8px">ยังไม่มีคนเช่าผ่านลิงก์/ลุคของคุณ — แชร์เพิ่มเพื่อเริ่มรับส่วนแบ่งค่ะ</p>';
-  $('#profSheet').innerHTML = `
-    <div class="shhd"><div class="shtitle">รายได้ครีเอเตอร์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div>
-    <div class="ernrow">
-      <div class="erncard"><b>${baht(e.affiliate_total||0)}</b><small>ส่วนแบ่งสะสม (เครดิต)</small></div>
-      <div class="erncard"><b>${e.conversions||0}</b><small>คนเช่าผ่านคุณ</small></div>
-    </div>
-    <div class="ernrow" style="margin-top:0">
-      <div class="erncard"><b>${e.looks_published||0}</b><small>ลุคที่แชร์</small></div>
-      <div class="erncard"><b>${e.likes_total||0}</b><small>ถูกใจรวม</small></div>
-      <div class="erncard"><b>${e.followers||0}</b><small>ผู้ติดตาม</small></div>
-    </div>
-    <div class="shtitle" style="font-size:15px;margin:16px 0 4px">รายการล่าสุด</div>
-    ${recent}
-    <button class="btn" style="margin-top:16px" onclick="closeOv('#ovProf');copyRef()">แชร์ลิงก์ชวนเช่า รับเพิ่ม</button>`;
-}
-async function copyRef(){
-  const url=myRefUrl(), text='เช่าชุดสวยที่ LLOOP ผ่านลิงก์ฉันได้เลย';
-  try{ if(navigator.share){ await navigator.share({ title:'LLOOP', text, url }); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
-  try{ await navigator.clipboard.writeText(url); toast('คัดลอกลิงก์ชวนเช่าแล้ว — แปะที่ไหนก็ได้ค่ะ'); }catch(e){ toast(url); }
-}
-
-// ---------- share a look ----------
-async function openShare(){
-  if(!LIVE || !CUSTOMER){ toast('เข้าสู่ระบบผ่าน LINE ก่อนแชร์ลุคนะคะ'); return; }
-  openOv('#ovShare');
-  $('#shareSheet').innerHTML = `<div class="shhd"><div class="shtitle">แชร์ลุคของคุณ</div><button class="x" onclick="closeOv('#ovShare')">×</button></div><p class="muted" style="margin-top:12px">กำลังโหลดชุดที่คุณเคยเช่า…</p>`;
-  let rentals=[]; try{ rentals = await window.API.myRentals(CUSTOMER); }catch(e){}
-  const opts = (rentals||[]).filter(r=>r.code||r.garment_code||r.name)
-    .map(r=>{ const code=r.code||r.garment_code; return `<option value="${esc(code||'')}" data-rental="${esc(r.id||r.rental_id||'')}">${esc(r.name||code)}</option>`; }).join('');
-  $('#shareSheet').innerHTML = `
-    <div class="shhd"><div class="shtitle">แชร์ลุคของคุณ</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
-    <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-top:8px">
-      <div style="font-size:12.5px;font-weight:600">ลิงก์ชวนเช่าของคุณ</div>
-      <div class="muted" style="margin:2px 0 9px">แชร์ลิงก์นี้ที่ไหนก็ได้ (IG/โพสต์) — ใครเช่าผ่านลิงก์ คุณได้ส่วนแบ่งเครดิต ${esc(String(REF_PCT))}% ของค่าเช่า</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn ghost" style="font-size:13px;padding:10px;flex:1" onclick="copyRef()">คัดลอกลิงก์ชวนเช่า</button>
-        <button class="btn ghost" style="font-size:13px;padding:10px;flex:1" onclick="closeOv('#ovShare');openEarnings()">รายได้ของฉัน</button>
-      </div>
-    </div>
-    <p class="muted" style="margin-top:12px">หรือแชร์ "ลุค" จากชุดที่เคยเช่า — รูปผ่านการตรวจแล้วขึ้นฟีด ได้เครดิตทันที</p>
-    <label class="lbl">ชุดที่ใส่ในรูป</label>
-    ${opts?`<select class="inp" id="shGarment">${opts}</select>`
-      :`<input class="inp" id="shGarmentCode" placeholder="ใส่โค้ดชุด เช่น g3">`}
-    <label class="lbl">รูปแบบโพสต์</label>
-    <select class="inp" id="shTpl" onchange="tplHint()">
-      <option value="single">ลุคเดี่ยว (รูปเดียว)</option>
-      <option value="before_after">Before / After (2 รูป)</option>
-      <option value="styles">3 วิธีแมตช์ (หลายรูป)</option></select>
-    <label class="lbl">รูปลุคของคุณ <span id="shPhint" class="muted" style="font-weight:400"></span></label>
-    <input class="inp" type="file" id="shPhoto" accept="image/*">
-    <label class="lbl">แคปชั่น (ไม่บังคับ)</label>
-    <textarea id="shCap" placeholder="เล่าเรื่องลุคนี้สั้น ๆ ใส่ไปงานไหน รู้สึกยังไง"></textarea>
-    <label class="lbl">โอกาส (ไม่บังคับ)</label>
-    <select class="inp" id="shOcc"><option value="">— เลือกโอกาส —</option>
-      ${['งานแต่ง','รับปริญญา','ทำงาน','คาเฟ่','เดท','ปาร์ตี้','งานบุญ','สงกรานต์','ลำลอง','ทริป'].map(o=>`<option>${o}</option>`).join('')}</select>
-    <div class="lbl" style="margin-top:14px">ฟิต/ไซซ์ (ช่วยคนอื่นตัดสินใจ — ไม่บังคับ)</div>
-    <div style="display:flex;gap:8px">
-      <input class="inp" id="shHeight" inputmode="numeric" placeholder="สูง (ซม.)" style="flex:1">
-      <input class="inp" id="shSize" placeholder="ไซซ์ที่เช่า" style="flex:1">
-    </div>
-    <select class="inp" id="shFit" style="margin-top:8px"><option value="">ใส่แล้วรู้สึก…</option>
-      <option value="true">พอดีตัว</option><option value="large">เผื่อ/ใหญ่นิดหน่อย</option><option value="small">ฟิต/เล็กนิดหน่อย</option></select>
-    <label class="lbl" style="display:flex;align-items:flex-start;gap:9px;font-weight:500;margin-top:14px">
-      <input type="checkbox" id="shCross" style="width:auto;margin-top:3px">
-      <span>ยินยอมให้ LLOOP นำลุคนี้ไปรีโพสต์ในไอจี/เพจของแบรนด์ เพื่อช่วยให้มีคนเห็น (เปิดเผยสู่สาธารณะ)</span>
-    </label>
-    <button class="btn" id="shSubmit" style="margin-top:16px">แชร์ลุค</button>`;
-  $('#shSubmit').onclick = submitShare;
-}
-
-function tplHint(){
-  const t=$('#shTpl')&&$('#shTpl').value, ph=$('#shPhoto'), h=$('#shPhint'), cap=$('#shCap');
-  if(!ph) return;
-  if(t==='single'){ ph.removeAttribute('multiple'); if(h) h.textContent=''; }
-  else { ph.setAttribute('multiple','multiple'); if(h) h.textContent = t==='before_after'?'(เลือก 2 รูป: ก่อน-หลัง)':'(เลือกหลายรูป รูปแรก=ปก)'; }
-  if(cap && t==='styles' && !cap.value) cap.value='วิธีที่ 1: \nวิธีที่ 2: \nวิธีที่ 3: ';
-  if(cap && t==='before_after' && !cap.value) cap.value='ก่อน: \nหลัง: ';
-}
-async function submitShare(){
-  const sel=$('#shGarment'); const code = sel ? sel.value : ($('#shGarmentCode') && $('#shGarmentCode').value.trim());
-  const rental = sel && sel.selectedOptions[0] ? (sel.selectedOptions[0].dataset.rental||null) : null;
-  const tpl = $('#shTpl') ? $('#shTpl').value : 'single';
-  const files = ($('#shPhoto') && $('#shPhoto').files) ? Array.from($('#shPhoto').files) : [];
-  if(!code){ toast('เลือกชุดที่ใส่ในรูปก่อนนะคะ'); return; }
-  if(!files.length){ toast('แนบรูปลุคก่อนนะคะ'); return; }
-  if(tpl==='before_after' && files.length<2){ toast('Before/After ต้อง 2 รูปนะคะ'); return; }
-  const btn=$('#shSubmit'); btn.disabled=true; btn.textContent='กำลังส่ง…';
-  const cross = $('#shCross') && $('#shCross').checked;
-  const fit = { height: parseInt($('#shHeight')&&$('#shHeight').value)||null, size: ($('#shSize')&&$('#shSize').value||'').trim()||null, fit: $('#shFit')&&$('#shFit').value||null };
-  let res=null; try{ res = await window.API.shareLook(code, files, $('#shCap').value, $('#shOcc').value, rental, cross, fit, tpl); }catch(e){}
-  if(!res || !res.ok){ btn.disabled=false; btn.textContent='แชร์ลุค'; toast('ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะคะ'); return; }
-  closeOv('#ovShare');
-  toast('ส่งลุคแล้ว — ผ่านแล้วจะขึ้นฟีดและแจ้งใน LINE ค่ะ');
-  setTimeout(async()=>{ try{ FEED = await window.API.communityFeed(30,null,OCC); renderFeed(); renderOcc(); }catch(e){} }, 3500);
-}
-
-document.addEventListener('DOMContentLoaded', boot);
+  async function feature(id, on){
+    const { error } = await sb.rpc('feature_look', { p_look:id, p_on:on });
+    if(error){ toast('ไม่สำเร็จ: '+error.message); return; }
+    toast(on?'ชูเป็นลุคเด่นแล้ว — แจ้งครีเอเตอร์ให้ค่ะ':'เลิกชูแล้ว'); load(STATUS);
+  }
+  async function loadComments(){
+    document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on', b.dataset.s==='comments'));
+    $('grid').style.display='none'; const el=$('cmts'); el.style.display=''; el.innerHTML='<div class="empty">กำลังโหลด…</div>';
+    const { data, error } = await sb.rpc('ops_comments_recent', { p_limit:100, p_only_hidden:false });
+    if(error){ el.innerHTML=`<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
+    const rows=data||[];
+    if(!rows.length){ el.innerHTML='<div class="empty">ยังไม่มีคอมเมนต์</div>'; return; }
+    el.innerHTML = rows.map(c=>`<div class="lbrow" style="${c.hidden?'opacity:.6':''}">
+      ${c.photo?`<img class="lav" src="${esc(c.photo)}">`:'<span class="lav"></span>'}
+      <div class="lnm">${esc(c.by)} <small>${esc(c.body)}</small></div>
+      <button onclick="hideC('${c.id}', ${c.hidden?'false':'true'})">${c.hidden?'ปลดซ่อน':'ซ่อน'}</button>
+    </div>`).join('');
+  }
+  async function hideC(id, on){
+    const { error } = await sb.rpc('hide_comment', { p_id:id, p_on:on });
+    if(error){ toast('ไม่สำเร็จ: '+error.message); return; }
+    toast(on?'ซ่อนคอมเมนต์แล้ว':'ปลดซ่อนแล้ว'); loadComments();
+  }
+  async function loadReports(){
+    document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on', b.dataset.s==='reports'));
+    $('grid').style.display='none'; const el=$('cmts'); el.style.display=''; el.innerHTML='<div class="empty">กำลังโหลด…</div>';
+    const { data, error } = await sb.rpc('ops_reports', { p_limit:80 });
+    if(error){ el.innerHTML=`<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
+    const rows=data||[];
+    if(!rows.length){ el.innerHTML='<div class="empty">ยังไม่มีลุคที่ถูกรายงาน</div>'; return; }
+    el.innerHTML = rows.map(r=>`<div class="lbrow">
+      ${r.photo?`<img class="lav" src="${esc(r.photo)}">`:'<span class="lav"></span>'}
+      <div class="lnm">${esc(r.creator)} <small>ถูกรายงาน ${r.reports} ครั้ง · ${esc((r.reasons||[]).join(', ')||'-')} · สถานะ ${esc(r.status)}</small></div>
+      <button class="danger" onclick="rep('${r.look}','hide')">ซ่อน</button>
+      <button onclick="rep('${r.look}','restore')">คืน</button>
+    </div>`).join('');
+  }
+  async function rep(look, act){
+    const { error } = act==='hide'
+      ? await sb.rpc('reject_look', { p_look:look, p_audit:{by:'ops_report'} })
+      : await sb.rpc('publish_look', { p_look:look });
+    if(error){ toast('ไม่สำเร็จ: '+error.message); return; }
+    toast(act==='hide'?'ซ่อนลุคแล้ว':'คืนลุคแล้ว'); loadReports();
+  }
+  async function reject(id){
+    if(!confirm('ซ่อนลุคนี้ออกจากฟีด?')) return;
+    const { error } = await sb.rpc('reject_look', { p_look:id, p_audit:{by:'ops'} });
+    if(error){ toast('ไม่สำเร็จ: '+error.message); return; }
+    toast('ซ่อนแล้ว'); load(STATUS);
+  }
+  document.addEventListener('DOMContentLoaded', ()=>load('published'));
 </script>
+<script src="ops-menu.js"></script>
 </body>
 </html>
