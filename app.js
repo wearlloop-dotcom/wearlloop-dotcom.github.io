@@ -143,6 +143,13 @@ function personalScore(g) {
   if (sp.categories && g.category && sp.categories.includes(g.category)) s += 18;
   if (sp.avoid_colors && g.colors.some(col => sp.avoid_colors.includes(col[1]))) s -= 20;
   if (EVENT && g.occasion_tags.includes(EVENT.occasion)) s += 12; // ตรงกับงานในปฏิทิน
+  // ML-lite: รสนิยมที่เรียนจากพฤติกรรมจริง (category/brand/season ที่ลูกค้าสนใจเอง)
+  const tt = c._taste;
+  if (tt && tt.n >= 5) {
+    s += Math.round((tt.categories && tt.categories[g.category] || 0) * 40);
+    s += Math.round((tt.brands && tt.brands[g.brand] || 0) * 30);
+    s += Math.round((tt.seasons && tt.seasons[g.season] || 0) * 20);
+  }
   return s;
 }
 
@@ -292,7 +299,7 @@ function renderDatebar() {
 }
 async function setHomeDate(d) {
   gUseDate = d || null;
-  if (gUseDate) { try { gAvailSet = await window.API.availableSetOn?.(gUseDate); } catch (e) { gAvailSet = null; } }
+  if (gUseDate) { try { gAvailSet = await window.API.availableSetOn?.(gUseDate, CUSTOMER && CUSTOMER.id); } catch (e) { gAvailSet = null; } }
   else { gAvailSet = null; gOnlyAvail = false; }
   // sync ช่องวันที่ทั้งสองจุด (แถบ stylist + datebar ใต้กริด)
   const vd = $('#venueDate'); if (vd) { vd.value = gUseDate || ''; vd.classList.remove('need'); }
@@ -2435,6 +2442,7 @@ async function boot() {
     CUSTOMER._streak = await window.API.myStreak?.() || 0;
     // แนะนำเฉพาะบุคคล (collaborative — "คนเหมือนคุณเช่า") → ดันขึ้นบนสุดในแท็บ "แนะนำสำหรับคุณ"
     gPersonalRecs = (await window.API.recommendPersonal?.(8) || []).map(r => r.code).filter(Boolean);
+    CUSTOMER._taste = await window.API.myTaste?.();  // รสนิยมที่เรียนจากพฤติกรรม → ใช้ใน personalScore
   } catch (e) { /**/ } }
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();
   if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
