@@ -1544,8 +1544,11 @@ function renderStyleCard(c) {
       <div class="stylerec">${th?'วิเคราะห์ Personal Color + รูปหน้า + หุ่น โดยสไตลิสต์ แล้วรับสรุป + ชุดเช่าที่แมตช์คุณ':'A stylist Personal Color + face + body analysis, then a summary and rental picks made for you'}</div>
       <div class="lockgrid">${lockGrid}</div>
       <details class="pcdetail"><summary>${th?'ดูว่าได้อะไรบ้าง':'See exactly what you get'}</summary><div class="pcd-body">${detailRows}</div></details>
-      <div class="creditback">${th?'ค่าวิเคราะห์ ฿4,900 กลายเป็นเครดิตเต็มจำนวนไว้เลือกชุด — เหมือนได้วิเคราะห์ฟรี':'Your ฿4,900 becomes ฿4,900 rental credit — the analysis pays for itself'}</div>
-      <button class="bookbtn" onclick="bookPersonalColor()">${th?'จองคิว Personal Color · ฿4,900':'Book Personal Color · ฿4,900'}<span class="bsub">${th?'ได้เครดิต ฿4,900 คืนเต็มไว้เช่าชุด':'฿4,900 back as rental credit'}</span></button>
+      <div id="pcPayFlow">
+        <div class="creditback">${th?'ค่าวิเคราะห์ ฿4,900 กลายเป็นเครดิตเต็มจำนวนไว้เลือกชุด — เหมือนได้วิเคราะห์ฟรี':'Your ฿4,900 becomes ฿4,900 rental credit — the analysis pays for itself'}</div>
+        <button class="bookbtn" onclick="bookPersonalColor()">${th?'จองคิว Personal Color · ฿4,900':'Book Personal Color · ฿4,900'}<span class="bsub">${th?'ได้เครดิต ฿4,900 คืนเต็มไว้เช่าชุด':'฿4,900 back as rental credit'}</span></button>
+      </div>
+      <div id="pcBookZone"></div>
       <div class="claimbox" style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">
         <div class="stylerec" style="margin-bottom:6px">${th?'ทำกับสตูดิโอมาแล้ว? กรอกรหัสที่ได้รับ เพื่อดึงผลเข้าบัญชีนี้':'Already did it at a studio? Enter your code to pull the results in'}</div>
         <div style="display:flex;gap:8px">

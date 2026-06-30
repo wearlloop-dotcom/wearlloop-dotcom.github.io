@@ -143,6 +143,43 @@ window.API = (function () {
     return { ok: true, payment_id: data.payment_id, amount: Number(data.amount) || 4900 };
   }
 
+  // ===== จองนัด Personal Color กับสไตลิสต์ (partner_booking.sql) =====
+  async function pcStatus() {
+    if (!window.meRpc) return { paid: false, appointment: null };
+    const { data } = await window.meRpc('my_pc_status', {});
+    return data || { paid: false, appointment: null };
+  }
+  async function stylistDirectory() {
+    if (!window.meRpc) return [];
+    const { data } = await window.meRpc('partner_directory', {});
+    return Array.isArray(data) ? data : [];
+  }
+  async function stylistPublic(id) {
+    if (!window.meRpc) return null;
+    const { data } = await window.meRpc('partner_public', { p_id: id });
+    return (data && !data.error) ? data : null;
+  }
+  async function pcBookSlot(slotId, note, mode) {
+    if (!window.meRpc) return { ok: false, error: 'ต้องเข้าสู่ระบบด้วย LINE ก่อน' };
+    const { data, error } = await window.meRpc('pc_book_slot', { p_slot: slotId, p_note: note || '', p_mode: mode || 'studio' });
+    if (error) return { ok: false, error: error.message };
+    if (!data || data.error) {
+      const map = { not_paid: 'ต้องจ่ายค่า Personal Color ก่อนจองเวลา', slot_taken: 'ช่องนี้เพิ่งถูกจอง ลองเลือกใหม่', slot_past: 'ช่องนี้ผ่านไปแล้ว', already_booked: 'คุณมีนัดอยู่แล้ว', slot_not_found: 'ไม่พบช่องเวลา' };
+      return { ok: false, error: map[data && data.error] || 'จองไม่สำเร็จ', code: data && data.error, appointment_id: data && data.appointment_id };
+    }
+    return { ok: true, appointment_id: data.appointment_id, starts_at: data.starts_at };
+  }
+  async function myAppointments() {
+    if (!window.meRpc) return [];
+    const { data } = await window.meRpc('my_pc_appointments', {});
+    return Array.isArray(data) ? data : [];
+  }
+  async function pcCancelAppointment(id) {
+    if (!window.meRpc) return { ok: false };
+    const { data } = await window.meRpc('pc_cancel_appointment', { p_id: id });
+    return { ok: data === 'ok', code: data };
+  }
+
   async function saveProfile(customer) {
     if (CONFIG.USE_MOCK ||!lineUid) return { ok: true };
     const c = client();
@@ -975,5 +1012,5 @@ window.API = (function () {
     return data || {};
   }
 
-  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, joinWaitlist, leaveWaitlist, myWaitlist, waitlistCount, trendingRequests, voteRequest, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, notifInbox, notifUnread, notifMarkRead, notifSetPref, socialProof, recommendWith, recommendPersonal, liveViewers, myStreak, expVariant, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed, reportLook, reactLook, lookReactions, occasionHubs, garmentFit, myCreatorEarnings };
+  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, pcStatus, stylistDirectory, stylistPublic, pcBookSlot, myAppointments, pcCancelAppointment, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, joinWaitlist, leaveWaitlist, myWaitlist, waitlistCount, trendingRequests, voteRequest, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, notifInbox, notifUnread, notifMarkRead, notifSetPref, socialProof, recommendWith, recommendPersonal, liveViewers, myStreak, expVariant, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed, reportLook, reactLook, lookReactions, occasionHubs, garmentFit, myCreatorEarnings };
 })();
