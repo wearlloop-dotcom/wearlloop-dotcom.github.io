@@ -187,6 +187,12 @@
   /* quota chip + login hint */
   .stylist .quota{font-size:11px;color:var(--stone);border:1px solid var(--line);border-radius:20px;padding:3px 10px;white-space:nowrap}
   .stylist .quota b{color:var(--ink)}
+  /* LLOOP Atelier — what-is-it hint (hover on desktop, tap on mobile) */
+  .atelier-info{position:relative;display:inline-flex;align-items:center;gap:5px;cursor:pointer;outline:none}
+  .atelier-info .ai-ic{flex:0 0 auto;display:inline-flex;width:14px;height:14px;align-items:center;justify-content:center;border:1px solid var(--stone);border-radius:50%;font-size:9px;font-style:normal;font-weight:600;color:var(--stone);line-height:1}
+  .atelier-tip{position:absolute;bottom:calc(100% + 9px);right:0;width:248px;max-width:78vw;background:var(--ink);color:#fff;font-size:11px;line-height:1.55;letter-spacing:.2px;text-align:left;white-space:normal;text-transform:none;font-weight:400;padding:10px 12px;border-radius:6px;box-shadow:0 8px 22px rgba(0,0,0,.18);opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .15s,transform .15s;z-index:60;pointer-events:none}
+  .atelier-tip::after{content:"";position:absolute;top:100%;right:14px;border:6px solid transparent;border-top-color:var(--ink)}
+  .atelier-info:hover .atelier-tip,.atelier-info:focus-visible .atelier-tip,.atelier-info.show .atelier-tip{opacity:1;visibility:visible;transform:translateY(0)}
   /* places autocomplete dropdown (Places API New) */
   .stylist .in{position:relative}
   .pacbox{position:absolute;top:100%;left:16px;right:16px;z-index:40;background:#fff;border:1px solid var(--line);border-radius:0 0 4px 4px;box-shadow:0 8px 22px rgba(0,0,0,.10);max-height:260px;overflow:auto}

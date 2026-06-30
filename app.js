@@ -740,11 +740,15 @@ async function refreshStylistQuota() {
   const chip = $('#stylistQuota'); if (!chip) return;
   let n = null;
   try { n = await window.API.stylistQuota?.(); } catch (_e) {}
-  if (n == null) { chip.hidden = false; chip.innerHTML = `<b>${t('vLoginNeed')}</b>`; return; }
+  if (n == null) { chip.hidden = false; chip.innerHTML = `<span class="atelier-info" tabindex="0" role="button" aria-label="LLOOP Atelier คืออะไร" onclick="event.stopPropagation();this.classList.toggle('show')"><b>${t('vLoginNeed')}</b><i class="ai-ic" aria-hidden="true">i</i><span class="atelier-tip">${t('vAtelierTip')}</span></span>`; return; }
   chip.hidden = false;
   chip.innerHTML = `${t('vQuotaLeft')} <b>${n}</b> ${t('vQuotaTimes')}`;
   chip._n = n;
 }
+// ปิด tooltip "LLOOP Atelier คืออะไร" เมื่อแตะที่อื่น (มือถือ)
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.atelier-info.show').forEach(el => { if (!el.contains(e.target)) el.classList.remove('show'); });
+});
 
 // ลิงค์ Google Maps (วาง/แชร์มา) — รองรับลิงค์สั้นและลิงค์เต็ม
 const MAPS_URL_RE = /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl|maps\.google\.[a-z.]+|(www\.)?google\.[a-z.]+\/maps)/i;
