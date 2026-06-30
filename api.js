@@ -505,10 +505,12 @@ window.API = (function () {
     const { data: id, error } = window.meRpc ? await window.meRpc('submit_video_review', a) : await c.rpc('submit_video_review', a);
     if (error || !id) return { ok: false, error };
     // ให้ AI เช็ก (prod เท่านั้น — localhost/ยังไม่ deploy จะรอเจ้าของตรวจ)
+    // ส่ง LINE idToken ไปด้วย — review-check verify ตัวตน+เจ้าของรีวิวก่อนเรียก AI/ให้เครดิต
     try {
-      await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/review-check`, {
+      const idToken = (typeof liff !== 'undefined' && liff.getIDToken) ? liff.getIDToken() : null;
+      if (idToken) await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/review-check`, {
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${CONFIG.SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ review_id: id }),
+        body: JSON.stringify({ review_id: id, id_token: idToken }),
       });
     } catch (e) { /* รอ AI/เจ้าของภายหลัง */ }
     return { ok: true, id };

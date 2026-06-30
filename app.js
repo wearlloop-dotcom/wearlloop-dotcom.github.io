@@ -180,6 +180,9 @@ function applyStatic() {
   const vi = $('#venueInput'); if (vi) vi.placeholder = t('stylistPlaceholder');
   const vt = t('vTime'); if (vt && typeof vt === 'object') { ['','morning','day','evening','night'].forEach(k => { const o = document.getElementById('vtOpt_'+k); if (o) o.textContent = vt[k] || ''; }); }
   const cyc = t('cyc'); for (let i = 0; i < 4; i++) { const e = document.getElementById('cyc'+ i); if (e) e.textContent = cyc[i]; }
+  // editorial ท้ายหน้า — eyebrow เล็กๆ คงอังกฤษแบรนด์ไว้ใน HTML, แปลเฉพาะหัวข้อ+เนื้อหา
+  ['edEditTitle','maniLead','maniBody','howTitle','step1H','step1P','step2H','step2P','step3H','step3P','step4H','step4P','craftCap','craftBody','teaserBody'].forEach(k => set(k, k));
+  const tb = $('#teaserBtn'); if (tb && !tb.disabled) tb.textContent = t('teaserBtn');
 }
 
 function setLang(l) {

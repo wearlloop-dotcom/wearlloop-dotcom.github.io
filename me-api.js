@@ -15,26 +15,45 @@
     _inited = true;
   }
 
+  // base URL (ไม่มี query) — redirectUri ให้ตรง LIFF endpoint + กลับมาสะอาด
+  function baseUrl() { return location.origin + location.pathname; }
+
+  // เด้งเข้า LINE login เอง พร้อมกัน redirect loop: ลองได้ครั้งเดียวต่อ session
+  // ถ้ากลับมาแล้วยัง unauthorized อีก (login ไม่ติด/ยกเลิก) → ไม่เด้งซ้ำ ปล่อยให้โชว์ error แทน
+  function reauth() {
+    if (sessionStorage.getItem('meReauthTried')) return false; // เคยลองแล้วรอบนี้ → กัน loop
+    sessionStorage.setItem('meReauthTried', '1');
+    try { if (liff.isLoggedIn()) liff.logout(); } catch (_e) {} // ล้างโทเคนเก่าที่หมดอายุก่อน
+    try { liff.login({ redirectUri: baseUrl() }); } catch (_e) {}
+    return true;
+  }
+
   // drop-in แทน client.rpc(fn,args) → คืน { data, error }
   async function meRpc(fn, args) {
     try {
       await ensureInit();
       if (!liff.isLoggedIn()) {
-        if (liff.isInClient()) { liff.login(); return { data: null, error: { message: 'redirecting_to_login' } }; }
-        return { data: null, error: { message: 'ต้องเข้าสู่ระบบด้วย LINE ก่อน' } };
+        // ยังไม่ล็อกอิน → เด้งเข้า LINE เลย (ทั้งในแอปและบนเว็บ) กัน loop ด้วย reauth()
+        reauth();
+        return { data: null, error: { message: 'redirecting_to_login' } };
       }
       const idToken = liff.getIDToken();
-      if (!idToken) return { data: null, error: { message: 'ไม่พบ LINE idToken' } };
+      if (!idToken) { reauth(); return { data: null, error: { message: 'redirecting_to_login' } }; }
       const r = await fetch(FUNCTIONS + '/me-rpc', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_token: idToken, fn, args: args || {} }),
       });
       const out = await r.json().catch(() => ({}));
       if (!r.ok || out.error) {
+        // โทเคนหมดอายุ → เด้งเข้า LINE login ให้เองอัตโนมัติ (แทน toast ที่กดยาก)
+        if (out.error === 'unauthorized' && reauth()) {
+          return { data: null, error: { message: 'redirecting_to_login' } };
+        }
         const map = { unauthorized: 'เซสชันหมดอายุ เข้าสู่ระบบใหม่', no_customer: 'ยังไม่พบบัญชีลูกค้าของคุณ',
           fn_not_allowed: 'คำสั่งนี้ไม่อนุญาต' };
         return { data: null, error: { message: map[out.error] || out.message || ('me-rpc ' + r.status) } };
       }
+      sessionStorage.removeItem('meReauthTried'); // สำเร็จ → เคลียร์ guard ให้รอบหน้าเด้งได้อีก
       return { data: out.data, error: null };
     } catch (e) {
       return { data: null, error: { message: (e && e.message) || 'me-rpc failed' } };
