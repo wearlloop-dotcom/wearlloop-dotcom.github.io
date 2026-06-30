@@ -16,6 +16,15 @@
     { key: 'swim',      label: 'ทะเล · บีช' }
   ];
 
+  // ประเทศต้นทาง (origin) — แกนแยกจากสไตล์ · default ไทย, group korean → kr
+  const ORIGINS = [
+    { key: 'th',   label: 'แบรนด์ไทย' },
+    { key: 'vn',   label: 'แบรนด์เวียดนาม' },
+    { key: 'kr',   label: 'แบรนด์เกาหลี' },
+    { key: 'cn',   label: 'แบรนด์จีน' },
+    { key: 'intl', label: 'แบรนด์ต่างประเทศ' }
+  ];
+
   // name = ชื่อแสดง · aliases = คำค้น/สะกดอื่น (lowercase) · hot = ดีมานด์สูง · types = ประเภทของ
   const BRANDS = [
     // — มินิมอล / everyday-premium —
@@ -77,7 +86,15 @@
     { key:'sculptor',    name:'Sculptor',     group:'korean',   tier:'mid',    hot:false, aliases:['สคัลป์เตอร์'],           types:['เสื้อ','กางเกง'],              note:'สตรีทแวร์เกาหลี ลุคสปอร์ตวัยรุ่น' },
 
     // — ทะเล / swim —
-    { key:'gigi',        name:'Gigi',         group:'swim',     tier:'budget', hot:false, aliases:['gigibeachbabes','gigi beach babes'], types:['ชุดว่ายน้ำ','ชุดทะเล'], note:'ชุดว่ายน้ำ-ชุดทะเล เด่นลุคบีช' }
+    { key:'gigi',        name:'Gigi',         group:'swim',     tier:'budget', hot:false, aliases:['gigibeachbabes','gigi beach babes'], types:['ชุดว่ายน้ำ','ชุดทะเล'], note:'ชุดว่ายน้ำ-ชุดทะเล เด่นลุคบีช' },
+
+    // — เวียดนาม (origin=vn) · style/vibe เป็น best-guess แก้ได้อิสระ · ส่งเพิ่มได้ —
+    { key:'lseoul',      name:'Lseoul',       group:'feminine', origin:'vn', tier:'mid', hot:true,  aliases:['lseoul','แอลโซล'],              types:['เดรส','เสื้อ'],   note:'เฟมินีนเวียดนามยอดฮิต ลุคสาวหวาน' },
+    { key:'huelleyrose', name:'Huelleyrose',  group:'feminine', origin:'vn', tier:'mid', hot:true,  aliases:['huelley rose','huelley'],       types:['เดรส'],          note:'หวานโรแมนติก เดรสออกงาน (เวียดนาม)' },
+    { key:'ononmade',    name:'Ononmade',     group:'feminine', origin:'vn', tier:'mid', hot:false, aliases:['ononmad','on on made'],         types:['เดรส','ชุดเซ็ต'], note:'เฟมินีนมินิมอล (เวียดนาม)' },
+    { key:'redbean',     name:'Redbean',      group:'party',    origin:'vn', tier:'mid', hot:false, aliases:['red bean','redbean beachclub'], types:['เดรส','ชุดทะเล'], note:'สดใส beachclub วันหยุด (เวียดนาม)' },
+    { key:'ibiboss',     name:'Ibiboss',      group:'statement',origin:'vn', tier:'mid', hot:false, aliases:['ibi boss'],                     types:['เดรส'],          note:'ป้ายแซ่บ ลุคมั่นใจ (เวียดนาม)' },
+    { key:'lanchy',      name:'Lanchy',       group:'feminine', origin:'vn', tier:'mid', hot:false, aliases:['lanchi'],                       types:['เดรส','เสื้อ'],   note:'เฟมินีนเวียดนาม' }
   ];
 
   // map ชื่อแบรนด์ (lowercase) + alias → entry  สำหรับค้นหา/จับคู่กับ g.brand
@@ -100,6 +117,8 @@
 
   // ชื่อมาตรฐานของแบรนด์ — ถ้าตรง taxonomy คืนชื่อแสดง (กันสะกด/ตัวพิมพ์เพี้ยน เช่น "aimer"/"AIMER"→"Aimer")
   function canon(name) { const m = lookup(name); return m ? m.name : (name ? String(name).trim() : ''); }
+  // origin ของแบรนด์ — default ไทย, group korean → เกาหลี (แบรนด์ vn ระบุ origin เอง)
+  function originOf(b) { return b && (b.origin || (b.group === 'korean' ? 'kr' : 'th')); }
 
-  w.LLOOP_BRANDS = { GROUPS, BRANDS, lookup, canon };
+  w.LLOOP_BRANDS = { GROUPS, ORIGINS, BRANDS, lookup, canon, originOf };
 })(window);

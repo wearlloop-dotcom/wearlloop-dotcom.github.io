@@ -151,16 +151,13 @@
 </style>
 </head>
 <body>
-<header><div class="contain hbar">
-  <div class="logo">LLOOP</div>
-  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> หน้าหลัก</a>
-</div></header>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 
 <div class="contain">
   <div class="hero">
     <div class="eyebrow">together</div>
-    <h1 class="htitle">ครอบครัว &amp; กลุ่ม</h1>
-    <p class="hsub">ผูกคนที่รักไว้ในกลุ่มเดียว — คุณแม่ คุณลูก คุณยาย หรือแก๊งเพื่อน แล้วให้สไตลิสต์ของเราจัดชุดเข้าตีมเดียวกัน เช่าพร้อมกันในออเดอร์เดียว</p>
+    <h1 class="htitle" data-i18n="Family &amp; groups">ครอบครัว &amp; กลุ่ม</h1>
+    <p class="hsub" data-i18n="Keep the people you love in one circle — mum, your kids, grandma, or your friends — and let our stylist dress everyone in one theme, rented together in a single order.">ผูกคนที่รักไว้ในกลุ่มเดียว — คุณแม่ คุณลูก คุณยาย หรือแก๊งเพื่อน แล้วให้สไตลิสต์ของเราจัดชุดเข้าตีมเดียวกัน เช่าพร้อมกันในออเดอร์เดียว</p>
   </div>
 
   <!-- คำเชิญรอตอบรับ -->
@@ -176,8 +173,8 @@
         <div class="seccap" id="grpCap"></div>
       </div>
       <div style="display:flex;gap:7px">
-        <button class="btn ghost" id="inviteBtn" style="font-size:12px;padding:8px 12px">ชวนเพื่อน</button>
-        <button class="btn ghost" id="addBtn" style="font-size:12px;padding:8px 12px">+ เพิ่มสมาชิก</button>
+        <button class="btn ghost" id="inviteBtn" data-i18n="Invite a friend" style="font-size:12px;padding:8px 12px">ชวนเพื่อน</button>
+        <button class="btn ghost" id="addBtn" data-i18n="+ Add member" style="font-size:12px;padding:8px 12px">+ เพิ่มสมาชิก</button>
       </div>
     </div>
 
@@ -185,20 +182,20 @@
 
     <!-- ชวนเพื่อน -->
     <div class="form" id="invForm">
-      <div style="font-weight:600;margin-bottom:4px">ชวนเพื่อนเข้ากลุ่ม</div>
-      <div class="seccap" style="margin-bottom:12px">วิธีง่ายสุด: แชร์ลิงก์ทาง LINE ให้เพื่อนแตะเข้าร่วมได้เลย</div>
+      <div style="font-weight:600;margin-bottom:4px" data-i18n="Invite a friend to the group">ชวนเพื่อนเข้ากลุ่ม</div>
+      <div class="seccap" style="margin-bottom:12px" data-i18n="The easy way: share a link on LINE and your friend can tap to join.">วิธีง่ายสุด: แชร์ลิงก์ทาง LINE ให้เพื่อนแตะเข้าร่วมได้เลย</div>
       <div class="invlink" id="invLink">
         <span class="lk" id="invLinkUrl">lloop.app/join/…</span>
-        <button class="btn sage" id="copyLink" style="padding:8px 14px;font-size:12px">แชร์ทาง LINE</button>
+        <button class="btn sage" id="copyLink" data-i18n="Share on LINE" style="padding:8px 14px;font-size:12px">แชร์ทาง LINE</button>
       </div>
-      <div class="ordiv"><span>หรือ ชวนด้วยรหัสเพื่อน</span></div>
+      <div class="ordiv"><span data-i18n="or invite with a friend code">หรือ ชวนด้วยรหัสเพื่อน</span></div>
       <div class="frow">
-        <div class="fld"><label>รหัสเพื่อน (6 ตัว)</label><input id="i_code" placeholder="เช่น A1B2C3" maxlength="8" style="text-transform:uppercase"></div>
-        <div class="fld"><label>ความสัมพันธ์</label><input id="i_rel" placeholder="เช่น เพื่อน"></div>
+        <div class="fld"><label data-i18n="Friend code (6 chars)">รหัสเพื่อน (6 ตัว)</label><input id="i_code" placeholder="เช่น A1B2C3" data-i18n-ph="e.g. A1B2C3" maxlength="8" style="text-transform:uppercase"></div>
+        <div class="fld"><label data-i18n="Relationship">ความสัมพันธ์</label><input id="i_rel" placeholder="เช่น เพื่อน" data-i18n-ph="e.g. friend"></div>
       </div>
       <div style="display:flex;gap:9px">
-        <button class="btn" id="sendInvite">ส่งคำเชิญ</button>
-        <button class="btn ghost" id="cancelInvite">ปิด</button>
+        <button class="btn" id="sendInvite" data-i18n="Send invite">ส่งคำเชิญ</button>
+        <button class="btn ghost" id="cancelInvite" data-i18n="Close">ปิด</button>
       </div>
     </div>
 
@@ -206,24 +203,24 @@
     <div class="form" id="form">
       <div class="quick" id="relQuick"></div>
       <div class="frow">
-        <div class="fld"><label>ชื่อเล่น</label><input id="f_name" placeholder="เช่น น้องเป่าเปา"></div>
-        <div class="fld"><label>ช่วงวัย</label><select id="f_age">
-          <option value="kid">เด็ก</option><option value="teen">วัยรุ่น</option>
-          <option value="adult" selected>ผู้ใหญ่</option><option value="senior">ผู้ใหญ่ขึ้นวัย</option>
+        <div class="fld"><label data-i18n="Nickname">ชื่อเล่น</label><input id="f_name" placeholder="เช่น น้องเป่าเปา" data-i18n-ph="e.g. Bao"></div>
+        <div class="fld"><label data-i18n="Age group">ช่วงวัย</label><select id="f_age">
+          <option value="kid" data-i18n="Child">เด็ก</option><option value="teen" data-i18n="Teen">วัยรุ่น</option>
+          <option value="adult" selected data-i18n="Adult">ผู้ใหญ่</option><option value="senior" data-i18n="Senior">ผู้ใหญ่ขึ้นวัย</option>
         </select></div>
-        <div class="fld"><label>เพศ</label><select id="f_gender">
-          <option value="female" selected>หญิง</option><option value="male">ชาย</option><option value="">ไม่ระบุ</option>
+        <div class="fld"><label data-i18n="Gender">เพศ</label><select id="f_gender">
+          <option value="female" selected data-i18n="Female">หญิง</option><option value="male" data-i18n="Male">ชาย</option><option value="" data-i18n="Prefer not to say">ไม่ระบุ</option>
         </select></div>
       </div>
       <div class="frow">
-        <div class="fld"><label>อก (นิ้ว)</label><input id="f_bust" type="number" placeholder="32"></div>
-        <div class="fld"><label>เอว (นิ้ว)</label><input id="f_waist" type="number" placeholder="26"></div>
-        <div class="fld"><label>สะโพก (นิ้ว)</label><input id="f_hip" type="number" placeholder="35"></div>
-        <div class="fld"><label>สูง (ซม.)</label><input id="f_height" type="number" placeholder="120"></div>
+        <div class="fld"><label data-i18n="Bust (in)">อก (นิ้ว)</label><input id="f_bust" type="number" placeholder="32"></div>
+        <div class="fld"><label data-i18n="Waist (in)">เอว (นิ้ว)</label><input id="f_waist" type="number" placeholder="26"></div>
+        <div class="fld"><label data-i18n="Hip (in)">สะโพก (นิ้ว)</label><input id="f_hip" type="number" placeholder="35"></div>
+        <div class="fld"><label data-i18n="Height (cm)">สูง (ซม.)</label><input id="f_height" type="number" placeholder="120"></div>
       </div>
       <div style="display:flex;gap:9px">
-        <button class="btn sage" id="saveMember">บันทึกเข้ากลุ่ม</button>
-        <button class="btn ghost" id="cancelMember">ยกเลิก</button>
+        <button class="btn sage" id="saveMember" data-i18n="Save to group">บันทึกเข้ากลุ่ม</button>
+        <button class="btn ghost" id="cancelMember" data-i18n="Cancel">ยกเลิก</button>
       </div>
     </div>
   </div>
@@ -231,24 +228,24 @@
   <!-- theme styling -->
   <div class="sec" id="themeSec">
     <div class="sechead">
-      <div><div class="sectitle">จัดชุดเข้าตีมทั้งกลุ่ม</div>
-      <div class="seccap">สไตลิสต์เลือก “ตัวที่เข้าตีม + พอดีตัวที่สุด ที่ว่างจริงในวันนั้น” ให้ทุกคน</div></div>
+      <div><div class="sectitle" data-i18n="Dress the whole group in one theme">จัดชุดเข้าตีมทั้งกลุ่ม</div>
+      <div class="seccap" data-i18n="Our stylist picks the on-theme, best-fitting piece that's actually free on the day — for everyone.">สไตลิสต์เลือก “ตัวที่เข้าตีม + พอดีตัวที่สุด ที่ว่างจริงในวันนั้น” ให้ทุกคน</div></div>
     </div>
     <div class="toolbar">
-      <div class="fld" style="max-width:200px"><label>งาน / โอกาส</label>
+      <div class="fld" style="max-width:200px"><label data-i18n="Occasion">งาน / โอกาส</label>
         <select id="t_occ">
-          <option value="wedding_guest">ไปงานแต่ง</option>
-          <option value="family_portrait">ถ่ายรูปครอบครัว</option>
-          <option value="songkran">สงกรานต์</option>
-          <option value="dinner">ดินเนอร์</option>
+          <option value="wedding_guest" data-i18n="Wedding guest">ไปงานแต่ง</option>
+          <option value="family_portrait" data-i18n="Family portrait">ถ่ายรูปครอบครัว</option>
+          <option value="songkran" data-i18n="Songkran">สงกรานต์</option>
+          <option value="dinner" data-i18n="Dinner">ดินเนอร์</option>
         </select></div>
-      <div class="fld" style="max-width:160px"><label>วันใช้งาน</label><input id="t_date" type="date"></div>
-      <button class="btn" id="suggestBtn">จัดชุดให้เลย</button>
+      <div class="fld" style="max-width:160px"><label data-i18n="Date">วันใช้งาน</label><input id="t_date" type="date"></div>
+      <button class="btn" id="suggestBtn" data-i18n="Style us now">จัดชุดให้เลย</button>
     </div>
 
     <!-- theme-color source selector -->
     <div class="srcbar">
-      <div class="srclabel">โทนสีของตีม</div>
+      <div class="srclabel" data-i18n="Theme colour">โทนสีของตีม</div>
       <div class="srcrow" id="srcRow"></div>
       <div id="srcExtra"></div>
     </div>
@@ -256,7 +253,7 @@
     <div id="themeResult"></div>
   </div>
 
-  <div class="demo">หน้าตัวอย่าง · ข้อมูลเป็นตัวอย่างเพื่อดูดีไซน์</div>
+  <div class="demo" data-i18n="Preview page · sample data to show the design">หน้าตัวอย่าง · ข้อมูลเป็นตัวอย่างเพื่อดูดีไซน์</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -266,6 +263,7 @@
 <script src="liffAuth.js?v=38"></script>
 <script src="me-api.js?v=54"></script>
 <script src="api.js?v=54"></script>
+<script src="nav.js?v=1"></script>
 <script>
 // ===== MOCK DATA (แทน Supabase ระหว่างพรีวิว) =====
 const PALETTE = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };

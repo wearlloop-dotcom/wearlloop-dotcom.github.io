@@ -477,14 +477,11 @@
 </head>
 <body>
 
-<header>
-  <a href="index.html" class="back-link">กลับ</a>
-  <a href="index.html" class="logo">LLOOP</a>
-</header>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 
 <!-- Garment info bar -->
 <div class="garment-bar" id="garmentBar">
-  <div class="label">กำลังรีวิว</div>
+  <div class="label" data-i18n="Reviewing">กำลังรีวิว</div>
   <div class="garment-name" id="garmentName">—</div>
   <div class="garment-meta">
     <span id="garmentSize"></span>
@@ -494,7 +491,7 @@
 
 <!-- Reward banner -->
 <div class="reward-banner">
-  <div class="rb-text">แชร์รูปที่ใส่จริง รับเครดิตคืนทุกครั้ง</div>
+  <div class="rb-text" data-i18n="Share a photo of you wearing it — credit back every time">แชร์รูปที่ใส่จริง รับเครดิตคืนทุกครั้ง</div>
   <div class="rb-credit">+10 CREDIT</div>
 </div>
 
@@ -505,8 +502,8 @@
     <div class="sc-icon">
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <h2>ขอบคุณสำหรับรีวิว</h2>
-    <p id="successSub">ความเห็นของคุณช่วยให้เราพัฒนาบริการได้ดีขึ้น</p>
+    <h2 data-i18n="Thank you for your review">ขอบคุณสำหรับรีวิว</h2>
+    <p id="successSub" data-i18n="Your feedback helps us do better">ความเห็นของคุณช่วยให้เราพัฒนาบริการได้ดีขึ้น</p>
   </div>
 
   <!-- FORM STATE -->
@@ -523,7 +520,7 @@
 
     <!-- 1. Score -->
     <div class="section">
-      <div class="section-title">ให้คะแนนชุดนี้</div>
+      <div class="section-title" data-i18n="Rate this piece">ให้คะแนนชุดนี้</div>
       <div class="score-row" id="scoreRow">
         <button class="score-btn" data-v="1">1</button>
         <button class="score-btn" data-v="2">2</button>
@@ -535,7 +532,7 @@
 
     <!-- 2. Fit -->
     <div class="section">
-      <div class="section-title">ไซส์ตรงไหม</div>
+      <div class="section-title" data-i18n="How was the fit?">ไซส์ตรงไหม</div>
       <div class="fit-row" id="fitRow">
         <button class="fit-btn" data-v="-2">-2</button>
         <button class="fit-btn" data-v="-1">-1</button>
@@ -544,9 +541,9 @@
         <button class="fit-btn" data-v="2">+2</button>
       </div>
       <div class="fit-labels">
-        <span>เล็กกว่าที่คาด</span>
-        <span>ตรงไซส์</span>
-        <span>ใหญ่กว่าที่คาด</span>
+        <span data-i18n="Smaller than expected">เล็กกว่าที่คาด</span>
+        <span data-i18n="True to size">ตรงไซส์</span>
+        <span data-i18n="Larger than expected">ใหญ่กว่าที่คาด</span>
       </div>
     </div>
 

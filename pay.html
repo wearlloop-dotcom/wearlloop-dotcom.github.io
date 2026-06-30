@@ -98,23 +98,20 @@
 </style>
 </head>
 <body>
-<header><div class="contain hbar">
-  <div class="logo">LLOOP</div>
-  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> หน้าหลัก</a>
-</div></header>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 
 <div class="contain">
   <div class="hero">
     <div class="eyebrow">split pay</div>
-    <h1 class="htitle">บิลของคุณ</h1>
-    <p class="hsub">จองตีมกับเพื่อน · ส่วนของคุณ</p>
+    <h1 class="htitle" data-i18n="Your bill">บิลของคุณ</h1>
+    <p class="hsub" data-i18n="Group theme booking · your share">จองตีมกับเพื่อน · ส่วนของคุณ</p>
   </div>
 
   <div id="root">
-    <div class="sec"><div class="empty"><p>กำลังโหลดบิล…</p></div></div>
+    <div class="sec"><div class="empty"><p data-i18n="Loading your bill…">กำลังโหลดบิล…</p></div></div>
   </div>
 
-  <div class="demo" id="demo">หน้าจ่ายเงินรายคน LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (group_order_summary / group_pay_confirm)</div>
+  <div class="demo" id="demo" data-i18n="LLOOP per-person payment page · live via Supabase through &lt;b&gt;liff/api.js&lt;/b&gt; (group_order_summary / group_pay_confirm)">หน้าจ่ายเงินรายคน LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (group_order_summary / group_pay_confirm)</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -125,6 +122,7 @@
 <script src="promptpay.js?v=38"></script>
 <script src="me-api.js?v=54"></script>
 <script src="api.js?v=54"></script>
+<script src="nav.js?v=1"></script>
 <script>
 // ============================================================
 //  pay.html — บิลรายคนของ split-pay group rental
@@ -179,8 +177,8 @@ const SWATCH = {
 async function boot(){
   // ไม่มี order id ใน URL → empty state
   if(!ORDER){
-    edgeState('ยังไม่มีบิลให้แสดง',
-      'เปิดหน้านี้จากปุ่ม “จ่ายส่วนของฉัน” ในข้อความ LINE ที่เพื่อนส่งให้ เพื่อดูบิลและโอนค่าเช่าของคุณค่ะ');
+    edgeState(NAV.t('ยังไม่มีบิลให้แสดง','No bill to show yet'),
+      NAV.t('เปิดหน้านี้จากปุ่ม “จ่ายส่วนของฉัน” ในข้อความ LINE ที่เพื่อนส่งให้ เพื่อดูบิลและโอนค่าเช่าของคุณค่ะ','Open this page from the “Pay my share” button in the LINE message your friend sent you, to see your bill and transfer your rental fee.'));
     return;
   }
 
@@ -203,14 +201,14 @@ async function boot(){
     if(!res || res.error){
       const code = res && res.error;
       if(code==='denied'){
-        edgeState('นี่ไม่ใช่บิลของคุณ',
-          'บิลนี้เป็นของสมาชิกคนอื่นในกลุ่ม — เปิดลิงก์ที่ส่งมาให้คุณโดยตรงเพื่อดูส่วนของตัวเองนะคะ');
+        edgeState(NAV.t('นี่ไม่ใช่บิลของคุณ','This isn’t your bill'),
+          NAV.t('บิลนี้เป็นของสมาชิกคนอื่นในกลุ่ม — เปิดลิงก์ที่ส่งมาให้คุณโดยตรงเพื่อดูส่วนของตัวเองนะคะ','This bill belongs to another group member — open the link sent directly to you to see your own share.'));
       } else if(code==='not_found'){
-        edgeState('ไม่พบบิลนี้',
-          'บิลนี้อาจหมดเวลากันชุด (hold) หรือถูกยกเลิกไปแล้ว — ลองจองใหม่กับเพื่อนอีกครั้งนะคะ');
+        edgeState(NAV.t('ไม่พบบิลนี้','Bill not found'),
+          NAV.t('บิลนี้อาจหมดเวลากันชุด (hold) หรือถูกยกเลิกไปแล้ว — ลองจองใหม่กับเพื่อนอีกครั้งนะคะ','This bill may have passed its hold time or been cancelled — try booking again with your friends.'));
       } else {
-        edgeState('เปิดบิลไม่สำเร็จ',
-          'เกิดข้อผิดพลาด' + (code?(' ('+code+')'):'') + ' — ลองเปิดลิงก์ใหม่อีกครั้งนะคะ');
+        edgeState(NAV.t('เปิดบิลไม่สำเร็จ','Couldn’t open the bill'),
+          NAV.t('เกิดข้อผิดพลาด','Something went wrong') + (code?(' ('+code+')'):'') + NAV.t(' — ลองเปิดลิงก์ใหม่อีกครั้งนะคะ',' — please open the link again.'));
       }
       return;
     }

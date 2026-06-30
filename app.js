@@ -25,7 +25,7 @@ function matchQuery(g) {
   return hay.includes(gQuery);
 }
 let gUseDate = null, gAvailSet = null, gOnlyAvail = false;  // เลือกวันใช้ตั้งแต่หน้าแรก
-let fNewOnly = false, fPrice = null, gInStockOnly = false;  // quick filters: มาใหม่ / ช่วงราคา / เฉพาะมีของ(directory)
+let fNewOnly = false, fPrice = null, gInStockOnly = false, gGroupByCountry = false;  // quick filters + directory: มาใหม่/ราคา/เฉพาะมีของ/จัดตามประเทศ
 let gStylistPending = false;  // กดแนะนำแต่ยังไม่เลือกวัน → พอเลือกแล้วยิงต่อให้เอง
 let gWish = new Set();  // garment id ที่หมายตา (wishlist)
 let gDur = 3;           // ระยะเวลาเช่า (วัน) ในหน้ารายละเอียด
@@ -305,9 +305,11 @@ function openBrandDir() {
     if (m) { cnt[m.key] = (cnt[m.key] || 0) + 1; }
     else { const c = meta.canon(bn), k = c.toLowerCase(), e = extras.get(k); if (e) { e.n++; e.d = nicerBrand(e.d, c); } else extras.set(k, { d: c, n: 1 }); }
   });
-  let html = `<div class="bdir${gShowTypes ? ' show-types' : ''}"><button class="bd-x" onclick="closeBrandDir()" aria-label="close">×</button><div class="bd-h">${TH ? 'รวมแบรนด์' : 'All brands'}</div><div class="bd-toolbar"><button class="bd-toggle ${gShowTypes ? 'on' : ''}" onclick="toggleBrandTypes(this)">${TH ? 'แสดงประเภทของ' : 'Show types'}</button><button class="bd-toggle ${gInStockOnly ? 'on' : ''}" onclick="toggleInStock()">${TH ? 'เฉพาะมีของ' : 'In stock'}</button></div>`;
-  meta.GROUPS.forEach(gr => {
-    const items = meta.BRANDS.filter(b => b.group === gr.key);
+  let html = `<div class="bdir${gShowTypes ? ' show-types' : ''}"><button class="bd-x" onclick="closeBrandDir()" aria-label="close">×</button><div class="bd-h">${TH ? 'รวมแบรนด์' : 'All brands'}</div><div class="bd-toolbar"><button class="bd-toggle ${gShowTypes ? 'on' : ''}" onclick="toggleBrandTypes(this)">${TH ? 'แสดงประเภทของ' : 'Show types'}</button><button class="bd-toggle ${gInStockOnly ? 'on' : ''}" onclick="toggleInStock()">${TH ? 'เฉพาะมีของ' : 'In stock'}</button><button class="bd-toggle ${gGroupByCountry ? 'on' : ''}" onclick="toggleCountry()">${TH ? 'จัดตามประเทศ' : 'By country'}</button></div>`;
+  const sections = gGroupByCountry ? meta.ORIGINS : meta.GROUPS;
+  const keyOf = gGroupByCountry ? (b => meta.originOf(b)) : (b => b.group);
+  sections.forEach(gr => {
+    const items = meta.BRANDS.filter(b => keyOf(b) === gr.key);
     if (!items.length) return;
     const rows = items.map(b => {
       const n = cnt[b.key] || 0;
@@ -331,6 +333,7 @@ function openBrandDir() {
 function closeBrandDir() { $('#brandDirOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 function toggleBrandTypes(btn){ gShowTypes = !gShowTypes; const d = document.querySelector('.bdir'); if (d) d.classList.toggle('show-types', gShowTypes); if (btn) btn.classList.toggle('on', gShowTypes); }
 function toggleInStock(){ gInStockOnly = !gInStockOnly; openBrandDir(); }
+function toggleCountry(){ gGroupByCountry = !gGroupByCountry; openBrandDir(); }
 function pickBrand(b) { closeBrandDir(); setBrand(b); window.scrollTo({ top: 380, behavior: 'smooth' }); }
 function notifyBrand(key, name) {
   window.track?.('brand_demand', key);
@@ -1151,6 +1154,9 @@ let _backupPicks = [];          // โค้ดชุดที่ลูกค้
 let _bpPool = [];               // ชุดที่ว่างวันนั้น เรียงตามความใกล้ชุดหลักแล้ว
 let _bpPrimary = null;          // ชุดหลักที่กำลังจอง (ใช้คิดคะแนนความใกล้)
 let _bpQuery = '';              // คำค้นในตัวเลือกชุดสำรอง
+let _bpWhy = {};                // code → เหตุผลที่ AI สไตลิสต์ให้ (ทำไมสลับแทนได้เนียน)
+let _bpRanked = false;          // AI จัดอันดับให้แล้วหรือยัง
+let _bpRanking = false;         // กันกดซ้ำระหว่างรอ AI
 const BACKUP_MAX = 2;           // เลือกได้สูงสุดกี่ตัว
 
 // คะแนนความ "ใกล้ชุดหลัก" — ยิ่งสูงยิ่งสลับแทนได้เนียน (ไซส์ใส่ได้ต้องมาก่อน)
@@ -1175,7 +1181,7 @@ function backupScore(primary, c) {
 async function toggleBackupPick(primaryId) {
   const cb = $('#wantBackup'), box = $('#backupPicker');
   if (!cb || !box) return;
-  if (!cb.checked) { box.hidden = true; box.innerHTML = ''; _backupPicks = []; _bpPool = []; _bpQuery = ''; return; }
+  if (!cb.checked) { box.hidden = true; box.innerHTML = ''; _backupPicks = []; _bpPool = []; _bpQuery = ''; _bpWhy = {}; _bpRanked = false; return; }
   const date = $('#useDate') && $('#useDate').value;
   if (!date) {
     toast(lang ==='th'?'เลือกวันที่ต้องใช้ก่อน แล้วค่อยเลือกชุดสำรองนะคะ':'Pick your date first, then choose spares');
@@ -1195,7 +1201,7 @@ async function toggleBackupPick(primaryId) {
     .map(o => o.g);
   // ถ้าลูกค้าปิดแล้วเปิดใหม่/เปลี่ยนวัน → ตัดที่เลือกค้างซึ่งไม่อยู่ใน pool ออก
   _backupPicks = _backupPicks.filter(c => _bpPool.some(p => (p.code || p.id) === c));
-  _bpQuery = '';
+  _bpQuery = ''; _bpWhy = {}; _bpRanked = false;
   renderBackupPicker();
 }
 // โครงคงที่ (หัวข้อ + ช่องค้นหา) — ไม่ re-render ทั้งก้อนตอนพิมพ์ กันคีย์บอร์ดเด้งปิด
@@ -1206,9 +1212,15 @@ function renderBackupPicker() {
     box.innerHTML = `<div class="bp-empty">${lang ==='th'?'วันนั้นยังไม่มีชุดอื่นว่างให้เลือกเป็นสำรองค่ะ':'No other pieces are free that day to set as a spare'}</div>`;
     return;
   }
+  const canAI = !(window.CONFIG && CONFIG.USE_MOCK) && _bpPool.length >= 3;
   box.innerHTML = `
-    <div class="bp-head">${lang ==='th'?`แนะนำชุดที่เข้ากับชุดหลัก · เลือกได้สูงสุด ${BACKUP_MAX} ตัว`:`Closest matches to your pick · up to ${BACKUP_MAX}`}</div>
+    <div class="bp-head">${_bpRanked
+      ? (lang ==='th'?`สไตลิสต์ AI เรียงให้แล้ว · เลือกได้สูงสุด ${BACKUP_MAX} ตัว`:`Stylist-ranked · up to ${BACKUP_MAX}`)
+      : (lang ==='th'?`แนะนำชุดที่เข้ากับชุดหลัก · เลือกได้สูงสุด ${BACKUP_MAX} ตัว`:`Closest matches to your pick · up to ${BACKUP_MAX}`)}</div>
     <div class="bp-search"><input type="text" id="bpSearch" inputmode="search" placeholder="${lang ==='th'?'ค้นหาชุดอื่นที่ว่างวันนั้น…':'search other free pieces…'}" value="${esc(_bpQuery)}" oninput="onBackupSearch(this.value)"></div>
+    ${canAI ? `<button type="button" class="bp-ai${_bpRanked?' done':''}" id="bpAiBtn"${_bpRanked?' disabled':''} onclick="aiRankBackups()">${_bpRanked
+        ? (lang ==='th'?'✦ สไตลิสต์ AI จัดอันดับให้แล้ว':'✦ Ranked by the AI stylist')
+        : (lang ==='th'?'✦ ให้สไตลิสต์ AI ช่วยเรียงให้':'✦ Let the AI stylist rank these')}</button>` : ''}
     <div id="bpGridWrap"></div>`;
   renderBackupGrid();
 }
@@ -1228,14 +1240,51 @@ function renderBackupGrid() {
     const code = p.code || p.id;
     const photo = p.photo || (Array.isArray(p.photos) && p.photos[0]);
     const on = _backupPicks.includes(code);
-    return `<button type="button" class="bp-chip${on?' on':''}" data-code="${esc(code)}" onclick="pickBackup('${esc(code)}')">
+    const why = _bpWhy[code];
+    return `<button type="button" class="bp-chip${on?' on':''}" data-code="${esc(code)}" onclick="pickBackup('${esc(code)}')"${why?` title="${esc(why)}"`:''}>
       <span class="bp-thumb" style="${photo?`background-image:url('${esc(photo)}')`:`background:${esc(p.bg||'#E7E2DA')}`}"></span>
       <span class="bp-nm">${esc(p.name||'—')}</span>
+      ${why?`<span class="bp-why">${esc(why)}</span>`:''}
       <span class="bp-tick">✓</span>
     </button>`;
   }).join('')}</div>`;
 }
 function onBackupSearch(v) { _bpQuery = v; renderBackupGrid(); }
+// ลูกค้ากด → ส่งชุดหลัก + ชุดที่เลือกได้ ไปให้ AI สไตลิสต์เรียง "สลับแทนได้เนียนสุด" ก่อน
+async function aiRankBackups() {
+  if (_bpRanking || !_bpPrimary || !_bpPool.length) return;
+  const btn = $('#bpAiBtn');
+  _bpRanking = true;
+  if (btn) { btn.disabled = true; btn.textContent = lang ==='th'?'✦ กำลังให้สไตลิสต์เรียงให้…':'✦ stylist is ranking…'; }
+  const slim = g => ({
+    code: g.code || g.id, name: g.name, brand: g.brand, category: g.category,
+    size: g.size, price: g.price,
+    colors: (g.colors || []).map(c => c[0]),
+    occasion: (g.occasion_tags || []).map(occName),
+  });
+  try {
+    const ranked = await window.API.rankBackups(slim(_bpPrimary), _bpPool.slice(0, 24).map(slim), lang);
+    if (Array.isArray(ranked) && ranked.length) {
+      _bpWhy = {};
+      const order = [];
+      ranked.forEach(r => { if (r && r.code) { _bpWhy[r.code] = r.why || ''; order.push(String(r.code)); } });
+      const byCode = new Map(_bpPool.map(p => [String(p.code || p.id), p]));
+      const head = order.map(c => byCode.get(c)).filter(Boolean);
+      const headSet = new Set(order);
+      const tail = _bpPool.filter(p => !headSet.has(String(p.code || p.id)));
+      _bpPool = [...head, ...tail];
+      _bpRanked = true; _bpQuery = '';
+      renderBackupPicker();
+    } else {
+      toast(lang ==='th'?'สไตลิสต์ยังเรียงให้ไม่ได้ ลองใหม่อีกครั้งนะคะ':'Could not rank right now — please try again');
+      if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้สไตลิสต์ AI ช่วยเรียงให้':'✦ Let the AI stylist rank these'; }
+    }
+  } catch (e) {
+    toast(lang ==='th'?'เชื่อมต่อสไตลิสต์ไม่ได้ ลองใหม่นะคะ':'Stylist unavailable — please try again');
+    if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้สไตลิสต์ AI ช่วยเรียงให้':'✦ Let the AI stylist rank these'; }
+  }
+  _bpRanking = false;
+}
 function pickBackup(code) {
   const i = _backupPicks.indexOf(code);
   if (i >= 0) _backupPicks.splice(i, 1);
@@ -1852,7 +1901,7 @@ function openProfile(onboard) {
       ${onboard ? '' : `${renderStyleCard(c)}
       ${renderImpactCard()}`}
       <div class="field"><label>${t('pName')}</label><input id="pName" autocomplete="name" value="${c.name || c.display_name ||''}"></div>
-      ${onboard ? '' : `<div class="frow">
+      ${onboard ? '' : `${renderMeasuredRef(c)}<div class="frow">
         <div class="field"><label>${t('pHeight')}</label><input id="pHeight" type="number" value="${c.height_cm ||''}"></div>
         <div class="field"><label>${t('pShoe')}</label><input id="pShoe" value="${c.shoe_size ||''}"></div>
       </div>
@@ -2056,6 +2105,33 @@ function openPcPaySheet(amount, paymentId, pay) {
   }
 }
 function closePcPay() { const el = document.getElementById('pcpay'); if (el) el.remove(); }
+// ค่าวัดตัวที่สไตลิสต์วัดมาให้ — โชว์เป็น "อ้างอิง" ถาวร (ลูกค้าแก้ค่าจริงด้านล่างได้ แต่ ref นี้ค้างไว้ + วันที่วัด)
+function renderMeasuredRef(c) {
+  const mr = (c.style_profile || {}).measured_ref;
+  if (!mr) return '';
+  const th = lang === 'th';
+  const rows = [
+    [th ? 'รอบอก' : 'Bust', mr.bust_in, '"'],
+    [th ? 'รอบเอว' : 'Waist', mr.waist_in, '"'],
+    [th ? 'สะโพก' : 'Hip', mr.hip_in, '"'],
+    [th ? 'ส่วนสูง' : 'Height', mr.height_cm, ' cm'],
+    [th ? 'ไซส์เดรส' : 'Dress size', mr.dress_size, ''],
+    [th ? 'เบอร์รองเท้า' : 'Shoe', mr.shoe_size, ''],
+  ].filter(r => r[1] != null && r[1] !== '');
+  if (!rows.length) return '';
+  const cells = rows.map(([l, v, u]) =>
+    `<div class="mrcell"><span class="mrlbl">${l}</span><b>${v}${u}</b></div>`).join('');
+  const when = mr.at ? `${th ? 'วัดล่าสุด' : 'Measured'} ${mr.at}${mr.by ? ' · ' + mr.by : ''}` : '';
+  return `<div class="measref">
+    <div class="mrhead">
+      <span>${th ? 'ค่าที่สไตลิสต์วัดให้ (อ้างอิง)' : 'Measured by your stylist (reference)'}</span>
+      ${when ? `<span class="mrwhen">${when}</span>` : ''}
+    </div>
+    <div class="mrgrid">${cells}</div>
+    <div class="mrnote">${th ? 'แก้ค่าของคุณเองได้ด้านล่าง — ค่าที่สไตลิสต์วัดจะเก็บไว้ให้อ้างอิงเสมอ' : 'Edit your own values below — the stylist’s measurements stay here for reference'}</div>
+  </div>`;
+}
+
 function renderStyleCard(c) {
   const sp = c.style_profile || {};
   const tier = c.crm_tier ||'new';
