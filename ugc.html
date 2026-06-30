@@ -62,7 +62,7 @@
     <div class="frm">
       <div class="fld"><label>รหัสชุด (code)</label><input id="gcode" placeholder="เช่น g1" style="width:120px"></div>
       <div class="fld"><label>เครดิตรางวัล</label><input id="greward" type="number" min="1" value="300" style="width:110px"></div>
-      <div class="fld"><label>ไซซ์ที่ต้องการ</label><input id="gsize" placeholder="M" style="width:80px"></div>
+      <div class="fld"><label>ไซส์ที่ต้องการ</label><input id="gsize" placeholder="M" style="width:80px"></div>
       <div class="fld"><label>ครบกำหนด (วัน)</label><input id="gdue" type="number" min="1" value="14" style="width:100px"></div>
       <button class="btn" id="gcreate">เปิดงาน</button>
     </div>
@@ -132,7 +132,7 @@ async function loadList(){
       ${g.garment_photo?`<img class="thumb" src="${esc(g.garment_photo)}" loading="lazy">`:`<div class="thumb"></div>`}
       <div class="info">
         <div class="nm">${esc(g.garment_name||g.garment)} · ฿${g.reward_credit}</div>
-        <div class="meta">ไซซ์ ${esc(g.needed_size||'-')} · <span class="tag ${esc(g.status)}">${esc(g.status)}</span>${g.creator_handle||g.creator_uid?` · ${esc(g.creator_handle||g.creator_uid)}`:''}${g.last_audit?` · ออดิท: ${esc(g.last_audit)}`:''}</div>
+        <div class="meta">ไซส์ ${esc(g.needed_size||'-')} · <span class="tag ${esc(g.status)}">${esc(g.status)}</span>${g.creator_handle||g.creator_uid?` · ${esc(g.creator_handle||g.creator_uid)}`:''}${g.last_audit?` · ออดิท: ${esc(g.last_audit)}`:''}</div>
         ${g.status==='open'?`<div class="acts"><button class="btn ghost sm" onclick="cancelGig('${g.gig_id}')">ยกเลิกงาน</button></div>`:''}
       </div></div>`).join('');
 }

@@ -165,7 +165,7 @@
       '<div class="code">'+esc(g.code)+'</div>'+
       '<div class="nm">'+esc(g.name||'')+'</div>'+
       '<span class="pill '+(ready?'ok':'warn')+'">'+esc(g.status||'')+' · '+esc(g.data_status)+'</span>'+
-      '<div class="meta">'+[g.size?'ไซซ์ '+esc(g.size):'',g.color_name?esc(g.color_name):''].filter(Boolean).join(' · ')+
+      '<div class="meta">'+[g.size?'ไซส์ '+esc(g.size):'',g.color_name?esc(g.color_name):''].filter(Boolean).join(' · ')+
         '<br>วิธีดูแล: '+esc(g.wash||'-')+
         '<br>เห็นล่าสุด: '+dt(g.last_seen_at)+(g.last_seen_action?' ('+esc(g.last_seen_action)+')':'')+'</div>'+
       '<div class="acts">'+

@@ -59,7 +59,7 @@
   <section class="phead">
     <div class="eyebrow">purchasing · supply</div>
     <h1>เติมชุดให้ทันใจลูกค้า</h1>
-    <div class="sub">ดูว่าโทนสี ไซซ์ และวัสดุไหนกำลังขาด แล้วสั่งซื้อให้ครบ — เพื่อให้ทุกชุดพร้อมกลับเข้า loop เสมอ</div>
+    <div class="sub">ดูว่าโทนสี ไซส์ และวัสดุไหนกำลังขาด แล้วสั่งซื้อให้ครบ — เพื่อให้ทุกชุดพร้อมกลับเข้า loop เสมอ</div>
   </section>
   <div class="tabs">
     <span class="tab on" data-t="restock" onclick="go(this)">ควรเติมชุด</span>
@@ -115,23 +115,23 @@
           <tr><td>เฉลี่ย 3 เดือนล่าสุด</td><td class="n">${f.avg_last3mo} ครั้ง/เดือน</td></tr>
           <tr><td>เทียบ 3 เดือนก่อนหน้า</td><td class="n">${f.avg_prev3mo} ครั้ง/เดือน ${growthBadge}</td></tr>
           <tr class="tot"><td>พยากรณ์เดือนหน้า</td><td class="n">~${f.forecast_next_month} ครั้ง</td></tr>
-          ${(f.by_size||[]).length?`<tr><td>ไซซ์ขายดี (90 วัน)</td><td class="n">${f.by_size.map(x=>x.size+':'+x.rented).join(' · ')}</td></tr>`:''}
+          ${(f.by_size||[]).length?`<tr><td>ไซส์ขายดี (90 วัน)</td><td class="n">${f.by_size.map(x=>x.size+':'+x.rented).join(' · ')}</td></tr>`:''}
           ${(f.by_season||[]).length?`<tr><td>โทนสีขายดี (90 วัน)</td><td class="n">${f.by_season.map(x=>(ST[x.season]||x.season).split(' ')[0]+':'+x.rented).join(' · ')}</td></tr>`:''}
           ${(f.peak_months||[]).length?`<tr><td>เดือนพีคในรอบปี</td><td class="n">${f.peak_months.map(x=>'เดือน'+x.month_no).join(', ')}</td></tr>`:''}
         </table>`:'<div class="muted">ยังไม่มีประวัติเช่าพอจะพยากรณ์ — ระบบจะคำนวณเองเมื่อมีข้อมูลเช่าจริง</div>'}</div>
-      <div class="card"><h2>ไซซ์ที่ดีมานด์เกินชุด — ควรเติม</h2>
-      ${sgaps.length?`<table><tr><th>ไซซ์</th><th class="n">เช่า 90 วัน</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
+      <div class="card"><h2>ไซส์ที่ดีมานด์เกินชุด — ควรเติม</h2>
+      ${sgaps.length?`<table><tr><th>ไซส์</th><th class="n">เช่า 90 วัน</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
         ${sgaps.map(s=>`<tr><td>${esc(s.size)}</td><td class="n">${s.rented_90d}</td><td class="n">${s.available===0?'<span class="pill low">0!</span>':s.available}</td><td class="n">${s.ratio||'-'}:1</td></tr>`).join('')}</table>`
-        :'<div class="muted">ไซซ์ในระบบเพียงพอกับดีมานด์ ✓</div>'}</div>
+        :'<div class="muted">ไซส์ในระบบเพียงพอกับดีมานด์ ✓</div>'}</div>
       <div class="card"><h2>โทนสีที่ลูกค้าเยอะกว่าชุด — ควรเติม</h2>
       ${gaps.length?`<table><tr><th>โทนสี</th><th class="n">ลูกค้า</th><th class="n">ลูกค้าประจำ</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
         ${gaps.map(g=>`<tr><td>${esc(ST[g.season]||g.season)}</td><td class="n">${g.customers}</td><td class="n">${g.loyal}</td><td class="n">${g.available===0?'<span class="pill low">0 — ไม่มีเลย!</span>':g.available}</td><td class="n">${g.ratio||'-'}:1</td></tr>`).join('')}</table>`
         :'<div class="muted">ตอนนี้ชุดในระบบเพียงพอกับฐานลูกค้าทุกโทนสี ✓</div>'}</div>
       <div class="card"><h2>ชุดที่ลูกค้าอยากได้ (wishlist) แต่ไม่ว่าง</h2>
-      ${wish.length?`<table><tr><th>ชุด</th><th>โทน/ไซซ์</th><th class="n">คนรอ</th></tr>
+      ${wish.length?`<table><tr><th>ชุด</th><th>โทน/ไซส์</th><th class="n">คนรอ</th></tr>
         ${wish.map(w=>`<tr><td>${esc(w.name||w.code)}</td><td>${esc(ST[w.season]||w.season||'-')} ${esc(w.size||'')}</td><td class="n">${w.wishes}</td></tr>`).join('')}</table>`:'<div class="muted">ไม่มี</div>'}</div>
       <div class="card"><h2>ชุดที่เช่าบ่อย (ควรซื้อเพิ่มแบบเดียวกัน)</h2>
-      ${hot.length?`<table><tr><th>ชุด</th><th>โทน/ไซซ์</th><th class="n">เช่าไป</th></tr>
+      ${hot.length?`<table><tr><th>ชุด</th><th>โทน/ไซส์</th><th class="n">เช่าไป</th></tr>
         ${hot.map(h=>`<tr><td>${esc(h.name||h.code)}</td><td>${esc(ST[h.season]||h.season||'-')} ${esc(h.size||'')}</td><td class="n">${h.times_rented} ครั้ง</td></tr>`).join('')}</table>`:'<div class="muted">ยังไม่มีชุดที่เช่าบ่อย</div>'}
       <div class="muted" style="margin-top:8px">ระบบเตือนเจ้าของทาง LINE อัตโนมัติทุกสัปดาห์เมื่อมีโทนสีที่ขาด</div></div>`;
   }

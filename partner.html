@@ -14,7 +14,7 @@
   .bar h1{font-family:var(--display);font-size:18px;font-weight:700}
   .bar .tag{font-size:12px;background:#3a3a3a;padding:3px 10px;border-radius:20px}
   .wrap{max-width:660px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;scroll-margin-top:64px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
   .card h2{font-family:var(--display);font-size:15px;margin-bottom:2px}
   .card .sub{font-size:12px;color:var(--muted);margin-bottom:10px}
   label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-weight:500}
@@ -46,103 +46,18 @@
   .langtog{margin-left:auto;display:flex;border:1px solid #4a4a4a;border-radius:20px;overflow:hidden;flex:none}
   .langtog button{background:transparent;color:#bdbcb7;border:none;padding:5px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
   .langtog button.on{background:#fff;color:var(--ink)}
-  /* phead (เดิมมาจาก ops-ui.css — inline เพราะหน้านี้อยู่ใต้ liff/) */
-  .phead{padding:4px 2px}
-  .phead .eyebrow{font-family:var(--display);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
-  .phead h1{font-family:var(--display);font-size:24px;font-weight:700;margin:4px 0 6px}
-  .phead .sub{font-size:13px;color:var(--muted);line-height:1.55}
-  /* gate (กันคนที่ยังไม่ใช่พาร์ทเนอร์ที่เซ็นแล้ว) */
-  #gate{display:none}
-  #gate .card{text-align:center;padding:30px 22px}
-  #gate h2{font-size:18px;margin-bottom:8px}
-  #gate p{font-size:14px;color:var(--muted);line-height:1.6}
-  #main{display:none}
-  .hello{font-size:13px;color:var(--muted);margin-top:2px}
-  .hello b{color:var(--ink)}
-  /* ลูกค้าของฉัน */
-  .clients{display:flex;flex-direction:column;gap:8px;margin-top:4px}
-  .clientrow{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:#fff}
-  .clientrow:hover{border-color:var(--ink)}
-  .clientrow .nm{font-weight:600;font-size:14px}
-  .clientrow .cd{font-size:12px;color:var(--muted)}
-  .clientrow .hl{font-size:12px;color:var(--muted);margin-left:auto;text-align:right;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .empty{font-size:13px;color:var(--muted);padding:6px 2px}
-  /* แถบกระโดดหัวข้อ (sticky) — ฟอร์มยาว เลื่อนหาง่ายขึ้น */
-  .jump{position:sticky;top:0;z-index:5;background:#F2F1EE;display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin:-2px 0 2px}
-  .jump button{flex:none;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:7px 13px;font-size:13px;color:var(--ink);cursor:pointer;font-family:var(--sans);white-space:nowrap}
-  .jump button:hover{border-color:var(--ink)}
-  .draftnote{background:#EEF3FB;border:1px solid #C9D7EC;border-radius:9px;padding:9px 12px;font-size:13px;color:#2c4a6e;margin-top:10px;display:none}
-  .draftnote.show{display:block}
-  /* แท็บสลับมุมมองพอร์ทัล */
-  .pnav{position:sticky;top:0;z-index:6;display:flex;gap:6px;overflow-x:auto;background:#F2F1EE;padding:8px 0;margin:2px 0 6px}
-  .pnav button{flex:none;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:8px 16px;font-size:14px;color:var(--ink);cursor:pointer;font-family:var(--sans);white-space:nowrap}
-  .pnav button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .view{display:none;flex-direction:column;gap:14px}
-  .view.on{display:flex}
-  .savebar{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
-  .pubtoggle{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);font-weight:600;cursor:pointer;margin:0}
-  .pubtoggle input{width:18px;height:18px}
-  /* ปฏิทินเวลาว่าง */
-  .cal{display:flex;flex-direction:column;gap:7px;margin-top:6px}
-  .daygrp{margin-top:8px}
-  .daygrp .dh{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:5px}
-  .slot{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff}
-  .slot .tm{font-weight:600;font-size:14px}
-  .slot .st{font-size:12px;color:var(--muted);margin-left:auto}
-  .slot.booked{background:#F6F3EE;border-color:#D8CFC0}
-  .slot.booked .st{color:#8a6d3b}
-  .slot .rm{border:none;background:none;color:#b03a3a;cursor:pointer;font-size:13px;padding:2px 6px}
-  /* คิวจอง */
-  .bookings{display:flex;flex-direction:column;gap:10px;margin-top:6px}
-  .bkrow{border:1.5px solid var(--line);border-radius:12px;padding:12px;background:#fff}
-  .bkrow .bt{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
-  .bkrow .bt .bcode{margin-left:auto;font-size:12px;color:var(--muted);font-weight:400}
-  .bkrow .bn{font-size:13px;color:var(--muted);margin-top:5px}
-  .bkrow .bact{display:flex;gap:8px;margin-top:10px}
-  .bkrow .bact button{flex:1;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-size:13px;background:#fff;cursor:pointer;font-family:var(--sans)}
-  .bkrow .bact .done{background:var(--ok);color:#fff;border-color:var(--ok)}
-  .bkrow.is-done{opacity:.6}
-  /* ค่าตอบแทน */
-  .earn{display:flex;gap:10px;margin-top:6px}
-  .earn .erow{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px;text-align:center;background:#fff}
-  .earn .ev{display:block;font-family:var(--display,inherit);font-size:20px;font-weight:700;color:var(--ink)}
-  .earn .el{display:block;font-size:11px;color:var(--muted);margin-top:2px}
 </style>
+<link rel="stylesheet" href="ops-ui.css">
 </head>
 <body>
-<div class="bar"><h1>พอร์ทัลสไตลิสต์</h1><span class="tag">พาร์ทเนอร์ LLOOP</span>
+<div class="bar"><h1>พอร์ทัลสไตลิสต์</h1><span class="tag">พาร์ทเนอร์ LLOOP · ข้อมูลภายใน</span>
   <span class="langtog"><button id="thBtn" class="on" onclick="setPLang('th')">TH</button><button id="enBtn" onclick="setPLang('en')">EN</button></span></div>
-
-<!-- ประตู: เปิดได้เฉพาะพาร์ทเนอร์ที่ลงนามสัญญาแล้ว -->
-<div class="wrap" id="gate">
-  <div class="card">
-    <h2 id="gateTitle">กำลังตรวจสิทธิ์…</h2>
-    <p id="gateMsg">รอสักครู่ค่ะ</p>
-  </div>
-</div>
-
-<div class="wrap" id="main">
+<div class="wrap">
   <section class="phead">
     <div class="eyebrow">stylist partner</div>
     <h1>บันทึกตัวตนของลูกค้าทุกคน</h1>
-    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดที่วนต่อใช่กับเขาที่สุด</div>
-    <div class="hello" id="hello"></div>
+    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดใน loop ใช่กับเขาที่สุด</div>
   </section>
-
-  <nav class="pnav" id="pnav">
-    <button class="on" data-v="clients" onclick="switchView('clients')">ลูกค้า</button>
-    <button data-v="profile" onclick="switchView('profile')">โปรไฟล์</button>
-    <button data-v="calendar" onclick="switchView('calendar')">เวลาว่าง</button>
-    <button data-v="bookings" onclick="switchView('bookings')">คิวจอง</button>
-  </nav>
-
-  <div class="view on" id="view-clients">
-  <div class="card" id="myclientsCard">
-    <h2>ลูกค้าของฉัน</h2>
-    <div class="sub">ลูกค้าที่เคยบันทึกไว้ — แตะเพื่อเปิดแก้ไขต่อ (ไม่ต้องจำรหัส)</div>
-    <div class="clients" id="myclients"><div class="empty">ยังไม่มีลูกค้าที่บันทึก</div></div>
-  </div>
-
   <div class="card">
     <h2>ค้นหาลูกค้า — รหัสจากแอป LLOOP</h2>
     <div class="scan">
@@ -150,20 +65,10 @@
       <button class="btn dark" onclick="lookup()">ค้นหา</button>
     </div>
     <div class="found" id="found"></div>
-    <div class="draftnote" id="draftnote"></div>
   </div>
 
   <fieldset id="form">
-  <div class="jump" id="jump">
-    <button type="button" onclick="jumpTo('sec-service')">บริการ</button>
-    <button type="button" onclick="jumpTo('sec-color')">สี</button>
-    <button type="button" onclick="jumpTo('sec-face')">หน้า</button>
-    <button type="button" onclick="jumpTo('sec-body')">หุ่น</button>
-    <button type="button" onclick="jumpTo('sec-measure')">วัดตัว</button>
-    <button type="button" onclick="jumpTo('sec-style')">สไตล์</button>
-    <button type="button" onclick="jumpTo('sec-lookbook')">รูป/สรุป</button>
-  </div>
-  <div class="card" id="sec-service">
+  <div class="card">
     <h2>ข้อมูลการให้บริการ</h2>
     <div class="sub">บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ</div>
     <div class="g3">
@@ -184,11 +89,11 @@
         <option value="internal">ใช้ภายในเท่านั้น</option><option value="no">ไม่ยินยอม</option></select></div>
     </div>
   </div>
-  <div class="card" id="sec-color">
+  <div class="card">
     <h2>Personal Color — 12 Seasons</h2>
     <div class="sub">ผลวิเคราะห์สีจากคอร์ส (เลือก type 12 ฤดู)</div>
     <div class="g2">
-      <div><label>12-Season Type</label><select id="type12" onchange="onType12()">
+      <div><label>12-Season Type</label><select id="type12" onchange="autoSeason()">
         <option value="">—</option>
         <option>Light Spring</option><option>Warm Spring</option><option>Bright Spring</option>
         <option>Bright Winter</option><option>Cool Winter</option><option>Deep Winter</option>
@@ -228,7 +133,7 @@
     <label>หรือวางลิงก์ไฟล์ (คั่นด้วย ,)</label><input id="pc_file" placeholder="https://...">
   </div>
 
-  <div class="card" id="sec-face">
+  <div class="card">
     <h2>Face Analysis</h2>
     <div class="g2">
       <div><label>รูปหน้า</label><select id="face_shape"><option value="">—</option><option>รูปไข่</option><option>กลม</option><option>เหลี่ยม</option><option>หัวใจ</option><option>ยาว</option><option>เพชร</option></select></div>
@@ -241,7 +146,7 @@
     <label>โน้ตเพิ่มเติม (หน้า/ผม)</label><input id="hair_notes" placeholder="เลี่ยงหน้าม้าหนา ฯลฯ">
   </div>
 
-  <div class="card" id="sec-body">
+  <div class="card">
     <h2>Body Analysis</h2>
     <div class="g2">
       <div><label>ประเภทหุ่น</label><select id="body_type">
@@ -269,7 +174,7 @@
     <label>หรือวางลิงก์ไฟล์ (คั่นด้วย ,)</label><input id="fb_file" placeholder="https://...">
   </div>
 
-  <div class="card" id="sec-measure">
+  <div class="card">
     <h2>วัดตัว (ละเอียด)</h2>
     <div class="sub">หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก</div>
     <div class="g3">
@@ -294,7 +199,7 @@
     </div>
   </div>
 
-  <div class="card" id="sec-style">
+  <div class="card">
     <h2>Soul Styling & Wardrobe</h2>
     <label>Core / Soul Style</label><input id="core_style" placeholder="ตัวตน/แก่นสไตล์">
     <label>Vibe / ลุค</label><input id="vibe" placeholder="modern, elegant, minimal">
@@ -318,7 +223,7 @@
     <label>หรือวางลิงก์ Mood Board (คั่นด้วย ,)</label><input id="mood_board" placeholder="https://...">
   </div>
 
-  <div class="card" id="sec-lookbook">
+  <div class="card">
     <h2>Lookbook & รูปลูกค้า</h2>
     <label>Personal Lookbook 20 Looks</label>
     <input type="file" id="lookbook_file" accept="image/*" multiple onchange="uploadFiles(this,'lookbook','lookbook_thumbs')">
@@ -338,85 +243,19 @@
 
   <button class="btn ok" onclick="save()">บันทึกโปรไฟล์ลูกค้า</button>
   </fieldset>
-  </div><!-- /view-clients -->
-
-  <!-- ===== โปรไฟล์สไตลิสต์ (กรอกเอง + เผยแพร่เอง) ===== -->
-  <div class="view" id="view-profile">
-    <div class="card">
-      <h2>โปรไฟล์สไตลิสต์ของฉัน</h2>
-      <div class="sub">ข้อมูลนี้จะแสดงให้ลูกค้าเห็นบนแอป LLOOP เมื่อเปิด "เผยแพร่" — เป็นหน้าที่ลูกค้าใช้เลือกคุณตอนจอง Personal Color</div>
-      <div class="g2">
-        <div><label>ชื่อที่แสดง</label><input id="pf_display" placeholder="ชื่อ-เล่น/ชื่อมืออาชีพ"></div>
-        <div><label>ชื่อสตูดิโอ</label><input id="pf_studio" placeholder="ถ้ามี"></div>
-      </div>
-      <label>พาดหัวสั้น ๆ</label><input id="pf_headline" placeholder="เช่น ผู้เชี่ยวชาญ Personal Color 12-season">
-      <label>แนะนำตัว</label><textarea id="pf_bio" placeholder="ประสบการณ์ แนวการวิเคราะห์ และสิ่งที่ลูกค้าจะได้รับ"></textarea>
-      <div class="g2">
-        <div><label>พื้นที่ให้บริการ</label><input id="pf_area" placeholder="เช่น สุขุมวิท / ออนไลน์"></div>
-        <div><label>ความเชี่ยวชาญ (คั่นด้วย ,)</label><input id="pf_specialties" placeholder="Personal Color, Makeup, Body Styling"></div>
-      </div>
-      <label>รายละเอียดบริการ / สิ่งที่ลูกค้าจะได้</label><textarea id="pf_session" placeholder="เช่น วิเคราะห์สี 12 ฤดู + พาเลตส่วนตัว + แนะนำการแต่งหน้า ~90 นาที"></textarea>
-      <label>รูปโปรไฟล์</label>
-      <input type="file" id="pf_photo_up" accept="image/*" onchange="uploadProfilePhoto(this)">
-      <input id="pf_photo" placeholder="หรือวางลิงก์รูป https://...">
-      <div class="files" id="pf_photo_thumb"></div>
-      <div class="savebar">
-        <label class="pubtoggle"><input type="checkbox" id="pf_public"> เผยแพร่ให้ลูกค้าเห็น</label>
-        <button class="btn ok" onclick="saveProfile()">บันทึกโปรไฟล์</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== เวลาว่าง (ปฏิทิน) ===== -->
-  <div class="view" id="view-calendar">
-    <div class="card">
-      <h2>เปิดเวลาว่าง</h2>
-      <div class="sub">ตั้งช่วงเวลาในแต่ละวัน ระบบจะแบ่งเป็นช่อง ๆ ให้ลูกค้าจองเองได้เลย</div>
-      <div class="g3">
-        <div><label>วันที่</label><input id="av_date" type="date"></div>
-        <div><label>เริ่ม</label><input id="av_start" type="time" value="13:00"></div>
-        <div><label>ถึง</label><input id="av_end" type="time" value="17:00"></div>
-      </div>
-      <div class="g2">
-        <div><label>ความยาวต่อคิว (นาที)</label><select id="av_interval">
-          <option>60</option><option>90</option><option>120</option><option>45</option><option>30</option></select></div>
-        <div style="display:flex;align-items:flex-end"><button class="btn dark" style="width:100%" onclick="addSlots()">เพิ่มช่องเวลา</button></div>
-      </div>
-    </div>
-    <div class="card">
-      <h2>ปฏิทินของฉัน</h2>
-      <div class="sub">ช่องที่ว่าง = ลูกค้ายังจองได้ · ลบได้เฉพาะช่องที่ยังไม่มีคนจอง</div>
-      <div class="cal" id="calList"><div class="empty">ยังไม่มีช่องเวลา</div></div>
-    </div>
-  </div>
-
-  <!-- ===== คิวที่ถูกจอง ===== -->
-  <div class="view" id="view-bookings">
-    <div class="card" id="earnCard" style="display:none">
-      <h2>ค่าตอบแทนของฉัน</h2>
-      <div class="sub">฿1,000 ต่อการวิเคราะห์ 1 ครั้ง — บันทึกเมื่อกด “เสร็จงาน”</div>
-      <div class="earn" id="earn"></div>
-    </div>
-    <div class="card">
-      <h2>คิวที่ถูกจอง</h2>
-      <div class="sub">ลูกค้าที่จองเข้ามา — เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ</div>
-      <div class="bookings" id="bookList"><div class="empty">ยังไม่มีคิว</div></div>
-    </div>
-  </div>
 </div>
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="./config.js"></script>
-<script src="./me-api.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
 <script>
-  // publishable client — ใช้เฉพาะ Storage (อัปโหลดรูป/ไฟล์) · ส่วน RPC วิ่งผ่าน me-rpc gateway
-  const SUPABASE_URL=(window.CONFIG&&window.CONFIG.SUPABASE_URL)||'https://rprwilsbjptdnvsibjgi.supabase.co';
-  const SUPABASE_KEY=(window.CONFIG&&window.CONFIG.SUPABASE_ANON_KEY)||'sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  // RPC ทุกตัวผ่าน gateway me-rpc (verify LINE idToken → inject p_line_uid) — กัน spoof
-  sb.rpc = (fn,args)=> window.meRpc(fn, args||{});
+  if(window.opsRpc) sb.rpc=window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
   const $=id=>document.getElementById(id);
   let code=null, baseSeason='';
   const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2200);};
@@ -424,254 +263,30 @@
   const str=id=>$(id).value||undefined;
   const list=id=>($(id).value||'').split(',').map(s=>s.trim()).filter(Boolean);
   const checked=id=>[...$(id).querySelectorAll('input:checked')].map(i=>i.value);
-
-  // ===== gate: เปิดพอร์ทัลเฉพาะพาร์ทเนอร์ที่ลงนามสัญญาแล้ว =====
-  async function initGate(){
-    let res;
-    try{ res = await window.meRpc('partner_portal_me', {}); }
-    catch(e){ res = { data:null, error:{ message:(e&&e.message)||'error' } }; }
-    const { data, error } = res || {};
-    if(error || !data || data.is_partner!==true){
-      const m=(error&&error.message)||'';
-      const needLogin = /LINE|เข้าสู่ระบบ|idToken|unauthorized|เซสชัน/i.test(m);
-      $('gate').style.display='block'; $('main').style.display='none';
-      if(needLogin){
-        $('gateTitle').textContent='เปิดหน้านี้ผ่าน LINE';
-        $('gateMsg').textContent='กรุณาเปิดลิงก์พอร์ทัลจากแชต LINE ของ LLOOP เพื่อยืนยันตัวตนค่ะ';
-      }else{
-        $('gateTitle').textContent='ยังไม่พบสัญญาที่ลงนาม';
-        $('gateMsg').textContent='พอร์ทัลนี้เปิดให้พาร์ทเนอร์ที่ลงนามสัญญากับ LLOOP แล้วเท่านั้น — หากลงนามแล้วแต่ยังเข้าไม่ได้ ติดต่อทีม LLOOP ได้เลยค่ะ';
-      }
-      return;
-    }
-    $('gate').style.display='none'; $('main').style.display='flex';
-    const who=data.org||data.name||'พาร์ทเนอร์';
-    $('hello').innerHTML='ลงชื่อเข้าใช้ในนาม <b>'+who+'</b>';
-    loadClients();
-  }
-  async function loadClients(){
-    try{
-      const { data } = await window.meRpc('partner_portal_clients', {});
-      const box=$('myclients'); const arr=Array.isArray(data)?data:[];
-      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีลูกค้าที่บันทึก — ค้นหาด้วยรหัสด้านล่างเพื่อเริ่ม</div>'; return; }
-      box.innerHTML='';
-      arr.forEach(c=>{
-        const row=document.createElement('div'); row.className='clientrow';
-        row.innerHTML='<div><div class="nm">'+(c.name||'ลูกค้า')+'</div><div class="cd">'+(c.code||'')+'</div></div>'+
-          '<div class="hl">'+(c.headline||'')+'</div>';
-        row.onclick=()=>{ $('code').value=c.code; lookup(); window.scrollTo({top:0,behavior:'smooth'}); };
-        box.appendChild(row);
-      });
-    }catch(e){ /* เงียบไว้ — ลิสต์ไม่ขึ้นไม่กระทบการค้นหา */ }
-  }
-
-  // ============================================================
-  // สลับมุมมอง: ลูกค้า / โปรไฟล์ / เวลาว่าง / คิวจอง
-  // ============================================================
-  let _profileLoaded=false;
-  function switchView(v){
-    document.querySelectorAll('#pnav button').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
-    document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on', el.id==='view-'+v));
-    window.scrollTo({top:0,behavior:'smooth'});
-    if(v==='profile' && !_profileLoaded){ loadProfile(); }
-    if(v==='calendar'){ loadCalendar(); }
-    if(v==='bookings'){ loadBookings(); }
-  }
-
-  // ---------- โปรไฟล์ ----------
-  async function loadProfile(){
-    try{
-      const { data, error } = await window.meRpc('partner_profile_self', {});
-      if(error || !data || data.error){ return; }
-      $('pf_display').value   = data.display_name||'';
-      $('pf_studio').value    = data.studio_name||'';
-      $('pf_headline').value  = data.headline||'';
-      $('pf_bio').value       = data.bio||'';
-      $('pf_area').value      = data.area||'';
-      $('pf_specialties').value = (data.specialties||[]).join(', ');
-      $('pf_session').value   = data.session_note||'';
-      $('pf_photo').value     = data.photo_url||'';
-      $('pf_public').checked  = !!data.is_public;
-      renderProfilePhoto();
-      _profileLoaded=true;
-    }catch(e){}
-  }
-  function renderProfilePhoto(){
-    const url=($('pf_photo').value||'').trim(), box=$('pf_photo_thumb'); if(!box) return;
-    box.innerHTML = url ? '<div class="th"><img src="'+url+'" alt=""></div>' : '';
-  }
-  async function uploadProfilePhoto(input){
-    const file=input.files&&input.files[0]; if(!file) return;
-    const path=`partner/${Date.now()}-${file.name}`.replace(/\s+/g,'_');
-    try{
-      const { error:upErr } = await sb.storage.from('uploads').upload(path, file, { upsert:false });
-      if(upErr) throw upErr;
-      const { data:pub } = sb.storage.from('uploads').getPublicUrl(path);
-      $('pf_photo').value = (pub&&pub.publicUrl)||''; renderProfilePhoto(); toast('อัปโหลดรูปแล้ว');
-    }catch(e){ toast('อัปโหลดไม่ได้ — วางลิงก์รูปแทนได้'); }
-    input.value='';
-  }
-  async function saveProfile(){
-    const data={
-      display_name:$('pf_display').value.trim(),
-      studio_name:$('pf_studio').value.trim(),
-      headline:$('pf_headline').value.trim(),
-      bio:$('pf_bio').value.trim(),
-      area:$('pf_area').value.trim(),
-      session_note:$('pf_session').value.trim(),
-      photo_url:$('pf_photo').value.trim(),
-      specialties:($('pf_specialties').value||'').split(',').map(s=>s.trim()).filter(Boolean),
-      is_public:$('pf_public').checked
-    };
-    const { data:res, error } = await window.meRpc('partner_profile_save', { p_data:data });
-    if(error || (res&&res.error)){ toast('บันทึกไม่สำเร็จ'); return; }
-    toast($('pf_public').checked ? 'บันทึก + เผยแพร่แล้ว' : 'บันทึกแล้ว (ยังไม่เผยแพร่)');
-  }
-
-  // ---------- เวลาว่าง / ปฏิทิน ----------
-  const fmtDay=d=>new Date(d).toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
-  const fmtTime=d=>new Date(d).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-  async function addSlots(){
-    const p_date=$('av_date').value;
-    if(!p_date){ toast('เลือกวันที่ก่อนค่ะ'); return; }
-    const { data, error } = await window.meRpc('partner_slots_add', {
-      p_date, p_start:$('av_start').value||'13:00', p_end:$('av_end').value||'17:00', p_interval:Number($('av_interval').value)||60 });
-    if(error || (data&&data.error)){ toast('เพิ่มไม่สำเร็จ'); return; }
-    toast('เพิ่ม '+((data&&data.added)||0)+' ช่อง'); loadCalendar();
-  }
-  async function loadCalendar(){
-    const box=$('calList');
-    try{
-      const { data } = await window.meRpc('partner_calendar_self', {});
-      const arr=Array.isArray(data)?data:[];
-      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีช่องเวลา — เพิ่มด้านบนได้เลย</div>'; return; }
-      const groups={};
-      arr.forEach(s=>{ const k=new Date(s.starts_at).toDateString(); (groups[k]=groups[k]||[]).push(s); });
-      box.innerHTML='';
-      Object.keys(groups).forEach(k=>{
-        const g=document.createElement('div'); g.className='daygrp';
-        g.innerHTML='<div class="dh">'+fmtDay(groups[k][0].starts_at)+'</div>';
-        groups[k].forEach(s=>{
-          const row=document.createElement('div'); row.className='slot'+(s.status==='booked'?' booked':'');
-          let right = s.status==='booked'
-            ? '<span class="st">จองแล้ว · '+(s.customer||'ลูกค้า')+'</span>'
-            : '<span class="st">ว่าง</span><button class="rm" onclick="removeSlot(\''+s.id+'\')">ลบ</button>';
-          row.innerHTML='<span class="tm">'+fmtTime(s.starts_at)+'</span>'+right;
-          g.appendChild(row);
-        });
-        box.appendChild(g);
-      });
-    }catch(e){ box.innerHTML='<div class="empty">โหลดปฏิทินไม่สำเร็จ</div>'; }
-  }
-  async function removeSlot(id){
-    const { data } = await window.meRpc('partner_slot_remove', { p_id:id });
-    if(data==='booked'){ toast('ช่องนี้มีคนจองแล้ว ลบไม่ได้'); return; }
-    toast('ลบช่องแล้ว'); loadCalendar();
-  }
-
-  // ---------- ค่าตอบแทนของฉัน ----------
-  async function loadEarnings(){
-    try{
-      const { data } = await window.meRpc('partner_earnings_self', {});
-      if(!data || data.error){ return; }
-      const fmt=n=>'฿'+Number(n||0).toLocaleString();
-      $('earn').innerHTML =
-        '<div class="erow"><span class="ev">'+fmt(data.accrued)+'</span><span class="el">รอจ่าย</span></div>'+
-        '<div class="erow"><span class="ev">'+fmt(data.paid)+'</span><span class="el">จ่ายแล้ว</span></div>'+
-        '<div class="erow"><span class="ev">'+(data.sessions||0)+'</span><span class="el">ครั้ง</span></div>';
-      $('earnCard').style.display = (data.sessions>0)?'block':'none';
-    }catch(e){}
-  }
-  // ---------- คิวที่ถูกจอง ----------
-  async function loadBookings(){
-    loadEarnings();
-    const box=$('bookList');
-    try{
-      const { data } = await window.meRpc('partner_bookings_self', {});
-      const arr=Array.isArray(data)?data:[];
-      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีคิว — เปิดเวลาว่างไว้ ลูกค้าจะจองเข้ามาเอง</div>'; return; }
-      box.innerHTML='';
-      arr.forEach(b=>{
-        const div=document.createElement('div'); div.className='bkrow'+(b.status==='done'?' is-done':'');
-        const when=new Date(b.starts_at).toLocaleString('th-TH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-        let html='<div class="bt">'+(b.customer||'ลูกค้า')+'<span class="bcode">'+(b.code?('รหัส '+b.code):'')+'</span></div>'+
-          '<div class="bn">'+when+(b.customer_note?(' · “'+b.customer_note+'”'):'')+'</div>';
-        if(b.status==='confirmed'){
-          html+='<div class="bact">'+
-            (b.code?'<button onclick="goAnalyse(\''+b.code+'\')">กรอกผลวิเคราะห์</button>':'')+
-            '<button class="done" onclick="bookingAction(\''+b.id+'\',\'done\')">เสร็จงาน</button>'+
-            '<button onclick="bookingAction(\''+b.id+'\',\'cancel\')">ยกเลิก</button></div>';
-        }else{ html+='<div class="bn">เสร็จงานแล้ว</div>'; }
-        div.innerHTML=html; box.appendChild(div);
-      });
-    }catch(e){ box.innerHTML='<div class="empty">โหลดคิวไม่สำเร็จ</div>'; }
-  }
-  async function bookingAction(id, action){
-    if(action==='cancel' && !confirm('ยกเลิกคิวนี้? ระบบจะคืนช่องเวลาให้ว่างอีกครั้ง')) return;
-    const { data } = await window.meRpc('partner_booking_update', { p_id:id, p_action:action });
-    if(data!=='ok'){ toast('ทำรายการไม่สำเร็จ'); return; }
-    toast(action==='done'?'บันทึกว่าเสร็จงานแล้ว':'ยกเลิกคิวแล้ว'); loadBookings();
-  }
-  function goAnalyse(code){ switchView('clients'); $('code').value=code; lookup(); }
-
   // 12-season type -> base season (enum 4) สำหรับระบบ fit/For You
   function autoSeason(){
     const t=($('type12').value||'').toLowerCase();
     baseSeason = t.includes('spring')?'spring':t.includes('summer')?'summer':t.includes('autumn')?'autumn':t.includes('winter')?'winter':'neutral';
   }
-  // ===== Preset 12-season — เลือกฤดู → เติมพาเลต/นิวทรัล/โลหะ/สีเลี่ยง/undertone อัตโนมัติ =====
-  // palette = 5 สีเสื้อผ้า · avoid = 2 สีเลี่ยง · neutrals/metals = ข้อความ (เติมเฉพาะช่องว่าง)
-  const SEASON_PRESETS={
-    'Light Spring':{palette:['#F7C59F','#FBE7A1','#A7D7C5','#F4A9A8','#BFD7EA'],avoid:['#2B2B2B','#4B0082'],neutrals:'ครีม · เทาอ่อนอุ่น · คาเมล',metals:'ทองอ่อน'},
-    'Warm Spring':{palette:['#F2A65A','#F4D35E','#6FA287','#E07A5F','#D9A441'],avoid:['#000000','#B0C4DE'],neutrals:'ครีม · คาเมล · น้ำตาลอุ่น',metals:'ทอง'},
-    'Bright Spring':{palette:['#FF6F61','#FFD23F','#16A085','#FF1493','#1E90FF'],avoid:['#8B8B8B','#6B4226'],neutrals:'งาช้าง · เทาอุ่น',metals:'ทอง'},
-    'Light Summer':{palette:['#BFD7EA','#F4C2C2','#C9E4DE','#D8B4E2','#AEC6CF'],avoid:['#FF8C00','#000000'],neutrals:'เทาอ่อน · ขาวนวล',metals:'เงิน'},
-    'Cool Summer':{palette:['#6A9FB5','#C08CAF','#7FB3A6','#9AA0C9','#BFCAD6'],avoid:['#FF7518','#DAA520'],neutrals:'เทาเย็น · กรมท่าอ่อน',metals:'เงิน/ขาว'},
-    'Soft Summer':{palette:['#9BAEBC','#B89AA6','#8FA998','#A9A9B0','#C7B8C8'],avoid:['#FF4500','#FFD700'],neutrals:'เทา · โทป',metals:'เงินด้าน'},
-    'Soft Autumn':{palette:['#B79F7B','#8E9A6C','#C08552','#A3998E','#9E7B6B'],avoid:['#FF00FF','#000000'],neutrals:'เบจ · โทป · น้ำตาลนุ่ม',metals:'ทองด้าน'},
-    'Warm Autumn':{palette:['#7A5230','#A8642E','#C9A86A','#6E7B4F','#9C3B2E'],avoid:['#E8E8EF','#BFC4CC'],neutrals:'ครีม · กากี · น้ำตาลอุ่น',metals:'ทอง · ทองแดง'},
-    'Deep Autumn':{palette:['#5E3B1E','#6E2C2C','#4F5D2F','#8C6A1E','#2F4F4F'],avoid:['#F5F5F5','#ADD8E6'],neutrals:'น้ำตาลเข้ม · ครีมเข้ม',metals:'ทองเข้ม/ทองแดง'},
-    'Bright Winter':{palette:['#E0115F','#1CA9C9','#4B0082','#00A86B','#111111'],avoid:['#D2B48C','#808000'],neutrals:'ขาวบริสุทธิ์ · ดำ',metals:'เงิน'},
-    'Cool Winter':{palette:['#0F4C81','#B0306A','#2E8B57','#6C5B7B','#2B2B2B'],avoid:['#FF8C00','#DAA520'],neutrals:'ขาว · เทาเย็น · ดำ',metals:'เงิน/ขาว'},
-    'Deep Winter':{palette:['#1B1B3A','#5D1A2E','#14532D','#3B0A45','#0A0A0A'],avoid:['#FFDAB9','#BDB76B'],neutrals:'ดำ · ขาวเย็น',metals:'เงิน/ขาว'}
-  };
-  function applySeasonPreset(){
-    const key=$('type12').value||''; const p=SEASON_PRESETS[key]; if(!p) return;
-    (p.palette||[]).slice(0,5).forEach((hex,i)=>{ const el=$('c'+(i+1)); if(el) el.value=hex; });
-    (p.avoid||[]).slice(0,2).forEach((hex,i)=>{ const el=$('a'+(i+1)); if(el) el.value=hex; });
-    if(p.neutrals && !$('neutrals').value) $('neutrals').value=p.neutrals;
-    if(p.metals   && !$('metals').value)   $('metals').value=p.metals;
-    if(!$('undertone').value) $('undertone').value=(baseSeason==='spring'||baseSeason==='autumn')?'warm':'cool';
-    toast('เติมพาเลตตาม '+key+' ให้แล้ว — ปรับได้');
-    saveDraft();
-  }
-  // เลือกฤดูเอง (จากมือ partner) → set base season + เติม preset · ตอน fillForm เรียกแค่ autoSeason() ไม่ทับของเดิม
-  function onType12(){ autoSeason(); applySeasonPreset(); }
-  function jumpTo(id){ const el=$(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
-
   async function lookup(){
     const c=$('code').value.trim().toUpperCase(); if(!c){toast('ใส่รหัสก่อนค่ะ');return;}
-    const { data, error } = await sb.rpc('partner_portal_lookup',{ p_code: c });
-    if(error){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent=error.message; return; }
-    if(data && data.error==='not_partner'){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='สิทธิ์ของคุณยังไม่พร้อมใช้พอร์ทัล'; return; }
+    const { data } = await sb.rpc('partner_lookup',{ p_code: c });
     if(!data||!data.found){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='ไม่พบรหัส '+c; $('form').className=''; return; }
     code=c; $('found').className='found show'; $('found').style.color='';
     $('found').textContent='พบลูกค้า: '+data.name+(data.has_profile?' (มีผลเดิม — บันทึกทับได้)':''); $('form').className='on';
     // ดึงข้อมูลเดิมมาเติมในฟอร์ม (ถ้ามี) เพื่อไม่ต้องพิมพ์ใหม่
     resetForm();
     try{
-      const { data:prof } = await sb.rpc('partner_portal_get',{ p_code: c });
+      const { data:prof } = await sb.rpc('partner_get',{ p_code: c });
       if(prof && (prof.color||prof.measurements||prof.face||prof.body||prof.style||prof.headline)) fillForm(prof);
     }catch(e){ /* ลูกค้าใหม่ / ยังไม่มีผล — ปล่อยฟอร์มว่าง */ }
-    // ถ้ามีฉบับร่างที่ยังไม่บันทึกของรหัสนี้ค้างในเครื่อง → ถามว่าจะกู้คืนไหม
-    maybeRestoreDraft(c);
   }
   // ล้างฟอร์มก่อนเติมข้อมูลใหม่ (กันค่าค้างจากลูกค้าคนก่อน)
   function resetForm(){
     $('form').querySelectorAll('input,select,textarea').forEach(el=>{
       if(el.id==='code') return;
       if(el.type==='checkbox'){ el.checked=false; }
-      else if(el.type!=='color' && el.type!=='file'){ el.value=''; }
+      else if(el.type!=='color'){ el.value=''; }
     });
     [['c1','#15233F'],['c2','#7A1F3D'],['c3','#0E0E0E'],['c4','#1E5C5A'],['c5','#C9A86A'],['a1','#E8C9A0'],['a2','#B7B7B7']].forEach(([id,v])=>{ if($(id)) $(id).value=v; });
     ['pc_file_chips','fb_file_chips','mood_board_chips','lookbook_thumbs','photos_thumbs'].forEach(id=>{ if($(id)) $(id).innerHTML=''; });
@@ -715,13 +330,12 @@
     setList('lookbook', d.lookbook); setList('photos', d.photos);
     setV('headline', d.headline); setV('analyst', d.analyst); setV('partner', d.partner); setV('tier', d.analyst_tier);
   }
-
-  // ===== เก็บข้อมูลทั้งฟอร์มเป็น object (ใช้ทั้งบันทึกจริง + ฉบับร่างในเครื่อง) =====
-  function buildPayload(){
+  async function save(){
+    if(!code){toast('ค้นหาลูกค้าก่อนค่ะ');return;}
     autoSeason();
     const m={}; ['height_cm','weight_kg','bust_in','underbust_in','waist_in','hip_in','high_hip_in','shoulder_in','shoulder_to_waist_in','back_length_in','arm_length_in','bicep_in','neck_in','thigh_in','inseam_in'].forEach(k=>{const v=num(k);if(v!==undefined)m[k]=v;});
     ['cup','dress_size','shoe_size'].forEach(k=>{const v=str(k);if(v)m[k]=v;});
-    return {
+    const data={
       measurements:m,
       service:{date:str('service_date'), type:str('service_type'), price:num('service_price'),
         next_appt:str('next_appt'), photo_consent:str('photo_consent')},
@@ -742,45 +356,12 @@
       lookbook:list('lookbook'), photos:list('photos'),
       headline:str('headline'), analyst:str('analyst'), partner:str('partner'), analyst_tier:str('tier')
     };
-  }
-
-  // ===== ฉบับร่างในเครื่อง (กันพิมพ์ครึ่งทางแล้วหลุด) =====
-  const draftKey=c=>'partnerDraft:'+c;
-  let draftTimer=null;
-  function saveDraft(){
-    if(!code) return;
-    try{ localStorage.setItem(draftKey(code), JSON.stringify({ at:new Date().toISOString(), data:buildPayload() })); }catch(e){}
-  }
-  function maybeRestoreDraft(c){
-    $('draftnote').className='draftnote';
-    let raw; try{ raw=localStorage.getItem(draftKey(c)); }catch(e){ raw=null; }
-    if(!raw) return;
-    let d; try{ d=JSON.parse(raw); }catch(e){ return; }
-    if(!d||!d.data) return;
-    const when=(d.at||'').slice(0,16).replace('T',' ');
-    $('draftnote').className='draftnote show';
-    $('draftnote').innerHTML='มีฉบับร่างที่ยังไม่บันทึกของรหัสนี้ค้างไว้ ('+when+') '+
-      '<a href="#" id="restoreDraft" style="color:#1d4ed8;font-weight:600"> กู้คืน</a> · '+
-      '<a href="#" id="discardDraft" style="color:#888"> ทิ้งฉบับร่าง</a>';
-    $('restoreDraft').onclick=(e)=>{ e.preventDefault(); fillForm(d.data); $('draftnote').className='draftnote'; toast('กู้คืนฉบับร่างแล้ว'); };
-    $('discardDraft').onclick=(e)=>{ e.preventDefault(); try{localStorage.removeItem(draftKey(c));}catch(_){ } $('draftnote').className='draftnote'; };
-  }
-
-  async function save(){
-    if(!code){toast('ค้นหาลูกค้าก่อนค่ะ');return;}
-    const data=buildPayload();
-    const { data:res, error } = await sb.rpc('partner_portal_save',{ p_code:code, p_data:data });
+    const { data:res, error } = await sb.rpc('partner_save',{ p_code:code, p_data:data });
     if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
-    if(res==='not_partner'){ toast('สิทธิ์ของคุณยังไม่พร้อมใช้พอร์ทัล'); return; }
     if(res==='not_found'){ toast('ไม่พบลูกค้า'); return; }
-    try{ localStorage.removeItem(draftKey(code)); }catch(e){}
-    toast('บันทึกแล้ว — ลูกค้าได้สรุปสไตล์ในแอป');
-    $('form').className=''; $('code').value=''; $('found').className='found'; $('draftnote').className='draftnote'; code=null;
-    loadClients();
+    toast('บันทึกแล้ว — ลูกค้าได้สรุปสไตล์ในแอป'); $('form').className=''; $('code').value=''; $('found').className='found'; code=null;
   }
   $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') lookup(); });
-  // autosave ฉบับร่างเมื่อมีการแก้ไขในฟอร์ม (debounce)
-  $('form').addEventListener('input', ()=>{ if(!code) return; clearTimeout(draftTimer); draftTimer=setTimeout(saveDraft, 800); });
 
   // อัปโหลดรูปจริงไป Supabase Storage (bucket: uploads) แล้วเก็บลิงก์ลง textarea เป้าหมาย
   // graceful fallback: ถ้า bucket ยังไม่เปิด ให้วางลิงก์เองได้ตามเดิม
@@ -809,7 +390,7 @@
     if(added.length){
       const cur=(target.value||'').trim();
       target.value = cur ? cur.replace(/,\s*$/,'')+', '+added.join(', ') : added.join(', ');
-      toast('อัปโหลดแล้ว '+added.length+' รูป'); saveDraft();
+      toast('อัปโหลดแล้ว '+added.length+' รูป');
     }
     input.value='';
   }
@@ -838,7 +419,7 @@
       const cur=(target.value||'').trim();
       target.value = cur ? cur.replace(/,\s*$/,'')+', '+added.join(', ') : added.join(', ');
       renderFileChips(targetId, chipsId);
-      toast('แนบไฟล์แล้ว '+added.length+' ไฟล์'); saveDraft();
+      toast('แนบไฟล์แล้ว '+added.length+' ไฟล์');
     }
     input.value='';
   }
@@ -858,16 +439,11 @@
   // map คีย์เป็นข้อความไทยต้นฉบับ → คำแปลอังกฤษ (คีย์ที่ไม่มีในนี้จะคงภาษาไทยไว้)
   const PARTNER_EN={
     'พอร์ทัลสไตลิสต์':'Stylist portal',
-    'พาร์ทเนอร์ LLOOP':'LLOOP partner',
+    'พาร์ทเนอร์ LLOOP · ข้อมูลภายใน':'LLOOP partner · internal',
     'บันทึกตัวตนของลูกค้าทุกคน':"Record every client's profile",
-    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดที่วนต่อใช่กับเขาที่สุด':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis — so every rotating piece suits them best.',
-    'ลูกค้าของฉัน':'My clients',
-    'ลูกค้าที่เคยบันทึกไว้ — แตะเพื่อเปิดแก้ไขต่อ (ไม่ต้องจำรหัส)':'Clients you have saved — tap to continue editing (no code needed)',
-    'ยังไม่มีลูกค้าที่บันทึก':'No saved clients yet',
-    'ยังไม่มีลูกค้าที่บันทึก — ค้นหาด้วยรหัสด้านล่างเพื่อเริ่ม':'No saved clients yet — search by code below to start',
+    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดใน loop ใช่กับเขาที่สุด':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis — so every rotating piece suits them best.',
     'ค้นหาลูกค้า — รหัสจากแอป LLOOP':'Find client — code from the LLOOP app',
     'ค้นหา':'Search',
-    'บริการ':'Service', 'สี':'Colour', 'หน้า':'Face', 'หุ่น':'Body', 'วัดตัว':'Measure', 'สไตล์':'Style', 'รูป/สรุป':'Photos',
     'ข้อมูลการให้บริการ':'Service details',
     'บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ':'Record what service and when — used for follow-up and receipts',
     'วันที่ให้บริการ':'Service date', 'บริการที่ใช้':'Service used', 'มูลค่าบริการ (฿)':'Service value (฿)',
@@ -925,7 +501,7 @@
     'คุณคือ Warm Autumn โทนอุ่นละมุน':'You are a soft, warm Warm Autumn',
     'ชื่อสไตลิสต์':'Stylist name', 'ทีม/พาร์ทเนอร์':'Team/partner', 'บันทึกโปรไฟล์ลูกค้า':'Save client profile',
   };
-  const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.card h2,.card .sub,.jump button,.empty,label,button.btn,option';
+  const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.card h2,.card .sub,label,button.btn,option';
   let plang=localStorage.getItem('partnerLang')||'th', collected=false;
   function collectI18n(){
     if(collected)return; collected=true;
@@ -958,7 +534,8 @@
   }
   function setPLang(l){ plang=l; localStorage.setItem('partnerLang',l); applyLang(); }
   collectI18n(); applyLang();
-  initGate();
 </script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
 </body>
 </html>
