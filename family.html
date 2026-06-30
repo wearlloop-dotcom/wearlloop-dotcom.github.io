@@ -180,6 +180,15 @@
 
     <div id="memberBody"></div>
 
+    <!-- แพ็กเพื่อนเจ้าสาว -->
+    <div class="form show" id="bridesmaidCard" style="display:none;margin-top:14px">
+      <div style="font-weight:600;margin-bottom:4px" data-i18n="Bridesmaid package">แพ็กเพื่อนเจ้าสาว</div>
+      <div class="seccap" style="margin-bottom:10px" data-i18n="Rent in one theme together — the more of you, the more you save. One order, billed to one payer.">เช่าเข้าตีมพร้อมกัน ยิ่งหลายคนยิ่งลด · ส่งรวมออเดอร์เดียว บิลที่ผู้จ่ายคนเดียว</div>
+      <div id="bmLadder" style="font-size:13px;line-height:1.9"></div>
+      <div id="bmPerk" class="seccap" style="margin-top:8px"></div>
+      <button class="btn sage" id="bmCta" style="margin-top:10px;font-size:13px;padding:9px 16px" data-i18n="Style the whole group in theme">จัดชุดเข้าตีมให้ทั้งกลุ่ม</button>
+    </div>
+
     <!-- ชวนเพื่อน -->
     <div class="form" id="invForm">
       <div style="font-weight:600;margin-bottom:4px" data-i18n="Invite a friend to the group">ชวนเพื่อนเข้ากลุ่ม</div>
@@ -491,6 +500,7 @@ function renderMembers(){
   $('#grpName').textContent=g.name;
   const oth=others(g);
   $('#grpCap').textContent=NAV.t(`${g.members.length} คน · ${oth.length} สมาชิกที่ผูกไว้`,`${g.members.length} people · ${oth.length} linked members`);
+  fillBridesmaid(g.members.length);
   const body=$('#memberBody');
 
   if(oth.length===0){
@@ -514,6 +524,24 @@ function renderRelQuick(){
 }
 window.pickRel=r=>{selRel=r;renderRelQuick();};
 window.openForm=()=>{ $('#form').classList.add('show'); renderRelQuick(); $('#form').scrollIntoView({behavior:'smooth',block:'center'}); };
+
+// ===== แพ็กเพื่อนเจ้าสาว — ส่วนลดกลุ่มตามจำนวนคน (ตรงกับ group_discount_tiers ในระบบ) =====
+function bmDiscPct(n){ return n>=5?18:n>=4?15:n>=3?10:n>=2?5:0; }
+function fillBridesmaid(count){
+  const card=$('#bridesmaidCard'); if(!card) return;
+  card.style.display='';
+  const active=bmDiscPct(count);
+  const rows=[[2,5],[3,10],[4,15],[5,18]].map(([m,p])=>{
+    const on=(p===active && count>=m);
+    const label=m===5?NAV.t('5 คนขึ้นไป','5+ people'):NAV.t(`${m} คน`,`${m} people`);
+    return `<div style="${on?'font-weight:700;color:#2f6f4f':'opacity:.75'}">${label} — ${NAV.t('ลด','save')} ${p}%</div>`;
+  }).join('');
+  $('#bmLadder').innerHTML = rows + (active>0
+    ? `<div style="margin-top:6px;font-weight:700;color:#2f6f4f">${NAV.t(`กลุ่มคุณ ${count} คน → ลด ${active}% ทันที`,`Your group of ${count} → ${active}% off`)}</div>`
+    : `<div style="margin-top:6px" class="seccap">${NAV.t('เพิ่มอีกอย่างน้อย 2 คน เริ่มได้ส่วนลดกลุ่ม','Add at least 2 people to start the group discount')}</div>`);
+  $('#bmPerk').innerHTML = NAV.t('ครบ 4 คน เจ้าสาวได้ผ้าคลุม/แอคเซสซอรีฟรี 1 ชิ้น · ชวนเพื่อนใหม่รับเครดิต ฿200','At 4 people the bride gets a free accessory · invite a new friend for ฿200 credit');
+}
+document.getElementById('bmCta')?.addEventListener('click', ()=>{ document.getElementById('themeSec')?.scrollIntoView({behavior:'smooth',block:'start'}); });
 
 function bindForm(){
   $('#addBtn').onclick=openForm;

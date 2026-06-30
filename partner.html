@@ -119,6 +119,27 @@
   <div class="card">
     <h2 id="gateTitle">กำลังตรวจสิทธิ์…</h2>
     <p id="gateMsg">รอสักครู่ค่ะ</p>
+
+    <!-- ปุ่มสมัครเอง (โผล่เมื่อ owner เปิดสวิตช์ partner_self_register) -->
+    <div id="regCta" style="display:none;margin-top:18px">
+      <button class="btn dark" onclick="showReg()">สมัครเป็นพาร์ทเนอร์</button>
+    </div>
+
+    <!-- ฟอร์มสมัครเอง -->
+    <div id="regForm" style="display:none;margin-top:16px;text-align:left">
+      <label>ชื่อ–นามสกุล *</label>
+      <input id="rName" placeholder="ชื่อที่จะแสดงกับลูกค้า" autocomplete="name">
+      <label>ชื่อสตูดิโอ / ทีม</label>
+      <input id="rOrg" placeholder="เช่น Classis Studio (ไม่บังคับ)">
+      <label>เบอร์โทร</label>
+      <input id="rPhone" inputmode="tel" placeholder="08x-xxx-xxxx">
+      <label>พื้นที่ให้บริการ</label>
+      <input id="rArea" placeholder="เช่น กรุงเทพฯ / ออนไลน์">
+      <label>ความเชี่ยวชาญ (คั่นด้วย ,)</label>
+      <input id="rSpec" placeholder="Personal Color, จัดลุคออกงาน">
+      <button class="btn dark" id="rSubmit" onclick="submitReg()" style="margin-top:14px;width:100%">ยืนยันสมัคร + เข้าพอร์ทัล</button>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5">การกดสมัครถือว่ายอมรับเงื่อนไขการเป็นพาร์ทเนอร์สไตลิสต์ของ LLOOP — บัญชี LINE ที่เปิดหน้านี้จะถูกผูกเป็นพาร์ทเนอร์ทันที</p>
+    </div>
   </div>
 </div>
 
@@ -440,6 +461,10 @@
       if(needLogin){
         $('gateTitle').textContent='เปิดหน้านี้ผ่าน LINE';
         $('gateMsg').textContent='กรุณาเปิดลิงก์พอร์ทัลจากแชต LINE ของ LLOOP เพื่อยืนยันตัวตนค่ะ';
+      }else if(data && data.can_self_register){
+        $('gateTitle').textContent='เริ่มเป็นพาร์ทเนอร์สไตลิสต์';
+        $('gateMsg').textContent='ลงทะเบียนสั้น ๆ แล้วเข้าใช้พอร์ทัลได้เลย — บันทึกผลวิเคราะห์ลูกค้า เปิดเวลาว่าง และรับคิวจอง';
+        $('regCta').style.display='block';
       }else{
         $('gateTitle').textContent='ยังไม่พบสัญญาที่ลงนาม';
         $('gateMsg').textContent='พอร์ทัลนี้เปิดให้พาร์ทเนอร์ที่ลงนามสัญญากับ LLOOP แล้วเท่านั้น — หากลงนามแล้วแต่ยังเข้าไม่ได้ ติดต่อทีม LLOOP ได้เลยค่ะ';
@@ -450,6 +475,26 @@
     const who=data.org||data.name||'พาร์ทเนอร์';
     $('hello').innerHTML='ลงชื่อเข้าใช้ในนาม <b>'+who+'</b>';
     loadClients();
+  }
+
+  // ===== สมัครเป็นพาร์ทเนอร์เอง (เมื่อ owner เปิดสวิตช์) =====
+  function showReg(){ $('regCta').style.display='none'; $('regForm').style.display='block'; $('rName').focus(); }
+  async function submitReg(){
+    const name=(str('rName')||'').trim();
+    if(!name){ toast('กรอกชื่อก่อนค่ะ'); $('rName').focus(); return; }
+    const btn=$('rSubmit'); btn.disabled=true; const t0=btn.textContent; btn.textContent='กำลังสมัคร…';
+    let res;
+    try{ res = await window.meRpc('partner_self_register', { p_data:{
+      name, org:str('rOrg')||'', phone:str('rPhone')||'', area:str('rArea')||'', specialties:str('rSpec')||'' } }); }
+    catch(e){ res={ data:null, error:{ message:(e&&e.message)||'error' } }; }
+    btn.disabled=false; btn.textContent=t0;
+    const { data, error } = res || {};
+    if(error){ toast('สมัครไม่สำเร็จ: '+(error.message||'')); return; }
+    if(data && data.error){
+      const m={ closed:'ขณะนี้ปิดรับสมัครด้วยตนเองอยู่ค่ะ', need_name:'กรอกชื่อก่อนค่ะ', no_uid:'เปิดหน้านี้ผ่าน LINE ก่อนค่ะ' };
+      toast(m[data.error]||('สมัครไม่ได้: '+data.error)); return;
+    }
+    toast('ยินดีต้อนรับสู่พาร์ทเนอร์ LLOOP'); initGate();
   }
   async function loadClients(){
     try{
