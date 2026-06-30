@@ -98,5 +98,8 @@
     return null;
   }
 
-  w.LLOOP_BRANDS = { GROUPS, BRANDS, lookup };
+  // ชื่อมาตรฐานของแบรนด์ — ถ้าตรง taxonomy คืนชื่อแสดง (กันสะกด/ตัวพิมพ์เพี้ยน เช่น "aimer"/"AIMER"→"Aimer")
+  function canon(name) { const m = lookup(name); return m ? m.name : (name ? String(name).trim() : ''); }
+
+  w.LLOOP_BRANDS = { GROUPS, BRANDS, lookup, canon };
 })(window);

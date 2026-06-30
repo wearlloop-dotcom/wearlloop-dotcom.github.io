@@ -203,10 +203,18 @@ function renderChips() {
 }
 
 // ===== Discover — เลือกตามโอกาส + มู้ด (มู้ด = กลุ่มสไตล์จาก taxonomy แบรนด์) =====
-const MOOD_LABEL = { minimal:'มินิมอล', feminine:'หวานเฟมินีน', statement:'ออกงาน-เปรี้ยว', party:'สดใสปาร์ตี้', korean:'เกาหลี', outer:'โค้ทเลเยอร์', swim:'ทะเล-บีช' };
+const MOOD_LABEL = {
+  th:{ minimal:'มินิมอล', feminine:'หวานเฟมินีน', statement:'ออกงาน-เปรี้ยว', party:'สดใสปาร์ตี้', korean:'เกาหลี', outer:'โค้ทเลเยอร์', swim:'ทะเล-บีช' },
+  en:{ minimal:'Minimal', feminine:'Feminine', statement:'Statement', party:'Playful', korean:'Korean', outer:'Outerwear', swim:'Beachwear' }
+};
 const MOOD_ORDER = ['minimal','feminine','statement','party','korean','outer','swim'];
 function garmentGroup(g){ const m = window.LLOOP_BRANDS && window.LLOOP_BRANDS.lookup(g.brand); return m ? m.group : null; }
-const OCC_SUB = { wedding_guest:'ค็อกเทล · สุภาพ', dinner:'หรู · โรแมนติก', party:'เด่น · สนุก', cafe:'ลำลองมีสไตล์', work:'สมาร์ทแคชชวล', trip:'เบา พลิ้ว สดใส', graduation:'ทางการ · ถ่ายรูป', festival:'สดใส · สนุก', merit:'สุภาพเรียบร้อย', date:'หวาน · มั่นใจ' };
+// ชื่อแบรนด์มาตรฐานของชุด (กันสะกด/ตัวพิมพ์เพี้ยนตอน intake → ชิป/ฟิลเตอร์ไม่แตกเป็นหลายแบรนด์)
+function gbrand(g){ return window.LLOOP_BRANDS ? window.LLOOP_BRANDS.canon(g.brand) : (g.brand || ''); }
+const OCC_SUB = {
+  th:{ wedding_guest:'ค็อกเทล · สุภาพ', dinner:'หรู · โรแมนติก', party:'เด่น · สนุก', cafe:'ลำลองมีสไตล์', work:'สมาร์ทแคชชวล', trip:'เบา พลิ้ว สดใส', graduation:'ทางการ · ถ่ายรูป', festival:'สดใส · สนุก', merit:'สุภาพเรียบร้อย', date:'หวาน · มั่นใจ' },
+  en:{ wedding_guest:'Cocktail · polished', dinner:'Refined · romantic', party:'Bold · fun', cafe:'Casual, with style', work:'Smart casual', trip:'Light & breezy', graduation:'Formal · photo-ready', festival:'Bright · fun', merit:'Modest · neat', date:'Sweet · confident' }
+};
 
 function renderDiscover(){
   const el = $('#discover'); if(!el) return;
@@ -219,12 +227,12 @@ function renderDiscover(){
   if(tags.length){
     html += `<div class="disc-q">${TH?'วันนี้ไปไหนคะ':'Where to today?'}</div>`;
     html += `<div class="disc-s">${TH?'เลือกโอกาส แล้วเราคัดลุคให้':'Pick an occasion — we curate the looks'}</div>`;
-    html += `<div class="occgrid">` + tags.map((tg,i)=>`<button class="oc b${i%3} ${fOccasion===tg?'on':''}" onclick="pickOccasion('${tg}')"><span class="t">${occName(tg)}</span><span class="s">${OCC_SUB[tg]||''}</span></button>`).join('') + `</div>`;
+    html += `<div class="occgrid">` + tags.map((tg,i)=>`<button class="oc b${i%3} ${fOccasion===tg?'on':''}" onclick="pickOccasion('${tg}')"><span class="t">${occName(tg)}</span><span class="s">${(OCC_SUB[lang]||OCC_SUB.th)[tg]||''}</span></button>`).join('') + `</div>`;
   }
   if(moods.length){
     html += `<div class="disc-h">${TH?'เลือกตามมู้ด':'By mood'}</div>`;
     html += `<div class="moodrow"><button class="moodc ${!fMood?'on':''}" onclick="setMood('')">${TH?'ทั้งหมด':'All'}</button>` +
-      moods.map(k=>`<button class="moodc ${fMood===k?'on':''}" onclick="setMood('${k}')">${MOOD_LABEL[k]||k}</button>`).join('') + `</div>`;
+      moods.map(k=>`<button class="moodc ${fMood===k?'on':''}" onclick="setMood('${k}')">${(MOOD_LABEL[lang]||MOOD_LABEL.th)[k]||k}</button>`).join('') + `</div>`;
   }
   el.innerHTML = html;
 }
@@ -247,7 +255,7 @@ function renderFilters() {
 function renderBrandChips() {
   const el = $('#brandRow'); if (!el) return;
   const meta = window.LLOOP_BRANDS;
-  const inStock = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
+  const inStock = [...new Set(GARMENTS.map(gbrand).filter(Boolean))];
   if (!inStock.length) { el.innerHTML = ''; return; }
   const hotRank = b => { const m = meta && meta.lookup(b); return m && m.hot ? 0 : 1; };
   const top = inStock.slice().sort((a, b) => hotRank(a) - hotRank(b) || a.localeCompare(b)).slice(0, 8);
@@ -263,12 +271,12 @@ function renderBrandChips() {
 function openBrandDir() {
   const meta = window.LLOOP_BRANDS; if (!meta) { setBrand(''); return; }
   const TH = lang === 'th';
-  const cnt = {}, actual = {}, extras = {};
+  const cnt = {}, extras = {};
   GARMENTS.forEach(g => {
     const bn = g.brand; if (!bn) return;
     const m = meta.lookup(bn);
-    if (m) { cnt[m.key] = (cnt[m.key] || 0) + 1; if (!actual[m.key]) actual[m.key] = bn; }
-    else { extras[bn] = (extras[bn] || 0) + 1; }
+    if (m) { cnt[m.key] = (cnt[m.key] || 0) + 1; }
+    else { const c = meta.canon(bn); extras[c] = (extras[c] || 0) + 1; }
   });
   let html = `<div class="bdir"><button class="bd-x" onclick="closeBrandDir()" aria-label="close">×</button><div class="bd-h">${TH ? 'รวมแบรนด์' : 'All brands'}</div>`;
   meta.GROUPS.forEach(gr => {
@@ -278,7 +286,7 @@ function openBrandDir() {
     html += items.map(b => {
       const n = cnt[b.key] || 0;
       const ty = (b.types || []).join(' · ');
-      if (n > 0) return `<button class="bd-b have" data-b="${esc(actual[b.key])}" onclick="pickBrand(this.dataset.b)"><span class="bd-n">${esc(b.name)}<span class="bd-c">${n}</span></span><span class="bd-t">${esc(ty)}</span></button>`;
+      if (n > 0) return `<button class="bd-b have" data-b="${esc(b.name)}" onclick="pickBrand(this.dataset.b)"><span class="bd-n">${esc(b.name)}<span class="bd-c">${n}</span></span><span class="bd-t">${esc(ty)}</span></button>`;
       return `<button class="bd-b soon" data-k="${esc(b.key)}" data-n="${esc(b.name)}" onclick="notifyBrand(this.dataset.k,this.dataset.n)"><span class="bd-n">${esc(b.name)}</span><span class="bd-t">${esc(ty)}</span></button>`;
     }).join('');
     html += `</div></div>`;
@@ -351,7 +359,7 @@ function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
     (!fColor || g.colors.some(c => c[1] === fColor)) &&
-    (!fBrand || g.brand === fBrand) &&
+    (!fBrand || gbrand(g) === fBrand) &&
     (!fMood || garmentGroup(g) === fMood) &&
     (!fToneOnly || g.season === CUSTOMER.my_color_season) &&
     (!fWishOnly || gWish.has(g.id)) &&
@@ -1084,6 +1092,8 @@ async function reserve(id, useCredit) {
     if (di) try { di.focus(); } catch (e) { /**/ }
     return;
   }
+  // ต้องมีที่อยู่จัดส่งก่อนจอง — กันจ่ายเงินแล้วไม่มีที่ส่งของ
+  if (!requireAddress()) return;
   // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
   if (!(await kycGate())) return;
   window.track?.('begin_checkout', g.code || g.id, { price: g.price, date });
@@ -1225,6 +1235,15 @@ async function customerCanRent() {
   } catch (e) { console.warn(e); return true; }
 }
 // ด่านก่อนจอง: ผ่าน→true · ไม่ผ่าน→เปิดหน้า KYC + แจ้งเตือน แล้วคืน false
+// ต้องมีที่อยู่จัดส่งก่อนจอง — ถ้ายังไม่มี เปิดฟอร์มสั้นให้กรอก แล้วค่อยกดจองอีกครั้ง
+function requireAddress() {
+  if (!CUSTOMER || !CUSTOMER.id) return true;        // ยังไม่ล็อกอิน — flow เดิมจัดการ
+  if (CUSTOMER.address && CUSTOMER.address.trim()) return true;
+  toast(lang === 'th' ? 'ใส่ที่อยู่จัดส่งก่อนนะคะ แล้วกดจองอีกครั้ง' : 'Add your delivery address first, then book again');
+  openProfile(true);
+  return false;
+}
+
 async function kycGate() {
   const ok = await customerCanRent();
   if (!ok) {
@@ -1484,6 +1503,8 @@ async function bookCartNow() {
   const TH = lang === 'th';
   const date = $('#cartDate') && $('#cartDate').value;
   if (!date) { toast(TH ? 'เลือกวันที่ก่อนนะคะ' : 'Pick a date'); return; }
+  // ต้องมีที่อยู่จัดส่งก่อนจอง
+  if (!requireAddress()) { closeCart(); return; }
   // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
   if (!(await kycGate())) return;
   const btn = $('#cartSheet .ksubmit'); if (btn) { btn.disabled = true; btn.textContent = TH ? 'กำลังจอง…' : 'Booking…'; }
@@ -1583,7 +1604,7 @@ function openMenu() {
     <div class="msec">
       <div class="ml">${en ? 'My account' : 'บัญชีของฉัน'}</div>
       ${item(I.verify, en ? 'Verify identity (KYC)' : 'ยืนยันตัวตน (KYC)', "openKyc('')")}
-      ${item(I.gift, en ? 'Invite friends · get credit' : 'ชวนเพื่อน · รับเครดิต', 'openWallet()')}
+      ${item(I.gift, en ? 'Invite friends · get credit' : 'ชวนเพื่อน · รับเครดิต', 'openWallet(true)')}
     </div>
 
     <div class="msec">
@@ -1619,7 +1640,7 @@ function openProfile(onboard) {
   const avatar = c.picture_url ?`<img class="pavatar" src="${c.picture_url}" alt="" referrerpolicy="no-referrer">`
     :`<div class="pavatar pavatar-x">${(dispName[0]||'L').toUpperCase()}</div>`;
   const head = onboard
-    ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'ยินดีต้อนรับ':'Welcome'}${dispName?' '+dispName:''}</div><div class="onbsub">${lang==='th'?'กรอกข้อมูลสั้น ๆ ครั้งเดียว เพื่อให้เราแนะนำลุคที่ใช่ และจัดส่งถึงคุณได้':'A few details, once — so we can recommend your looks and ship to you'}</div></div></div>`
+    ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'ยินดีต้อนรับ':'Welcome'}${dispName?' '+dispName:''}</div><div class="onbsub">${lang==='th'?'ใส่ชื่อ เบอร์ และที่อยู่จัดส่ง — แค่นี้ก็เริ่มเช่าได้เลย (ไซซ์/สไตล์ค่อยเพิ่มทีหลังได้)':'Name, phone, and address — that’s all you need to start (sizes & style later)'}</div></div></div>`
     : (c.line_uid || c.display_name || c.picture_url
       ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'สวัสดีคุณ':'Hi'} ${dispName||''}</div><div class="onbsub">${lang==='th'?'เข้าสู่ระบบด้วย LINE แล้ว':'Signed in with LINE'}</div></div></div>`
       :'');
@@ -1651,10 +1672,10 @@ function openProfile(onboard) {
       <button type="button" class="walletlink" onclick="closeProfile();openWallet()" style="width:100%;text-align:left;border:1px solid var(--line,#E7E5E1);background:#FBF8F2;border-radius:12px;padding:11px 14px;margin-bottom:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
         <span>${lang==='th'?'กระเป๋า LLOOP · เครดิต ชวนเพื่อน ระดับสมาชิก':'LLOOP wallet · credit, invites, tier'}</span><span style="color:var(--muted,#8C8B86)">${c.credit_balance ? '฿'+Math.round(c.credit_balance)+' ›' : '›'}</span>
       </button>
-      ${renderStyleCard(c)}
-      ${renderImpactCard()}
+      ${onboard ? '' : `${renderStyleCard(c)}
+      ${renderImpactCard()}`}
       <div class="field"><label>${t('pName')}</label><input id="pName" autocomplete="name" value="${c.name || c.display_name ||''}"></div>
-      <div class="frow">
+      ${onboard ? '' : `<div class="frow">
         <div class="field"><label>${t('pHeight')}</label><input id="pHeight" type="number" value="${c.height_cm ||''}"></div>
         <div class="field"><label>${t('pShoe')}</label><input id="pShoe" value="${c.shoe_size ||''}"></div>
       </div>
@@ -1679,10 +1700,10 @@ function openProfile(onboard) {
         <div class="field"><label>${lang==='th'?'สีที่ชอบ':'Favourite colours'}</label><input id="pFav" value="${pf.fav_colors ||''}" placeholder="${lang==='th'?'เช่น ครีม เอิร์ธโทน':'e.g. cream, earth'}"></div>
         <div class="field"><label>${lang==='th'?'สีที่เลี่ยง':'Colours to avoid'}</label><input id="pAvoid" value="${pf.avoid_colors ||''}" placeholder="${lang==='th'?'เช่น ส้มสด':'e.g. neon'}"></div>
       </div>
-      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง — ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>
+      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง — ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>`}
       <div class="frow">
         <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
-        <div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>
+        ${onboard ? '' : `<div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>`}
       </div>
       <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label>
         <textarea id="pAddrDetail" rows="2" autocomplete="shipping street-address" inputmode="text" placeholder="${lang === 'th' ? 'บ้านเลขที่ / หมู่บ้าน-คอนโด / ซอย / ถนน' : 'House no. / building / soi / road'}">${c.address || ''}</textarea>
@@ -1696,8 +1717,8 @@ function openProfile(onboard) {
         <div class="field"><label>${lang === 'th' ? 'อำเภอ/เขต' : 'District'}</label><input id="pAmphoe" readonly placeholder="${lang === 'th' ? 'เติมอัตโนมัติ' : 'auto'}"></div>
         <div class="field"><label>${lang === 'th' ? 'จังหวัด' : 'Province'}</label><input id="pProvince" readonly placeholder="${lang === 'th' ? 'เติมอัตโนมัติ' : 'auto'}"></div>
       </div>
-      <div class="field"><label>${t('pNotes')}</label><input id="pNotes" value="${c.notes ||''}"></div>
-      <button class="savebtn" onclick="saveProfile()">${t('pSave')}</button>
+      ${onboard ? '' : `<div class="field"><label>${t('pNotes')}</label><input id="pNotes" value="${c.notes ||''}"></div>`}
+      <button class="savebtn" onclick="saveProfile()">${onboard ? (lang==='th'?'บันทึก & ไปต่อ':'Save & continue') : t('pSave')}</button>
     </div>`;
   $('#pOverlay').classList.add('open');
   document.body.style.overflow ='hidden';
@@ -2090,7 +2111,7 @@ function openFamily() { location.href = 'family.html'; }
 // ===== ผลกระทบ + แกลเลอรี charity (wow, interactive) =====
 // กระเป๋า LLOOP — เครดิต + ระดับสมาชิก + ชวนเพื่อน รวมไว้ที่เดียว (ไม่ต้องมุดเข้าฟอร์มแก้โปรไฟล์)
 function closeWallet() { $('#walletOverlay').classList.remove('open'); document.body.style.overflow = ''; }
-function openWallet() {
+function openWallet(focusRef) {
   const c = CUSTOMER;
   const en = lang === 'en';
   $('#walletSheet').innerHTML = `
@@ -2105,6 +2126,11 @@ function openWallet() {
   document.body.style.overflow = 'hidden';
   setTimeout(() => animateCounts($('#walletSheet')), 80);
   loadReferralCode();
+  // เปิดจาก "ชวนเพื่อน" → เลื่อนไปการ์ดโค้ดชวนเพื่อนเลย
+  if (focusRef) setTimeout(() => {
+    const sheet = $('#walletSheet'), ref = sheet && sheet.querySelector('.refcard');
+    if (sheet && ref) sheet.scrollTo({ top: ref.offsetTop - 12, behavior: 'smooth' });
+  }, 120);
 }
 
 async function openImpact() {
@@ -2248,7 +2274,10 @@ function renderMembership(sub, plans) {
     `<button onclick="memSetPeriod('${pr}')" style="white-space:nowrap;padding:8px 15px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid ${pr === gMemPeriod ? 'var(--ink)' : 'var(--line)'};background:${pr === gMemPeriod ? 'var(--ink)' : '#fff'};color:${pr === gMemPeriod ? '#fff' : 'var(--muted)'}">${PL[pr] || pr}</button>`
   ).join('') + `</div>`;
   // การ์ดแพ็กเกจ (เฉพาะรอบที่เลือก) — ราคา/เดือน + ชุด/เดือน + ครอบคลุม + เก็บเงินยังไง
-  const filtered = baseplans.filter(p => (p.period || 'month') === gMemPeriod);
+  // กันการ์ดแพ็กที่ config หาย (ราคา 0 หรือ 0 ชุด) ไม่ให้โชว์เป็น "฿0/เดือน · 0 ชุด" ที่ดูน่าเชื่อถือผิด ๆ
+  const filtered = baseplans.filter(p => (p.period || 'month') === gMemPeriod
+    && (Number(p.price_per_month || p.price || p.price_month) || 0) > 0
+    && (p.rentals_per_month_equiv || p.rentals_per_cycle || 0) > 0);
   html += filtered.map(p => {
     const current = sub && sub.plan_code === p.code && sub.status !== 'cancelled';
     const pm = Number(p.price_per_month || p.price || p.price_month) || 0;
@@ -2446,16 +2475,21 @@ function renderOrders(rentals) {
   // เรียง agenda: วันที่กำลังจะถึง (ใกล้→ไกล) ก่อน แล้วตามด้วยวันที่ผ่านมา (ใหม่→เก่า)
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const isPast = d => new Date(d + 'T00:00:00') < today;
-  const upcoming = allDates.filter(d => !isPast(d));
-  const past = allDates.filter(isPast).reverse();
+  const upcoming = allDates.filter(d => !isPast(d));   // ใกล้→ไกล (วันนี้เป็นต้นไป)
+  const past = allDates.filter(isPast).reverse();      // ที่ผ่านมา: ใหม่→เก่า
   const ordered = upcoming.concat(past);
-  _ordersData = { sparesByPrimary, byDate, ordered, nodate };
+  _ordersData = { sparesByPrimary, byDate, ordered, upcoming, past, nodate };
   drawOrders();
 }
 function drawOrders() {
   const body = $('#ordersBody'); if (!body || !_ordersData) return;
-  const { byDate, ordered, nodate, sparesByPrimary } = _ordersData;
-  const agenda = ordered.map(d => orderDayBlock(d, byDate[d])).join('');
+  const { byDate, upcoming, past, nodate, sparesByPrimary } = _ordersData;
+  // เรียงตามวัน: วันนี้เป็นต้นไปก่อน แล้วคั่นด้วยหัวข้อ "ที่ผ่านมา" ให้อ่านลำดับวันได้ชัด
+  const upBlocks = upcoming.map(d => orderDayBlock(d, byDate[d])).join('');
+  const pastBlocks = past.length
+    ? `<div class="oday-sep">${lang ==='th'?'ที่ผ่านมา':'Past'}</div>` + past.map(d => orderDayBlock(d, byDate[d])).join('')
+    : '';
+  const agenda = upBlocks + pastBlocks;
   const nod = nodate.length ? `<div class="oday" id="day-nodate">
       <div class="oday-h"><div class="oday-date">${lang ==='th'?'ยังไม่ระบุวัน':'No date yet'}</div></div>
       ${nodate.map(r => orderCard(r, sparesByPrimary[r.rental_id] || [])).join('')}
@@ -2464,23 +2498,27 @@ function drawOrders() {
 }
 // ปฏิทินแบบโชว์เฉพาะ "วันที่มีออเดอร์" เป็นชิปเรียงให้เห็นครบทุกวันในทีเดียว
 function ordersRail() {
-  const { byDate, ordered } = _ordersData;
+  const { byDate, ordered, upcoming, past } = _ordersData;
   const th = lang === 'th';
   const months = th ? ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']
     : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const dows = th ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['Su','Mo','Tu','We','Th','Fr','Sa'];
-  const chips = ordered.map((key, i) => {
+  const chip = (key, on) => {
     const d = new Date(key + 'T00:00:00');
     const rows = byDate[key];
     const main = rows.find(r => (r.role || 'primary') !== 'backup') || rows[0];
     const extra = rows.length > 1 ? ` +${rows.length - 1}` : '';
-    return `<button type="button" class="orail-chip${i === 0 ? ' on' : ''}" data-key="${key}" onclick="ordersJump('${key}')">
+    return `<button type="button" class="orail-chip${on ? ' on' : ''}" data-key="${key}" onclick="ordersJump('${key}')">
       <span class="orail-dow">${dows[d.getDay()]}</span>
       <span class="orail-day">${d.getDate()}</span>
       <span class="orail-mon">${months[d.getMonth()]}</span>
       <span class="orail-name">${(main.name || '—')}${extra}</span>
     </button>`;
-  }).join('');
+  };
+  // ชิปเรียงตามวัน: วันนี้เป็นต้นไปก่อน → คั่น "ที่ผ่านมา" → วันที่ผ่านมา (ไม่ให้ดูเหมือนเรียงมั่ว)
+  const chips = upcoming.map((k, i) => chip(k, i === 0)).join('')
+    + (past.length ? `<span class="orail-sep">${th ? 'ที่ผ่านมา' : 'Past'}</span>` : '')
+    + past.map((k, i) => chip(k, upcoming.length === 0 && i === 0)).join('');
   return `<div class="orail-wrap">
     <div class="orail-head">${th ? `วันที่มีออเดอร์ · ${ordered.length} วัน` : `${ordered.length} rental days`}</div>
     <div class="orail">${chips}</div>
@@ -2923,14 +2961,15 @@ function composeAddress() {
 }
 function closeProfile() { $('#pOverlay').classList.remove('open'); document.body.style.overflow =''; }
 async function saveProfile() {
-  CUSTOMER.name = $('#pName').value;
-  CUSTOMER.height_cm = +$('#pHeight').value || null;
-  CUSTOMER.shoe_size = $('#pShoe').value;
-  CUSTOMER.bust_in = +$('#pBust').value || null;
-  CUSTOMER.waist_in = +$('#pWaist').value || null;
-  CUSTOMER.hip_in = +$('#pHip').value || null;
+  // null-safe ทุกช่อง — ฟอร์มสั้น (onboard) ไม่ได้ render ทุกฟิลด์
+  if ($('#pName')) CUSTOMER.name = $('#pName').value;
+  if ($('#pHeight')) CUSTOMER.height_cm = +$('#pHeight').value || null;
+  if ($('#pShoe')) CUSTOMER.shoe_size = $('#pShoe').value;
+  if ($('#pBust')) CUSTOMER.bust_in = +$('#pBust').value || null;
+  if ($('#pWaist')) CUSTOMER.waist_in = +$('#pWaist').value || null;
+  if ($('#pHip')) CUSTOMER.hip_in = +$('#pHip').value || null;
   CUSTOMER.my_color_season = pSeason;
-  CUSTOMER.notes = $('#pNotes').value;
+  if ($('#pNotes')) CUSTOMER.notes = $('#pNotes').value;
   CUSTOMER.phone = $('#pPhone') ? $('#pPhone').value : CUSTOMER.phone;
   CUSTOMER.address = composeAddress();
   CUSTOMER.weight_kg = $('#pWeight') ? (+$('#pWeight').value || null) : CUSTOMER.weight_kg;

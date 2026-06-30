@@ -823,7 +823,7 @@ window.destInput = function(n){
 window.setPayMode = function(mode){
   if(PAYMODE===mode) return;
   PAYMODE = mode;
-  if(mode==='split'){ SHIP={}; DEST={}; }   // โหมดแยกจ่าย = แต่ละคนส่งที่ตัวเอง ไม่ใช้กล่องรวม
+  // โหมดแยกจ่าย = แต่ละคนส่งที่ตัวเอง · ซ่อนการตั้งค่ากล่องรวมไว้เฉย ๆ (ไม่ลบ SHIP/DEST ทิ้ง สลับกลับมาได้เหมือนเดิม)
   renderAssign();
 };
 
