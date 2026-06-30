@@ -175,6 +175,10 @@
       </div>
       <input id="rSpecOther" placeholder="ความเชี่ยวชาญอื่น ๆ (คั่นด้วย , )">
 
+      <label>โซเชียล (ไม่บังคับ)</label>
+      <input id="rIG" placeholder="Instagram — @ชื่อ หรือ ลิงก์" autocomplete="off">
+      <input id="rTikTok" placeholder="TikTok — @ชื่อ หรือ ลิงก์" autocomplete="off" style="margin-top:8px">
+
       <button class="btn dark" id="rSubmit" onclick="submitReg()" style="margin-top:14px;width:100%">ยืนยันสมัคร + เข้าพอร์ทัล</button>
       <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5">การกดสมัครถือว่ายอมรับเงื่อนไขการเป็นพาร์ทเนอร์สไตลิสต์ของ LLOOP — บัญชี LINE ที่เปิดหน้านี้จะถูกผูกเป็นพาร์ทเนอร์ทันที</p>
     </div>
@@ -619,7 +623,8 @@
       name, org:str('rOrg')||'', phone:str('rPhone')||'',
       area:regArea(), postal:(($('pZip')&&$('pZip').value)||'').trim(),
       place_name:pl.name||'', lat:(pl.lat!=null?String(pl.lat):''), lng:(pl.lng!=null?String(pl.lng):''),
-      service_modes:modes, specialties:specs } }); }
+      service_modes:modes, specialties:specs,
+      socials:{ ig:str('rIG')||'', tiktok:str('rTikTok')||'' } } }); }
     catch(e){ res={ data:null, error:{ message:(e&&e.message)||'error' } }; }
     btn.disabled=false; btn.textContent=t0;
     const { data, error } = res || {};
