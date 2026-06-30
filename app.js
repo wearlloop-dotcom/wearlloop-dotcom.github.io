@@ -1290,7 +1290,7 @@ function renderBackupGrid() {
     const photo = p.photo || (Array.isArray(p.photos) && p.photos[0]);
     const on = _backupPicks.includes(code);
     const why = _bpWhy[code];
-    return `<button type="button" class="bp-chip${on?' on':''}" data-code="${esc(code)}" onclick="pickBackup('${esc(code)}')"${why?` title="${esc(why)}"`:''}>
+    return `<button type="button" class="bp-chip${on?' on':''}" data-code="${esc(code)}" onclick="pickBackup(this.dataset.code)"${why?` title="${esc(why)}"`:''}>
       <span class="bp-thumb" style="${photo?`background-image:url('${esc(photo)}')`:`background:${esc(p.bg||'#E7E2DA')}`}"></span>
       <span class="bp-nm">${esc(p.name||'—')}</span>
       ${why?`<span class="bp-why">${esc(why)}</span>`:''}
@@ -1369,10 +1369,11 @@ async function reserve(id, useCredit) {
   // ด่าน KYC — เต็มเฉพาะชุดพรีเมียม/ดีไซเนอร์
   if (!(await kycGate(g.tier))) return;
   window.track?.('begin_checkout', g.code || g.id, { price: g.price, date });
-  // กันจองชน — เช็กว่างก่อน
-  const free = await checkAvail(id);
-  if (free === false) return;
   const toDate = durEnd(date);
+  // กันจองชน — เช็กว่างตลอดช่วงเช่า (ไม่ใช่แค่วันแรก) ให้ตรงกับที่ server จองจริง
+  let freeRange = true;
+  try { freeRange = await window.API.availableRange(id, date, toDate); } catch (e) { console.warn(e); }
+  if (freeRange === false) { checkAvail(id); return; }
   const wantBackup = !!($('#wantBackup') && $('#wantBackup').checked);
   // ชุดสำรอง = ลูกค้าเลือกเอง (ส่งเฉพาะโค้ดที่เลือก) · ไม่เลือก = ไม่มีสำรอง
   if (wantBackup && !_backupPicks.length) {
@@ -1461,7 +1462,7 @@ function openKyc(id) {
     </div>`;
   $('#kycOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
 }
-function closeKyc() { $('#kycOverlay').classList.remove('open'); document.body.style.overflow = 'hidden'; }
+function closeKyc() { $('#kycOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 async function submitKycForm(id) {
   const TH = lang === 'th';
   const fileEl = $('#kycId'), social = ($('#kycSocial') && $('#kycSocial').value || '').trim();
@@ -3416,8 +3417,10 @@ function showLoginGate() {
 }
 // ===== ประตู LLOOP Atelier — บังคับล็อกอิน LINE + ยอมรับข้อตกลง ก่อนใช้ฟีเจอร์ AI =====
 function _isLoggedIn() {
-  let tok = null; try { tok = window.liff && liff.getIDToken && liff.getIDToken(); } catch (_e) {}
-  return !!(CUSTOMER && CUSTOMER.id) || !!tok;
+  if (CUSTOMER && CUSTOMER.id) return true;
+  // ใช้ isLoggedIn() แทน getIDToken() เพราะ token อาจหมดอายุแต่ getIDToken ยังคืนค่า
+  try { if (window.liff && liff.isLoggedIn && liff.isLoggedIn()) return true; } catch (_e) {}
+  return false;
 }
 // ต้องยอมรับข้อตกลงเวอร์ชันล่าสุดก่อน → ถ้ายังไม่ยอมรับ เปิดให้กดยอมรับแล้วคืน false
 async function ensureTermsAccepted() {
@@ -3589,8 +3592,9 @@ async function boot() {
   fForYou =!!(CUSTOMER.bust_in!= null || CUSTOMER.my_color_season || (CUSTOMER.style_profile && Object.keys(CUSTOMER.style_profile).length));
   // สถานะล็อกอิน: มี lineUid = ล็อกอินผ่าน LINE แล้ว → โชว์เครดิตจริง; ไม่มี = guest → โชว์ปุ่มเข้าสู่ระบบ
   const loggedIn =!!s.lineUid;
-  // บังคับล็อกอินทั้งเว็บก่อนใช้งาน (เว้นโหมดเดโม/localhost) — guest เห็นแค่ประตูล็อกอิน
-  if (!loggedIn && !(window.CONFIG && CONFIG.USE_MOCK)) showLoginGate();
+  // บังคับล็อกอินทั้งเว็บก่อนใช้งาน (เว้นโหมดเดโม/localhost) — guest เห็นแค่ประตูล็อกอิน ไม่โหลด/ไม่ track ต่อ
+  const _isLocalDev = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname);
+  if (!loggedIn && !(window.CONFIG && CONFIG.USE_MOCK) && !_isLocalDev) { showLoginGate(); return; }
   const loginBtn = $('#loginBtn'); const creditEl = document.querySelector('.credit');
   if (loginBtn) loginBtn.hidden = loggedIn;
   if (creditEl) creditEl.hidden =!loggedIn;
