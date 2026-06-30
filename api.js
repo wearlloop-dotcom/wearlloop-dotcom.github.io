@@ -256,10 +256,13 @@ window.API = (function () {
     };
   }
 
-  // เช็กชุดว่างในวันที่กำหนด
-  async function availableOn(garmentId, dateStr) {
+  // เช็กชุดว่างในวันที่กำหนด · ส่ง customerId เพื่อให้ "วันที่กันสิทธิ์คิวไว้ให้เรา" แสดงเป็นว่าง (first-pick)
+  async function availableOn(garmentId, dateStr, customerId) {
     if (CONFIG.USE_MOCK) return true;
-    const { data } = await client().rpc('garment_available_on', { p_garment: garmentId, p_date: dateStr });
+    const args = customerId
+      ? { p_garment: garmentId, p_date: dateStr, p_customer: customerId }
+      : { p_garment: garmentId, p_date: dateStr };
+    const { data } = await client().rpc('garment_available_on', args);
     return data!== false;
   }
   // ชุดที่ว่างทั้งหมดในวันเดียว (กรองหน้าแรก) → Set ของ id (null = ถือว่าว่างหมด/mock)

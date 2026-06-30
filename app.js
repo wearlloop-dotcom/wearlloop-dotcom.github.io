@@ -697,7 +697,7 @@ async function checkAvail(id) {
   msg.className ='availmsg checking';
   msg.textContent = lang ==='th'?'กำลังเช็ก…':'checking…';
   let free = true;
-  try { free = await window.API.availableOn(id, date); } catch (e) { console.warn(e); }
+  try { free = await window.API.availableOn(id, date, CUSTOMER && CUSTOMER.id); } catch (e) { console.warn(e); }
   if (free) {
     msg.className ='availmsg ok';
     msg.textContent = lang ==='th'?`✓ ว่าง ${fmtDate(date)} จองได้เลย`:`✓ Free on ${fmtDate(date)}`;

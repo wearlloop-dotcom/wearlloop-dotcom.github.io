@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LLOOP · การ์ดราคา IG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Prompt:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#ECE6DA; --paper:#F8F4EC; --ink:#1A1A1A; --clay:#A75F3A; --sage:#6E8A6A; --gold:#C9A86A;
+    --line:#e0d8c8; --muted:#8a7a5e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--cream); color:var(--ink); font-family:'Prompt',sans-serif; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px; margin:0 auto; padding:24px 18px 64px; display:grid; gap:26px; grid-template-columns:1fr;}
+  @media(min-width:760px){ .wrap{grid-template-columns:340px 1fr; align-items:start;} }
+  h1{font-family:'Poppins'; font-weight:500; font-size:18px; letter-spacing:2px; margin:0 0 4px;}
+  .sub{font-size:12.5px; color:var(--muted); margin:0 0 18px; line-height:1.6;}
+
+  .panel{background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px;}
+  label{display:block; font-size:11.5px; color:var(--muted); margin:12px 0 5px; letter-spacing:.3px;}
+  label:first-child{margin-top:0;}
+  input,select{width:100%; font-family:'Prompt'; font-size:14px; padding:9px 11px; border:1px solid var(--line);
+    border-radius:9px; background:var(--paper); color:var(--ink); outline:none;}
+  input:focus,select:focus{border-color:var(--gold);}
+  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+  .chk{display:flex; align-items:center; gap:8px; margin-top:14px; font-size:13px; color:var(--ink);}
+  .chk input{width:auto;}
+  .btn{margin-top:18px; width:100%; border:0; background:var(--ink); color:var(--cream); font-family:'Prompt';
+    font-size:14px; letter-spacing:.5px; padding:12px; border-radius:10px; cursor:pointer;}
+  .btn:active{transform:scale(.99);}
+  .hint{font-size:11px; color:var(--muted); margin-top:10px; line-height:1.6;}
+
+  .stage{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .scaler{width:100%; max-width:432px; aspect-ratio:4/5; overflow:hidden; border-radius:16px; box-shadow:0 8px 30px rgba(26,26,26,.10);}
+
+  /* ===== การ์ดจริง 1080x1350, ย่อด้วย transform ===== */
+  #card{width:1080px; height:1350px; transform-origin:top left; background:var(--paper);
+    padding:96px 88px; display:flex; flex-direction:column; position:relative;}
+  .c-top{display:flex; justify-content:space-between; align-items:center;}
+  .c-mark{font-family:'Poppins'; font-weight:500; font-size:46px; letter-spacing:11px; color:var(--ink);}
+  .c-ring{width:54px; height:54px; border-radius:50%; border:3px solid var(--gold);}
+  .c-eyebrow{margin-top:104px; font-size:30px; letter-spacing:8px; color:var(--clay); text-transform:uppercase;}
+  .c-name{font-family:'Poppins'; font-weight:500; font-size:74px; line-height:1.12; color:var(--ink); margin-top:18px;}
+  .c-meta{font-size:30px; color:var(--muted); margin-top:14px;}
+  .c-priceline{margin-top:52px; display:flex; align-items:baseline; gap:18px;}
+  .c-price{font-family:'Poppins'; font-weight:500; font-size:104px; color:var(--clay); line-height:1;}
+  .c-per{font-size:34px; color:var(--muted);}
+  .c-worth{font-size:26px; color:var(--sage); margin-top:14px;}
+  .c-rates{margin-top:46px; border-top:2px solid var(--line); padding-top:34px;}
+  .c-rate{display:flex; justify-content:space-between; align-items:baseline; padding:15px 0; font-size:38px; color:#3a342c;}
+  .c-rate b{font-family:'Poppins'; font-weight:500;}
+  .c-rate.best span:first-child::after{content:' · คุ้มสุด'; color:var(--sage); font-size:26px;}
+  .c-foot{margin-top:auto;}
+  .c-note{font-size:28px; color:var(--sage); line-height:1.7;}
+  .c-cta{margin-top:30px; background:var(--ink); color:var(--cream); text-align:center;
+    border-radius:16px; padding:34px; font-size:36px; letter-spacing:2px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div>
+      <h1>LLOOP · การ์ดราคา</h1>
+      <p class="sub">สไลด์สุดท้ายของโพสต์เสื้อผ้า — กรอกเลขให้ตรง quote จริง (เรท 1/3/5 วันเป็นแพ็กเหมา ไม่ใช่คูณตรง) แล้วโหลด PNG ไปวางใน carousel</p>
+
+      <div class="panel">
+        <label>ชื่อชุด</label>
+        <input id="f-name" value="Amélie Linen Set" oninput="render()">
+
+        <label>แบรนด์ · รหัส</label>
+        <input id="f-meta" value="LLOOP · LL-0241" oninput="render()">
+
+        <label>ราคา/วัน เริ่มต้น (บาท)</label>
+        <input id="f-price" type="number" value="390" oninput="render()">
+
+        <label>ยอดรวมตามจำนวนวัน (จาก quote จริง)</label>
+        <div class="row3">
+          <div><div class="hint" style="margin:0 0 4px">1 วัน</div><input id="f-d1" type="number" value="390" oninput="render()"></div>
+          <div><div class="hint" style="margin:0 0 4px">3 วัน</div><input id="f-d3" type="number" value="690" oninput="render()"></div>
+          <div><div class="hint" style="margin:0 0 4px">5 วัน</div><input id="f-d5" type="number" value="990" oninput="render()"></div>
+        </div>
+
+        <label>มูลค่าชุด (โชว์ความคุ้ม — เว้นว่างได้)</label>
+        <input id="f-worth" type="number" placeholder="เช่น 4900" oninput="render()">
+
+        <label class="chk"><input type="checkbox" id="f-best" checked onchange="render()"> ติดป้าย “คุ้มสุด” ที่ 3 วัน</label>
+
+        <button class="btn" onclick="download()">ดาวน์โหลด PNG (1080×1350)</button>
+        <p class="hint">ฟอนต์: Poppins + Prompt ตาม brand.json · ขั้นต่อไป wire ปุ่ม “ดึงจากรหัสชุด” ให้เรียก <code>quote_rental</code> เติมเลขอัตโนมัติ</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="scaler"><div id="card"></div></div>
+      <div class="hint">พรีวิวย่ออัตโนมัติ — ไฟล์จริงคมเต็ม 1080×1350</div>
+    </div>
+
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const baht = n => '฿' + Number(n||0).toLocaleString('th-TH');
+
+  function render(){
+    const name = $('f-name').value || '—';
+    const meta = $('f-meta').value || '';
+    const price = $('f-price').value;
+    const d1=$('f-d1').value, d3=$('f-d3').value, d5=$('f-d5').value;
+    const worth = $('f-worth').value;
+    const best = $('f-best').checked;
+
+    $('card').innerHTML = `
+      <div class="c-top">
+        <div class="c-mark">LLOOP</div>
+        <div class="c-ring"></div>
+      </div>
+      <div class="c-eyebrow">เช่าชุดนี้</div>
+      <div class="c-name">${name}</div>
+      ${meta ? `<div class="c-meta">${meta}</div>` : ''}
+      <div class="c-priceline">
+        <span class="c-price">${baht(price)}</span>
+        <span class="c-per">/วัน เริ่มต้น</span>
+      </div>
+      ${worth ? `<div class="c-worth">มูลค่าชุด ${baht(worth)} · เช่าคุ้มกว่าซื้อ</div>` : ''}
+      <div class="c-rates">
+        <div class="c-rate"><span>เช่า 1 วัน</span><b>${baht(d1)}</b></div>
+        <div class="c-rate ${best?'best':''}"><span>เช่า 3 วัน</span><b>${baht(d3)}</b></div>
+        <div class="c-rate"><span>เช่า 5 วัน</span><b>${baht(d5)}</b></div>
+      </div>
+      <div class="c-foot">
+        <div class="c-note">มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
+        <div class="c-cta">ทักแชต LLOOP เพื่อจอง</div>
+      </div>`;
+    fit();
+  }
+
+  function fit(){
+    const stage = document.querySelector('.scaler');
+    const w = stage.clientWidth;
+    $('card').style.transform = 'scale(' + (w/1080) + ')';
+  }
+  window.addEventListener('resize', fit);
+
+  async function download(){
+    const card = $('card');
+    const prev = card.style.transform;
+    card.style.transform = 'scale(1)';
+    const canvas = await html2canvas(card, {scale:1, width:1080, height:1350, backgroundColor:'#F8F4EC', useCORS:true});
+    card.style.transform = prev;
+    const a = document.createElement('a');
+    const code = ($('f-meta').value.split('·').pop()||'card').trim().replace(/\s+/g,'');
+    a.download = 'lloop-price-' + code + '.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }
+
+  render();
+</script>
+</body>
+</html>
