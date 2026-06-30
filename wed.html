@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · งานแต่งนี้ใส่อะไรดี</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#2A2622;--line:#E6E0D6;--muted:#8C857B;--cream:#F6F2EA;--card:#fff;--sage:#2F6F4F;--gold:#9C7A3C;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--cream);font-size:16px;line-height:1.5}
+  .wrap{max-width:560px;margin:0 auto;padding:16px 14px 60px}
+  .hero{text-align:center;padding:14px 6px 18px}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .hero h1{font-family:var(--display);font-size:22px;font-weight:700;margin:6px 0 4px}
+  .hero .sub{font-size:14px;color:var(--muted)}
+  .meta{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+  .chip{background:#fff;border:1px solid var(--line);border-radius:20px;padding:6px 13px;font-size:13px;font-weight:500}
+  .share{display:block;width:100%;margin:10px 0 4px;padding:12px;border:0;border-radius:12px;background:var(--sage);color:#fff;font-family:var(--sans);font-weight:600;font-size:15px;cursor:pointer}
+  .note{background:#FBF7EF;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13.5px;color:#6f6658;margin:12px 0;line-height:1.55}
+  .note b{color:var(--ink)}
+  .seclabel{font-family:var(--display);font-size:15px;font-weight:600;margin:18px 2px 10px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .g{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative}
+  .g .ph{aspect-ratio:3/4;background:#EFE9DF center/cover no-repeat}
+  .g .body{padding:9px 10px 11px}
+  .g .nm{font-size:13.5px;font-weight:600;line-height:1.3}
+  .g .br{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .g .pr{font-size:13px;font-weight:600;margin-top:5px;color:var(--ink)}
+  .g .pick{display:block;width:100%;margin-top:8px;padding:8px;border:0;border-radius:9px;background:var(--ink);color:#fff;font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;text-align:center}
+  .g.taken{opacity:.66}
+  .g.taken .pick{background:#CFC7B8;pointer-events:none}
+  .badge{position:absolute;top:8px;left:8px;background:var(--gold);color:#fff;font-size:11px;font-weight:600;padding:4px 9px;border-radius:14px}
+  .badge.soft{background:#B7A98C}
+  .form{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:8px}
+  .form label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
+  .form input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-family:var(--sans);font-size:15px}
+  .center{text-align:center;color:var(--muted);padding:34px 10px}
+  .lk{word-break:break-all;font-size:12.5px;color:var(--sage);background:#F1F5F2;border-radius:9px;padding:9px 11px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="center">กำลังโหลด…</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=51"></script>
+<script src="data.js?v=51"></script>
+<script src="liffAuth.js?v=51"></script>
+<script src="me-api.js?v=54"></script>
+<script src="api.js?v=55"></script>
+<script src="nav.js?v=1"></script>
+<script>
+const $app = document.getElementById('app');
+const u = new URL(location.href);
+let CODE = (u.searchParams.get('code') || '').toUpperCase();
+let CUSTOMER = null, GARMENTS = [], SUMMARY = null, AVAIL = null;
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const imgOf = (g) => (g.photos && g.photos[0]) || g.photo || g.image || '';
+const fmtDate = (d) => { if (!d) return ''; try { return new Date(d + 'T00:00:00').toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d; } };
+
+async function boot(){
+  let state; try { state = await window.API.init(); } catch (e) {}
+  CUSTOMER = (state && state.CUSTOMER) || null;
+  GARMENTS = (state && state.GARMENTS) || [];
+  if (!CODE) { return renderCreate(); }
+  if (CUSTOMER) { try { await window.API.wedShareJoin(CUSTOMER, CODE); } catch (e) {} }
+  let s; try { s = await window.API.wedShareSummary(CUSTOMER, CODE); } catch (e) {}
+  SUMMARY = s && s.data;
+  if (!SUMMARY || SUMMARY.error) { return renderNotFound(); }
+  try { AVAIL = await window.API.availableSetOn(SUMMARY.event_date, CUSTOMER && CUSTOMER.id); } catch (e) { AVAIL = null; }
+  renderEvent();
+}
+
+function renderNotFound(){
+  $app.innerHTML = `<div class="center"><h1 style="font-family:var(--display)">ไม่พบงานนี้</h1>
+    <p style="margin-top:8px">ลิงก์อาจหมดอายุหรือพิมพ์ผิด</p>
+    <a class="pick" style="display:inline-block;margin-top:14px;background:var(--sage);padding:10px 18px;border-radius:10px" href="index.html">ดูทั้งร้าน</a></div>`;
+}
+
+function renderCreate(){
+  $app.innerHTML = `
+    <div class="hero"><div class="eyebrow">The Loop · งานแต่ง</div>
+      <h1>ชวนเพื่อนเช่าชุดเข้างานเดียวกัน</h1>
+      <div class="sub">สร้างลิงก์งาน แชร์ให้เพื่อนแขก — ทุกคนเห็นชุดที่ว่างวันงาน และไม่ใส่ชนกัน</div></div>
+    <div class="form">
+      <label>ชื่องาน</label>
+      <input id="wt" placeholder="เช่น งานแต่งมิ้น & โต้ง">
+      <label>วันงาน</label>
+      <input id="wd" type="date">
+      <button class="share" id="mk" style="margin-top:16px">สร้างลิงก์งาน</button>
+      <div id="mkOut"></div>
+    </div>
+    <div class="note">ชวนเพื่อนใหม่มาเช่า ได้เครดิต <b>฿50</b> ทั้งคู่เมื่อเพื่อนเช่าครั้งแรก · เพื่อนเห็นว่าใครเลือกชุดไหนแล้ว จะได้ไม่ซ้ำกันในงาน</div>`;
+  document.getElementById('mk').addEventListener('click', async () => {
+    const title = document.getElementById('wt').value.trim();
+    const date = document.getElementById('wd').value;
+    if (!CUSTOMER) { document.getElementById('mkOut').innerHTML = '<div class="note">กรุณาเข้าสู่ระบบด้วย LINE ก่อน</div>'; return; }
+    if (!date) { document.getElementById('mkOut').innerHTML = '<div class="note">เลือกวันงานก่อนค่ะ</div>'; return; }
+    const r = await window.API.wedShareCreate(CUSTOMER, title, date);
+    if (!r.ok) { document.getElementById('mkOut').innerHTML = '<div class="note">สร้างไม่สำเร็จ ลองใหม่อีกครั้ง</div>'; return; }
+    const link = location.origin + location.pathname + '?code=' + r.data.code;
+    document.getElementById('mkOut').innerHTML = `<div class="lk">${esc(link)}</div>
+      <button class="share" id="cp">คัดลอกลิงก์ไปแชร์</button>`;
+    document.getElementById('cp').addEventListener('click', () => doShare(link, title));
+  });
+}
+
+function doShare(link, title){
+  const text = (title ? title + ' — ' : '') + 'มาเช่าชุดเข้างานด้วยกัน เลือกชุดที่นี่: ' + link;
+  if (navigator.share) { navigator.share({ title: title || 'งานแต่ง', text, url: link }).catch(() => {}); }
+  else { navigator.clipboard && navigator.clipboard.writeText(link); alert('คัดลอกลิงก์แล้ว — เอาไปแชร์ในกลุ่มได้เลย'); }
+}
+
+function renderEvent(){
+  const taken = {};
+  (SUMMARY.taken || []).forEach(t => { taken[String(t.garment_code).toUpperCase()] = t; });
+  const link = location.origin + location.pathname + '?code=' + SUMMARY.code;
+
+  const list = GARMENTS.filter(g => !AVAIL || AVAIL.has(g.id));
+  const cards = list.map(g => {
+    const code = String(g.code || '').toUpperCase();
+    const t = taken[code];
+    const isHard = t && (t.status === 'reserved' || t.status === 'rented');
+    const badge = t ? `<div class="badge ${isHard ? '' : 'soft'}">${isHard ? esc(t.by) + ' จองแล้ว' : esc(t.by) + ' กำลังดู'}</div>` : '';
+    const img = imgOf(g);
+    return `<div class="g ${isHard ? 'taken' : ''}">
+      ${badge}
+      <div class="ph" style="${img ? `background-image:url('${esc(img)}')` : ''}"></div>
+      <div class="body">
+        <div class="nm">${esc(g.name || 'ชุด')}</div>
+        <div class="br">${esc(g.brand || '')}</div>
+        ${g.rental_price ? `<div class="pr">เช่า ฿${Math.round(g.rental_price)}</div>` : ''}
+        ${isHard
+          ? `<span class="pick">เพื่อนเลือกแล้ว</span>`
+          : `<a class="pick" href="#" data-code="${esc(code)}">เลือกเป็นของฉัน</a>`}
+      </div></div>`;
+  }).join('');
+
+  $app.innerHTML = `
+    <div class="hero">
+      <div class="eyebrow">The Loop · งานแต่ง</div>
+      <h1>${esc(SUMMARY.title || 'งานแต่ง')}</h1>
+      <div class="sub">${fmtDate(SUMMARY.event_date)}</div>
+      <div class="meta">
+        <span class="chip">เพื่อนในงาน ${SUMMARY.member_count || 1} คน</span>
+        <span class="chip">${(SUMMARY.taken || []).length} ชุดถูกเลือกแล้ว</span>
+      </div>
+    </div>
+    <button class="share" id="sh">ชวนเพื่อนคนอื่นในงาน</button>
+    <div class="note">เลือกชุดที่ <b>ว่างวันงาน</b> ด้านล่าง — ตัวที่เพื่อนจองแล้วจะขึ้นป้าย เพื่อไม่ให้ใส่ซ้ำกัน · ชวนเพื่อนใหม่รับเครดิต <b>฿50</b> ทั้งคู่</div>
+    <div class="seclabel">ชุดที่ว่างวันงาน</div>
+    <div class="grid">${cards || '<div class="center">ยังไม่มีชุดว่างในวันนี้ — ทีมจะช่วยจัดหาเพิ่ม</div>'}</div>`;
+
+  document.getElementById('sh').addEventListener('click', () => doShare(link, SUMMARY.title));
+  $app.querySelectorAll('a.pick[data-code]').forEach(a => {
+    a.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const code = a.dataset.code;
+      if (CUSTOMER) { try { await window.API.wedSharePick(CUSTOMER, SUMMARY.code, code, 'reserved'); } catch (err) {} }
+      // ไปหน้าจองชุดตัวนี้ (g.html อ่าน ?code=)
+      location.href = 'g.html?code=' + encodeURIComponent(code);
+    });
+  });
+}
+
+boot();
+</script>
+</body>
+</html>

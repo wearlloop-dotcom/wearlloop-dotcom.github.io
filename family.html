@@ -539,7 +539,7 @@ function fillBridesmaid(count){
   $('#bmLadder').innerHTML = rows + (active>0
     ? `<div style="margin-top:6px;font-weight:700;color:#2f6f4f">${NAV.t(`กลุ่มคุณ ${count} คน → ลด ${active}% ทันที`,`Your group of ${count} → ${active}% off`)}</div>`
     : `<div style="margin-top:6px" class="seccap">${NAV.t('เพิ่มอีกอย่างน้อย 2 คน เริ่มได้ส่วนลดกลุ่ม','Add at least 2 people to start the group discount')}</div>`);
-  $('#bmPerk').innerHTML = NAV.t('ครบ 4 คน เจ้าสาวได้ผ้าคลุม/แอคเซสซอรีฟรี 1 ชิ้น · ชวนเพื่อนใหม่รับเครดิต ฿200','At 4 people the bride gets a free accessory · invite a new friend for ฿200 credit');
+  $('#bmPerk').innerHTML = NAV.t('ครบ 4 คน เจ้าสาวได้ผ้าคลุม/แอคเซสซอรีฟรี 1 ชิ้น · ชวนเพื่อนใหม่รับเครดิต ฿50','At 4 people the bride gets a free accessory · invite a new friend for ฿50 credit');
 }
 document.getElementById('bmCta')?.addEventListener('click', ()=>{ document.getElementById('themeSec')?.scrollIntoView({behavior:'smooth',block:'start'}); });
 

@@ -2201,7 +2201,7 @@ function renderReferralCard() {
     </div>
   </div>`;
 }
-// แชร์การ์ดเกมพร้อมโค้ดของเรา → เพื่อนเล่นแล้วเช่า เครดิต ฿200 เข้ากระเป๋า LLOOP ทั้งคู่
+// แชร์การ์ดเกมพร้อมโค้ดของเรา → เพื่อนเล่นแล้วเช่า เครดิต ฿50 เข้ากระเป๋า LLOOP ทั้งคู่
 async function shareQuizInvite() {
   let code = CUSTOMER.referral_code;
   if (!code) { try { code = await window.API.ensureReferralCode(CUSTOMER); CUSTOMER.referral_code = code; } catch (e) { /**/ } }
@@ -2231,7 +2231,7 @@ async function applyPendingReferral() {
   if (!code || !CUSTOMER.id) return;
   let res = 'not_found';
   try { res = await window.API.applyReferral(CUSTOMER, code); } catch (e) { return; }
-  if (res === 'ok') toast(lang === 'th' ? 'รับเครดิตเพื่อนชวนแล้ว ฿200 เข้ากระเป๋า LLOOP' : 'Friend credit added — ฿200 in your LLOOP wallet');
+  if (res === 'ok') toast(lang === 'th' ? 'บันทึกโค้ดเพื่อนแล้ว · รับเครดิต ฿50 ทั้งคู่เมื่อเช่าครั้งแรก' : 'Friend code saved — ฿50 credit for both on your first rental');
   if (res !== 'not_found') { try { localStorage.removeItem('lloop_ref'); } catch (_e) {} }
 }
 async function applyReferralCode() {
@@ -3872,7 +3872,7 @@ function routeDeepLink() {
       if (wd && /^\d{4}-\d{2}-\d{2}$/.test(wd)) gUseDate = wd;
       if (g) { setTimeout(() => openDetail(g.id), 80); return; }
     }
-    // โค้ดชวนเพื่อนจากลิงก์ (?ref=CODE) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿200 ทั้งคู่ เข้ากระเป๋า LLOOP)
+    // โค้ดชวนเพื่อนจากลิงก์ (?ref=CODE) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿50 ทั้งคู่ เมื่อเช่าครั้งแรก)
     if (ref) { try { localStorage.setItem('lloop_ref', ref.trim()); } catch (_e) {} applyPendingReferral(); }
     // มาจากการ์ดเกม quiz.html (?occasion=KEY&mood=...) → จำโอกาสไว้ให้ LLOOP Atelier ใช้ + กรองคลังให้ตรงงาน
     const occ = qs.get('occasion') || (ls && ls.get('occasion'));
