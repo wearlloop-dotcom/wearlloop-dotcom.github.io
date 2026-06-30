@@ -214,7 +214,7 @@
     const {data,error}=await sb.rpc('hr_verify_bind',{p_token:verifyToken,p_line_uid:lineUid});
     if(error){toast('ไม่สำเร็จ: '+error.message);$('bindBtn').disabled=false;return;}
     if(data&&data.error){
-      const m={bad_token:'ลิงก์ไม่ถูกต้องหรือหมดอายุ',uid_taken:'LINE นี้ถูกผูกกับพนักงานคนอื่นแล้ว',no_uid:'อ่าน LINE UID ไม่ได้'}[data.error]||data.error;
+      const m={bad_token:'ลิงก์ไม่ถูกต้องหรือหมดอายุ',uid_taken:'LINE นี้ถูกผูกกับพนักงานคนอื่นแล้ว',token_used:'ลิงก์นี้ถูกใช้ผูกบัญชีอื่นไปแล้ว — แจ้งแอดมินออกลิงก์ใหม่',no_uid:'อ่าน LINE UID ไม่ได้'}[data.error]||data.error;
       toast(m);$('bindBtn').disabled=false;return;
     }
     wrap.innerHTML=`<div class="card gate ok"><div class="icon">✓</div>

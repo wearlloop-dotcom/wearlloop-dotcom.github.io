@@ -831,6 +831,15 @@ async function renderQuote(id, date) {
     </div>` : '';
   // ป้ายราคาพนักงาน — โชว์เฉพาะพนักงาน (is_staff) ลูกค้าทั่วไปไม่เห็น
   const staffBadge = q.is_staff ? `<div style="display:inline-block;margin:2px 0 8px;font-size:12px;font-weight:600;color:#0F6E56;background:#E4F0EC;border:1px solid #cfe6da;border-radius:20px;padding:3px 11px">${TH ? 'ราคาพนักงาน' : 'Staff price'} −${q.staff_discount}%${q.rate_full ? ` · ${TH ? 'ปกติ' : 'was'} ${baht(q.rate_full)}` : ''}</div>` : '';
+  // จ่ายด้วยเครดิตในกระเป๋า — ครอบค่าเช่า+ค่าส่ง (ไม่รวมมัดจำ) เมื่อยอดในกระเป๋าพอ
+  const creditBal = Math.round(CUSTOMER.credit_balance || 0);
+  const creditCover = Math.round((q.total || 0) - (q.deposit || 0));
+  const canCredit = creditCover > 0 && creditBal >= creditCover;
+  const creditBtn = !canCredit ? '' : `
+    <button onclick="reserve('${id}', true)" style="width:100%;margin-top:12px;border:1px solid #C9A227;background:#FBF6E9;color:#7A5C00;border-radius:12px;padding:11px 14px;font-weight:600;cursor:pointer;text-align:left">
+      ${TH ? 'จ่ายด้วยเครดิตในกระเป๋า' : 'Pay with wallet credit'} <b>${baht(creditCover)}</b>
+      <div style="font-size:12px;font-weight:400;color:#9A7B1E;margin-top:3px">${TH ? `ในกระเป๋ามี ฿${creditBal} · เหลือ ฿${creditBal - creditCover}` : `Wallet ฿${creditBal} · ฿${creditBal - creditCover} left`}${q.deposit > 0 ? (TH ? ` · มัดจำ ฿${q.deposit} เก็บตอนรับชุด` : ` · deposit ฿${q.deposit} at pickup`) : ''}</div>
+    </button>`;
   box.innerHTML = `
     <div class="qhd">${TH ? 'สรุปยอด' : 'Summary'} · ${q.days} ${TH ? 'วัน' : 'days'}</div>
     ${staffBadge}
@@ -842,6 +851,7 @@ async function renderQuote(id, date) {
     <div class="qdates">${TH ? 'จัดส่งราว' : 'Ships ~'} ${fmtDate(q.ship_date)} · ${TH ? 'กำหนดคืน' : 'Return by'} <b>${fmtDate(q.return_date)}${q.return_by ? (TH ? ` ก่อน ${q.return_by} น.` : ` by ${q.return_by}`) : ''}</b></div>
     <div class="qdates">${TH ? 'คืนตรงเวลาช่วยให้ชุดพร้อมส่งคิวถัดไปทัน · ค่าส่งคืนผู้เช่าออกเอง' : 'On-time return keeps the next booking on track · return shipping paid by renter'}</div>
     ${kyc}
+    ${creditBtn}
     ${payBlock}`;
   // วาด QR แบรนด์ LLOOP ฝังยอด (หลัง element อยู่ใน DOM แล้ว)
   if (pay && pay.pay_promptpay_id && window.promptpayBrandedQR) {
@@ -850,7 +860,7 @@ async function renderQuote(id, date) {
   }
 }
 
-async function reserve(id) {
+async function reserve(id, useCredit) {
   const g = GARMENTS.find(x => x.id === id);
   const date = $('#useDate') && $('#useDate').value;
   if (!date) {
@@ -865,17 +875,33 @@ async function reserve(id) {
   const free = await checkAvail(id);
   if (free === false) return;
   const toDate = durEnd(date);
-  const credit = Math.min(CUSTOMER.credit_balance || 0, Math.round(g.price * 0.5));
-  let ok = true, backups = [];
+  let ok = true, backups = [], rentalId = null;
   try {
     const res = await window.API.bookWithBackups(CUSTOMER, g.code || g.id, date, toDate);
     ok =!res.error && res.data &&!res.data.error;
     backups = (res.data && res.data.backups) || [];
+    rentalId = res.data && res.data.rental;
     if (!ok) toast(lang ==='th'?'ชุดนี้เพิ่งถูกจองวันนั้นพอดี ลองวันอื่นนะคะ':'Just got booked for that date — try another');
   } catch (e) { console.warn(e); }
   if (!ok) { checkAvail(id); return; }
-  CUSTOMER.credit_balance = (CUSTOMER.credit_balance || 0) - credit;
-  $('#credit').textContent ='฿'+ (CUSTOMER.credit_balance || 0);
+  // จ่ายด้วยเครดิตในกระเป๋า — หักจริงฝั่ง backend (Dr2050/Cr4010) + ยืนยันจองทันที ไม่ต้องแนบสลิป
+  if (useCredit && rentalId) {
+    const pr = await window.API.payWithCredit(rentalId);
+    if (pr.ok) {
+      const d = pr.data || {};
+      if (d.balance != null) CUSTOMER.credit_balance = d.balance;
+      if ($('#credit')) $('#credit').textContent = '฿' + Math.round(CUSTOMER.credit_balance || 0);
+      fbTrack('Purchase', { content_ids:[g.code || g.id], content_name: g.name, value: d.paid || g.price, currency:'THB' });
+      closeDetail();
+      const depNote = (d.deposit_due > 0) ? (lang ==='th'?` · มัดจำ ฿${Math.round(d.deposit_due)} เก็บตอนรับชุด`:` · deposit ฿${Math.round(d.deposit_due)} at pickup`) : '';
+      toast((lang ==='th'?`จ่ายด้วยเครดิตสำเร็จ · ${g.name}`:`Paid with credit · ${g.name}`) + depNote);
+      return;
+    }
+    // เครดิตไม่พอ/ผิดพลาด → จองยังค้างเป็น hold ให้ไปจ่าย QR แทน
+    toast(pr.error === 'insufficient'
+      ? (lang ==='th'?'เครดิตไม่พอ จ่ายผ่าน QR แทนได้เลยค่ะ':'Not enough credit — pay via QR instead')
+      : (lang ==='th'?'จ่ายด้วยเครดิตไม่สำเร็จ ลองจ่าย QR นะคะ':'Credit payment failed — try QR'));
+  }
   fbTrack('InitiateCheckout', { content_ids:[g.code || g.id], content_name: g.name, value: g.price, currency:'THB' });
   closeDetail();
   const bk = backups.length
@@ -1967,15 +1993,52 @@ function renderMembership(sub, plans) {
 }
 async function subscribeClick(code, name) {
   const en = lang === 'en';
-  if (!confirm(en ? `Subscribe to ${name}?` : `ยืนยันสมัครแพ็กเกจ ${name}?`)) return;
   try {
+    // เริ่มสมัคร → ระบบจดแพ็กที่เลือก + คืน QR ให้จ่าย (เปิดสิทธิ์จริงเมื่อสลิปผ่าน)
     const res = await window.API.subscribe?.(CUSTOMER, code);
+    const d = res && res.data;
     if (res && res.data === 'need_base') { toast(en ? 'Subscribe to a plan first' : 'สมัครแพ็กหลักก่อนนะคะ'); return; }
+    if (!res || !res.ok || !d || d.ok === false) {
+      const er = d && d.error;
+      toast(er === 'no_plan' ? (en ? 'Plan not found' : 'ไม่พบแพ็กเกจนี้') : (en ? 'Something went wrong' : 'เกิดข้อผิดพลาด ลองใหม่นะคะ'));
+      return;
+    }
+    showSubPayModal(d);   // จ่ายเงินก่อนถึงเปิดสิทธิ์
+  } catch (e) { toast(en ? 'Something went wrong' : 'เกิดข้อผิดพลาด ลองใหม่นะคะ'); }
+}
+// แผงจ่ายเงินสมาชิก — PromptPay QR + แนบสลิปในแชต → ระบบเปิดสิทธิ์อัตโนมัติ
+function showSubPayModal(d) {
+  const en = lang === 'en';
+  const pay = d.pay || {}; const price = Number(d.price) || 0;
+  closeSubPay();
+  const ov = document.createElement('div');
+  ov.id = 'subPayOv';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(20,18,16,.55);display:flex;align-items:center;justify-content:center;z-index:9999;padding:18px';
+  const acct = pay.pay_account_no ? `${en ? 'or transfer to' : 'หรือโอนเข้าบัญชี'} ${esc(pay.pay_bank_name || '')} ${esc(pay.pay_account_no)} (${esc(pay.pay_account_name || '')})` : '';
+  ov.innerHTML = `<div style="background:#fff;border-radius:16px;max-width:340px;width:100%;padding:22px;text-align:center;font-family:var(--sans,sans-serif)">
+    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#86857F">${en ? 'membership' : 'สมัครสมาชิก'}</div>
+    <div style="font-size:18px;font-weight:700;margin:4px 0 2px">${esc(d.name || '')}</div>
+    <div style="font-size:24px;font-weight:700">฿${price.toLocaleString('th-TH')}</div>
+    <div style="font-size:12px;color:#86857F;margin-bottom:14px">${en ? 'per' : 'ต่อ'} ${esc(d.period_label || d.period || '')}${d.rentals ? ` · ${en ? 'rentals' : 'เช่าได้'} ${d.rentals}` : ''}</div>
+    <div id="subqr" style="display:flex;justify-content:center;margin-bottom:12px"></div>
+    <div style="font-size:13px;color:#1A1A1A;line-height:1.55">${en ? 'Scan PromptPay to pay, then' : 'สแกนพร้อมเพย์เพื่อจ่าย แล้ว'}<br><b>${en ? 'attach the slip in LINE chat' : 'แนบสลิปในแชต LINE'}</b> ${en ? '— membership opens automatically' : '— ระบบเปิดสิทธิ์ให้อัตโนมัติ'}</div>
+    ${acct ? `<div style="font-size:11px;color:#86857F;margin-top:8px">${acct}</div>` : ''}
+    <button onclick="closeSubPay(true)" style="width:100%;background:#1A1A1A;color:#fff;border:none;padding:12px;border-radius:8px;margin-top:16px;font-size:14px;cursor:pointer">${en ? 'I have transferred / Close' : 'ฉันโอนแล้ว / ปิด'}</button>
+  </div>`;
+  document.body.appendChild(ov);
+  if (pay.pay_promptpay_id && window.promptpayBrandedQR) {
+    try { window.promptpayBrandedQR(document.getElementById('subqr'), pay.pay_promptpay_id, price, pay.pay_promptpay_type); } catch (e) { /**/ }
+  }
+}
+async function closeSubPay(refresh) {
+  const ov = document.getElementById('subPayOv'); if (ov) ov.remove();
+  if (refresh !== true) return;
+  try {
     CUSTOMER._sub = await window.API.mySubscription?.(CUSTOMER) || { active: false };
     let plans = []; try { plans = await window.API.subPlans?.() || []; } catch (e) { /**/ }
     renderMembership(CUSTOMER._sub, plans);
-    toast(en ? 'Welcome to ' + name : 'ยินดีต้อนรับสู่ ' + name);
-  } catch (e) { toast(en ? 'Something went wrong' : 'เกิดข้อผิดพลาด ลองใหม่นะคะ'); }
+    toast(lang === 'en' ? 'We will open your membership once the slip is verified' : 'เมื่อสลิปผ่าน ระบบจะเปิดสิทธิ์ให้อัตโนมัติค่ะ');
+  } catch (e) { /**/ }
 }
 async function subActionClick(action) {
   const en = lang === 'en';

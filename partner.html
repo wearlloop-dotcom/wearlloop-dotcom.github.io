@@ -102,6 +102,11 @@
   .bkrow .bact button{flex:1;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-size:13px;background:#fff;cursor:pointer;font-family:var(--sans)}
   .bkrow .bact .done{background:var(--ok);color:#fff;border-color:var(--ok)}
   .bkrow.is-done{opacity:.6}
+  /* ค่าตอบแทน */
+  .earn{display:flex;gap:10px;margin-top:6px}
+  .earn .erow{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px;text-align:center;background:#fff}
+  .earn .ev{display:block;font-family:var(--display,inherit);font-size:20px;font-weight:700;color:var(--ink)}
+  .earn .el{display:block;font-size:11px;color:var(--muted);margin-top:2px}
 </style>
 </head>
 <body>
@@ -387,6 +392,11 @@
 
   <!-- ===== คิวที่ถูกจอง ===== -->
   <div class="view" id="view-bookings">
+    <div class="card" id="earnCard" style="display:none">
+      <h2>ค่าตอบแทนของฉัน</h2>
+      <div class="sub">฿1,000 ต่อการวิเคราะห์ 1 ครั้ง — บันทึกเมื่อกด “เสร็จงาน”</div>
+      <div class="earn" id="earn"></div>
+    </div>
     <div class="card">
       <h2>คิวที่ถูกจอง</h2>
       <div class="sub">ลูกค้าที่จองเข้ามา — เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ</div>
@@ -559,8 +569,22 @@
     toast('ลบช่องแล้ว'); loadCalendar();
   }
 
+  // ---------- ค่าตอบแทนของฉัน ----------
+  async function loadEarnings(){
+    try{
+      const { data } = await window.meRpc('partner_earnings_self', {});
+      if(!data || data.error){ return; }
+      const fmt=n=>'฿'+Number(n||0).toLocaleString();
+      $('earn').innerHTML =
+        '<div class="erow"><span class="ev">'+fmt(data.accrued)+'</span><span class="el">รอจ่าย</span></div>'+
+        '<div class="erow"><span class="ev">'+fmt(data.paid)+'</span><span class="el">จ่ายแล้ว</span></div>'+
+        '<div class="erow"><span class="ev">'+(data.sessions||0)+'</span><span class="el">ครั้ง</span></div>';
+      $('earnCard').style.display = (data.sessions>0)?'block':'none';
+    }catch(e){}
+  }
   // ---------- คิวที่ถูกจอง ----------
   async function loadBookings(){
+    loadEarnings();
     const box=$('bookList');
     try{
       const { data } = await window.meRpc('partner_bookings_self', {});
