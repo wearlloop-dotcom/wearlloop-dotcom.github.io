@@ -46,6 +46,9 @@
   .scan .btn{width:auto;flex:0 0 auto}
   .big button{width:100%}
   .qrow .btn{width:auto}
+  .scanrow{display:flex;gap:10px;margin-top:10px}
+  .scanrow .btn{flex:1;background:var(--soft);border:1px solid var(--line);color:var(--ink)}
+  .muted2{color:var(--muted);font-size:13px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -57,14 +60,19 @@
   <section class="phead">
     <div class="eyebrow">wash · quality check</div>
     <h1>ส่งต่อความสะอาดที่มั่นใจ</h1>
-    <div class="sub">ตรวจสภาพ ซัก และคืนความสวยให้ทุกชุด ก่อนหมุนเวียนสู่ลูกค้าคนถัดไป</div>
+    <div class="sub">ตรวจสภาพ ซัก และคืนความสวยให้ทุกชุด ก่อนส่งต่อสู่ลูกค้าคนถัดไป</div>
   </section>
   <div class="card">
-    <h2>1) ชุดกลับถึงร้าน — ใส่โค้ด</h2>
+    <h2>1) ชุดกลับถึงร้าน — สแกน หรือใส่โค้ด</h2>
     <div class="scan">
       <input id="code" placeholder="เช่น g1" autocomplete="off" enterkeyhint="go">
       <button class="btn dark" onclick="checkin()">รับเข้า</button>
     </div>
+    <div class="scanrow">
+      <button class="btn ghost" type="button" onclick="scanInto('code', checkin)">สแกน QR ป้ายชุด</button>
+      <button class="btn ghost" type="button" onclick="nfcCheckin()">แตะ NFC</button>
+    </div>
+    <div class="muted2">สแกน QR หรือแตะแท็ก NFC ที่ป้ายชุด — รับเข้าคิวตรวจให้อัตโนมัติ ไม่ต้องพิมพ์</div>
     <div id="panel"></div>
   </div>
 
@@ -80,6 +88,8 @@
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
 <script src="qc-photo.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="scan.js"></script>
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
@@ -95,6 +105,20 @@
     const { data, error } = await sb.rpc('care_checkin',{ p_code: code });
     if(error||!data||data.error){ $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">ไม่พบชุด ${code}</div>`; return; }
     current=code; renderPanel(data); loadQueue();
+  }
+  // แตะ NFC ที่ป้ายชุด → หาโค้ดจากแท็ก → รับเข้าอัตโนมัติ (Android Chrome รองรับ Web NFC)
+  async function nfcCheckin(){
+    if(!('NDEFReader' in window)){ toast('มือถือนี้ไม่รองรับ NFC — ใช้สแกน QR หรือพิมพ์โค้ดได้ค่ะ'); return; }
+    try{
+      const r=new NDEFReader(); await r.scan(); toast('แตะแท็กที่ป้ายชุด…');
+      r.onreading=async (e)=>{
+        const uid=e.serialNumber||'';
+        const { data } = await sb.rpc('tag_lookup',{ p_tag_uid: uid });
+        if(!data||!data.found){ toast('แท็กนี้ยังไม่ผูกกับชุด — ผูกที่หน้า NFC ก่อนค่ะ'); return; }
+        sb.rpc('tag_scan',{ p_tag_uid: uid, p_action:'checkin', p_source:'nfc', p_location:null });
+        $('code').value=data.code; checkin();
+      };
+    }catch(_){ toast('อ่าน NFC ไม่ได้ค่ะ'); }
   }
   function renderPanel(d){
     qcShotCount=0;
