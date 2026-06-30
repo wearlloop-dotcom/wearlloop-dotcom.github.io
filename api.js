@@ -185,15 +185,16 @@ window.API = (function () {
 
   async function saveProfile(customer) {
     if (CONFIG.USE_MOCK ||!lineUid) return { ok: true };
-    const c = client();
-    const { error } = await c.from('customers').update({
+    // ออดิท: เขียนผ่าน gateway (verify LINE idToken → inject p_customer) แทน UPDATE ตรง กัน write-IDOR
+    if (!window.meRpc) return { ok:false, error:{ message:'ต้องเข้าสู่ระบบก่อนบันทึกโปรไฟล์' } };
+    const { data, error } = await window.meRpc('save_profile', { p: {
       display_name: customer.name, height_cm: customer.height_cm, shoe_size: customer.shoe_size,
       bust_in: customer.bust_in, waist_in: customer.waist_in, hip_in: customer.hip_in,
       my_color_season: customer.my_color_season, notes: customer.notes,
       phone: customer.phone, address: customer.address,
       weight_kg: customer.weight_kg, size: customer.size, prefs: customer.prefs, birthday: customer.birthday || null,
-    }).eq('line_uid', lineUid);
-    return { ok:!error, error };
+    }});
+    return { ok:!error, data, error };
   }
 
   // โควต้า AI สไตลิสต์ที่เหลือ (อ่านผ่าน gateway me-rpc — กัน IDOR) · null = ยังไม่ล็อกอิน
