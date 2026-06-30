@@ -108,6 +108,15 @@
   .story .top .sx{background:none;border:none;color:#fff;font-size:26px;line-height:1}
   .story .img{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .story .img img{max-width:100%;max-height:100%;object-fit:contain}
+  .story .subdots{position:absolute;top:10px;left:0;right:0;display:flex;justify-content:center;gap:6px;z-index:3}
+  .story .subdots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45)}
+  .story .subdots span.on{background:#fff}
+  .ernrow{display:flex;gap:10px;margin:12px 0}
+  .erncard{flex:1;background:var(--sand);border-radius:12px;padding:13px;text-align:center}
+  .erncard b{display:block;font-family:var(--display);font-size:22px}
+  .erncard small{font-size:11px;color:var(--muted)}
+  .ernitem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+  .ernitem img{width:38px;height:46px;border-radius:7px;object-fit:cover;background:var(--soft)}
   .story .zone{position:absolute;top:0;bottom:0;width:38%;z-index:2}
   .story .zone.l{left:0}.story .zone.r{right:0}
   .story .info{padding:14px 16px calc(18px + env(safe-area-inset-bottom));color:#fff;background:linear-gradient(to top,rgba(0,0,0,.78),transparent)}
@@ -188,8 +197,8 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=49"></script>
 <script src="liffAuth.js?v=49"></script>
-<script src="me-api.js?v=52"></script>
-<script src="api.js?v=52"></script>
+<script src="me-api.js?v=53"></script>
+<script src="api.js?v=53"></script>
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
@@ -577,6 +586,32 @@ async function doFollow(handle){
   }
 }
 
+async function openEarnings(){
+  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE ก่อนนะคะ'); return; }
+  openOv('#ovProf');
+  $('#profSheet').innerHTML = `<div class="shhd"><div class="shtitle">รายได้ครีเอเตอร์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div><p class="muted" style="margin-top:14px">กำลังโหลด…</p>`;
+  let e=null; try{ e=await window.API.myCreatorEarnings(); }catch(err){}
+  if(!e){ $('#profSheet').innerHTML=`<div class="shhd"><div class="shtitle">รายได้</div><button class="x" onclick="closeOv('#ovProf')">×</button></div><p class="muted" style="margin-top:14px">ยังไม่มีข้อมูลค่ะ</p>`; return; }
+  const recent=(e.recent||[]).map(r=>`<div class="ernitem">
+    ${r.photo?`<img src="${esc(r.photo)}">`:'<span style="width:38px;height:46px;border-radius:7px;background:var(--soft);display:inline-block"></span>'}
+    <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${esc(r.garment||'มีคนเช่าตามลุค')}</div>
+      <div class="muted">${new Date(r.at).toLocaleDateString('th-TH',{day:'numeric',month:'short'})} · ${r.kind==='creator_ref'?'ผ่านลิงก์ชวนเช่า':'เช่าตามลุค'}</div></div>
+    <div style="font-weight:700;color:var(--ok)">+${baht(r.amount)}</div></div>`).join('') || '<p class="muted" style="margin-top:8px">ยังไม่มีคนเช่าผ่านลิงก์/ลุคของคุณ — แชร์เพิ่มเพื่อเริ่มรับส่วนแบ่งค่ะ</p>';
+  $('#profSheet').innerHTML = `
+    <div class="shhd"><div class="shtitle">รายได้ครีเอเตอร์</div><button class="x" onclick="closeOv('#ovProf')">×</button></div>
+    <div class="ernrow">
+      <div class="erncard"><b>${baht(e.affiliate_total||0)}</b><small>ส่วนแบ่งสะสม (เครดิต)</small></div>
+      <div class="erncard"><b>${e.conversions||0}</b><small>คนเช่าผ่านคุณ</small></div>
+    </div>
+    <div class="ernrow" style="margin-top:0">
+      <div class="erncard"><b>${e.looks_published||0}</b><small>ลุคที่แชร์</small></div>
+      <div class="erncard"><b>${e.likes_total||0}</b><small>ถูกใจรวม</small></div>
+      <div class="erncard"><b>${e.followers||0}</b><small>ผู้ติดตาม</small></div>
+    </div>
+    <div class="shtitle" style="font-size:15px;margin:16px 0 4px">รายการล่าสุด</div>
+    ${recent}
+    <button class="btn" style="margin-top:16px" onclick="closeOv('#ovProf');copyRef()">แชร์ลิงก์ชวนเช่า รับเพิ่ม</button>`;
+}
 async function copyRef(){
   const url=myRefUrl(), text='เช่าชุดสวยที่ LLOOP ผ่านลิงก์ฉันได้เลย';
   try{ if(navigator.share){ await navigator.share({ title:'LLOOP', text, url }); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
@@ -596,7 +631,10 @@ async function openShare(){
     <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-top:8px">
       <div style="font-size:12.5px;font-weight:600">ลิงก์ชวนเช่าของคุณ</div>
       <div class="muted" style="margin:2px 0 9px">แชร์ลิงก์นี้ที่ไหนก็ได้ (IG/โพสต์) — ใครเช่าผ่านลิงก์ คุณได้ส่วนแบ่งเครดิต ${esc(String(REF_PCT))}% ของค่าเช่า</div>
-      <button class="btn ghost" style="font-size:13px;padding:10px" onclick="copyRef()">คัดลอกลิงก์ชวนเช่า</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn ghost" style="font-size:13px;padding:10px;flex:1" onclick="copyRef()">คัดลอกลิงก์ชวนเช่า</button>
+        <button class="btn ghost" style="font-size:13px;padding:10px;flex:1" onclick="closeOv('#ovShare');openEarnings()">รายได้ของฉัน</button>
+      </div>
     </div>
     <p class="muted" style="margin-top:12px">หรือแชร์ "ลุค" จากชุดที่เคยเช่า — รูปผ่านการตรวจแล้วขึ้นฟีด ได้เครดิตทันที</p>
     <label class="lbl">ชุดที่ใส่ในรูป</label>
