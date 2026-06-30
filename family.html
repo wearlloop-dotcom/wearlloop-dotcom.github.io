@@ -526,19 +526,15 @@ window.pickRel=r=>{selRel=r;renderRelQuick();};
 window.openForm=()=>{ $('#form').classList.add('show'); renderRelQuick(); $('#form').scrollIntoView({behavior:'smooth',block:'center'}); };
 
 // ===== แพ็กเพื่อนเจ้าสาว — ส่วนลดกลุ่มตามจำนวนคน (ตรงกับ group_discount_tiers ในระบบ) =====
-function bmDiscPct(n){ return n>=5?18:n>=4?15:n>=3?10:n>=2?5:0; }
+function bmDiscPct(n){ return n>=2?5:0; }
 function fillBridesmaid(count){
   const card=$('#bridesmaidCard'); if(!card) return;
   card.style.display='';
   const active=bmDiscPct(count);
-  const rows=[[2,5],[3,10],[4,15],[5,18]].map(([m,p])=>{
-    const on=(p===active && count>=m);
-    const label=m===5?NAV.t('5 คนขึ้นไป','5+ people'):NAV.t(`${m} คน`,`${m} people`);
-    return `<div style="${on?'font-weight:700;color:#2f6f4f':'opacity:.75'}">${label} — ${NAV.t('ลด','save')} ${p}%</div>`;
-  }).join('');
-  $('#bmLadder').innerHTML = rows + (active>0
-    ? `<div style="margin-top:6px;font-weight:700;color:#2f6f4f">${NAV.t(`กลุ่มคุณ ${count} คน → ลด ${active}% ทันที`,`Your group of ${count} → ${active}% off`)}</div>`
-    : `<div style="margin-top:6px" class="seccap">${NAV.t('เพิ่มอีกอย่างน้อย 2 คน เริ่มได้ส่วนลดกลุ่ม','Add at least 2 people to start the group discount')}</div>`);
+  $('#bmLadder').innerHTML = `<div style="font-weight:700;color:#2f6f4f">${NAV.t('เช่าตั้งแต่ 2 คนขึ้นไป — ลด 5% ทุกชุด','Rent as 2+ people — 5% off every dress')}</div>`
+    + (active>0
+        ? `<div style="margin-top:4px" class="seccap">${NAV.t(`กลุ่มคุณ ${count} คน ได้ส่วนลด 5% แล้ว`,`Your group of ${count} gets 5% off`)}</div>`
+        : `<div style="margin-top:4px" class="seccap">${NAV.t('เพิ่มอีกอย่างน้อย 2 คน เริ่มได้ส่วนลด','Add at least 2 people to start the discount')}</div>`);
   $('#bmPerk').innerHTML = NAV.t('ครบ 4 คน เจ้าสาวได้ผ้าคลุม/แอคเซสซอรีฟรี 1 ชิ้น · ชวนเพื่อนใหม่รับเครดิต ฿50','At 4 people the bride gets a free accessory · invite a new friend for ฿50 credit');
 }
 document.getElementById('bmCta')?.addEventListener('click', ()=>{ document.getElementById('themeSec')?.scrollIntoView({behavior:'smooth',block:'start'}); });
