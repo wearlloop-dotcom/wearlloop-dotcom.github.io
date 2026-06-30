@@ -19,7 +19,7 @@ function matchQuery(g) {
   if (!gQuery) return true;
   // brand alias/positioning → ค้นหา "มิตร", "celeb", "ราตรี", สะกดต่าง ก็เจอ
   const bm = window.LLOOP_BRANDS && window.LLOOP_BRANDS.lookup(g.brand);
-  const bx = bm ? (bm.aliases.join(' ') + ' ' + bm.note) : '';
+  const bx = bm ? (bm.aliases.join(' ') + ' ' + bm.note + ' ' + (bm.types || []).join(' ')) : '';
   const hay = [g.name, g.brand, bx, g.category, (g.occasion_tags || []).map(occName).join(' '),
     g.colors.map(c => c[0]).join(' ')].join(' ').toLowerCase();
   return hay.includes(gQuery);
@@ -245,15 +245,16 @@ function openBrandDir() {
     html += `<div class="bd-g"><div class="bd-gt">${gr.label}</div><div class="bd-row">`;
     html += items.map(b => {
       const n = cnt[b.key] || 0;
-      if (n > 0) return `<button class="bd-b have" data-b="${esc(actual[b.key])}" onclick="pickBrand(this.dataset.b)">${esc(b.name)}<span class="bd-c">${n}</span></button>`;
-      return `<button class="bd-b soon" data-k="${esc(b.key)}" data-n="${esc(b.name)}" onclick="notifyBrand(this.dataset.k,this.dataset.n)">${esc(b.name)}</button>`;
+      const ty = (b.types || []).join(' · ');
+      if (n > 0) return `<button class="bd-b have" data-b="${esc(actual[b.key])}" onclick="pickBrand(this.dataset.b)"><span class="bd-n">${esc(b.name)}<span class="bd-c">${n}</span></span><span class="bd-t">${esc(ty)}</span></button>`;
+      return `<button class="bd-b soon" data-k="${esc(b.key)}" data-n="${esc(b.name)}" onclick="notifyBrand(this.dataset.k,this.dataset.n)"><span class="bd-n">${esc(b.name)}</span><span class="bd-t">${esc(ty)}</span></button>`;
     }).join('');
     html += `</div></div>`;
   });
   const ex = Object.keys(extras);
   if (ex.length) {
     html += `<div class="bd-g"><div class="bd-gt">${TH ? 'อื่น ๆ' : 'More'}</div><div class="bd-row">`;
-    html += ex.map(b => `<button class="bd-b have" data-b="${esc(b)}" onclick="pickBrand(this.dataset.b)">${esc(b)}<span class="bd-c">${extras[b]}</span></button>`).join('');
+    html += ex.map(b => `<button class="bd-b have" data-b="${esc(b)}" onclick="pickBrand(this.dataset.b)"><span class="bd-n">${esc(b)}<span class="bd-c">${extras[b]}</span></span></button>`).join('');
     html += `</div></div>`;
   }
   html += `<div class="bd-note">${TH ? 'มีตัวเลข = เช่าได้เลย · กดแบรนด์อื่นเพื่อบอก “อยากให้มี” เราจะหาเข้ามาให้' : 'Number = available now · tap others to request them'}</div></div>`;
