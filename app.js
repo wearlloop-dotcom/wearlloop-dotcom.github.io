@@ -291,7 +291,7 @@ function openBrandDir() {
       const n = cnt[b.key] || 0;
       const ty = (b.types || []).join(' · ');
       if (n > 0) return `<button class="bd-b have" data-b="${esc(b.name)}" onclick="pickBrand(this.dataset.b)"><span class="bd-n">${esc(b.name)}<span class="bd-c">${n}</span></span><span class="bd-t">${esc(ty)}</span></button>`;
-      return `<button class="bd-b soon" data-k="${esc(b.key)}" data-n="${esc(b.name)}" onclick="notifyBrand(this.dataset.k,this.dataset.n)"><span class="bd-n">${esc(b.name)}</span><span class="bd-t">${esc(ty)}</span></button>`;
+      return `<button class="bd-b soon" data-k="${esc(b.key)}" data-n="${esc(b.name)}" onclick="notifyBrand(this.dataset.k,this.dataset.n)"><span class="bd-n">${esc(b.name)}</span></button>`;
     }).join('');
     html += `</div></div>`;
   });
@@ -377,9 +377,10 @@ function groupByStyle(list){
   });
   return out;
 }
-// รูปสำหรับแกลเลอรี (lookbook ใส่ตารางไซส์เป็นรูปสุดท้าย → แยกออกไปบล็อกตารางไซส์)
-function galleryPhotos(g){ const p = Array.isArray(g.photos)? g.photos : []; return (g.sourceMeta && p.length > 1) ? p.slice(0, -1) : p; }
-function sizeChartPhoto(g){ const p = Array.isArray(g.photos)? g.photos : []; return (g.sourceMeta && p.length > 1) ? p[p.length-1] : null; }
+// รูปตารางไซส์ = ภาพที่ OCR ระบุไว้จริง (source_meta.size_chart_url) — ไม่เดาจาก "รูปสุดท้าย"
+function sizeChartPhoto(g){ return (g.sourceMeta && g.sourceMeta.size_chart_url) || null; }
+// แกลเลอรี = รูปทั้งหมด ยกภาพตารางไซส์ออก (โชว์แยกในบล็อกตารางไซส์)
+function galleryPhotos(g){ const p = Array.isArray(g.photos)? g.photos : []; const c = sizeChartPhoto(g); return c ? p.filter(u => u !== c) : p; }
 
 function renderGrid() {
   let list = GARMENTS.filter(g =>
