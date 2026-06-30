@@ -1163,29 +1163,32 @@ async function addToCart(id) {
   const g = GARMENTS.find(x => x.id === id); if (!g) return;
   const TH = lang === 'th';
   if (gCart.find(x => x.id === id)) { toast(TH ? 'ชุดนี้อยู่ในตะกร้าแล้ว' : 'Already in cart'); return; }
-  // ต้องเลือกวันที่ก่อน — เช่ากล่องเดียว ทุกชุดใช้วันเดียวกัน
+  // ต้องเลือกวันที่ก่อน — เช่ากล่องเดียว ทุกชุดใช้ "วันเดียวกัน + ระยะเวลาเดียวกัน"
   const cartDate = gCart.length ? gCart[0].date : null;
+  const cartDur = gCart.length ? (gCart[0].dur || gDur) : gDur;
   const picked = ($('#useDate') && $('#useDate').value) || '';
   const date = cartDate || picked;
+  const dur = cartDate ? cartDur : gDur;   // ถ้ามีของในตะกร้าแล้ว ล็อกระยะเวลาตามตะกร้า
   if (!date) {
     toast(TH ? 'เลือกวันที่ต้องใช้ก่อนเพิ่มลงตะกร้านะคะ' : 'Pick your date first');
     const d = $('#useDate'); if (d) { d.classList.add('need'); d.focus(); try { d.showPicker && d.showPicker(); } catch (e) {} }
     return;
   }
-  // เช็กว่าว่างจริงในวันนั้นก่อนค่อยใส่ตะกร้า (ไม่ให้ใส่ชุดที่ไม่ว่าง)
+  // เช็กว่าว่างตลอดช่วง [date .. date+dur-1] ก่อนค่อยใส่ตะกร้า (ไม่ใช่แค่วันเดียว)
+  const to = addDays(date, dur - 1);
   const btn = $('#sheet .cartbtn'); const orig = btn && btn.textContent;
   if (btn) { btn.disabled = true; btn.textContent = TH ? 'กำลังเช็ก…' : 'Checking…'; }
   let free = true;
-  try { free = await window.API.availableOn(id, date, CUSTOMER && CUSTOMER.id); } catch (e) { console.warn(e); }
+  try { free = await window.API.availableRange(id, date, to); } catch (e) { console.warn(e); }
   if (btn) { btn.disabled = false; btn.textContent = orig; }
   if (!free) {
     toast(cartDate
-      ? (TH ? `ชุดนี้ไม่ว่าง ${fmtDate(date)} (วันเดียวกับตะกร้า) — เลือกชุดอื่นนะคะ` : `Not available on ${fmtDate(date)}`)
-      : (TH ? `ชุดนี้ไม่ว่าง ${fmtDate(date)} ลองวันอื่นนะคะ` : `Not available on ${fmtDate(date)} — try another date`));
+      ? (TH ? `ชุดนี้ไม่ว่างช่วง ${fmtDate(date)} (วันเดียวกับตะกร้า) — เลือกชุดอื่นนะคะ` : `Not available for ${fmtDate(date)}`)
+      : (TH ? `ชุดนี้ไม่ว่างช่วง ${fmtDate(date)} ลองวันอื่นนะคะ` : `Not available for ${fmtDate(date)} — try another date`));
     return;
   }
   const photo = g.photo || (Array.isArray(g.photos) && g.photos[0]) || '';
-  gCart.push({ id, code: g.code || g.id, name: g.name, price: g.price, brand: g.brand || '', photo, bg: g.bg || '#E7E2DA', date, dur: gDur });
+  gCart.push({ id, code: g.code || g.id, name: g.name, price: g.price, brand: g.brand || '', photo, bg: g.bg || '#E7E2DA', date, dur });
   saveCart();
   renderCartBtn();
   toast(TH ? `เพิ่ม "${g.name}" · ว่าง ${fmtDate(date)} ลงตะกร้าแล้ว` : `Added "${g.name}" · ${fmtDate(date)}`);
@@ -1200,14 +1203,14 @@ function openCart() {
   const TH = lang === 'th';
   if (!gCart.length) { toast(TH ? 'ยังไม่มีชุดในตะกร้า' : 'Cart is empty'); return; }
   const date = ((gCart[0] && gCart[0].date) || ($('#useDate') && $('#useDate').value) || gUseDate || '');
+  gDur = (gCart[0] && gCart[0].dur) || gDur;   // ระยะเวลาของตะกร้า (กล่องเดียว = ระยะเวลาเดียว) ไม่หลุดจากหน้า detail
   const items = gCart.map(it => {
     const thumb = it.photo ? `background-image:url('${it.photo}')` : `background:${it.bg || '#E7E2DA'}`;
-    const dlabel = it.date ? `<em class="cfree">${TH ? 'ว่าง ' + fmtDate(it.date) : 'free ' + fmtDate(it.date)}</em>` : '';
-    return `<div class="crow">
+    return `<div class="crow" data-id="${it.id}">
       <button class="cthumb" style="${thumb}" onclick="cartOpenDetail('${it.id}')" aria-label="${TH ? 'ดูรายละเอียด' : 'View details'}"></button>
       <span class="cinfo" onclick="cartOpenDetail('${it.id}')">
         ${it.brand ? `<small>${it.brand}</small>` : ''}<span class="cnm">${it.name}</span>
-        ${dlabel}<em class="clink">${TH ? 'ดูรายละเอียด ›' : 'View details ›'}</em>
+        <em class="cstat"></em><em class="clink">${TH ? 'ดูรายละเอียด ›' : 'View details ›'}</em>
       </span>
       <b>฿${it.price}</b>
       <button class="cx" onclick="removeFromCart('${it.id}')" aria-label="${TH ? 'นำออก' : 'Remove'}">×</button>
@@ -1220,19 +1223,52 @@ function openCart() {
       <div class="cdesc">${TH ? 'เช่าหลายชุด ส่งกล่องเดียว ค่าส่งครั้งเดียว' : 'Multiple dresses, one shipment, one shipping fee'}</div>
       <div class="clist">${items}</div>
       <div class="cdate">
-        <label>${TH ? 'วันที่ต้องใช้' : 'Date'}</label>
-        <input type="date" id="cartDate" min="${todayStr()}" value="${date}">
+        <label>${TH ? 'วันที่ต้องใช้ (ทุกชุดในตะกร้าใช้วันเดียวกัน)' : 'Date (all items share one date)'}</label>
+        <input type="date" id="cartDate" min="${todayStr()}" value="${date}" onchange="revalidateCart()">
         <div class="durchips" id="cartDur">
           <button data-d="1" class="${gDur === 1 ? 'on' : ''}" onclick="setCartDur(1)">${TH ? '1 วัน' : '1d'}</button>
           <button data-d="3" class="${gDur === 3 ? 'on' : ''}" onclick="setCartDur(3)">${TH ? '3 วัน' : '3d'}</button>
           <button data-d="5" class="${gDur === 5 ? 'on' : ''}" onclick="setCartDur(5)">${TH ? '5 วัน' : '5d'}</button>
         </div>
       </div>
-      <button class="ksubmit" onclick="bookCartNow()">${TH ? 'จองทั้งหมด' : 'Book all'}</button>
+      <button class="ksubmit" id="cartBook" onclick="bookCartNow()">${TH ? 'จองทั้งหมด' : 'Book all'}</button>
     </div>`;
   $('#cartOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
+  revalidateCart();   // เช็กว่างตามวัน/ระยะเวลาปัจจุบันทันทีที่เปิด
 }
-function setCartDur(d) { gDur = d; document.querySelectorAll('#cartDur button').forEach(b => b.classList.toggle('on', +b.dataset.d === d)); }
+function setCartDur(d) {
+  gDur = d;
+  gCart.forEach(it => { it.dur = d; });   // กล่องเดียว = ระยะเวลาเดียวกันทุกชุด
+  saveCart();
+  document.querySelectorAll('#cartDur button').forEach(b => b.classList.toggle('on', +b.dataset.d === d));
+  revalidateCart();
+}
+// เช็กว่างทุกชุดตามวัน+ระยะเวลาในตะกร้าปัจจุบัน → โชว์สถานะรายชุด + ปิดปุ่มจองถ้ามีชุดไม่ว่าง
+async function revalidateCart() {
+  const TH = lang === 'th';
+  const di = $('#cartDate'); const date = di && di.value;
+  const book = $('#cartBook');
+  if (!date) { if (book) book.disabled = false; return; }
+  const to = addDays(date, gDur - 1);
+  gCart.forEach(it => { it.date = date; });   // sync วันที่ที่เลือกล่าสุดเข้าทุกชุด
+  saveCart();
+  let anyBusy = false;
+  await Promise.all(gCart.map(async it => {
+    const row = document.querySelector(`#cartSheet .crow[data-id="${it.id}"] .cstat`);
+    if (row) { row.className = 'cstat checking'; row.textContent = TH ? 'กำลังเช็ก…' : 'checking…'; }
+    let free = true;
+    try { free = await window.API.availableRange(it.id, date, to); } catch (e) { free = true; }
+    if (row) {
+      row.className = free ? 'cstat cfree' : 'cstat cbusy';
+      row.textContent = free ? (TH ? `ว่าง ${fmtDate(date)}` : `free ${fmtDate(date)}`) : (TH ? `ไม่ว่าง ${fmtDate(date)}` : `unavailable ${fmtDate(date)}`);
+    }
+    if (!free) anyBusy = true;
+  }));
+  if (book) {
+    book.disabled = anyBusy;
+    book.textContent = anyBusy ? (TH ? 'มีชุดไม่ว่าง — นำออกก่อนนะคะ' : 'Remove unavailable items') : (TH ? 'จองทั้งหมด' : 'Book all');
+  }
+}
 function closeCart() { $('#cartOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 // กดชุดในตะกร้า → กลับไปดูรายละเอียดชุดเต็ม (ปิดตะกร้าก่อน แล้วเปิด detail)
 function cartOpenDetail(id) { closeCart(); openDetail(id); }

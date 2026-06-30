@@ -406,7 +406,12 @@
   .cinfo .cnm{font-size:14px}
   .cinfo em{font-style:normal}
   .cinfo .cfree{font-size:11px;color:var(--sage,#5c7a52)}
+  .cinfo .cstat{font-size:11px}
+  .cinfo .cstat.cfree{color:var(--sage,#5c7a52)}
+  .cinfo .cstat.checking{color:var(--muted)}
+  .cinfo .cstat.cbusy{color:#c0392b}
   .cinfo .clink{font-size:11px;color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+  .ksubmit:disabled{opacity:.5;cursor:not-allowed}
   .crow b{font-weight:500;white-space:nowrap;align-self:flex-start}
   .cx{background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1;flex:0 0 auto;align-self:flex-start}
   .datepick input.need,.cdate input.need{border-color:#c0392b !important;box-shadow:0 0 0 2px rgba(192,57,43,.15)}
@@ -601,7 +606,7 @@
   .ocal-dow{margin-bottom:4px}
   .ocal-cell{position:relative;min-height:46px;border-radius:6px;display:flex;flex-direction:column;align-items:center;padding:5px 2px 3px;overflow:hidden}
   .ocal-cell.dow{min-height:0;padding:0 0 2px;font-size:10px;letter-spacing:.3px;color:#A39472}
-  .ocal-cell.empty{background:transparent}
+  .ocal-cell.empty{background:transparent;grid-column:auto;min-height:0}
   .ocal-cell .ocal-d{font-size:12px;color:#6B6452;font-variant-numeric:tabular-nums}
   .ocal-cell.today{outline:1px solid #C9A86A;outline-offset:-1px}
   .ocal-cell.has{background:#F4EEE1;cursor:pointer;transition:transform .12s ease, background .15s ease}
@@ -1158,6 +1163,6 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=58"></script>
+<script src="app.js?v=59"></script>
 </body>
 </html>

@@ -273,6 +273,16 @@ window.API = (function () {
     const { data } = await client().rpc('available_garments_on', args);
     return new Set((data || []).map(x => (x && x.id) ? x.id : x));
   }
+  // เช็กว่าชุดว่าง "ตลอดช่วง" [from..to] ไหม (pre-filter ฝั่ง client; server ยัง re-check ตอนจองจริง)
+  // หมายเหตุ: ใช้ช่วงจองดิบจาก garment_booked_ranges (ยังไม่รวม buffer ส่ง-ซัก) — เป็นการกรองเบื้องต้น
+  async function availableRange(garmentId, fromStr, toStr) {
+    if (CONFIG.USE_MOCK) return true;
+    let ranges = [];
+    try { ranges = await bookedRanges(garmentId); } catch (e) { return true; }  // เช็กไม่ได้ → ปล่อยให้ server ตัดสิน
+    const a = fromStr, b = toStr;
+    // overlap แบบรวมปลาย [] : (from <= r.to) && (to >= r.from)
+    return !(ranges || []).some(r => a <= (r.to_date || r.to) && b >= (r.from_date || r.from));
+  }
   // ช่วงวันที่ถูกจองของชุด (สำหรับปฏิทินในรายละเอียด)
   async function bookedRanges(garmentId, exclRentalId) {
     if (CONFIG.USE_MOCK) return [];
@@ -1036,5 +1046,5 @@ window.API = (function () {
     return data || {};
   }
 
-  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, pcStatus, stylistDirectory, stylistPublic, pcBookSlot, myAppointments, pcCancelAppointment, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, payWithCredit, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, joinWaitlist, leaveWaitlist, myWaitlist, waitlistCount, trendingRequests, voteRequest, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, notifInbox, notifUnread, notifMarkRead, notifSetPref, socialProof, recommendWith, recommendPersonal, liveViewers, myStreak, myTaste, expVariant, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed, reportLook, reactLook, lookReactions, occasionHubs, garmentFit, myCreatorEarnings };
+  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, pcStatus, stylistDirectory, stylistPublic, pcBookSlot, myAppointments, pcCancelAppointment, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, availableRange, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, payWithCredit, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, joinWaitlist, leaveWaitlist, myWaitlist, waitlistCount, trendingRequests, voteRequest, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, notifInbox, notifUnread, notifMarkRead, notifSetPref, socialProof, recommendWith, recommendPersonal, liveViewers, myStreak, myTaste, expVariant, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed, reportLook, reactLook, lookReactions, occasionHubs, garmentFit, myCreatorEarnings };
 })();
