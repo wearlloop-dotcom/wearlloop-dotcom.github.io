@@ -2364,7 +2364,10 @@ let _termsVersion = null;
 async function maybeShowTerms() {
   let terms; try { terms = await window.API.getTerms?.(); } catch (e) { return; }
   if (!terms ||!terms.version) return;
-  if (CUSTOMER.terms_accepted_version === terms.version) return; // ยอมรับเวอร์ชันล่าสุดแล้ว
+  if (CUSTOMER.terms_accepted_version === terms.version) return; // ยอมรับเวอร์ชันล่าสุดแล้ว (จาก server)
+  // guest: ยังไม่ login → save server ไม่ได้ → จำใน localStorage กันเด้งซ้ำ + กันบังปุ่ม login
+  let _lsTerms = null; try { _lsTerms = localStorage.getItem('lloop_terms_v'); } catch (e) {}
+  if (_lsTerms === terms.version) return;
   _termsVersion = terms.version;
   $('#termsBody').textContent = terms.body;
   $('#termsOverlay').classList.add('open');
@@ -2374,6 +2377,7 @@ async function acceptTermsClick() {
   $('#termsOverlay').classList.remove('open');
   document.body.style.overflow ='';
   CUSTOMER.terms_accepted_version = _termsVersion;
+  try { localStorage.setItem('lloop_terms_v', _termsVersion); } catch (e) {}  // จำฝั่ง client กันเด้งซ้ำ (โดยเฉพาะ guest)
   try { await window.API.acceptTerms(CUSTOMER, _termsVersion); } catch (e) { console.warn(e); }
   maybeOnboard();
 }
