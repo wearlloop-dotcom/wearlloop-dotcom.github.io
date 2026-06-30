@@ -309,16 +309,14 @@ function familiesOf(g){ const fams=new Set();
   if(!fams.size) fams.add('cream'); return fams; }
 
 function renderFilters() {
-  // ยุบสีเป็นกลุ่ม (rainbow) — โชว์เฉพาะกลุ่มที่มีในคลัง
-  const present = new Set();
-  GARMENTS.forEach(g => familiesOf(g).forEach(f => present.add(f)));
+  // ปุ่มสีเดียว (rainbow) → เปิด modal เลือกสี/ดูดสีจากรูป
   const brands = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
-  const sw = COLOR_FAMILIES.filter(f => present.has(f.key)).map(f =>
-    `<button class="swatchbtn ${fColor === f.key?'active':''}" style="background:${f.hex}" onclick="setColor('${f.key}')" title="${lang==='th'?f.th:f.en}" aria-label="${(lang==='th'?'กรองสี ':'filter colour ')+(lang==='th'?f.th:f.en)}"></button>`).join('');
+  const af = fColor ? COLOR_FAMILIES.find(f => f.key === fColor) : null;
+  const colorBtn = `<button class="colorpick ${fColor?'on':''}" onclick="openColorModal()"><i class="rainbow"${af?` style="background:${af.hex}"`:''}></i>${af?(lang==='th'?af.th:af.en):(lang==='th'?'เลือกสี':'Colour')}</button>`;
   const opts = [`<option value="">${t('allBrands')}</option>`].concat(brands.map(b =>`<option value="${b}"${fBrand === b?'selected':''}>${b}</option>`)).join('');
   $('#filters').innerHTML =`
     <button class="tone ${fToneOnly?'':'off'}" onclick="toggleTone()">● ${t('myTone')}</button>
-    ${sw ? `<div class="swrow">${sw}</div>` : ''}
+    ${colorBtn}
     <select class="brandsel" onchange="setBrand(this.value)">${opts}</select>`;
   renderBrandChips();
   renderQuickFilters();
@@ -410,6 +408,29 @@ function notifyBrand(key, name) {
 
 function setOccasion(t2) { fOccasion = t2; renderCatnav(); renderChips(); renderDiscover(); renderGrid(); }
 function setColor(h) { fColor = (fColor === h? null : h); renderFilters(); renderGrid(); }
+// ===== Modal เลือกสี + ดูดสีจากรูป (การ์ดงานแต่ง) =====
+let _cardCtx=null,_cardCanvas=null;
+function pickColor(key){ fColor=(fColor===key?null:key); closeColorModal(); renderFilters(); renderGrid(); }
+function famChip(f,extra){ return `<button class="cfam ${fColor===f.key?'on':''} ${extra||''}" onclick="pickColor('${f.key}')" title="${lang==='th'?f.th:f.en}"><i style="background:${f.hex}"></i><span>${lang==='th'?f.th:f.en}</span></button>`; }
+function openColorModal(){
+  const present=new Set(); GARMENTS.forEach(g=>familiesOf(g).forEach(f=>present.add(f)));
+  const pal=COLOR_FAMILIES.map(f=>famChip(f, present.has(f.key)?'':'dim')).join('');
+  const m=document.createElement('div'); m.id='cmodal'; m.className='cmodal'; m.onclick=e=>{ if(e.target===m) closeColorModal(); };
+  m.innerHTML=`<div class="cmsheet">
+    <div class="cmhead"><b>${lang==='th'?'เลือกสีที่ชอบ':'Pick a colour'}</b><button class="cmx" onclick="closeColorModal()">×</button></div>
+    <div class="cmpal">${pal}</div>
+    <div class="cmor">${lang==='th'?'หรือดูดสีจากรูป — เช่น การ์ดงานแต่ง / ธีมงาน':'or pick from a photo — e.g. a wedding card'}</div>
+    <label class="cmupload">${lang==='th'?'＋ อัปโหลดรูป':'＋ Upload image'}<input type="file" accept="image/*" onchange="onCardImage(this)" hidden></label>
+    <div id="cmcanvaswrap" style="display:none"><div class="cmhint">${lang==='th'?'แตะที่รูปเพื่อดูดสี 🖌️':'Tap the image to pick a colour 🖌️'}</div><canvas id="cmcanvas" onclick="onCanvasClick(event)"></canvas><div id="cmsugg" class="cmsugg"></div></div>
+    ${fColor?`<button class="cmclear" onclick="pickColor('${fColor}')">${lang==='th'?'✕ ล้างตัวกรองสี':'✕ Clear colour'}</button>`:''}
+  </div>`;
+  document.body.appendChild(m);
+}
+function closeColorModal(){ const m=document.getElementById('cmodal'); if(m) m.remove(); _cardCtx=null; _cardCanvas=null; }
+function _rgbHex(r,g,b){ return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join(''); }
+function onCardImage(input){ const f=input.files&&input.files[0]; if(!f) return; const img=new Image(); img.onload=()=>{ const cv=document.getElementById('cmcanvas'); if(!cv) return; const W=Math.min(340,img.width||340); const sc=W/(img.width||W); cv.width=W; cv.height=Math.round((img.height||W)*sc); const ctx=cv.getContext('2d',{willReadFrequently:true}); ctx.drawImage(img,0,0,cv.width,cv.height); _cardCtx=ctx; _cardCanvas=cv; const wrap=document.getElementById('cmcanvaswrap'); if(wrap) wrap.style.display='block'; try{ showDominant(ctx,cv); }catch(e){} }; img.src=URL.createObjectURL(f); }
+function onCanvasClick(e){ if(!_cardCtx||!_cardCanvas) return; const cv=_cardCanvas, r=cv.getBoundingClientRect(); const x=Math.floor((e.clientX-r.left)*cv.width/r.width); const y=Math.floor((e.clientY-r.top)*cv.height/r.height); const p=_cardCtx.getImageData(Math.max(0,Math.min(cv.width-1,x)),Math.max(0,Math.min(cv.height-1,y)),1,1).data; pickColor(classifyHex(_rgbHex(p[0],p[1],p[2]))); }
+function showDominant(ctx,cv){ const d=ctx.getImageData(0,0,cv.width,cv.height).data; const cnt={}; for(let i=0;i<d.length;i+=4*23){ if(d[i+3]<128) continue; const f=classifyHex(_rgbHex(d[i],d[i+1],d[i+2])); cnt[f]=(cnt[f]||0)+1; } const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k])=>COLOR_FAMILIES.find(x=>x.key===k)).filter(Boolean); const sg=document.getElementById('cmsugg'); if(sg) sg.innerHTML=`<div class="cmsugglbl">${lang==='th'?'สีในรูปนี้ — แตะเลือก':'Colours here — tap to use'}</div>`+top.map(f=>famChip(f,'sm')).join(''); }
 function setBrand(b) { fBrand = b; renderBrandChips(); renderGrid(); }
 function toggleTone() { fToneOnly =!fToneOnly; renderCatnav(); renderFilters(); renderGrid(); }
 
