@@ -694,7 +694,7 @@ function openDetail(id) {
     [t('bust'), g.bust?`${g.bust[0]}–${g.bust[1]}"`: t('free')],
     [t('waist'), g.waist?`${g.waist[0]}–${g.waist[1]}"`: t('free')],
     [t('hip'), g.hip?`${g.hip}"`: t('free')],
-    [t('length'), g.length?`${g.length} ${t('cm')}`:'—'],
+    [t('length'), g.length?`${Math.round(g.length/2.54*2)/2}"`:'—'],
 ].map(m =>`<div class="mcell"><span>${m[0]}</span>${m[1]}</div>`).join('');
   const swatches = g.colors.map(c =>`<div class="swatch"><i style="background:${c[1]}"></i><span>${c[0]}</span></div>`).join('');
   const tips = tipList.map(x =>`<div class="trow"><i></i>${x}</div>`).join('');
