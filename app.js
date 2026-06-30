@@ -574,6 +574,15 @@ function openDetail(id) {
       </div>
     </div>
     <div id="quotebox" class="quotebox"></div>`}
+    <label class="backupopt" for="wantBackup">
+      <input type="checkbox" id="wantBackup">
+      <span class="bo-txt">
+        <span class="bo-title">${lang==='th'?'เตรียมชุดสำรองเผื่อไว้ให้ฉัน':'Keep a spare on standby'}</span>
+        <span class="bo-why">${lang==='th'
+          ? 'เผื่อชุดหลักมีเหตุไม่พร้อมจริง ๆ เช่น ผู้เช่าก่อนหน้าทำชุดเสียหาย เราจะสลับชุดสำรองที่เข้ากันให้ทันที — ไม่มีค่าใช้จ่ายเพิ่ม'
+          : 'If your main piece truly can’t make it (e.g. a prior renter damaged it), we swap in a matching spare right away — no extra charge.'}</span>
+      </span>
+    </label>
     <div class="cta">
       <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}${subCapLabel(g)}</span>` : '฿'+staffPrice(g.price)+staffTag()}</span>
       ${subCovers(g) ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
@@ -876,9 +885,10 @@ async function reserve(id, useCredit) {
   const free = await checkAvail(id);
   if (free === false) return;
   const toDate = durEnd(date);
+  const wantBackup = !!($('#wantBackup') && $('#wantBackup').checked);
   let ok = true, backups = [], rentalId = null;
   try {
-    const res = await window.API.bookWithBackups(CUSTOMER, g.code || g.id, date, toDate);
+    const res = await window.API.bookWithBackups(CUSTOMER, g.code || g.id, date, toDate, wantBackup);
     ok =!res.error && res.data &&!res.data.error;
     backups = (res.data && res.data.backups) || [];
     rentalId = res.data && res.data.rental;
@@ -906,7 +916,7 @@ async function reserve(id, useCredit) {
   fbTrack('InitiateCheckout', { content_ids:[g.code || g.id], content_name: g.name, value: g.price, currency:'THB' });
   closeDetail();
   const bk = backups.length
-? (lang ==='th'?` · เตรียมชุดสำรองให้ ${backups.length} ตัวแล้ว`:` · ${backups.length} backups reserved`)
+? (lang ==='th'?` · เตรียมชุดสำรองเผื่อให้ ${backups.length} ตัว`:` · ${backups.length} spare(s) on standby`)
     :'';
   toast(`${t('reservedPre')} ${g.name} ${t('reservedPost')} ${fmtDate(date)}${bk}`);
 }
@@ -1145,7 +1155,8 @@ async function submitKycRequired() {
 function addToCart(id) {
   const g = GARMENTS.find(x => x.id === id); if (!g) return;
   if (gCart.find(x => x.id === id)) { toast(lang === 'th' ? 'ชุดนี้อยู่ในตะกร้าแล้ว' : 'Already in cart'); return; }
-  gCart.push({ id, code: g.code || g.id, name: g.name, price: g.price });
+  const photo = g.photo || (Array.isArray(g.photos) && g.photos[0]) || '';
+  gCart.push({ id, code: g.code || g.id, name: g.name, price: g.price, brand: g.brand || '', photo, bg: g.bg || '#E7E2DA' });
   renderCartBtn();
   toast(lang === 'th' ? `เพิ่ม "${g.name}" ลงตะกร้าแล้ว` : `Added "${g.name}"`);
 }
@@ -1159,7 +1170,18 @@ function openCart() {
   const TH = lang === 'th';
   if (!gCart.length) { toast(TH ? 'ยังไม่มีชุดในตะกร้า' : 'Cart is empty'); return; }
   const date = (($('#useDate') && $('#useDate').value) || gUseDate || '');
-  const items = gCart.map(it => `<div class="crow"><span>${it.name}</span><b>฿${it.price}</b><button class="cx" onclick="removeFromCart('${it.id}')">×</button></div>`).join('');
+  const items = gCart.map(it => {
+    const thumb = it.photo ? `background-image:url('${it.photo}')` : `background:${it.bg || '#E7E2DA'}`;
+    return `<div class="crow">
+      <button class="cthumb" style="${thumb}" onclick="cartOpenDetail('${it.id}')" aria-label="${TH ? 'ดูรายละเอียด' : 'View details'}"></button>
+      <span class="cinfo" onclick="cartOpenDetail('${it.id}')">
+        ${it.brand ? `<small>${it.brand}</small>` : ''}${it.name}
+        <em>${TH ? 'ดูรายละเอียด' : 'View details'}</em>
+      </span>
+      <b>฿${it.price}</b>
+      <button class="cx" onclick="removeFromCart('${it.id}')" aria-label="${TH ? 'นำออก' : 'Remove'}">×</button>
+    </div>`;
+  }).join('');
   $('#cartSheet').innerHTML = `
     <div class="csheet">
       <button class="close" onclick="closeCart()">×</button>
@@ -1181,6 +1203,8 @@ function openCart() {
 }
 function setCartDur(d) { gDur = d; document.querySelectorAll('#cartDur button').forEach(b => b.classList.toggle('on', +b.dataset.d === d)); }
 function closeCart() { $('#cartOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+// กดชุดในตะกร้า → กลับไปดูรายละเอียดชุดเต็ม (ปิดตะกร้าก่อน แล้วเปิด detail)
+function cartOpenDetail(id) { closeCart(); openDetail(id); }
 async function bookCartNow() {
   const TH = lang === 'th';
   const date = $('#cartDate') && $('#cartDate').value;
@@ -2069,9 +2093,15 @@ function trackUrl(courier, no) {
   return base ? base + encodeURIComponent(no) : null;
 }
 function rentalStatusLabel(s) {
-  const th = { reserved:'จองแล้ว', out:'จัดส่ง/กำลังใช้', returned:'คืนแล้ว', cancelled:'ยกเลิก'};
-  const en = { reserved:'Reserved', out:'Shipped / In use', returned:'Returned', cancelled:'Cancelled'};
+  const th = { reserved:'จองแล้ว', hold:'รอชำระเงิน', out:'จัดส่ง/กำลังใช้', returned:'คืนแล้ว', cancelled:'ยกเลิก', backup:'ชุดสำรอง'};
+  const en = { reserved:'Reserved', hold:'Awaiting payment', out:'Shipped / In use', returned:'Returned', cancelled:'Cancelled', backup:'Spare'};
   return (lang ==='th'? th : en)[s] || s;
+}
+// thumbnail ของออเดอร์ — ใช้รูปจริงถ้ามี ไม่งั้น fallback สีพื้น (เทียบกับ GARMENTS ที่โหลดไว้)
+function orderThumb(r) {
+  const g = GARMENTS.find(x => x.code === r.code);
+  const photo = r.photo || (g && (g.photo || (Array.isArray(g.photos) && g.photos[0])));
+  return photo ? `background-image:url('${photo}')` : `background:${(g && g.bg) || '#E7E2DA'}`;
 }
 async function openOrders() {
   $('#ordersOverlay').classList.add('open');
@@ -2100,34 +2130,68 @@ function renderOrders(rentals) {
     body.innerHTML =`<div class="oempty">${lang ==='th'?'ยังไม่มีออเดอร์ — เลือกชุดที่ถูกใจแล้วเริ่มลุคแรกของคุณได้เลย':'No rentals yet — pick a look you love to begin'}</div>`;
     return;
   }
-  body.innerHTML = rentals.map(r => {
-    const status = rentalStatusLabel(r.status);
-    const stClass = r.status ==='returned'?'done' : r.status ==='cancelled'?'cancel' : r.status ==='out'?'out' :'res';
-    const url = (r.courier && r.tracking_no) ? trackUrl(r.courier, r.tracking_no) : null;
-    const ship = (r.courier && r.tracking_no) ?`
-      <div class="orow"><span>${lang ==='th'?'ขนส่ง':'Courier'}</span>${
-        url?`<a href="${url}" target="_blank" rel="noopener">${r.courier} · ${r.tracking_no}</a>`:`${r.courier} · ${r.tracking_no}`
-      }${r.eta?` <i class="oeta">${lang ==='th'?'ถึงราว':'eta'} ${fmtDate(r.eta)}</i>`:''}</div>`:'';
-    const reRent =`<button class="obtn" onclick="reRentByCode('${(r.code||'').replace(/'/g,"")}')">${lang ==='th'?'เช่าอีก':'Rent again'}</button>`;
-    const review = r.status ==='returned'
-      ?`<button class="obtn ghost" onclick="openReview('${r.rental_id}','${(r.name||'').replace(/'/g,"")}')">${lang ==='th'?'รีวิว':'Review'}</button>`:'';
-    // ยืดหยุ่นกว่าคู่แข่ง: ลูกค้ายกเลิก/เลื่อน/ต่อเวลาเองได้ (ผ่าน me-rpc gateway)
-    const canCancelResched = (r.status ==='reserved'|| r.status ==='hold');
-    const canExtend = (r.status ==='reserved'|| r.status ==='out');
-    const reschedB = canCancelResched ?`<button class="obtn ghost" onclick="orderReschedule('${r.rental_id}')">${lang ==='th'?'เลื่อนวัน':'Reschedule'}</button>`:'';
-    const extendB = canExtend ?`<button class="obtn ghost" onclick="orderExtend('${r.rental_id}')">${lang ==='th'?'ต่อเวลา':'Extend'}</button>`:'';
-    const cancelB = canCancelResched ?`<button class="obtn ghost" onclick="orderCancel('${r.rental_id}')">${lang ==='th'?'ยกเลิก':'Cancel'}</button>`:'';
-    return`<div class="ocard">
-      <div class="otop">
+  // จับกลุ่ม: ชุดสำรองไปซ้อนใต้ชุดหลักของมัน (ไม่โผล่เป็นออเดอร์แยกให้งง)
+  const primaries = rentals.filter(r => (r.role || 'primary') !== 'backup');
+  const spares = rentals.filter(r => (r.role || 'primary') === 'backup');
+  const sparesByPrimary = {};
+  spares.forEach(s => { (sparesByPrimary[s.primary_rental_id] = sparesByPrimary[s.primary_rental_id] || []).push(s); });
+  // ชุดสำรองที่หาชุดหลักไม่เจอ (เช่นชุดหลักถูกลบ) → แสดงเดี่ยว ๆ ท้ายสุด
+  const orphanSpares = spares.filter(s => !primaries.some(p => p.rental_id === s.primary_rental_id));
+  const cards = primaries.map(r => orderCard(r, (sparesByPrimary[r.rental_id] || []))).join('');
+  const orphans = orphanSpares.map(r => orderCard(r, [])).join('');
+  body.innerHTML = cards + orphans;
+}
+function orderCard(r, spareList) {
+  const isSpare = (r.role || 'primary') === 'backup';
+  const status = rentalStatusLabel(isSpare ? 'backup' : r.status);
+  const stClass = isSpare ? 'spare'
+    : r.status ==='returned'?'done' : r.status ==='cancelled'?'cancel' : r.status ==='out'?'out'
+    : r.status ==='hold'?'hold' :'res';
+  const url = (r.courier && r.tracking_no) ? trackUrl(r.courier, r.tracking_no) : null;
+  const ship = (r.courier && r.tracking_no) ?`
+    <div class="orow"><span>${lang ==='th'?'ขนส่ง':'Courier'}</span>${
+      url?`<a href="${url}" target="_blank" rel="noopener">${r.courier} · ${r.tracking_no}</a>`:`${r.courier} · ${r.tracking_no}`
+    }${r.eta?` <i class="oeta">${lang ==='th'?'ถึงราว':'eta'} ${fmtDate(r.eta)}</i>`:''}</div>`:'';
+  // ราคา/มัดจำ — ให้รายละเอียดครบ ไม่ใช่การ์ดเปล่า
+  const priceLine = r.covered_by_sub
+    ? `<div class="orow"><span>${lang==='th'?'ค่าเช่า':'Rental'}</span>${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}</div>`
+    : (r.price != null ? `<div class="orow"><span>${lang==='th'?'ค่าเช่า':'Rental'}</span>฿${Math.round(r.price)}${r.deposit>0?` <i class="oeta">+${lang==='th'?'มัดจำ':'deposit'} ฿${Math.round(r.deposit)}</i>`:''}</div>` : '');
+  const durLine = r.rent_days ? `<div class="orow"><span>${lang==='th'?'ระยะเวลา':'Duration'}</span>${r.rent_days} ${lang==='th'?'วัน':'days'}</div>` : '';
+  const reRent =`<button class="obtn" onclick="reRentByCode('${(r.code||'').replace(/'/g,"")}')">${lang ==='th'?'เช่าอีก':'Rent again'}</button>`;
+  const review = (!isSpare && r.status ==='returned')
+    ?`<button class="obtn ghost" onclick="openReview('${r.rental_id}','${(r.name||'').replace(/'/g,"")}')">${lang ==='th'?'รีวิว':'Review'}</button>`:'';
+  // ยืดหยุ่นกว่าคู่แข่ง: ลูกค้ายกเลิก/เลื่อน/ต่อเวลาเองได้ (ผ่าน me-rpc gateway) — เฉพาะชุดหลัก
+  const canCancelResched = !isSpare && (r.status ==='reserved'|| r.status ==='hold');
+  const canExtend = !isSpare && (r.status ==='reserved'|| r.status ==='out');
+  const reschedB = canCancelResched ?`<button class="obtn ghost" onclick="orderReschedule('${r.rental_id}')">${lang ==='th'?'เลื่อนวัน':'Reschedule'}</button>`:'';
+  const extendB = canExtend ?`<button class="obtn ghost" onclick="orderExtend('${r.rental_id}')">${lang ==='th'?'ต่อเวลา':'Extend'}</button>`:'';
+  const cancelB = canCancelResched ?`<button class="obtn ghost" onclick="orderCancel('${r.rental_id}')">${lang ==='th'?'ยกเลิก':'Cancel'}</button>`:'';
+  const actions = isSpare ? '' : `<div class="oactions">${reRent}${reschedB}${extendB}${cancelB}${review}</div>`;
+  // กล่องชุดสำรองที่ซ้อนใต้ชุดหลัก + อธิบายว่าเตรียมไว้เผื่ออะไร
+  const sparesBox = (spareList && spareList.length) ? `
+    <div class="ospares">
+      <div class="ospares-h">${lang==='th'?'ชุดสำรองเผื่อไว้ให้':'Spare(s) on standby'}</div>
+      ${spareList.map(s => `<div class="ospare"><span class="othumb sm" style="${orderThumb(s)}"></span><span class="osp-name">${s.name||'—'}</span></div>`).join('')}
+      <div class="ospares-why">${lang==='th'
+        ? 'ถ้าชุดหลักมีเหตุไม่พร้อมจริง ๆ (เช่น ผู้เช่าก่อนหน้าทำเสียหาย) เราสลับตัวสำรองให้ทันที ไม่มีค่าใช้จ่ายเพิ่ม'
+        : 'If your main piece can’t make it (e.g. damaged by a prior renter), we swap in a spare right away at no extra cost.'}</div>
+    </div>` : '';
+  return`<div class="ocard${isSpare?' ocard-spare':''}">
+    <div class="otop">
+      <span class="othumb" style="${orderThumb(r)}"></span>
+      <div class="oname-wrap">
         <div class="oname">${r.name ||'—'}</div>
         <span class="ost ${stClass}">${status}</span>
       </div>
-      <div class="orow"><span>${lang ==='th'?'วันที่ใช้':'Use date'}</span>${r.use_date? fmtDate(r.use_date):'—'}</div>
-      <div class="orow"><span>${lang ==='th'?'กำหนดคืน':'Due back'}</span>${r.due_at? fmtDate(r.due_at):'—'}</div>
-      ${ship}
-      <div class="oactions">${reRent}${reschedB}${extendB}${cancelB}${review}</div>
-    </div>`;
-  }).join('');
+    </div>
+    ${durLine}
+    <div class="orow"><span>${lang ==='th'?'วันที่ใช้':'Use date'}</span>${r.use_date? fmtDate(r.use_date):'—'}</div>
+    <div class="orow"><span>${lang ==='th'?'กำหนดคืน':'Due back'}</span>${r.due_at? fmtDate(r.due_at):'—'}</div>
+    ${priceLine}
+    ${ship}
+    ${sparesBox}
+    ${actions}
+  </div>`;
 }
 // ===== ยกเลิก / เลื่อน / ต่อเวลา (ลูกค้าทำเอง — ผ่าน gateway ที่เช็ค ownership) =====
 function _isYmd(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s); }
@@ -2439,11 +2503,15 @@ function notifText(n) {
     review_request:  [th?'ชุดเป็นยังไงบ้างคะ':'How was it?', th?`รีวิว "${p.name||''}" รับเครดิต`:`Review "${p.name||''}" for credit`],
     referral_credit: [th?'ได้เครดิตจากการชวนเพื่อน':'Referral credit', th?`฿${p.amount||''} เข้ากระเป๋าแล้ว`:`฿${p.amount||''} added`],
     birthday:        [th?'ของขวัญวันเกิด':'Birthday gift', th?`เช่าฟรี 1 ชุด มูลค่าถึง ฿${p.value_cap||''}`:`1 free rental up to ฿${p.value_cap||''}`],
-    wishlist_available:[th?'ชุดที่หมายตาว่างแล้ว':'Wishlist item available', th?`"${p.name||''}" รีบจองก่อนใคร`:`"${p.name||''}" — book now`],
+    wishlist_available:[th?'ชุดที่หมายตาว่างแล้ว':'Wishlist item available', th?`"${p.name||''}" รีบจองก่อนใคร`:`"${p.name||''}" — book now`, p.code],
+    new_arrival:     [th?'ของใหม่ที่น่าจะถูกใจ':'New arrival for you',
+                      th?`"${p.name||''}" เพิ่งเข้า${p.season_match?' · เข้ากับโทนสีคุณ':''}`:`"${p.name||''}" just arrived${p.season_match?' · matches your colors':''}`, p.code],
     style_ready:     [th?'สไตลิสต์พร้อมแล้ว':'Your stylist is ready', th?'เลือกชุดที่ใช่ให้คุณแล้ว':'We styled looks for you'],
     charity_update:  [th?'ความสวยที่มีความหมาย':'Beauty that gives back', p.caption||(th?'ขอบคุณที่เป็นส่วนหนึ่งของการให้':'Thank you for giving back')],
   };
-  return M[n.kind] || [th?'การแจ้งเตือน':'Notification', ''];
+  // fallback: อย่างน้อยดึงชื่อชุดจาก payload มาโชว์ แทนการ์ดเปล่า (กัน kind ใหม่ที่ยังไม่ map)
+  const name = p.name || p.garment || '';
+  return M[n.kind] || [th?'การแจ้งเตือน':'Notification', name?`"${name}"`:'', p.code];
 }
 function relTime(ts) {
   const th = lang === 'th';
@@ -2470,9 +2538,10 @@ async function openInbox() {
     if (list) list.innerHTML = `<div class="ix-empty">${lang==='th'?'ยังไม่มีการแจ้งเตือน':'No notifications yet'}</div>`;
   } else if (list) {
     list.innerHTML = items.map(n => {
-      const [title, sub] = notifText(n);
+      const [title, sub, code] = notifText(n);
       const unread = !n.read_at;
-      return `<div class="ix-item ${unread?'unread':''}"><i class="ix-dot ${unread?'':'read'}"></i>`
+      const tap = code ? ` ix-tap" onclick="openNotifGarment('${esc(code)}')"` : '"';
+      return `<div class="ix-item ${unread?'unread':''}${tap}><i class="ix-dot ${unread?'':'read'}"></i>`
         + `<div class="ix-body"><div class="ix-title">${title}</div>`
         + `${sub?`<div class="ix-sub">${sub}</div>`:''}<div class="ix-time">${relTime(n.created_at)}</div></div></div>`;
     }).join('');
@@ -2482,6 +2551,8 @@ async function openInbox() {
   refreshUnread();
 }
 function closeInbox() { $('#inboxMask')?.classList.remove('open'); }
+// แตะการ์ดแจ้งเตือนที่อ้างถึงชุด → ปิดกล่อง แล้วเปิดดู/เช่าชุดนั้น
+function openNotifGarment(code) { if (!code) return; closeInbox(); reRentByCode(code); }
 async function markAllRead() { await window.API.notifMarkRead?.(null); refreshUnread(); $('#inboxList')?.querySelectorAll('.ix-item.unread').forEach(el => { el.classList.remove('unread'); el.querySelector('.ix-dot')?.classList.add('read'); }); }
 async function setNotifPref(on) {
   await window.API.notifSetPref?.(on);

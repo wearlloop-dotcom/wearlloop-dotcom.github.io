@@ -298,12 +298,14 @@ window.API = (function () {
     if (CONFIG.USE_MOCK ||!customer.id) return;
     await window.meRpc('accept_terms', { p_customer: customer.id, p_version: version });
   }
-  // จองพร้อมชุดสำรอง 2 ตัว
-  async function bookWithBackups(customer, primaryCode, fromStr, toStr) {
+  // จอง — ชุดสำรองเป็นทางเลือกของลูกค้า:
+  //   wantBackup=false → p_backups:[] (ไม่เตรียมสำรอง)  ·  true → null (ระบบเลือกชุดสำรองที่เข้ากันให้)
+  async function bookWithBackups(customer, primaryCode, fromStr, toStr, wantBackup) {
     if (CONFIG.USE_MOCK) return { data: { primary: { code: primaryCode }, backups: [] } };
     const c = client();
     if (lineUid) await c.from('customer_touchpoints').insert({ line_uid: lineUid, kind:'reserve', detail: { garment: primaryCode } });
-    const { data, error } = await window.meRpc('book_with_backups', { p_customer: customer.id || null, p_primary_code: primaryCode, p_from: fromStr, p_to: toStr, p_backups: null });
+    const p_backups = wantBackup ? null : [];
+    const { data, error } = await window.meRpc('book_with_backups', { p_customer: customer.id || null, p_primary_code: primaryCode, p_from: fromStr, p_to: toStr, p_backups });
     return { data, error };
   }
   // จ่ายค่าเช่าด้วยเครดิตในกระเป๋า (หักจากบัญชี + ยืนยันจองทันที ไม่ต้องแนบสลิป)
