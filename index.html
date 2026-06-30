@@ -44,6 +44,12 @@
   /* ===== promo ===== */
   .promo{background:var(--ink);color:#fff;text-align:center;font-size:11px;letter-spacing:1px;padding:8px 12px}
 
+  /* ===== credit expiry banner ===== */
+  .expiry-banner{background:#F5ECD5;border-bottom:1px solid #D4A84B;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px}
+  .expiry-banner .eb-msg{color:#5C3D00;line-height:1.4}
+  .expiry-banner .eb-msg b{color:#3D2600}
+  .expiry-banner .eb-cta{background:#3D2600;color:#F5ECD5;border:none;border-radius:3px;padding:5px 14px;font-size:11px;letter-spacing:.6px;white-space:nowrap;cursor:pointer;flex-shrink:0}
+
   /* ===== header ===== */
   header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
   .hbar{display:flex;align-items:center;justify-content:space-between;height:58px;gap:12px}
@@ -713,6 +719,10 @@
 </div>
 
 <div class="promo" id="promo">love + loop · ส่งฟรี · ลุคใหม่ทุกเดือน</div>
+<div class="expiry-banner" id="expiryBanner" hidden>
+  <span class="eb-msg" id="expiryMsg"></span>
+  <button class="eb-cta" onclick="scrollToGrid()">ใช้เลย</button>
+</div>
 
 <header>
   <div class="contain hbar">
