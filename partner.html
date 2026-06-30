@@ -144,10 +144,37 @@
       <input id="rOrg" placeholder="เช่น Classis Studio (ไม่บังคับ)">
       <label>เบอร์โทร</label>
       <input id="rPhone" inputmode="tel" placeholder="08x-xxx-xxxx">
-      <label>พื้นที่ให้บริการ</label>
-      <input id="rArea" placeholder="เช่น กรุงเทพฯ / ออนไลน์">
-      <label>ความเชี่ยวชาญ (คั่นด้วย ,)</label>
-      <input id="rSpec" placeholder="Personal Color, จัดลุคออกงาน">
+
+      <label>ให้บริการแบบไหน</label>
+      <div class="rchips" id="rModes">
+        <label class="rchip"><input type="checkbox" value="studio"><span>ที่สตูดิโอ</span></label>
+        <label class="rchip"><input type="checkbox" value="onsite"><span>นอกสถานที่</span></label>
+        <label class="rchip"><input type="checkbox" value="online"><span>ออนไลน์</span></label>
+      </div>
+
+      <label>ค้นหาสถานที่ / สตูดิโอ</label>
+      <input id="rPlaceInput" placeholder="พิมพ์ชื่อสถานที่ แล้วเลือกจากรายการ" autocomplete="off">
+      <div class="subhint">เลือกจากแผนที่เพื่อปักพิกัด หรือกรอกรหัสไปรษณีย์ด้านล่างก็ได้</div>
+      <div class="frow">
+        <div class="field"><label>รหัสไปรษณีย์</label><input id="pZip" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="เช่น 10310" oninput="onZipInput()"></div>
+        <div class="field"><label>ตำบล/แขวง</label><select id="pTambon" onchange="onTambonPick()"><option value="">— ใส่รหัสก่อน —</option></select></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>อำเภอ/เขต</label><input id="pAmphoe" readonly placeholder="เติมอัตโนมัติ"></div>
+        <div class="field"><label>จังหวัด</label><input id="pProvince" readonly placeholder="เติมอัตโนมัติ"></div>
+      </div>
+
+      <label>ความเชี่ยวชาญ</label>
+      <div class="rchips" id="rSpecs">
+        <label class="rchip"><input type="checkbox" value="Personal Color"><span>Personal Color</span></label>
+        <label class="rchip"><input type="checkbox" value="จัดลุคออกงาน"><span>จัดลุคออกงาน</span></label>
+        <label class="rchip"><input type="checkbox" value="วิเคราะห์รูปร่าง"><span>วิเคราะห์รูปร่าง</span></label>
+        <label class="rchip"><input type="checkbox" value="มิกซ์แอนด์แมตช์"><span>มิกซ์แอนด์แมตช์</span></label>
+        <label class="rchip"><input type="checkbox" value="แต่งหน้า"><span>แต่งหน้า</span></label>
+        <label class="rchip"><input type="checkbox" value="ช้อปปิ้งไกด์"><span>ช้อปปิ้งไกด์</span></label>
+      </div>
+      <input id="rSpecOther" placeholder="ความเชี่ยวชาญอื่น ๆ (คั่นด้วย , )">
+
       <button class="btn dark" id="rSubmit" onclick="submitReg()" style="margin-top:14px;width:100%">ยืนยันสมัคร + เข้าพอร์ทัล</button>
       <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5">การกดสมัครถือว่ายอมรับเงื่อนไขการเป็นพาร์ทเนอร์สไตลิสต์ของ LLOOP — บัญชี LINE ที่เปิดหน้านี้จะถูกผูกเป็นพาร์ทเนอร์ทันที</p>
     </div>
@@ -504,14 +531,95 @@
   }
 
   // ===== สมัครเป็นพาร์ทเนอร์เอง (เมื่อ owner เปิดสวิตช์) =====
-  function showReg(){ $('regCta').style.display='none'; $('regForm').style.display='block'; $('rName').focus(); }
+  function showReg(){ $('regCta').style.display='none'; $('regForm').style.display='block'; $('rName').focus(); loadPartnerMaps(); }
+
+  // ---- ที่อยู่: เติม ตำบล/อำเภอ/จังหวัด จากรหัสไปรษณีย์ (reuse th-postal.json) ----
+  let _thPostal=null,_thPostalLoading=null,_zipEntries=[];
+  function loadThPostal(){ if(_thPostal)return Promise.resolve(_thPostal); if(_thPostalLoading)return _thPostalLoading;
+    _thPostalLoading=fetch('th-postal.json').then(r=>r.ok?r.json():{}).then(d=>{_thPostal=d||{};return _thPostal;}).catch(()=>{_thPostal={};return _thPostal;}); return _thPostalLoading; }
+  async function onZipInput(){
+    const zi=$('pZip'); if(!zi)return;
+    let z=(zi.value||'').replace(/\D/g,'').slice(0,5); if(zi.value!==z) zi.value=z;
+    const sel=$('pTambon'),am=$('pAmphoe'),pv=$('pProvince');
+    if(z.length<5){ _zipEntries=[]; if(sel)sel.innerHTML='<option value="">— ใส่รหัสก่อน —</option>'; if(am)am.value=''; if(pv)pv.value=''; return; }
+    const db=await loadThPostal(); _zipEntries=db[z]||[];
+    if(!_zipEntries.length){ if(sel)sel.innerHTML='<option value="">ไม่พบรหัสนี้ — พิมพ์ที่อยู่จากแผนที่ได้</option>'; if(am)am.value=''; if(pv)pv.value=''; return; }
+    const multi=new Set(_zipEntries.map(e=>e[1])).size>1;
+    if(sel) sel.innerHTML='<option value="">เลือกตำบล/แขวง</option>'+_zipEntries.map((e,i)=>'<option value="'+i+'">'+e[2]+(multi?(' · '+e[1]):'')+'</option>').join('');
+    if(_zipEntries.length===1){ sel.value='0'; onTambonPick(); }
+    else if(!multi){ if(am)am.value=_zipEntries[0][1]; if(pv)pv.value=_zipEntries[0][0]; }
+  }
+  function onTambonPick(){ const sel=$('pTambon'); if(!sel||sel.value==='')return; const e=_zipEntries[+sel.value]; if(!e)return; if($('pAmphoe'))$('pAmphoe').value=e[1]; if($('pProvince'))$('pProvince').value=e[0]; }
+  function regArea(){
+    const z=(($('pZip')&&$('pZip').value)||'').trim();
+    const sel=$('pTambon'); let tb=''; if(sel&&sel.value!==''&&_zipEntries[+sel.value]) tb=_zipEntries[+sel.value][2];
+    const am=(($('pAmphoe')&&$('pAmphoe').value)||'').trim(), pv=(($('pProvince')&&$('pProvince').value)||'').trim();
+    const loc=[tb&&('ต.'+tb),am&&('อ.'+am),pv&&('จ.'+pv),z].filter(Boolean).join(' ');
+    const place=(window.PARTNER_PLACE&&window.PARTNER_PLACE.name)||'';
+    return [place,loc].filter(Boolean).join(' · ');
+  }
+
+  // ---- map picker (Google Places ใหม่) — โหลดตอนเปิดฟอร์ม, ปักพิกัด + ชื่อสถานที่ (degrade เงียบถ้าไม่มี key) ----
+  window.PARTNER_PLACE=null; let _mapsTried=false;
+  function loadPartnerMaps(){
+    if(_mapsTried||(window.google&&window.google.maps))return; _mapsTried=true;
+    const k=(window.CONFIG&&window.CONFIG.GOOGLE_MAPS_KEY)||''; if(!k)return;
+    const s=document.createElement('script'); s.async=true;
+    s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(k)+'&libraries=places&loading=async&callback=initPartnerPlace';
+    document.head.appendChild(s);
+  }
+  window.initPartnerPlace=async function(){
+    try{
+      const input=$('rPlaceInput'); if(!input||!window.google||!google.maps||!google.maps.importLibrary)return;
+      const lib=await google.maps.importLibrary('places'); const AS=lib.AutocompleteSuggestion, TK=lib.AutocompleteSessionToken;
+      if(!AS)return; let token=new TK();
+      const box=document.createElement('div'); box.className='pacbox'; box.style.display='none';
+      input.insertAdjacentElement('afterend',box);
+      const clear=()=>{box.style.display='none';box.innerHTML='';};
+      let timer=null;
+      input.addEventListener('input',function(){
+        window.PARTNER_PLACE=null; clearTimeout(timer); const q=input.value.trim();
+        if(q.length<2){clear();return;}
+        timer=setTimeout(async function(){
+          try{
+            const res=await AS.fetchAutocompleteSuggestions({input:q,sessionToken:token,includedRegionCodes:['th'],language:'th',region:'th'});
+            const sugg=(res&&res.suggestions)||[]; if(!sugg.length){clear();return;}
+            box.innerHTML='';
+            sugg.slice(0,5).forEach(function(s){
+              const pred=s.placePrediction; if(!pred)return;
+              const label=(pred.text&&pred.text.text)?pred.text.text:'';
+              const row=document.createElement('div'); row.className='pacitem'; row.textContent=label;
+              row.addEventListener('mousedown',async function(ev){
+                ev.preventDefault(); clear();
+                try{ const place=pred.toPlace(); await place.fetchFields({fields:['displayName','location','id']}); token=new TK();
+                  input.value=place.displayName||label;
+                  window.PARTNER_PLACE={ name:place.displayName||label, lat:place.location?place.location.lat():null, lng:place.location?place.location.lng():null, place_id:place.id||null };
+                }catch(e){ window.PARTNER_PLACE=null; }
+              });
+              box.appendChild(row);
+            });
+            box.style.display='block';
+          }catch(e){ clear(); }
+        },280);
+      });
+      document.addEventListener('click',function(e){ if(e.target!==input&&!box.contains(e.target)) clear(); });
+    }catch(e){}
+  };
+
   async function submitReg(){
     const name=(str('rName')||'').trim();
     if(!name){ toast('กรอกชื่อก่อนค่ะ'); $('rName').focus(); return; }
+    const modes=[...$('rModes').querySelectorAll('input:checked')].map(i=>i.value);
+    const specs=[...$('rSpecs').querySelectorAll('input:checked')].map(i=>i.value)
+      .concat(((str('rSpecOther')||'').split(',').map(s=>s.trim()).filter(Boolean)));
+    const pl=window.PARTNER_PLACE||{};
     const btn=$('rSubmit'); btn.disabled=true; const t0=btn.textContent; btn.textContent='กำลังสมัคร…';
     let res;
     try{ res = await window.meRpc('partner_self_register', { p_data:{
-      name, org:str('rOrg')||'', phone:str('rPhone')||'', area:str('rArea')||'', specialties:str('rSpec')||'' } }); }
+      name, org:str('rOrg')||'', phone:str('rPhone')||'',
+      area:regArea(), postal:(($('pZip')&&$('pZip').value)||'').trim(),
+      place_name:pl.name||'', lat:(pl.lat!=null?String(pl.lat):''), lng:(pl.lng!=null?String(pl.lng):''),
+      service_modes:modes, specialties:specs } }); }
     catch(e){ res={ data:null, error:{ message:(e&&e.message)||'error' } }; }
     btn.disabled=false; btn.textContent=t0;
     const { data, error } = res || {};
