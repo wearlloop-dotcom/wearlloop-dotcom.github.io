@@ -113,7 +113,7 @@ function setLang(l) {
   $('#langEN')?.classList.toggle('on', l ==='en');
   closeDetail(); closeProfile();
   applyStatic();
-  renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderGrid();
+  renderEvent(); renderCatnav(); renderChips(); renderDiscover(); renderFilters(); renderGrid();
   $('#vresult').classList.remove('show');
 }
 
@@ -297,7 +297,7 @@ function notifyBrand(key, name) {
   toast(lang === 'th' ? `บันทึกแล้ว — จะแจ้งเมื่อ ${name} เข้าคลัง` : `Saved — we'll tell you when ${name} arrives`);
 }
 
-function setOccasion(t2) { fOccasion = t2; renderCatnav(); renderChips(); renderGrid(); }
+function setOccasion(t2) { fOccasion = t2; renderCatnav(); renderChips(); renderDiscover(); renderGrid(); }
 function setColor(h) { fColor = (fColor === h? null : h); renderFilters(); renderGrid(); }
 function setBrand(b) { fBrand = b; renderBrandChips(); renderGrid(); }
 function toggleTone() { fToneOnly =!fToneOnly; renderCatnav(); renderFilters(); renderGrid(); }
@@ -3162,7 +3162,7 @@ async function boot() {
     CUSTOMER._taste = await window.API.myTaste?.();  // รสนิยมที่เรียนจากพฤติกรรม → ใช้ใน personalScore
   } catch (e) { /**/ } }
   loadCart(); renderCartBtn();   // กู้ตะกร้าที่ค้างไว้ (กัน refresh แล้วของหาย)
-  renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();
+  renderEvent(); renderCatnav(); renderChips(); renderDiscover(); renderFilters(); renderDatebar(); renderGrid();
   if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
   const vd = $('#venueDate'); if (vd) { vd.min = todayStr(); vd.value = gUseDate || ''; }
   refreshStylistQuota();
