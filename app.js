@@ -3635,7 +3635,7 @@ function maybeOnboard() {
   if (!loggedIn) return;
   if (sessionStorage.getItem('lloop_onboarded')) return;
   if ($('#termsOverlay').classList.contains('open')) return; // รอยอมรับ terms ก่อน
-  const incomplete =!c.phone && c.height_cm == null &&!c.address; // ยังไม่เคยกรอก
+  const incomplete =!c.phone ||!c.address; // ยังกรอกไม่ครบช่องจำเป็น (เบอร์/ที่อยู่จัดส่ง) → ชวนกรอกต่อ
   if (!incomplete) return;
   sessionStorage.setItem('lloop_onboarded','1');
   setTimeout(() => openProfile(true), 450);

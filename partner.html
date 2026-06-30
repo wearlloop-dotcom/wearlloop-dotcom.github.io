@@ -14,19 +14,37 @@
   .bar h1{font-family:var(--display);font-size:18px;font-weight:700}
   .bar .tag{font-size:12px;background:#3a3a3a;padding:3px 10px;border-radius:20px}
   .wrap{max-width:660px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;scroll-margin-top:64px}
-  .card h2{font-family:var(--display);font-size:15px;margin-bottom:2px}
-  .card .sub{font-size:12px;color:var(--muted);margin-bottom:10px}
-  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-weight:500}
-  input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 12px;font-size:16px;font-family:var(--sans)}
-  textarea{min-height:60px;resize:vertical}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 18px 22px;scroll-margin-top:64px}
+  .card h2{font-family:var(--display);font-size:15px;margin-bottom:3px}
+  .card .sub{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+  /* กลุ่มหัวข้อย่อยในการ์ดเดียว — แบ่งสายตาไม่ให้เป็นกำแพงช่องกรอก */
+  .grp{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+  .grp.first{margin-top:4px;padding-top:0;border-top:none}
+  .grp .gt{font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.3px;margin-bottom:2px}
+  label{display:block;font-size:13px;color:var(--muted);margin:14px 0 5px;font-weight:500}
+  .grp .gt + label{margin-top:6px}
+  input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-size:16px;font-family:var(--sans);background:#fff}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ok)}
+  textarea{min-height:62px;resize:vertical;line-height:1.5}
   .scan{display:flex;gap:10px}.scan input{flex:1;text-transform:uppercase;font-size:20px;letter-spacing:2px}
-  .btn{border:none;border-radius:9px;padding:13px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .btn{border:none;border-radius:10px;padding:13px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--sans)}
   .btn.dark{background:var(--ink);color:#fff}.btn.ok{background:var(--ok);color:#fff;width:100%;padding:16px}
-  .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-  .found{background:#E4F0EC;color:#04342C;border-radius:9px;padding:10px 14px;font-weight:600;margin-top:10px;display:none}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 10px}
+  /* ตารางวัดตัว — ช่องตัวเลขสั้น จัด 3 คอลัมน์ เว้นแถวให้หายใจ ป้ายไม่ชนกัน */
+  .gm{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
+  .gm>div{min-width:0}.gm label{margin:0 0 5px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gm input{padding:11px 8px;text-align:center}
+  .found{background:#E4F0EC;color:#04342C;border-radius:10px;padding:10px 14px;font-weight:600;margin-top:10px;display:none}
   .found.show{display:block}
+  /* ตัวจริงของลูกค้า (LINE OA) — โชว์รูป+ชื่อจริง ตอนค้นเจอ */
+  .chero{display:none;align-items:center;gap:14px;background:linear-gradient(135deg,#EAF3EF,#E1EFE7);border:1px solid #C6E0D4;border-radius:14px;padding:14px 16px;margin-top:12px}
+  .chero.show{display:flex}
+  .chero .av{width:60px;height:60px;border-radius:50%;flex:none;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.13);background:var(--ok) center/cover no-repeat;color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:25px;font-weight:700}
+  .chero .ci{min-width:0}
+  .chero .cn{font-family:var(--display);font-weight:700;font-size:19px;color:#063a30;line-height:1.2;word-break:break-word}
+  .chero .cm{font-size:12.5px;color:#3c6258;margin-top:3px}
+  .chero .cm b{color:#063a30}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
   .chips label{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:14px;color:var(--ink);border:1.5px solid var(--line);border-radius:20px;padding:7px 12px;cursor:pointer}
   .chips input{width:auto}
@@ -72,8 +90,9 @@
   .hello b{color:var(--ink)}
   /* ลูกค้าของฉัน */
   .clients{display:flex;flex-direction:column;gap:8px;margin-top:4px}
-  .clientrow{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:#fff}
+  .clientrow{display:flex;align-items:center;gap:11px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff}
   .clientrow:hover{border-color:var(--ink)}
+  .clientrow .av2{width:40px;height:40px;border-radius:50%;flex:none;background:var(--soft) center/cover no-repeat;color:var(--muted);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:16px;font-weight:700}
   .clientrow .nm{font-weight:600;font-size:14px}
   .clientrow .cd{font-size:12px;color:var(--muted)}
   .clientrow .hl{font-size:12px;color:var(--muted);margin-left:auto;text-align:right;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -84,6 +103,21 @@
   .jump button:hover{border-color:var(--ink)}
   .draftnote{background:#EEF3FB;border:1px solid #C9D7EC;border-radius:9px;padding:9px 12px;font-size:13px;color:#2c4a6e;margin-top:10px;display:none}
   .draftnote.show{display:block}
+  .histbox{display:none;margin-top:10px}
+  .histbox.show{display:block}
+  .histbox details{background:#FAF7F2;border:1px solid #E6DDCE;border-radius:11px;padding:4px 14px}
+  .histbox summary{cursor:pointer;font-weight:700;color:#5b4a33;padding:8px 0;font-size:14px;list-style:none}
+  .histbox summary::-webkit-details-marker{display:none}
+  .histbox summary:before{content:'▸ ';color:#a9926b}
+  .histbox details[open] summary:before{content:'▾ '}
+  .hv-list{padding-bottom:8px;display:flex;flex-direction:column;gap:8px}
+  .hv{border-left:3px solid #D8C7A6;padding:6px 0 6px 12px}
+  .hv-top{display:flex;align-items:center;gap:8px}
+  .hv-top b{font-size:13px;color:#3a3024}
+  .hv-now{background:#2E5D4F;color:#fff;font-size:10px;font-weight:700;border-radius:6px;padding:1px 7px}
+  .hv-hl{font-size:13.5px;color:#1a1a1a;margin-top:2px}
+  .hv-by{font-size:12px;color:#7c6a4f;margin-top:1px}
+  .hv-m{font-size:12px;color:#555;margin-top:1px}
   /* แท็บสลับมุมมองพอร์ทัล */
   .pnav{position:sticky;top:0;z-index:6;display:flex;gap:6px;overflow-x:auto;background:#F2F1EE;padding:8px 0;margin:2px 0 6px}
   .pnav button{flex:none;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:8px 16px;font-size:14px;color:var(--ink);cursor:pointer;font-family:var(--sans);white-space:nowrap}
@@ -214,6 +248,8 @@
       <button class="btn dark" onclick="lookup()">ค้นหา</button>
     </div>
     <div class="found" id="found"></div>
+    <div class="chero" id="chero"><div class="av" id="chero_av"></div><div class="ci"><div class="cn" id="chero_name"></div><div class="cm" id="chero_meta"></div></div></div>
+    <div class="histbox" id="histbox"></div>
     <div class="draftnote" id="draftnote"></div>
   </div>
 
@@ -261,15 +297,19 @@
       <div><label>Soul Color</label><input id="soul_color" placeholder="สีประจำตัว"></div>
     </div>
     <div class="g3">
-      <div><label>Undertone</label><input id="undertone" placeholder="cool/warm"></div>
-      <div><label>Contrast</label><input id="contrast" placeholder="high/low"></div>
-      <div><label>Depth</label><input id="depth" placeholder="light/deep"></div>
+      <div><label>Undertone</label><input id="undertone" list="dl_undertone" placeholder="cool/warm"></div>
+      <div><label>Contrast</label><input id="contrast" list="dl_contrast" placeholder="high/low"></div>
+      <div><label>Depth</label><input id="depth" list="dl_depth" placeholder="light/deep"></div>
     </div>
     <div class="g3">
-      <div><label>Clarity / Chroma</label><input id="clarity" placeholder="bright/muted/soft"></div>
+      <div><label>Clarity / Chroma</label><input id="clarity" list="dl_clarity" placeholder="bright/muted/soft"></div>
       <div><label>สีตาธรรมชาติ</label><input id="natural_eye" placeholder="น้ำตาลเข้ม/อ่อน"></div>
       <div><label>สีผมธรรมชาติ</label><input id="natural_hair" placeholder=""></div>
     </div>
+    <datalist id="dl_undertone"><option value="Warm"></option><option value="Cool"></option><option value="Neutral"></option></datalist>
+    <datalist id="dl_contrast"><option value="High"></option><option value="Medium"></option><option value="Low"></option></datalist>
+    <datalist id="dl_depth"><option value="Light"></option><option value="Medium"></option><option value="Deep"></option></datalist>
+    <datalist id="dl_clarity"><option value="Bright"></option><option value="Muted"></option><option value="Soft"></option></datalist>
     <div class="g2">
       <div><label>โทนผิวจริง</label><input id="skin_tone" placeholder="fair/medium/tan, อมชมพู/อมเหลือง"></div>
       <div><label>สีกลาง (neutrals) ที่ใช่</label><input id="neutrals" placeholder="ครีม/เทาอุ่น/น้ำตาล"></div>
@@ -335,27 +375,37 @@
 
   <div class="card" id="sec-measure">
     <h2>วัดตัว (ละเอียด)</h2>
-    <div class="sub">หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก</div>
-    <div class="g3">
-      <div><label>ส่วนสูง (ซม.)</label><input id="height_cm" type="number"></div>
-      <div><label>น้ำหนัก (กก.)</label><input id="weight_kg" type="number"></div>
+    <div class="sub">หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก · กรอกเท่าที่มี เว้นว่างได้</div>
+    <div class="grp first"><div class="gt">พื้นฐาน</div>
+    <div class="gm">
+      <div><label>ส่วนสูง (ซม.)</label><input id="height_cm" type="number" inputmode="numeric"></div>
+      <div><label>น้ำหนัก (กก.)</label><input id="weight_kg" type="number" inputmode="numeric"></div>
       <div><label>ไซส์เดรส</label><input id="dress_size" placeholder="S/M/L"></div>
-      <div><label>รอบอก</label><input id="bust_in" type="number"></div>
-      <div><label>ใต้อก</label><input id="underbust_in" type="number"></div>
+    </div></div>
+    <div class="grp"><div class="gt">ช่วงบน</div>
+    <div class="gm">
+      <div><label>รอบอก</label><input id="bust_in" type="number" inputmode="decimal"></div>
+      <div><label>ใต้อก</label><input id="underbust_in" type="number" inputmode="decimal"></div>
       <div><label>คัพ</label><input id="cup"></div>
-      <div><label>รอบเอว</label><input id="waist_in" type="number"></div>
-      <div><label>สะโพก</label><input id="hip_in" type="number"></div>
-      <div><label>สะโพกบน</label><input id="high_hip_in" type="number"></div>
-      <div><label>ไหล่</label><input id="shoulder_in" type="number"></div>
-      <div><label>ไหล่ถึงเอว</label><input id="shoulder_to_waist_in" type="number"></div>
-      <div><label>ความยาวหลัง</label><input id="back_length_in" type="number"></div>
-      <div><label>ความยาวแขน</label><input id="arm_length_in" type="number"></div>
-      <div><label>รอบต้นแขน</label><input id="bicep_in" type="number"></div>
-      <div><label>รอบคอ</label><input id="neck_in" type="number"></div>
-      <div><label>ต้นขา</label><input id="thigh_in" type="number"></div>
-      <div><label>เป้า (inseam)</label><input id="inseam_in" type="number"></div>
+      <div><label>ไหล่</label><input id="shoulder_in" type="number" inputmode="decimal"></div>
+      <div><label>ไหล่ถึงเอว</label><input id="shoulder_to_waist_in" type="number" inputmode="decimal"></div>
+      <div><label>รอบคอ</label><input id="neck_in" type="number" inputmode="decimal"></div>
+    </div></div>
+    <div class="grp"><div class="gt">ช่วงล่าง</div>
+    <div class="gm">
+      <div><label>รอบเอว</label><input id="waist_in" type="number" inputmode="decimal"></div>
+      <div><label>สะโพก</label><input id="hip_in" type="number" inputmode="decimal"></div>
+      <div><label>สะโพกบน</label><input id="high_hip_in" type="number" inputmode="decimal"></div>
+      <div><label>ต้นขา</label><input id="thigh_in" type="number" inputmode="decimal"></div>
+      <div><label>เป้า (inseam)</label><input id="inseam_in" type="number" inputmode="decimal"></div>
       <div><label>เบอร์รองเท้า</label><input id="shoe_size"></div>
-    </div>
+    </div></div>
+    <div class="grp"><div class="gt">แขน-หลัง</div>
+    <div class="gm">
+      <div><label>ความยาวแขน</label><input id="arm_length_in" type="number" inputmode="decimal"></div>
+      <div><label>รอบต้นแขน</label><input id="bicep_in" type="number" inputmode="decimal"></div>
+      <div><label>ความยาวหลัง</label><input id="back_length_in" type="number" inputmode="decimal"></div>
+    </div></div>
   </div>
 
   <div class="card" id="sec-style">
@@ -643,7 +693,11 @@
       box.innerHTML='';
       arr.forEach(c=>{
         const row=document.createElement('div'); row.className='clientrow';
-        row.innerHTML='<div><div class="nm">'+(c.name||'ลูกค้า')+'</div><div class="cd">'+(c.code||'')+'</div></div>'+
+        const nm=c.name||'ลูกค้า';
+        const av=c.picture
+          ? '<div class="av2" style="background-image:url(&quot;'+c.picture+'&quot;)"></div>'
+          : '<div class="av2">'+(nm.trim().charAt(0).toUpperCase()||'?')+'</div>';
+        row.innerHTML=av+'<div><div class="nm">'+nm+'</div><div class="cd">'+(c.code||'')+'</div></div>'+
           '<div class="hl">'+(c.headline||'')+'</div>';
         row.onclick=()=>{ $('code').value=c.code; lookup(); window.scrollTo({top:0,behavior:'smooth'}); };
         box.appendChild(row);
@@ -835,14 +889,25 @@
   function onType12(){ autoSeason(); applySeasonPreset(); }
   function jumpTo(id){ const el=$(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
 
+  // ===== ตัวจริงของลูกค้า (LINE OA) — โชว์รูป+ชื่อจริงตอนค้นเจอ =====
+  function renderHero(name, pic, hasProfile){
+    const av=$('chero_av');
+    if(pic){ av.style.backgroundImage='url("'+pic+'")'; av.textContent=''; }
+    else { av.style.backgroundImage='none'; av.textContent=(name||'?').trim().charAt(0).toUpperCase()||'?'; }
+    $('chero_name').textContent=name||(plang==='en'?'Client':'ลูกค้า');
+    $('chero_meta').innerHTML=tr('รหัส')+' <b>'+code+'</b> · '+(hasProfile?tr('มีผลวิเคราะห์เดิม (บันทึกทับได้)'):tr('ลูกค้าใหม่'));
+    $('chero').className='chero show';
+  }
+  function hideHero(){ const h=$('chero'); if(h) h.className='chero'; }
+
   async function lookup(){
     const c=$('code').value.trim().toUpperCase(); if(!c){toast('ใส่รหัสก่อนค่ะ');return;}
     const { data, error } = await sb.rpc('partner_portal_lookup',{ p_code: c });
-    if(error){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent=error.message; return; }
-    if(data && data.error==='not_partner'){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='สิทธิ์ของคุณยังไม่พร้อมใช้พอร์ทัล'; return; }
-    if(!data||!data.found){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='ไม่พบรหัส '+c; $('form').className=''; return; }
-    code=c; $('found').className='found show'; $('found').style.color='';
-    $('found').textContent='พบลูกค้า: '+data.name+(data.has_profile?' (มีผลเดิม — บันทึกทับได้)':''); $('form').className='on';
+    if(error){ hideHero(); $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent=error.message; return; }
+    if(data && data.error==='not_partner'){ hideHero(); $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='สิทธิ์ของคุณยังไม่พร้อมใช้พอร์ทัล'; return; }
+    if(!data||!data.found){ hideHero(); $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='ไม่พบรหัส '+c; $('form').className=''; return; }
+    code=c; $('found').className='found';   // ใช้ hero โชว์ตัวจริงแทนกล่องเขียวเดิม
+    renderHero(data.name, data.picture, data.has_profile); $('form').className='on';
     // ดึงข้อมูลเดิมมาเติมในฟอร์ม (ถ้ามี) เพื่อไม่ต้องพิมพ์ใหม่
     resetForm();
     try{
@@ -851,6 +916,33 @@
     }catch(e){ /* ลูกค้าใหม่ / ยังไม่มีผล — ปล่อยฟอร์มว่าง */ }
     // ถ้ามีฉบับร่างที่ยังไม่บันทึกของรหัสนี้ค้างในเครื่อง → ถามว่าจะกู้คืนไหม
     maybeRestoreDraft(c);
+    // ประวัติการตรวจที่ผ่านมา (ทุกครั้งที่เคยกรอก — ไม่ทับกัน)
+    loadHistory(c);
+  }
+  // โหลด+แสดงไทม์ไลน์ประวัติการตรวจของลูกค้า
+  async function loadHistory(c){
+    const box=$('histbox'); if(!box) return; box.className='histbox'; box.innerHTML='';
+    let visits=[];
+    try{
+      const { data } = await sb.rpc('partner_portal_history',{ p_code:c });
+      if(data && data.found && Array.isArray(data.visits)) visits=data.visits;
+    }catch(e){ return; }
+    if(!visits.length) return;  // ลูกค้าใหม่ — ยังไม่มีประวัติ
+    const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    const rows=visits.map((v,i)=>{
+      const m=v.measured||{}, mm=[];
+      if(m.bust_in)mm.push('อก '+m.bust_in); if(m.waist_in)mm.push('เอว '+m.waist_in);
+      if(m.hip_in)mm.push('สะโพก '+m.hip_in); if(m.dress_size)mm.push('ไซส์ '+m.dress_size);
+      const who=[v.partner,v.analyst].filter(Boolean).join(' · ');
+      return '<div class="hv">'
+        +'<div class="hv-top"><b>'+esc(v.at||'')+'</b>'+(i===0?'<span class="hv-now">ล่าสุด</span>':'')+'</div>'
+        +(v.headline?'<div class="hv-hl">'+esc(v.headline)+'</div>':'')
+        +(who?'<div class="hv-by">'+esc(who)+'</div>':'')
+        +(mm.length?'<div class="hv-m">'+esc(mm.join(' · '))+'</div>':'')
+        +'</div>';
+    }).join('');
+    box.className='histbox show';
+    box.innerHTML='<details><summary>ประวัติการตรวจ ('+visits.length+' ครั้ง)</summary><div class="hv-list">'+rows+'</div></details>';
   }
   // ล้างฟอร์มก่อนเติมข้อมูลใหม่ (กันค่าค้างจากลูกค้าคนก่อน)
   function resetForm(){
@@ -961,7 +1053,7 @@
     if(res==='not_found'){ toast('ไม่พบลูกค้า'); return; }
     try{ localStorage.removeItem(draftKey(code)); }catch(e){}
     toast('บันทึกแล้ว — ลูกค้าได้สรุปสไตล์ในแอป');
-    $('form').className=''; $('code').value=''; $('found').className='found'; $('draftnote').className='draftnote'; code=null;
+    $('form').className=''; $('code').value=''; $('found').className='found'; hideHero(); $('draftnote').className='draftnote'; if($('histbox')){$('histbox').className='histbox';$('histbox').innerHTML='';} code=null;
     loadClients();
   }
   $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') lookup(); });
@@ -1053,6 +1145,7 @@
     'ยังไม่มีลูกค้าที่บันทึก — ค้นหาด้วยรหัสด้านล่างเพื่อเริ่ม':'No saved clients yet — search by code below to start',
     'ค้นหาลูกค้า — รหัสจากแอป LLOOP':'Find client — code from the LLOOP app',
     'ค้นหา':'Search',
+    'รหัส':'Code', 'มีผลวิเคราะห์เดิม (บันทึกทับได้)':'has a previous analysis (you can overwrite)', 'ลูกค้าใหม่':'new client',
     'บริการ':'Service', 'สี':'Colour', 'หน้า':'Face', 'หุ่น':'Body', 'วัดตัว':'Measure', 'สไตล์':'Style', 'รูป/สรุป':'Photos',
     'ข้อมูลการให้บริการ':'Service details',
     'บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ':'Record what service and when — used for follow-up and receipts',
