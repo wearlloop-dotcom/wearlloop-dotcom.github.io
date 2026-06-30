@@ -189,6 +189,17 @@
 
   function addDays(iso, n){ const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
 
+  // ข้อมูลในระบบเก็บเป็น en — แปลเป็นไทยให้ตรงโทนแบรนด์ (ไม่เจอในตาราง = คงคำเดิม)
+  const OCC={wedding_guest:'งานแต่ง',wedding:'งานแต่ง',engagement:'งานหมั้น',dinner:'ดินเนอร์',party:'งานปาร์ตี้',
+    cocktail:'ค็อกเทล',gala:'กาล่า',graduation:'รับปริญญา',prom:'พรอม',birthday:'งานวันเกิด',work:'ออฟฟิศ',
+    casual:'ลำลอง',date:'เดต',songkran:'สงกรานต์',newyear:'ปีใหม่',temple:'ทำบุญ',concert:'คอนเสิร์ต',photoshoot:'ถ่ายรูป'};
+  const COL={navy:'กรมท่า',black:'ดำ',white:'ขาว',cream:'ครีม',ivory:'งาช้าง','off white':'ขาวนวล','royal blue':'น้ำเงินสด',
+    blue:'น้ำเงิน',red:'แดง',burgundy:'ไวน์แดง',maroon:'แดงเลือดหมู',pink:'ชมพู',blush:'ชมพูนวล',nude:'นู้ด',beige:'เบจ',
+    green:'เขียว',sage:'เขียวเซจ',emerald:'เขียวมรกต',olive:'เขียวมะกอก',brown:'น้ำตาล',terracotta:'ดินเผา',
+    gold:'ทอง',champagne:'แชมเปญ',silver:'เงิน',gray:'เทา',grey:'เทา',yellow:'เหลือง',mustard:'มัสตาร์ด',
+    orange:'ส้ม',purple:'ม่วง',lavender:'ลาเวนเดอร์',lilac:'ม่วงไลแลค',teal:'เขียวน้ำทะเล'};
+  const th=(m,s)=> m[String(s||'').trim().toLowerCase()] || s;
+
   let SB=null;
   function sb(){ if(!SB && window.supabase && window.CONFIG) SB=window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return SB; }
 
@@ -203,13 +214,13 @@
     set('f-name', g.name||g.code);
     set('f-meta', [g.brand,g.code].filter(Boolean).join(' · '));
     set('f-photo', (Array.isArray(g.photos)&&g.photos[0]) || g.photo || '');
-    set('f-colorname', g.color_name||'');
+    set('f-colorname', th(COL, g.color_name)||'');
     if(g.color_hex) set('f-colorhex', g.color_hex);
     const range=(a,b)=> (a!=null&&b!=null)?`${a}–${b}`:(a!=null?String(a):'');
     set('f-bust', range(g.bust_min_in,g.bust_max_in));
     set('f-waist', range(g.waist_min_in,g.waist_max_in));
     set('f-len', g.length_cm!=null?String(g.length_cm):'');
-    set('f-for', (g.occasion_tags||[]).join(' · '));
+    set('f-for', (g.occasion_tags||[]).map(t=>th(OCC,t)).join(' · '));
     set('f-price', g.rental_price!=null?g.rental_price:'');
 
     const today=new Date().toISOString().slice(0,10);
