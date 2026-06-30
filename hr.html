@@ -117,10 +117,16 @@
       <div class="g3">
         <div><label>ตำแหน่ง</label><select id="role">
           <option value="">— เลือก —</option>
-          <option value="admin">แอดมิน</option><option value="stylist">สไตลิสต์</option>
-          <option value="laundry">ซัก/ดูแลชุด</option><option value="repair">ช่างซ่อม</option>
-          <option value="shipping">จัดส่ง</option><option value="sales">ขาย</option>
-          <option value="owner">เจ้าของ/ผู้บริหาร</option></select></div>
+          <option value="owner">เจ้าของ/ผู้บริหาร</option>
+          <option value="manager">ผู้จัดการ (เห็นทุกแผนก)</option>
+          <option value="hr_admin">หัวหน้าฝ่ายบุคคล (อนุมัติลา/เบิก/ประกาศ)</option>
+          <option value="care">ดูแลชุด/ซัก/QC/ซ่อม</option>
+          <option value="stock">สต๊อก/เก็บเข้าช่อง/รับเข้า</option>
+          <option value="marketing">การตลาด/คอนเทนต์/ไลฟ์</option>
+          <option value="accounting">บัญชี/การเงิน</option>
+          <option value="stylist">สไตลิสต์</option>
+          <option value="sales">ขาย</option>
+          <option value="admin">แอดมิน</option></select></div>
         <div><label>แผนก</label><input id="department" placeholder="เช่น คลัง/ดูแลชุด"></div>
         <div><label>ประเภทจ้าง</label><select id="emp_type">
           <option value="fulltime">ประจำ</option><option value="parttime">พาร์ทไทม์</option>
@@ -223,7 +229,7 @@
   let curStatus='', curEmp=null, curKpiPeriod=thisPeriod();
   function thisPeriod(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2500);}
-  const ROLE_TH={admin:'แอดมิน',stylist:'สไตลิสต์',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง',sales:'ขาย',owner:'เจ้าของ'};
+  const ROLE_TH={owner:'เจ้าของ',manager:'ผู้จัดการ',hr_admin:'หัวหน้าบุคคล',care:'ดูแลชุด',stock:'สต๊อก',marketing:'การตลาด',accounting:'บัญชี',stylist:'สไตลิสต์',sales:'ขาย',admin:'แอดมิน',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง'};
   const ST_TH={applicant:'ผู้สมัคร',interview:'สัมภาษณ์',offer:'เสนองาน',hired:'จ้างแล้ว',probation:'ทดลองงาน',active:'ทำงาน',suspended:'พักงาน',resigned:'ลาออก',rejected:'ไม่ผ่าน'};
   function pill(s){return `<span class="pill ${s}">${ST_TH[s]||s}</span>`;}
 
@@ -336,6 +342,8 @@
           <div class="u">${verifyUrl}</div>
           <div class="row-btns">
             <button class="btn ghost sm" onclick="cp('${verifyUrl}')">คัดลอกลิงก์</button>
+            ${e.verified?'':`<button class="btn ghost sm" onclick="resendVerify('${e.id}')">ส่งลิงก์ใหม่</button>
+            <button class="btn ghost sm" onclick="bindUid('${e.id}')">ผูก UID เอง</button>`}
             <span class="hint" style="align-self:center">${e.verified?'✓ ยืนยันแล้ว — เข้าทำงานได้':'⚠ ยังไม่ยืนยัน — ยังเข้าทำงานไม่ได้'}</span>
           </div>
         </div>`:''}`;
@@ -549,6 +557,23 @@
     if(data&&data.error){toast(data.hint||('ไม่สำเร็จ: '+data.error));return;}
     toast('เปลี่ยนสถานะเป็น '+(ST_TH[s]||s)+(data.emp_no?(' · รหัส '+data.emp_no):''));
     await openEmp(id); loadStats(); load();
+  }
+  // ส่งลิงก์ยืนยัน UID ใหม่ (push เข้า LINE ถ้ารู้ uid / ไม่งั้นให้คัดลอกลิงก์ส่งเอง)
+  async function resendVerify(id){
+    const {data,error}=await sb.rpc('hr_resend_verify',{p_id:id});
+    if(error){toast('ไม่สำเร็จ: '+error.message);return;}
+    if(data&&data.error){toast('ไม่สำเร็จ: '+data.error);return;}
+    if(data.already_verified){toast('พนักงานยืนยันแล้วค่ะ');return;}
+    toast(data.sent?'ส่งลิงก์เข้า LINE พนักงานแล้ว':'พนักงานยังไม่เคยผูก LINE — ใช้ปุ่ม "คัดลอกลิงก์" ส่งเองค่ะ');
+  }
+  // owner ผูก LINE UID ให้เอง (กรณี token หาย/เปลี่ยนเครื่อง)
+  async function bindUid(id){
+    const uid=prompt('วาง LINE UID ของพนักงาน (ขึ้นต้น U…)');
+    if(!uid)return;
+    const {data,error}=await sb.rpc('hr_set_line_uid',{p_id:id,p_line_uid:uid.trim()});
+    if(error){toast('ไม่สำเร็จ: '+error.message);return;}
+    if(data&&data.error){toast({uid_taken:'UID นี้ผูกกับพนักงานคนอื่นแล้ว',no_uid:'ยังไม่ได้วาง UID',not_found:'ไม่พบพนักงาน'}[data.error]||data.error);return;}
+    toast('ผูก UID + เปิดสิทธิ์ทำงานแล้วค่ะ');await openEmp(id);loadStats();load();
   }
 
   // ---------- KPI ----------

@@ -87,14 +87,13 @@
     <div class="notice hide" id="noNfc"></div>
   </div>
 
-  <!-- gate หลังบ้าน: เฉพาะสตาฟ (ลูกค้าแตะ tag จะเด้งหน้าชุดสวย ๆ ไม่ใช่หน้านี้) -->
+  <!-- gate หลังบ้าน: ยืนยันสตาฟรายคนผ่าน LINE (ทุกการสแกนติดชื่อคนทำ) -->
   <div class="lock" id="lock">
     <div class="lockbox">
       <div class="lt">เฉพาะสตาฟ</div>
-      <div class="ls">ใส่ PIN เพื่อเข้าโหมดหลังบ้าน</div>
-      <input id="pin" type="password" inputmode="numeric" placeholder="PIN" onkeydown="if(event.key==='Enter')unlock()">
-      <button class="btn" onclick="unlock()">เข้าระบบ</button>
-      <div class="muted">ลูกค้าที่แตะ tag จะเห็นหน้าชุดของลูกค้า ไม่ใช่หน้านี้</div>
+      <div class="ls" id="lockMsg">กำลังตรวจสิทธิ์ผ่าน LINE…</div>
+      <button class="btn" id="lockBtn" onclick="gateStaff()" style="display:none">เข้าสู่ระบบ LINE อีกครั้ง</button>
+      <div class="muted">ลูกค้าที่แตะ tag จะเห็นหน้าชุดของลูกค้า ไม่ใช่หน้านี้ · ทุกการแตะจะบันทึกชื่อคนทำ</div>
     </div>
   </div>
 
@@ -200,17 +199,25 @@
     $('pairCode').value='';
   }
 
-  // gate หลังบ้าน
-  function gate(){ if(sessionStorage.getItem('nfc_ok')==='1') $('lock').style.display='none'; }
-  async function unlock(){
-    const pin=$('pin').value.trim();
-    if(!pin){ toast('ใส่ PIN',true); return; }
-    const {data,error}=await sb.rpc('nfc_staff_ok',{p_pin:pin});
-    if(error){ toast('เชื่อมระบบไม่ได้',true); return; }
-    if(data===true){ sessionStorage.setItem('nfc_ok','1'); $('lock').style.display='none'; toast('เข้าระบบแล้ว'); }
-    else toast('PIN ไม่ถูกต้อง',true);
+  // gate หลังบ้าน — ยืนยันเป็นพนักงาน active ผ่าน LINE (opsRpc → ops-rpc verify idToken + hr_check_access)
+  let STAFF=null;
+  async function gateStaff(){
+    $('lockMsg').textContent='กำลังตรวจสิทธิ์ผ่าน LINE…'; $('lockBtn').style.display='none';
+    const {data,error}=await sb.rpc('ops_me',{});
+    if(error){
+      if(error.message==='redirecting_to_login') return;   // opsLogin กำลังพาไป LINE login
+      $('lockMsg').textContent='เข้าสู่ระบบไม่สำเร็จ: '+error.message;
+      $('lockBtn').textContent='ลองใหม่'; $('lockBtn').style.display=''; return;
+    }
+    if(!data || data.ok!==true){
+      $('lockMsg').textContent='บัญชี LINE นี้ไม่มีสิทธิ์เข้าหลังบ้าน';
+      $('lockBtn').textContent='ลองบัญชีอื่น'; $('lockBtn').style.display=''; return;
+    }
+    STAFF=data;
+    document.querySelector('.bar h1').textContent='แตะ NFC · '+(data.name||data.nickname||'สตาฟ');
+    $('lock').style.display='none';
   }
-  gate();
+  gateStaff();
 
   // ตรวจรองรับ NFC
   if(!NFC_OK){
