@@ -265,17 +265,56 @@ function normalizeGarmentColors() {
   });
 }
 
+// ===== กลุ่มสี (rainbow) — ยุบเฉดใกล้กันเป็นกลุ่มเดียว, กดได้เฉดใกล้เคียงด้วย =====
+const COLOR_FAMILIES = [
+  {key:'pink',   th:'ชมพู',        en:'Pink',   hex:'#E6A6B6'},
+  {key:'red',    th:'แดง',         en:'Red',    hex:'#C25B5B'},
+  {key:'peach',  th:'พีช/ส้ม',     en:'Peach',  hex:'#E6B295'},
+  {key:'yellow', th:'เหลือง',      en:'Yellow', hex:'#E6CE8E'},
+  {key:'green',  th:'เขียว',       en:'Green',  hex:'#9CB089'},
+  {key:'blue',   th:'ฟ้า/น้ำเงิน',  en:'Blue',   hex:'#9DB6CC'},
+  {key:'purple', th:'ม่วง',        en:'Purple', hex:'#B3A8C9'},
+  {key:'brown',  th:'น้ำตาล',      en:'Brown',  hex:'#A6845C'},
+  {key:'cream',  th:'ครีม/ขาว',    en:'Cream',  hex:'#F1EADC'},
+  {key:'grey',   th:'เทา',         en:'Grey',   hex:'#B6B2AA'},
+  {key:'black',  th:'ดำ',          en:'Black',  hex:'#2E2E2E'},
+];
+function _hexHSL(hex){ let h=String(hex||'').replace('#',''); if(h.length===3) h=h.split('').map(c=>c+c).join(''); if(h.length<6) return null;
+  const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2; let s=0,hue=0;
+  if(mx!==mn){const d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn); hue=mx===r?((g-b)/d+(g<b?6:0)):mx===g?(b-r)/d+2:(r-g)/d+4; hue*=60;}
+  return {h:hue,s,l}; }
+function classifyHex(hex){ const c=_hexHSL(hex); if(!c) return 'cream'; const {h,s,l}=c;
+  if(l>=0.85) return 'cream'; if(l<=0.16) return 'black'; if(s<=0.12) return 'grey';
+  if(h>=15&&h<=50&&s<=0.5&&l<=0.6) return 'brown';
+  if(h<15||h>=330) return (s<0.5||l>0.62)?'pink':'red';
+  if(h<45) return 'peach'; if(h<68) return 'yellow'; if(h<165) return 'green';
+  if(h<255) return 'blue'; if(h<300) return 'purple'; return 'pink'; }
+function classifyName(name){ const n=String(name||'').toLowerCase();
+  if(/black|noir|onyx/.test(n)) return 'black';
+  if(/grey|gray|charcoal|graphite/.test(n)) return 'grey';
+  if(/cocoa|latte|coffee|brown|\btan\b|caramel|mocha|matin|mustard|chestnut|toffee|khaki/.test(n)) return 'brown';
+  if(/olive|sage|matcha|mint|green|moss|pistachio/.test(n)) return 'green';
+  if(/\bblue\b|bleu|periwinkle|sky|denim|navy|cornflower/.test(n)) return 'blue';
+  if(/lavender|lilac|violet|purple|mauve|wisteria/.test(n)) return 'purple';
+  if(/yellow|lemon|butter|\bcorn\b|gold|honey|banana|custard/.test(n)) return 'yellow';
+  if(/peach|coral|apricot|terracotta|orange|salmon/.test(n)) return 'peach';
+  if(/pink|blush|rosy|\brose\b|flamingo|cherry|sugar|fleur|bouquet|sakura|magenta|fuchsia|dandelion/.test(n)) return 'pink';
+  if(/\bred\b|ruby|scarlet|crimson|wine|burgundy/.test(n)) return 'red';
+  return 'cream'; }
+function familiesOf(g){ const fams=new Set();
+  const cv=(g.sourceMeta&&g.sourceMeta.color_variants)||null;
+  if(cv&&cv.length){ cv.forEach(c=>fams.add(classifyName(c.name))); }
+  else { (g.colors||[]).forEach(c=>{ const hex=c[1]; if(hex&&hex!==PLACEHOLDER_HEX) fams.add(classifyHex(hex)); else if(c[0]&&c[0]!=='—') fams.add(classifyName(c[0])); }); }
+  if(!fams.size) fams.add('cream'); return fams; }
+
 function renderFilters() {
-  // เก็บเฉดสีจริงจากคลัง (ตัดเทา placeholder ทิ้ง) พร้อมชื่อสีไว้โชว์เป็น tooltip
-  const shadeMap = new Map();
-  GARMENTS.forEach(g => (g.colors || []).forEach(c => {
-    const nm = c[0], hex = c[1];
-    if (!hex || hex === PLACEHOLDER_HEX || nm === '—' || shadeMap.has(hex)) return;
-    shadeMap.set(hex, nm || '');
-  }));
+  // ยุบสีเป็นกลุ่ม (rainbow) — โชว์เฉพาะกลุ่มที่มีในคลัง
+  const present = new Set();
+  GARMENTS.forEach(g => familiesOf(g).forEach(f => present.add(f)));
   const brands = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
-  const sw = [...shadeMap].map(([h, nm]) =>
-    `<button class="swatchbtn ${fColor === h?'active':''}" style="background:${h}" onclick="setColor('${h}')" title="${nm}" aria-label="${(lang==='th'?'กรองสี ':'filter colour ')+nm}"></button>`).join('');
+  const sw = COLOR_FAMILIES.filter(f => present.has(f.key)).map(f =>
+    `<button class="swatchbtn ${fColor === f.key?'active':''}" style="background:${f.hex}" onclick="setColor('${f.key}')" title="${lang==='th'?f.th:f.en}" aria-label="${(lang==='th'?'กรองสี ':'filter colour ')+(lang==='th'?f.th:f.en)}"></button>`).join('');
   const opts = [`<option value="">${t('allBrands')}</option>`].concat(brands.map(b =>`<option value="${b}"${fBrand === b?'selected':''}>${b}</option>`)).join('');
   $('#filters').innerHTML =`
     <button class="tone ${fToneOnly?'':'off'}" onclick="toggleTone()">● ${t('myTone')}</button>
@@ -443,7 +482,7 @@ function galleryPhotos(g){ const p = Array.isArray(g.photos)? g.photos : []; con
 function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
-    (!fColor || g.colors.some(c => c[1] === fColor)) &&
+    (!fColor || familiesOf(g).has(fColor)) &&
     (!fBrand || gbrand(g).toLowerCase() === String(fBrand).toLowerCase()) &&
     (!fMood || garmentGroup(g) === fMood) &&
     (!fToneOnly || g.season === CUSTOMER.my_color_season) &&
@@ -704,7 +743,7 @@ function mapEmbedHtml(place) {
   return `<div class="vmap"><iframe loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${src}"></iframe><div class="cap">${t('vMapNote')}: ${esc(place.name||'')}</div></div>`;
 }
 
-function setColorFromVenue(h) { fColor = h; renderFilters(); renderGrid(); window.scrollTo({ top: 380, behavior:'smooth'}); }
+function setColorFromVenue(h) { fColor = classifyHex(h); renderFilters(); renderGrid(); window.scrollTo({ top: 380, behavior:'smooth'}); }
 
 // ===== detail =====
 function openDetail(id) {
