@@ -59,10 +59,11 @@
   <section class="phead">
     <div class="eyebrow">purchasing · supply</div>
     <h1>เติมชุดให้ทันใจลูกค้า</h1>
-    <div class="sub">ดูว่าโทนสี ไซซ์ และวัสดุไหนกำลังขาด แล้วสั่งซื้อให้ครบ — เพื่อให้ทุกชุดหมุนเวียนกลับมาพร้อมเสมอ</div>
+    <div class="sub">ดูว่าโทนสี ไซส์ และวัสดุไหนกำลังขาด แล้วสั่งซื้อให้ครบ — เพื่อให้ทุกชุดพร้อมกลับเข้า loop เสมอ</div>
   </section>
   <div class="tabs">
     <span class="tab on" data-t="restock" onclick="go(this)">ควรเติมชุด</span>
+    <span class="tab" data-t="buy" onclick="go(this)">ช้อปเพิ่ม</span>
     <span class="tab" data-t="low" onclick="go(this)">ของใกล้หมด</span>
     <span class="tab" data-t="po" onclick="go(this)">ใบสั่งซื้อ</span>
     <span class="tab" data-t="ap" onclick="go(this)">เจ้าหนี้ค้างจ่าย</span>
@@ -95,6 +96,7 @@
       if(!SUPPLIERS.length) SUPPLIERS=(await api('suppliers')).rows||[];
       if(!SUPPLIES.length) SUPPLIES=(await api('supplies')).rows||[];
       if(tab==='restock') return renderRestock(v,(await api('restock')).restock);
+      if(tab==='buy') return renderBuy(v,(await api('buy_list',{status:'all'})).rows);
       if(tab==='low') return renderLow(v,(await api('low_stock')).rows);
       if(tab==='po') return renderPo(v,(await api('po_list')).rows);
       if(tab==='ap') return renderApPo(v,(await api('po_unpaid')).rows);
@@ -115,25 +117,87 @@
           <tr><td>เฉลี่ย 3 เดือนล่าสุด</td><td class="n">${f.avg_last3mo} ครั้ง/เดือน</td></tr>
           <tr><td>เทียบ 3 เดือนก่อนหน้า</td><td class="n">${f.avg_prev3mo} ครั้ง/เดือน ${growthBadge}</td></tr>
           <tr class="tot"><td>พยากรณ์เดือนหน้า</td><td class="n">~${f.forecast_next_month} ครั้ง</td></tr>
-          ${(f.by_size||[]).length?`<tr><td>ไซซ์ขายดี (90 วัน)</td><td class="n">${f.by_size.map(x=>x.size+':'+x.rented).join(' · ')}</td></tr>`:''}
+          ${(f.by_size||[]).length?`<tr><td>ไซส์ขายดี (90 วัน)</td><td class="n">${f.by_size.map(x=>x.size+':'+x.rented).join(' · ')}</td></tr>`:''}
           ${(f.by_season||[]).length?`<tr><td>โทนสีขายดี (90 วัน)</td><td class="n">${f.by_season.map(x=>(ST[x.season]||x.season).split(' ')[0]+':'+x.rented).join(' · ')}</td></tr>`:''}
           ${(f.peak_months||[]).length?`<tr><td>เดือนพีคในรอบปี</td><td class="n">${f.peak_months.map(x=>'เดือน'+x.month_no).join(', ')}</td></tr>`:''}
         </table>`:'<div class="muted">ยังไม่มีประวัติเช่าพอจะพยากรณ์ — ระบบจะคำนวณเองเมื่อมีข้อมูลเช่าจริง</div>'}</div>
-      <div class="card"><h2>ไซซ์ที่ดีมานด์เกินชุด — ควรเติม</h2>
-      ${sgaps.length?`<table><tr><th>ไซซ์</th><th class="n">เช่า 90 วัน</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
+      <div class="card"><h2>ไซส์ที่ดีมานด์เกินชุด — ควรเติม</h2>
+      ${sgaps.length?`<table><tr><th>ไซส์</th><th class="n">เช่า 90 วัน</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
         ${sgaps.map(s=>`<tr><td>${esc(s.size)}</td><td class="n">${s.rented_90d}</td><td class="n">${s.available===0?'<span class="pill low">0!</span>':s.available}</td><td class="n">${s.ratio||'-'}:1</td></tr>`).join('')}</table>`
-        :'<div class="muted">ไซซ์ในระบบเพียงพอกับดีมานด์ ✓</div>'}</div>
+        :'<div class="muted">ไซส์ในระบบเพียงพอกับดีมานด์ ✓</div>'}</div>
       <div class="card"><h2>โทนสีที่ลูกค้าเยอะกว่าชุด — ควรเติม</h2>
       ${gaps.length?`<table><tr><th>โทนสี</th><th class="n">ลูกค้า</th><th class="n">ลูกค้าประจำ</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
         ${gaps.map(g=>`<tr><td>${esc(ST[g.season]||g.season)}</td><td class="n">${g.customers}</td><td class="n">${g.loyal}</td><td class="n">${g.available===0?'<span class="pill low">0 — ไม่มีเลย!</span>':g.available}</td><td class="n">${g.ratio||'-'}:1</td></tr>`).join('')}</table>`
         :'<div class="muted">ตอนนี้ชุดในระบบเพียงพอกับฐานลูกค้าทุกโทนสี ✓</div>'}</div>
       <div class="card"><h2>ชุดที่ลูกค้าอยากได้ (wishlist) แต่ไม่ว่าง</h2>
-      ${wish.length?`<table><tr><th>ชุด</th><th>โทน/ไซซ์</th><th class="n">คนรอ</th></tr>
+      ${wish.length?`<table><tr><th>ชุด</th><th>โทน/ไซส์</th><th class="n">คนรอ</th></tr>
         ${wish.map(w=>`<tr><td>${esc(w.name||w.code)}</td><td>${esc(ST[w.season]||w.season||'-')} ${esc(w.size||'')}</td><td class="n">${w.wishes}</td></tr>`).join('')}</table>`:'<div class="muted">ไม่มี</div>'}</div>
       <div class="card"><h2>ชุดที่เช่าบ่อย (ควรซื้อเพิ่มแบบเดียวกัน)</h2>
-      ${hot.length?`<table><tr><th>ชุด</th><th>โทน/ไซซ์</th><th class="n">เช่าไป</th></tr>
+      ${hot.length?`<table><tr><th>ชุด</th><th>โทน/ไซส์</th><th class="n">เช่าไป</th></tr>
         ${hot.map(h=>`<tr><td>${esc(h.name||h.code)}</td><td>${esc(ST[h.season]||h.season||'-')} ${esc(h.size||'')}</td><td class="n">${h.times_rented} ครั้ง</td></tr>`).join('')}</table>`:'<div class="muted">ยังไม่มีชุดที่เช่าบ่อย</div>'}
       <div class="muted" style="margin-top:8px">ระบบเตือนเจ้าของทาง LINE อัตโนมัติทุกสัปดาห์เมื่อมีโทนสีที่ขาด</div></div>`;
+  }
+
+  // ---------- ช้อปเพิ่ม: ก็อปลิงก์ Shopee/Lazada → รายการอยากซื้อ → สั่งซื้อ ----------
+  const SRC={shopee:'Shopee',lazada:'Lazada',ig:'IG',customer:'ลูกค้าขอ',manual:'กรอกเอง'};
+  const BST={idea:'ไอเดีย',approved:'อนุมัติแล้ว',ordered:'สั่งแล้ว',received:'รับของแล้ว',intaked:'เข้าคลังแล้ว',dropped:'ทิ้งแล้ว'};
+  let BUYD={};   // ดราฟต์ที่ดึงมา รอบันทึก
+  function renderBuy(v,rows){
+    rows=rows||[];
+    const live=rows.filter(r=>r.status!=='intaked'&&r.status!=='dropped');
+    const done=rows.filter(r=>r.status==='intaked'||r.status==='dropped');
+    v.innerHTML=`
+      <div class="card"><h2>ก็อปลิงก์ชุดที่อยากซื้อ</h2>
+        <div class="muted" style="margin-bottom:8px">วางลิงก์จาก Shopee / Lazada / IG แล้วกดดึง — ระบบจะดึงชื่อ รูป และราคาให้ (ถ้าแพลตฟอร์มบล็อก ให้กรอกเองได้)</div>
+        <div style="display:flex;gap:6px"><input id="buy_url" placeholder="วางลิงก์ที่นี่… เช่น https://shopee.co.th/..." style="flex:1">
+          <button class="btn" style="width:auto;white-space:nowrap" onclick="buyImport()">ดึงข้อมูล</button></div>
+        <div id="buy_preview"></div>
+      </div>
+      <div class="card"><h2>รายการอยากซื้อ (${live.length})</h2>
+        ${live.length?live.map(buyRow).join(''):'<div class="muted">ยังไม่มีรายการ — วางลิงก์ด้านบนเพื่อเริ่ม</div>'}</div>
+      ${done.length?`<div class="card"><h2>ประวัติ (${done.length})</h2><table>
+        ${done.map(r=>`<tr><td>${esc(r.title)}</td><td><span class="pill ${r.status==='intaked'?'received':''}">${BST[r.status]}</span> ${esc(r.garment_code||'')}</td></tr>`).join('')}</table></div>`:''}`;
+  }
+  function buyRow(r){
+    const next={idea:['approved','อนุมัติ'],approved:['__order','สั่งซื้อ'],ordered:['received','รับของแล้ว'],received:['__intake','ส่งเข้าคลัง']}[r.status];
+    return `<div class="po-item" style="align-items:center;gap:10px;border-bottom:1px solid var(--line);padding:8px 0">
+      ${r.image_url?`<img src="${esc(r.image_url)}" style="width:54px;height:54px;object-fit:cover;border-radius:8px" onerror="this.style.display='none'">`:''}
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600">${esc(r.title)} ${r.qty>1?`<span class="muted">×${r.qty}</span>`:''}</div>
+        <div class="muted" style="font-size:12px">${esc(SRC[r.source]||r.source)} · ${r.price?baht(r.price):'ราคา—'} ${[r.size,r.color,r.brand].filter(Boolean).map(esc).join(' · ')}
+          ${r.source_url?` · <a href="${esc(r.source_url)}" target="_blank">เปิดลิงก์</a>`:''}</div>
+      </div>
+      <span class="pill ${r.status==='ordered'?'ordered':r.status==='received'?'received':''}">${BST[r.status]}</span>
+      ${next?`<button class="mini" onclick='buyNext(${JSON.stringify(r.id)},${JSON.stringify(next[0])})'>${next[1]}</button>`:''}
+      <button class="x" title="ทิ้ง" onclick='buyNext(${JSON.stringify(r.id)},"dropped")'>×</button></div>`;
+  }
+  async function buyImport(){
+    const url=($('buy_url').value||'').trim(); if(!url)return toast('วางลิงก์ก่อน');
+    const pv=$('buy_preview'); pv.innerHTML='<div class="muted" style="padding:10px">กำลังดึงข้อมูล…</div>';
+    let m={}; try{ m=(await api('buy_import',{url})).meta||{}; }catch(e){ pv.innerHTML=''; return; }
+    BUYD={source:m.source||'manual',source_url:m.source_url||url,title:m.title||'',image_url:m.image_url||'',price:m.price||'',qty:1,size:'',color:'',brand:'',note:''};
+    pv.innerHTML=`<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">
+      ${m.warn?`<div class="muted" style="color:#b4690e;margin-bottom:6px">ดึงอัตโนมัติไม่ครบ (${esc(m.source)} อาจบล็อก) — กรอกเติมได้เลย</div>`:''}
+      ${BUYD.image_url?`<img src="${esc(BUYD.image_url)}" style="width:90px;height:90px;object-fit:cover;border-radius:10px;float:right;margin-left:10px" onerror="this.style.display='none'">`:''}
+      <label>ชื่อชุด</label><input id="bd_title" value="${esc(BUYD.title)}" oninput="BUYD.title=this.value">
+      <div class="g3"><div><label>ราคา (฿)</label><input id="bd_price" type="number" value="${esc(BUYD.price)}" oninput="BUYD.price=this.value"></div>
+        <div><label>จำนวน</label><input id="bd_qty" type="number" value="1" oninput="BUYD.qty=this.value"></div>
+        <div><label>ไซส์</label><input id="bd_size" oninput="BUYD.size=this.value"></div></div>
+      <div class="g2"><div><label>สี/โทน</label><input oninput="BUYD.color=this.value"></div>
+        <div><label>แบรนด์</label><input oninput="BUYD.brand=this.value"></div></div>
+      <label>โน้ต</label><input placeholder="เช่น ซื้อเผื่อโทนฤดูร้อน / รอโปร 6.6" oninput="BUYD.note=this.value">
+      <button class="btn" style="margin-top:8px" onclick="buySave()">บันทึกเข้ารายการ</button></div>`;
+  }
+  async function buySave(){
+    if(!BUYD.title)return toast('ใส่ชื่อชุดก่อน');
+    const r=await api('buy_save',{item:BUYD}); if(!r.ok)return toast('ไม่สำเร็จ: '+(r.error||''));
+    toast('บันทึกเข้ารายการแล้ว'); $('buy_url').value=''; $('buy_preview').innerHTML=''; BUYD={}; render();
+  }
+  async function buyNext(id,status){
+    if(status==='dropped'&&!confirm('ลบรายการนี้ออกจากรายการอยากซื้อ?'))return;
+    if(status==='__order'){ const r=await api('buy_to_po',{id}); toast(r.ok?'สร้างใบสั่งซื้อแล้ว (ดูแท็บใบสั่งซื้อ)':'ไม่สำเร็จ: '+(r.error||'')); return render(); }
+    if(status==='__intake'){ const code=prompt('ใส่รหัสชุดที่ขึ้นคลังแล้ว (ถ้ามี) แล้วระบบจะปิดรายการ:','')||''; const r=await api('buy_status',{id,status:'intaked',garment:code}); toast(r.ok?'ปิดรายการ — เข้าคลังแล้ว':'ไม่สำเร็จ'); return render(); }
+    const r=await api('buy_status',{id,status}); toast(r.ok?'อัปเดตแล้ว':'ไม่สำเร็จ: '+(r.error||'')); render();
   }
   function renderLow(v,rows){
     v.innerHTML=`<div class="card"><h2>ของใกล้หมด — ควรสั่งซื้อ</h2><table><tr><th>วัสดุ</th><th class="n">คงเหลือ</th><th class="n">จุดสั่ง</th><th class="n">ควรสั่ง</th><th></th></tr>
