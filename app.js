@@ -543,6 +543,30 @@ async function loadRating(garmentId) {
   el.innerHTML =`<span class="star">★</span> ${avg} <span class="rcount">(${r.count} ${reviewWord})</span>`;
 }
 
+// สรุปฟิต/ไซซ์ จาก "ลุคจริง" ในชุมชน (คนเคยใส่บอกสูง/ไซซ์/ความพอดี) — ลดลังเล ลดคืนผิดไซซ์
+async function loadFit(code) {
+  const el = $('#fitsummary'); if (!el) return;
+  let f = null; try { f = await window.API.garmentFit?.(code); } catch (e) { /**/ }
+  if (!f || !f.n) { el.innerHTML = ''; return; }
+  const th = lang === 'th';
+  const fit = f.fit || {};
+  const tot = (fit.true||0)+(fit.large||0)+(fit.small||0);
+  const chips = [];
+  if (f.avg_height) chips.push(`<span class="fsr-chip">${th?'สูงเฉลี่ย':'avg height'} <b>${f.avg_height}</b> ${th?'ซม.':'cm'}</span>`);
+  if (f.common_size) chips.push(`<span class="fsr-chip">${th?'ไซซ์ที่เช่าบ่อย':'common size'} <b>${esc(f.common_size)}</b></span>`);
+  let verdict = '';
+  if (tot >= 2) {
+    const top = (fit.true>=fit.large && fit.true>=fit.small) ? 'true' : (fit.large>=fit.small ? 'large' : 'small');
+    verdict = top==='true' ? (th?'ส่วนใหญ่บอกใส่พอดีตัว':'most say true to size')
+            : top==='large' ? (th?'หลายคนบอกเผื่อ/ใหญ่นิด แนะนำลดไซซ์':'runs large — size down')
+            : (th?'หลายคนบอกฟิต/เล็กนิด แนะนำเผื่อไซซ์':'runs small — size up');
+  }
+  el.innerHTML = `<div class="fitsr">
+    <div class="fsr-h">${th?'ฟิตจริงจากคนใน loop':'Fit from real renters'} <span class="fsr-n">${f.n} ${th?'ลุค':'looks'}</span></div>
+    <div class="fsr-chips">${chips.join('')}</div>
+    ${verdict?`<div class="fsr-v">${verdict}</div>`:''}</div>`;
+}
+
 // Social proof: "มีคนเช่าไปแล้ว X ครั้ง · กำลังมาแรง · กำลังดูอยู่ N คน" — urgency + ความน่าเชื่อ
 async function loadSocialProof(code) {
   const el = $('#socialproof'); if (!el) return;
