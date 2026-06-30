@@ -14,21 +14,29 @@
   }
   *{box-sizing:border-box}
   body{margin:0; background:var(--cream); color:var(--ink); font-family:'Prompt',sans-serif; -webkit-font-smoothing:antialiased;}
-  .wrap{max-width:920px; margin:0 auto; padding:24px 18px 64px; display:grid; gap:26px; grid-template-columns:1fr;}
-  @media(min-width:760px){ .wrap{grid-template-columns:340px 1fr; align-items:start;} }
+  .wrap{max-width:960px; margin:0 auto; padding:24px 18px 64px; display:grid; gap:26px; grid-template-columns:1fr;}
+  @media(min-width:780px){ .wrap{grid-template-columns:360px 1fr; align-items:start;} }
   h1{font-family:'Poppins'; font-weight:500; font-size:18px; letter-spacing:2px; margin:0 0 4px;}
-  .sub{font-size:12.5px; color:var(--muted); margin:0 0 18px; line-height:1.6;}
+  .sub{font-size:12.5px; color:var(--muted); margin:0 0 16px; line-height:1.6;}
 
   .panel{background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px;}
-  label{display:block; font-size:11.5px; color:var(--muted); margin:12px 0 5px; letter-spacing:.3px;}
-  label:first-child{margin-top:0;}
+  .pull{display:flex; gap:8px; margin-bottom:6px;}
+  .pull input{flex:1;}
+  .pull button{white-space:nowrap; border:0; background:var(--clay); color:#fff; font-family:'Prompt'; font-size:13px;
+    padding:0 16px; border-radius:9px; cursor:pointer;}
+  .status{font-size:11.5px; min-height:16px; margin:0 0 10px; color:var(--sage);}
+  .status.err{color:#b1442f;}
+  hr{border:0; border-top:1px solid var(--line); margin:14px 0;}
+  label{display:block; font-size:11.5px; color:var(--muted); margin:11px 0 5px; letter-spacing:.3px;}
   input,select{width:100%; font-family:'Prompt'; font-size:14px; padding:9px 11px; border:1px solid var(--line);
     border-radius:9px; background:var(--paper); color:var(--ink); outline:none;}
   input:focus,select:focus{border-color:var(--gold);}
-  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
-  .chk{display:flex; align-items:center; gap:8px; margin-top:14px; font-size:13px; color:var(--ink);}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+  .mini{font-size:10.5px; color:var(--muted); margin:0 0 4px;}
+  .chk{display:flex; align-items:center; gap:8px; margin-top:14px; font-size:13px;}
   .chk input{width:auto;}
-  .btn{margin-top:18px; width:100%; border:0; background:var(--ink); color:var(--cream); font-family:'Prompt';
+  .btn{margin-top:16px; width:100%; border:0; background:var(--ink); color:var(--cream); font-family:'Prompt';
     font-size:14px; letter-spacing:.5px; padding:12px; border-radius:10px; cursor:pointer;}
   .btn:active{transform:scale(.99);}
   .hint{font-size:11px; color:var(--muted); margin-top:10px; line-height:1.6;}
@@ -36,27 +44,31 @@
   .stage{display:flex; flex-direction:column; align-items:center; gap:14px;}
   .scaler{width:100%; max-width:432px; aspect-ratio:4/5; overflow:hidden; border-radius:16px; box-shadow:0 8px 30px rgba(26,26,26,.10);}
 
-  /* ===== การ์ดจริง 1080x1350, ย่อด้วย transform ===== */
-  #card{width:1080px; height:1350px; transform-origin:top left; background:var(--paper);
-    padding:96px 88px; display:flex; flex-direction:column; position:relative;}
+  /* ===== การ์ดจริง 1080x1350 ===== */
+  #card{width:1080px; height:1350px; transform-origin:top left; background:var(--paper); display:flex; flex-direction:column;}
+  .c-photo{width:100%; height:600px; object-fit:cover; display:block; background:var(--cream);}
+  .c-photo.ph{display:flex; align-items:center; justify-content:center; font-family:'Poppins'; font-weight:500;
+    font-size:64px; letter-spacing:6px; color:#fff;}
+  .c-body{flex:1; padding:60px 70px 64px; display:flex; flex-direction:column;}
   .c-top{display:flex; justify-content:space-between; align-items:center;}
-  .c-mark{font-family:'Poppins'; font-weight:500; font-size:46px; letter-spacing:11px; color:var(--ink);}
-  .c-ring{width:54px; height:54px; border-radius:50%; border:3px solid var(--gold);}
-  .c-eyebrow{margin-top:104px; font-size:30px; letter-spacing:8px; color:var(--clay); text-transform:uppercase;}
-  .c-name{font-family:'Poppins'; font-weight:500; font-size:74px; line-height:1.12; color:var(--ink); margin-top:18px;}
-  .c-meta{font-size:30px; color:var(--muted); margin-top:14px;}
-  .c-priceline{margin-top:52px; display:flex; align-items:baseline; gap:18px;}
-  .c-price{font-family:'Poppins'; font-weight:500; font-size:104px; color:var(--clay); line-height:1;}
-  .c-per{font-size:34px; color:var(--muted);}
-  .c-worth{font-size:26px; color:var(--sage); margin-top:14px;}
-  .c-rates{margin-top:46px; border-top:2px solid var(--line); padding-top:34px;}
-  .c-rate{display:flex; justify-content:space-between; align-items:baseline; padding:15px 0; font-size:38px; color:#3a342c;}
-  .c-rate b{font-family:'Poppins'; font-weight:500;}
-  .c-rate.best span:first-child::after{content:' · คุ้มสุด'; color:var(--sage); font-size:26px;}
+  .c-mark{font-family:'Poppins'; font-weight:500; font-size:38px; letter-spacing:9px; color:var(--ink);}
+  .c-ring{width:44px; height:44px; border-radius:50%; border:3px solid var(--gold);}
+  .c-name{font-family:'Poppins'; font-weight:500; font-size:60px; line-height:1.1; color:var(--ink); margin-top:30px;}
+  .c-meta{font-size:27px; color:var(--muted); margin-top:10px;}
+  .c-for{font-size:26px; letter-spacing:1px; color:var(--clay); margin-top:22px;}
+  .c-specs{display:flex; flex-wrap:wrap; gap:18px 40px; margin-top:24px; font-size:27px; color:#3a342c;}
+  .c-spec{display:flex; align-items:center; gap:12px;}
+  .c-swatch{width:30px; height:30px; border-radius:50%; border:1px solid rgba(0,0,0,.12);}
+  .c-priceline{margin-top:34px; display:flex; align-items:baseline; gap:16px;}
+  .c-price{font-family:'Poppins'; font-weight:500; font-size:86px; color:var(--clay); line-height:1;}
+  .c-per{font-size:30px; color:var(--muted);}
+  .c-rates{margin-top:22px; display:flex; gap:34px; font-size:28px; color:#3a342c;}
+  .c-rates b{font-family:'Poppins'; font-weight:500;}
+  .c-rates .best{color:var(--sage);}
   .c-foot{margin-top:auto;}
-  .c-note{font-size:28px; color:var(--sage); line-height:1.7;}
-  .c-cta{margin-top:30px; background:var(--ink); color:var(--cream); text-align:center;
-    border-radius:16px; padding:34px; font-size:36px; letter-spacing:2px;}
+  .c-note{font-size:25px; color:var(--sage); line-height:1.6;}
+  .c-cta{margin-top:24px; background:var(--ink); color:var(--cream); text-align:center;
+    border-radius:14px; padding:30px; font-size:32px; letter-spacing:1.5px;}
 </style>
 </head>
 <body>
@@ -64,32 +76,54 @@
 
     <div>
       <h1>LLOOP · การ์ดราคา</h1>
-      <p class="sub">สไลด์สุดท้ายของโพสต์เสื้อผ้า — กรอกเลขให้ตรง quote จริง (เรท 1/3/5 วันเป็นแพ็กเหมา ไม่ใช่คูณตรง) แล้วโหลด PNG ไปวางใน carousel</p>
+      <p class="sub">สไลด์สุดท้ายของโพสต์เสื้อผ้า — ใส่รหัสชุดแล้วกด “ดึง” เพื่อเติมรูป/สี/ไซส์/ราคา 1·3·5 วันจากระบบอัตโนมัติ แล้วโหลด PNG</p>
 
       <div class="panel">
+        <div class="pull">
+          <input id="f-code" placeholder="รหัสชุด เช่น LL-0241" onkeydown="if(event.key==='Enter')pull()">
+          <button onclick="pull()">ดึงจากระบบ</button>
+        </div>
+        <p class="status" id="status">ใส่รหัสแล้วกดดึง · หรือกรอกมือด้านล่างก็ได้</p>
+        <hr>
+
         <label>ชื่อชุด</label>
         <input id="f-name" value="Amélie Linen Set" oninput="render()">
 
         <label>แบรนด์ · รหัส</label>
         <input id="f-meta" value="LLOOP · LL-0241" oninput="render()">
 
+        <label>ลิงก์รูปชุด (เว้นว่าง = ใช้บล็อกสี)</label>
+        <input id="f-photo" placeholder="https://…" oninput="render()">
+
+        <div class="grid2">
+          <div><label>ชื่อสี</label><input id="f-colorname" value="ครีมพีช" oninput="render()"></div>
+          <div><label>โค้ดสี</label><input id="f-colorhex" type="color" value="#E4C7A8" oninput="render()" style="height:38px;padding:4px"></div>
+        </div>
+
+        <label>ไซส์ (นิ้ว / ซม.)</label>
+        <div class="grid3">
+          <div><div class="mini">อก</div><input id="f-bust" value="32–36" oninput="render()"></div>
+          <div><div class="mini">เอว</div><input id="f-waist" value="26–30" oninput="render()"></div>
+          <div><div class="mini">ยาว(ซม.)</div><input id="f-len" value="95" oninput="render()"></div>
+        </div>
+
+        <label>เหมาะกับงาน (คั่นด้วย ·)</label>
+        <input id="f-for" value="งานแต่ง · ดินเนอร์" oninput="render()">
+
         <label>ราคา/วัน เริ่มต้น (บาท)</label>
         <input id="f-price" type="number" value="390" oninput="render()">
 
-        <label>ยอดรวมตามจำนวนวัน (จาก quote จริง)</label>
-        <div class="row3">
-          <div><div class="hint" style="margin:0 0 4px">1 วัน</div><input id="f-d1" type="number" value="390" oninput="render()"></div>
-          <div><div class="hint" style="margin:0 0 4px">3 วัน</div><input id="f-d3" type="number" value="690" oninput="render()"></div>
-          <div><div class="hint" style="margin:0 0 4px">5 วัน</div><input id="f-d5" type="number" value="990" oninput="render()"></div>
+        <label>ค่าเช่ารวมตามวัน (จาก quote จริง)</label>
+        <div class="grid3">
+          <div><div class="mini">1 วัน</div><input id="f-d1" type="number" value="390" oninput="render()"></div>
+          <div><div class="mini">3 วัน</div><input id="f-d3" type="number" value="690" oninput="render()"></div>
+          <div><div class="mini">5 วัน</div><input id="f-d5" type="number" value="990" oninput="render()"></div>
         </div>
-
-        <label>มูลค่าชุด (โชว์ความคุ้ม — เว้นว่างได้)</label>
-        <input id="f-worth" type="number" placeholder="เช่น 4900" oninput="render()">
 
         <label class="chk"><input type="checkbox" id="f-best" checked onchange="render()"> ติดป้าย “คุ้มสุด” ที่ 3 วัน</label>
 
         <button class="btn" onclick="download()">ดาวน์โหลด PNG (1080×1350)</button>
-        <p class="hint">ฟอนต์: Poppins + Prompt ตาม brand.json · ขั้นต่อไป wire ปุ่ม “ดึงจากรหัสชุด” ให้เรียก <code>quote_rental</code> เติมเลขอัตโนมัติ</p>
+        <p class="hint">ราคาที่โชว์ = ค่าเช่า (ไม่รวมมัดจำ/ส่ง ที่บอกไว้ใต้การ์ดแล้ว) · ฟอนต์ Poppins+Prompt ตาม brand.json</p>
       </div>
     </div>
 
@@ -100,62 +134,103 @@
 
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
   const $ = id => document.getElementById(id);
+  const v = id => $(id).value;
+  const set = (id,val)=>{ const e=$(id); if(e!=null && val!=null) e.value=val; };
   const baht = n => '฿' + Number(n||0).toLocaleString('th-TH');
+  const status = (m,err)=>{ const s=$('status'); s.textContent=m; s.className='status'+(err?' err':''); };
 
   function render(){
-    const name = $('f-name').value || '—';
-    const meta = $('f-meta').value || '';
-    const price = $('f-price').value;
-    const d1=$('f-d1').value, d3=$('f-d3').value, d5=$('f-d5').value;
-    const worth = $('f-worth').value;
-    const best = $('f-best').checked;
+    const photo = v('f-photo').trim();
+    const name = v('f-name')||'—';
+    const meta = v('f-meta');
+    const hex = v('f-colorhex'); const colorName = v('f-colorname').trim();
+    const bust=v('f-bust').trim(), waist=v('f-waist').trim(), len=v('f-len').trim();
+    const forr = v('f-for').trim();
+    const price=v('f-price'), d1=v('f-d1'), d3=v('f-d3'), d5=v('f-d5'), best=$('f-best').checked;
+
+    const photoEl = photo
+      ? `<img class="c-photo" crossorigin="anonymous" src="${photo}" alt="">`
+      : `<div class="c-photo ph" style="background:${hex||'#C9A86A'}">${(v('f-meta').split('·').pop()||'LLOOP').trim()}</div>`;
+
+    const specs = [];
+    if (colorName) specs.push(`<div class="c-spec"><span class="c-swatch" style="background:${hex}"></span>${colorName}</div>`);
+    const sz = [bust&&`อก ${bust}`, waist&&`เอว ${waist}`, len&&`ยาว ${len} ซม.`].filter(Boolean).join(' · ');
+    if (sz) specs.push(`<div class="c-spec">${sz}</div>`);
 
     $('card').innerHTML = `
-      <div class="c-top">
-        <div class="c-mark">LLOOP</div>
-        <div class="c-ring"></div>
-      </div>
-      <div class="c-eyebrow">เช่าชุดนี้</div>
-      <div class="c-name">${name}</div>
-      ${meta ? `<div class="c-meta">${meta}</div>` : ''}
-      <div class="c-priceline">
-        <span class="c-price">${baht(price)}</span>
-        <span class="c-per">/วัน เริ่มต้น</span>
-      </div>
-      ${worth ? `<div class="c-worth">มูลค่าชุด ${baht(worth)} · เช่าคุ้มกว่าซื้อ</div>` : ''}
-      <div class="c-rates">
-        <div class="c-rate"><span>เช่า 1 วัน</span><b>${baht(d1)}</b></div>
-        <div class="c-rate ${best?'best':''}"><span>เช่า 3 วัน</span><b>${baht(d3)}</b></div>
-        <div class="c-rate"><span>เช่า 5 วัน</span><b>${baht(d5)}</b></div>
-      </div>
-      <div class="c-foot">
-        <div class="c-note">มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
-        <div class="c-cta">ทักแชต LLOOP เพื่อจอง</div>
+      ${photoEl}
+      <div class="c-body">
+        <div class="c-top"><div class="c-mark">LLOOP</div><div class="c-ring"></div></div>
+        <div class="c-name">${name}</div>
+        ${meta?`<div class="c-meta">${meta}</div>`:''}
+        ${forr?`<div class="c-for">เหมาะกับ ${forr}</div>`:''}
+        ${specs.length?`<div class="c-specs">${specs.join('')}</div>`:''}
+        <div class="c-priceline"><span class="c-price">${baht(price)}</span><span class="c-per">/วัน เริ่มต้น</span></div>
+        <div class="c-rates">
+          <span>1 วัน <b>${baht(d1)}</b></span>
+          <span class="${best?'best':''}">3 วัน <b>${baht(d3)}</b>${best?' · คุ้มสุด':''}</span>
+          <span>5 วัน <b>${baht(d5)}</b></span>
+        </div>
+        <div class="c-foot">
+          <div class="c-note">มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
+          <div class="c-cta">ทักแชต LLOOP เพื่อจอง</div>
+        </div>
       </div>`;
     fit();
   }
 
-  function fit(){
-    const stage = document.querySelector('.scaler');
-    const w = stage.clientWidth;
-    $('card').style.transform = 'scale(' + (w/1080) + ')';
-  }
+  function fit(){ const w=document.querySelector('.scaler').clientWidth; $('card').style.transform='scale('+(w/1080)+')'; }
   window.addEventListener('resize', fit);
 
+  function addDays(iso, n){ const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+
+  let SB=null;
+  function sb(){ if(!SB && window.supabase && window.CONFIG) SB=window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return SB; }
+
+  async function pull(){
+    const code = (v('f-code')||'').trim();
+    if(!code){ status('ใส่รหัสชุดก่อนนะคะ', true); return; }
+    if(!sb()){ status('ต่อระบบไม่ได้ (เปิดผ่านเซิร์ฟเวอร์ liff)', true); return; }
+    status('กำลังดึง…');
+    const { data:g, error } = await sb().from('garments').select('*').ilike('code', code).maybeSingle();
+    if(error || !g){ status('ไม่พบชุดรหัสนี้ (หรือยังไม่ ready)', true); return; }
+
+    set('f-name', g.name||g.code);
+    set('f-meta', [g.brand,g.code].filter(Boolean).join(' · '));
+    set('f-photo', (Array.isArray(g.photos)&&g.photos[0]) || g.photo || '');
+    set('f-colorname', g.color_name||'');
+    if(g.color_hex) set('f-colorhex', g.color_hex);
+    const range=(a,b)=> (a!=null&&b!=null)?`${a}–${b}`:(a!=null?String(a):'');
+    set('f-bust', range(g.bust_min_in,g.bust_max_in));
+    set('f-waist', range(g.waist_min_in,g.waist_max_in));
+    set('f-len', g.length_cm!=null?String(g.length_cm):'');
+    set('f-for', (g.occasion_tags||[]).join(' · '));
+    set('f-price', g.rental_price!=null?g.rental_price:'');
+
+    const today=new Date().toISOString().slice(0,10);
+    for(const [id,days] of [['f-d1',1],['f-d3',3],['f-d5',5]]){
+      try{
+        const { data:q } = await sb().rpc('quote_rental', { p_code:code, p_customer:null, p_from:today, p_to:addDays(today,days-1), p_courier:'flash', p_remote:false });
+        if(q && q.rate!=null) set(id, q.rate);
+      }catch(e){}
+    }
+    status('ดึงสำเร็จ · ปรับแก้ได้ก่อนโหลด');
+    render();
+  }
+
   async function download(){
-    const card = $('card');
-    const prev = card.style.transform;
-    card.style.transform = 'scale(1)';
-    const canvas = await html2canvas(card, {scale:1, width:1080, height:1350, backgroundColor:'#F8F4EC', useCORS:true});
-    card.style.transform = prev;
-    const a = document.createElement('a');
-    const code = ($('f-meta').value.split('·').pop()||'card').trim().replace(/\s+/g,'');
-    a.download = 'lloop-price-' + code + '.png';
-    a.href = canvas.toDataURL('image/png');
-    a.click();
+    const card=$('card'), prev=card.style.transform; card.style.transform='scale(1)';
+    let canvas;
+    try{ canvas=await html2canvas(card,{scale:1,width:1080,height:1350,backgroundColor:'#F8F4EC',useCORS:true}); }
+    catch(e){ status('โหลดรูปไม่ได้ (รูปชุดอาจติด CORS) — ลองลบลิงก์รูปแล้วโหลดใหม่', true); card.style.transform=prev; return; }
+    card.style.transform=prev;
+    const code=(v('f-meta').split('·').pop()||'card').trim().replace(/\s+/g,'');
+    const a=document.createElement('a'); a.download='lloop-price-'+code+'.png'; a.href=canvas.toDataURL('image/png'); a.click();
   }
 
   render();
