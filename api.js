@@ -40,6 +40,9 @@ window.API = (function () {
       grade: r.condition_grade || null, washCount: r.wash_count ?? null,         // ความสะอาด/ดูแล
       timesRented: r.times_rented ?? 0,
       photo: (Array.isArray(r.photos) && r.photos[0]) || r.photo || null,
+      photos: Array.isArray(r.photos) ? r.photos : [],
+      size: r.size || null,
+      sourceMeta: r.source_meta || null,
       styling_tips: r.styling_tips || [],
       fabric: r.fabric_composition, stretch: r.stretch ||'none',
       lining: r.has_lining, sheer: r.is_sheer, weight: r.fabric_weight,

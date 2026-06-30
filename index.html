@@ -358,7 +358,18 @@
   .sheet{background:#fff;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;animation:up .25s}
   @keyframes up{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
   .dphoto{aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;position:relative;background:var(--soft2)}
-  .close{position:absolute;top:12px;right:12px;background:#fff;border:none;width:34px;height:34px;border-radius:50%;font-size:18px}
+  .dgal{position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .dgal::-webkit-scrollbar{display:none}
+  .dgal>div{flex:0 0 100%;scroll-snap-align:center;background-size:cover;background-position:center;background-repeat:no-repeat}
+  .dgcount{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.45);color:#fff;font-size:11px;padding:3px 11px;border-radius:20px;letter-spacing:.3px;pointer-events:none}
+  .dsizes{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 2px}
+  .dsizes button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 17px;font-weight:600;cursor:pointer;font-size:14px;color:#2b2b2b}
+  .dsizes button.on{border-color:#2B5070;background:#EEF2F6;color:#2B5070}
+  .dsizes button:disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+  .dsizechart img{width:100%;border:1px solid var(--line);border-radius:10px;display:block}
+  .dscnote{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.5}.dscnote b{color:#2B5070}
+  .psizes{font-size:11px;color:var(--muted);letter-spacing:.5px;margin-top:3px}
+  .close{position:absolute;top:12px;right:12px;z-index:3;background:#fff;border:none;width:34px;height:34px;border-radius:50%;font-size:18px}
   .dbody{padding:18px}
   .cbrand{font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
   .dname{font-family:var(--display);font-size:22px;font-weight:600;line-height:1.15}

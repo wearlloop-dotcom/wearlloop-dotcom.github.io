@@ -358,6 +358,29 @@ async function toggleWish(garmentId, event) {
   if (fWishOnly) renderGrid();
 }
 
+// ===== จัดกลุ่ม "สไตล์เดียวกันต่างไซส์" ให้เป็นการ์ดเดียว =====
+const SIZE_ORDER = ['XS','S','M','L','XL','XXL','FREE'];
+function sizeRank(s){ const i = SIZE_ORDER.indexOf(String(s||'').toUpperCase().trim()); return i < 0 ? 98 : i; }
+// key รวม = แบรนด์+ชื่อ+สี (สีต่าง = คนละการ์ด กันรวมผิด); ไม่มี size → ไม่รวม
+function styleKey(g){ return [String(g.brand||'').toLowerCase().trim(), String(g.name||'').toLowerCase().trim(), String((g.colors&&g.colors[0]&&g.colors[0][0])||'').toLowerCase().trim()].join('|'); }
+// ชุดทุกไซส์ของ style เดียวกัน (เรียงไซส์) — ใช้ทำปุ่มเลือกไซส์ในรายละเอียด
+function styleVariants(g){ const k = styleKey(g); return GARMENTS.filter(x => styleKey(x) === k).sort((a,b)=> sizeRank(a.size)-sizeRank(b.size)); }
+// ยุบลิสต์ให้เหลือ 1 ตัวแทนต่อ style (ตัวแทน = ไซส์ S ถ้ามี) + แนบ _variants ที่อยู่ในลิสต์
+function groupByStyle(list){
+  const byKey = new Map();
+  list.forEach(g => { const k = styleKey(g); (byKey.get(k) || byKey.set(k, []).get(k)).push(g); });
+  const seen = new Set(), out = [];
+  list.forEach(g => { const k = styleKey(g); if (seen.has(k)) return; seen.add(k);
+    const vs = byKey.get(k).slice().sort((a,b)=> sizeRank(a.size)-sizeRank(b.size));
+    const rep = vs.find(x => String(x.size||'').toUpperCase() === 'S') || vs[0];
+    out.push(Object.assign({}, rep, { _variants: vs }));
+  });
+  return out;
+}
+// รูปสำหรับแกลเลอรี (lookbook ใส่ตารางไซส์เป็นรูปสุดท้าย → แยกออกไปบล็อกตารางไซส์)
+function galleryPhotos(g){ const p = Array.isArray(g.photos)? g.photos : []; return (g.sourceMeta && p.length > 1) ? p.slice(0, -1) : p; }
+function sizeChartPhoto(g){ const p = Array.isArray(g.photos)? g.photos : []; return (g.sourceMeta && p.length > 1) ? p[p.length-1] : null; }
+
 function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
@@ -383,7 +406,7 @@ function renderGrid() {
     return;
   }
   // continuous feed: เก็บลิสต์เต็ม แล้วโหลดทีละหน้า (มีจุดหยุดพอดี — ไม่ใช่ infinite loop เสพติด)
-  gGridList = list;
+  gGridList = groupByStyle(list);   // รวมไซส์ของสไตล์เดียวกันเป็นการ์ดเดียว
   gGridShown = 0;
   $('#grid').innerHTML = '';
   renderGridPage();
@@ -394,7 +417,10 @@ function gridCardHtml(g) {
   const fit = fitConfidence(CUSTOMER, g);
   const fn = fitNote(g);
   const match = g.season === CUSTOMER.my_color_season;
-  const av = !gUseDate || !gAvailSet || gAvailSet.has(g.id);
+  const vs = g._variants || [g];
+  const av = !gUseDate || !gAvailSet || vs.some(v => gAvailSet.has(v.id));
+  const sizeList = [...new Set(vs.map(v => String(v.size||'').toUpperCase()).filter(Boolean))].sort((a,b)=> sizeRank(a)-sizeRank(b));
+  const sizeLbl = sizeList.length ? `<div class="psizes">${lang==='th'?'ไซส์':'Size'} ${sizeList.join(' · ')}</div>` : '';
   const sv = savingsPct(g);
   const dots = g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
   const ph = gPhoto(g);
@@ -422,6 +448,7 @@ function gridCardHtml(g) {
         <div class="pbrand">${g.brand ||''}</div>
         <div class="pname">${g.name}</div>
         <div class="pprice">฿${staffPrice(g.price)}${staffTag()} <span style="color:var(--muted);font-weight:400">/ ${t('perTime')}</span></div>
+        ${sizeLbl}
         <div class="pcolors">${dots}</div>
         ${fn?`<div class="fitnote ${fn.cls}">${fn.text}</div>`:''}
       </div>
@@ -642,10 +669,27 @@ function openDetail(id) {
   const swatches = g.colors.map(c =>`<div class="swatch"><i style="background:${c[1]}"></i><span>${c[0]}</span></div>`).join('');
   const tips = tipList.map(x =>`<div class="trow"><i></i>${x}</div>`).join('');
 
-  const dHero = gPhoto(g);
+  const galImgs = galleryPhotos(g);
+  const chart = sizeChartPhoto(g);
+  const variants = styleVariants(g);
+  const hasSizes = variants.some(v => v.size);
+  // ไซส์ที่ "เรามีจริง" — ยึดจากแถวชุดในระบบ (data หลังบ้าน) ไม่ใช่จากแบรนด์
+  const ourSizesLabel = [...new Set(variants.map(v => String(v.size||'').toUpperCase()).filter(Boolean))]
+    .sort((a,b)=> sizeRank(a)-sizeRank(b))
+    .map(s => s==='FREE' ? (lang==='th'?'ฟรีไซส์':'Free') : s).join(' · ');
+  const sizeChips = hasSizes ? `<div class="dsizes">${variants.map(v => {
+    const on = v.id === g.id;
+    const avAble = !(gUseDate && gAvailSet) || gAvailSet.has(v.id);
+    const lbl = String(v.size||'').toUpperCase() === 'FREE' ? (lang==='th'?'ฟรีไซส์':'Free') : (v.size || '–');
+    return `<button class="${on?'on':''}" ${(!on && !avAble)?'disabled':''} ${on?'':`onclick="openDetail('${v.id}')"`}>${lbl}</button>`;
+  }).join('')}</div>` : '';
+
   $('#sheet').innerHTML =`
-    <div class="dphoto" style="${dHero?`background-image:url('${dHero}');background-size:cover;background-position:center`:`background:${g.bg}`}">
-      ${dHero?'':`<span class="ph" style="font-family:var(--serif);font-style:italic;color:rgba(0,0,0,.28)">${g.name}</span>`}
+    <div class="dphoto" style="${galImgs.length?'':`background:${g.bg}`}">
+      ${galImgs.length
+        ? `<div class="dgal">${galImgs.map(u=>`<div style="background-image:url('${u}')"></div>`).join('')}</div>
+           ${galImgs.length>1?`<span class="dgcount">${lang==='th'?`เลื่อนดู ${galImgs.length} รูป →`:`${galImgs.length} photos →`}</span>`:''}`
+        : `<span class="ph" style="font-family:var(--serif);font-style:italic;color:rgba(0,0,0,.28)">${g.name}</span>`}
       <button class="close" onclick="closeDetail()">×</button>
       ${match?`<span class="season" style="position:absolute;top:14px;left:14px">${t('toneMatch')}</span>`:''}
     </div>
@@ -653,6 +697,7 @@ function openDetail(id) {
       <div class="cbrand">${g.brand ||''}</div>
       <div class="dname">${g.name}</div>
       <div class="dmeta">${g.tier} · ${t('rotating')}</div>
+      ${sizeChips ? `<div class="sec">${lang==='th'?'เลือกไซส์':'Select size'}</div>${sizeChips}` : ''}
       <div id="ratingline" class="ratingline"></div>
       <div id="socialproof" class="socialproof"></div>
       ${fit!= null?`<div class="fitbox"><div class="pct">${fit}%</div>
@@ -664,6 +709,7 @@ function openDetail(id) {
       <div id="ugcWrap" style="display:none"><div class="sec">${lang ==='th'?'รูปจริงจากลูกค้า':'Real customer photos'}</div><div id="ugcbox" class="ugcbox"></div></div>
       <div class="sec">${t('secSize')}</div>
       <div class="measure">${measures}</div>
+      ${chart ? `<div class="sec">${lang==='th'?'ตารางไซส์':'Size chart'}</div><div class="dsizechart"><img src="${chart}" alt="size chart" loading="lazy">${ourSizesLabel ? `<div class="dscnote">${lang==='th'?`ตารางอ้างอิงจากแบรนด์ — <b>ไซส์ที่เรามีให้เช่า: ${ourSizesLabel}</b>`:`Brand reference — <b>we rent: ${ourSizesLabel}</b>`}</div>` : ''}</div>` : ''}
       <div id="fitsummary"></div>
       <div class="sec">${t('secFabric')}</div>
       <div class="fabric">${fabricTags}</div>
