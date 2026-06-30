@@ -36,6 +36,9 @@ function loadCart() {
   try { const v = JSON.parse(localStorage.getItem(CART_KEY) || '[]'); if (Array.isArray(v)) gCart = v; } catch (e) { gCart = []; }
 }
 
+// รูปชุด — ใช้ photo หลัก ไม่งั้น photos[0] (ให้ตรงกับที่ stylist pick ใช้)
+function gPhoto(g) { return (g && (g.photo || (Array.isArray(g.photos) && g.photos[0]))) || ''; }
+
 // บวกวันแบบ local (กัน toISOString เลื่อนโซน +7) → คืน 'YYYY-MM-DD'
 function addDays(dateStr, n) {
   const d = new Date(dateStr + 'T00:00:00'); d.setDate(d.getDate() + n);
@@ -383,9 +386,10 @@ function gridCardHtml(g) {
   const av = !gUseDate || !gAvailSet || gAvailSet.has(g.id);
   const sv = savingsPct(g);
   const dots = g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
+  const ph = gPhoto(g);
   return`<div class="pcard ${gUseDate && !av ? 'busy' : ''}" onclick="openDetail('${g.id}')">
-      <div class="pphoto" style="${g.photo?`background-image:url('${g.photo}');background-size:cover;background-position:center`:`background:${g.bg}`}">
-        ${g.photo?'':`<span class="ph">${g.name}</span>`}
+      <div class="pphoto" style="${ph?`background-image:url('${ph}');background-size:cover;background-position:center`:`background:${g.bg}`}">
+        ${ph?'':`<span class="ph">${g.name}</span>`}
         <button class="wish ${gWish.has(g.id)?'on':''}" onclick="toggleWish('${g.id}',event)" aria-label="wishlist">♥</button>
         <div class="badges">
           ${gUseDate ? `<span class="bdg ${av ? 'avail' : 'busy'}">${av ? (lang === 'th' ? 'ว่าง ' + fmtDate(gUseDate) : 'free ' + fmtDate(gUseDate)) : (lang === 'th' ? 'ไม่ว่าง' : 'booked')}</span>` : ''}
@@ -627,9 +631,10 @@ function openDetail(id) {
   const swatches = g.colors.map(c =>`<div class="swatch"><i style="background:${c[1]}"></i><span>${c[0]}</span></div>`).join('');
   const tips = tipList.map(x =>`<div class="trow"><i></i>${x}</div>`).join('');
 
+  const dHero = gPhoto(g);
   $('#sheet').innerHTML =`
-    <div class="dphoto" style="${g.photo?`background-image:url('${g.photo}');background-size:cover;background-position:center`:`background:${g.bg}`}">
-      ${g.photo?'':`<span class="ph" style="font-family:var(--serif);font-style:italic;color:rgba(0,0,0,.28)">${g.name}</span>`}
+    <div class="dphoto" style="${dHero?`background-image:url('${dHero}');background-size:cover;background-position:center`:`background:${g.bg}`}">
+      ${dHero?'':`<span class="ph" style="font-family:var(--serif);font-style:italic;color:rgba(0,0,0,.28)">${g.name}</span>`}
       <button class="close" onclick="closeDetail()">×</button>
       ${match?`<span class="season" style="position:absolute;top:14px;left:14px">${t('toneMatch')}</span>`:''}
     </div>
@@ -938,7 +943,6 @@ async function renderQuote(id, date) {
         <img src="${pay.pay_promptpay_qr}" alt="PromptPay QR" style="display:block;margin:0 auto;width:200px;max-width:70%;border:1px solid var(--line,#E7E5E1);border-radius:6px">
         <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(netTotal)}</b></div></div>` : ''}
       <div style="font-size:12px;color:var(--muted,#8C8B86);margin-top:6px">${pay.pay_note || (TH ? 'โอนแล้วแนบสลิปในแชตนี้ ระบบตรวจให้อัตโนมัติค่ะ' : 'Transfer then send slip in chat — we verify it automatically')}</div>
-      <div style="font-size:12px;margin-top:6px;text-align:center"><a href="#" onclick="closeDetail();openOrders();return false" style="color:var(--ink,#1A1A1A);text-decoration:underline">${TH ? 'เช็กสถานะออเดอร์ของฉัน' : 'Track my order status'}</a></div>
     </div>`;
   const kyc = q.kyc_required ? `<div class="kycnote">
       <div class="kt">${TH ? 'ยืนยันตัวตน ลดมัดจำได้' : 'Verify to lower your deposit'}</div>
@@ -984,7 +988,9 @@ function showPayConfirm({ g, date, total, pay, backups }) {
   const TH = lang === 'th';
   closePayConfirm();
   const bk = (backups && backups.length) ? (TH ? `เตรียมชุดสำรองให้ ${backups.length} ตัว` : `${backups.length} spare(s) on standby`) : '';
-  const hasPay = pay && (pay.pay_account_no || pay.pay_promptpay_id || pay.pay_promptpay_qr);
+  // QR แบบฝังยอดต้องมี total เสมอ — ถ้าดึงยอดไม่ได้ อย่าโชว์กล่อง QR เปล่า ให้ตกไป fallback แทน
+  const canQR = !!(pay && pay.pay_promptpay_id) && total != null;
+  const hasPay = pay && (pay.pay_account_no || pay.pay_promptpay_qr || canQR);
   const ov = document.createElement('div');
   ov.id = 'payConfirmOverlay';
   ov.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(26,26,26,.55);display:flex;align-items:flex-end;justify-content:center';
@@ -997,7 +1003,7 @@ function showPayConfirm({ g, date, total, pay, backups }) {
       </div>
       ${hasPay ? `
       <div style="text-align:center;margin-top:14px">
-        ${pay.pay_promptpay_id ? `<div id="pcfqr"></div>` : pay.pay_promptpay_qr ? `<img src="${pay.pay_promptpay_qr}" alt="PromptPay QR" style="display:block;margin:0 auto;width:200px;max-width:70%;border:1px solid var(--line,#E7E5E1);border-radius:6px">` : ''}
+        ${canQR ? `<div id="pcfqr"></div>` : pay.pay_promptpay_qr ? `<img src="${pay.pay_promptpay_qr}" alt="PromptPay QR" style="display:block;margin:0 auto;width:200px;max-width:70%;border:1px solid var(--line,#E7E5E1);border-radius:6px">` : ''}
         ${pay.pay_account_no ? `<div style="font-size:13px;margin-top:8px">${pay.pay_bank_name || ''} <b>${pay.pay_account_no}</b>${pay.pay_account_name ? ` · ${pay.pay_account_name}` : ''}</div>` : ''}
         ${total != null ? `<div style="font-size:15px;font-weight:600;margin-top:10px">${TH ? 'โอน' : 'Transfer'} ฿${total}</div>` : ''}
       </div>
@@ -1070,9 +1076,12 @@ async function reserve(id, useCredit) {
   if (!date) {
     const msg = $('#availMsg');
     if (msg) { msg.className ='availmsg busy'; msg.textContent = lang ==='th'?'เลือกวันที่ต้องใช้ก่อนนะคะ':'Pick a date first'; }
-    const dp = document.querySelector('.datepick');
-    if (dp) dp.scrollIntoView({ behavior:'smooth', block:'center' });
-    const di = $('#useDate'); if (di) try { di.focus(); } catch (e) { /**/ }
+    const di = $('#useDate');
+    if (di) { di.classList.add('need'); di.addEventListener('input', () => di.classList.remove('need'), { once:true }); }
+    // เลื่อน container ของชีตเอง (scrollIntoView ไม่เสถียรใน overlay fixed/LIFF webview)
+    const dp = document.querySelector('.datepick'), cont = dp && (dp.closest('.sheet') || dp.parentElement);
+    if (dp && cont) { const top = dp.getBoundingClientRect().top - cont.getBoundingClientRect().top + cont.scrollTop - 12; cont.scrollTo({ top, behavior:'smooth' }); }
+    if (di) try { di.focus(); } catch (e) { /**/ }
     return;
   }
   // ด่าน KYC — ลูกค้าใหม่ต้องยืนยันตัวตนก่อนเช่า
@@ -1639,10 +1648,11 @@ function openProfile(onboard) {
       ${head}
       <h3>${onboard?(lang==='th'?'ข้อมูลเบื้องต้น':'Quick details'):t('pTitle')}</h3>
       <p class="hint">${t('pHint')}</p>
-      ${renderTheLoop(c)}
+      <button type="button" class="walletlink" onclick="closeProfile();openWallet()" style="width:100%;text-align:left;border:1px solid var(--line,#E7E5E1);background:#FBF8F2;border-radius:12px;padding:11px 14px;margin-bottom:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+        <span>${lang==='th'?'กระเป๋า LLOOP · เครดิต ชวนเพื่อน ระดับสมาชิก':'LLOOP wallet · credit, invites, tier'}</span><span style="color:var(--muted,#8C8B86)">${c.credit_balance ? '฿'+Math.round(c.credit_balance)+' ›' : '›'}</span>
+      </button>
       ${renderStyleCard(c)}
       ${renderImpactCard()}
-      ${renderReferralCard()}
       <div class="field"><label>${t('pName')}</label><input id="pName" autocomplete="name" value="${c.name || c.display_name ||''}"></div>
       <div class="frow">
         <div class="field"><label>${t('pHeight')}</label><input id="pHeight" type="number" value="${c.height_cm ||''}"></div>
@@ -1692,7 +1702,6 @@ function openProfile(onboard) {
   $('#pOverlay').classList.add('open');
   document.body.style.overflow ='hidden';
   setTimeout(() => animateCounts($('#pSheet')), 80);  // ตัวเลขนับขึ้นในการ์ดอิมแพกต์
-  loadReferralCode();  // ดึงโค้ดชวนเพื่อน (async inject)
   loadPcBookZone();    // จ่ายแล้ว → ให้เลือกสไตลิสต์/จองเวลา หรือโชว์นัด (async inject)
 }
 // การ์ดชวนเพื่อน — รับเครดิตทั้งคู่
@@ -2667,7 +2676,7 @@ async function pickExtendDate(ds) {
     if (q && !q.error) { _extend.charge = q.extra_charge || 0; _renderExtend(); }
   } catch (e) { _extend.charge = 0; _renderExtend(); }
 }
-function closeExtend() { $('#reschedOverlay').classList.remove('open'); document.body.style.overflow =''; _extend = null; }
+function closeExtend() { $('#reschedOverlay').classList.remove('open'); document.body.style.overflow =''; _extend = null; const s = $('#reschedSheet'); if (s) s.innerHTML = ''; }
 async function confirmExtend() {
   if (!_extend || !_extend.pick) return;
   const { rentalId, pick } = _extend;
@@ -2743,7 +2752,7 @@ function _renderResched() {
     <button class="rvsubmit" id="rsdGo" ${S.pick?'':'disabled'} onclick="confirmResched()">${th?'ยืนยันเลื่อนวัน':'Confirm reschedule'}</button>`;
 }
 function pickReschedDate(ds) { _resched.pick = ds; _renderResched(); }
-function closeResched() { $('#reschedOverlay').classList.remove('open'); document.body.style.overflow =''; _resched = null; }
+function closeResched() { $('#reschedOverlay').classList.remove('open'); document.body.style.overflow =''; _resched = null; const s = $('#reschedSheet'); if (s) s.innerHTML = ''; }
 async function confirmResched() {
   if (!_resched || !_resched.pick) return;
   const { rentalId, pick, span } = _resched;
