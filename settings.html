@@ -114,6 +114,19 @@
     </div>
   </div>
 
+  <div class="card" id="partnerCard" style="display:none">
+    <h2>พาร์ทเนอร์สไตลิสต์ลงทะเบียนเอง</h2>
+    <div class="desc">เปิด = ใครก็ตามที่เปิดหน้าพอร์ทัลสไตลิสต์ผ่าน LINE จะเห็นปุ่ม “สมัครเป็นพาร์ทเนอร์” กรอกชื่อแล้วเข้าใช้พอร์ทัลได้ทันที (ผูกบัญชี LINE เป็นพาร์ทเนอร์) · ปิด = รับเฉพาะคนที่ออกสัญญาให้จากหลังบ้านเท่านั้น</div>
+    <div class="feat">
+      <div class="info">
+        <div class="name">เปิดรับสมัครพาร์ทเนอร์ด้วยตนเอง</div>
+        <div class="note">เหมาะตอนเปิดรับสไตลิสต์ใหม่จำนวนมาก · ปิดสวิตช์ไม่ถอนสิทธิ์คนที่สมัครไปแล้ว (เพิกถอนรายตัวที่หน้าสัญญา)</div>
+        <div class="need">ผู้สมัครจะถูกบันทึกเป็นสัญญา self-register — ตรวจ/เพิกถอนได้ที่ ops/contracts.html</div>
+      </div>
+      <label class="sw" data-key="partner_self_register_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+  </div>
+
   <div class="card" id="premiumCard" style="display:none">
     <h2>ระบบคุ้มครองชุดออกงาน (ชุดแพง)</h2>
     <div class="desc">เปิดเมื่อพร้อมเริ่มปล่อยเช่าชุดราคาแพง — พอเปิด ระบบจะ “เตือนเจ้าของอัตโนมัติ” ทุกครั้งที่ชุดแพงถูกจอง ให้ทำขั้นตอนคุ้มครอง (วิดีโอก่อนแพค/ตอนแกะของ ฯลฯ) ลดความผิดพลาดของคน · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก</div>
@@ -141,6 +154,24 @@
       <label>หรือ tier เหล่านี้<div class="sub">คั่นด้วยจุลภาค เช่น Premium,Luxury</div></label>
       <input id="premTiers" type="text" style="width:160px;text-align:left" placeholder="Premium,Luxury">
     </div>
+  </div>
+
+  <div class="card" id="financeCard" style="display:none">
+    <h2>กองทุนซื้อชุดใหม่ &amp; กำไรต่อชุด</h2>
+    <div class="desc">ทุกการเช่ากันเงินส่วนหนึ่งไว้ “ซื้อชุดใหม่” อัตโนมัติ (restock) — คลังโตเองไม่ต้องเติมทุน · เช็กกำไรสุทธิต่อชุดได้รายตัว (หักค่าซักตามคลาสผ้า + ค่าคน/ส่ง/แพ็ก/กันสำรอง/restock)</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 14px">
+      <div style="text-align:center"><div id="rsBal" style="font-size:20px;font-weight:700">–</div><div class="sub">คงเหลือในกอง</div></div>
+      <div style="text-align:center"><div id="rsProv" style="font-size:20px;font-weight:700">–</div><div class="sub">กันสะสมทั้งหมด</div></div>
+      <div style="text-align:center"><div id="rsSpent" style="font-size:20px;font-weight:700">–</div><div class="sub">ใช้ซื้อชุดแล้ว</div></div>
+      <div style="text-align:center"><div id="rsPct" style="font-size:20px;font-weight:700">–</div><div class="sub">% กันต่อครั้ง</div></div>
+    </div>
+    <div class="disc">
+      <label>เช็กกำไรต่อชุด<div class="sub">ใส่รหัสชุด + จำนวนวัน → ดูรายได้/ค่าซัก/ต้นทุน/กำไรสุทธิ</div></label>
+      <input id="mgCode" type="text" placeholder="เช่น g2" style="width:110px;text-align:left">
+      <input id="mgDays" type="number" min="1" max="14" value="3" style="width:56px">
+      <button id="mgBtn" type="button" style="padding:7px 14px;border:0;border-radius:8px;background:#2f6f4f;color:#fff;font-weight:600;cursor:pointer">เช็ก</button>
+    </div>
+    <div id="mgOut" class="sub" style="margin-top:8px;line-height:1.6"></div>
   </div>
 
   <div class="hint" id="hint" style="display:none">
@@ -180,9 +211,32 @@ async function load(){
   $('#loading').style.display = 'none';
   $('#panel').style.display = '';
   $('#stylistCard').style.display = '';
+  $('#partnerCard').style.display = '';
   $('#premiumCard').style.display = '';
+  $('#financeCard').style.display = '';
   $('#hint').style.display = '';
+  loadFinance();
 }
+
+const baht = (n) => '฿' + Math.round(Number(n) || 0).toLocaleString();
+async function loadFinance(){
+  const { data } = await window.opsRpc('restock_balance', {});
+  if (!data) return;
+  $('#rsBal').textContent   = baht(data.balance);
+  $('#rsProv').textContent  = baht(data.provisioned);
+  $('#rsSpent').textContent = baht(data.spent);
+  $('#rsPct').textContent   = (data.pct ?? 15) + '%';
+}
+$('#mgBtn').addEventListener('click', async () => {
+  const code = ($('#mgCode').value || '').trim();
+  const days = Math.min(14, Math.max(1, parseInt($('#mgDays').value || '3', 10) || 3));
+  if (!code) { $('#mgOut').textContent = 'ใส่รหัสชุดก่อน'; return; }
+  $('#mgOut').textContent = 'กำลังคำนวณ…';
+  const { data, error } = await window.opsRpc('margin_estimate', { p_code: code, p_days: days });
+  if (error) { $('#mgOut').textContent = 'ผิดพลาด: ' + error.message; return; }
+  if (!data || data.error) { $('#mgOut').textContent = (data && data.error === 'not_found') ? 'ไม่พบชุดรหัสนี้' : 'คำนวณไม่ได้'; return; }
+  $('#mgOut').innerHTML = `เช่า ${data.days} วัน · ผ้าคลาส ${data.care_class} — รายได้ ${baht(data.revenue)} · ค่าซัก ${baht(data.clean)} · ต้นทุนคงที่ ${baht(data.fixed_cost)} · กัน restock ${baht(data.restock_set_aside)} · <b style="color:#2f6f4f">กำไรสุทธิ ${baht(data.net)} (${data.net_pct}%)</b>`;
+});
 
 async function save(key, value, sw){
   if (sw) sw.classList.add('busy');
