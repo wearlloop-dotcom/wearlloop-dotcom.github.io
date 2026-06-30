@@ -756,9 +756,9 @@ window.API = (function () {
     const { data } = await window.meRpc('my_likes', {});
     return data || [];
   }
-  async function addComment(lookId, body) {
+  async function addComment(lookId, body, parentId) {
     if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
-    const { data, error } = await window.meRpc('add_comment', { p_look: lookId, p_body: body });
+    const { data, error } = await window.meRpc('add_comment', { p_look: lookId, p_body: body, p_parent: parentId || null });
     const res = error ? { ok: false, error } : (data || { ok: false });
     // AI moderation ชั้นสอง (ถ้า keyword ไม่ได้ซ่อนไว้แล้ว) — best-effort, ไม่บล็อก UX
     if (res.ok && res.id && !res.hidden) {
@@ -797,6 +797,22 @@ window.API = (function () {
     const { data } = await client().rpc('leaderboard', { p_metric: metric || 'rented', p_limit: limit || 20 });
     return data || [];
   }
+  // bookmark ลุค
+  async function toggleSave(lookId) {
+    if (CONFIG.USE_MOCK || !window.meRpc) return null;
+    const { data } = await window.meRpc('toggle_save', { p_look: lookId });
+    return data || null;
+  }
+  async function mySaves() {
+    if (CONFIG.USE_MOCK || !window.meRpc) return [];
+    const { data } = await window.meRpc('my_saves', {});
+    return data || [];
+  }
+  async function savedFeed(limit) {
+    if (CONFIG.USE_MOCK || !window.meRpc) return [];
+    const { data } = await window.meRpc('saved_feed', { p_limit: limit || 30 });
+    return data || [];
+  }
 
-  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard };
+  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed };
 })();

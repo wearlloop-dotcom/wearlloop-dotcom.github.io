@@ -88,8 +88,8 @@
   .story{position:fixed;inset:0;background:#000;z-index:300;display:none;flex-direction:column}
   .story.open{display:flex}
   .story .bars{display:flex;gap:4px;padding:10px 12px 6px}
-  .story .bar{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3)}
-  .story .bar.on{background:#fff}
+  .story .bar{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3);overflow:hidden}
+  .story .bar i{display:block;height:100%;width:0;background:#fff;border-radius:3px}
   .story .top{display:flex;align-items:center;gap:9px;padding:4px 14px 8px;color:#fff}
   .story .top .sav{width:32px;height:32px;border-radius:50%;background:#555;object-fit:cover}
   .story .top .snm{font-size:14px;font-weight:600;flex:1;min-width:0}
@@ -124,6 +124,7 @@
   .cmt{display:flex;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}
   .cmt .cav{width:30px;height:30px;border-radius:50%;background:var(--sand);object-fit:cover;flex-shrink:0}
   .cmt .cb{font-size:13px}.cmt .cby{font-weight:600;font-size:12px}
+  .cmt .rpl{display:inline-block;margin-top:3px;font-size:11.5px;color:var(--sage);font-weight:600;cursor:pointer}
   .followbtn{background:var(--ink);color:#fff;border:none;border-radius:20px;padding:7px 18px;font-size:12.5px;font-weight:600;margin-top:8px}
   .followbtn.on{background:#fff;color:var(--ink);border:1px solid var(--line)}
   .hide{display:none}
@@ -144,7 +145,8 @@
   <div class="tabs" id="tabs">
     <button class="tab on" data-tab="all" onclick="switchTab('all')">ทั้งหมด</button>
     <button class="tab" data-tab="following" onclick="switchTab('following')">ที่ตามอยู่</button>
-    <button class="tab" data-tab="board" onclick="switchTab('board')">อันดับครีเอเตอร์</button>
+    <button class="tab" data-tab="saved" onclick="switchTab('saved')">บันทึกไว้</button>
+    <button class="tab" data-tab="board" onclick="switchTab('board')">อันดับ</button>
   </div>
   <div class="occ" id="occ"></div>
   <div class="grid" id="feed">
@@ -167,17 +169,19 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=39"></script>
-<script src="liffAuth.js?v=39"></script>
-<script src="me-api.js?v=48"></script>
-<script src="api.js?v=48"></script>
+<script src="config.js?v=49"></script>
+<script src="liffAuth.js?v=49"></script>
+<script src="me-api.js?v=49"></script>
+<script src="api.js?v=49"></script>
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 const baht = n => '฿'+Number(n||0).toLocaleString('th-TH');
 const TIER_TH = { new:'', silver:'Silver', gold:'Gold', platinum:'Platinum' };
 let CUSTOMER=null, LIVE=false, FEED=[], TAB='all', OCC=null, TAG=null, STORY_I=-1;
-let LIKED=new Set(), FOLLOWING=new Set();
+let LIKED=new Set(), FOLLOWING=new Set(), SAVED=new Set();
+let STORY_TIMER=null, STORY_T0=0, STORY_PAUSED=0, REPLY_TO=null;
+const STORY_MS=5000;
 
 function toast(t){ const e=$('#toast'); e.textContent=t; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),2600); }
 function openOv(id){ $(id).classList.add('open'); document.body.style.overflow='hidden'; }
@@ -191,7 +195,7 @@ async function boot(){
     }
   }catch(e){ /* ดูฟีดได้แม้ไม่ล็อกอิน */ }
   try{ FEED = await window.API.communityFeed(30, null, null); }catch(e){ FEED=[]; }
-  if(LIVE){ try{ LIKED=new Set(await window.API.myLikes()); FOLLOWING=new Set(await window.API.myFollowing()); }catch(e){} }
+  if(LIVE){ try{ LIKED=new Set(await window.API.myLikes()); FOLLOWING=new Set(await window.API.myFollowing()); SAVED=new Set(await window.API.mySaves()); }catch(e){} }
   renderFeed();
   renderOcc();
   $('#shareBtn').onclick = openShare;
@@ -245,7 +249,9 @@ function cardHtml(c){
         <button class="act" onclick="openComments('${c.id}')">
           <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           <span id="cmt-${c.id}">${c.comments||0}</span></button>
-        <span class="act" style="margin-left:auto" onclick='shareOut(${JSON.stringify({u:lookUrl(c),n:(g.name||"")}).replace(/'/g,"&#39;")})'>
+        <button class="act ${SAVED.has(c.id)?'on':''}" id="save-${c.id}" onclick="saveLook('${c.id}')" style="margin-left:auto">
+          <svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z"/></svg></button>
+        <span class="act" onclick='shareOut(${JSON.stringify({u:lookUrl(c),n:(g.name||"")}).replace(/'/g,"&#39;")})'>
           <svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>แชร์</span>
       </div>`:`<span class="shareln" onclick='shareOut(${JSON.stringify({u:lookUrl(c),n:(g.name||"")}).replace(/'/g,"&#39;")})'>
         <svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>แชร์ลุคนี้</span>`}
@@ -281,16 +287,32 @@ function openStory(id){
   $('#story').classList.add('open'); document.body.style.overflow='hidden';
   renderStory();
 }
-function closeStory(){ $('#story').classList.remove('open'); document.body.style.overflow=''; STORY_I=-1; }
+function clearStoryTimer(){ if(STORY_TIMER){ cancelAnimationFrame(STORY_TIMER); STORY_TIMER=null; } }
+function closeStory(){ clearStoryTimer(); $('#story').classList.remove('open'); document.body.style.overflow=''; STORY_I=-1; }
 function storyNav(d){
+  clearStoryTimer();
   const n=STORY_I+d;
-  if(n<0){ return; } if(n>=FEED.length){ closeStory(); return; }
+  if(n<0){ STORY_I=0; return renderStory(); } if(n>=FEED.length){ closeStory(); return; }
   STORY_I=n; renderStory();
 }
+function startStoryTimer(){
+  clearStoryTimer(); STORY_T0=performance.now(); STORY_PAUSED=0;
+  const fill=$('#sbar-'+STORY_I);
+  (function step(t){
+    if(STORY_PAUSED){ STORY_TIMER=requestAnimationFrame(step); return; }
+    const r=Math.min(1,(t-STORY_T0)/STORY_MS);
+    if(fill) fill.style.width=(r*100)+'%';
+    if(r>=1){ storyNav(1); return; }
+    STORY_TIMER=requestAnimationFrame(step);
+  })(performance.now());
+}
+function storyPress(){ STORY_PRESS=performance.now(); STORY_PAUSED=performance.now(); }
+function storyRelease(){ if(STORY_PAUSED){ STORY_T0+=performance.now()-STORY_PAUSED; STORY_PAUSED=0; } }
+function storyTap(d){ if(performance.now()-STORY_PRESS>260) return; storyNav(d); } // กดค้าง=หยุดอ่าน ไม่เลื่อน
 function renderStory(){
   const c=FEED[STORY_I]; if(!c){ closeStory(); return; }
   const cr=c.creator||{}, g=c.garment||{};
-  const bars=FEED.map((_,i)=>`<div class="bar ${i<=STORY_I?'on':''}"></div>`).join('');
+  const bars=FEED.map((_,i)=>`<div class="bar"><i id="sbar-${i}" style="width:${i<STORY_I?'100%':'0'}"></i></div>`).join('');
   const av=cr.avatar?`<img class="sav" src="${esc(cr.avatar)}">`:`<span class="sav"></span>`;
   const tags=(Array.isArray(c.tags)&&c.tags.length)?`<div class="stags">${c.tags.map(t=>`<span onclick="closeStory();filterTag('${esc(t)}')">#${esc(t)}</span>`).join('')}</div>`:'';
   const canLike=c.source==='look';
@@ -298,9 +320,9 @@ function renderStory(){
     <div class="bars">${bars}</div>
     <div class="top">${av}<div class="snm" onclick="closeStory();openProfile('${esc(cr.handle||'')}')">${esc(cr.name||'Loop')}</div>
       <button class="sx" onclick="closeStory()">×</button></div>
-    <div class="img">
-      <div class="zone l" onclick="storyNav(-1)"></div>
-      <div class="zone r" onclick="storyNav(1)"></div>
+    <div class="img" onpointerdown="storyPress()" onpointerup="storyRelease()" onpointercancel="storyRelease()">
+      <div class="zone l" onclick="storyTap(-1)"></div>
+      <div class="zone r" onclick="storyTap(1)"></div>
       ${c.photo?`<img src="${esc(c.photo)}">`:''}
     </div>
     <div class="info">
@@ -310,9 +332,19 @@ function renderStory(){
         ${canLike?`<button class="slike ${LIKED.has(c.id)?'on':''}" id="slike-${c.id}" onclick="storyLike('${c.id}')">
           <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.5 12 21 12 21z"/></svg>
           <span id="slikes-${c.id}">${c.likes||0}</span></button>`:''}
+        ${canLike?`<button class="slike ${SAVED.has(c.id)?'on':''}" id="ssave-${c.id}" onclick="storySave('${c.id}')">
+          <svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z"/></svg></button>`:''}
         ${g.code?`<a class="srent" href="${lookUrl(c)}">เช่าลุคนี้${g.price?` · ${baht(g.price)}`:''}</a>`:''}
       </div>
     </div>`;
+  startStoryTimer();
+}
+async function storySave(id){
+  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อบันทึกค่ะ'); return; }
+  const btn=$('#ssave-'+id); if(btn) btn.classList.toggle('on');
+  let res=null; try{ res=await window.API.toggleSave(id); }catch(e){}
+  if(res){ if(btn) btn.classList.toggle('on', !!res.saved); if(res.saved) SAVED.add(id); else SAVED.delete(id);
+    const fb=$('#save-'+id); if(fb) fb.classList.toggle('on', !!res.saved); }
 }
 async function storyLike(id){
   if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อถูกใจค่ะ'); return; }
@@ -337,8 +369,24 @@ async function switchTab(tab){
     if(!LIVE){ feed.innerHTML='<div class="empty"><p>ล็อกอิน LINE เพื่อดูลุคจากคนที่คุณตามค่ะ</p></div>'; return; }
     feed.innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
     let f=[]; try{ f=await window.API.followingFeed(30); }catch(e){}
-    feed.innerHTML = f.length? f.map(cardHtml).join('') : '<div class="empty"><p>ยังไม่มีลุคจากคนที่ตาม — ไปกดติดตามในแท็บ “ทั้งหมด” ได้เลยค่ะ</p></div>';
+    FEED=f; feed.innerHTML = f.length? f.map(cardHtml).join('') : '<div class="empty"><p>ยังไม่มีลุคจากคนที่ตาม — ไปกดติดตามในแท็บ “ทั้งหมด” ได้เลยค่ะ</p></div>';
+  } else if(tab==='saved'){
+    if(!LIVE){ feed.innerHTML='<div class="empty"><p>ล็อกอิน LINE เพื่อดูลุคที่บันทึกไว้ค่ะ</p></div>'; return; }
+    feed.innerHTML='<div class="empty"><p>กำลังโหลด…</p></div>';
+    let f=[]; try{ f=await window.API.savedFeed(40); }catch(e){}
+    FEED=f; feed.innerHTML = f.length? f.map(cardHtml).join('') : '<div class="empty"><p>ยังไม่มีลุคที่บันทึก — กดไอคอนคั่นหน้าบนการ์ดเพื่อเก็บไว้ดูทีหลังค่ะ</p></div>';
   } else { renderFeed(); }
+}
+
+async function saveLook(id){
+  if(!LIVE){ toast('เข้าสู่ระบบผ่าน LINE เพื่อบันทึกลุคค่ะ'); return; }
+  const btn=$('#save-'+id), was=btn&&btn.classList.contains('on');
+  if(btn) btn.classList.toggle('on');
+  let res=null; try{ res=await window.API.toggleSave(id); }catch(e){}
+  if(res){ if(btn) btn.classList.toggle('on', !!res.saved); if(res.saved) SAVED.add(id); else SAVED.delete(id);
+    toast(res.saved?'บันทึกลุคไว้แล้ว':'นำออกจากที่บันทึกแล้ว');
+    if(TAB==='saved' && !res.saved) switchTab('saved'); }
+  else if(btn) btn.classList.toggle('on', was);
 }
 
 async function renderBoard(){
@@ -366,26 +414,40 @@ async function likeLook(id){
 }
 
 async function openComments(id){
+  REPLY_TO=null;
   openOv('#ovShare');
   $('#shareSheet').innerHTML = `<div class="shhd"><div class="shtitle">คอมเมนต์</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
     <div id="cmtList" style="margin-top:8px"><p class="muted">กำลังโหลด…</p></div>
-    ${LIVE?`<div style="display:flex;gap:8px;margin-top:12px">
+    ${LIVE?`<div id="replyBar" class="hide" style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--muted)">
+        <span id="replyTxt"></span><button class="x" style="font-size:18px" onclick="clearReply()">×</button></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
       <input class="inp" id="cmtIn" placeholder="พิมพ์คอมเมนต์…" style="flex:1">
       <button class="btn" style="width:auto;padding:11px 18px" onclick="submitComment('${id}')">ส่ง</button></div>`
       :`<p class="muted" style="margin-top:12px">เข้าสู่ระบบผ่าน LINE เพื่อคอมเมนต์ค่ะ</p>`}`;
   await loadComments(id);
 }
+function cmtHtml(c, reply){
+  const av=c.avatar?`<img class="cav" src="${esc(c.avatar)}">`:`<span class="cav"></span>`;
+  return `<div class="cmt" style="${reply?'margin-left:38px':''}">${av}<div class="cb">
+    <div class="cby">${esc(c.by||'Loop')}</div>${esc(c.body||'')}
+    ${(LIVE && !reply)?`<span class="rpl" onclick="setReply('${c.id}','${esc((c.by||'').replace(/'/g,''))}')">ตอบกลับ</span>`:''}
+    </div></div>`;
+}
 async function loadComments(id){
   let list=[]; try{ list=await window.API.lookComments(id); }catch(e){}
   const el=$('#cmtList'); if(!el) return;
-  el.innerHTML = list.length? list.map(c=>{
-    const av=c.avatar?`<img class="cav" src="${esc(c.avatar)}">`:`<span class="cav"></span>`;
-    return `<div class="cmt">${av}<div class="cb"><div class="cby">${esc(c.by||'Loop')}</div>${esc(c.body||'')}</div></div>`;
-  }).join('') : '<p class="muted">ยังไม่มีคอมเมนต์ — เป็นคนแรกที่ชมลุคนี้ค่ะ</p>';
+  if(!list.length){ el.innerHTML='<p class="muted">ยังไม่มีคอมเมนต์ — เป็นคนแรกที่ชมลุคนี้ค่ะ</p>'; return; }
+  const tops=list.filter(c=>!c.parent), byParent={};
+  list.filter(c=>c.parent).forEach(c=>{ (byParent[c.parent]=byParent[c.parent]||[]).push(c); });
+  el.innerHTML = tops.map(c=> cmtHtml(c,false) + (byParent[c.id]||[]).map(r=>cmtHtml(r,true)).join('')).join('');
 }
+function setReply(cid, name){ REPLY_TO=cid; const b=$('#replyBar'),t=$('#replyTxt'); if(t)t.textContent='กำลังตอบ '+name; if(b)b.classList.remove('hide'); const i=$('#cmtIn'); if(i)i.focus(); }
+function clearReply(){ REPLY_TO=null; const b=$('#replyBar'); if(b)b.classList.add('hide'); }
 async function submitComment(id){
   const inp=$('#cmtIn'); const body=(inp&&inp.value||'').trim(); if(!body) return;
-  inp.value=''; let res=null; try{ res=await window.API.addComment(id, body); }catch(e){}
+  const parent=REPLY_TO; inp.value='';
+  let res=null; try{ res=await window.API.addComment(id, body, parent); }catch(e){}
+  clearReply();
   if(res&&res.ok&&res.hidden){ toast('คอมเมนต์ถูกซ่อนไว้ตรวจสอบ (พบคำที่ไม่เหมาะสม) ค่ะ'); }
   else if(res&&res.ok){ await loadComments(id); const c=$('#cmt-'+id); if(c) c.textContent=(+c.textContent||0)+1; }
   else toast('ส่งคอมเมนต์ไม่สำเร็จ ลองใหม่นะคะ');

@@ -97,6 +97,17 @@
   .ch-head em{font-style:italic;color:var(--gold-light)}
   .ch-body{margin-top:22px;font-size:15px;color:var(--muted);font-weight:300;line-height:1.95;font-family:'Noto Sans Thai',var(--sans)}
 
+  /* ── VIDEO CARD (inline story clip) ── */
+  .video-card{max-width:520px;margin:34px auto 0}
+  .vc-media{position:relative;aspect-ratio:16/10;border:1px solid rgba(201,168,106,.35);border-radius:6px;overflow:hidden;background:linear-gradient(150deg,#1A1610 0%,#0C0B08 60%,#13110B 100%)}
+  .vc-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#0C0B08}
+  .vc-poster{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+  .vc-play{width:62px;height:62px;border:1px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);transition:transform .4s ease,background .4s ease}
+  .vc-play svg{width:20px;height:20px;margin-left:3px;fill:currentColor}
+  .video-card:hover .vc-play{transform:scale(1.06);background:rgba(201,168,106,.08)}
+  .vc-tag{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+  .vc-cap{margin-top:14px;font-size:12px;color:var(--muted);font-family:'Noto Sans Thai',var(--sans);text-align:center;line-height:1.7}
+
   /* ── THE LOOP DIAGRAM ── */
   .loop-sec{padding:24px 24px 8px;text-align:center}
   .loop-art{width:104px;height:104px;color:var(--gold);margin:0 auto;display:block;opacity:.92;animation:spin 22s linear infinite}
@@ -124,19 +135,16 @@
   [data-fade].visible{opacity:1;transform:none}
 </style>
 <script>window.CONFIG=window.CONFIG||{};</script>
+<script src="config.js"></script>
 <script src="analytics.js"></script>
 </head>
 <body>
 
 <!-- HERO -->
 <section class="hero">
-  <!-- แทนบรรทัดนี้ด้วย <video> เมื่อมีไฟล์วิดีโอ -->
+  <!-- พื้นหลังไล่สี = poster fallback · วิดีโอ ambient ขึ้นทับเมื่อมีลิงก์ใน CONFIG.ABOUT_HERO_VIDEO -->
   <div class="hero-video-placeholder"></div>
-  <!--
-  <video class="hero-video" autoplay muted loop playsinline>
-    <source src="brand-video.mp4" type="video/mp4">
-  </video>
-  -->
+  <video id="heroVid" class="hero-video" muted loop playsinline preload="metadata" aria-hidden="true"></video>
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <p class="hero-eyebrow">Our Story</p>
@@ -168,6 +176,15 @@
 <section class="chapter">
   <p class="ch-label" data-fade>03 · วิธีที่เราทำให้เป็นจริง</p>
   <h2 class="ch-head" data-fade>เราเรียกมันว่า <em>the loop</em></h2>
+  <figure class="video-card" data-fade>
+    <div class="vc-media" id="storyVidWrap">
+      <div class="vc-poster">
+        <span class="vc-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+        <span class="vc-tag">คลิปสั้น · เร็ว ๆ นี้</span>
+      </div>
+    </div>
+    <figcaption class="vc-cap">หนึ่งชุด หนึ่งวงจร — เช่า ใส่ คืน ส่งต่อ</figcaption>
+  </figure>
   <div class="loop-sec" data-fade>
     <svg class="loop-art" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M13 19a13 13 0 0 1 22-3.5"/><path d="M35 8.5V15h-6.5"/>
@@ -236,6 +253,27 @@
     entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') })
   }, {threshold: 0.15})
   document.querySelectorAll('[data-fade]').forEach(el => observer.observe(el))
+
+  // Video — เสียบจาก CONFIG เมื่อมีลิงก์ · เว้นว่าง = โชว์ poster/พื้นหลังไล่สีตามเดิม
+  (function(){
+    const C = window.CONFIG || {};
+    const hv = document.getElementById('heroVid');
+    if (hv && C.ABOUT_HERO_VIDEO){
+      if (C.ABOUT_HERO_POSTER) hv.poster = C.ABOUT_HERO_POSTER;
+      hv.src = C.ABOUT_HERO_VIDEO;
+      hv.autoplay = true;
+      const p = hv.play(); if (p && p.catch) p.catch(()=>{});
+    }
+    const wrap = document.getElementById('storyVidWrap');
+    if (wrap && C.ABOUT_STORY_VIDEO){
+      const v = document.createElement('video');
+      v.src = C.ABOUT_STORY_VIDEO;
+      v.controls = true; v.playsInline = true; v.preload = 'metadata';
+      if (C.ABOUT_STORY_POSTER) v.poster = C.ABOUT_STORY_POSTER;
+      const ph = wrap.querySelector('.vc-poster'); if (ph) ph.remove();
+      wrap.appendChild(v);
+    }
+  })();
 </script>
 </body>
 </html>

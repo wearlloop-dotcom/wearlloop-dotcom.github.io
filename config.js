@@ -17,4 +17,11 @@ window.CONFIG = {
     // 'https://<storage>/lloop-hero-share.mp4',        // คลิป #1 แชร์ตู้เสื้อผ้ากัน
   ],
   HERO_POSTER:'', // รูป poster ระหว่างวิดีโอโหลด (เว้นว่าง = พื้นหลังไล่สี)
+
+  // ===== วิดีโอหน้า About (story) — เว้นว่างไว้ = โชว์ poster placeholder สวย ๆ พร้อมเสียบลิงก์ทีหลัง =====
+  // hero = วิดีโอพื้นหลังหัวเรื่อง (ambient, เล่นเงียบวนลูป) · story = คลิปสั้นแทรกในบท "the loop"
+  ABOUT_HERO_VIDEO:'',   // เช่น 'https://<storage>/lloop-story-hero.mp4'  (เว้นว่าง = ใช้พื้นหลังไล่สีเดิม)
+  ABOUT_HERO_POSTER:'',  // รูปนิ่งคั่นระหว่างโหลด hero
+  ABOUT_STORY_VIDEO:'',  // เช่น 'https://<storage>/lloop-the-loop.mp4'   (เว้นว่าง = โชว์การ์ด poster + ปุ่มเล่น)
+  ABOUT_STORY_POSTER:'', // รูปนิ่งของคลิป the loop (โชว์เป็น poster ก่อนกดเล่น)
 };
