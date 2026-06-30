@@ -3,910 +3,502 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wishlist — LLOOP</title>
+<title>LLOOP · Wishlist</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
-<script src="me-api.js"></script>
-<script src="analytics.js"></script>
+<script src="ops-api.js"></script>
+<link rel="stylesheet" href="ops-ui.css">
 <style>
-  :root {
-    --cream: #FBFAF7;
-    --cream2: #F5F4F2;
-    --line: #E7E5E1;
-    --ink: #1A1A1A;
-    --muted: #8C8B86;
-    --sage: #6FB3A6;
-    --sage-light: #E4F0EC;
-    --warm: #C9A86A;
-  }
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  align-items: center;
+}
+.filters select, .filters input {
+  padding: 7px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #fff;
+}
+.filters label { font-size: 13px; color: #555; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+.wish-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.wish-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: #f7f5f2;
+  color: #666;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e5e0d8;
+  white-space: nowrap;
+}
+.wish-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #ede9e3;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.wish-table tr:hover td { background: #faf8f5; }
+.wish-table .desc { max-width: 200px; }
+.wish-table .desc-text { font-weight: 500; color: #2B2825; }
+.wish-table .brand-text { font-size: 12px; color: #888; margin-top: 2px; }
 
-  body {
-    background: var(--cream);
-    color: var(--ink);
-    font-family: 'Inter', 'Prompt', -apple-system, sans-serif;
-    font-size: 15px;
-    line-height: 1.8;
-    -webkit-font-smoothing: antialiased;
-  }
+.wish-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #e5e0d8;
+  background: #f7f5f2;
+  display: block;
+}
+.wish-thumb-empty {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  border: 1px solid #e5e0d8;
+  background: #f7f5f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  header {
-    background: #fff;
-    border-bottom: 1px solid var(--line);
-    padding: 18px 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: relative;
-  }
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.badge.pending  { background: #F5F0E8; color: #8A7355; }
+.badge.sourcing { background: #E4F0EC; color: #3A8A7D; }
+.badge.added    { background: #D8EFDB; color: #2E7D32; }
+.badge.rejected { background: #F5E4E4; color: #B22222; }
 
-  .back-link {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: color 0.2s;
-  }
-  .back-link:hover { color: var(--ink); }
-  .back-link::before {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-left: 1.5px solid currentColor;
-    border-bottom: 1.5px solid currentColor;
-    transform: rotate(45deg);
-    margin-bottom: 1px;
-  }
+.demand-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: #6FB3A6;
+  line-height: 1;
+}
+.demand-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
 
-  .logo {
-    font-family: 'Inter', 'Prompt', -apple-system, sans-serif;
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: 4px;
-    color: var(--ink);
-    text-decoration: none;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
+.action-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+.action-row select {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+}
+.action-row textarea {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  resize: vertical;
+  min-height: 48px;
+  font-family: inherit;
+}
+.save-btn {
+  padding: 5px 12px;
+  background: #6FB3A6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  align-self: flex-start;
+}
+.save-btn:hover { opacity: 0.85; }
+.save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .page-hero {
-    background: var(--cream2);
-    border-bottom: 1px solid var(--line);
-    padding: 48px 24px 40px;
-    text-align: center;
-  }
+.notify-btn {
+  padding: 5px 10px;
+  background: #fff;
+  color: #6FB3A6;
+  border: 1px solid #6FB3A6;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  align-self: flex-start;
+  white-space: nowrap;
+}
+.notify-btn:hover { background: #6FB3A6; color: #fff; }
+.notify-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.notify-btn.sent { background: #D8EFDB; color: #2E7D32; border-color: #2E7D32; }
 
-  .page-hero .label {
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
+.empty-row td { text-align: center; color: #aaa; padding: 32px; }
 
-  .page-hero h1 {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 8px;
-    line-height: 1.4;
-  }
-
-  .page-hero .sub {
-    font-size: 14px;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  .wrap {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-  }
-
-  /* ---- Form card ---- */
-  .form-card {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 32px 28px;
-    margin-bottom: 40px;
-  }
-
-  .form-card h2 {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 24px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .field {
-    margin-bottom: 20px;
-  }
-
-  .field label {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--ink);
-    margin-bottom: 6px;
-    letter-spacing: 0.3px;
-  }
-
-  .field label .req {
-    color: var(--sage);
-    margin-left: 2px;
-  }
-
-  .field label .hint {
-    font-weight: 300;
-    color: var(--muted);
-    font-size: 12px;
-    margin-left: 6px;
-  }
-
-  .field input,
-  .field select {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    background: var(--cream);
-    color: var(--ink);
-    font-family: 'Inter', 'Prompt', -apple-system, sans-serif;
-    font-size: 15px;
-    line-height: 1.6;
-    transition: border-color 0.2s;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-
-  .field input:focus,
-  .field select:focus {
-    border-color: var(--sage);
-    background: #fff;
-  }
-
-  .field select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237C7771' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 36px;
-  }
-
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  /* ---- Image upload zone ---- */
-  .upload-zone {
-    border: 2px dashed var(--line);
-    border-radius: 6px;
-    background: var(--cream);
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    overflow: hidden;
-    position: relative;
-    min-height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .upload-zone:hover, .upload-zone.dragover {
-    border-color: var(--sage);
-    background: var(--sage-light);
-  }
-  .upload-zone input[type=file] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-  }
-  .upload-placeholder {
-    text-align: center;
-    padding: 32px 24px;
-    pointer-events: none;
-  }
-  .upload-placeholder .icon {
-    width: 48px;
-    height: 48px;
-    background: var(--cream2);
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 12px;
-  }
-  .upload-placeholder .icon svg {
-    width: 22px; height: 22px;
-    stroke: var(--muted); fill: none; stroke-width: 1.5;
-    stroke-linecap: round; stroke-linejoin: round;
-  }
-  .upload-placeholder .main-text {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--ink);
-    margin-bottom: 4px;
-  }
-  .upload-placeholder .sub-text {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  #imgPreview {
-    display: none;
-    width: 100%;
-    max-height: 280px;
-    object-fit: cover;
-    border-radius: 4px;
-  }
-
-  .btn-submit {
-    width: 100%;
-    padding: 14px 20px;
-    background: var(--sage);
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-family: 'Inter', 'Prompt', -apple-system, sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: opacity 0.2s;
-    margin-top: 8px;
-  }
-
-  .btn-submit:hover { opacity: 0.88; }
-  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  /* ---- Success state ---- */
-  .success-banner {
-    display: none;
-    background: var(--sage-light);
-    border: 1px solid var(--sage);
-    border-radius: 6px;
-    padding: 24px 28px;
-    margin-bottom: 32px;
-    text-align: center;
-  }
-
-  .success-banner .check {
-    width: 40px;
-    height: 40px;
-    background: var(--sage);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 14px;
-  }
-
-  .success-banner .check svg {
-    width: 20px;
-    height: 20px;
-    stroke: #fff;
-    fill: none;
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .success-banner p {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--ink);
-    margin-bottom: 4px;
-  }
-
-  .success-banner .sub {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  /* ---- Previous requests ---- */
-  .prev-section h2 {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--muted);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-  }
-
-  .request-card {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 16px 18px;
-    margin-bottom: 12px;
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-  }
-
-  .request-card .rc-thumb {
-    width: 56px;
-    height: 56px;
-    border-radius: 4px;
-    object-fit: cover;
-    border: 1px solid var(--line);
-    flex-shrink: 0;
-    background: var(--cream2);
-  }
-
-  .request-card .rc-body {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .request-card .rc-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 4px;
-  }
-
-  .request-card .rc-desc {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--ink);
-    line-height: 1.5;
-  }
-
-  .request-card .rc-brand {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 300;
-    margin-bottom: 2px;
-  }
-
-  .status-badge {
-    flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    padding: 3px 10px;
-    border-radius: 20px;
-  }
-  .status-badge.pending   { background: #F5F0E8; color: #8A7355; }
-  .status-badge.sourcing  { background: #E4F0EC; color: #3A8A7D; }
-  .status-badge.added     { background: #D8EFDB; color: #2E7D32; }
-  .status-badge.rejected  { background: #F5E4E4; color: #B22; }
-
-  .request-card .rc-meta {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 300;
-    margin-top: 4px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .loading-msg {
-    text-align: center;
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 300;
-    padding: 24px 0;
-  }
-
-  /* queue position pill */
-  .pos-pill {
-    flex-shrink: 0;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--sage);
-    background: var(--sage-light);
-    border-radius: 20px;
-    padding: 4px 12px;
-    white-space: nowrap;
-  }
-  .pos-pill.open { color: #fff; background: var(--sage); }
-
-  /* vote button */
-  .vote-btn {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1px;
-    min-width: 52px;
-    padding: 6px 4px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--cream);
-    color: var(--muted);
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.15s;
-  }
-  .vote-btn .vc { font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1; }
-  .vote-btn .vl { font-size: 10px; letter-spacing: 0.3px; }
-  .vote-btn.voted { border-color: var(--sage); background: var(--sage-light); }
-  .vote-btn.voted .vc, .vote-btn.voted .vl { color: var(--sage); }
-  .vote-btn:active { transform: scale(0.94); }
-  .vote-btn:disabled { opacity: 0.55; cursor: default; }
-
-  .empty-msg {
-    text-align: center;
-    color: var(--muted);
-    font-size: 14px;
-    font-weight: 300;
-    padding: 28px 0;
-    border: 1px dashed var(--line);
-    border-radius: 4px;
-  }
-
-  .error-msg {
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
-    border-radius: 4px;
-    color: #B91C1C;
-    font-size: 13px;
-    padding: 12px 16px;
-    margin-top: 12px;
-    display: none;
-  }
-
-  footer {
-    background: var(--cream2);
-    border-top: 1px solid var(--line);
-    text-align: center;
-    padding: 28px 24px;
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 300;
-    letter-spacing: 0.5px;
-  }
-
-  @media (max-width: 480px) {
-    .field-row { grid-template-columns: 1fr; gap: 0; }
-    .form-card { padding: 24px 18px; }
-    .page-hero h1 { font-size: 20px; }
-  }
+.scroll-x { overflow-x: auto; }
 </style>
 </head>
 <body>
-
-<header>
-  <a href="index.html" class="back-link">กลับหน้าหลัก</a>
-  <a href="index.html" class="logo">LLOOP</a>
-</header>
-
-<div class="page-hero">
-  <div class="label">Wishlist</div>
-  <h1>บอกให้เรารู้ว่าคุณอยากใส่อะไร</h1>
-  <p class="sub">ส่งรูปชุดที่ชอบมา — เราจะพยายามหามาให้</p>
-</div>
-
-<div class="wrap">
-
-  <!-- Success banner (hidden until submit) -->
-  <div class="success-banner" id="successBanner">
-    <div class="check">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  <div class="bar">
+    <h1>Wishlist</h1>
+    <div class="nav">
+      <a href="home.html">หน้าหลัก</a>
+      <a href="stock.html">สต๊อก</a>
+      <a href="garment.html">ชุด</a>
     </div>
-    <p>ขอบคุณที่บอกเรา · เราจะหามาให้</p>
   </div>
 
-  <!-- Form -->
-  <div class="form-card" id="formCard">
-    <h2>ส่งรูปชุดที่ต้องการ</h2>
+  <div class="wrap">
+    <section class="phead">
+      <div class="eyebrow">customer wishlist</div>
+      <h1>ความต้องการของลูกค้า</h1>
+      <div class="sub">ดูว่าลูกค้าอยากได้ชุดแบบไหน — เรียงตามดีมานด์สูงสุด ปรับสถานะ และแจ้งลูกค้าเมื่อมีชุดพร้อม</div>
+      <div class="kpis">
+        <div class="kpi"><div class="n" id="k_total">—</div><div class="l">คำขอทั้งหมด</div></div>
+        <div class="kpi ok"><div class="n" id="k_pending">—</div><div class="l">รอดำเนินการ</div></div>
+        <div class="kpi"><div class="n" id="k_sourcing">—</div><div class="l">กำลังหา</div></div>
+        <div class="kpi ok"><div class="n" id="k_added">—</div><div class="l">หามาได้แล้ว</div></div>
+      </div>
+    </section>
 
-    <form id="wishForm" novalidate>
-
-      <!-- Image upload -->
-      <div class="field">
-        <label>รูปชุดที่ต้องการ <span class="req">*</span> <span class="hint">ถ่ายหรือเลือกจากกล้อง/แกลเลอรี</span></label>
-        <div class="upload-zone" id="uploadZone">
-          <input type="file" id="imgFile" accept="image/*" capture="environment">
-          <div class="upload-placeholder" id="uploadPlaceholder">
-            <div class="icon">
-              <svg viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
-              </svg>
-            </div>
-            <div class="main-text">แตะเลือกรูป</div>
-          </div>
-          <img id="imgPreview" alt="preview">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <h2>รายการ Wishlist</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn ghost" onclick="loadData()">รีเฟรช</button>
+          <button class="btn" onclick="exportCsv()" id="expBtn">Export CSV</button>
         </div>
       </div>
 
-      <!-- Reference link -->
-      <div class="field">
-        <label for="refLink">ลิงก์อ้างอิง <span class="hint">optional</span></label>
-        <input type="url" id="refLink" placeholder="วางลิงก์จาก Pinterest, Zara, IG...">
-      </div>
-
-      <!-- Brand -->
-      <div class="field">
-        <label for="brand">แบรนด์ <span class="hint">optional</span></label>
-        <input type="text" id="brand" placeholder="เช่น Zara, Mango, Self Portrait…">
-      </div>
-
-      <div class="field-row">
-        <!-- Size -->
-        <div class="field">
-          <label for="size">ไซส์ <span class="hint">optional</span></label>
-          <select id="size">
-            <option value="">-- ไม่ระบุ --</option>
-            <option value="XS">XS</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
-            <option value="FREE SIZE">FREE SIZE</option>
+      <div class="filters">
+        <label>สถานะ
+          <select id="fStatus" onchange="applyFilters()">
+            <option value="">ทั้งหมด</option>
+            <option value="pending">รอดำเนินการ</option>
+            <option value="sourcing">กำลังหา</option>
+            <option value="added">หามาได้แล้ว</option>
+            <option value="rejected">ไม่ได้หา</option>
           </select>
-        </div>
-
-        <!-- Occasion -->
-        <div class="field">
-          <label for="occasion">โอกาส <span class="hint">optional</span></label>
-          <select id="occasion">
-            <option value="">-- ไม่ระบุ --</option>
+        </label>
+        <label>โอกาส
+          <select id="fOccasion" onchange="applyFilters()">
+            <option value="">ทั้งหมด</option>
             <option value="ออกงาน">ออกงาน</option>
             <option value="งานแต่ง">งานแต่ง</option>
             <option value="ปาร์ตี้">ปาร์ตี้</option>
             <option value="ถ่ายรูป">ถ่ายรูป</option>
             <option value="everyday">everyday</option>
           </select>
-        </div>
+        </label>
+        <label>ค้นหา
+          <input type="text" id="fSearch" placeholder="แบรนด์ / คำอธิบาย…" oninput="applyFilters()">
+        </label>
       </div>
 
-      <!-- Budget -->
-      <div class="field">
-        <label for="budget">งบต่อวัน <span class="hint">ไม่บังคับ</span></label>
-        <input type="number" id="budget" placeholder="บาท" min="0" step="50">
+      <div class="scroll-x">
+        <table class="wish-table" id="wishTable">
+          <thead>
+            <tr>
+              <th>รูปที่ขอ</th>
+              <th>แบรนด์ / คำอธิบาย</th>
+              <th>ไซส์</th>
+              <th>โอกาส</th>
+              <th>คนขอ</th>
+              <th>งบเฉลี่ย</th>
+              <th>วันล่าสุด</th>
+              <th>สถานะ</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="wishBody">
+            <tr><td colspan="9" style="text-align:center;color:#aaa;padding:32px;">กำลังโหลด…</td></tr>
+          </tbody>
+        </table>
       </div>
+    </div>
 
-      <div class="error-msg" id="errMsg"></div>
-
-      <button type="submit" class="btn-submit" id="submitBtn">ส่งคำขอ</button>
-    </form>
+    <div class="card" id="queueCard" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:10px;">
+        <h2>คิวรอชุด · waitlist</h2>
+        <button class="btn ghost" onclick="loadQueue()">รีเฟรช</button>
+      </div>
+      <div class="sub" style="margin-bottom:16px;color:#888;font-size:13px;">ชุดที่ลูกค้าต่อคิวรออยู่ — คนรอเยอะ = ควรเติมสต๊อก/ซื้อเพิ่ม · ของกลับมาว่างระบบแจ้งคิวแรกให้เลือกวันก่อนอัตโนมัติ</div>
+      <div class="scroll-x">
+        <table class="wish-table">
+          <thead>
+            <tr><th>ชุด</th><th>แบรนด์</th><th>สถานะชุด</th><th>คนรอคิว</th><th>ถือสิทธิ์อยู่</th><th>คิวเก่าสุด</th></tr>
+          </thead>
+          <tbody id="queueBody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <!-- My queue (waitlist) -->
-  <div class="prev-section" id="queueSection" style="display:none;margin-bottom:40px">
-    <h2>ชุดที่คุณต่อคิวไว้</h2>
-    <div id="queueList"></div>
-  </div>
-
-  <!-- Trending requests — vote -->
-  <div class="prev-section" id="trendSection" style="display:none;margin-bottom:40px">
-    <h2>คนอื่นก็อยากได้ · โหวตให้เราหามาก่อน</h2>
-    <div id="trendList"></div>
-  </div>
-
-  <!-- Previous requests -->
-  <div class="prev-section" id="prevSection" style="display:none">
-    <h2>คำขอของคุณ</h2>
-    <div id="prevList"><div class="loading-msg">กำลังโหลด…</div></div>
-  </div>
-
-</div>
-
-<footer>
-  LLOOP &nbsp;&middot;&nbsp; Wishlist &nbsp;&middot;&nbsp; บอกเราว่าคุณอยากใส่อะไร
-</footer>
+  <div class="toast" id="toast"></div>
 
 <script>
 const CFG = window.CONFIG || {};
-const SB_URL = CFG.SUPABASE_URL;
-const SB_KEY = CFG.SUPABASE_ANON_KEY;
-const LIFF_ID = CFG.LIFF_ID;
-const sb = window.supabase.createClient(SB_URL, SB_KEY);
+const SUPABASE_URL = CFG.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co';
+const SUPABASE_KEY = CFG.SUPABASE_ANON_KEY || '';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+if (window.opsRpc) sb.rpc = window.opsRpc;
+if (window.opsLogin) window.opsLogin().catch(() => {});
 
 const $ = id => document.getElementById(id);
-const STATUS_TH = { pending:'รอตรวจ', sourcing:'กำลังหา', added:'มีแล้ว', rejected:'หาไม่ได้' };
+const esc = s => s == null ? '' : String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 
-let uid = null;
-let selectedFile = null;
-
-function showErr(msg) {
-  const el = $('errMsg');
-  el.textContent = msg;
-  el.style.display = msg ? 'block' : 'none';
+let T = null;
+function toast(m, bad) {
+  const t = $('toast');
+  t.textContent = m;
+  t.className = 'toast show' + (bad ? ' bad' : '');
+  clearTimeout(T);
+  T = setTimeout(() => t.className = 'toast', 3000);
 }
 
-// Image preview
-$('imgFile').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  selectedFile = file;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    $('imgPreview').src = ev.target.result;
-    $('imgPreview').style.display = 'block';
-    $('uploadPlaceholder').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
-});
+const STATUS_TH = { pending:'รอดำเนินการ', sourcing:'กำลังหา', added:'หามาได้แล้ว', rejected:'ไม่ได้หา' };
 
-// Drag-over visual
-const zone = $('uploadZone');
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
-zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-zone.addEventListener('drop', e => {
-  e.preventDefault();
-  zone.classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
-    selectedFile = file;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      $('imgPreview').src = ev.target.result;
-      $('imgPreview').style.display = 'block';
-      $('uploadPlaceholder').style.display = 'none';
-    };
-    reader.readAsDataURL(file);
-  }
-});
+let allRows = [];
 
-async function uploadImage(file) {
-  const ext = file.name.split('.').pop() || 'jpg';
-  const fileName = `${uid}_${Date.now()}.${ext}`;
-  const res = await fetch(`${SB_URL}/storage/v1/object/wishlist-images/${fileName}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${SB_KEY}`,
-      'Content-Type': file.type,
-      'x-upsert': 'true'
-    },
-    body: file
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error('Upload ไม่สำเร็จ: ' + err);
-  }
-  return `${SB_URL}/storage/v1/object/public/wishlist-images/${fileName}`;
-}
+async function loadData() {
+  $('wishBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:32px;">กำลังโหลด…</td></tr>';
 
-function esc(s) {
-  if (s == null) return '';
-  return String(s).replace(/[<>&"]/g, c => ({ '<':'&lt;', '>':'&gt;', '&':'&amp;', '"':'&quot;' }[c]));
-}
-
-async function loadPrevRequests() {
-  if (!uid) return;
-  $('prevSection').style.display = 'block';
-  const { data, error } = await sb
-    .from('garment_requests')
-    .select('*')
-    .eq('customer_uid', uid)
-    .order('created_at', { ascending: false });
+  // R-4: ผ่าน gateway (LINE idToken + role) แทน .from() ด้วย anon — garment_requests มี customer_uid (PII)
+  const { data, error } = await sb.rpc('wishlist_ops_list', {});
 
   if (error) {
-    $('prevList').innerHTML = '<div class="loading-msg">โหลดไม่สำเร็จ</div>';
-    return;
-  }
-  if (!data || data.length === 0) {
-    $('prevList').innerHTML = '<div class="empty-msg">ยังไม่มีคำขอ</div>';
+    $('wishBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#c00;padding:32px;">${esc(error.message)}</td></tr>`;
     return;
   }
 
-  $('prevList').innerHTML = data.map(r => {
+  allRows = data || [];
+  updateKpis();
+  applyFilters();
+}
+
+function updateKpis() {
+  $('k_total').textContent = allRows.length;
+  $('k_pending').textContent = allRows.filter(r => r.status === 'pending').length;
+  $('k_sourcing').textContent = allRows.filter(r => r.status === 'sourcing').length;
+  $('k_added').textContent = allRows.filter(r => r.status === 'added').length;
+}
+
+function applyFilters() {
+  const fStatus = $('fStatus').value;
+  const fOccasion = $('fOccasion').value;
+  const fSearch = $('fSearch').value.toLowerCase().trim();
+
+  let rows = allRows;
+  if (fStatus) rows = rows.filter(r => r.status === fStatus);
+  if (fOccasion) rows = rows.filter(r => r.occasion === fOccasion);
+  if (fSearch) rows = rows.filter(r =>
+    (r.brand || '').toLowerCase().includes(fSearch) ||
+    (r.item_description || '').toLowerCase().includes(fSearch)
+  );
+
+  renderTable(rows);
+}
+
+function renderTable(rows) {
+  if (!rows.length) {
+    $('wishBody').innerHTML = '<tr class="empty-row"><td colspan="9">ไม่พบรายการ</td></tr>';
+    return;
+  }
+
+  $('wishBody').innerHTML = rows.map(r => {
     const dateStr = new Date(r.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
-    const meta = [
-      r.size ? 'ไซส์ ' + r.size : null,
-      r.occasion || null,
-      r.budget_max ? 'งบ ฿' + Number(r.budget_max).toLocaleString() + '/วัน' : null,
-      dateStr,
-    ].filter(Boolean);
-    const statusKey = r.status || 'pending';
+    const budget = r.budget_max ? '฿' + Number(r.budget_max).toLocaleString() : '—';
+    const st = r.status || 'pending';
+
     const thumbHtml = r.reference_image_url
-      ? `<img class="rc-thumb" src="${esc(r.reference_image_url)}" alt="รูปที่ขอ" loading="lazy">`
-      : `<div class="rc-thumb" style="display:flex;align-items:center;justify-content:center;">
-           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-         </div>`;
-    return `<div class="request-card">
-      ${thumbHtml}
-      <div class="rc-body">
-        <div class="rc-top">
-          <div>
-            ${r.brand ? `<div class="rc-brand">${esc(r.brand)}</div>` : ''}
-            <div class="rc-desc">${esc(r.item_description)}</div>
-          </div>
-          <span class="status-badge ${statusKey}">${STATUS_TH[statusKey] || statusKey}</span>
+      ? `<img class="wish-thumb" src="${esc(r.reference_image_url)}" alt="รูปชุด" loading="lazy">`
+      : `<div class="wish-thumb-empty"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`;
+
+    const notifiedLabel = r.notified_at ? 'แจ้งแล้ว' : 'แจ้งลูกค้า';
+    const notifiedClass = r.notified_at ? 'notify-btn sent' : 'notify-btn';
+    const notifiedDisabled = r.notified_at ? 'disabled' : '';
+
+    return `<tr data-id="${esc(r.id)}">
+      <td>${thumbHtml}</td>
+      <td class="desc">
+        ${r.brand ? `<div class="brand-text">${esc(r.brand)}</div>` : ''}
+        <div class="desc-text">${esc(r.item_description)}</div>
+      </td>
+      <td>${esc(r.size || '—')}</td>
+      <td>${esc(r.occasion || '—')}</td>
+      <td><div class="demand-num">1</div><div class="demand-sub">คน</div></td>
+      <td>${budget}</td>
+      <td style="white-space:nowrap;font-size:12px;color:#888;">${dateStr}</td>
+      <td><span class="badge ${st}">${STATUS_TH[st] || st}</span></td>
+      <td>
+        <div class="action-row">
+          <select class="status-sel" data-id="${esc(r.id)}" onchange="markDirty(this)">
+            <option value="pending"  ${st==='pending'  ? 'selected':''}>รอดำเนินการ</option>
+            <option value="sourcing" ${st==='sourcing' ? 'selected':''}>กำลังหา</option>
+            <option value="added"    ${st==='added'    ? 'selected':''}>หามาได้แล้ว</option>
+            <option value="rejected" ${st==='rejected' ? 'selected':''}>ไม่ได้หา</option>
+          </select>
+          <textarea class="note-ta" data-id="${esc(r.id)}" placeholder="หมายเหตุ ops…">${esc(r.ops_note || '')}</textarea>
+          <button class="save-btn" data-id="${esc(r.id)}" onclick="saveRow(this)" disabled>บันทึก</button>
+          <button class="${notifiedClass}" data-id="${esc(r.id)}" onclick="notifyCustomer(this)" ${notifiedDisabled}>${notifiedLabel}</button>
         </div>
-        ${meta.length ? `<div class="rc-meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>` : ''}
-        ${r.ops_note ? `<div style="margin-top:8px;font-size:13px;color:var(--muted);font-weight:300;border-top:1px solid var(--line);padding-top:8px;">${esc(r.ops_note)}</div>` : ''}
-      </div>
-    </div>`;
+      </td>
+    </tr>`;
   }).join('');
 }
 
-$('wishForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  showErr('');
+function markDirty(el) {
+  const id = el.dataset.id;
+  const btn = document.querySelector(`.save-btn[data-id="${id}"]`);
+  if (btn) btn.disabled = false;
+}
 
-  if (!selectedFile) { showErr('กรุณาเลือกรูปชุดที่ต้องการก่อน'); return; }
-  if (!uid) { showErr('กรุณาเข้าสู่ระบบก่อน'); return; }
-
-  const btn = $('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'กำลัง upload รูป…';
-
-  let imageUrl = null;
-  try {
-    imageUrl = await uploadImage(selectedFile);
-  } catch (err) {
-    showErr(err.message);
-    btn.disabled = false;
-    btn.textContent = 'ส่งคำขอ';
-    return;
-  }
-
-  btn.textContent = 'กำลังส่ง…';
-
-  const { data, error } = await sb.rpc('submit_garment_request', {
-    p_uid: uid,
-    p_brand: $('brand').value.trim() || null,
-    p_description: null,  // ดูจากรูป → function ใช้ coalesce เป็น '(ดูจากรูป)'
-    p_size: $('size').value || null,
-    p_budget: $('budget').value ? Number($('budget').value) : null,
-    p_occasion: $('occasion').value || null,
-    p_ref_url: $('refLink').value.trim() || null,
-    p_image_url: imageUrl,
-  });
-
-  btn.disabled = false;
-  btn.textContent = 'ส่งคำขอ';
-
-  if (error) {
-    showErr('เกิดข้อผิดพลาด: ' + error.message);
-    return;
-  }
-
-  // Reset
-  $('successBanner').style.display = 'block';
-  $('wishForm').reset();
-  selectedFile = null;
-  $('imgPreview').style.display = 'none';
-  $('uploadPlaceholder').style.display = 'block';
-  showErr('');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  await loadPrevRequests();
+document.addEventListener('input', e => {
+  if (e.target.classList.contains('note-ta')) markDirty(e.target);
 });
 
-// ===== คิวของฉัน (waitlist) =====
-async function loadMyQueue() {
-  if (!window.meRpc) return;
-  let rows = [];
-  try { const { data } = await window.meRpc('my_waitlist', {}); rows = Array.isArray(data) ? data : []; }
-  catch (e) { return; }
-  if (!rows.length) { $('queueSection').style.display = 'none'; return; }
-  $('queueSection').style.display = 'block';
-  const fmtD = s => { if (!s) return ''; try { return new Date(s).toLocaleDateString('th-TH', { day:'numeric', month:'short' }); } catch(e) { return s; } };
-  $('queueList').innerHTML = rows.map(r => {
-    const open = r.status === 'notified' || r.available_now;
-    const dlabel = r.want_date ? fmtD(r.want_date) : '';
-    const pill = open
-      ? `<span class="pos-pill open">${r.status === 'notified' ? 'ถึงคิวคุณ · เลือกก่อนใคร' : 'วันนี้ว่างแล้ว'}</span>`
-      : `<span class="pos-pill">คิวที่ ${r.position}/${r.total}</span>`;
-    const thumb = r.photo
-      ? `<img class="rc-thumb" src="${esc(r.photo)}" alt="" loading="lazy">`
-      : `<div class="rc-thumb"></div>`;
-    const dParam = r.want_date ? `&date=${esc(r.want_date)}` : '';
-    return `<div class="request-card">
-      ${thumb}
-      <div class="rc-body">
-        <div class="rc-top">
-          <div>
-            ${r.brand ? `<div class="rc-brand">${esc(r.brand)}</div>` : ''}
-            <div class="rc-desc">${esc(r.name || r.code || '')}</div>
-            ${dlabel ? `<div class="rc-brand">วันที่อยากได้ · ${dlabel}</div>` : ''}
-          </div>
-          ${pill}
-        </div>
-        <div class="rc-meta">
-          ${r.price != null ? `<span>฿${Number(r.price).toLocaleString()}/วัน</span>` : ''}
-          <span style="cursor:pointer;color:var(--sage)" onclick="leaveQueue('${r.garment_id}','${esc(r.want_date||'')}')">ออกจากคิว</span>
-          ${open ? `<a href="index.html?garment=${esc(r.code||'')}${dParam}" style="color:var(--sage);text-decoration:none;font-weight:600">เลือกวัน + จอง →</a>` : ''}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
+async function saveRow(btn) {
+  const id = btn.dataset.id;
+  const sel = document.querySelector(`.status-sel[data-id="${id}"]`);
+  const ta  = document.querySelector(`.note-ta[data-id="${id}"]`);
+  const newStatus = sel ? sel.value : null;
+  const newNote   = ta  ? ta.value.trim() : null;
 
-async function leaveQueue(garmentId, wantDate) {
-  if (!window.meRpc) return;
-  try { await window.meRpc('leave_waitlist', { p_garment: garmentId, p_date: wantDate || null }); } catch (e) {}
-  await loadMyQueue();
-}
-
-// ===== คนอื่นก็อยากได้ · โหวต =====
-async function loadTrending() {
-  if (!window.meRpc) return;
-  let rows = [];
-  try { const { data } = await window.meRpc('trending_requests', { p_limit: 24 }); rows = Array.isArray(data) ? data : []; }
-  catch (e) { return; }
-  // เก็บเฉพาะที่มีคนอยากได้จริง (votes>1) หรือมีรูป — ให้ดูน่าโหวต
-  rows = rows.filter(r => (r.votes || 0) >= 1);
-  if (!rows.length) { $('trendSection').style.display = 'none'; return; }
-  $('trendSection').style.display = 'block';
-  $('trendList').innerHTML = rows.map(r => {
-    const thumb = r.reference_image_url
-      ? `<img class="rc-thumb" src="${esc(r.reference_image_url)}" alt="" loading="lazy">`
-      : `<div class="rc-thumb"></div>`;
-    const meta = [r.size ? 'ไซส์ ' + r.size : null, r.occasion || null].filter(Boolean);
-    const btn = r.mine
-      ? `<button class="vote-btn voted" disabled title="คำขอของคุณ"><span class="vc">${r.votes}</span><span class="vl">ของคุณ</span></button>`
-      : `<button class="vote-btn ${r.voted ? 'voted' : ''}" id="vb_${r.id}" onclick="doVote('${r.id}')"><span class="vc">${r.votes}</span><span class="vl">อยากได้</span></button>`;
-    return `<div class="request-card">
-      ${thumb}
-      <div class="rc-body">
-        <div class="rc-top">
-          <div>
-            ${r.brand ? `<div class="rc-brand">${esc(r.brand)}</div>` : ''}
-            <div class="rc-desc">${esc(r.item_description || '(ดูจากรูป)')}</div>
-          </div>
-          ${btn}
-        </div>
-        ${meta.length ? `<div class="rc-meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-async function doVote(requestId) {
-  const btn = $('vb_' + requestId);
-  if (!window.meRpc || !btn) return;
   btn.disabled = true;
-  try {
-    const { data } = await window.meRpc('vote_request', { p_request: requestId });
-    if (data && !data.error) {
-      btn.classList.toggle('voted', !!data.voted);
-      btn.querySelector('.vc').textContent = data.votes;
-    }
-  } catch (e) {}
-  btn.disabled = false;
-}
+  btn.textContent = '…';
 
-async function init() {
-  if (!LIFF_ID) { showErr('ยังไม่ได้ตั้งค่า LIFF_ID'); return; }
-  try {
-    await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
-    if (!liff.isLoggedIn()) {
-      liff.login({ redirectUri: window.location.href });
-      return;
-    }
-    const profile = await liff.getProfile();
-    uid = profile.userId;
-    await loadPrevRequests();
-    loadMyQueue();
-    loadTrending();
-  } catch (err) {
-    showErr('LINE login ไม่สำเร็จ: ' + (err.message || err));
+  // R-4: ผ่าน gateway แทน .from().update() ด้วย anon
+  const { error } = await sb.rpc('wishlist_ops_update', { p: { id, status: newStatus, ops_note: newNote || null } });
+
+  btn.textContent = 'บันทึก';
+
+  if (error) {
+    toast('บันทึกไม่สำเร็จ: ' + error.message, true);
+    btn.disabled = false;
+    return;
   }
+
+  const row = allRows.find(r => r.id === id);
+  if (row) { row.status = newStatus; row.ops_note = newNote; }
+  updateKpis();
+
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (tr) {
+    const badge = tr.querySelector('.badge');
+    if (badge) { badge.className = `badge ${newStatus}`; badge.textContent = STATUS_TH[newStatus] || newStatus; }
+  }
+
+  toast('บันทึกแล้ว');
 }
 
-init();
+async function notifyCustomer(btn) {
+  const id = btn.dataset.id;
+  btn.disabled = true;
+  btn.textContent = 'กำลังแจ้ง…';
+
+  const { error } = await sb.rpc('notify_customer_wishlist', {
+    p_request_id: id,
+    p_garment_id: null
+  });
+
+  if (error) {
+    toast('แจ้งไม่สำเร็จ: ' + error.message, true);
+    btn.disabled = false;
+    btn.textContent = 'แจ้งลูกค้า';
+    return;
+  }
+
+  btn.textContent = 'แจ้งแล้ว';
+  btn.className = 'notify-btn sent';
+
+  const row = allRows.find(r => r.id === id);
+  if (row) { row.status = 'added'; row.notified_at = new Date().toISOString(); }
+  updateKpis();
+
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (tr) {
+    const badge = tr.querySelector('.badge');
+    if (badge) { badge.className = 'badge added'; badge.textContent = STATUS_TH['added']; }
+    const sel = tr.querySelector('.status-sel');
+    if (sel) sel.value = 'added';
+  }
+
+  toast('แจ้งลูกค้าแล้ว');
+}
+
+function exportCsv() {
+  const fStatus = $('fStatus').value;
+  const fOccasion = $('fOccasion').value;
+  const fSearch = $('fSearch').value.toLowerCase().trim();
+
+  let rows = allRows;
+  if (fStatus) rows = rows.filter(r => r.status === fStatus);
+  if (fOccasion) rows = rows.filter(r => r.occasion === fOccasion);
+  if (fSearch) rows = rows.filter(r =>
+    (r.brand || '').toLowerCase().includes(fSearch) ||
+    (r.item_description || '').toLowerCase().includes(fSearch)
+  );
+
+  if (!rows.length) { toast('ไม่มีข้อมูลที่จะ export', true); return; }
+
+  const cols = ['brand','item_description','size','occasion','budget_max','status','ops_note','created_at','reference_image_url'];
+  const head = ['แบรนด์','คำอธิบาย','ไซส์','โอกาส','งบ/วัน','สถานะ','หมายเหตุ ops','วันที่ขอ','รูปอ้างอิง'];
+  const cell = v => { let s = v == null ? '' : String(v); if (/[",\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"'; return s; };
+  const csv = [head.join(',')].concat(rows.map(r => cols.map(c => cell(r[c])).join(','))).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lloop-wishlist-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('ดาวน์โหลด ' + rows.length + ' รายการแล้ว');
+}
+
+// ===== คิวรอชุด (waitlist demand) =====
+const ST_TH = { available:'ว่าง', rented:'ถูกเช่า', reserved:'จองอยู่', unavailable:'ไม่พร้อม' };
+async function loadQueue() {
+  const { data, error } = await sb.rpc('waitlist_ops_summary', {});
+  if (error) { return; }  // เงียบ — ยังไม่ deploy RPC ก็ไม่พังหน้า
+  const rows = data || [];
+  if (!rows.length) { $('queueCard').style.display = 'none'; return; }
+  $('queueCard').style.display = 'block';
+  $('queueBody').innerHTML = rows.map(r => {
+    const thumb = r.photo
+      ? `<img class="wish-thumb" src="${esc(r.photo)}" style="display:inline-block;vertical-align:middle;margin-right:8px;" loading="lazy">`
+      : '';
+    const oldest = r.oldest ? new Date(r.oldest).toLocaleDateString('th-TH', { month:'short', day:'numeric' }) : '—';
+    return `<tr>
+      <td>${thumb}<span class="desc-text">${esc(r.name || r.code || '')}</span></td>
+      <td style="color:#888;">${esc(r.brand || '—')}</td>
+      <td>${esc(ST_TH[r.status] || r.status || '—')}</td>
+      <td><span class="demand-num">${r.waiting || 0}</span></td>
+      <td style="color:#3A8A7D;">${r.notified || 0}</td>
+      <td style="white-space:nowrap;font-size:12px;color:#888;">${oldest}</td>
+    </tr>`;
+  }).join('');
+}
+
+loadData();
+loadQueue();
 </script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu && window.opsMenu.mount();</script>
 </body>
 </html>

@@ -155,7 +155,8 @@
   function qcMissing(){ const why=prompt('ขาดชิ้นอะไร?','เข็มขัด')||''; const fee=prompt('คิดค่าของขาดเท่าไร? (0=ไม่คิด)','0'); qc('missing',false,Number(fee)||0,why); }
   async function washDone(){
     const { data, error } = await sb.rpc('care_wash_done',{ p_code: current, p_method:null, p_handler:null });
-    if(error||!data||data.error){ toast('ผิดพลาด'); return; }
+    if(error){ toast('ผิดพลาด:'+error.message); return; }
+    if(!data||data.error){ toast(data&&data.msg ? data.msg : 'ผิดพลาด'); loadQueue(); return; }  // เช่น ยังไม่ได้ตรวจสภาพ (QC) / ของไม่ครบชิ้น
     toast(`${current} ซักเสร็จ ปล่อยเช่าต่อได้`); $('panel').innerHTML=''; $('code').value=''; current=null; loadQueue();
   }
 

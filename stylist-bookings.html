@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · คิวสไตลิสต์ Personal Color (หลังบ้าน)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;--navy:#1A1A1A;--sage:#6FB3A6;--champ:#C9A86A;--ok:#0F6E56;--danger:#A32D2D;--clay:#A75F3A;
+    --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:15px}
+  .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar h1{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:1px}
+  .bar .tag{font-size:11px;background:#33312d;padding:3px 10px;border-radius:20px;letter-spacing:1px}
+  .wrap{max-width:820px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:18px}
+  .card h2{font-family:var(--display);font-size:20px;margin-bottom:2px}
+  .card .sub{font-size:12px;color:var(--stone);margin-bottom:12px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .kpi{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:14px}
+  .kpi .n{font-family:var(--display);font-size:26px;font-weight:700}
+  .kpi .l{font-size:11px;color:var(--stone);letter-spacing:.5px;margin-top:2px}
+  @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .filt{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+  .filt button{flex:none;background:#fff;border:1.5px solid var(--hair);border-radius:20px;padding:8px 15px;font-size:14px;color:var(--ink);cursor:pointer;font-family:var(--sans);white-space:nowrap}
+  .filt button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .bk{border:1px solid var(--hair);border-radius:4px;padding:14px;background:var(--surface)}
+  .bk .top{display:flex;align-items:baseline;gap:8px}
+  .bk .when{font-family:var(--display);font-size:16px;font-weight:600}
+  .bk .badge{margin-left:auto;font-size:11px;padding:3px 10px;border-radius:20px;letter-spacing:.5px}
+  .badge.confirmed{background:#E7F1EE;color:var(--ok)}
+  .badge.done{background:#EFE9DF;color:#7a5c2e}
+  .badge.cancelled{background:#F6E4E4;color:var(--danger)}
+  .badge.no_show{background:#F0EDE8;color:var(--stone)}
+  .bk .who{font-size:14px;margin-top:6px}
+  .bk .who b{color:var(--clay)}
+  .bk .meta{font-size:12.5px;color:var(--stone);margin-top:4px;line-height:1.6}
+  .bk .note{font-size:13px;color:var(--ink);background:var(--canvas);border:1px solid var(--hair);border-radius:3px;padding:8px 10px;margin-top:8px}
+  .empty{font-size:13px;color:var(--stone);padding:18px 2px;text-align:center}
+  .gate{font-size:14px;color:var(--stone);padding:24px;text-align:center}
+</style>
+</head>
+<body>
+<div class="bar"><h1>คิวสไตลิสต์</h1><span class="tag">Personal Color · หลังบ้าน</span></div>
+
+<div class="wrap" id="wrap">
+  <div class="kpis" id="kpis">
+    <div class="kpi"><div class="n" id="k_total">–</div><div class="l">ทั้งหมด</div></div>
+    <div class="kpi"><div class="n" id="k_confirmed">–</div><div class="l">รอทำ</div></div>
+    <div class="kpi"><div class="n" id="k_done">–</div><div class="l">เสร็จแล้ว</div></div>
+    <div class="kpi"><div class="n" id="k_cancelled">–</div><div class="l">ยกเลิก</div></div>
+  </div>
+
+  <div class="card">
+    <h2>คิวจองทั้งหมด</h2>
+    <div class="sub">รวมทุกสไตลิสต์ — ดูสถานะ ติดต่อลูกค้า และรหัสสำหรับกรอกผลวิเคราะห์</div>
+    <div class="filt" id="filt">
+      <button class="on" data-s="" onclick="setFilter('',this)">ทั้งหมด</button>
+      <button data-s="confirmed" onclick="setFilter('confirmed',this)">รอทำ</button>
+      <button data-s="done" onclick="setFilter('done',this)">เสร็จแล้ว</button>
+      <button data-s="cancelled" onclick="setFilter('cancelled',this)">ยกเลิก</button>
+    </div>
+    <div class="list" id="list" style="margin-top:12px"><div class="empty">กำลังโหลด…</div></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const $=id=>document.getElementById(id);
+  let ALL=[], curFilter='';
+  const esc=s=>String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const STLABEL={confirmed:'รอทำ',done:'เสร็จแล้ว',cancelled:'ยกเลิก',no_show:'ไม่มา'};
+
+  async function load(){
+    let rows=[];
+    try{
+      const { data, error } = await sb.rpc('ops_pc_appointments', { p_status:'' });
+      if(error) throw error;
+      rows = Array.isArray(data)?data:[];
+    }catch(e){
+      $('list').innerHTML='<div class="gate">เปิดหน้านี้ผ่าน LINE ของพนักงาน (เข้าสู่ระบบ + สิทธิ์) เพื่อดูคิว</div>';
+      return;
+    }
+    ALL=rows; renderKpis(); render();
+  }
+  function renderKpis(){
+    const by=s=>ALL.filter(a=>a.status===s).length;
+    $('k_total').textContent=ALL.length;
+    $('k_confirmed').textContent=by('confirmed');
+    $('k_done').textContent=by('done');
+    $('k_cancelled').textContent=by('cancelled');
+  }
+  function setFilter(s,btn){ curFilter=s; document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on',b===btn)); render(); }
+  function render(){
+    const box=$('list');
+    const arr=curFilter?ALL.filter(a=>a.status===curFilter):ALL;
+    if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีคิวในหมวดนี้</div>'; return; }
+    box.innerHTML='';
+    arr.forEach(a=>{
+      const when=new Date(a.starts_at).toLocaleString('th-TH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const div=document.createElement('div'); div.className='bk';
+      let html=`<div class="top"><span class="when">${when} น.</span><span class="badge ${a.status}">${STLABEL[a.status]||a.status}</span></div>`;
+      html+=`<div class="who">สไตลิสต์ <b>${esc(a.partner||'—')}</b>${a.studio?` · ${esc(a.studio)}`:''}</div>`;
+      html+=`<div class="meta">ลูกค้า ${esc(a.customer||'—')}`+
+        (a.customer_phone?` · ☎ ${esc(a.customer_phone)}`:'')+
+        (a.code?` · รหัส ${esc(a.code)}`:'')+`</div>`;
+      if(a.customer_note) html+=`<div class="note">โน้ตลูกค้า: ${esc(a.customer_note)}</div>`;
+      if(a.partner_note)  html+=`<div class="note">โน้ตสไตลิสต์: ${esc(a.partner_note)}</div>`;
+      div.innerHTML=html; box.appendChild(div);
+    });
+  }
+  load();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
+</body>
+</html>
