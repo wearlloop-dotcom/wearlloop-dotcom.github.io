@@ -726,6 +726,11 @@ function openDetail(id) {
 ].join('');
   window._curDetailId = g.id;  // ให้ปุ่มสลับหน่วยเรียก measureCells ใหม่ได้
   const swatches = g.colors.map(c =>`<div class="swatch"><i style="background:${c[1]}"></i><span>${c[0]}</span></div>`).join('');
+  const cvars = (g.sourceMeta && g.sourceMeta.color_variants) || [];
+  window._cvars = cvars;
+  const colorSel = cvars.length
+    ? `<div class="sec">${lang==='th'?'สีที่มี':'Colors'} (${cvars.length})</div><div class="dcolors" id="dcolors">${cvars.map((c,i)=>`<button class="dcolor${i===0?' on':''}" onclick="setGColor(${i})" title="${(c.name||'').replace(/"/g,'')}">${c.image?`<i style="background-image:url('${c.image}')"></i>`:`<i class="noimg"></i>`}<span>${c.name||''}</span></button>`).join('')}</div>`
+    : `<div class="sec">${t('secColor')}</div><div class="colors">${swatches}</div>`;
   const tips = tipList.map(x =>`<div class="trow"><i></i>${x}</div>`).join('');
 
   const galImgs = galleryPhotos(g);
@@ -777,8 +782,7 @@ function openDetail(id) {
       <div id="fitsummary"></div>
       <div class="sec">${t('secFabric')}</div>
       <div class="fabric">${fabricTags}</div>
-      <div class="sec">${t('secColor')}</div>
-      <div class="colors">${swatches}</div>
+      ${colorSel}
       <div id="recoWith" class="recowith"></div>
       <div class="sec">${lang ==='th'?'ปฏิทินว่าง':'Availability'}</div>
       <div id="availcal" class="availcal"></div>
@@ -843,6 +847,11 @@ function measureCells(g){
 }
 function setMUnit(u){ gMUnit=u; const box=document.getElementById('measureBox'); const g=GARMENTS.find(x=>x.id===window._curDetailId); if(box&&g) box.innerHTML=measureCells(g); document.querySelectorAll('.munit button').forEach(b=>b.classList.toggle('on', b.dataset.u===u)); }
 function closeDetail() { $('#overlay').classList.remove('open'); document.body.style.overflow =''; }
+// เลือกสี → ไฮไลต์ + เปลี่ยนรูปหลักเป็นสีนั้น
+function setGColor(i){ const c=(window._cvars||[])[i]; if(!c) return;
+  document.querySelectorAll('#dcolors .dcolor').forEach((b,j)=>b.classList.toggle('on',j===i));
+  if(c.image){ const g=document.getElementById('dgal'); if(g&&g.firstElementChild){ g.firstElementChild.style.backgroundImage=`url('${c.image}')`; g.scrollTo({left:0,behavior:'smooth'}); if(typeof galTick==='function') galTick(); } }
+}
 // เลื่อนแกลเลอรีด้วยปุ่มลูกศร + อัปเดตตัวนับรูป
 function galNav(dir){ const g=document.getElementById('dgal'); if(!g) return; g.scrollBy({left: dir*g.clientWidth, behavior:'smooth'}); }
 function galTick(){ const g=document.getElementById('dgal'), c=document.getElementById('dgcount'); if(!g||!c) return; const n=g.children.length; const i=Math.min(n, Math.round(g.scrollLeft/Math.max(1,g.clientWidth))+1); c.textContent=i+' / '+n; }

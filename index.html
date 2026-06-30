@@ -410,6 +410,12 @@
   .munit{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:0 0 auto}
   .munit button{border:none;background:#fff;color:var(--muted);font-size:12px;padding:4px 12px;cursor:pointer;letter-spacing:.3px}
   .munit button.on{background:#2B5070;color:#fff}
+  .dcolors{display:flex;flex-wrap:wrap;gap:9px}
+  .dcolor{display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;width:52px;padding:0}
+  .dcolor i{width:46px;height:46px;border-radius:9px;border:2px solid transparent;background-size:cover;background-position:center;display:block;background-color:var(--soft2)}
+  .dcolor.on i{border-color:#2B5070}
+  .dcolor i.noimg{background:linear-gradient(135deg,#efeae1,#ddd5c7)}
+  .dcolor span{font-size:9px;color:var(--muted);line-height:1.15;text-align:center;max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .measure{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .mcell{background:var(--soft);padding:8px 11px;font-size:14px;font-weight:500}.mcell span{display:block;font-size:11px;color:var(--muted);font-weight:400}
   .fabric{display:flex;flex-wrap:wrap;gap:6px}.ftag{font-size:12px;background:var(--soft);color:var(--muted);padding:4px 11px}.ftag.main{background:#EEF2F6;color:#2B5070}
