@@ -537,22 +537,22 @@
 
       <!-- Reference link -->
       <div class="field">
-        <label for="refLink">ลิงก์อ้างอิง <span class="hint">optional</span></label>
-        <input type="url" id="refLink" placeholder="วางลิงก์จาก Pinterest, Zara, IG...">
+        <label for="refLink"><span data-i18n="Reference link">ลิงก์อ้างอิง</span> <span class="hint">optional</span></label>
+        <input type="url" id="refLink" placeholder="วางลิงก์จาก Pinterest, Zara, IG..." data-i18n-ph="Paste a link from Pinterest, Zara, IG...">
       </div>
 
       <!-- Brand -->
       <div class="field">
-        <label for="brand">แบรนด์ <span class="hint">optional</span></label>
-        <input type="text" id="brand" placeholder="เช่น Zara, Mango, Self Portrait…">
+        <label for="brand"><span data-i18n="Brand">แบรนด์</span> <span class="hint">optional</span></label>
+        <input type="text" id="brand" placeholder="เช่น Zara, Mango, Self Portrait…" data-i18n-ph="e.g. Zara, Mango, Self Portrait…">
       </div>
 
       <div class="field-row">
         <!-- Size -->
         <div class="field">
-          <label for="size">ไซส์ <span class="hint">optional</span></label>
+          <label for="size"><span data-i18n="Size">ไซส์</span> <span class="hint">optional</span></label>
           <select id="size">
-            <option value="">-- ไม่ระบุ --</option>
+            <option value="" data-i18n="-- Any --">-- ไม่ระบุ --</option>
             <option value="XS">XS</option>
             <option value="S">S</option>
             <option value="M">M</option>
@@ -564,13 +564,13 @@
 
         <!-- Occasion -->
         <div class="field">
-          <label for="occasion">โอกาส <span class="hint">optional</span></label>
+          <label for="occasion"><span data-i18n="Occasion">โอกาส</span> <span class="hint">optional</span></label>
           <select id="occasion">
-            <option value="">-- ไม่ระบุ --</option>
-            <option value="ออกงาน">ออกงาน</option>
-            <option value="งานแต่ง">งานแต่ง</option>
-            <option value="ปาร์ตี้">ปาร์ตี้</option>
-            <option value="ถ่ายรูป">ถ่ายรูป</option>
+            <option value="" data-i18n="-- Any --">-- ไม่ระบุ --</option>
+            <option value="ออกงาน" data-i18n="Event">ออกงาน</option>
+            <option value="งานแต่ง" data-i18n="Wedding">งานแต่ง</option>
+            <option value="ปาร์ตี้" data-i18n="Party">ปาร์ตี้</option>
+            <option value="ถ่ายรูป" data-i18n="Photoshoot">ถ่ายรูป</option>
             <option value="everyday">everyday</option>
           </select>
         </div>
@@ -578,38 +578,38 @@
 
       <!-- Budget -->
       <div class="field">
-        <label for="budget">งบต่อวัน <span class="hint">ไม่บังคับ</span></label>
-        <input type="number" id="budget" placeholder="บาท" min="0" step="50">
+        <label for="budget"><span data-i18n="Budget per day">งบต่อวัน</span> <span class="hint" data-i18n="optional">ไม่บังคับ</span></label>
+        <input type="number" id="budget" placeholder="บาท" min="0" step="50" data-i18n-ph="THB">
       </div>
 
       <div class="error-msg" id="errMsg"></div>
 
-      <button type="submit" class="btn-submit" id="submitBtn">ส่งคำขอ</button>
+      <button type="submit" class="btn-submit" id="submitBtn" data-i18n="Send request">ส่งคำขอ</button>
     </form>
   </div>
 
   <!-- My queue (waitlist) -->
   <div class="prev-section" id="queueSection" style="display:none;margin-bottom:40px">
-    <h2>ชุดที่คุณต่อคิวไว้</h2>
+    <h2 data-i18n="Pieces you're in line for">ชุดที่คุณต่อคิวไว้</h2>
     <div id="queueList"></div>
   </div>
 
   <!-- Trending requests — vote -->
   <div class="prev-section" id="trendSection" style="display:none;margin-bottom:40px">
-    <h2>คนอื่นก็อยากได้ · โหวตให้เราหามาก่อน</h2>
+    <h2 data-i18n="Others want these too · vote to move them up">คนอื่นก็อยากได้ · โหวตให้เราหามาก่อน</h2>
     <div id="trendList"></div>
   </div>
 
   <!-- Previous requests -->
   <div class="prev-section" id="prevSection" style="display:none">
-    <h2>คำขอของคุณ</h2>
-    <div id="prevList"><div class="loading-msg">กำลังโหลด…</div></div>
+    <h2 data-i18n="Your requests">คำขอของคุณ</h2>
+    <div id="prevList"><div class="loading-msg" data-i18n="Loading…">กำลังโหลด…</div></div>
   </div>
 
 </div>
 
 <footer>
-  LLOOP &nbsp;&middot;&nbsp; Wishlist &nbsp;&middot;&nbsp; บอกเราว่าคุณอยากใส่อะไร
+  LLOOP &nbsp;&middot;&nbsp; Wishlist &nbsp;&middot;&nbsp; <span data-i18n="Tell us what you'd love to wear">บอกเราว่าคุณอยากใส่อะไร</span>
 </footer>
 
 <script>

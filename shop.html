@@ -111,17 +111,17 @@
   </section>
 
   <section>
-    <div class="sh">ชุดมาใหม่</div>
-    <div class="grid" id="grid"><div class="loading">กำลังโหลดชุด…</div></div>
+    <div class="sh" data-i18n="New arrivals">ชุดมาใหม่</div>
+    <div class="grid" id="grid"><div class="loading" data-i18n="Loading pieces…">กำลังโหลดชุด…</div></div>
   </section>
 
   <section class="steps">
-    <div class="step"><div class="n">1</div><div class="t">เลือก + วางมัดจำ</div></div>
-    <div class="step"><div class="n">2</div><div class="t">ยืนยันใน LINE</div></div>
-    <div class="step"><div class="n">3</div><div class="t">รับชุด · คืน · จบ</div></div>
+    <div class="step"><div class="n">1</div><div class="t" data-i18n="Choose + place deposit">เลือก + วางมัดจำ</div></div>
+    <div class="step"><div class="n">2</div><div class="t" data-i18n="Confirm on LINE">ยืนยันใน LINE</div></div>
+    <div class="step"><div class="n">3</div><div class="t" data-i18n="Receive · return · done">รับชุด · คืน · จบ</div></div>
   </section>
 
-  <footer>LLOOP · เช่าชุดพร้อมสไตลิสต์ · มัดจำคืนเต็มทุกครั้ง</footer>
+  <footer data-i18n="LLOOP · rent with a stylist · full deposit back every time">LLOOP · เช่าชุดพร้อมสไตลิสต์ · มัดจำคืนเต็มทุกครั้ง</footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -138,8 +138,11 @@
 
   const rotw = document.getElementById('rotw');
   if (rotw){
-    const words = ['งานแต่ง','รับปริญญา','ปาร์ตี้ค่ำคืน','ออกเดท','ทุกวันสำคัญ'];
+    const words = (window.NAV && NAV.lang==='en')
+      ? ['weddings','graduation','evening parties','a date','every special day']
+      : ['งานแต่ง','รับปริญญา','ปาร์ตี้ค่ำคืน','ออกเดท','ทุกวันสำคัญ'];
     let i = 0;
+    rotw.textContent = words[0];
     setInterval(function(){
       rotw.style.opacity = 0; rotw.style.transform = 'translateY(-7px)';
       setTimeout(function(){
@@ -158,11 +161,11 @@
     const out = !(g.status === 'available');
     const img = photo
       ? `<img src="${photo}" alt="${g.name||g.code||''}" loading="lazy">`
-      : `<div class="ph">${g.name || g.code || 'ชุด'}</div>`;
+      : `<div class="ph">${g.name || g.code || NAV.t('ชุด','Outfit')}</div>`;
     return `<a class="pcard" href="${LINE}">
-      <div class="pphoto">${img}${out?'<span class="pout">มีคิวจอง</span>':''}</div>
+      <div class="pphoto">${img}${out?`<span class="pout">${NAV.t('มีคิวจอง','Booked')}</span>`:''}</div>
       <div class="pname">${g.name || g.code || ''}</div>
-      <div class="pprice">${baht(price)} <small>/ วัน</small></div>
+      <div class="pprice">${baht(price)} <small>${NAV.t('/ วัน','/ day')}</small></div>
     </a>`;
   }
 

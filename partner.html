@@ -110,6 +110,7 @@
 </style>
 </head>
 <body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="bar"><h1>พอร์ทัลสไตลิสต์</h1><span class="tag">พาร์ทเนอร์ LLOOP</span>
   <span class="langtog"><button id="thBtn" class="on" onclick="setPLang('th')">TH</button><button id="enBtn" onclick="setPLang('en')">EN</button></span></div>
 
@@ -410,6 +411,7 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="./config.js"></script>
 <script src="./me-api.js"></script>
+<script src="nav.js?v=1"></script>
 <script>
   // publishable client — ใช้เฉพาะ Storage (อัปโหลดรูป/ไฟล์) · ส่วน RPC วิ่งผ่าน me-rpc gateway
   const SUPABASE_URL=(window.CONFIG&&window.CONFIG.SUPABASE_URL)||'https://rprwilsbjptdnvsibjgi.supabase.co';
@@ -926,7 +928,8 @@
     'ชื่อสไตลิสต์':'Stylist name', 'ทีม/พาร์ทเนอร์':'Team/partner', 'บันทึกโปรไฟล์ลูกค้า':'Save client profile',
   };
   const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.card h2,.card .sub,.jump button,.empty,label,button.btn,option';
-  let plang=localStorage.getItem('partnerLang')||'th', collected=false;
+  // ภาษาให้ตรงกับแถบ topbar ร่วม (nav.js เก็บใน lloop_lang) — ใช้เป็นแหล่งความจริงเดียว
+  let plang=localStorage.getItem('lloop_lang')||localStorage.getItem('partnerLang')||'th', collected=false, _syncingLang=false;
   function collectI18n(){
     if(collected)return; collected=true;
     document.querySelectorAll(I18N_SEL).forEach(el=>{

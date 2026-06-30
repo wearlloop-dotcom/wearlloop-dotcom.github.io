@@ -343,16 +343,16 @@ function renderStatus(st){
     const warn = !m.paid;
     let badges;
     if(m.paid){
-      badges = '<span class="bdg ok">จ่ายแล้ว</span>' + (m.shipped ? '<span class="bdg ship">จัดส่งแล้ว</span>' : '');
+      badges = '<span class="bdg ok">'+NAV.t('จ่ายแล้ว','Paid')+'</span>' + (m.shipped ? '<span class="bdg ship">'+NAV.t('จัดส่งแล้ว','Shipped')+'</span>' : '');
     } else {
-      badges = '<span class="bdg warn">รอชำระ</span>';
+      badges = '<span class="bdg warn">'+NAV.t('รอชำระ','Pending')+'</span>';
     }
     const items = Number(m.items||0);
     return `<div class="rrow ${warn?'warn':''}">
       ${avaHtml(m.picture, m.order_group||m.name, m.name)}
       <div class="rt">
-        <div class="rn">${esc(m.name||'สมาชิก')}</div>
-        <div class="rm">${items>0?(items+' ชุด'):'—'}${m.order_group?(' · '+esc(m.order_group)):''}</div>
+        <div class="rn">${esc(m.name||NAV.t('สมาชิก','Member'))}</div>
+        <div class="rm">${items>0?(items+NAV.t(' ชุด',' pcs')):'—'}${m.order_group?(' · '+esc(m.order_group)):''}</div>
       </div>
       <div class="rright">
         <div class="rtot">${baht(m.total)}</div>
@@ -363,9 +363,9 @@ function renderStatus(st){
 
   $('#rosterBody').innerHTML = rows + `
     <div class="totbox">
-      <div class="trow"><span class="muted">จ่ายแล้ว ${paidCount} คน</span><span>${baht(members.filter(m=>m.paid).reduce((s,m)=>s+Number(m.total||0),0))}</span></div>
-      ${unpaid>0?`<div class="trow"><span class="muted">รอชำระ ${unpaid} คน</span><span style="color:#8a6d2f">${baht(members.filter(m=>!m.paid).reduce((s,m)=>s+Number(m.total||0),0))}</span></div>`:''}
-      <div class="trow hl"><span>ยอดรวมทั้งกลุ่ม</span><span>${baht(grand)}</span></div>
+      <div class="trow"><span class="muted">${NAV.t('จ่ายแล้ว ','Paid · ')}${paidCount}${NAV.t(' คน',' people')}</span><span>${baht(members.filter(m=>m.paid).reduce((s,m)=>s+Number(m.total||0),0))}</span></div>
+      ${unpaid>0?`<div class="trow"><span class="muted">${NAV.t('รอชำระ ','Pending · ')}${unpaid}${NAV.t(' คน',' people')}</span><span style="color:#8a6d2f">${baht(members.filter(m=>!m.paid).reduce((s,m)=>s+Number(m.total||0),0))}</span></div>`:''}
+      <div class="trow hl"><span>${NAV.t('ยอดรวมทั้งกลุ่ม','Group total')}</span><span>${baht(grand)}</span></div>
     </div>`;
 }
 
@@ -379,6 +379,7 @@ function edgeState(title, body, btnLabel, href){
 }
 
 document.addEventListener('DOMContentLoaded', boot);
+window.addEventListener('lloop:lang', function(){ location.reload(); });
 </script>
 </body>
 </html>

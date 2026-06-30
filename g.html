@@ -260,14 +260,14 @@ async function onPick(){
 
 async function onBook(){
   const from = $('#useDate') && $('#useDate').value;
-  if (!from){ toast('เลือกวันก่อนนะคะ'); return; }
+  if (!from){ toast(NAV.t('เลือกวันก่อนนะคะ','Pick a date first')); return; }
   if (!(CUSTOMER && CUSTOMER.id)){ window.LiffAuth.signIn(); return; }
   const to = addDays(from, gDur - 1);
-  const btn = $('#bookBtn'); if (btn){ btn.disabled = true; btn.textContent = 'กำลังจอง…'; }
+  const btn = $('#bookBtn'); if (btn){ btn.disabled = true; btn.textContent = NAV.t('กำลังจอง…','Booking…'); }
   // เช็กว่างวันแรกอีกชั้น (กันชนนาทีสุดท้าย) — book_cart เป็นคนตัดสินจริง
   let free = true; try { free = await window.API.availableOn(G.id, from); } catch (e) {}
   if (free === false){
-    if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
+    if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
     try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) {}
     onPick();
     return;
@@ -284,8 +284,8 @@ async function onBook(){
     window.track?.('booked', G.code, { total });
     renderDone(from, to, total, covered);
   } else {
-    if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
-    toast('ชุดนี้เพิ่งถูกจองช่วงนั้นพอดี ลองวันอื่นนะคะ');
+    if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
+    toast(NAV.t('ชุดนี้เพิ่งถูกจองช่วงนั้นพอดี ลองวันอื่นนะคะ','This piece was just booked for those dates — try other dates.'));
     try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) {}
     onPick();
   }
@@ -295,30 +295,33 @@ function renderDone(from, to, total, covered){
   const hasPP = PAY && (PAY.pay_promptpay_id || PAY.pay_promptpay_qr);
   // สมาชิกที่แพ็กคลุมชุดนี้ → ไม่ต้องจ่าย (จองสำเร็จเลย)
   const payBlock = covered
-    ? `<div class="paybox"><div class="paynote" style="text-align:center">ชุดนี้รวมอยู่ในแพ็กสมาชิกของคุณแล้ว — ไม่ต้องโอนเพิ่ม จัดส่งตามวันที่เลือกค่ะ</div></div>`
+    ? `<div class="paybox"><div class="paynote" style="text-align:center">${NAV.t('ชุดนี้รวมอยู่ในแพ็กสมาชิกของคุณแล้ว — ไม่ต้องโอนเพิ่ม จัดส่งตามวันที่เลือกค่ะ','This piece is included in your membership — nothing more to pay, shipped on your chosen date.')}</div></div>`
     : !(hasPP && total) ? '' : `
     <div class="paybox">
-      <div class="qhd">โอนเพื่อยืนยัน</div>
+      <div class="qhd">${NAV.t('โอนเพื่อยืนยัน','Transfer to confirm')}</div>
       ${PAY.pay_promptpay_id ? `<div id="ppqr2"></div>`
         : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
-      <div class="payamt">สแกนแล้วโอน <b>${baht(total)}</b></div>
-      <div class="paynote">โอนแล้วแนบสลิปในแชต LLOOP — ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ</div>
+      <div class="payamt">${NAV.t('สแกนแล้วโอน','Scan and transfer')} <b>${baht(total)}</b></div>
+      <div class="paynote">${NAV.t('โอนแล้วแนบสลิปในแชต LLOOP — ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ','Transfer and attach the slip in LLOOP chat — once the team confirms, the piece is yours, shipped on your chosen date.')}</div>
     </div>`;
   $('#root').innerHTML = `
     <div class="sec">
       <div class="done">
         <div class="di"><span class="ck"></span></div>
-        <h4>ล็อกชุดไว้ให้แล้ว</h4>
-        <p>${G.name || G.code} · ใช้วันที่ ${fmtDate(from)}${gDur > 1 ? ` ถึง ${fmtDate(to)}` : ''}</p>
+        <h4>${NAV.t('ล็อกชุดไว้ให้แล้ว','Your piece is locked in')}</h4>
+        <p>${G.name || G.code} · ${NAV.t('ใช้วันที่','Wear date')} ${fmtDate(from)}${gDur > 1 ? `${NAV.t(' ถึง ',' to ')}${fmtDate(to)}` : ''}</p>
       </div>
       ${payBlock}
-      <a class="btn" href="index.html?go=orders" style="display:block;text-decoration:none;text-align:center">ดูออเดอร์ของฉัน</a>
+      <a class="btn" href="index.html?go=orders" style="display:block;text-decoration:none;text-align:center">${NAV.t('ดูออเดอร์ของฉัน','View my orders')}</a>
     </div>`;
   if (PAY && PAY.pay_promptpay_id && total && window.promptpayBrandedQR){
     const el = document.getElementById('ppqr2');
     if (el) window.promptpayBrandedQR(el, PAY.pay_promptpay_id, total, PAY.pay_promptpay_type);
   }
 }
+
+// re-render page content (rendered via JS) when the language toggle flips
+window.addEventListener('lloop:lang', function(){ location.reload(); });
 </script>
 </body>
 </html>

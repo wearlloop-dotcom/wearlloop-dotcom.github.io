@@ -382,7 +382,7 @@ function mapGroup(g){
     id: g.group_id, name: g.name||NAV.t('กลุ่ม','Group'), kind: g.kind||'family',
     my_role: g.my_role, my_status: g.my_status,
     members: (g.members||[]).map(m=>({
-      id: m.customer_id, name: m.name||'สมาชิก', rel: m.relation||null,
+      id: m.customer_id, name: m.name||NAV.t('สมาชิก','Member'), rel: m.relation||null,
       role: m.role||'member', age: m.age_band||'adult', gen: m.gender||'',
       managed: !!m.managed, season: m.color_season||null,
       bust: m.bust_in||null, waist: m.waist_in||null, hip: m.hip_in||null,
@@ -398,7 +398,7 @@ async function reloadGroups(){
   GROUPS = mapped.filter(g => g.my_status !== 'invited');
   INVITES = mapped.filter(g => g.my_status === 'invited').map(g=>{
     const owner = (g.members||[]).find(m=>m.role==='owner');
-    return { group_id: g.id, name: g.name, kind: g.kind, from: (owner && owner.name) || 'มีคนชวนคุณ' };
+    return { group_id: g.id, name: g.name, kind: g.kind, from: (owner && owner.name) || NAV.t('มีคนชวนคุณ','Someone invited you') };
   });
   if(!GROUPS.find(x=>x.id===active)) active = GROUPS[0] ? GROUPS[0].id : null;
 }
@@ -421,29 +421,29 @@ function renderSwitch(){
   GROUPS.forEach(g=>{
     const b=document.createElement('button');
     b.className='gchip'+(g.id===active?' on':'');
-    b.innerHTML=`<span class="k">${g.kind==='friends'?'เพื่อน':g.kind==='couple'?'คู่':'ครอบครัว'}</span>${g.name}`;
+    b.innerHTML=`<span class="k">${g.kind==='friends'?NAV.t('เพื่อน','Friends'):g.kind==='couple'?NAV.t('คู่','Couple'):NAV.t('ครอบครัว','Family')}</span>${g.name}`;
     b.onclick=()=>{active=g.id;selRel=null;render();};
     el.appendChild(b);
   });
   const add=document.createElement('button');
-  add.className='gchip add'; add.textContent='+ สร้างกลุ่มใหม่';
+  add.className='gchip add'; add.textContent=NAV.t('+ สร้างกลุ่มใหม่','+ New group');
   add.onclick=createGroupFlow;
   el.appendChild(add);
 }
 
 async function createGroupFlow(){
-  const name = (prompt('ตั้งชื่อกลุ่มใหม่','กลุ่มใหม่')||'').trim();
+  const name = (prompt(NAV.t('ตั้งชื่อกลุ่มใหม่','Name your new group'),NAV.t('กลุ่มใหม่','New group'))||'').trim();
   if(name===null) return;
   if(LIVE){
     try{
-      const res = unwrap(await window.API.createGroup(ME, name||'กลุ่มใหม่', 'family'));
+      const res = unwrap(await window.API.createGroup(ME, name||NAV.t('กลุ่มใหม่','New group'), 'family'));
       await reloadGroups();
       if(res && res.group_id) active = res.group_id;
       render();
-    }catch(e){ toast('สร้างกลุ่มไม่สำเร็จ: '+(e.message||e)); }
+    }catch(e){ toast(NAV.t('สร้างกลุ่มไม่สำเร็จ: ','Couldn\'t create the group: ')+(e.message||e)); }
   } else {
     const id='g'+(GROUPS.length+1);
-    GROUPS.push({id,name:name||('กลุ่มใหม่ '+id),kind:'family',members:[{id:'me',name:ME.name,rel:null,role:'owner',age:'adult',gen:'female',managed:false,season:'autumn'}]});
+    GROUPS.push({id,name:name||(NAV.t('กลุ่มใหม่ ','New group ')+id),kind:'family',members:[{id:'me',name:ME.name,rel:null,role:'owner',age:'adult',gen:'female',managed:false,season:'autumn'}]});
     active=id; render();
   }
 }
