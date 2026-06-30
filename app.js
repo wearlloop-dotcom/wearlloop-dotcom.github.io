@@ -830,7 +830,7 @@ async function renderQuote(id, date) {
         <div id="ppqr"></div>
         <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(q.total)}</b></div></div>`
       : pay.pay_promptpay_qr ? `<div style="text-align:center;margin:10px 0">
-        <img src="${pay.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:70%;border:1px solid var(--line,#E7E5E1);border-radius:6px">
+        <img src="${pay.pay_promptpay_qr}" alt="PromptPay QR" style="display:block;margin:0 auto;width:200px;max-width:70%;border:1px solid var(--line,#E7E5E1);border-radius:6px">
         <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(q.total)}</b></div></div>` : ''}
       <div style="font-size:12px;color:var(--muted,#8C8B86);margin-top:6px">${pay.pay_note || (TH ? 'โอนแล้วแนบสลิปในแชตนี้' : 'Transfer then send slip in chat')}</div>
     </div>`;
