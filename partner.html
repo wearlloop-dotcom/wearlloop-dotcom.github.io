@@ -428,7 +428,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- supabase-js (CDN) ใช้แค่ Storage อัปรูป → defer ไม่ให้บล็อกการตรวจสิทธิ์ (gate ใช้ fetch ผ่าน me-api) -->
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="./config.js"></script>
 <script src="./me-api.js"></script>
@@ -437,9 +438,14 @@
   // publishable client — ใช้เฉพาะ Storage (อัปโหลดรูป/ไฟล์) · ส่วน RPC วิ่งผ่าน me-rpc gateway
   const SUPABASE_URL=(window.CONFIG&&window.CONFIG.SUPABASE_URL)||'https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY=(window.CONFIG&&window.CONFIG.SUPABASE_ANON_KEY)||'sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
-  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  // RPC ทุกตัวผ่าน gateway me-rpc (verify LINE idToken → inject p_line_uid) — กัน spoof
-  sb.rpc = (fn,args)=> window.meRpc(fn, args||{});
+  // RPC ทุกตัวผ่าน gateway me-rpc (verify LINE idToken → inject p_line_uid) — กัน spoof · ไม่ต้องใช้ supabase-js
+  // sb.storage = lazy: สร้าง client ตอนใช้จริง (อัปรูป) เท่านั้น → gate ไม่ค้างรอ supabase-js CDN
+  let _sbClient=null;
+  const sb={ rpc:(fn,args)=> window.meRpc(fn, args||{}) };
+  Object.defineProperty(sb,'storage',{ get(){
+    if(!_sbClient && window.supabase){ _sbClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); }
+    return _sbClient ? _sbClient.storage : null;
+  }});
   const $=id=>document.getElementById(id);
   let code=null, baseSeason='';
   const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2200);};
