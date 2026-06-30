@@ -53,7 +53,7 @@
   <section class="phead">
     <div class="eyebrow">today at the studio</div>
     <h1>งานวันนี้ ที่รอมือเรา</h1>
-    <div class="sub">รวมทุกชุดที่ต้องส่ง คืน ซัก ตรวจ และดูแล วันนี้ — ให้ทุกตัวกลับเข้า loop ได้อย่างไม่ตกหล่น</div>
+    <div class="sub">รวมทุกชุดที่ต้องส่ง คืน ซัก ตรวจ และดูแล วันนี้ — ให้ทุกตัวหมุนเวียนต่อได้อย่างไม่ตกหล่น</div>
   </section>
   <div class="toolrow">
     <div class="when" id="when"></div>
@@ -123,14 +123,9 @@
       '')).join('');
     const wash=(d.wash||[]).map(x=>{ const s=STAGE[x.stage]||[x.stage||'',''];
       return rowLink('/laundry.html', esc(x.code)+' · '+esc(x.name||''), '', `<span class="tag ${s[1]}">${esc(s[0])}</span>`); }).join('');
-    const review=(d.review||[]).map(x=>{
-      const code=esc(x.code);
-      return `<div class="row" id="rv-${code}">
-        <a href="/garment.html?code=${encodeURIComponent(x.code)}" style="text-decoration:none;color:inherit;flex:1">
-          <div class="code">${code}${x.name?' · '+esc(x.name):''}</div></a>
-        <button class="btn" style="padding:7px 13px;font-size:13px;width:auto" onclick="approveGarment('${code}',this)">อนุมัติขึ้นร้าน</button>
-      </div>`;
-    }).join('');
+    const review=(d.review||[]).map(x=>rowLink(
+      '/shipout.html?code='+encodeURIComponent(x.code),
+      esc(x.code)+' · '+esc(x.name||''), '', '')).join('');
     const acq=(d.acq||[]).map(x=>{
       const isBulk = x.mode==='bulk';
       const label = isBulk ? ('ขายเหมา '+(x.count||0)+' ตัว') : 'เสนอขาย';
@@ -146,16 +141,6 @@
       section('คิวซัก/ดูแล', (d.wash||[]).length, false, wash, 'wash') +
       section('รอตรวจ/อนุมัติ', (d.review||[]).length, false, review, 'review') +
       section('รับซื้อรอจัดการ', (d.acq||[]).length, false, acq, 'acq');
-  }
-
-  // อนุมัติชุด needs_review → ready (ขึ้นหน้าลูกค้า + ยิงโซเชียล/new_arrival อัตโนมัติ)
-  async function approveGarment(code, btn){
-    btn.disabled=true; const old=btn.textContent; btn.textContent='กำลังอนุมัติ…';
-    const { data, error } = await sb.rpc('mark_garment_ready', { p_code: code });
-    if(error){ alert('อนุมัติไม่ได้: '+esc(error.message)); btn.disabled=false; btn.textContent=old; return; }
-    if(data==='ready'){ const row=$('rv-'+code); if(row) row.remove(); return; }
-    const msg={need_photo:'ยังไม่มีรูป — เพิ่มรูปก่อนถึงจะขึ้นร้านได้',need_price:'ยังไม่ตั้งราคาเช่า — ตั้งราคาก่อน',not_found:'ไม่พบชุดนี้',retired:'ชุดนี้ปลดระวางแล้ว'}[data]||('ผลลัพธ์: '+data);
-    alert(msg); btn.disabled=false; btn.textContent=old;
   }
 
   async function load(){

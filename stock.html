@@ -110,7 +110,7 @@
     if(error||!data){ toast('export ไม่สำเร็จ',true); return; }
     if(!data.length){ toast('ไม่มีข้อมูล',true); return; }
     const cols=['code','name','brand','size','status','data_status','rental_price','times_rented','wash_count','condition_grade','active_due','last_seen_at'];
-    const head=['รหัส','ชื่อ','แบรนด์','ไซส์','สถานะ','ข้อมูล','ค่าเช่า','เช่าไปแล้ว','ซักแล้ว','เกรด','คืนล่าสุด(เช่าอยู่)','เห็นล่าสุด'];
+    const head=['รหัส','ชื่อ','แบรนด์','ไซซ์','สถานะ','ข้อมูล','ค่าเช่า','เช่าไปแล้ว','ซักแล้ว','เกรด','คืนล่าสุด(เช่าอยู่)','เห็นล่าสุด'];
     const cell=v=>{ let s=v==null?'':String(v); if(/[",\n]/.test(s)) s='"'+s.replace(/"/g,'""')+'"'; return s; };
     const csv=[head.join(',')].concat(data.map(r=>cols.map(c=>cell(r[c])).join(','))).join('\n');
     const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});

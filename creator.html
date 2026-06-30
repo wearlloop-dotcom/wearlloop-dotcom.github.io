@@ -53,11 +53,16 @@
 </style>
 </head>
 <body>
-<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="wrap">
-  <div class="credit" style="text-align:right;padding:12px 18px 0"><span data-i18n="Wallet credit">เครดิตในกระเป๋า</span><b id="credit">฿–</b></div>
-  <div class="tag" data-i18n="Shoot beautiful looks, earn credit toward your next rental">ถ่ายชุดสวย ๆ ได้เครดิตไว้เช่าครั้งหน้า</div>
-  <div id="view"><div class="empty" data-i18n="Loading…">กำลังโหลด…</div></div>
+  <header>
+    <div class="hl">
+      <button class="hback" onclick="goBack()" aria-label="กลับ">‹</button>
+      <div class="brand">LLOOP<small>creator · loop</small></div>
+    </div>
+    <div class="credit">เครดิตในกระเป๋า<b id="credit">฿–</b></div>
+  </header>
+  <div class="tag">ถ่ายชุดสวย ๆ ได้เครดิตไว้เช่าครั้งหน้า</div>
+  <div id="view"><div class="empty">กำลังโหลด…</div></div>
 </div>
 <div id="toast"></div>
 
@@ -65,20 +70,20 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="me-api.js"></script>
-<script src="nav.js?v=1"></script>
 <script>
 const $ = s => document.querySelector(s);
 const FN = CONFIG.SUPABASE_URL + '/functions/v1';
 const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 let BOARD = null, pickedFile = null;
 
-const ERR = () => ({ need_rental:NAV.t('เช่าชุดครั้งแรกก่อน แล้วเริ่มรับงานถ่ายได้เลย','Rent your first outfit, then you can start taking photo gigs'),
-  too_many_active:NAV.t('ยังมีงานค้างอยู่ — ส่งงานเดิมให้เสร็จก่อนนะคะ','You still have an open gig — please finish it first'),
-  already_taken:NAV.t('งานนี้มีคนรับไปแล้ว ลองงานอื่นดูค่ะ','This gig has been taken — try another one'), blocked:NAV.t('บัญชีนี้ถูกพักการรับงานชั่วคราว','This account is temporarily paused from taking gigs'),
-  gig_not_found:NAV.t('ไม่พบงานนี้แล้ว','This gig is no longer available'), no_customer:NAV.t('ยังไม่พบบัญชีของคุณ','We could not find your account') });
-const msg = e => ERR()[e] || e || NAV.t('เกิดข้อผิดพลาด','Something went wrong');
+const ERR = { need_rental:'เช่าชุดครั้งแรกก่อน แล้วเริ่มรับงานถ่ายได้เลย',
+  too_many_active:'ยังมีงานค้างอยู่ — ส่งงานเดิมให้เสร็จก่อนนะคะ',
+  already_taken:'งานนี้มีคนรับไปแล้ว ลองงานอื่นดูค่ะ', blocked:'บัญชีนี้ถูกพักการรับงานชั่วคราว',
+  gig_not_found:'ไม่พบงานนี้แล้ว', no_customer:'ยังไม่พบบัญชีของคุณ' };
+const msg = e => ERR[e] || e || 'เกิดข้อผิดพลาด';
 let _tt; function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('show');
   clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),2800); }
+function goBack(){ if (history.length > 1) history.back(); else location.href = 'index.html'; }
 
 async function load(){
   const { data, error } = await window.meRpc('gig_board', {});
@@ -90,27 +95,27 @@ function render(){
   $('#credit').textContent = '฿' + Math.round(BOARD.wallet_balance || 0);
   const openGigs = BOARD.open || [], mine = BOARD.mine || [];
   let html = '';
-  if (!BOARD.can_claim) html += `<div class="note">${msg(BOARD.reason)} <a href="index.html">${NAV.t('ไปเลือกชุด','Browse outfits')}</a></div>`;
-  html += `<div class="sec">${NAV.t('งานถ่ายที่เปิดรับ','Open photo gigs')}</div>`;
+  if (!BOARD.can_claim) html += `<div class="note">${msg(BOARD.reason)} <a href="index.html">ไปเลือกชุด</a></div>`;
+  html += `<div class="sec">งานถ่ายที่เปิดรับ</div>`;
   html += openGigs.length ? openGigs.map(g => `
     <div class="gig">
       <div class="ph" style="${g.photo?`background-image:url('${g.photo}')`:''}">${g.photo?'':g.name||g.garment}</div>
       <div class="body">
         <div class="name">${g.name || g.garment}</div>
-        <div class="meta">${NAV.t('ต้องการรูปหุ่นไซส์','On-body photo wanted, size')} ${g.needed_size || '-'}</div>
-        <span class="reward">${NAV.t('ได้เครดิต','Earn')} ฿${g.reward}</span><br>
-        <button class="btn" ${BOARD.can_claim?'':'disabled'} onclick="claim('${g.gig_id}','${(g.name||g.garment||'').replace(/'/g,'')}')">${NAV.t('รับงานนี้','Take this gig')}</button>
+        <div class="meta">ต้องการรูปหุ่นไซซ์ ${g.needed_size || '-'}</div>
+        <span class="reward">ได้เครดิต ฿${g.reward}</span><br>
+        <button class="btn" ${BOARD.can_claim?'':'disabled'} onclick="claim('${g.gig_id}','${(g.name||g.garment||'').replace(/'/g,'')}')">รับงานนี้</button>
       </div>
-    </div>`).join('') : `<div class="empty">${NAV.t('ยังไม่มีงานเปิดรับตอนนี้ — แวะมาใหม่นะคะ','No open gigs right now — check back soon')}</div>`;
+    </div>`).join('') : `<div class="empty">ยังไม่มีงานเปิดรับตอนนี้ — แวะมาใหม่นะคะ</div>`;
   if (mine.length){
-    html += `<div class="sec">${NAV.t('งานของฉัน','My gigs')}</div>`;
-    const lbl = {reserved:NAV.t('รอส่งรูป','Awaiting photo'),submitted:NAV.t('กำลังตรวจ','In review'),approved:NAV.t('ผ่าน + ได้เครดิตแล้ว','Approved + credited'),rejected:NAV.t('ไม่ผ่าน','Not approved'),open:'-'};
+    html += `<div class="sec">งานของฉัน</div>`;
+    const lbl = {reserved:'รอส่งรูป',submitted:'กำลังตรวจ',approved:'ผ่าน + ได้เครดิตแล้ว',rejected:'ไม่ผ่าน',open:'-'};
     html += mine.map(g => `
       <div class="gig"><div class="body">
         <div class="name">${g.name || g.garment}</div>
         <div class="meta">฿${g.reward}</div>
         <span class="st ${g.status}">${lbl[g.status]||g.status}</span>
-        ${g.status==='reserved'?`<br><button class="btn ghost" onclick="claim('${g.gig_id}','${(g.name||g.garment||'').replace(/'/g,'')}')" style="margin-top:8px">${NAV.t('ส่งรูป','Submit photo')}</button>`:''}
+        ${g.status==='reserved'?`<br><button class="btn ghost" onclick="claim('${g.gig_id}','${(g.name||g.garment||'').replace(/'/g,'')}')" style="margin-top:8px">ส่งรูป</button>`:''}
       </div></div>`).join('');
   }
   $('#view').innerHTML = html;
@@ -128,14 +133,14 @@ async function claim(gigId, name){
 function uploadView(gigId, name){
   pickedFile = null;
   $('#view').innerHTML = `
-    <button class="back" onclick="load()">${NAV.t('← กลับกระดานงาน','← Back to gig board')}</button>
-    <div class="sec">${NAV.t('ส่งรูป','Submit photo')} · ${name}</div>
+    <button class="back" onclick="load()">← กลับกระดานงาน</button>
+    <div class="sec">ส่งรูป · ${name}</div>
     <div class="upload">
       <input id="file" type="file" accept="image/*" style="display:none" onchange="onPick(event)">
       <img id="prev">
-      <p>${NAV.t('เลือกรูปชุดเต็มตัว ชัด แสงสวย','Choose a clear, well-lit full-length photo')}</p>
-      <button class="btn ghost" onclick="document.getElementById('file').click()">${NAV.t('เลือกรูป','Choose photo')}</button>
-      <button class="btn" id="go" disabled onclick="submitAndAudit('${gigId}','${(name||'').replace(/'/g,'')}')">${NAV.t('อัปรูป แล้วให้เราตรวจ','Upload and review')}</button>
+      <p>เลือกรูปชุดเต็มตัว ชัด แสงสวย</p>
+      <button class="btn ghost" onclick="document.getElementById('file').click()">เลือกรูป</button>
+      <button class="btn" id="go" disabled onclick="submitAndAudit('${gigId}','${(name||'').replace(/'/g,'')}')">อัปรูป แล้วให้เราตรวจ</button>
     </div>
     <div id="auditResult"></div>`;
 }
@@ -149,23 +154,23 @@ function onPick(e){
 async function submitAndAudit(gigId, name){
   if (!pickedFile) return;
   $('#go').disabled = true;
-  $('#auditResult').innerHTML = `<div class="audit"><h4>${NAV.t('กำลังอัปโหลด…','Uploading…')}</h4></div>`;
+  $('#auditResult').innerHTML = `<div class="audit"><h4>กำลังอัปโหลด…</h4></div>`;
   try {
     // 1) อัปรูปเข้า storage → public url
     const path = `ugc-${Date.now()}-${(pickedFile.name||'p').replace(/\s+/g,'_')}`;
     const up = await sb.storage.from('uploads').upload(path, pickedFile);
-    if (up.error) throw new Error(NAV.t('อัปโหลดรูปไม่สำเร็จ','Photo upload failed'));
+    if (up.error) throw new Error('อัปโหลดรูปไม่สำเร็จ');
     const url = sb.storage.from('uploads').getPublicUrl(path).data.publicUrl;
     // 2) ผูกรูปกับงาน (สร้าง asset)
     const { data: sub, error: se } = await window.meRpc('ugc_submit', { p_gig: gigId, p_photo_url: url });
     if (se || (sub && sub.error)) throw new Error(msg(se ? se.message : sub.error));
     // 3) ให้ AI ตรวจ (auth ด้วย LINE idToken) — ผ่าน = จ่ายเครดิตอัตโนมัติฝั่ง server
-    $('#auditResult').innerHTML = `<div class="audit"><h4>${NAV.t('กำลังให้ AI ตรวจ…','AI is reviewing…')}</h4></div>`;
+    $('#auditResult').innerHTML = `<div class="audit"><h4>กำลังให้ AI ตรวจ…</h4></div>`;
     const idToken = (window.liff && liff.getIDToken) ? liff.getIDToken() : null;
     const r = await fetch(FN + '/ugc-audit', { method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ id_token: idToken, asset_id: sub.asset_id }) });
     const a = await r.json();
-    if (a.error) throw new Error(NAV.t('ตรวจรูปไม่สำเร็จ: ','Photo review failed: ') + a.error);
+    if (a.error) throw new Error('ตรวจรูปไม่สำเร็จ: ' + a.error);
     showAudit(gigId, name, a);
   } catch (err) {
     $('#auditResult').innerHTML = `<div class="err">${err.message}</div>`;
@@ -176,21 +181,20 @@ async function submitAndAudit(gigId, name){
 function showAudit(gigId, name, a){
   const row = (label, ok) => `<div class="checkrow"><span class="${ok?'ok':'bad'}">${ok?'✓':'✕'}</span>${label}</div>`;
   // ugc-audit คืน audit เต็ม → โชว์ ✓/✕ รายข้อ
-  const checks = [[NAV.t('เห็นชุดเต็มตัว','Full outfit visible'), a.dress_fully_visible], [NAV.t('ภาพชัด โฟกัสดี','Sharp and in focus'), a.in_focus],
-    [NAV.t('แสงดี','Good lighting'), a.lighting_ok], [NAV.t('เหมาะสม (brand-safe)','Brand-safe'), a.brand_safe]];
+  const checks = [['เห็นชุดเต็มตัว', a.dress_fully_visible], ['ภาพชัด โฟกัสดี', a.in_focus],
+    ['แสงดี', a.lighting_ok], ['เหมาะสม (brand-safe)', a.brand_safe]];
   $('#auditResult').innerHTML = `
     <div class="audit">
-      <h4>${a.pass ? NAV.t('ผ่าน! ชุดนี้เข้าคลังแล้ว','Approved! This look is now in the closet') : NAV.t('ยังไม่ผ่าน — ลองถ่าย/เลือกใหม่','Not approved — try another shot')}</h4>
+      <h4>${a.pass ? 'ผ่าน! ชุดนี้เข้าคลังแล้ว' : 'ยังไม่ผ่าน — ลองถ่าย/เลือกใหม่'}</h4>
       ${checks.map(([l,v]) => row(l, !!v)).join('')}
       ${(a.reasons&&a.reasons.length) ? `<div style="font-size:12px;color:var(--stone);margin-top:8px">${a.reasons.join(' · ')}</div>` : ''}
       ${a.pass
-        ? `<p style="margin-top:10px;color:var(--ok)">${NAV.t('ได้เครดิตเข้ากระเป๋าแล้ว — ไว้ลดค่าเช่าครั้งหน้า','Credit added to your wallet — use it on your next rental')}</p>
-           <button class="btn" onclick="load()" style="margin-top:10px">${NAV.t('กลับกระดานงาน','Back to gig board')}</button>`
-        : `<button class="btn ghost" onclick="uploadView('${gigId}','${(name||'').replace(/'/g,'')}')" style="margin-top:10px">${NAV.t('ลองใหม่','Try again')}</button>`}
+        ? `<p style="margin-top:10px;color:var(--ok)">ได้เครดิตเข้ากระเป๋าแล้ว — ไว้ลดค่าเช่าครั้งหน้า</p>
+           <button class="btn" onclick="load()" style="margin-top:10px">กลับกระดานงาน</button>`
+        : `<button class="btn ghost" onclick="uploadView('${gigId}','${(name||'').replace(/'/g,'')}')" style="margin-top:10px">ลองใหม่</button>`}
     </div>`;
 }
 
-window.addEventListener('lloop:lang', function(){ location.reload(); });
 load();
 </script>
 </body>

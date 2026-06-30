@@ -69,16 +69,12 @@
   .c-note{font-size:25px; color:var(--sage); line-height:1.6;}
   .c-cta{margin-top:24px; background:var(--ink); color:var(--cream); text-align:center;
     border-radius:14px; padding:30px; font-size:32px; letter-spacing:1.5px;}
-  /* โหมดแสดงผลเต็มจอ (เปิดด้วย ?display=1) — ซ่อนฟอร์ม โชว์เฉพาะการ์ด */
-  body.kiosk .wrap{grid-template-columns:1fr; max-width:560px;}
-  body.kiosk .left{display:none;}
-  body.kiosk .scaler{max-width:100%;}
 </style>
 </head>
 <body>
   <div class="wrap">
 
-    <div class="left">
+    <div>
       <h1>LLOOP · การ์ดราคา</h1>
       <p class="sub">สไลด์สุดท้ายของโพสต์เสื้อผ้า — ใส่รหัสชุดแล้วกด “ดึง” เพื่อเติมรูป/สี/ไซส์/ราคา 1·3·5 วันจากระบบอัตโนมัติ แล้วโหลด PNG</p>
 
@@ -86,7 +82,6 @@
         <div class="pull">
           <input id="f-code" placeholder="รหัสชุด เช่น LL-0241" onkeydown="if(event.key==='Enter')pull()">
           <button onclick="pull()">ดึงจากระบบ</button>
-          <button onclick="nfcScan()" id="nfcBtn" style="background:var(--sage)">แตะ NFC</button>
         </div>
         <p class="status" id="status">ใส่รหัสแล้วกดดึง · หรือกรอกมือด้านล่างก็ได้</p>
         <hr>
@@ -249,36 +244,7 @@
     const a=document.createElement('a'); a.download='lloop-price-'+code+'.png'; a.href=canvas.toDataURL('image/png'); a.click();
   }
 
-  // ===== Web NFC (Android Chrome) — จ่อแท็กแล้วเปลี่ยนการ์ดเอง =====
-  function codeFromUrl(s){ try{ const u=new URL(s); return u.searchParams.get('code')||u.searchParams.get('c')||''; }catch(e){ return ''; } }
-  async function nfcScan(){
-    if(!('NDEFReader' in window)){ status('เครื่องนี้อ่าน NFC ผ่านเว็บไม่ได้ — ใช้ Android Chrome หรือใช้แท็กแบบเก็บลิงก์แทน', true); return; }
-    try{
-      const r=new NDEFReader(); await r.scan();
-      status('จ่อมือถือกับป้าย NFC ที่ชุด…');
-      r.onreading=(e)=>{
-        let code='';
-        for(const rec of e.message.records){
-          const txt=()=>{ try{ return new TextDecoder(rec.encoding||'utf-8').decode(rec.data).trim(); }catch(_){ return ''; } };
-          if(rec.recordType==='url') code=codeFromUrl(txt());
-          else if(rec.recordType==='text'){ const t=txt(); code=codeFromUrl(t)||t; }
-          if(code) break;
-        }
-        if(code){ $('f-code').value=code; pull(); }
-        else status('อ่านป้ายได้ แต่ไม่พบรหัสชุดในป้าย — เขียนรหัส/ลิงก์ ?code= ลงแท็กก่อน', true);
-      };
-    }catch(e){ status('เริ่มสแกน NFC ไม่ได้: '+e.message, true); }
-  }
-
-  // ===== เปิดด้วย ?code= (จากแท็ก NFC ที่เก็บลิงก์ / QR) → โชว์การ์ดเอง · ?display=1 = เต็มจอ =====
-  (function init(){
-    const u=new URL(location.href);
-    if(u.searchParams.get('display')==='1') document.body.classList.add('kiosk');
-    const code=u.searchParams.get('code')||u.searchParams.get('c');
-    render();
-    if(code){ $('f-code').value=code; pull(); }
-    if(!('NDEFReader' in window)){ const b=$('nfcBtn'); if(b) b.style.display='none'; }
-  })();
+  render();
 </script>
 </body>
 </html>
