@@ -310,7 +310,7 @@ function renderDone(from, to){
         <p>${G.name || G.code} · ใช้วันที่ ${fmtDate(from)}${gDur > 1 ? ` ถึง ${fmtDate(to)}` : ''}</p>
       </div>
       ${payBlock}
-      <a class="btn" href="index.html?tab=orders" style="display:block;text-decoration:none;text-align:center">ดูออเดอร์ของฉัน</a>
+      <a class="btn" href="index.html?go=orders" style="display:block;text-decoration:none;text-align:center">ดูออเดอร์ของฉัน</a>
     </div>`;
   if (PAY && PAY.pay_promptpay_id && total && window.promptpayBrandedQR){
     const el = document.getElementById('ppqr2');

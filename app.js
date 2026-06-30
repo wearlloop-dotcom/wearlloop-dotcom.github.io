@@ -482,6 +482,7 @@ function openDetail(id) {
       <div id="ugcWrap" style="display:none"><div class="sec">${lang ==='th'?'รูปจริงจากลูกค้า':'Real customer photos'}</div><div id="ugcbox" class="ugcbox"></div></div>
       <div class="sec">${t('secSize')}</div>
       <div class="measure">${measures}</div>
+      <div id="fitsummary"></div>
       <div class="sec">${t('secFabric')}</div>
       <div class="fabric">${fabricTags}</div>
       <div class="sec">${t('secColor')}</div>
@@ -523,6 +524,7 @@ function openDetail(id) {
   renderAvailCalendar(g.id);
   renderUGC(g.id);
   loadRating(g.id);  // เรตติ้ง/รีวิวของชุด (async inject)
+  loadFit(g.code || g.id);  // สรุปฟิตจากลุคจริงในชุมชน (Lemon8: trust)
   loadSocialProof(g.code || g.id);  // มีคนเช่า/ดู/หมายตา (social proof)
   loadRecommendWith(g.code || g.id);  // ใส่คู่กับชุดนี้บ่อย (collaborative)
   if (gUseDate) checkAvail(g.id);  // โชว์สถานะวันที่เลือกจากหน้าแรกทันที
