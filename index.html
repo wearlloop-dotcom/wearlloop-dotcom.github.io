@@ -150,7 +150,8 @@
   .segpill button:hover{color:var(--ink)}
   .segpill button.on{background:var(--ink);color:#fff}
   .curbtn{min-width:30px}
-  @media(max-width:679px){.prefrow{justify-content:center;gap:8px}.segpill button{padding:5px 10px}}
+  .curnote{font-size:11px;color:var(--muted);text-align:right;padding:0 0 7px;line-height:1.5}
+  @media(max-width:679px){.prefrow{justify-content:center;gap:8px}.segpill button{padding:5px 10px}.curnote{text-align:center}}
   .catnav{border-bottom:1px solid var(--line);background:#fff}
   .catnav .row{display:flex;gap:26px;justify-content:center;align-items:center;height:42px;overflow-x:auto;scrollbar-width:none}
   .catnav .row::-webkit-scrollbar{display:none}
@@ -175,6 +176,8 @@
   .stylist input.vdate{flex:0 0 auto;min-width:0;width:150px;color:var(--ink)}
   .stylist input.vdate:invalid,.stylist input.vdate:not(:valid){color:var(--muted)}
   .stylist input.vdate.need{border-color:var(--gold);box-shadow:0 0 0 2px rgba(193,154,107,.18)}
+  .stylist select.vtime{flex:0 0 auto;min-width:0;width:150px;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:16px;background:#fff;color:var(--ink);height:40px}
+  .stylist select.vtime:invalid{color:var(--muted)}
   .stylist button{background:var(--ink);color:#fff;border:none;padding:0 20px;height:40px;font-size:12px;letter-spacing:1px;text-transform:uppercase}
   .vresult{font-size:13px;display:none;padding:0 0 12px}
   .vresult.show{display:block}
@@ -447,6 +450,8 @@
   #cmcanvas{max-width:100%;border-radius:10px;border:1px solid var(--line);cursor:crosshair;display:block}
   .cmsugg{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:12px}
   .cmsugglbl{width:100%;font-size:12px;color:var(--muted)}
+  .cmpicked{min-height:20px;font-size:13px;color:#333;display:flex;align-items:center;gap:7px;margin-top:9px}
+  .cmpicked .pk{width:18px;height:18px;border-radius:50%;display:inline-block;box-shadow:0 0 0 1px rgba(0,0,0,.12);flex:0 0 auto}
   .cpdots{display:inline-flex;gap:2px;margin-right:2px}.cpdots i{width:13px;height:13px;border-radius:50%;display:inline-block;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
   .cmfoot{display:flex;gap:10px;margin-top:18px}
   .cmclear{flex:1;border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;cursor:pointer;color:var(--muted)}
@@ -1079,7 +1084,8 @@
     <button class="curbtn" data-cur="JPY" onclick="setCur('JPY')" title="Japanese Yen">¥</button>
     <button class="curbtn" data-cur="CNY" onclick="setCur('CNY')" title="Chinese Yuan">元</button>
   </div>
-</div></div>
+</div>
+<div class="contain"><div class="curnote" id="curNote" hidden></div></div></div>
 
 <nav class="catnav"><div class="contain row" id="catnav"></div></nav>
 
@@ -1110,6 +1116,13 @@
     <span class="lbl" id="stylistLabel">จะไปที่ไหนคะ</span>
     <input id="venueInput" placeholder="" autocomplete="off"/>
     <input type="date" id="venueDate" class="vdate" onchange="setHomeDate(this.value)" aria-label="วันที่ไปงาน"/>
+    <select id="venueTime" class="vtime" onchange="setHomeTime(this.value)" aria-label="ช่วงเวลาที่ไป">
+      <option value="" id="vtOpt_"></option>
+      <option value="morning" id="vtOpt_morning"></option>
+      <option value="day" id="vtOpt_day"></option>
+      <option value="evening" id="vtOpt_evening"></option>
+      <option value="night" id="vtOpt_night"></option>
+    </select>
     <button id="stylistBtn" onclick="askVenue()">แนะนำ</button>
     <span class="quota" id="stylistQuota" hidden></span>
   </div>
@@ -1241,14 +1254,14 @@
 <script src="config.js?v=45"></script>
 <script src="analytics.js?v=45"></script>
 <script src="pixel.js?v=45"></script>
-<script src="i18n.js?v=50"></script>
+<script src="i18n.js?v=51"></script>
 <script src="data.js?v=45"></script>
 <script src="brands.js?v=5"></script>
 <script src="liffAuth.js?v=55"></script>
 <script src="me-api.js?v=54"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=45"></script>
-<script src="api.js?v=57"></script>
+<script src="api.js?v=58"></script>
 <script>
   /* Spotlight — ดึงชุดที่เช่าน้อยสุดมาโชว์รูปใหญ่ + สลับสไลด์อัตโนมัติ (visual layer) */
   window.renderSpotlight = function(garments){
@@ -1369,6 +1382,6 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=75"></script>
+<script src="app.js?v=76"></script>
 </body>
 </html>

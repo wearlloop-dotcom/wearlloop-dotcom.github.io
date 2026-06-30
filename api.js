@@ -242,14 +242,14 @@ window.API = (function () {
   }
 
   async function stylist(payload, lang) {
-    const { venue, place, occasion, date } = payload || {};
+    const { venue, place, occasion, date, time } = payload || {};
     if (!CONFIG.USE_MOCK) {
       let idToken = null;
       try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (_e) {}
       const r = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/stylist`, {
         method:'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ id_token: idToken, venue, place, occasion, lang, date }),
+        body: JSON.stringify({ id_token: idToken, venue, place, occasion, lang, date, time }),
       });
       return await r.json().catch(() => ({ ok:false, error:'network'}));
     }

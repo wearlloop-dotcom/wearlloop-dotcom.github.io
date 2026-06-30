@@ -25,6 +25,7 @@ function matchQuery(g) {
   return hay.includes(gQuery);
 }
 let gUseDate = null, gAvailSet = null, gOnlyAvail = false;  // เลือกวันใช้ตั้งแต่หน้าแรก
+let gUseTime = '';  // ช่วงเวลาที่ไป (morning/day/evening/night) — ให้ AI วิเคราะห์ความเป็นทางการ/โทนให้ตรงเวลา
 let fNewOnly = false, fPrice = null, gInStockOnly = false, gGroupByCountry = false;  // quick filters + directory: มาใหม่/ราคา/เฉพาะมีของ/จัดตามประเทศ
 let gStylistPending = false;  // กดแนะนำแต่ยังไม่เลือกวัน → พอเลือกแล้วยิงต่อให้เอง
 let gWish = new Set();  // garment id ที่หมายตา (wishlist)
@@ -51,7 +52,7 @@ let lang = (localStorage.getItem('lloop_lang') ||'th');
 const $ = s => document.querySelector(s);
 
 // ===== สกุลเงิน (แสดงผลเท่านั้น — ชำระจริงเป็นเงินบาทผ่าน PromptPay) =====
-// rate = จำนวนเงินต่างประเทศต่อ 1 บาท (อัปเดตเป็นค่าประมาณได้ที่นี่จุดเดียว)
+// rate = จำนวนเงินต่างประเทศต่อ 1 บาท · ค่าเริ่ม = fallback (ใช้เมื่อดึงเรตสดไม่ได้)
 const CUR = {
   THB: { sym:'฿',   rate:1,     round:1,  approx:false },
   USD: { sym:'$',   rate:0.028, round:1,  approx:true  },
@@ -60,6 +61,7 @@ const CUR = {
 };
 let cur = (localStorage.getItem('lloop_cur') || 'THB');
 if (!CUR[cur]) cur = 'THB';
+let fxInfo = { live: false, date: '' };   // เรตสด/วันที่ สำหรับข้อความกำกับ
 // แปลงบาท → สกุลที่เลือก + จัดรูปแบบ (มี "≈" นำหน้าถ้าเป็นค่าประมาณ)
 function money(thb) {
   const n = Number(thb || 0);
@@ -69,6 +71,42 @@ function money(thb) {
   const body = c.suf ? `${num}${c.sym}` : `${c.sym}${num}`;
   return (c.approx ? '≈' : '') + body;
 }
+// ดึงเรตสด (ฐาน THB) จาก FX API ฟรี — แคช 24 ชม. · ล้มเหลว = ใช้ fallback ใน CUR
+async function refreshFx() {
+  try {
+    const cached = JSON.parse(localStorage.getItem('lloop_fx') || 'null');
+    if (cached && cached.ts && (Date.now() - cached.ts) < 864e5 && cached.rates) {
+      applyFx(cached.rates, cached.date); return;
+    }
+    const r = await fetch('https://open.er-api.com/v6/latest/THB');
+    const j = await r.json();
+    if (j && j.result === 'success' && j.rates) {
+      const rates = { USD: j.rates.USD, JPY: j.rates.JPY, CNY: j.rates.CNY };
+      const date = (j.time_last_update_utc || '').replace(/ \d{2}:\d{2}:\d{2}.*$/, '');
+      localStorage.setItem('lloop_fx', JSON.stringify({ ts: Date.now(), rates, date }));
+      applyFx(rates, date);
+    }
+  } catch (e) { /* เงียบ — ใช้ fallback */ }
+}
+function applyFx(rates, date) {
+  ['USD', 'JPY', 'CNY'].forEach(k => { if (rates[k] && CUR[k]) CUR[k].rate = rates[k]; });
+  fxInfo = { live: true, date: date || '' };
+  if (cur !== 'THB') { renderGrid(); renderQuickFilters && renderQuickFilters(); }
+  updateCurNote();
+}
+// ข้อความกำกับใต้แถบสกุลเงิน — โชว์เฉพาะตอนเลือกสกุลต่างชาติ
+function updateCurNote() {
+  const el = $('#curNote'); if (!el) return;
+  if (cur === 'THB') { el.hidden = true; return; }
+  const th = lang === 'th';
+  const src = fxInfo.live
+    ? (th ? `เรตอ้างอิง ${fxInfo.date || 'ล่าสุด'}` : `rates as of ${fxInfo.date || 'today'}`)
+    : (th ? 'เรตโดยประมาณ' : 'approx rates');
+  el.textContent = th
+    ? `บริการเช่าและจัดส่งเฉพาะในประเทศไทย · ราคาต่างสกุลเป็นค่าประมาณ (${src}) · ชำระจริงเป็นเงินบาท`
+    : `Rental & delivery within Thailand only · foreign prices are approximate (${src}) · charged in Thai Baht`;
+  el.hidden = false;
+}
 function setCur(c) {
   if (!CUR[c]) return;
   cur = c; localStorage.setItem('lloop_cur', c);
@@ -76,6 +114,7 @@ function setCur(c) {
   // re-render ทุกจุดที่โชว์ราคา browse
   renderGrid(); renderQuickFilters && renderQuickFilters();
   if ($('#overlay')?.classList.contains('open') && window._detailId) openDetail(window._detailId);
+  updateCurNote();
   if (c !== 'THB' && typeof toast === 'function')
     toast(lang === 'th' ? 'ราคาโดยประมาณ · ชำระจริงเป็นเงินบาท (THB)' : 'Approx prices · you pay in Thai Baht (THB)');
 }
@@ -139,6 +178,7 @@ function applyStatic() {
   set('collTitle','collTitle'); set('collSub','collSub');
   set('introHouse','introHouse'); set('introTag','introTag'); set('introSub','introSub'); set('introEnter','introEnter');
   const vi = $('#venueInput'); if (vi) vi.placeholder = t('stylistPlaceholder');
+  const vt = t('vTime'); if (vt && typeof vt === 'object') { ['','morning','day','evening','night'].forEach(k => { const o = document.getElementById('vtOpt_'+k); if (o) o.textContent = vt[k] || ''; }); }
   const cyc = t('cyc'); for (let i = 0; i < 4; i++) { const e = document.getElementById('cyc'+ i); if (e) e.textContent = cyc[i]; }
 }
 
@@ -152,6 +192,7 @@ function setLang(l) {
   renderEvent(); renderCatnav(); renderChips(); renderDiscover(); renderFilters(); renderGrid();
   // เมนู drawer เปิดค้างอยู่ → rebuild ให้ label เปลี่ยนภาษาทันที (ปุ่ม TH/EN อยู่ในเมนูนี้)
   if ($('#menuOverlay')?.classList.contains('open')) openMenu();
+  updateCurNote();
   $('#vresult').classList.remove('show');
 }
 
@@ -453,7 +494,7 @@ function openColorModal(){
     <div class="cmpal">${pal}</div>
     <div class="cmor">${lang==='th'?'หรือดูดสีจากรูป — เช่น การ์ดงานแต่ง / ธีมงาน':'or pick from a photo — e.g. a wedding card'}</div>
     <label class="cmupload">${lang==='th'?'＋ อัปโหลดรูป':'＋ Upload image'}<input type="file" accept="image/*" onchange="onCardImage(this)" hidden></label>
-    <div id="cmcanvaswrap" style="display:none"><div class="cmhint">${lang==='th'?'แตะที่รูปเพื่อดูดสี 🖌️':'Tap the image to pick a colour 🖌️'}</div><canvas id="cmcanvas" onclick="onCanvasClick(event)"></canvas><div id="cmsugg" class="cmsugg"></div></div>
+    <div id="cmcanvaswrap" style="display:none"><div class="cmhint">${lang==='th'?'แตะหลายจุดบนรูปเพื่อเก็บหลายสี 🖌️':'Tap several spots to add colours 🖌️'}</div><canvas id="cmcanvas" onclick="onCanvasClick(event)"></canvas><div id="cmpicked" class="cmpicked"></div><div id="cmsugg" class="cmsugg"></div></div>
     <div class="cmfoot"><button class="cmclear" onclick="clearColors()">${lang==='th'?'ล้างสี':'Clear'}</button><button class="cmdone" onclick="closeColorModal()">${lang==='th'?'ดูชุด':'Show dresses'}</button></div>
   </div>`;
   document.body.appendChild(m);
@@ -461,8 +502,22 @@ function openColorModal(){
 function closeColorModal(){ const m=document.getElementById('cmodal'); if(m) m.remove(); _cardCtx=null; _cardCanvas=null; }
 function _rgbHex(r,g,b){ return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join(''); }
 function onCardImage(input){ const f=input.files&&input.files[0]; if(!f) return; const img=new Image(); img.onload=()=>{ const cv=document.getElementById('cmcanvas'); if(!cv) return; const W=Math.min(340,img.width||340); const sc=W/(img.width||W); cv.width=W; cv.height=Math.round((img.height||W)*sc); const ctx=cv.getContext('2d',{willReadFrequently:true}); ctx.drawImage(img,0,0,cv.width,cv.height); _cardCtx=ctx; _cardCanvas=cv; const wrap=document.getElementById('cmcanvaswrap'); if(wrap) wrap.style.display='block'; try{ showDominant(ctx,cv); }catch(e){} }; img.src=URL.createObjectURL(f); }
-function onCanvasClick(e){ if(!_cardCtx||!_cardCanvas) return; const cv=_cardCanvas, r=cv.getBoundingClientRect(); const x=Math.floor((e.clientX-r.left)*cv.width/r.width); const y=Math.floor((e.clientY-r.top)*cv.height/r.height); const p=_cardCtx.getImageData(Math.max(0,Math.min(cv.width-1,x)),Math.max(0,Math.min(cv.height-1,y)),1,1).data; pickColor(classifyHex(_rgbHex(p[0],p[1],p[2]))); }
-function showDominant(ctx,cv){ const d=ctx.getImageData(0,0,cv.width,cv.height).data; const cnt={}; for(let i=0;i<d.length;i+=4*23){ if(d[i+3]<128) continue; const f=classifyHex(_rgbHex(d[i],d[i+1],d[i+2])); cnt[f]=(cnt[f]||0)+1; } const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k])=>COLOR_FAMILIES.find(x=>x.key===k)).filter(Boolean); const sg=document.getElementById('cmsugg'); if(sg) sg.innerHTML=`<div class="cmsugglbl">${lang==='th'?'สีในรูปนี้ — แตะเลือก':'Colours here — tap to use'}</div>`+top.map(f=>famChip(f,'sm')).join(''); }
+function onCanvasClick(e){ if(!_cardCtx||!_cardCanvas) return; const cv=_cardCanvas, r=cv.getBoundingClientRect(); if(!r.width||!r.height) return;
+  const x=Math.floor((e.clientX-r.left)*cv.width/r.width), y=Math.floor((e.clientY-r.top)*cv.height/r.height);
+  const sx=Math.max(0,Math.min(cv.width-3,x-2)), sy=Math.max(0,Math.min(cv.height-3,y-2));
+  const d=_cardCtx.getImageData(sx,sy,Math.min(5,cv.width),Math.min(5,cv.height)).data; let R=0,G=0,B=0,n=0;
+  for(let i=0;i<d.length;i+=4){ if(d[i+3]<128) continue; R+=d[i];G+=d[i+1];B+=d[i+2];n++; }
+  if(!n) return; const hex=_rgbHex(Math.round(R/n),Math.round(G/n),Math.round(B/n)), fam=classifyHex(hex);
+  pickColor(fam);
+  const fb=document.getElementById('cmpicked'); if(fb){ const F=COLOR_FAMILIES.find(x=>x.key===fam); const on=fColors.includes(fam);
+    fb.innerHTML=`<span class="pk" style="background:${hex}"></span>${on?(lang==='th'?'เพิ่มสี ':'Added '):(lang==='th'?'เอาออก ':'Removed ')}<b>${F?(lang==='th'?F.th:F.en):fam}</b>`; }
+}
+function showDominant(ctx,cv){ const d=ctx.getImageData(0,0,cv.width,cv.height).data; const sc={};
+  for(let i=0;i<d.length;i+=4*5){ if(d[i+3]<128) continue; const hex=_rgbHex(d[i],d[i+1],d[i+2]); const c=_hexHSL(hex); const f=classifyHex(hex);
+    const w=1+(c?c.s*c.s*12:0);  // เน้นสีสด (ดอกไม้/ธีม) มากกว่าพื้นหลังจาง
+    sc[f]=(sc[f]||0)+w; }
+  const top=Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k])=>COLOR_FAMILIES.find(x=>x.key===k)).filter(Boolean);
+  const sg=document.getElementById('cmsugg'); if(sg) sg.innerHTML=`<div class="cmsugglbl">${lang==='th'?'สีในรูปนี้ — แตะเลือก (เลือกได้หลายสี)':'Colours here — tap to add'}</div>`+top.map(f=>famChip(f,'sm')).join(''); }
 function setBrand(b) { fBrand = b; renderBrandChips(); renderGrid(); }
 function toggleTone() { fToneOnly =!fToneOnly; renderCatnav(); renderFilters(); renderGrid(); }
 
@@ -655,6 +710,10 @@ async function setHomeDate(d) {
   // ถ้าค้างรอเลือกวันอยู่ (กดแนะนำไปแล้วแต่ยังไม่มีวัน) → ยิงต่อให้เอง
   if (gUseDate && gStylistPending) { gStylistPending = false; askVenue(); }
 }
+function setHomeTime(v) {
+  gUseTime = v || '';
+  const vt = $('#venueTime'); if (vt) vt.value = gUseTime;
+}
 function clearHomeDate() { gUseDate = null; gAvailSet = null; gOnlyAvail = false; renderDatebar(); renderGrid(); }
 function toggleOnlyAvail() { gOnlyAvail = !gOnlyAvail; renderDatebar(); renderGrid(); }
 
@@ -680,7 +739,7 @@ async function askVenue() {
   const el = $('#vresult');
   const hasPlace = !!(window.SELECTED_PLACE && window.SELECTED_PLACE.name);
   if (!q && !hasPlace) { el.classList.remove('show'); return; }
-  if (q) window.track?.('stylist_ask', q, { occasion: window.gQuizOccasion || (EVENT && EVENT.occasion) || null, date: gUseDate || null });
+  if (q) window.track?.('stylist_ask', q, { occasion: window.gQuizOccasion || (EVENT && EVENT.occasion) || null, date: gUseDate || null, time: gUseTime || null });
   // บังคับล็อกอิน + ยอมรับข้อตกลงก่อน (โควต้าผูกกับบัญชี + กันยิง resolve-place เปลือง Google API)
   if (!_isLoggedIn()) {
     el.className = 'vresult show';
@@ -717,7 +776,7 @@ async function askVenue() {
   el.className ='vresult show';
   el.innerHTML =`<span class="note">${t('vAnalyzingPre')} “${esc(name)}”…</span>`;
 
-  const v = await window.API.stylist({ venue: name, place, occasion: window.gQuizOccasion || (EVENT && EVENT.occasion), date: gUseDate }, lang);
+  const v = await window.API.stylist({ venue: name, place, occasion: window.gQuizOccasion || (EVENT && EVENT.occasion), date: gUseDate, time: gUseTime || null }, lang);
 
   if (!v || v.ok === false) {
     const msg = v && v.error === 'no_quota' ? t('vNoQuota')
@@ -3678,6 +3737,7 @@ async function boot() {
   $('#langEN')?.classList.toggle('on', lang ==='en');
   document.querySelectorAll('.langbtn').forEach(b => b.classList.toggle('on', b.dataset.l === lang));
   document.querySelectorAll('.curbtn').forEach(b => b.classList.toggle('on', b.dataset.cur === cur));
+  updateCurNote(); refreshFx();
   applyStatic();
   setupHeroVideo();
   let s;
