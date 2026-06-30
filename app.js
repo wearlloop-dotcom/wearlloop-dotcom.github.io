@@ -3392,6 +3392,19 @@ async function acceptTermsClick() {
   try { await window.API.acceptTerms(CUSTOMER, _termsVersion); } catch (e) { console.warn(e); }
   maybeOnboard();
 }
+// ประตูล็อกอินเต็มหน้า — บังคับเข้าสู่ระบบก่อนใช้งานทั้งเว็บ (เรียกตอน boot ถ้าเป็น guest)
+function showLoginGate() {
+  const gate = $('#loginGate'); if (!gate) return;
+  if (lang === 'en') {
+    const set = (id, tx) => { const e = $('#' + id); if (e) e.textContent = tx; };
+    set('lgTitle', 'Welcome');
+    set('lgSub', 'Sign in with LINE to browse pieces and use LLOOP Atelier');
+    set('lgBtnLabel', 'Sign in with LINE');
+    set('lgNote', 'Signing in means you accept the Terms of Service and Privacy Policy');
+  }
+  gate.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 // ===== ประตู LLOOP Atelier — บังคับล็อกอิน LINE + ยอมรับข้อตกลง ก่อนใช้ฟีเจอร์ AI =====
 function _isLoggedIn() {
   let tok = null; try { tok = window.liff && liff.getIDToken && liff.getIDToken(); } catch (_e) {}
@@ -3567,6 +3580,8 @@ async function boot() {
   fForYou =!!(CUSTOMER.bust_in!= null || CUSTOMER.my_color_season || (CUSTOMER.style_profile && Object.keys(CUSTOMER.style_profile).length));
   // สถานะล็อกอิน: มี lineUid = ล็อกอินผ่าน LINE แล้ว → โชว์เครดิตจริง; ไม่มี = guest → โชว์ปุ่มเข้าสู่ระบบ
   const loggedIn =!!s.lineUid;
+  // บังคับล็อกอินทั้งเว็บก่อนใช้งาน (เว้นโหมดเดโม/localhost) — guest เห็นแค่ประตูล็อกอิน
+  if (!loggedIn && !(window.CONFIG && CONFIG.USE_MOCK)) showLoginGate();
   const loginBtn = $('#loginBtn'); const creditEl = document.querySelector('.credit');
   if (loginBtn) loginBtn.hidden = loggedIn;
   if (creditEl) creditEl.hidden =!loggedIn;
