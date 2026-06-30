@@ -4,7 +4,7 @@ let OCCASIONS = {}, CUSTOMER = {}, EVENT = null, GARMENTS = [], VENUES = [];
 let STAFF_PCT = 0;
 const staffPrice = (p) => STAFF_PCT > 0 ? Math.round(Number(p || 0) * (1 - STAFF_PCT / 100)) : Number(p || 0);
 const staffTag = () => STAFF_PCT > 0 ? `<span style="display:inline-block;font-size:11px;font-weight:600;color:#0F6E56;background:#E4F0EC;border:1px solid #cfe6da;border-radius:20px;padding:1px 8px;margin-left:6px">${lang==='th'?'พนักงาน':'Staff'} −${STAFF_PCT}%</span>` : '';
-let fOccasion = null, fColor = null, fBrand ='', fToneOnly = false, fForYou = false, fWishOnly = false;
+let fOccasion = null, fColor = null, fBrand ='', fMood = null, fToneOnly = false, fForYou = false, fWishOnly = false;
 let gPersonalRecs = [];  // โค้ดชุดแนะนำเฉพาะบุคคล (collaborative) — เรียงตามความเกี่ยวข้อง
 let gQuery = '';  // คำค้นหา catalog (ชื่อ/แบรนด์/โอกาส/สี)
 let _searchTimer = null;
@@ -199,6 +199,35 @@ function renderChips() {
   $('#chips').innerHTML = html;
 }
 
+// ===== Discover — เลือกตามโอกาส + มู้ด (มู้ด = กลุ่มสไตล์จาก taxonomy แบรนด์) =====
+const MOOD_LABEL = { minimal:'มินิมอล', feminine:'หวานเฟมินีน', statement:'ออกงาน-เปรี้ยว', party:'สดใสปาร์ตี้', korean:'เกาหลี', outer:'โค้ทเลเยอร์', swim:'ทะเล-บีช' };
+const MOOD_ORDER = ['minimal','feminine','statement','party','korean','outer','swim'];
+function garmentGroup(g){ const m = window.LLOOP_BRANDS && window.LLOOP_BRANDS.lookup(g.brand); return m ? m.group : null; }
+const OCC_SUB = { wedding_guest:'ค็อกเทล · สุภาพ', dinner:'หรู · โรแมนติก', party:'เด่น · สนุก', cafe:'ลำลองมีสไตล์', work:'สมาร์ทแคชชวล', trip:'เบา พลิ้ว สดใส', graduation:'ทางการ · ถ่ายรูป', festival:'สดใส · สนุก', merit:'สุภาพเรียบร้อย', date:'หวาน · มั่นใจ' };
+
+function renderDiscover(){
+  const el = $('#discover'); if(!el) return;
+  const TH = lang === 'th';
+  const tags = [...new Set(GARMENTS.flatMap(g => g.occasion_tags || []))];
+  const groups = new Set(GARMENTS.map(garmentGroup).filter(Boolean));
+  const moods = MOOD_ORDER.filter(k => groups.has(k));
+  if(!tags.length && !moods.length){ el.innerHTML = ''; return; }
+  let html = '';
+  if(tags.length){
+    html += `<div class="disc-q">${TH?'วันนี้ไปไหนคะ':'Where to today?'}</div>`;
+    html += `<div class="disc-s">${TH?'เลือกโอกาส แล้วเราคัดลุคให้':'Pick an occasion — we curate the looks'}</div>`;
+    html += `<div class="occgrid">` + tags.map((tg,i)=>`<button class="oc b${i%3} ${fOccasion===tg?'on':''}" onclick="pickOccasion('${tg}')"><span class="t">${occName(tg)}</span><span class="s">${OCC_SUB[tg]||''}</span></button>`).join('') + `</div>`;
+  }
+  if(moods.length){
+    html += `<div class="disc-h">${TH?'เลือกตามมู้ด':'By mood'}</div>`;
+    html += `<div class="moodrow"><button class="moodc ${!fMood?'on':''}" onclick="setMood('')">${TH?'ทั้งหมด':'All'}</button>` +
+      moods.map(k=>`<button class="moodc ${fMood===k?'on':''}" onclick="setMood('${k}')">${MOOD_LABEL[k]||k}</button>`).join('') + `</div>`;
+  }
+  el.innerHTML = html;
+}
+function pickOccasion(tg){ setOccasion(fOccasion===tg?null:tg); const a=document.querySelector('.ed-eyebrow'); window.scrollTo({ top: a? a.offsetTop-16 : 380, behavior:'smooth' }); }
+function setMood(k){ fMood = k || null; renderDiscover(); renderGrid(); }
+
 function renderFilters() {
   const hexes = [...new Set(GARMENTS.flatMap(g => g.colors.map(c => c[1])))];
   const brands = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
@@ -320,6 +349,7 @@ function renderGrid() {
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
     (!fColor || g.colors.some(c => c[1] === fColor)) &&
     (!fBrand || g.brand === fBrand) &&
+    (!fMood || garmentGroup(g) === fMood) &&
     (!fToneOnly || g.season === CUSTOMER.my_color_season) &&
     (!fWishOnly || gWish.has(g.id)) &&
     matchQuery(g));
