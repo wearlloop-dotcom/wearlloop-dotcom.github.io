@@ -44,6 +44,7 @@ const weightName = w => (lang ==='th'? w : (window.I18N.en.weight[w] || w));
 const stretchLabel = s => s ==='none'? t('noStretch') : s ==='slight'? t('slight') : t('stretchy');
 
 function enterApp() {
+  try { sessionStorage.setItem('lloop_entered', '1'); } catch (e) {}  // จำว่าเข้าแล้ว → กลับหน้าหลักไม่ต้องคั่น intro ซ้ำ
   const el = $('#intro');
   el.classList.add('hide');
   setTimeout(() => { el.style.display ='none'; }, 900);

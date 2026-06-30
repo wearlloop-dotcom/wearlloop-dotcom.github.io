@@ -794,6 +794,11 @@
   <div class="introsub" id="introSub">share the look, save the planet</div>
   <button class="enterbtn" id="introEnter" onclick="enterApp()">เปิดคอลเลกชัน</button>
 </div>
+<script>
+  /* intro โชว์แค่ครั้งแรกของ session — กลับหน้าหลักจากหน้าอื่นเข้าคอลเลกชันเลย ไม่คั่นซ้ำ
+     ทำแบบ synchronous ตรงนี้ (ก่อน intro paint) กัน flash */
+  try { if (sessionStorage.getItem('lloop_entered') === '1') document.getElementById('intro').style.display = 'none'; } catch (e) {}
+</script>
 
 <div class="promo" id="promo">love + loop · ส่งฟรี · ลุคใหม่ทุกเดือน</div>
 <div class="expiry-banner" id="expiryBanner" hidden>

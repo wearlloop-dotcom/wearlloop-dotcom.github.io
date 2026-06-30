@@ -314,7 +314,7 @@ window.API = (function () {
     const { data, error } = await window.meRpc('pay_rental_with_credit', { p_rental: rentalId });
     if (error) return { ok: false, error: error.message };
     if (data && data.error) return { ok: false, error: data.error };
-    return { ok: true, data: (data && data.data) || data };
+    return { ok: true, data };
   }
   // อิมแพกต์รักษ์โลกของฉัน
   async function myImpact(customer) {
