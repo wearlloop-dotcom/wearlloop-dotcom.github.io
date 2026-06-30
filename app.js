@@ -1576,6 +1576,126 @@ async function claimCode() {
   setTimeout(() => location.reload(), 900);
 }
 
+// ===== จองเวลากับสไตลิสต์ (หลังจ่าย ฿4,900) =====
+// เติมโซนในการ์ดโปรไฟล์: จ่ายแล้ว+ยังไม่จอง → ปุ่มเลือกสไตลิสต์ · มีนัด → การ์ดนัด
+let _stPicked = null, _stSlot = null;
+async function loadPcBookZone() {
+  const zone = document.getElementById('pcBookZone');
+  if (!zone) return;
+  let st; try { st = await window.API.pcStatus(); } catch (e) { return; }
+  if (!st || (!st.paid && !st.appointment)) return;  // ยังไม่จ่าย → คงปุ่มจ่ายเดิมไว้
+  const flow = document.getElementById('pcPayFlow'); if (flow) flow.style.display = 'none';
+  const th = lang === 'th';
+  if (st.appointment) {
+    const a = st.appointment;
+    const when = new Date(a.starts_at).toLocaleString(th ? 'th-TH' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+    zone.innerHTML = `<div class="apptcard">
+      <div class="ah">${th ? 'นัด Personal Color ของคุณ' : 'Your Personal Color session'}</div>
+      <div class="aw">${esc(a.partner || 'สไตลิสต์')}${a.studio ? ` · ${esc(a.studio)}` : ''}</div>
+      <div class="ap">${when}${a.area ? ` · ${esc(a.area)}` : ''}</div>
+      <button class="acancel" onclick="cancelMyAppointment('${a.id}')">${th ? 'ยกเลิก/เปลี่ยนเวลา' : 'Cancel / reschedule'}</button>
+    </div>`;
+  } else {
+    zone.innerHTML = `<button class="pcbookcta" onclick="openStylistPicker()">${th ? 'เลือกสไตลิสต์ & จองเวลา' : 'Choose a stylist & book'}<span class="bsub">${th ? 'จ่ายแล้ว — เลือกวันเวลาที่สะดวกได้เลย' : "You've paid — pick a time that suits you"}</span></button>`;
+  }
+}
+async function openStylistPicker() {
+  const th = lang === 'th';
+  _stPicked = null; _stSlot = null;
+  const wrap = document.createElement('div'); wrap.id = 'stpick'; wrap.className = 'pcpay';
+  wrap.innerHTML = `<div class="pcsheet lft"><button class="pcx" onclick="closeStylistPicker()" aria-label="close">×</button>
+    <div class="pchead">${th ? 'เลือกสไตลิสต์' : 'Choose a stylist'}</div>
+    <div id="stbody"><div class="oloading">${th ? 'กำลังโหลด…' : 'Loading…'}</div></div></div>`;
+  document.body.appendChild(wrap);
+  let list; try { list = await window.API.stylistDirectory(); } catch (e) { list = []; }
+  const body = document.getElementById('stbody'); if (!body) return;
+  if (!list.length) {
+    body.innerHTML = `<div class="oloading">${th ? 'ยังไม่มีสไตลิสต์เปิดรับช่วงนี้ — ทักแชต LLOOP เพื่อนัดได้ค่ะ' : 'No stylist open right now — message LLOOP to book.'}</div>`;
+    return;
+  }
+  body.innerHTML = `<div class="stlist">${list.map(stylistCardHtml).join('')}</div>`;
+}
+function stylistCardHtml(s) {
+  const th = lang === 'th';
+  const av = s.photo_url ? `style="background-image:url('${s.photo_url}')"` : '';
+  const chips = (s.specialties || []).slice(0, 3).map(x => `<span>${esc(x)}</span>`).join('');
+  const slots = Number(s.open_slots || 0);
+  const mt = slots > 0 ? (th ? `${slots} ช่องว่าง` : `${slots} open slots`) : (th ? 'ยังไม่มีเวลาว่าง' : 'No open times');
+  return `<div class="stcard" onclick="selectStylist('${s.id}')">
+    <div class="av" ${av}></div>
+    <div style="flex:1">
+      <div class="nm">${esc(s.display_name || 'สไตลิสต์')}${s.studio_name ? ` · ${esc(s.studio_name)}` : ''}</div>
+      ${s.headline ? `<div class="hl">${esc(s.headline)}</div>` : ''}
+      ${s.area ? `<div class="hl">${esc(s.area)}</div>` : ''}
+      ${chips ? `<div class="stchips">${chips}</div>` : ''}
+      <div class="mt">${mt}</div>
+    </div></div>`;
+}
+async function selectStylist(id) {
+  const th = lang === 'th';
+  const body = document.getElementById('stbody'); if (!body) return;
+  body.innerHTML = `<div class="oloading">${th ? 'กำลังโหลดเวลาว่าง…' : 'Loading times…'}</div>`;
+  let p; try { p = await window.API.stylistPublic(id); } catch (e) { p = null; }
+  if (!p) { body.innerHTML = `<div class="oloading">${th ? 'โหลดไม่สำเร็จ' : 'Could not load'}</div>`; return; }
+  _stPicked = p; _stSlot = null;
+  const slots = Array.isArray(p.slots) ? p.slots : [];
+  let slotsHtml;
+  if (!slots.length) {
+    slotsHtml = `<div class="oloading">${th ? 'สไตลิสต์ยังไม่เปิดเวลาว่าง — ลองเลือกท่านอื่น' : 'No open times yet — try another stylist'}</div>`;
+  } else {
+    const groups = {};
+    slots.forEach(s => { const k = new Date(s.starts_at).toDateString(); (groups[k] = groups[k] || []).push(s); });
+    slotsHtml = Object.keys(groups).map(k => {
+      const dl = new Date(groups[k][0].starts_at).toLocaleDateString(th ? 'th-TH' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+      const btns = groups[k].map(s => {
+        const tm = new Date(s.starts_at).toLocaleTimeString(th ? 'th-TH' : 'en-GB', { hour: '2-digit', minute: '2-digit' });
+        return `<button class="stslot" data-id="${s.id}" onclick="pickSlot(this,'${s.id}')">${tm}</button>`;
+      }).join('');
+      return `<div class="stdaylabel">${dl}</div><div class="stslots">${btns}</div>`;
+    }).join('');
+  }
+  body.innerHTML = `<button class="stback" onclick="openStylistPicker()">‹ ${th ? 'เลือกสไตลิสต์อื่น' : 'Other stylists'}</button>
+    <div class="stcard" style="cursor:default">
+      <div class="av" ${p.photo_url ? `style="background-image:url('${p.photo_url}')"` : ''}></div>
+      <div style="flex:1"><div class="nm">${esc(p.display_name || 'สไตลิสต์')}${p.studio_name ? ` · ${esc(p.studio_name)}` : ''}</div>${p.headline ? `<div class="hl">${esc(p.headline)}</div>` : ''}</div>
+    </div>
+    ${p.bio ? `<div class="stbio">${esc(p.bio)}</div>` : ''}
+    ${p.session_note ? `<div class="stbio" style="color:#86857F">${esc(p.session_note)}</div>` : ''}
+    ${slotsHtml}
+    <textarea class="stnote" id="stNote" rows="2" placeholder="${th ? 'อยากบอกอะไรสไตลิสต์ไหม? (ไม่บังคับ)' : 'Anything for the stylist? (optional)'}"></textarea>
+    <button class="stconfirm" id="stConfirm" onclick="confirmStylistBooking()" disabled>${th ? 'ยืนยันการจอง' : 'Confirm booking'}</button>`;
+}
+function pickSlot(btn, id) {
+  _stSlot = id;
+  document.querySelectorAll('#stbody .stslot').forEach(b => b.classList.toggle('sel', b === btn));
+  const c = document.getElementById('stConfirm'); if (c) c.disabled = false;
+}
+async function confirmStylistBooking() {
+  const th = lang === 'th';
+  if (!_stSlot) { toast(th ? 'เลือกเวลาก่อนค่ะ' : 'Pick a time'); return; }
+  const btn = document.getElementById('stConfirm'); if (btn) { btn.disabled = true; btn.textContent = th ? 'กำลังจอง…' : 'Booking…'; }
+  const note = (document.getElementById('stNote') || {}).value || '';
+  const r = await window.API.pcBookSlot(_stSlot, note, 'studio');
+  if (!r.ok) {
+    toast(r.error || (th ? 'จองไม่สำเร็จ' : 'Failed'));
+    if (r.code === 'slot_taken') { selectStylist(_stPicked.id); }      // ช่องถูกจอง → รีโหลดเวลาว่าง
+    else if (btn) { btn.disabled = false; btn.textContent = th ? 'ยืนยันการจอง' : 'Confirm booking'; }
+    return;
+  }
+  closeStylistPicker();
+  toast(th ? 'จองสำเร็จ — ส่งรายละเอียดให้สไตลิสต์แล้ว' : 'Booked — details sent to your stylist');
+  loadPcBookZone();
+}
+function closeStylistPicker() { const el = document.getElementById('stpick'); if (el) el.remove(); }
+async function cancelMyAppointment(id) {
+  const th = lang === 'th';
+  if (!confirm(th ? 'ยกเลิกนัดนี้? คุณจองเวลาใหม่กับสไตลิสต์คนไหนก็ได้' : 'Cancel this booking? You can rebook with any stylist.')) return;
+  const r = await window.API.pcCancelAppointment(id);
+  if (!r.ok) { toast(th ? 'ยกเลิกไม่สำเร็จ' : 'Could not cancel'); return; }
+  toast(th ? 'ยกเลิกแล้ว — เลือกเวลาใหม่ได้เลย' : 'Cancelled — pick a new time');
+  loadPcBookZone();
+}
+
 // ===== ครอบครัว & กลุ่ม — ไปหน้าจัดการกลุ่ม + เช่าเข้าตีม =====
 function openFamily() { location.href = 'family.html'; }
 // ===== ผลกระทบ + แกลเลอรี charity (wow, interactive) =====
