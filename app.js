@@ -5,6 +5,7 @@ let STAFF_PCT = 0;
 const staffPrice = (p) => STAFF_PCT > 0 ? Math.round(Number(p || 0) * (1 - STAFF_PCT / 100)) : Number(p || 0);
 const staffTag = () => STAFF_PCT > 0 ? `<span style="display:inline-block;font-size:11px;font-weight:600;color:#0F6E56;background:#E4F0EC;border:1px solid #cfe6da;border-radius:20px;padding:1px 8px;margin-left:6px">${lang==='th'?'พนักงาน':'Staff'} −${STAFF_PCT}%</span>` : '';
 let fOccasion = null, fColor = null, fBrand ='', fToneOnly = false, fForYou = false, fWishOnly = false;
+let gPersonalRecs = [];  // โค้ดชุดแนะนำเฉพาะบุคคล (collaborative) — เรียงตามความเกี่ยวข้อง
 let gUseDate = null, gAvailSet = null, gOnlyAvail = false;  // เลือกวันใช้ตั้งแต่หน้าแรก
 let gStylistPending = false;  // กดแนะนำแต่ยังไม่เลือกวัน → พอเลือกแล้วยิงต่อให้เอง
 let gWish = new Set();  // garment id ที่หมายตา (wishlist)
@@ -232,7 +233,11 @@ function renderGrid() {
     (!fToneOnly || g.season === CUSTOMER.my_color_season) &&
     (!fWishOnly || gWish.has(g.id)));
   if (fWishOnly && !list.length) { $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา — แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
-  if (fForYou) list = [...list].sort((a, b) => personalScore(b) - personalScore(a)); // จัดอันดับเฉพาะคุณ
+  if (fForYou) {
+    // ดันชุดที่ "คนเหมือนคุณเช่า" (collaborative จาก behavior data) ขึ้นบนสุด แล้วตามด้วย personalScore
+    const recIdx = g => { const i = gPersonalRecs.indexOf(g.code); return i < 0 ? 999 : i; };
+    list = [...list].sort((a, b) => (recIdx(a) - recIdx(b)) || (personalScore(b) - personalScore(a)));
+  }
   const availOf = g => !gUseDate || !gAvailSet || gAvailSet.has(g.id);  // null set = ว่างหมด (mock)
   if (gUseDate && gOnlyAvail) list = list.filter(availOf);
   if (!list.length) { $('#grid').innerHTML =`<div class="empty">${t('empty')}</div>`; return; }
@@ -250,6 +255,7 @@ function renderGrid() {
         <div class="badges">
           ${gUseDate ? `<span class="bdg ${av ? 'avail' : 'busy'}">${av ? (lang === 'th' ? 'ว่าง ' + fmtDate(gUseDate) : 'free ' + fmtDate(gUseDate)) : (lang === 'th' ? 'ไม่ว่าง' : 'booked')}</span>` : ''}
           ${g.isNew?`<span class="bdg new">NEW</span>`:''}
+          ${(fForYou && gPersonalRecs.includes(g.code))?`<span class="bdg pick">${lang==='th'?'แนะนำสำหรับคุณ':'For you'}</span>`:''}
           ${match?`<span class="bdg tone">${t('toneMatch')}</span>`:''}
           ${sv?`<span class="bdg" style="background:#27500A;color:#fff">${lang==='th'?'ประหยัด ':'save '}${sv}%</span>`:''}
         </div>
@@ -551,20 +557,21 @@ async function loadFit(code) {
   const th = lang === 'th';
   const fit = f.fit || {};
   const tot = (fit.true||0)+(fit.large||0)+(fit.small||0);
+  const cs = 'display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #cfe6da;border-radius:8px;padding:5px 10px;font-size:12px;color:#0F6E56;font-weight:500';
   const chips = [];
-  if (f.avg_height) chips.push(`<span class="fsr-chip">${th?'สูงเฉลี่ย':'avg height'} <b>${f.avg_height}</b> ${th?'ซม.':'cm'}</span>`);
-  if (f.common_size) chips.push(`<span class="fsr-chip">${th?'ไซซ์ที่เช่าบ่อย':'common size'} <b>${esc(f.common_size)}</b></span>`);
+  if (f.avg_height) chips.push(`<span style="${cs}">${th?'สูงเฉลี่ย':'avg height'} <b>${f.avg_height}</b> ${th?'ซม.':'cm'}</span>`);
+  if (f.common_size) chips.push(`<span style="${cs}">${th?'ไซซ์ที่เช่าบ่อย':'common size'} <b>${esc(f.common_size)}</b></span>`);
   let verdict = '';
   if (tot >= 2) {
     const top = (fit.true>=fit.large && fit.true>=fit.small) ? 'true' : (fit.large>=fit.small ? 'large' : 'small');
     verdict = top==='true' ? (th?'ส่วนใหญ่บอกใส่พอดีตัว':'most say true to size')
-            : top==='large' ? (th?'หลายคนบอกเผื่อ/ใหญ่นิด แนะนำลดไซซ์':'runs large — size down')
-            : (th?'หลายคนบอกฟิต/เล็กนิด แนะนำเผื่อไซซ์':'runs small — size up');
+            : top==='large' ? (th?'หลายคนบอกเผื่อ/ใหญ่นิด — แนะนำลดไซซ์':'runs large — size down')
+            : (th?'หลายคนบอกฟิต/เล็กนิด — แนะนำเผื่อไซซ์':'runs small — size up');
   }
-  el.innerHTML = `<div class="fitsr">
-    <div class="fsr-h">${th?'ฟิตจริงจากคนใน loop':'Fit from real renters'} <span class="fsr-n">${f.n} ${th?'ลุค':'looks'}</span></div>
-    <div class="fsr-chips">${chips.join('')}</div>
-    ${verdict?`<div class="fsr-v">${verdict}</div>`:''}</div>`;
+  el.innerHTML = `<div style="background:#E4F0EC;border:1px solid #cfe6df;border-radius:12px;padding:12px 13px;margin-top:10px">
+    <div style="font-size:13px;font-weight:600;color:#04342C;margin-bottom:8px">${th?'ฟิตจริงจากคนใน loop':'Fit from real renters'} <span style="color:#0F6E56;font-weight:500">· ${f.n} ${th?'ลุค':'looks'}</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px">${chips.join('')}</div>
+    ${verdict?`<div style="font-size:12.5px;color:#04342C;margin-top:9px;font-weight:500">${verdict}</div>`:''}</div>`;
 }
 
 // Social proof: "มีคนเช่าไปแล้ว X ครั้ง · กำลังมาแรง · กำลังดูอยู่ N คน" — urgency + ความน่าเชื่อ
@@ -2298,7 +2305,12 @@ async function boot() {
   }
   window.track?.('session_start', null, { logged_in: loggedIn, tier: CUSTOMER.crm_tier || 'guest' });
   setupScrollTracking();
-  if (loggedIn) { try { await window.flushEvents?.(); CUSTOMER._streak = await window.API.myStreak?.() || 0; } catch (e) { /**/ } }
+  if (loggedIn) { try {
+    await window.flushEvents?.();
+    CUSTOMER._streak = await window.API.myStreak?.() || 0;
+    // แนะนำเฉพาะบุคคล (collaborative — "คนเหมือนคุณเช่า") → ดันขึ้นบนสุดในแท็บ "แนะนำสำหรับคุณ"
+    gPersonalRecs = (await window.API.recommendPersonal?.(8) || []).map(r => r.code).filter(Boolean);
+  } catch (e) { /**/ } }
   renderEvent(); renderCatnav(); renderChips(); renderFilters(); renderDatebar(); renderGrid();
   if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
   const vd = $('#venueDate'); if (vd) { vd.min = todayStr(); vd.value = gUseDate || ''; }

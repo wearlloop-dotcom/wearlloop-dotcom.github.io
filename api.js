@@ -849,6 +849,12 @@ window.API = (function () {
     const { data } = await window.meRpc('my_creator', {});
     return data || null;
   }
+  // dashboard รายได้ครีเอเตอร์
+  async function myCreatorEarnings() {
+    if (CONFIG.USE_MOCK || !window.meRpc) return null;
+    const { data } = await window.meRpc('my_creator_earnings', {});
+    return data || null;
+  }
   // ตั้ง handle/bio/ความเป็นสาธารณะ
   async function setHandle(handle, bio, isPublic) {
     if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
@@ -856,12 +862,14 @@ window.API = (function () {
     return error ? { ok: false, error } : (data || { ok: false });
   }
   // แชร์ลุค: อัปโหลดรูป → สร้าง look (pending) → ทริกเกอร์ AI moderation (look-audit)
-  async function shareLook(garmentCode, file, caption, occasion, rentalId, crosspost, fit) {
+  // files = อาเรย์รูป (รูปแรก = ปก, ที่เหลือ = extra สำหรับ before/after, 3 ways) · fit = {height,size,fit} · tpl = single|before_after|styles
+  async function shareLook(garmentCode, files, caption, occasion, rentalId, crosspost, fit, tpl) {
     if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
-    let url = '';
-    try { const urls = await uploadPhotos([file]); url = urls[0] || ''; } catch (e) { /**/ }
-    if (!url) return { ok: false, error: 'upload_failed' };
-    const { data, error } = await window.meRpc('share_look', { p_garment_code: garmentCode, p_photo_url: url, p_caption: caption || null, p_occasion: occasion || null, p_rental: rentalId || null, p_crosspost: !!crosspost, p_height: (fit && fit.height) || null, p_size: (fit && fit.size) || null, p_fit: (fit && fit.fit) || null });
+    const arr = Array.isArray(files) ? files : [files];
+    let urls = [];
+    try { urls = await uploadPhotos(arr.filter(Boolean)); } catch (e) { /**/ }
+    if (!urls.length) return { ok: false, error: 'upload_failed' };
+    const { data, error } = await window.meRpc('share_look', { p_garment_code: garmentCode, p_photo_url: urls[0], p_caption: caption || null, p_occasion: occasion || null, p_rental: rentalId || null, p_crosspost: !!crosspost, p_height: (fit && fit.height) || null, p_size: (fit && fit.size) || null, p_fit: (fit && fit.fit) || null, p_template: tpl || 'single', p_extra: urls.slice(1) });
     if (error || !data || !data.look_id) return { ok: false, error: error || 'share_failed' };
     // ตรวจด้วย AI (auto-publish ถ้าผ่าน) — best-effort, ไม่บล็อก UX
     let idToken = null; try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (e) {}
@@ -967,5 +975,5 @@ window.API = (function () {
     return data || {};
   }
 
-  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, joinWaitlist, leaveWaitlist, myWaitlist, waitlistCount, trendingRequests, voteRequest, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, notifInbox, notifUnread, notifMarkRead, notifSetPref, socialProof, recommendWith, recommendPersonal, liveViewers, myStreak, expVariant, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed, reportLook, reactLook, lookReactions, occasionHubs, garmentFit };
+  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, stylist, resolvePlace, stylistQuota, availableOn, availableSetOn, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, myImpact, myWallet, recentCharity, hairStyle, myRentals, toggleWishlist, myWishlist, joinWaitlist, leaveWaitlist, myWaitlist, waitlistCount, trendingRequests, voteRequest, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, notifInbox, notifUnread, notifMarkRead, notifSetPref, socialProof, recommendWith, recommendPersonal, liveViewers, myStreak, expVariant, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed, reportLook, reactLook, lookReactions, occasionHubs, garmentFit, myCreatorEarnings };
 })();
