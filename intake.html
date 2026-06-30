@@ -131,7 +131,7 @@
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
   const FUNCTIONS=SUPABASE_URL.replace('.supabase.co','.functions.supabase.co');
-  const QR_BASE='https://lloop.app/g.html?c=';   // หน้าเช่าชุดนี้ (g.html รับ ?c=<code> → เลือกวัน+จอง)
+  const QR_BASE='https://wearlloop-dotcom.github.io/g.html?c=';  // หน้าเช่าชุดนี้ (g.html รับ ?c=<code> → เลือกวัน+จอง) · github.io ออนไลน์จริง (lloop.app ยังไม่ผูก DNS)
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
