@@ -57,6 +57,17 @@
   #gate h2{font-size:18px;margin-bottom:8px}
   #gate p{font-size:14px;color:var(--muted);line-height:1.6}
   #main{display:none}
+  /* ฟอร์มสมัครเอง: chips + ที่อยู่ + แผนที่ */
+  #regForm .frow{display:flex;gap:8px}
+  #regForm .frow .field{flex:1}
+  #regForm .subhint{font-size:11px;color:var(--muted);margin:2px 0 8px}
+  .rchips{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 6px}
+  .rchip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line,#e3ddd2);border-radius:999px;padding:7px 12px;cursor:pointer;font-size:13px;background:#fff;user-select:none}
+  .rchip input{display:none}
+  .rchip:has(input:checked){border-color:var(--navy,#1b2a4a);background:var(--navy,#1b2a4a);color:#fff}
+  .pacbox{position:relative;border:1px solid var(--line,#e3ddd2);border-top:none;border-radius:0 0 10px 10px;background:#fff;overflow:hidden;margin-top:-6px;margin-bottom:8px}
+  .pacitem{padding:10px 12px;font-size:13px;cursor:pointer;border-top:1px solid #f0ece3}
+  .pacitem:active{background:#f6f2ea}
   .hello{font-size:13px;color:var(--muted);margin-top:2px}
   .hello b{color:var(--ink)}
   /* ลูกค้าของฉัน */

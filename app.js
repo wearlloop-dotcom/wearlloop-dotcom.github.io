@@ -2602,11 +2602,17 @@ function closeWallet() { $('#walletOverlay').classList.remove('open'); document.
 function openWallet(focusRef) {
   const c = CUSTOMER;
   const en = lang === 'en';
+  // ยังไม่ล็อกอิน → โชว์ปุ่มเข้าระบบ LINE เด่น ๆ ด้านบน (กดแล้วเด้งเข้า LINE) แทนข้อความเฉย ๆ ที่กดไม่ได้
+  const loginCta = c.id ? '' : `<button class="lineLoginCta" onclick="LiffAuth.signIn()">
+      <svg class="lico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.9-5a8.38 8.38 0 0 1-.9-4 8.5 8.5 0 0 1 8.5-8.5 8.38 8.38 0 0 1 8.5 8.5z"/></svg>
+      <span>${en ? 'Sign in with LINE' : 'เข้าสู่ระบบด้วย LINE'}</span>
+    </button>`;
   $('#walletSheet').innerHTML = `
     <div class="pform">
       <button class="close" style="position:static;float:right" onclick="closeWallet()">×</button>
       <h3>${en ? 'LLOOP wallet' : 'กระเป๋า LLOOP'}</h3>
       <p class="hint">${en ? 'your credit, tier and invites — all in one place' : 'เครดิต ระดับสมาชิก และชวนเพื่อน รวมไว้ที่เดียว'}</p>
+      ${loginCta}
       ${renderTheLoop(c)}
       ${renderReferralCard()}
     </div>`;
