@@ -89,6 +89,19 @@
   .prails:empty{display:none}
   .prails{margin:6px 0 2px}
   .prails .sec{margin:14px 0 6px}
+  /* สิ่งที่คุณชอบ — taste profile sheet */
+  .taste-hero{padding:22px 20px 8px}
+  .taste-hero .ik{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+  .taste-hero .ihead{font-size:22px;margin-top:4px;color:var(--ink)}
+  .taste-body{padding:6px 20px 4px}
+  .taste-empty{padding:18px 4px;color:var(--muted);font-size:14px;line-height:1.7}
+  .tg{margin:16px 0}
+  .tg-h{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .tb-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .tb-k{flex:0 0 38%;font-size:13px;color:var(--ink)}
+  .tb-bar{flex:1;height:8px;border-radius:6px;background:#EFE7DA;overflow:hidden}
+  .tb-bar i{display:block;height:100%;border-radius:6px;background:var(--ink)}
+  .taste-foot{padding:8px 20px 22px;font-size:11px;color:var(--muted)}
   .recorow{display:flex;gap:10px;overflow-x:auto;padding:4px 0 2px;-webkit-overflow-scrolling:touch}
   .recorow .gthumb{flex:0 0 116px;cursor:pointer}
   .recorow .gth-img{width:116px;height:150px;border-radius:8px;overflow:hidden;background:#EadFce}
@@ -266,6 +279,9 @@
   .moodrow{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}.moodrow::-webkit-scrollbar{display:none}
   .moodc{white-space:nowrap;font-family:var(--sans);font-size:12.5px;border:1px solid var(--line);background:#fff;color:#5C5446;padding:7px 14px;border-radius:30px;cursor:pointer}
   .moodc.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .quickrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .qf{font-family:var(--sans);font-size:12.5px;border:1px solid var(--line);background:#fff;color:#5C5446;padding:7px 13px;border-radius:30px;cursor:pointer;white-space:nowrap}
+  .qf.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 
   /* ===== product grid ===== */
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 4px;padding:16px 0 60px}
@@ -368,6 +384,9 @@
   .dgal{position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .dgal::-webkit-scrollbar{display:none}
   .dgal>div{flex:0 0 100%;scroll-snap-align:center;background-size:cover;background-position:center;background-repeat:no-repeat}
+  .dgarrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.85);color:#2b2b2b;font-size:24px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;padding:0}
+  .dgarrow.prev{left:10px}.dgarrow.next{right:10px}
+  @media(hover:hover){.dgarrow:hover{background:#fff}}
   .dgcount{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.45);color:#fff;font-size:11px;padding:3px 11px;border-radius:20px;letter-spacing:.3px;pointer-events:none}
   .dsizes{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 2px}
   .dsizes button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 17px;font-weight:600;cursor:pointer;font-size:14px;color:#2b2b2b}
@@ -404,6 +423,10 @@
   .backuppick{margin:12px 18px 4px;padding:14px 15px;background:#FFFDF8;border:1px dashed #E2D6BF;border-radius:8px}
   .backuppick .bp-load,.backuppick .bp-empty{font-size:12px;color:#8A7A5E;font-style:italic;padding:4px 2px}
   .backuppick .bp-head{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#A39472;margin:0 0 10px}
+  .backuppick .bp-search{margin:0 0 12px}
+  .backuppick .bp-search input{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:13px;padding:9px 12px;border:1px solid #E2D6BF;border-radius:7px;background:#fff;color:#3B362C}
+  .backuppick .bp-search input::placeholder{color:#B6A988}
+  .backuppick .bp-search input:focus{outline:none;border-color:#A75F3A}
   .backuppick .bp-grid{display:flex;gap:14px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .backuppick .bp-grid::-webkit-scrollbar{display:none}
   .backuppick .bp-chip{position:relative;flex:0 0 auto;width:84px;background:none;border:none;padding:0;cursor:pointer;font-family:var(--sans);display:flex;flex-direction:column;gap:5px;text-align:center}
@@ -1023,6 +1046,7 @@
     <div class="chips" id="chips"></div>
     <div class="filters" id="filters"></div>
     <div class="brandrow" id="brandRow"></div>
+    <div class="quickrow" id="quickRow"></div>
   </div>
   <div class="grid" id="grid"></div>
   <div class="gridend" id="gridEnd"></div>
@@ -1248,6 +1272,6 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=66"></script>
+<script src="app.js?v=68"></script>
 </body>
 </html>

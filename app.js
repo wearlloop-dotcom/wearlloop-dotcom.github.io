@@ -25,6 +25,7 @@ function matchQuery(g) {
   return hay.includes(gQuery);
 }
 let gUseDate = null, gAvailSet = null, gOnlyAvail = false;  // เลือกวันใช้ตั้งแต่หน้าแรก
+let fNewOnly = false, fPrice = null, gInStockOnly = false;  // quick filters: มาใหม่ / ช่วงราคา / เฉพาะมีของ(directory)
 let gStylistPending = false;  // กดแนะนำแต่ยังไม่เลือกวัน → พอเลือกแล้วยิงต่อให้เอง
 let gWish = new Set();  // garment id ที่หมายตา (wishlist)
 let gDur = 3;           // ระยะเวลาเช่า (วัน) ในหน้ารายละเอียด
@@ -252,6 +253,27 @@ function renderFilters() {
     <div class="swrow">${sw}</div>
     <select class="brandsel" onchange="setBrand(this.value)">${opts}</select>`;
   renderBrandChips();
+  renderQuickFilters();
+}
+
+// ===== Quick filters: มาใหม่ / ช่วงราคา / ว่างวันฉัน (รวมแถบเดียว) =====
+function priceOk(g){ if(!fPrice) return true; const p=Number(g.price||0); return fPrice==='lo'? p<=300 : fPrice==='mid'? (p>300&&p<=500) : fPrice==='hi'? p>500 : true; }
+function renderQuickFilters(){
+  const el=$('#quickRow'); if(!el) return;
+  const TH=lang==='th';
+  const PL={lo:'≤฿300',mid:'฿300–500',hi:'฿500+'};
+  const priceLabel=fPrice?PL[fPrice]:(TH?'ทุกราคา':'Any');
+  const availOn=!!(gUseDate&&gOnlyAvail);
+  el.innerHTML =
+    `<button class="qf ${fNewOnly?'on':''}" onclick="setNewOnly()">${TH?'มาใหม่':'New'}</button>`+
+    `<button class="qf ${fPrice?'on':''}" onclick="cyclePrice()">${TH?'งบ':'Budget'} · ${priceLabel}</button>`+
+    `<button class="qf ${availOn?'on':''}" onclick="quickAvail()">${TH?'ว่างวันฉัน':'Free on date'}${gUseDate?' · '+fmtDate(gUseDate):''}</button>`;
+}
+function setNewOnly(){ fNewOnly=!fNewOnly; renderQuickFilters(); renderGrid(); }
+function cyclePrice(){ const o=[null,'lo','mid','hi']; fPrice=o[(o.indexOf(fPrice)+1)%o.length]; renderQuickFilters(); renderGrid(); }
+function quickAvail(){
+  if(!gUseDate){ const d=$('#homeDate')||$('#venueDate'); if(d){ d.focus(); try{ d.showPicker&&d.showPicker(); }catch(e){} } toast(lang==='th'?'เลือกวันที่จะใส่ก่อนนะคะ':'Pick your date first'); return; }
+  toggleOnlyAvail();
 }
 
 // Shop by Brand — ชิปแบรนด์ในสต็อก (hot ก่อน) + ปุ่มเปิดหน้ารวมแบรนด์
@@ -283,18 +305,19 @@ function openBrandDir() {
     if (m) { cnt[m.key] = (cnt[m.key] || 0) + 1; }
     else { const c = meta.canon(bn), k = c.toLowerCase(), e = extras.get(k); if (e) { e.n++; e.d = nicerBrand(e.d, c); } else extras.set(k, { d: c, n: 1 }); }
   });
-  let html = `<div class="bdir${gShowTypes ? ' show-types' : ''}"><button class="bd-x" onclick="closeBrandDir()" aria-label="close">×</button><div class="bd-h">${TH ? 'รวมแบรนด์' : 'All brands'}</div><div class="bd-toolbar"><button class="bd-toggle ${gShowTypes ? 'on' : ''}" onclick="toggleBrandTypes(this)">${TH ? 'แสดงประเภทของ' : 'Show types'}</button></div>`;
+  let html = `<div class="bdir${gShowTypes ? ' show-types' : ''}"><button class="bd-x" onclick="closeBrandDir()" aria-label="close">×</button><div class="bd-h">${TH ? 'รวมแบรนด์' : 'All brands'}</div><div class="bd-toolbar"><button class="bd-toggle ${gShowTypes ? 'on' : ''}" onclick="toggleBrandTypes(this)">${TH ? 'แสดงประเภทของ' : 'Show types'}</button><button class="bd-toggle ${gInStockOnly ? 'on' : ''}" onclick="toggleInStock()">${TH ? 'เฉพาะมีของ' : 'In stock'}</button></div>`;
   meta.GROUPS.forEach(gr => {
     const items = meta.BRANDS.filter(b => b.group === gr.key);
     if (!items.length) return;
-    html += `<div class="bd-g"><div class="bd-gt">${gr.label}</div><div class="bd-row">`;
-    html += items.map(b => {
+    const rows = items.map(b => {
       const n = cnt[b.key] || 0;
       const ty = (b.types || []).join(' · ');
       if (n > 0) return `<button class="bd-b have" data-b="${esc(b.name)}" onclick="pickBrand(this.dataset.b)"><span class="bd-n">${esc(b.name)}<span class="bd-c">${n}</span></span><span class="bd-t">${esc(ty)}</span></button>`;
+      if (gInStockOnly) return '';
       return `<button class="bd-b soon" data-k="${esc(b.key)}" data-n="${esc(b.name)}" onclick="notifyBrand(this.dataset.k,this.dataset.n)"><span class="bd-n">${esc(b.name)}</span><span class="bd-t">${esc(ty)}</span></button>`;
     }).join('');
-    html += `</div></div>`;
+    if (!rows) return;
+    html += `<div class="bd-g"><div class="bd-gt">${gr.label}</div><div class="bd-row">${rows}</div></div>`;
   });
   if (extras.size) {
     html += `<div class="bd-g"><div class="bd-gt">${TH ? 'อื่น ๆ' : 'More'}</div><div class="bd-row">`;
@@ -307,6 +330,7 @@ function openBrandDir() {
 }
 function closeBrandDir() { $('#brandDirOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 function toggleBrandTypes(btn){ gShowTypes = !gShowTypes; const d = document.querySelector('.bdir'); if (d) d.classList.toggle('show-types', gShowTypes); if (btn) btn.classList.toggle('on', gShowTypes); }
+function toggleInStock(){ gInStockOnly = !gInStockOnly; openBrandDir(); }
 function pickBrand(b) { closeBrandDir(); setBrand(b); window.scrollTo({ top: 380, behavior: 'smooth' }); }
 function notifyBrand(key, name) {
   window.track?.('brand_demand', key);
@@ -392,6 +416,8 @@ function renderGrid() {
     (!fMood || garmentGroup(g) === fMood) &&
     (!fToneOnly || g.season === CUSTOMER.my_color_season) &&
     (!fWishOnly || gWish.has(g.id)) &&
+    (!fNewOnly || g.isNew) &&
+    priceOk(g) &&
     matchQuery(g));
   if (fWishOnly && !list.length) { $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา — แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
   if (fForYou) {
@@ -493,6 +519,7 @@ function renderDatebar() {
     <input type="date" id="homeDate" min="${todayStr()}" value="${gUseDate || ''}" onchange="setHomeDate(this.value)">
     ${gUseDate ? `<button class="dbonly ${gOnlyAvail ? 'on' : ''}" onclick="toggleOnlyAvail()">${en ? 'available only' : 'เฉพาะที่ว่าง'}${n != null ? ` (${n})` : ''}</button>
       <button class="dbclear" onclick="clearHomeDate()">${en ? 'clear' : 'ล้างวันที่'}</button>` : ''}`;
+  renderQuickFilters();
 }
 async function setHomeDate(d) {
   gUseDate = d || null;
@@ -693,8 +720,10 @@ function openDetail(id) {
   $('#sheet').innerHTML =`
     <div class="dphoto" style="${galImgs.length?'':`background:${g.bg}`}">
       ${galImgs.length
-        ? `<div class="dgal">${galImgs.map(u=>`<div style="background-image:url('${u}')"></div>`).join('')}</div>
-           ${galImgs.length>1?`<span class="dgcount">${lang==='th'?`เลื่อนดู ${galImgs.length} รูป →`:`${galImgs.length} photos →`}</span>`:''}`
+        ? `<div class="dgal" id="dgal" onscroll="galTick()">${galImgs.map(u=>`<div style="background-image:url('${u}')"></div>`).join('')}</div>
+           ${galImgs.length>1?`<button class="dgarrow prev" onclick="galNav(-1)" aria-label="prev">\u2039</button>
+             <button class="dgarrow next" onclick="galNav(1)" aria-label="next">\u203a</button>
+             <span class="dgcount" id="dgcount">1 / ${galImgs.length}</span>`:''}`
         : `<span class="ph" style="font-family:var(--serif);font-style:italic;color:rgba(0,0,0,.28)">${g.name}</span>`}
       <button class="close" onclick="closeDetail()">×</button>
       ${match?`<span class="season" style="position:absolute;top:14px;left:14px">${t('toneMatch')}</span>`:''}
@@ -775,6 +804,9 @@ function openDetail(id) {
   $('#overlay').scrollTop = 0; const sh = $('#sheet'); if (sh) sh.scrollTop = 0;
 }
 function closeDetail() { $('#overlay').classList.remove('open'); document.body.style.overflow =''; }
+// เลื่อนแกลเลอรีด้วยปุ่มลูกศร + อัปเดตตัวนับรูป
+function galNav(dir){ const g=document.getElementById('dgal'); if(!g) return; g.scrollBy({left: dir*g.clientWidth, behavior:'smooth'}); }
+function galTick(){ const g=document.getElementById('dgal'), c=document.getElementById('dgcount'); if(!g||!c) return; const n=g.children.length; const i=Math.min(n, Math.round(g.scrollLeft/Math.max(1,g.clientWidth))+1); c.textContent=i+' / '+n; }
 
 // เรตติ้งเฉลี่ยของชุด — ดึงแยกแล้วฉีดเข้าหน้ารายละเอียด (ไม่เรียกต่อการ์ดเพื่อ performance)
 async function loadRating(garmentId) {
@@ -1116,12 +1148,34 @@ function showPayConfirm({ g, date, total, pay, backups }) {
 
 // ===== ชุดสำรอง — ลูกค้าเลือกเอง =====
 let _backupPicks = [];          // โค้ดชุดที่ลูกค้าเลือกเป็นสำรอง
+let _bpPool = [];               // ชุดที่ว่างวันนั้น เรียงตามความใกล้ชุดหลักแล้ว
+let _bpPrimary = null;          // ชุดหลักที่กำลังจอง (ใช้คิดคะแนนความใกล้)
+let _bpQuery = '';              // คำค้นในตัวเลือกชุดสำรอง
 const BACKUP_MAX = 2;           // เลือกได้สูงสุดกี่ตัว
-// เปิด/ปิด picker เมื่อกดเช็กบ็อกซ์ + โหลดเฉพาะชุดที่ "ว่างจริง" ในวันที่เลือก
+
+// คะแนนความ "ใกล้ชุดหลัก" — ยิ่งสูงยิ่งสลับแทนได้เนียน (ไซส์ใส่ได้ต้องมาก่อน)
+function backupScore(primary, c) {
+  if (!primary) return 0;
+  let s = 0;
+  // ไซส์ตรงกัน = สำคัญสุด ชุดสำรองต้องใส่ได้จริง
+  if (primary.size && c.size && String(primary.size).toUpperCase() === String(c.size).toUpperCase()) s += 40;
+  // หมวดเดียวกัน (เดรส↔เดรส) สลับแทนตรงประเภท
+  if (primary.category && c.category && primary.category === c.category) s += 22;
+  // โอกาสใช้งานทับกัน
+  const po = primary.occasion_tags || [], co = c.occasion_tags || [];
+  s += Math.min(24, po.filter(tg => co.includes(tg)).length * 12);
+  // โทนสีทับกัน (เทียบ hex)
+  const ph = (primary.colors || []).map(x => x[1]), ch = (c.colors || []).map(x => x[1]);
+  s += Math.min(20, ph.filter(h => ch.includes(h)).length * 10);
+  // ช่วงราคาใกล้กัน (ห่าง ฿0 = +10 แล้วลดหลั่นตามส่วนต่าง)
+  if (primary.price && c.price) s += Math.max(0, 10 - Math.abs(primary.price - c.price) / 40);
+  return s;
+}
+// เปิด/ปิด picker เมื่อกดเช็กบ็อกซ์ + โหลดเฉพาะชุดที่ "ว่างจริง" ในวันที่เลือก แล้วเรียงตามความเข้ากัน
 async function toggleBackupPick(primaryId) {
   const cb = $('#wantBackup'), box = $('#backupPicker');
   if (!cb || !box) return;
-  if (!cb.checked) { box.hidden = true; box.innerHTML = ''; _backupPicks = []; return; }
+  if (!cb.checked) { box.hidden = true; box.innerHTML = ''; _backupPicks = []; _bpPool = []; _bpQuery = ''; return; }
   const date = $('#useDate') && $('#useDate').value;
   if (!date) {
     toast(lang ==='th'?'เลือกวันที่ต้องใช้ก่อน แล้วค่อยเลือกชุดสำรองนะคะ':'Pick your date first, then choose spares');
@@ -1132,26 +1186,56 @@ async function toggleBackupPick(primaryId) {
   // เฉพาะชุดที่ว่างในวันนั้น (Set ของ id) — ไม่ให้เลือกชุดที่ติดคิว
   let availSet = null;
   try { availSet = await window.API.availableSetOn(date, CUSTOMER.id); } catch (e) { /**/ }
-  const pool = GARMENTS.filter(x => x.id !== primaryId && (x.code || x.id) !== primaryId && (!availSet || availSet.has(x.id)));
+  _bpPrimary = GARMENTS.find(x => x.id === primaryId) || null;
+  // ว่างวันนั้น → ให้คะแนนความใกล้ชุดหลัก → ใกล้สุดมาก่อน
+  _bpPool = GARMENTS
+    .filter(x => x.id !== primaryId && (x.code || x.id) !== primaryId && (!availSet || availSet.has(x.id)))
+    .map(x => ({ g: x, sc: backupScore(_bpPrimary, x) }))
+    .sort((a, b) => b.sc - a.sc)
+    .map(o => o.g);
   // ถ้าลูกค้าปิดแล้วเปิดใหม่/เปลี่ยนวัน → ตัดที่เลือกค้างซึ่งไม่อยู่ใน pool ออก
-  _backupPicks = _backupPicks.filter(c => pool.some(p => (p.code || p.id) === c));
-  if (!pool.length) {
+  _backupPicks = _backupPicks.filter(c => _bpPool.some(p => (p.code || p.id) === c));
+  _bpQuery = '';
+  renderBackupPicker();
+}
+// โครงคงที่ (หัวข้อ + ช่องค้นหา) — ไม่ re-render ทั้งก้อนตอนพิมพ์ กันคีย์บอร์ดเด้งปิด
+function renderBackupPicker() {
+  const box = $('#backupPicker');
+  if (!box) return;
+  if (!_bpPool.length) {
     box.innerHTML = `<div class="bp-empty">${lang ==='th'?'วันนั้นยังไม่มีชุดอื่นว่างให้เลือกเป็นสำรองค่ะ':'No other pieces are free that day to set as a spare'}</div>`;
     return;
   }
   box.innerHTML = `
-    <div class="bp-head">${lang ==='th'?`เลือกชุดสำรองได้สูงสุด ${BACKUP_MAX} ตัว`:`Pick up to ${BACKUP_MAX} spare(s)`}</div>
-    <div class="bp-grid">${pool.map(p => {
-      const code = p.code || p.id;
-      const photo = p.photo || (Array.isArray(p.photos) && p.photos[0]);
-      const on = _backupPicks.includes(code);
-      return `<button type="button" class="bp-chip${on?' on':''}" data-code="${esc(code)}" onclick="pickBackup('${esc(code)}')">
-        <span class="bp-thumb" style="${photo?`background-image:url('${esc(photo)}')`:`background:${esc(p.bg||'#E7E2DA')}`}"></span>
-        <span class="bp-nm">${esc(p.name||'—')}</span>
-        <span class="bp-tick">✓</span>
-      </button>`;
-    }).join('')}</div>`;
+    <div class="bp-head">${lang ==='th'?`แนะนำชุดที่เข้ากับชุดหลัก · เลือกได้สูงสุด ${BACKUP_MAX} ตัว`:`Closest matches to your pick · up to ${BACKUP_MAX}`}</div>
+    <div class="bp-search"><input type="text" id="bpSearch" inputmode="search" placeholder="${lang ==='th'?'ค้นหาชุดอื่นที่ว่างวันนั้น…':'search other free pieces…'}" value="${esc(_bpQuery)}" oninput="onBackupSearch(this.value)"></div>
+    <div id="bpGridWrap"></div>`;
+  renderBackupGrid();
 }
+// เฉพาะกริด — รีเฟรชตอนค้นหาโดยไม่แตะช่อง input
+function renderBackupGrid() {
+  const wrap = $('#bpGridWrap');
+  if (!wrap) return;
+  const q = _bpQuery.trim().toLowerCase();
+  const list = q
+    ? _bpPool.filter(p => [p.name, p.brand, p.category, (p.occasion_tags || []).map(occName).join(' '), (p.colors || []).map(c => c[0]).join(' ')].join(' ').toLowerCase().includes(q))
+    : _bpPool;
+  if (!list.length) {
+    wrap.innerHTML = `<div class="bp-empty">${lang ==='th'?`ไม่พบ "${esc(_bpQuery)}" ในชุดที่ว่างวันนั้น`:`No "${esc(_bpQuery)}" among free pieces`}</div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="bp-grid">${list.map(p => {
+    const code = p.code || p.id;
+    const photo = p.photo || (Array.isArray(p.photos) && p.photos[0]);
+    const on = _backupPicks.includes(code);
+    return `<button type="button" class="bp-chip${on?' on':''}" data-code="${esc(code)}" onclick="pickBackup('${esc(code)}')">
+      <span class="bp-thumb" style="${photo?`background-image:url('${esc(photo)}')`:`background:${esc(p.bg||'#E7E2DA')}`}"></span>
+      <span class="bp-nm">${esc(p.name||'—')}</span>
+      <span class="bp-tick">✓</span>
+    </button>`;
+  }).join('')}</div>`;
+}
+function onBackupSearch(v) { _bpQuery = v; renderBackupGrid(); }
 function pickBackup(code) {
   const i = _backupPicks.indexOf(code);
   if (i >= 0) _backupPicks.splice(i, 1);
@@ -2263,6 +2347,57 @@ async function openImpact() {
   setTimeout(() => animateCounts($('#impactSheet')), 60);
 }
 function closeImpact() { $('#impactOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
+// ===== "สิ่งที่คุณชอบ" — โปรไฟล์รสนิยมที่เรียนจากพฤติกรรมจริง (Shopee/IG-style, โปร่งใส) =====
+const PRICE_BAND_LBL = { th:{entry:'คุ้มราคา',mid:'ระดับกลาง',premium:'พรีเมียม'}, en:{entry:'Value',mid:'Mid',premium:'Premium'} };
+function prettyKey(k){ return String(k||'').replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase()); }
+// แถวบาร์: เรียงมาก→น้อย เอา top N — dict {key:score(0..1)}
+function tasteBars(dict, labelFn, topN){
+  const rows = Object.entries(dict||{}).sort((a,b)=>b[1]-a[1]).slice(0, topN||5);
+  if(!rows.length) return '';
+  const max = rows[0][1] || 1;
+  return rows.map(([k,v])=>{
+    const pct = Math.max(6, Math.round((v/max)*100));
+    return `<div class="tb-row"><div class="tb-k">${esc(labelFn(k))}</div><div class="tb-bar"><i style="width:${pct}%"></i></div></div>`;
+  }).join('');
+}
+async function openTaste(){
+  const en = lang==='en';
+  const tt = CUSTOMER._taste || {};
+  const n = tt.n || 0;
+  const block = (title, dict, labelFn) => {
+    const bars = tasteBars(dict, labelFn);
+    return bars ? `<div class="tg"><div class="tg-h">${title}</div>${bars}</div>` : '';
+  };
+  let body = '';
+  if (n < 5) {
+    body = `<div class="taste-empty">${en
+      ? 'We\'re still learning your taste. Browse a few more looks and we\'ll show what you love here.'
+      : 'เรากำลังเรียนรู้สไตล์ของคุณอยู่ — ลองดูชุดเพิ่มอีกสักนิด แล้วเราจะสรุป “สิ่งที่คุณชอบ” ให้ตรงใจ'}</div>`;
+  } else {
+    body = block(en?'Occasions':'โอกาสที่ชอบ', tt.occasions, occName)
+         + block(en?'Brands':'แบรนด์ที่ชอบ', tt.brands, k=>k)
+         + block(en?'Categories':'ประเภทที่ชอบ', tt.categories, prettyKey)
+         + block(en?'Colours':'โทนสีที่ชอบ', tt.colors, prettyKey)
+         + block(en?'Price':'ระดับราคา', tt.price_bands, k=>(PRICE_BAND_LBL[lang]||PRICE_BAND_LBL.th)[k]||k);
+  }
+  // ดูล่าสุด (recently viewed) — reuse thumbnails
+  const recent = (gRecentViewed||[]).map(r=>GARMENTS.find(g=>(g.code||'')===r.code)).filter(Boolean);
+  const recentHtml = recent.length ? `<div class="tg"><div class="tg-h">${en?'Recently viewed':'ดูล่าสุด'}</div><div class="recorow">${recent.map(gThumb).join('')}</div></div>` : '';
+  $('#tasteSheet').innerHTML = `
+    <button class="close" onclick="closeTaste()">×</button>
+    <div class="taste-hero">
+      <div class="ik">${en?'learned from what you browse & rent':'เรียนจากชุดที่คุณดูและเช่า'}</div>
+      <div class="ihead">${en?'What you love':'สิ่งที่คุณชอบ'}</div>
+    </div>
+    <div class="taste-body">${body}${recentHtml}</div>
+    <div class="taste-foot">${en
+      ? 'Private to you — used only to sort looks you\'ll love first.'
+      : 'เป็นข้อมูลส่วนตัวของคุณ — ใช้เพื่อจัดชุดที่น่าจะถูกใจขึ้นก่อนเท่านั้น'}</div>`;
+  $('#tasteOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeTaste(){ $('#tasteOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 
 // ===== สมาชิกรายเดือน (Membership / subscription) =====
 // ลูกค้ามีสิทธิ์สมาชิกเหลือไหม → ชุดนี้ "รวมในแพ็กเกจ" (เช็คทั้งแพ็กหลัก + แพ็กเสริมที่ถืออยู่)
