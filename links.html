@@ -3,482 +3,455 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LLOOP — ช่องทางของเรา</title>
+<title>LLOOP — circular fashion house</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;1,300&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #F8F4EC;
-  --card: #FFFFFF;
-  --ink: #1A1A1A;
-  --soft: #F2EDE3;
-  --line: #E7E1D5;
-  --muted: #8C8680;
-  --sage: #6E8A6A;
-  --gold: #C9A86A;
-  --clay: #A75F3A;
-  --cream: #ECE6DA;
-  --display: 'Poppins','Prompt',sans-serif;
-  --sans: 'Prompt',-apple-system,sans-serif;
+:root{
+  --bg:#F7F3EB;--card:#FFFDF9;--ink:#1A1A1A;
+  --line:#E4DDD0;--muted:#8C8378;
+  --sage:#6E8A6A;--sage-bg:#EAF0E7;
+  --gold:#C9A86A;--gold-bg:#FAF3E4;
+  --clay:#A75F3A;--clay-bg:#F5EBE3;
+  --cream:#ECE6DA;
+  --display:'Poppins','Prompt',sans-serif;
+  --sans:'Prompt',-apple-system,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  background:var(--bg);color:var(--ink);
-  font-family:var(--sans);font-size:15px;line-height:1.6;
-  -webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden;
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* grain texture */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  background-size:180px;opacity:.55;
 }
 
-/* ── progress bar ── */
-#pbar{
-  position:fixed;top:0;left:0;height:2px;width:0%;z-index:999;
-  background:linear-gradient(90deg,var(--clay),var(--gold));
-  transition:width .4s ease;
-}
+/* scroll progress */
+#pbar{position:fixed;top:0;left:0;height:1.5px;width:0%;z-index:99;background:var(--gold);transition:width .3s ease}
 
-/* ── floating background fabric shapes ── */
-.bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.fab{
-  position:absolute;border-radius:50%;opacity:0;
-  animation:float-in 1.2s ease forwards, drift 18s ease-in-out infinite;
-}
-.fab1{width:260px;height:260px;background:radial-gradient(circle,rgba(201,168,106,.10) 0%,transparent 70%);top:-60px;right:-80px;animation-delay:.1s,1.3s}
-.fab2{width:180px;height:180px;background:radial-gradient(circle,rgba(110,138,106,.09) 0%,transparent 70%);bottom:80px;left:-60px;animation-delay:.3s,1.5s}
-.fab3{width:120px;height:120px;background:radial-gradient(circle,rgba(167,95,58,.07) 0%,transparent 70%);top:45%;right:10%;animation-delay:.5s,1.8s}
-@keyframes float-in{to{opacity:1}}
-@keyframes drift{
-  0%,100%{transform:translateY(0) rotate(0deg)}
-  33%{transform:translateY(-18px) rotate(4deg)}
-  66%{transform:translateY(10px) rotate(-3deg)}
-}
+.wrap{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:0 22px 64px}
 
-/* ── wrap ── */
-.wrap{position:relative;z-index:1;max-width:460px;margin:0 auto;padding:0 20px 56px}
+/* ── HERO ── */
+.hero{padding:52px 0 0;text-align:center}
 
-/* ── header ── */
-.top{text-align:center;padding:48px 0 36px}
-
-.ring-wrap{
-  width:64px;height:64px;margin:0 auto 22px;
-  position:relative;cursor:pointer;
-}
-.ring-svg{width:100%;height:100%;animation:ring-spin 14s linear infinite}
+.ring-wrap{width:56px;height:56px;margin:0 auto 24px;cursor:pointer;position:relative}
+.ring-svg{width:100%;height:100%;animation:spin 16s linear infinite}
 .ring-dot{
-  position:absolute;
-  width:10px;height:10px;border-radius:50%;
-  background:var(--gold);
-  top:0;left:50%;transform:translate(-50%,-50%);
-  animation:ring-spin 14s linear infinite, dot-pulse 2.8s ease-in-out infinite;
-  transform-origin:5px 37px;
+  position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);
+  top:-4px;left:50%;margin-left:-4.5px;
+  transform-origin:28px 32px;
+  animation:spin 16s linear infinite, pulse 3s ease-in-out infinite;
 }
-@keyframes ring-spin{to{transform:rotate(360deg)}}
-@keyframes dot-pulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(201,168,106,.5)}
-  50%{box-shadow:0 0 0 6px rgba(201,168,106,0)}
-}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,106,.5)}60%{box-shadow:0 0 0 7px rgba(201,168,106,0)}}
 
-.logo{
-  font-family:var(--display);font-size:30px;font-weight:700;
-  letter-spacing:4px;color:var(--ink);
-  opacity:0;transform:translateY(10px);
-  animation:up .6s .3s ease forwards;
+.wordmark{
+  font-family:var(--display);font-size:32px;font-weight:700;letter-spacing:5px;
+  opacity:0;animation:rise .7s .2s ease forwards;
 }
-.tagline{
-  font-size:12.5px;color:var(--muted);letter-spacing:.8px;margin-top:5px;
-  opacity:0;transform:translateY(8px);
-  animation:up .6s .45s ease forwards;
+.hero-line{
+  font-size:13px;color:var(--muted);letter-spacing:.6px;margin-top:4px;
+  opacity:0;animation:rise .7s .38s ease forwards;
 }
-@keyframes up{to{opacity:1;transform:none}}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+.wordmark,.hero-line{transform:translateY(10px)}
 
-/* ── label divider ── */
-.label{
-  font-family:var(--display);font-size:10px;font-weight:600;
-  letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
-  margin:32px 0 13px;
-  display:flex;align-items:center;gap:10px;
-  opacity:0;animation:up .5s ease forwards;
+/* ── STORY BLOCKS ── */
+.story{
+  margin:40px 0 0;padding:28px 0 0;border-top:1px solid var(--line);
+  opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease;
 }
-.label::before,.label::after{content:"";flex:1;height:1px;background:var(--line)}
+.story.in{opacity:1;transform:none}
 
-/* ── link card ── */
+.story-label{
+  font-family:var(--display);font-size:9.5px;font-weight:600;
+  letter-spacing:.25em;text-transform:uppercase;color:var(--gold);
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.story-label::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold-bg),transparent)}
+
+.story-head{
+  font-family:var(--display);font-size:19px;font-weight:700;line-height:1.2;
+  letter-spacing:.3px;margin-bottom:8px;
+}
+.story-body{font-size:13.5px;color:var(--muted);line-height:1.75;font-weight:300}
+.story-body em{color:var(--clay);font-style:normal;font-weight:400}
+
+/* ── LINK CARDS ── */
+.cards{margin-top:22px;display:flex;flex-direction:column;gap:9px}
+
 .link-card{
-  display:flex;align-items:center;gap:14px;
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:4px;
-  padding:15px 18px;margin-bottom:10px;
+  display:flex;align-items:center;gap:13px;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:3px;padding:14px 16px;
   text-decoration:none;color:var(--ink);
   position:relative;overflow:hidden;
-  cursor:pointer;
-  opacity:0;transform:translateY(16px);
-  transition:
-    transform .22s cubic-bezier(.34,1.56,.64,1),
-    box-shadow .22s ease,
-    border-color .22s ease;
-  will-change:transform;
+  opacity:0;transform:translateY(12px);
+  transition:opacity .5s ease,transform .5s ease,box-shadow .2s ease,border-color .2s ease;
   -webkit-tap-highlight-color:transparent;
+  cursor:pointer;
 }
-.link-card.visible{opacity:1;transform:none}
-
-/* ink wash sweep on hover */
-.link-card::after{
-  content:"";
-  position:absolute;inset:0;
-  background:var(--wash,rgba(201,168,106,.06));
-  transform:translateX(-101%);
-  transition:transform .35s cubic-bezier(.4,0,.2,1);
-  pointer-events:none;
-}
-.link-card:hover::after{transform:translateX(0)}
+.link-card.in{opacity:1;transform:none}
 .link-card:hover{
-  border-color:rgba(201,168,106,.35);
-  box-shadow:0 6px 24px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04);
-  transform:translateY(-2px) scale(1.005);
+  box-shadow:0 4px 20px rgba(0,0,0,.07);
+  border-color:rgba(201,168,106,.4);
 }
-.link-card:active{transform:scale(.97)!important;transition-duration:.1s}
+.link-card:active{transform:scale(.975)!important;transition-duration:.1s}
 
-/* card variants wash color */
-.c-line  {--wash:rgba(0,185,68,.06)}
-.c-ig    {--wash:rgba(193,53,132,.06)}
-.c-tt    {--wash:rgba(0,0,0,.04)}
-.c-fb    {--wash:rgba(66,103,178,.06)}
-.c-comm  {--wash:rgba(110,138,106,.08)}
-.c-shop  {--wash:rgba(238,77,45,.06)}
-.c-laz   {--wash:rgba(0,40,222,.05)}
-.c-lmshop{--wash:rgba(0,185,68,.05)}
+/* sweep on hover */
+.link-card::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,rgba(201,168,106,.06) 0%,transparent 70%);
+  transform:translateX(-100%);
+  transition:transform .38s cubic-bezier(.4,0,.2,1);pointer-events:none;
+}
+.link-card:hover::before{transform:translateX(0)}
 
-/* featured */
-.link-card.featured{
-  background:var(--ink);border-color:var(--ink);color:#fff;
-  padding:18px 20px;
-  animation:pulse-border 3s 1.5s ease-in-out infinite;
-}
-.link-card.featured::after{background:rgba(201,168,106,.12)}
-.link-card.featured .card-sub{color:rgba(255,255,255,.5)}
-.link-card.featured .arrow{color:rgba(255,255,255,.5)}
-.link-card.featured:hover .arrow{color:#fff}
-.link-card.featured:hover{
-  border-color:var(--gold)!important;
-  box-shadow:0 8px 32px rgba(26,26,26,.2),0 0 0 1px var(--gold);
-}
-@keyframes pulse-border{
-  0%,100%{box-shadow:0 0 0 0 rgba(201,168,106,0)}
-  50%{box-shadow:0 0 0 5px rgba(201,168,106,.18)}
-}
-
-/* icon */
-.icon-wrap{
-  width:42px;height:42px;border-radius:3px;
+/* icon — all in LLOOP palette, never platform color */
+.icon{
+  width:38px;height:38px;border-radius:2px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;overflow:hidden;
+  background:var(--cream);
   transition:transform .22s cubic-bezier(.34,1.56,.64,1);
 }
-.link-card:hover .icon-wrap{transform:scale(1.12) rotate(-3deg)}
-.icon-wrap svg{width:22px;height:22px}
+.icon svg{width:18px;height:18px;color:var(--ink)}
+.link-card:hover .icon{transform:scale(1.1) rotate(-4deg)}
 
 .card-text{flex:1;min-width:0}
-.card-title{
-  font-family:var(--display);font-size:14px;font-weight:600;
-  letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+.card-platform{
+  font-family:var(--display);font-size:11px;font-weight:600;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:1px;
 }
-.card-sub{
-  font-size:12px;color:var(--muted);margin-top:1px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+.card-desc{
+  font-size:13.5px;color:var(--ink);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
 }
 
 .arrow{
   color:var(--muted);flex-shrink:0;
-  transition:transform .22s cubic-bezier(.34,1.56,.64,1),color .2s;
+  transition:transform .2s ease,color .2s ease;
 }
-.link-card:hover .arrow{transform:translateX(5px);color:var(--ink)}
-.featured:hover .arrow{color:#fff!important}
+.link-card:hover .arrow{transform:translateX(4px);color:var(--gold)}
 
-/* badge */
-.badge{
+/* featured variant */
+.link-card.feat{
+  background:var(--ink);border-color:var(--ink);
+  padding:17px 18px;
+  animation:glow-border 3.5s 2s ease-in-out infinite;
+}
+.feat .icon{background:rgba(255,255,255,.1)}
+.feat .icon svg{color:#fff}
+.feat .card-platform{color:rgba(255,255,255,.45)}
+.feat .card-desc{color:#fff;font-size:14px;font-weight:500}
+.feat .arrow{color:rgba(255,255,255,.4)}
+.feat:hover .arrow{color:var(--gold)}
+.feat::before{background:linear-gradient(90deg,rgba(201,168,106,.12),transparent 70%)}
+@keyframes glow-border{
+  0%,100%{box-shadow:0 0 0 0 rgba(201,168,106,0)}
+  50%{box-shadow:0 0 0 4px rgba(201,168,106,.2)}
+}
+
+.pill{
   font-family:var(--display);font-size:9px;font-weight:600;
   letter-spacing:.12em;text-transform:uppercase;
-  background:var(--gold);color:#fff;
-  padding:3px 8px;border-radius:2px;white-space:nowrap;flex-shrink:0;
+  border:1px solid rgba(201,168,106,.5);color:var(--gold);
+  padding:2px 8px;border-radius:1px;white-space:nowrap;flex-shrink:0;
 }
-.featured .badge{background:rgba(255,255,255,.18)}
+.feat .pill{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.7)}
 
-/* ── tap feedback overlay ── */
+/* ripple */
 .ripple{
   position:absolute;border-radius:50%;
-  background:rgba(201,168,106,.18);
+  background:rgba(201,168,106,.15);
   transform:scale(0);pointer-events:none;
-  animation:ripple-out .55s ease-out forwards;
+  animation:rout .6s ease-out forwards;
 }
-@keyframes ripple-out{
-  to{transform:scale(4);opacity:0}
-}
+@keyframes rout{to{transform:scale(4);opacity:0}}
 
-/* ── opening state ── */
-.link-card.opening .card-title::after{content:" …";color:var(--gold)}
-
-/* ── footer ── */
-.foot{
-  text-align:center;padding-top:40px;
-  font-size:12px;color:var(--muted);letter-spacing:.3px;
-  opacity:0;animation:up .5s ease forwards;
+/* ── CLOSING LINE ── */
+.closing{
+  margin-top:44px;padding-top:28px;border-top:1px solid var(--line);
+  text-align:center;
+  opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease;
 }
-.foot a{color:var(--muted);text-decoration:underline}
+.closing.in{opacity:1;transform:none}
+.closing-quote{
+  font-family:var(--display);font-size:15px;font-weight:500;
+  font-style:italic;line-height:1.5;color:var(--muted);
+  letter-spacing:.2px;
+}
+.closing-sub{font-size:12px;color:var(--line);margin-top:12px;letter-spacing:.5px}
 </style>
 </head>
 <body>
-
 <div id="pbar"></div>
-
-<div class="bg-canvas">
-  <div class="fab fab1"></div>
-  <div class="fab fab2"></div>
-  <div class="fab fab3"></div>
-</div>
-
 <div class="wrap">
 
-  <div class="top">
+  <!-- HERO -->
+  <div class="hero">
     <div class="ring-wrap" id="ringWrap">
-      <svg class="ring-svg" viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="28" stroke="var(--gold)" stroke-width="2.2"
-          stroke-dasharray="158" stroke-dashoffset="30" stroke-linecap="round"/>
+      <svg class="ring-svg" viewBox="0 0 56 56" fill="none">
+        <circle cx="28" cy="28" r="24" stroke="var(--gold)" stroke-width="1.8"
+          stroke-dasharray="138" stroke-dashoffset="28" stroke-linecap="round"/>
       </svg>
       <div class="ring-dot"></div>
     </div>
-    <div class="logo">LLOOP</div>
-    <div class="tagline">share the look, save the planet</div>
+    <div class="wordmark">LLOOP</div>
+    <div class="hero-line">circular fashion house</div>
   </div>
 
-  <div class="label" style="animation-delay:.55s">เริ่มต้นที่นี่</div>
+  <!-- STORY 1: WHY -->
+  <div class="story" data-reveal>
+    <div class="story-label">เรื่องของเรา</div>
+    <div class="story-head">ชุดสวยไม่ต้องเป็นเจ้าของ</div>
+    <div class="story-body">
+      เราเชื่อว่าตู้เสื้อผ้าที่ดีที่สุดคือตู้ที่ <em>หมุนเวียน</em><br>
+      เช่าชุดที่ใช่สำหรับวันนั้น ใส่ดี คืนง่าย<br>
+      แล้วปล่อยให้ชุดนั้นไปสร้างความสุขให้คนต่อไป
+    </div>
 
-  <a class="link-card featured c-liff" href="https://liff.line.me/YOUR_LIFF_ID" target="_blank">
-    <div class="icon-wrap" style="background:rgba(255,255,255,.12)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-      </svg>
+    <div class="cards" style="margin-top:20px">
+      <a class="link-card feat" href="https://liff.line.me/YOUR_LIFF_ID" target="_blank">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <div class="card-platform">เริ่มเลย</div>
+          <div class="card-desc">จองชุด · ให้ AI สไตลิสต์ช่วยเลือก</div>
+        </div>
+        <span class="pill">ลองฟรี</span>
+        <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
     </div>
-    <div class="card-text">
-      <div class="card-title">จองชุดออนไลน์</div>
-      <div class="card-sub">เช่าชุด · ใส่ดี · คืนง่าย</div>
-    </div>
-    <span class="badge">ลอง AI สไตลิสต์</span>
-    <span class="arrow">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-    </span>
-  </a>
+  </div>
 
-  <div class="label" style="animation-delay:.65s">ติดตามเรา</div>
+  <!-- STORY 2: FOLLOW -->
+  <div class="story" data-reveal>
+    <div class="story-label">ติดตามลุค</div>
+    <div class="story-head">แรงบันดาลใจใหม่ทุกวัน</div>
+    <div class="story-body">
+      ดูลุคจริงจากลูกค้าจริง ไม่มีกรอง ไม่มีโฆษณา<br>
+      แค่เสื้อผ้าดีๆ บนคนจริงๆ ที่รักโลกเหมือนกัน
+    </div>
 
-  <a class="link-card c-line" href="https://lin.ee/YOUR_LINE_ID" target="_blank">
-    <div class="icon-wrap" style="background:#e8f7ec">
-      <svg viewBox="0 0 32 32" fill="none">
-        <path d="M16 3C8.82 3 3 8.19 3 14.56c0 5.08 3.26 9.49 8.16 11.7-.32 1.18-.51 2.77.01 3.74 0 0 8.52-3.61 11.64-5.09.66.07 1.33.11 2.02.11 7.18 0 13-5.19 13-11.56C38 8.19 23.18 3 16 3z" fill="#06C755" transform="scale(.84) translate(1.5 1.5)"/>
-        <path d="M10.5 14.2h1.2v3h-1.2v-3zm2 0h1.2l1.4 1.9v-1.9h1.2v3H15l-1.4-1.9v1.9h-1.1v-3zm4.2 0h3.3v1h-2.1v.3h2.1v1h-2.1v.3h2.1v1h-3.3v-3zm4.3 0h1.2v2h1.6v1H21v-3z" fill="#fff"/>
-      </svg>
-    </div>
-    <div class="card-text">
-      <div class="card-title">LINE Official</div>
-      <div class="card-sub">พูดคุย · สอบถาม · รับโปรพิเศษ</div>
-    </div>
-    <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-  </a>
+    <div class="cards">
+      <a class="link-card" href="https://instagram.com/lloop.th" target="_blank">
+        <div class="icon" style="background:var(--clay-bg)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--clay)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r=".5" fill="var(--clay)"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <div class="card-platform">Instagram</div>
+          <div class="card-desc">@lloop.th</div>
+        </div>
+        <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
 
-  <a class="link-card c-ig" href="https://instagram.com/lloop.th" target="_blank">
-    <div class="icon-wrap" style="background:#fceef7">
-      <svg viewBox="0 0 24 24" fill="none">
-        <defs>
-          <linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#f09433"/>
-            <stop offset="50%" stop-color="#dc2743"/>
-            <stop offset="100%" stop-color="#bc1888"/>
-          </linearGradient>
-        </defs>
-        <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#ig)" stroke-width="2"/>
-        <circle cx="12" cy="12" r="4" stroke="url(#ig)" stroke-width="2"/>
-        <circle cx="17.5" cy="6.5" r="1" fill="#dc2743"/>
-      </svg>
-    </div>
-    <div class="card-text">
-      <div class="card-title">Instagram</div>
-      <div class="card-sub">@lloop.th · ลุคใหม่ทุกวัน</div>
-    </div>
-    <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-  </a>
+      <a class="link-card" href="https://tiktok.com/@lloop.th" target="_blank">
+        <div class="icon" style="background:var(--cream)">
+          <svg viewBox="0 0 24 24" fill="var(--ink)">
+            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.77a4.85 4.85 0 01-1.01-.08z"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <div class="card-platform">TikTok</div>
+          <div class="card-desc">@lloop.th</div>
+        </div>
+        <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
 
-  <a class="link-card c-tt" href="https://tiktok.com/@lloop.th" target="_blank">
-    <div class="icon-wrap" style="background:#f3f3f3">
-      <svg viewBox="0 0 24 24" fill="#1A1A1A">
-        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.77a4.85 4.85 0 01-1.01-.08z"/>
-      </svg>
-    </div>
-    <div class="card-text">
-      <div class="card-title">TikTok</div>
-      <div class="card-sub">@lloop.th · ลุควันนี้ใส่อะไรดี</div>
-    </div>
-    <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-  </a>
+      <a class="link-card" href="https://facebook.com/lloop.th" target="_blank">
+        <div class="icon" style="background:var(--sage-bg)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <div class="card-platform">Facebook</div>
+          <div class="card-desc">LLOOP — circular fashion house</div>
+        </div>
+        <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
 
-  <a class="link-card c-fb" href="https://facebook.com/lloop.th" target="_blank">
-    <div class="icon-wrap" style="background:#eef2fd">
-      <svg viewBox="0 0 24 24" fill="#1877F2">
-        <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.313 0 2.686.236 2.686.236v2.97H15.83c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
-      </svg>
+      <a class="link-card" href="https://lin.ee/YOUR_LINE_ID" target="_blank">
+        <div class="icon" style="background:var(--gold-bg)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <div class="card-platform">LINE Official</div>
+          <div class="card-desc">พูดคุย · สอบถาม · รับโปรพิเศษ</div>
+        </div>
+        <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
     </div>
-    <div class="card-text">
-      <div class="card-title">Facebook</div>
-      <div class="card-sub">LLOOP — circular fashion house</div>
-    </div>
-    <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-  </a>
+  </div>
 
-  <div class="label" style="animation-delay:.75s">ชุมชน &amp; ช้อปปิ้ง</div>
+  <!-- STORY 3: COMMUNITY -->
+  <div class="story" data-reveal>
+    <div class="story-label">เข้าวง</div>
+    <div class="story-head">The Loop — คนที่รักโลกเหมือนกัน</div>
+    <div class="story-body">
+      ชุมชนของคนที่เลือกใส่สวย <em>โดยไม่ต้องซื้อ</em><br>
+      แชร์ลุค รับเครดิต พูดคุยเรื่องแฟชั่นยั่งยืน<br>
+      เข้ามาฟรี ออกไปพร้อมไอเดียใหม่
+    </div>
 
-  <a class="link-card c-comm" href="https://line.me/ti/g2/YOUR_OPENCHAT_ID" target="_blank">
-    <div class="icon-wrap" style="background:#eaf0e8">
-      <svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-      </svg>
+    <div class="cards">
+      <a class="link-card" href="https://line.me/ti/g2/YOUR_OPENCHAT_ID" target="_blank">
+        <div class="icon" style="background:var(--sage-bg)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <div class="card-platform">LINE OpenChat</div>
+          <div class="card-desc">The Loop — ชุมชน LLOOP</div>
+        </div>
+        <span class="pill">ฟรี</span>
+        <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
     </div>
-    <div class="card-text">
-      <div class="card-title">The Loop — ชุมชน</div>
-      <div class="card-sub">LINE OpenChat · แชร์ลุค · รับดีลก่อนใคร</div>
-    </div>
-    <span class="badge" style="background:var(--sage)">ฟรี</span>
-    <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-  </a>
+  </div>
 
-  <a class="link-card c-shop" href="https://shopee.co.th/lloop.th" target="_blank">
-    <div class="icon-wrap" style="background:#fff1ed">
-      <svg viewBox="0 0 24 24" fill="#EE4D2D">
-        <path d="M19.5 8.5h-2A5.5 5.5 0 007 8.5H5A2.5 2.5 0 002.5 11v9A2.5 2.5 0 005 22.5h14a2.5 2.5 0 002.5-2.5v-9A2.5 2.5 0 0019.5 8.5zM12 3.5a3.5 3.5 0 013.5 3.5V8.5h-7V7A3.5 3.5 0 0112 3.5zm0 9a2 2 0 110 4 2 2 0 010-4z"/>
-      </svg>
+  <!-- STORY 4: SHOP -->
+  <div class="story" data-reveal>
+    <div class="story-label">หาเราได้ที่</div>
+    <div class="story-head">สะดวกที่ไหนก็ได้เลย</div>
+    <div class="story-body">
+      ช้อปผ่านแพลตฟอร์มที่คุ้นเคย<br>
+      สินค้าเดียวกัน คลังเดียวกัน บริการเดียวกัน
     </div>
-    <div class="card-text">
-      <div class="card-title">Shopee</div>
-      <div class="card-sub">shopee.co.th/lloop.th</div>
-    </div>
-    <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-  </a>
 
-  <a class="link-card c-laz" href="https://lazada.co.th/shop/lloop" target="_blank">
-    <div class="icon-wrap" style="background:#eef0ff">
-      <svg viewBox="0 0 40 24" fill="none">
-        <rect width="40" height="24" rx="4" fill="#0028DE"/>
-        <text x="20" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="800" fill="#FF6900">Laz</text>
-      </svg>
-    </div>
-    <div class="card-text">
-      <div class="card-title">Lazada</div>
-      <div class="card-sub">lazada.co.th/shop/lloop</div>
-    </div>
-    <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-  </a>
+    <div class="cards">
+      <a class="link-card" href="https://shopee.co.th/lloop.th" target="_blank">
+        <div class="icon" style="background:var(--clay-bg)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--clay)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <div class="card-platform">Shopee</div>
+          <div class="card-desc">shopee.co.th/lloop.th</div>
+        </div>
+        <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
 
-  <a class="link-card c-lmshop" href="https://shop.line.me/@lloop" target="_blank">
-    <div class="icon-wrap" style="background:#e6f7ee">
-      <svg viewBox="0 0 24 24" fill="none">
-        <rect x="1" y="1" width="22" height="22" rx="5" fill="#06C755"/>
-        <path d="M7 9h10M7 12h7M7 15h5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <div class="card-text">
-      <div class="card-title">LINE My Shop</div>
-      <div class="card-sub">ซื้อผ่าน LINE ได้เลย</div>
-    </div>
-    <span class="arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-  </a>
+      <a class="link-card" href="https://lazada.co.th/shop/lloop" target="_blank">
+        <div class="icon" style="background:var(--gold-bg)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <div class="card-platform">Lazada</div>
+          <div class="card-desc">lazada.co.th/shop/lloop</div>
+        </div>
+        <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
 
-  <div class="foot" style="animation-delay:.9s">
-    share the look, save the planet<br>
-    <a href="https://lloop.th">lloop.th</a>
+      <a class="link-card" href="https://shop.line.me/@lloop" target="_blank">
+        <div class="icon" style="background:var(--cream)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round">
+            <path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-text">
+          <div class="card-platform">LINE My Shop</div>
+          <div class="card-desc">ซื้อผ่าน LINE ได้เลย</div>
+        </div>
+        <span class="arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- CLOSING -->
+  <div class="closing" data-reveal>
+    <div class="closing-quote">
+      "แชร์ลุคสวย ช่วยรักษ์โลก"
+    </div>
+    <div class="closing-sub">— lloop.th —</div>
   </div>
 
 </div>
 
 <script>
-// ── progress bar on scroll ──
+// scroll progress
 const pbar = document.getElementById('pbar');
 window.addEventListener('scroll', () => {
-  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
-  pbar.style.width = Math.min(pct, 100) + '%';
-}, {passive: true});
+  const p = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  pbar.style.width = Math.min(p, 100) + '%';
+}, { passive: true });
 
-// ── intersection observer stagger ──
-const cards = document.querySelectorAll('.link-card');
-const labels = document.querySelectorAll('.label');
-const foot = document.querySelector('.foot');
-
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
+// reveal on scroll
+const reveals = document.querySelectorAll('[data-reveal]');
+const io = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      // stagger cards inside
+      e.target.querySelectorAll('.link-card').forEach((card, ci) => {
+        setTimeout(() => card.classList.add('in'), ci * 80);
+      });
+      io.unobserve(e.target);
     }
   });
-}, { threshold: 0.12 });
+}, { threshold: 0.08 });
+reveals.forEach(el => io.observe(el));
 
-// stagger cards
-cards.forEach((card, i) => {
-  card.style.transitionDelay = (i * 0.07) + 's';
-  observer.observe(card);
-});
-labels.forEach(el => { el.style.opacity = 1; });
-if (foot) { foot.style.opacity = 1; }
+// also reveal closing
+const closing = document.querySelector('.closing');
+if (closing) io.observe(closing);
 
-// ── ripple on tap ──
-cards.forEach(card => {
+// ripple
+document.querySelectorAll('.link-card').forEach(card => {
   card.addEventListener('pointerdown', e => {
     const rect = card.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height);
     const r = document.createElement('span');
     r.className = 'ripple';
-    r.style.cssText = `
-      width:${size}px;height:${size}px;
-      left:${e.clientX - rect.left - size/2}px;
-      top:${e.clientY - rect.top - size/2}px;
-    `;
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;`;
     card.appendChild(r);
-    setTimeout(() => r.remove(), 600);
+    setTimeout(() => r.remove(), 650);
   });
 });
 
-// ── "กำลังเปิด…" micro-state ──
-cards.forEach(card => {
-  card.addEventListener('click', function(e) {
-    this.classList.add('opening');
-    setTimeout(() => this.classList.remove('opening'), 1200);
+// ring: tap to spin fast
+const rw = document.getElementById('ringWrap');
+if (rw) {
+  rw.addEventListener('click', () => {
+    [rw.querySelector('.ring-svg'), rw.querySelector('.ring-dot')].forEach(el => {
+      el.style.animationDuration = '1.8s';
+      setTimeout(() => el.style.animationDuration = '', 2200);
+    });
   });
-});
+}
 
-// ── logo ring: pause + spin on click ──
-const ringWrap = document.getElementById('ringWrap');
-const ringSvg = ringWrap.querySelector('.ring-svg');
-const ringDot = ringWrap.querySelector('.ring-dot');
-ringWrap.addEventListener('click', () => {
-  ringSvg.style.animationDuration = '2s';
-  ringDot.style.animationDuration = '2s,.8s';
-  setTimeout(() => {
-    ringSvg.style.animationDuration = '14s';
-    ringDot.style.animationDuration = '14s,2.8s';
-  }, 2000);
-});
-
-// ── magnetic hover on desktop ──
-if (window.matchMedia('(hover:hover)').matches) {
-  cards.forEach(card => {
+// magnetic tilt desktop
+if (matchMedia('(hover:hover)').matches) {
+  document.querySelectorAll('.link-card').forEach(card => {
     card.addEventListener('mousemove', e => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left - rect.width/2) / rect.width;
-      const y = (e.clientY - rect.top - rect.height/2) / rect.height;
-      card.style.transform = `translateY(-2px) scale(1.005) rotateX(${-y*3}deg) rotateY(${x*4}deg)`;
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width / 2) / r.width;
+      const y = (e.clientY - r.top - r.height / 2) / r.height;
+      card.style.transform = `translateY(-2px) scale(1.006) rotateX(${-y * 2.5}deg) rotateY(${x * 3.5}deg)`;
     });
-    card.addEventListener('mouseleave', e => {
-      card.style.transform = '';
-    });
+    card.addEventListener('mouseleave', () => card.style.transform = '');
   });
 }
 </script>

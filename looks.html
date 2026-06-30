@@ -171,8 +171,8 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=49"></script>
 <script src="liffAuth.js?v=49"></script>
-<script src="me-api.js?v=49"></script>
-<script src="api.js?v=49"></script>
+<script src="me-api.js?v=50"></script>
+<script src="api.js?v=50"></script>
 <script>
 const $ = s => document.querySelector(s);
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
@@ -181,7 +181,7 @@ const TIER_TH = { new:'', silver:'Silver', gold:'Gold', platinum:'Platinum' };
 let CUSTOMER=null, LIVE=false, FEED=[], TAB='all', OCC=null, TAG=null, STORY_I=-1;
 let LIKED=new Set(), FOLLOWING=new Set(), SAVED=new Set();
 let STORY_TIMER=null, STORY_T0=0, STORY_PAUSED=0, REPLY_TO=null;
-const STORY_MS=5000;
+const STORY_MS=5000, REF_PCT=10;
 
 function toast(t){ const e=$('#toast'); e.textContent=t; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),2600); }
 function openOv(id){ $(id).classList.add('open'); document.body.style.overflow='hidden'; }
@@ -223,7 +223,13 @@ function clearTag(){ TAG=null; reloadFeed(); }
 function lookUrl(card){
   const base = location.origin + location.pathname.replace(/looks\.html$/,'index.html');
   const code = card.garment && card.garment.code;
-  return base + (code?`?garment=${encodeURIComponent(code)}&look=${card.id}`:`?look=${card.id}`);
+  const ref = card.creator && card.creator.handle;
+  return base + (code?`?garment=${encodeURIComponent(code)}&look=${card.id}`:`?look=${card.id}`)
+    + (ref?`&ref=${encodeURIComponent(ref)}`:'');
+}
+function myRefUrl(){
+  const h = CUSTOMER && (CUSTOMER.handle || CUSTOMER.link_code);
+  return location.origin + location.pathname.replace(/looks\.html$/,'index.html') + (h?`?ref=${encodeURIComponent(h)}`:'');
 }
 
 function cardHtml(c){
@@ -498,6 +504,12 @@ async function doFollow(handle){
   }
 }
 
+async function copyRef(){
+  const url=myRefUrl(), text='เช่าชุดสวยที่ LLOOP ผ่านลิงก์ฉันได้เลย';
+  try{ if(navigator.share){ await navigator.share({ title:'LLOOP', text, url }); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+  try{ await navigator.clipboard.writeText(url); toast('คัดลอกลิงก์ชวนเช่าแล้ว — แปะที่ไหนก็ได้ค่ะ'); }catch(e){ toast(url); }
+}
+
 // ---------- share a look ----------
 async function openShare(){
   if(!LIVE || !CUSTOMER){ toast('เข้าสู่ระบบผ่าน LINE ก่อนแชร์ลุคนะคะ'); return; }
@@ -508,7 +520,12 @@ async function openShare(){
     .map(r=>{ const code=r.code||r.garment_code; return `<option value="${esc(code||'')}" data-rental="${esc(r.id||r.rental_id||'')}">${esc(r.name||code)}</option>`; }).join('');
   $('#shareSheet').innerHTML = `
     <div class="shhd"><div class="shtitle">แชร์ลุคของคุณ</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
-    <p class="muted" style="margin-top:4px">รูปผ่านการตรวจแล้วขึ้นฟีด ได้เครดิตทันที</p>
+    <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-top:8px">
+      <div style="font-size:12.5px;font-weight:600">ลิงก์ชวนเช่าของคุณ</div>
+      <div class="muted" style="margin:2px 0 9px">แชร์ลิงก์นี้ที่ไหนก็ได้ (IG/โพสต์) — ใครเช่าผ่านลิงก์ คุณได้ส่วนแบ่งเครดิต ${esc(String(REF_PCT))}% ของค่าเช่า</div>
+      <button class="btn ghost" style="font-size:13px;padding:10px" onclick="copyRef()">คัดลอกลิงก์ชวนเช่า</button>
+    </div>
+    <p class="muted" style="margin-top:12px">หรือแชร์ "ลุค" จากชุดที่เคยเช่า — รูปผ่านการตรวจแล้วขึ้นฟีด ได้เครดิตทันที</p>
     <label class="lbl">ชุดที่ใส่ในรูป</label>
     ${opts?`<select class="inp" id="shGarment">${opts}</select>`
       :`<input class="inp" id="shGarmentCode" placeholder="ใส่โค้ดชุด เช่น g3">`}

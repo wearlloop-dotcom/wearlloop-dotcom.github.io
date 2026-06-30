@@ -2171,6 +2171,9 @@ function routeDeepLink() {
     // มาจากฟีดชุมชน (?look=ID) → log attribution ให้ครีเอเตอร์ได้ส่วนแบ่งเมื่อเช่าตาม
     const lookId = qs.get('look') || (ls && ls.get('look'));
     if (lookId && window.API && window.API.logLookView) { try { window.API.logLookView(lookId, gcode); } catch (e) {} }
+    // มาจากลิงก์ชวนเช่าของครีเอเตอร์ (?ref=handle) → log affiliate (แชร์นอกแอปก็ได้เครดิต)
+    const ref = qs.get('ref') || (ls && ls.get('ref'));
+    if (ref && window.API && window.API.logRef) { try { window.API.logRef(ref, gcode); } catch (e) {} }
     if (gcode) {
       const g = GARMENTS.find(x => (x.code || '').toLowerCase() === gcode.toLowerCase());
       if (g) { setTimeout(() => openDetail(g.id), 80); return; }
