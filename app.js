@@ -2537,21 +2537,23 @@ async function boot() {
   // เดโม: ยังไม่ได้ล็อกอินผ่าน LINE (เปิดบน localhost) ใส่ตัวอย่างให้หน้าผลกระทบดูมีชีวิต
   if (!CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   // เครดิตใกล้หมดอายุ: โชว์ banner กระตุ้นให้กลับมาใช้
+  // กันเหนียว: รีเซ็ตซ่อน+ล้างข้อความก่อนเสมอ แล้วโชว์เฉพาะเมื่อมีเครดิตจริง + ข้อความไม่ว่าง
+  const _eb = $('#expiryBanner'), _em = $('#expiryMsg');
+  if (_eb) _eb.hidden = true;
+  if (_em) _em.innerHTML = '';
   if (loggedIn) {
     try {
       const expiry = await window.API.creditExpiry?.();
-      if (expiry && expiry.amount > 0 && expiry.expires_at) {
-        const daysLeft = Math.ceil((new Date(expiry.expires_at) - Date.now()) / 86400000);
-        const banner = $('#expiryBanner'), msg = $('#expiryMsg');
-        if (banner && msg) {
-          const dayStr = lang === 'th' ? (daysLeft <= 1 ? 'พรุ่งนี้' : `${daysLeft} วัน`) : (daysLeft <= 1 ? 'tomorrow' : `${daysLeft} days`);
-          msg.innerHTML = lang === 'th'
-            ? `เครดิต <b>฿${Math.round(expiry.amount)}</b> หมดอายุใน <b>${dayStr}</b> — ใช้เช่าชุดก่อนนะคะ`
-            : `<b>฿${Math.round(expiry.amount)}</b> credit expires in <b>${dayStr}</b>`;
-          banner.hidden = false;
-        }
+      const amt = expiry ? Math.round(Number(expiry.amount) || 0) : 0;  // jsonb numeric อาจมาเป็น string
+      if (amt > 0 && expiry.expires_at && _eb && _em) {
+        const daysLeft = Math.max(1, Math.ceil((new Date(expiry.expires_at) - Date.now()) / 86400000));
+        const dayStr = lang === 'th' ? (daysLeft <= 1 ? 'พรุ่งนี้' : `${daysLeft} วัน`) : (daysLeft <= 1 ? 'tomorrow' : `${daysLeft} days`);
+        _em.innerHTML = lang === 'th'
+          ? `เครดิต <b>฿${amt}</b> หมดอายุใน <b>${dayStr}</b> — ใช้เช่าชุดก่อนนะคะ`
+          : `<b>฿${amt}</b> credit expires in <b>${dayStr}</b>`;
+        if (_em.textContent.trim()) _eb.hidden = false;  // โชว์เฉพาะเมื่อมีข้อความจริง
       }
-    } catch (e) { /* ไม่มีเครดิตใกล้หมด หรือ RPC error — ไม่แสดง banner */ }
+    } catch (e) { if (_eb) _eb.hidden = true; }
   }
   window.track?.('session_start', null, { logged_in: loggedIn, tier: CUSTOMER.crm_tier || 'guest' });
   setupScrollTracking();
