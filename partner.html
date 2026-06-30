@@ -35,6 +35,10 @@
   .gm{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
   .gm>div{min-width:0}.gm label{margin:0 0 5px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .gm input{padding:11px 8px;text-align:center}
+  /* หน่วยกำกับในช่อง (ซม./กก./นิ้ว) — ไม่กินที่ ไม่ทับตัวเลข */
+  .uin{position:relative}
+  .uin input{padding-right:30px;text-align:left}
+  .uin .u{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11.5px;color:var(--muted);pointer-events:none}
   .found{background:#E4F0EC;color:#04342C;border-radius:10px;padding:10px 14px;font-weight:600;margin-top:10px;display:none}
   .found.show{display:block}
   /* ตัวจริงของลูกค้า (LINE OA) — โชว์รูป+ชื่อจริง ตอนค้นเจอ */
@@ -375,36 +379,36 @@
 
   <div class="card" id="sec-measure">
     <h2>วัดตัว (ละเอียด)</h2>
-    <div class="sub">หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก · กรอกเท่าที่มี เว้นว่างได้</div>
+    <div class="sub">กรอกเท่าที่มี เว้นว่างได้ — หน่วยกำกับอยู่ในแต่ละช่อง</div>
     <div class="grp first"><div class="gt">พื้นฐาน</div>
     <div class="gm">
-      <div><label>ส่วนสูง (ซม.)</label><input id="height_cm" type="number" inputmode="numeric"></div>
-      <div><label>น้ำหนัก (กก.)</label><input id="weight_kg" type="number" inputmode="numeric"></div>
+      <div><label>ส่วนสูง</label><div class="uin"><input id="height_cm" type="number" inputmode="numeric"><span class="u">ซม.</span></div></div>
+      <div><label>น้ำหนัก</label><div class="uin"><input id="weight_kg" type="number" inputmode="numeric"><span class="u">กก.</span></div></div>
       <div><label>ไซส์เดรส</label><input id="dress_size" placeholder="S/M/L"></div>
     </div></div>
     <div class="grp"><div class="gt">ช่วงบน</div>
     <div class="gm">
-      <div><label>รอบอก</label><input id="bust_in" type="number" inputmode="decimal"></div>
-      <div><label>ใต้อก</label><input id="underbust_in" type="number" inputmode="decimal"></div>
+      <div><label>รอบอก</label><div class="uin"><input id="bust_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>ใต้อก</label><div class="uin"><input id="underbust_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
       <div><label>คัพ</label><input id="cup"></div>
-      <div><label>ไหล่</label><input id="shoulder_in" type="number" inputmode="decimal"></div>
-      <div><label>ไหล่ถึงเอว</label><input id="shoulder_to_waist_in" type="number" inputmode="decimal"></div>
-      <div><label>รอบคอ</label><input id="neck_in" type="number" inputmode="decimal"></div>
+      <div><label>ไหล่</label><div class="uin"><input id="shoulder_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>ไหล่ถึงเอว</label><div class="uin"><input id="shoulder_to_waist_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>รอบคอ</label><div class="uin"><input id="neck_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
     </div></div>
     <div class="grp"><div class="gt">ช่วงล่าง</div>
     <div class="gm">
-      <div><label>รอบเอว</label><input id="waist_in" type="number" inputmode="decimal"></div>
-      <div><label>สะโพก</label><input id="hip_in" type="number" inputmode="decimal"></div>
-      <div><label>สะโพกบน</label><input id="high_hip_in" type="number" inputmode="decimal"></div>
-      <div><label>ต้นขา</label><input id="thigh_in" type="number" inputmode="decimal"></div>
-      <div><label>เป้า (inseam)</label><input id="inseam_in" type="number" inputmode="decimal"></div>
+      <div><label>รอบเอว</label><div class="uin"><input id="waist_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>สะโพก</label><div class="uin"><input id="hip_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>สะโพกบน</label><div class="uin"><input id="high_hip_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>ต้นขา</label><div class="uin"><input id="thigh_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>เป้า (inseam)</label><div class="uin"><input id="inseam_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
       <div><label>เบอร์รองเท้า</label><input id="shoe_size"></div>
     </div></div>
     <div class="grp"><div class="gt">แขน-หลัง</div>
     <div class="gm">
-      <div><label>ความยาวแขน</label><input id="arm_length_in" type="number" inputmode="decimal"></div>
-      <div><label>รอบต้นแขน</label><input id="bicep_in" type="number" inputmode="decimal"></div>
-      <div><label>ความยาวหลัง</label><input id="back_length_in" type="number" inputmode="decimal"></div>
+      <div><label>ความยาวแขน</label><div class="uin"><input id="arm_length_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>รอบต้นแขน</label><div class="uin"><input id="bicep_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>ความยาวหลัง</label><div class="uin"><input id="back_length_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
     </div></div>
   </div>
 
@@ -1184,6 +1188,10 @@
     'เสื้อผ้า/ทรงที่ควรเลี่ยง':'Clothing/shapes to avoid', 'คอปาด, กระโปรงบานช่วงสะโพก':'boat neck, skirts flaring at hips',
     'ไฟล์งาน Face & Body (PDF/รูป/เอกสาร)':'Face & Body files (PDF/image/doc)',
     'วัดตัว (ละเอียด)':'Measurements (detailed)', 'หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก':'Inches, except height/weight',
+    'กรอกเท่าที่มี เว้นว่างได้ — หน่วยกำกับอยู่ในแต่ละช่อง':'Fill in what you have — units are shown in each field',
+    'พื้นฐาน':'Basics', 'ช่วงบน':'Upper body', 'ช่วงล่าง':'Lower body', 'แขน-หลัง':'Arms & back',
+    'ซม.':'cm', 'กก.':'kg', 'นิ้ว':'in',
+    'ส่วนสูง':'Height', 'น้ำหนัก':'Weight',
     'ส่วนสูง (ซม.)':'Height (cm)', 'น้ำหนัก (กก.)':'Weight (kg)', 'ไซส์เดรส':'Dress size', 'รอบอก':'Bust', 'ใต้อก':'Underbust',
     'คัพ':'Cup', 'รอบเอว':'Waist', 'สะโพก':'Hip', 'สะโพกบน':'High hip', 'ไหล่':'Shoulder', 'ไหล่ถึงเอว':'Shoulder to waist',
     'ความยาวหลัง':'Back length', 'ความยาวแขน':'Arm length', 'รอบต้นแขน':'Bicep', 'รอบคอ':'Neck', 'ต้นขา':'Thigh',
@@ -1225,7 +1233,7 @@
     'ลูกค้าที่จองเข้ามา — เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ':'Clients who booked — open the note, search the code to record the analysis, then tap Done when finished.',
     'ยังไม่มีคิว':'No bookings yet',
   };
-  const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.pnav button,.card h2,.card .sub,.jump button,.empty,label,button.btn,option';
+  const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.pnav button,.card h2,.card .sub,.jump button,.empty,label,button.btn,option,.gm .u,.grp .gt';
   // ภาษาให้ตรงกับแถบ topbar ร่วม (nav.js เก็บใน lloop_lang) — ใช้เป็นแหล่งความจริงเดียว
   let plang=localStorage.getItem('lloop_lang')||localStorage.getItem('partnerLang')||'th', collected=false, _syncingLang=false;
   function collectI18n(){
