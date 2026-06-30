@@ -94,7 +94,7 @@
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
-  const QR_BASE='https://lloop.app/g/';           // QR = ลิงก์เช็คชุด (เปลี่ยนเป็นโดเมนจริงทีหลัง)
+  const QR_BASE='https://lloop.app/g.html?c=';     // QR = หน้าเช่าชุดนี้ (g.html รับ ?c=<code> → เลือกวัน+จอง)
   const CONTACT='LINE @lloop';                     // ช่องติดต่อเวลาพบชุดหาย
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
