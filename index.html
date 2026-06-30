@@ -504,6 +504,34 @@
   .pcpay .pcstep{font-size:12.5px;color:#86857F;line-height:1.7;margin:12px auto;max-width:330px}
   .pcpay .pcref{font-size:11px;color:#B6A988;letter-spacing:1px;margin-bottom:14px}
   .pcpay .pcoa{display:block;background:#06C755;color:#fff;text-decoration:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600}
+  /* ===== เลือกสไตลิสต์ + จองเวลา (Personal Color) ===== */
+  .pcsheet.lft{text-align:left;max-height:88vh;overflow-y:auto}
+  .stlist{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .stcard{display:flex;gap:12px;align-items:center;border:1.5px solid #E6DCC8;border-radius:12px;padding:11px;cursor:pointer;background:#fff;text-align:left}
+  .stcard:hover{border-color:#A75F3A}
+  .stcard .av{width:52px;height:52px;border-radius:50%;background:#EADFCB center/cover no-repeat;flex:none}
+  .stcard .nm{font-weight:600;font-size:15px;color:#1A1A1A}
+  .stcard .hl{font-size:12.5px;color:#86857F;margin-top:2px}
+  .stcard .mt{font-size:11.5px;color:#A75F3A;margin-top:3px}
+  .stchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+  .stchips span{font-size:11px;background:#F2ECDF;color:#5E5746;border-radius:20px;padding:3px 9px}
+  .stback{background:none;border:none;color:#A75F3A;font-size:13px;cursor:pointer;padding:0;margin-bottom:6px}
+  .stbio{font-size:13px;color:#3B362C;line-height:1.6;margin:8px 0}
+  .stdaylabel{font-size:13px;font-weight:700;color:#1A1A1A;margin:12px 0 6px}
+  .stslots{display:flex;flex-wrap:wrap;gap:8px}
+  .stslot{border:1.5px solid #E6DCC8;border-radius:10px;padding:9px 13px;font-size:14px;cursor:pointer;background:#fff;color:#1A1A1A}
+  .stslot:hover,.stslot.sel{border-color:#A75F3A;background:#FBF1E9}
+  .stnote{width:100%;box-sizing:border-box;border:1.5px solid #E6DCC8;border-radius:10px;padding:10px;font-size:14px;margin-top:12px;font-family:inherit}
+  .stconfirm{width:100%;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;background:#1A1A1A;color:#fff;cursor:pointer;margin-top:12px}
+  .stconfirm:disabled{opacity:.45}
+  /* การ์ดสรุปสถานะนัด / ปุ่มเลือกสไตลิสต์ ในการ์ดโปรไฟล์ */
+  .pcbookcta{width:100%;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;background:#A75F3A;color:#fff;cursor:pointer;margin-top:4px}
+  .pcbookcta .bsub{display:block;font-size:11.5px;font-weight:400;opacity:.9;margin-top:2px}
+  .apptcard{border:1.5px solid #E6DCC8;background:#FBF7EE;border-radius:12px;padding:13px;margin-top:6px}
+  .apptcard .ah{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#A39472}
+  .apptcard .aw{font-family:var(--display);font-size:17px;color:#1A1A1A;margin-top:4px}
+  .apptcard .ap{font-size:13px;color:#5E5746;margin-top:3px}
+  .apptcard .acancel{background:none;border:none;color:#9A8456;font-size:12.5px;cursor:pointer;margin-top:8px;padding:0;text-decoration:underline}
   /* เรตติ้ง/รีวิวในหน้ารายละเอียด */
   .ratingline{font-size:13px;color:#5E5746;margin:-8px 0 14px;min-height:1px}
   .ratingline .star{color:#A75F3A}

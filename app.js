@@ -1313,6 +1313,7 @@ function openProfile(onboard) {
   document.body.style.overflow ='hidden';
   setTimeout(() => animateCounts($('#pSheet')), 80);  // ตัวเลขนับขึ้นในการ์ดอิมแพกต์
   loadReferralCode();  // ดึงโค้ดชวนเพื่อน (async inject)
+  loadPcBookZone();    // จ่ายแล้ว → ให้เลือกสไตลิสต์/จองเวลา หรือโชว์นัด (async inject)
 }
 // การ์ดชวนเพื่อน — รับเครดิตทั้งคู่
 function renderReferralCard() {
