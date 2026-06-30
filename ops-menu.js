@@ -29,6 +29,7 @@
       { href: 'ugc.html',        label: 'งานถ่าย UGC',   icon: '◰', roles: ['marketing','manager'] },
       { href: 'looks.html',      label: 'ชุมชน Loop Looks', icon: '❤', roles: ['marketing','manager'] },
       { href: 'market.html',     label: 'เฝ้าตลาด',      icon: '◴', roles: ['marketing','manager'] },
+      { href: 'requests.html',   label: 'คำขอชุดลูกค้า',  icon: '⌕', roles: ['marketing','manager'] },
     ] },
     { section: 'ธุรกิจ', items: [
       { href: 'cockpit.html',    label: 'คอกพิตเจ้าของ', icon: '◉', roles: ['owner','manager'] },

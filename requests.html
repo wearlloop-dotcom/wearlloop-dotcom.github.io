@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · คำขอชุดจากลูกค้า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  align-items: center;
+}
+.filters select, .filters input {
+  padding: 7px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #fff;
+}
+.filters label { font-size: 13px; color: #555; }
+
+.wish-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.wish-table th {
+  text-align: left;
+  padding: 10px 12px;
+  background: #f7f5f2;
+  color: #666;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e5e0d8;
+  white-space: nowrap;
+}
+.wish-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #ede9e3;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.wish-table tr:hover td { background: #faf8f5; }
+.wish-table .desc { max-width: 200px; }
+.wish-table .desc-text { font-weight: 500; color: #2B2825; }
+.wish-table .brand-text { font-size: 12px; color: #888; margin-top: 2px; }
+
+.wish-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #e5e0d8;
+  background: #f7f5f2;
+  display: block;
+}
+.wish-thumb-empty {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  border: 1px solid #e5e0d8;
+  background: #f7f5f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.badge.pending  { background: #F5F0E8; color: #8A7355; }
+.badge.sourcing { background: #E4F0EC; color: #3A8A7D; }
+.badge.added    { background: #D8EFDB; color: #2E7D32; }
+.badge.rejected { background: #F5E4E4; color: #B22222; }
+
+.demand-num {
+  font-size: 18px;
+  font-weight: 700;
+  color: #6FB3A6;
+  line-height: 1;
+}
+.demand-sub { font-size: 11px; color: #aaa; margin-top: 2px; }
+
+.action-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+.action-row select {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+}
+.action-row textarea {
+  padding: 5px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  resize: vertical;
+  min-height: 48px;
+  font-family: inherit;
+}
+.save-btn {
+  padding: 5px 12px;
+  background: #6FB3A6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  align-self: flex-start;
+}
+.save-btn:hover { opacity: 0.85; }
+.save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.notify-btn {
+  padding: 5px 10px;
+  background: #fff;
+  color: #6FB3A6;
+  border: 1px solid #6FB3A6;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  align-self: flex-start;
+  white-space: nowrap;
+}
+.notify-btn:hover { background: #6FB3A6; color: #fff; }
+.notify-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.notify-btn.sent { background: #D8EFDB; color: #2E7D32; border-color: #2E7D32; }
+
+.empty-row td { text-align: center; color: #aaa; padding: 32px; }
+
+.scroll-x { overflow-x: auto; }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h1>Wishlist</h1>
+    <div class="nav">
+      <a href="home.html">หน้าหลัก</a>
+      <a href="stock.html">สต๊อก</a>
+      <a href="garment.html">ชุด</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section class="phead">
+      <div class="eyebrow">customer wishlist</div>
+      <h1>ความต้องการของลูกค้า</h1>
+      <div class="sub">ดูว่าลูกค้าอยากได้ชุดแบบไหน — เรียงตามดีมานด์สูงสุด ปรับสถานะ และแจ้งลูกค้าเมื่อมีชุดพร้อม</div>
+      <div class="kpis">
+        <div class="kpi"><div class="n" id="k_total">—</div><div class="l">คำขอทั้งหมด</div></div>
+        <div class="kpi ok"><div class="n" id="k_pending">—</div><div class="l">รอดำเนินการ</div></div>
+        <div class="kpi"><div class="n" id="k_sourcing">—</div><div class="l">กำลังหา</div></div>
+        <div class="kpi ok"><div class="n" id="k_added">—</div><div class="l">หามาได้แล้ว</div></div>
+      </div>
+    </section>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <h2>รายการ Wishlist</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn ghost" onclick="loadData()">รีเฟรช</button>
+          <button class="btn" onclick="exportCsv()" id="expBtn">Export CSV</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <label>สถานะ
+          <select id="fStatus" onchange="applyFilters()">
+            <option value="">ทั้งหมด</option>
+            <option value="pending">รอดำเนินการ</option>
+            <option value="sourcing">กำลังหา</option>
+            <option value="added">หามาได้แล้ว</option>
+            <option value="rejected">ไม่ได้หา</option>
+          </select>
+        </label>
+        <label>โอกาส
+          <select id="fOccasion" onchange="applyFilters()">
+            <option value="">ทั้งหมด</option>
+            <option value="ออกงาน">ออกงาน</option>
+            <option value="งานแต่ง">งานแต่ง</option>
+            <option value="ปาร์ตี้">ปาร์ตี้</option>
+            <option value="ถ่ายรูป">ถ่ายรูป</option>
+            <option value="everyday">everyday</option>
+          </select>
+        </label>
+        <label>ค้นหา
+          <input type="text" id="fSearch" placeholder="แบรนด์ / คำอธิบาย…" oninput="applyFilters()">
+        </label>
+      </div>
+
+      <div class="scroll-x">
+        <table class="wish-table" id="wishTable">
+          <thead>
+            <tr>
+              <th>รูปที่ขอ</th>
+              <th>แบรนด์ / คำอธิบาย</th>
+              <th>ไซส์</th>
+              <th>โอกาส</th>
+              <th>คนขอ</th>
+              <th>งบเฉลี่ย</th>
+              <th>วันล่าสุด</th>
+              <th>สถานะ</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="wishBody">
+            <tr><td colspan="9" style="text-align:center;color:#aaa;padding:32px;">กำลังโหลด…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" id="queueCard" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:10px;">
+        <h2>คิวรอชุด · waitlist</h2>
+        <button class="btn ghost" onclick="loadQueue()">รีเฟรช</button>
+      </div>
+      <div class="sub" style="margin-bottom:16px;color:#888;font-size:13px;">ชุดที่ลูกค้าต่อคิวรออยู่ — คนรอเยอะ = ควรเติมสต๊อก/ซื้อเพิ่ม · ของกลับมาว่างระบบแจ้งคิวแรกให้เลือกวันก่อนอัตโนมัติ</div>
+      <div class="scroll-x">
+        <table class="wish-table">
+          <thead>
+            <tr><th>ชุด</th><th>แบรนด์</th><th>สถานะชุด</th><th>คนรอคิว</th><th>ถือสิทธิ์อยู่</th><th>คิวเก่าสุด</th></tr>
+          </thead>
+          <tbody id="queueBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const CFG = window.CONFIG || {};
+const SUPABASE_URL = CFG.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co';
+const SUPABASE_KEY = CFG.SUPABASE_ANON_KEY || '';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+if (window.opsRpc) sb.rpc = window.opsRpc;
+if (window.opsLogin) window.opsLogin().catch(() => {});
+
+const $ = id => document.getElementById(id);
+const esc = s => s == null ? '' : String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+let T = null;
+function toast(m, bad) {
+  const t = $('toast');
+  t.textContent = m;
+  t.className = 'toast show' + (bad ? ' bad' : '');
+  clearTimeout(T);
+  T = setTimeout(() => t.className = 'toast', 3000);
+}
+
+const STATUS_TH = { pending:'รอดำเนินการ', sourcing:'กำลังหา', added:'หามาได้แล้ว', rejected:'ไม่ได้หา' };
+
+let allRows = [];
+
+async function loadData() {
+  $('wishBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:32px;">กำลังโหลด…</td></tr>';
+
+  // R-4: ผ่าน gateway (LINE idToken + role) แทน .from() ด้วย anon — garment_requests มี customer_uid (PII)
+  const { data, error } = await sb.rpc('wishlist_ops_list', {});
+
+  if (error) {
+    $('wishBody').innerHTML = `<tr><td colspan="9" style="text-align:center;color:#c00;padding:32px;">${esc(error.message)}</td></tr>`;
+    return;
+  }
+
+  allRows = data || [];
+  updateKpis();
+  applyFilters();
+}
+
+function updateKpis() {
+  $('k_total').textContent = allRows.length;
+  $('k_pending').textContent = allRows.filter(r => r.status === 'pending').length;
+  $('k_sourcing').textContent = allRows.filter(r => r.status === 'sourcing').length;
+  $('k_added').textContent = allRows.filter(r => r.status === 'added').length;
+}
+
+function applyFilters() {
+  const fStatus = $('fStatus').value;
+  const fOccasion = $('fOccasion').value;
+  const fSearch = $('fSearch').value.toLowerCase().trim();
+
+  let rows = allRows;
+  if (fStatus) rows = rows.filter(r => r.status === fStatus);
+  if (fOccasion) rows = rows.filter(r => r.occasion === fOccasion);
+  if (fSearch) rows = rows.filter(r =>
+    (r.brand || '').toLowerCase().includes(fSearch) ||
+    (r.item_description || '').toLowerCase().includes(fSearch)
+  );
+
+  renderTable(rows);
+}
+
+function renderTable(rows) {
+  if (!rows.length) {
+    $('wishBody').innerHTML = '<tr class="empty-row"><td colspan="9">ไม่พบรายการ</td></tr>';
+    return;
+  }
+
+  $('wishBody').innerHTML = rows.map(r => {
+    const dateStr = new Date(r.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
+    const budget = r.budget_max ? '฿' + Number(r.budget_max).toLocaleString() : '—';
+    const st = r.status || 'pending';
+
+    const thumbHtml = r.reference_image_url
+      ? `<img class="wish-thumb" src="${esc(r.reference_image_url)}" alt="รูปชุด" loading="lazy">`
+      : `<div class="wish-thumb-empty"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`;
+
+    const notifiedLabel = r.notified_at ? 'แจ้งแล้ว' : 'แจ้งลูกค้า';
+    const notifiedClass = r.notified_at ? 'notify-btn sent' : 'notify-btn';
+    const notifiedDisabled = r.notified_at ? 'disabled' : '';
+
+    return `<tr data-id="${esc(r.id)}">
+      <td>${thumbHtml}</td>
+      <td class="desc">
+        ${r.brand ? `<div class="brand-text">${esc(r.brand)}</div>` : ''}
+        <div class="desc-text">${esc(r.item_description)}</div>
+      </td>
+      <td>${esc(r.size || '—')}</td>
+      <td>${esc(r.occasion || '—')}</td>
+      <td><div class="demand-num">1</div><div class="demand-sub">คน</div></td>
+      <td>${budget}</td>
+      <td style="white-space:nowrap;font-size:12px;color:#888;">${dateStr}</td>
+      <td><span class="badge ${st}">${STATUS_TH[st] || st}</span></td>
+      <td>
+        <div class="action-row">
+          <select class="status-sel" data-id="${esc(r.id)}" onchange="markDirty(this)">
+            <option value="pending"  ${st==='pending'  ? 'selected':''}>รอดำเนินการ</option>
+            <option value="sourcing" ${st==='sourcing' ? 'selected':''}>กำลังหา</option>
+            <option value="added"    ${st==='added'    ? 'selected':''}>หามาได้แล้ว</option>
+            <option value="rejected" ${st==='rejected' ? 'selected':''}>ไม่ได้หา</option>
+          </select>
+          <textarea class="note-ta" data-id="${esc(r.id)}" placeholder="หมายเหตุ ops…">${esc(r.ops_note || '')}</textarea>
+          <button class="save-btn" data-id="${esc(r.id)}" onclick="saveRow(this)" disabled>บันทึก</button>
+          <button class="${notifiedClass}" data-id="${esc(r.id)}" onclick="notifyCustomer(this)" ${notifiedDisabled}>${notifiedLabel}</button>
+          ${r.reference_url ? `<a class="notify-btn" href="${esc(r.reference_url)}" target="_blank" style="text-decoration:none;text-align:center">เปิดลิงก์</a>` : ''}
+          <button class="save-btn" data-id="${esc(r.id)}" onclick="sendToBuy(this)" style="background:#3A8A7D">ส่งไปช้อปเพิ่ม</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function markDirty(el) {
+  const id = el.dataset.id;
+  const btn = document.querySelector(`.save-btn[data-id="${id}"]`);
+  if (btn) btn.disabled = false;
+}
+
+document.addEventListener('input', e => {
+  if (e.target.classList.contains('note-ta')) markDirty(e.target);
+});
+
+async function saveRow(btn) {
+  const id = btn.dataset.id;
+  const sel = document.querySelector(`.status-sel[data-id="${id}"]`);
+  const ta  = document.querySelector(`.note-ta[data-id="${id}"]`);
+  const newStatus = sel ? sel.value : null;
+  const newNote   = ta  ? ta.value.trim() : null;
+
+  btn.disabled = true;
+  btn.textContent = '…';
+
+  // R-4: ผ่าน gateway แทน .from().update() ด้วย anon
+  const { error } = await sb.rpc('wishlist_ops_update', { p: { id, status: newStatus, ops_note: newNote || null } });
+
+  btn.textContent = 'บันทึก';
+
+  if (error) {
+    toast('บันทึกไม่สำเร็จ: ' + error.message, true);
+    btn.disabled = false;
+    return;
+  }
+
+  const row = allRows.find(r => r.id === id);
+  if (row) { row.status = newStatus; row.ops_note = newNote; }
+  updateKpis();
+
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (tr) {
+    const badge = tr.querySelector('.badge');
+    if (badge) { badge.className = `badge ${newStatus}`; badge.textContent = STATUS_TH[newStatus] || newStatus; }
+  }
+
+  toast('บันทึกแล้ว');
+}
+
+async function sendToBuy(btn) {
+  const id = btn.dataset.id;
+  btn.disabled = true;
+  btn.textContent = 'กำลังส่ง…';
+  const { error } = await sb.rpc('request_to_buy', { p_id: id });
+  if (error) {
+    toast('ส่งไม่สำเร็จ: ' + error.message, true);
+    btn.disabled = false; btn.textContent = 'ส่งไปช้อปเพิ่ม';
+    return;
+  }
+  btn.textContent = 'ส่งแล้ว ✓';
+  toast('ส่งเข้า “ช้อปเพิ่ม” ในหน้าจัดซื้อแล้ว');
+  // อัปสถานะ pending → กำลังหา ให้ตรงกับที่ RPC เปลี่ยน
+  const row = allRows.find(r => r.id === id);
+  if (row && row.status === 'pending') { row.status = 'sourcing';
+    const tr = document.querySelector(`tr[data-id="${id}"]`);
+    const badge = tr && tr.querySelector('.badge');
+    if (badge) { badge.className = 'badge sourcing'; badge.textContent = STATUS_TH.sourcing; }
+  }
+}
+
+async function notifyCustomer(btn) {
+  const id = btn.dataset.id;
+  btn.disabled = true;
+  btn.textContent = 'กำลังแจ้ง…';
+
+  const { error } = await sb.rpc('notify_customer_wishlist', {
+    p_request_id: id,
+    p_garment_id: null
+  });
+
+  if (error) {
+    toast('แจ้งไม่สำเร็จ: ' + error.message, true);
+    btn.disabled = false;
+    btn.textContent = 'แจ้งลูกค้า';
+    return;
+  }
+
+  btn.textContent = 'แจ้งแล้ว';
+  btn.className = 'notify-btn sent';
+
+  const row = allRows.find(r => r.id === id);
+  if (row) { row.status = 'added'; row.notified_at = new Date().toISOString(); }
+  updateKpis();
+
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (tr) {
+    const badge = tr.querySelector('.badge');
+    if (badge) { badge.className = 'badge added'; badge.textContent = STATUS_TH['added']; }
+    const sel = tr.querySelector('.status-sel');
+    if (sel) sel.value = 'added';
+  }
+
+  toast('แจ้งลูกค้าแล้ว');
+}
+
+function exportCsv() {
+  const fStatus = $('fStatus').value;
+  const fOccasion = $('fOccasion').value;
+  const fSearch = $('fSearch').value.toLowerCase().trim();
+
+  let rows = allRows;
+  if (fStatus) rows = rows.filter(r => r.status === fStatus);
+  if (fOccasion) rows = rows.filter(r => r.occasion === fOccasion);
+  if (fSearch) rows = rows.filter(r =>
+    (r.brand || '').toLowerCase().includes(fSearch) ||
+    (r.item_description || '').toLowerCase().includes(fSearch)
+  );
+
+  if (!rows.length) { toast('ไม่มีข้อมูลที่จะ export', true); return; }
+
+  const cols = ['brand','item_description','size','occasion','budget_max','status','ops_note','created_at','reference_image_url'];
+  const head = ['แบรนด์','คำอธิบาย','ไซส์','โอกาส','งบ/วัน','สถานะ','หมายเหตุ ops','วันที่ขอ','รูปอ้างอิง'];
+  const cell = v => { let s = v == null ? '' : String(v); if (/[",\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"'; return s; };
+  const csv = [head.join(',')].concat(rows.map(r => cols.map(c => cell(r[c])).join(','))).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lloop-wishlist-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('ดาวน์โหลด ' + rows.length + ' รายการแล้ว');
+}
+
+// ===== คิวรอชุด (waitlist demand) =====
+const ST_TH = { available:'ว่าง', rented:'ถูกเช่า', reserved:'จองอยู่', unavailable:'ไม่พร้อม' };
+async function loadQueue() {
+  const { data, error } = await sb.rpc('waitlist_ops_summary', {});
+  if (error) { return; }  // เงียบ — ยังไม่ deploy RPC ก็ไม่พังหน้า
+  const rows = data || [];
+  if (!rows.length) { $('queueCard').style.display = 'none'; return; }
+  $('queueCard').style.display = 'block';
+  $('queueBody').innerHTML = rows.map(r => {
+    const thumb = r.photo
+      ? `<img class="wish-thumb" src="${esc(r.photo)}" style="display:inline-block;vertical-align:middle;margin-right:8px;" loading="lazy">`
+      : '';
+    const oldest = r.oldest ? new Date(r.oldest).toLocaleDateString('th-TH', { month:'short', day:'numeric' }) : '—';
+    return `<tr>
+      <td>${thumb}<span class="desc-text">${esc(r.name || r.code || '')}</span></td>
+      <td style="color:#888;">${esc(r.brand || '—')}</td>
+      <td>${esc(ST_TH[r.status] || r.status || '—')}</td>
+      <td><span class="demand-num">${r.waiting || 0}</span></td>
+      <td style="color:#3A8A7D;">${r.notified || 0}</td>
+      <td style="white-space:nowrap;font-size:12px;color:#888;">${oldest}</td>
+    </tr>`;
+  }).join('');
+}
+
+loadData();
+loadQueue();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu && window.opsMenu.mount();</script>
+</body>
+</html>
