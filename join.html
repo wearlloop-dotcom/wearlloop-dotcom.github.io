@@ -344,11 +344,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   $('#demoNote').innerHTML = LIVE
     ? ''
-    : 'การเข้าร่วมกลุ่มต้องยืนยันตัวตนด้วย LINE — เปิดลิงก์นี้ในแอป LINE เพื่อเข้าร่วมค่ะ';
+    : NAV.t('การเข้าร่วมกลุ่มต้องยืนยันตัวตนด้วย LINE — เปิดลิงก์นี้ในแอป LINE เพื่อเข้าร่วมค่ะ','Joining a group requires LINE verification — open this link in the LINE app to join.');
 
   // ไม่มี token → empty state เป็นมิตร
   if(!TOKEN){
-    showEdge('ยังไม่มีคำเชิญ','ลิงก์นี้ไม่มีรหัสคำเชิญ — เปิดจากลิงก์ที่เพื่อนแชร์ทาง LINE เพื่อเข้าร่วมกลุ่มนะคะ');
+    showEdge(NAV.t('ยังไม่มีคำเชิญ','No invitation yet'),NAV.t('ลิงก์นี้ไม่มีรหัสคำเชิญ — เปิดจากลิงก์ที่เพื่อนแชร์ทาง LINE เพื่อเข้าร่วมกลุ่มนะคะ','This link has no invitation code — open the link your friend shared on LINE to join the group.'));
     return;
   }
 
@@ -358,25 +358,26 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       const p=unwrap(await window.API.groupInvitePreview(TOKEN));
       if(!p || p.error==='bad_token' || p.valid===false){
         if(p && (p.expired===true)){
-          showEdge('ลิงก์หมดอายุแล้ว','ลิงก์คำเชิญนี้หมดอายุแล้ว — ขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ');
+          showEdge(NAV.t('ลิงก์หมดอายุแล้ว','Link expired'),NAV.t('ลิงก์คำเชิญนี้หมดอายุแล้ว — ขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ','This invitation link has expired — ask the friend who invited you for a new one.'));
         } else {
-          showEdge('ลิงก์คำเชิญไม่ถูกต้อง','ลิงก์คำเชิญไม่ถูกต้องหรือถูกยกเลิกแล้ว ลองขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ');
+          showEdge(NAV.t('ลิงก์คำเชิญไม่ถูกต้อง','Invalid invitation link'),NAV.t('ลิงก์คำเชิญไม่ถูกต้องหรือถูกยกเลิกแล้ว ลองขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ','This invitation link is invalid or has been cancelled. Ask the friend who invited you for a new link.'));
         }
         return;
       }
       if(p.expired===true){
-        showEdge('ลิงก์หมดอายุแล้ว','ลิงก์คำเชิญนี้หมดอายุแล้ว — ขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ');
+        showEdge(NAV.t('ลิงก์หมดอายุแล้ว','Link expired'),NAV.t('ลิงก์คำเชิญนี้หมดอายุแล้ว — ขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ','This invitation link has expired — ask the friend who invited you for a new one.'));
         return;
       }
       PREVIEW=p; renderWelcome(p);
     }catch(e){
-      showEdge('เปิดคำเชิญไม่สำเร็จ','ลองใหม่อีกครั้ง หรือขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ');
+      showEdge(NAV.t('เปิดคำเชิญไม่สำเร็จ','Couldn\'t open the invitation'),NAV.t('ลองใหม่อีกครั้ง หรือขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ','Please try again, or ask the friend who invited you for a new link.'));
     }
   } else {
     // mock — โชว์ welcome ให้ reviewer เห็นดีไซน์
     PREVIEW=MOCK_PREVIEW; renderWelcome(MOCK_PREVIEW);
   }
 });
+window.addEventListener('lloop:lang', function(){ location.reload(); });
 </script>
 </body>
 </html>

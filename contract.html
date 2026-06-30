@@ -103,33 +103,34 @@
 <script src="analytics.js"></script>
 </head>
 <body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="top"><div class="mark">LLOOP</div><div class="tl">love · loop</div></div>
 
-<div id="loading" class="skel">กำลังเปิดสัญญา…</div>
-<div id="error" class="state hide"><div class="em">ไม่พบสัญญา</div><p>ลิงก์อาจหมดอายุหรือไม่ถูกต้อง — กรุณาติดต่อทีม LLOOP เพื่อขอลิงก์ใหม่ค่ะ</p></div>
+<div id="loading" class="skel" data-i18n="Opening the contract…">กำลังเปิดสัญญา…</div>
+<div id="error" class="state hide"><div class="em" data-i18n="Contract not found">ไม่พบสัญญา</div><p data-i18n="The link may have expired or be invalid — please contact the LLOOP team for a new link.">ลิงก์อาจหมดอายุหรือไม่ถูกต้อง — กรุณาติดต่อทีม LLOOP เพื่อขอลิงก์ใหม่ค่ะ</p></div>
 
 <div id="main" class="wrap hide">
   <!-- เอกสารสัญญา -->
   <div class="doc">
-    <div class="klabel">หนังสือสัญญา</div>
+    <div class="klabel" data-i18n="CONTRACT">หนังสือสัญญา</div>
     <h1 id="docTitle">สัญญาความร่วมมือพาร์ทเนอร์</h1>
-    <div class="meta">เลขที่ <b id="cNo">—</b> · สถานะ <span id="cStatusTxt">—</span></div>
+    <div class="meta"><span data-i18n="No.">เลขที่</span> <b id="cNo">—</b> · <span data-i18n="Status">สถานะ</span> <span id="cStatusTxt">—</span></div>
 
     <div class="parties">
       <div class="party">
-        <div class="role">ฝ่ายที่ 1 — ผู้ว่าจ้าง</div>
+        <div class="role" data-i18n="Party 1 — Principal">ฝ่ายที่ 1 — ผู้ว่าจ้าง</div>
         <div class="nm">LLOOP (แอลลูป)</div>
-        <div class="dt">แพลตฟอร์มเช่าชุด &amp; AI สไตลิสต์<br>“บริษัท” / “LLOOP”</div>
+        <div class="dt" data-i18n="Dress rental &amp; AI stylist platform<br>&ldquo;the Company&rdquo; / &ldquo;LLOOP&rdquo;">แพลตฟอร์มเช่าชุด &amp; AI สไตลิสต์<br>“บริษัท” / “LLOOP”</div>
       </div>
       <div class="party">
-        <div class="role">ฝ่ายที่ 2 — พาร์ทเนอร์</div>
+        <div class="role" data-i18n="Party 2 — Partner">ฝ่ายที่ 2 — พาร์ทเนอร์</div>
         <div class="nm" id="pName">—</div>
         <div class="dt" id="pDetail">—</div>
       </div>
     </div>
 
     <div class="comp">
-      <div class="ct">สรุปสาระสำคัญ</div>
+      <div class="ct" data-i18n="Key Terms Summary">สรุปสาระสำคัญ</div>
       <div id="compRows"></div>
     </div>
 
@@ -141,57 +142,57 @@
 
   <!-- โซนลงนาม -->
   <div id="signzone" class="signcard">
-    <h2>ลงนามในสัญญา</h2>
-    <div class="sub">โปรดอ่านสัญญาโดยละเอียดก่อนลงนาม การลงนามอิเล็กทรอนิกส์นี้มีผลผูกพันตามกฎหมาย</div>
+    <h2 data-i18n="Sign the contract">ลงนามในสัญญา</h2>
+    <div class="sub" data-i18n="Please read the contract carefully before signing. This electronic signature is legally binding.">โปรดอ่านสัญญาโดยละเอียดก่อนลงนาม การลงนามอิเล็กทรอนิกส์นี้มีผลผูกพันตามกฎหมาย</div>
 
-    <label>ชื่อ-นามสกุล ผู้ลงนาม</label>
-    <input type="text" id="signerName" placeholder="ชื่อ-นามสกุล ตามบัตรประชาชน">
+    <label data-i18n="Signer's full name">ชื่อ-นามสกุล ผู้ลงนาม</label>
+    <input type="text" id="signerName" placeholder="ชื่อ-นามสกุล ตามบัตรประชาชน" data-i18n-ph="Full name as shown on your ID card">
 
-    <label>เลขบัตรประชาชน / เลขผู้เสียภาษี</label>
+    <label data-i18n="ID card / Taxpayer number">เลขบัตรประชาชน / เลขผู้เสียภาษี</label>
     <input type="text" id="signerId" inputmode="numeric" placeholder="x-xxxx-xxxxx-xx-x">
 
-    <label>ลายเซ็น — เซ็นด้วยนิ้วหรือเมาส์ในกรอบด้านล่าง</label>
+    <label data-i18n="Signature — sign with your finger or mouse in the box below">ลายเซ็น — เซ็นด้วยนิ้วหรือเมาส์ในกรอบด้านล่าง</label>
     <div class="padwrap">
       <canvas id="pad"></canvas>
-      <div class="ph" id="padPh">เซ็นที่นี่</div>
+      <div class="ph" id="padPh" data-i18n="Sign here">เซ็นที่นี่</div>
     </div>
     <div class="padbar">
-      <span class="hint">ลายเซ็นจะถูกบันทึกเป็นหลักฐานพร้อมวันเวลา</span>
-      <button class="lnk" onclick="clearPad()">ล้างลายเซ็น</button>
+      <span class="hint" data-i18n="Your signature is recorded as evidence with a date and time.">ลายเซ็นจะถูกบันทึกเป็นหลักฐานพร้อมวันเวลา</span>
+      <button class="lnk" onclick="clearPad()" data-i18n="Clear signature">ล้างลายเซ็น</button>
     </div>
 
     <label class="consent">
       <input type="checkbox" id="consent">
-      <span id="consentTxt">ข้าพเจ้าได้อ่านและเข้าใจข้อความในสัญญาฉบับนี้โดยตลอดแล้ว ตกลงยอมรับและผูกพันตามเงื่อนไขทุกประการ และยินยอมให้การลงนามอิเล็กทรอนิกส์นี้มีผลสมบูรณ์เทียบเท่าการลงนามด้วยลายมือ ตามพระราชบัญญัติว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์</span>
+      <span id="consentTxt" data-i18n="I have read and understood this contract in full, agree to and am bound by all of its terms, and consent to this electronic signature having the same legal effect as a handwritten signature under the Electronic Transactions Act.">ข้าพเจ้าได้อ่านและเข้าใจข้อความในสัญญาฉบับนี้โดยตลอดแล้ว ตกลงยอมรับและผูกพันตามเงื่อนไขทุกประการ และยินยอมให้การลงนามอิเล็กทรอนิกส์นี้มีผลสมบูรณ์เทียบเท่าการลงนามด้วยลายมือ ตามพระราชบัญญัติว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์</span>
     </label>
 
-    <button class="btn go" id="signBtn" onclick="doSign()" disabled>ยอมรับและลงนาม</button>
-    <button class="btn ghost" onclick="openDecline()">ขอแก้ไข / ยังไม่ลงนาม</button>
-    <div class="note">เมื่อลงนาม ระบบจะบันทึกชื่อ ลายเซ็น วันเวลา และข้อมูลอุปกรณ์เพื่อเป็นหลักฐาน · สำเนาสัญญาจะส่งให้คุณทาง LINE</div>
+    <button class="btn go" id="signBtn" onclick="doSign()" disabled data-i18n="Accept and sign">ยอมรับและลงนาม</button>
+    <button class="btn ghost" onclick="openDecline()" data-i18n="Request changes / not signing yet">ขอแก้ไข / ยังไม่ลงนาม</button>
+    <div class="note" data-i18n="On signing, the system records your name, signature, date, time, and device information as evidence · a copy of the contract is sent to you via LINE.">เมื่อลงนาม ระบบจะบันทึกชื่อ ลายเซ็น วันเวลา และข้อมูลอุปกรณ์เพื่อเป็นหลักฐาน · สำเนาสัญญาจะส่งให้คุณทาง LINE</div>
   </div>
 
   <!-- ใบเสร็จเมื่อเซ็นแล้ว -->
   <div id="done" class="receipt hide">
-    <div class="badge signed">ลงนามเรียบร้อย</div>
-    <div class="em" style="margin-top:10px">ขอบคุณค่ะ</div>
-    <p style="color:var(--stone);font-size:14px">สัญญาเลขที่ <b id="doneNo"></b> มีผลสมบูรณ์แล้ว</p>
+    <div class="badge signed" data-i18n="Signed">ลงนามเรียบร้อย</div>
+    <div class="em" style="margin-top:10px" data-i18n="Thank you">ขอบคุณค่ะ</div>
+    <p style="color:var(--stone);font-size:14px"><span data-i18n="Contract No.">สัญญาเลขที่</span> <b id="doneNo"></b> <span data-i18n="is now in full effect">มีผลสมบูรณ์แล้ว</span></p>
     <div class="sig" id="doneSig"></div>
     <p style="font-size:13px;color:var(--stone)" id="doneMeta"></p>
     <!-- สะพานต่อ: เปิดพอร์ทัลสไตลิสต์ (เฉพาะสัญญาสไตลิสต์) -->
     <div id="donePortal" class="hide" style="margin:18px auto 0;max-width:340px;padding-top:16px;border-top:1px solid var(--hair)">
-      <p style="font-size:14px;color:var(--ink);margin-bottom:10px">ก้าวต่อไป — เริ่มบันทึกผลวิเคราะห์ให้ลูกค้าได้เลย</p>
-      <a class="btn" id="portalBtn" href="#" style="display:block;background:var(--navy);color:#fff;text-decoration:none;padding:14px;border-radius:2px;font-weight:600">เข้าพอร์ทัลสไตลิสต์</a>
-      <p style="font-size:12px;color:var(--stone);margin-top:8px">บันทึกสี/หน้า/หุ่น/สไตล์ของลูกค้าแต่ละคน ด้วยรหัสจากแอป LLOOP</p>
+      <p style="font-size:14px;color:var(--ink);margin-bottom:10px" data-i18n="Next step — start recording analyses for your customers">ก้าวต่อไป — เริ่มบันทึกผลวิเคราะห์ให้ลูกค้าได้เลย</p>
+      <a class="btn" id="portalBtn" href="#" style="display:block;background:var(--navy);color:#fff;text-decoration:none;padding:14px;border-radius:2px;font-weight:600" data-i18n="Open the stylist portal">เข้าพอร์ทัลสไตลิสต์</a>
+      <p style="font-size:12px;color:var(--stone);margin-top:8px" data-i18n="Record each customer's colour / face / body / style, using the code from the LLOOP app">บันทึกสี/หน้า/หุ่น/สไตล์ของลูกค้าแต่ละคน ด้วยรหัสจากแอป LLOOP</p>
     </div>
-    <button class="btn ghost" id="printBtn" style="max-width:280px;margin:16px auto 0" onclick="window.print()">บันทึก / พิมพ์สัญญา (PDF)</button>
+    <button class="btn ghost" id="printBtn" style="max-width:280px;margin:16px auto 0" onclick="window.print()" data-i18n="Save / print contract (PDF)">บันทึก / พิมพ์สัญญา (PDF)</button>
   </div>
 </div>
 
 <!-- แถบลงนามลอยล่าง -->
 <div id="actionbar" class="actionbar hide">
   <div class="inner">
-    <div class="st" id="abSt">เลื่อนอ่านจนจบ แล้วลงนามด้านล่าง</div>
-    <button class="b" onclick="scrollToSign()">ไปที่ลงนาม</button>
+    <div class="st" id="abSt" data-i18n="Scroll to the end, then sign below">เลื่อนอ่านจนจบ แล้วลงนามด้านล่าง</div>
+    <button class="b" onclick="scrollToSign()" data-i18n="Go to signing">ไปที่ลงนาม</button>
   </div>
 </div>
 
@@ -574,5 +575,6 @@
   }
   boot();
 </script>
+<script src="nav.js?v=1"></script>
 </body>
 </html>

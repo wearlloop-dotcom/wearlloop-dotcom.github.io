@@ -31,7 +31,7 @@
       '  font-family:var(--sans,inherit);font-size:13px;color:var(--muted,#8C8B86);text-decoration:none}',
       '.lloop-topbar .tb-back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9}',
       '.lloop-topbar .tb-back:hover{color:var(--ink,#1A1A1A)}',
-      '.lloop-topbar .tb-logo{flex:1 1 auto;text-align:center;font-family:var(--display,inherit);',
+      '.lloop-topbar .tb-logo{flex:1 1 auto;text-align:center;font-family:var(--display,var(--disp,var(--font-display,inherit)));',
       '  font-size:20px;font-weight:700;letter-spacing:1px;color:var(--ink,#1A1A1A);text-decoration:none}',
       '.lloop-topbar .tb-lang{flex:0 0 auto;display:inline-flex;border:1px solid var(--line,#E7E5E1);',
       '  border-radius:20px;overflow:hidden;background:#fff}',

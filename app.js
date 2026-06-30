@@ -119,6 +119,8 @@ function setLang(l) {
   closeDetail(); closeProfile();
   applyStatic();
   renderEvent(); renderCatnav(); renderChips(); renderDiscover(); renderFilters(); renderGrid();
+  // เมนู drawer เปิดค้างอยู่ → rebuild ให้ label เปลี่ยนภาษาทันที (ปุ่ม TH/EN อยู่ในเมนูนี้)
+  if ($('#menuOverlay')?.classList.contains('open')) openMenu();
   $('#vresult').classList.remove('show');
 }
 
@@ -973,7 +975,10 @@ async function loadLook(code, occasion) {
   const g = GARMENTS.find(x => (x.code || x.id) === code) || {};
   let look = null;
   try { look = await window.API.hairStyle?.(code, occasion); } catch (e) { /**/ }
+  const noQuota = look && look.error === 'no_quota';
   if (!look || !look.hair) look = mockLook(g);
+  // โควต้า LLOOP Atelier หมด → ยังโชว์คำแนะนำเบื้องต้นให้ แต่บอกเหตุผล
+  if (noQuota) look = { ...look, note: lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว — นี่คือคำแนะนำเบื้องต้น · เช่าชุดรับเพิ่ม 3 ครั้ง':'LLOOP Atelier quota used up — these are basic suggestions · rent for +3 more' };
   const row = (label, items) => (items && items.length)
     ? `<div class="lookrow"><span class="lk">${label}</span><div class="lv">${(Array.isArray(items) ? items : [items]).map(x => `<i>${x}</i>`).join('')}</div></div>` : '';
   box.innerHTML = `
@@ -1259,8 +1264,9 @@ function onBackupSearch(v) { _bpQuery = v; renderBackupGrid(); }
 async function aiRankBackups() {
   if (_bpRanking || !_bpPrimary || !_bpPool.length) return;
   const btn = $('#bpAiBtn');
+  const reset = () => { if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้ LLOOP Atelier ช่วยเรียงให้':'✦ Let LLOOP Atelier rank these'; } };
   _bpRanking = true;
-  if (btn) { btn.disabled = true; btn.textContent = lang ==='th'?'✦ กำลังให้สไตลิสต์เรียงให้…':'✦ stylist is ranking…'; }
+  if (btn) { btn.disabled = true; btn.textContent = lang ==='th'?'✦ LLOOP Atelier กำลังเรียงให้…':'✦ LLOOP Atelier is ranking…'; }
   const slim = g => ({
     code: g.code || g.id, name: g.name, brand: g.brand, category: g.category,
     size: g.size, price: g.price,
@@ -1268,8 +1274,13 @@ async function aiRankBackups() {
     occasion: (g.occasion_tags || []).map(occName),
   });
   try {
-    const ranked = await window.API.rankBackups(slim(_bpPrimary), _bpPool.slice(0, 24).map(slim), lang);
-    if (Array.isArray(ranked) && ranked.length) {
+    const resp = await window.API.rankBackups(slim(_bpPrimary), _bpPool.slice(0, 24).map(slim), lang) || {};
+    const ranked = Array.isArray(resp.ranked) ? resp.ranked : [];
+    if (resp.error === 'no_quota') {
+      // โควต้า LLOOP Atelier หมด → ใช้การเรียงอัตโนมัติเดิมต่อได้ ไม่เสียอะไร
+      toast(lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว — เช่าชุดเพื่อรับเพิ่ม 3 ครั้ง (ตอนนี้ใช้การเรียงอัตโนมัติให้แล้ว)':'LLOOP Atelier quota used up — rent an outfit for +3 (showing the auto-sorted order)');
+      if (btn) { btn.disabled = true; btn.textContent = lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว':'LLOOP Atelier quota used up'; }
+    } else if (ranked.length) {
       _bpWhy = {};
       const order = [];
       ranked.forEach(r => { if (r && r.code) { _bpWhy[r.code] = r.why || ''; order.push(String(r.code)); } });
@@ -1281,12 +1292,12 @@ async function aiRankBackups() {
       _bpRanked = true; _bpQuery = '';
       renderBackupPicker();
     } else {
-      toast(lang ==='th'?'สไตลิสต์ยังเรียงให้ไม่ได้ ลองใหม่อีกครั้งนะคะ':'Could not rank right now — please try again');
-      if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้ LLOOP Atelier ช่วยเรียงให้':'✦ Let LLOOP Atelier rank these'; }
+      toast(lang ==='th'?'LLOOP Atelier ยังเรียงให้ไม่ได้ ลองใหม่อีกครั้งนะคะ':'Could not rank right now — please try again');
+      reset();
     }
   } catch (e) {
-    toast(lang ==='th'?'เชื่อมต่อสไตลิสต์ไม่ได้ ลองใหม่นะคะ':'Stylist unavailable — please try again');
-    if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้ LLOOP Atelier ช่วยเรียงให้':'✦ Let LLOOP Atelier rank these'; }
+    toast(lang ==='th'?'เชื่อมต่อ LLOOP Atelier ไม่ได้ ลองใหม่นะคะ':'LLOOP Atelier unavailable — please try again');
+    reset();
   }
   _bpRanking = false;
 }

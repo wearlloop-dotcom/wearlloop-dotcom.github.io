@@ -225,9 +225,9 @@ window.API = (function () {
 
   // AI Stylist — วิเคราะห์สถานที่ (จาก Google Place) + personal ลูกค้า + คลังจริง → แนะนำชุดเป็นตัว ๆ
   // payload: { venue, place?:{name,types[],price_level,lat,lng}, occasion? }
-  // AI สไตลิสต์จัดอันดับชุดสำรอง (on-demand, ไม่กินโควต้า) → คืน [{code, why}] เรียงดีสุดก่อน
+  // LLOOP Atelier จัดอันดับชุดสำรอง (on-demand, หักโควต้า 1) → { ok, ranked:[{code,why}], remaining, error? }
   async function rankBackups(primary, candidates, lang) {
-    if (CONFIG.USE_MOCK || !primary || !Array.isArray(candidates) || !candidates.length) return [];
+    if (CONFIG.USE_MOCK || !primary || !Array.isArray(candidates) || !candidates.length) return { ok:false, ranked:[] };
     let idToken = null;
     try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (_e) {}
     try {
@@ -237,8 +237,8 @@ window.API = (function () {
         body: JSON.stringify({ id_token: idToken, primary, candidates, lang }),
       });
       const j = await r.json().catch(() => ({}));
-      return (j && j.ok && Array.isArray(j.ranked)) ? j.ranked : [];
-    } catch (_e) { return []; }
+      return (j && typeof j === 'object') ? j : { ok:false, ranked:[], error:'network' };
+    } catch (_e) { return { ok:false, ranked:[], error:'network' }; }
   }
 
   async function stylist(payload, lang) {
@@ -365,13 +365,16 @@ window.API = (function () {
   // AI ครบลุค — ทรงผม/เครื่องประดับที่เข้ากับชุด (prod = Edge Function, ไม่งั้น mock)
   async function hairStyle(garmentCode, occasion) {
     if (!CONFIG.USE_MOCK) {
+      let idToken = null;
+      try { idToken = window.liff && liff.getIDToken && liff.getIDToken(); } catch (_e) {}
       try {
         const r = await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/hair-style`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${CONFIG.SUPABASE_ANON_KEY}` },
-          body: JSON.stringify({ garment_code: garmentCode, occasion, lang: 'th' }),
+          body: JSON.stringify({ id_token: idToken, garment_code: garmentCode, occasion, lang: 'th' }),
         });
-        if (r.ok) { const d = await r.json(); if (d && d.hair) return d; }
+        const d = await r.json().catch(() => null);
+        if (d) return d; // { hair,... , remaining } หรือ { error:'no_quota' } → ให้ UI ตัดสินใจ
       } catch (e) { /* ตกไป mock */ }
     }
     return null; // ให้ฝั่ง UI ใช้ mock เอง
