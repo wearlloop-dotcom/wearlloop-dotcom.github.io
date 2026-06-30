@@ -838,6 +838,34 @@ async function loadRecommendWith(code) {
     + `<div class="recorow">${items.map(gThumb).join('')}</div>`;
 }
 
+// ===== Personal rails บนหน้าแรก (Shopee/Lazada-style) =====
+//   1) "ดูล่าสุด" (Recently viewed) — จาก behavior_events รายคน
+//   2) "เพราะคุณดู X" — collaborative (recommendWith) ของชุดที่เพิ่งดูล่าสุด
+let gRecentViewed = [];   // [{code,last_ts}] โหลดตอน init (login แล้วเท่านั้น)
+async function renderPersonalRail() {
+  const el = $('#personalRail'); if (!el) return;
+  const th = lang === 'th';
+  const codes = gRecentViewed.map(r => r.code);
+  const recent = codes.map(c => GARMENTS.find(g => (g.code || '') === c)).filter(Boolean);
+  let html = '';
+  if (recent.length >= 2) {   // โชว์เมื่อมีของจริงพอเป็นแถว
+    html += `<div class="sec">${th ? 'ดูล่าสุด' : 'Recently viewed'}</div>`
+          + `<div class="recorow">${recent.map(gThumb).join('')}</div>`;
+  }
+  // "เพราะคุณดู X" — อิงชุดที่เพิ่งดูล่าสุดสุด
+  const seed = recent[0];
+  if (seed) {
+    let recs = []; try { recs = await window.API.recommendWith?.(seed.code, 8) || []; } catch (e) { /**/ }
+    const items = recs.map(r => GARMENTS.find(g => (g.code || '') === r.code))
+                      .filter(g => g && g.code !== seed.code);
+    if (items.length >= 2) {
+      html += `<div class="sec">${th ? `เพราะคุณดู ${esc(seed.name || '')}` : `Because you viewed ${esc(seed.name || '')}`}</div>`
+            + `<div class="recorow">${items.slice(0, 10).map(gThumb).join('')}</div>`;
+    }
+  }
+  el.innerHTML = html;
+}
+
 // ปฏิทินว่าง/ไม่ว่างของชุด (2 เดือน) — แตะวันว่างเพื่อเลือก
 async function renderAvailCalendar(garmentId) {
   const box = $('#availcal'); if (!box) return;
@@ -1656,6 +1684,7 @@ function openMenu() {
     <div class="msec">
       <div class="ml">${en ? 'Discover' : 'ค้นพบ'}</div>
       ${item(I.foryou, en ? 'For you' : 'แนะนำเฉพาะคุณ', 'if(!fForYou)toggleForYou()')}
+      ${signedIn ? item(I.foryou, en ? 'What you love' : 'สิ่งที่คุณชอบ', 'openTaste()') : ''}
       ${item(I.stylist, en ? 'What to wear? — card game' : 'งานนี้ใส่อะไรดี — เพื่อนสาวช่วยเลือก', "location.href='quiz.html'")}
       ${item(I.stylist, en ? 'AI stylist by venue' : 'AI สไตลิสต์ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
@@ -3300,9 +3329,11 @@ async function boot() {
     // แนะนำเฉพาะบุคคล (collaborative — "คนเหมือนคุณเช่า") → ดันขึ้นบนสุดในแท็บ "แนะนำสำหรับคุณ"
     gPersonalRecs = (await window.API.recommendPersonal?.(8) || []).map(r => r.code).filter(Boolean);
     CUSTOMER._taste = await window.API.myTaste?.();  // รสนิยมที่เรียนจากพฤติกรรม → ใช้ใน personalScore
+    gRecentViewed = await window.API.myRecentlyViewed?.(12) || [];  // "ดูล่าสุด" (Shopee-style)
   } catch (e) { /**/ } }
   loadCart(); renderCartBtn();   // กู้ตะกร้าที่ค้างไว้ (กัน refresh แล้วของหาย)
   renderEvent(); renderCatnav(); renderChips(); renderDiscover(); renderFilters(); renderDatebar(); renderGrid();
+  renderPersonalRail();   // "ดูล่าสุด" + "เพราะคุณดู X" (เงียบถ้ายังไม่มีข้อมูล)
   if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
   const vd = $('#venueDate'); if (vd) { vd.min = todayStr(); vd.value = gUseDate || ''; }
   refreshStylistQuota();
