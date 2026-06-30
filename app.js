@@ -285,7 +285,7 @@ function _hexHSL(hex){ let h=String(hex||'').replace('#',''); if(h.length===3) h
   if(mx!==mn){const d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn); hue=mx===r?((g-b)/d+(g<b?6:0)):mx===g?(b-r)/d+2:(r-g)/d+4; hue*=60;}
   return {h:hue,s,l}; }
 function classifyHex(hex){ const c=_hexHSL(hex); if(!c) return 'cream'; const {h,s,l}=c;
-  if(l>=0.85) return 'cream'; if(l<=0.16) return 'black'; if(s<=0.12) return 'grey';
+  if(l>=0.85) return 'cream'; if(l<=0.22) return 'black'; if(s<=0.12) return 'grey';
   if(h>=15&&h<=50&&s<=0.5&&l<=0.6) return 'brown';
   if(h<15||h>=330) return (s<0.5||l>0.62)?'pink':'red';
   if(h<45) return 'peach'; if(h<68) return 'yellow'; if(h<165) return 'green';
