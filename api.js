@@ -274,9 +274,11 @@ window.API = (function () {
     return new Set((data || []).map(x => (x && x.id) ? x.id : x));
   }
   // ช่วงวันที่ถูกจองของชุด (สำหรับปฏิทินในรายละเอียด)
-  async function bookedRanges(garmentId) {
+  async function bookedRanges(garmentId, exclRentalId) {
     if (CONFIG.USE_MOCK) return [];
-    const { data } = await client().rpc('garment_booked_ranges', { p_garment: garmentId });
+    const args = { p_garment: garmentId };
+    if (exclRentalId) args.p_excl = exclRentalId;  // ปฏิทินเลื่อนวัน: ไม่นับคิวของตัวเอง
+    const { data } = await client().rpc('garment_booked_ranges', args);
     return data || [];
   }
   // จองตามช่วงวัน (กันจองชนวันเดียวกัน)

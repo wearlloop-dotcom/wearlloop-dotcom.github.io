@@ -591,7 +591,46 @@
   .ocard .oactions{display:flex;gap:8px;margin-top:12px}
   .ocard .obtn{flex:1;background:var(--ink);color:#fff;border:none;padding:10px;font-size:12px;letter-spacing:.5px;border-radius:6px;font-family:var(--sans);font-weight:500}
   .ocard .obtn.ghost{background:#fff;color:#3B362C;border:1px solid #E2D6BF}
+  /* ===== ปฏิทินออเดอร์ ===== */
+  .ocal{background:#fff;border:1px solid #EADFCB;border-radius:8px;padding:14px 14px 16px;margin-bottom:18px;box-shadow:0 2px 10px rgba(80,64,38,.06)}
+  .ocal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .ocal-title{font-family:var(--display);font-size:15px;font-weight:600;color:#3B362C}
+  .ocal-nav{width:30px;height:30px;border:1px solid #E2D6BF;background:#FBF7EE;border-radius:50%;color:#7C7361;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+  .ocal-nav:active{background:#EFE6D4}
+  .ocal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .ocal-dow{margin-bottom:4px}
+  .ocal-cell{position:relative;min-height:46px;border-radius:6px;display:flex;flex-direction:column;align-items:center;padding:5px 2px 3px;overflow:hidden}
+  .ocal-cell.dow{min-height:0;padding:0 0 2px;font-size:10px;letter-spacing:.3px;color:#A39472}
+  .ocal-cell.empty{background:transparent}
+  .ocal-cell .ocal-d{font-size:12px;color:#6B6452;font-variant-numeric:tabular-nums}
+  .ocal-cell.today{outline:1px solid #C9A86A;outline-offset:-1px}
+  .ocal-cell.has{background:#F4EEE1;cursor:pointer;transition:transform .12s ease, background .15s ease}
+  .ocal-cell.has:active{transform:scale(.94)}
+  .ocal-cell.has .ocal-d{color:#3B362C;font-weight:600}
+  .ocal-cell .ocal-tag{margin-top:2px;font-size:8.5px;line-height:1.15;color:#8A7A5E;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  /* ===== agenda รายวัน ===== */
+  .oday{margin-bottom:22px;scroll-margin-top:14px}
+  .oday-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:0 2px 10px;border-bottom:1px solid #EADFCB;margin-bottom:14px}
+  .oday-date{font-family:var(--display);font-size:16px;font-weight:600;color:#3B362C}
+  .oday-meta{font-size:11.5px;color:#A39472;white-space:nowrap}
+  .oday-flash{animation:odayFlash 1.5s ease}
+  @keyframes odayFlash{0%,100%{background:transparent}18%{background:#FBF3E2}}
+  /* ===== ชุดสำรอง เปิด/ปิด ===== */
+  .ocard .ospares{margin-top:12px;padding:0;background:#FAF5EA;border:1px dashed #E2D6BF;border-radius:6px;overflow:hidden}
+  .ocard .ospares-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;background:none;border:none;padding:11px 12px;cursor:pointer;font-family:var(--sans);font-size:12px;letter-spacing:.4px;color:#8A7A5E;text-align:left}
+  .ocard .ospares-caret{font-size:11px;color:#A39472;transition:transform .18s ease}
+  .ocard .ospares-body{padding:0 12px 12px}
+  .ocard .ospares-body .ospare{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+  .ocard .ospares-why{font-size:11.5px;color:#8A7A5E;line-height:1.5;margin-top:6px}
   /* ===== ฟอร์มรีวิว ===== */
+  #reschedSheet{padding:24px 22px 28px;position:relative;background:#FBF7EE}
+  .rsd-head{font-family:var(--display);font-size:19px;font-weight:600;color:#3B362C}
+  .rsd-name{font-size:13px;color:#7C7361;margin:2px 0 4px}
+  .rsd-hint{font-size:12px;color:#A39472;line-height:1.5;margin-bottom:14px}
+  .rsd-cal{display:flex;flex-wrap:wrap;gap:18px}
+  .rsd-sum{margin-top:14px;font-size:13px;color:#4A4438;background:var(--sage-bg);border:1px solid var(--sage);border-radius:8px;padding:10px 12px}
+  .rsd-sum i{color:#7C7361;font-style:normal}
+  .rvsubmit:disabled{opacity:.4}
   #reviewSheet{padding:24px 22px 28px;position:relative;background:#FBF7EE}
   .rvhead{font-family:var(--display);font-size:19px;font-weight:600;color:#3B362C}
   .rvname{font-size:13px;color:#7C7361;margin:2px 0 14px}
@@ -955,6 +994,7 @@
 <div class="overlay" id="ordersOverlay"><div class="sheet" id="ordersSheet"></div></div>
 <div class="overlay" id="memberOverlay"><div class="sheet" id="memberSheet"></div></div>
 <div class="overlay" id="reviewOverlay"><div class="sheet" id="reviewSheet"></div></div>
+<div class="overlay" id="reschedOverlay"><div class="sheet" id="reschedSheet"></div></div>
 <div class="overlay" id="kycOverlay"><div class="sheet" id="kycSheet"></div></div>
 <div class="overlay" id="cartOverlay"><div class="sheet" id="cartSheet"></div></div>
 <button class="cartfab" id="cartFab" style="display:none" onclick="openCart()"><span>ตะกร้า</span><i id="cartCount">0</i></button>

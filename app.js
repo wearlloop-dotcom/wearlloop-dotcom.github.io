@@ -2155,7 +2155,13 @@ async function openOrders() {
   renderOrders(rentals);
 }
 function closeOrders() { $('#ordersOverlay').classList.remove('open'); document.body.style.overflow =''; }
+let _myRentals = [];
+// state ของปฏิทิน + agenda (ให้ปุ่มเปลี่ยนเดือน/แตะวัน เรนเดอร์ซ้ำได้)
+let _ordersData = null;
+function _pad2(n) { return String(n).padStart(2, '0'); }
+function _ymdKey(y, m, d) { return `${y}-${_pad2(m + 1)}-${_pad2(d)}`; }
 function renderOrders(rentals) {
+  _myRentals = rentals || [];
   const body = $('#ordersBody'); if (!body) return;
   if (!rentals.length) {
     body.innerHTML =`<div class="oempty">${lang ==='th'?'ยังไม่มีออเดอร์ — เลือกชุดที่ถูกใจแล้วเริ่มลุคแรกของคุณได้เลย':'No rentals yet — pick a look you love to begin'}</div>`;
@@ -2166,11 +2172,96 @@ function renderOrders(rentals) {
   const spares = rentals.filter(r => (r.role || 'primary') === 'backup');
   const sparesByPrimary = {};
   spares.forEach(s => { (sparesByPrimary[s.primary_rental_id] = sparesByPrimary[s.primary_rental_id] || []).push(s); });
-  // ชุดสำรองที่หาชุดหลักไม่เจอ (เช่นชุดหลักถูกลบ) → แสดงเดี่ยว ๆ ท้ายสุด
+  // ชุดสำรองที่หาชุดหลักไม่เจอ (เช่นชุดหลักถูกลบ) → แสดงเดี่ยว ๆ ตามวันของมันเอง
   const orphanSpares = spares.filter(s => !primaries.some(p => p.rental_id === s.primary_rental_id));
-  const cards = primaries.map(r => orderCard(r, (sparesByPrimary[r.rental_id] || []))).join('');
-  const orphans = orphanSpares.map(r => orderCard(r, [])).join('');
-  body.innerHTML = cards + orphans;
+  // จับกลุ่มชุดหลัก (+ สำรองกำพร้า) ตามวันที่ใช้ → ปฏิทิน + agenda รายวัน
+  const byDate = {};
+  const push = r => { const k = r.use_date || 'nodate'; (byDate[k] = byDate[k] || []).push(r); };
+  primaries.forEach(push); orphanSpares.forEach(push);
+  const nodate = byDate['nodate'] || []; delete byDate['nodate'];
+  const allDates = Object.keys(byDate).sort();
+  // เรียง agenda: วันที่กำลังจะถึง (ใกล้→ไกล) ก่อน แล้วตามด้วยวันที่ผ่านมา (ใหม่→เก่า)
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const isPast = d => new Date(d + 'T00:00:00') < today;
+  const upcoming = allDates.filter(d => !isPast(d));
+  const past = allDates.filter(isPast).reverse();
+  const ordered = upcoming.concat(past);
+  // เดือนเริ่มต้นของปฏิทิน = เดือนของวันใกล้ที่สุดที่กำลังจะถึง (ไม่มีก็เดือนล่าสุด/เดือนนี้)
+  const pick = upcoming[0] || (allDates.length ? allDates[allDates.length - 1] : null);
+  const anchor = pick ? new Date(pick + 'T00:00:00') : today;
+  _ordersData = { sparesByPrimary, byDate, ordered, nodate, calY: anchor.getFullYear(), calM: anchor.getMonth() };
+  drawOrders();
+}
+function drawOrders() {
+  const body = $('#ordersBody'); if (!body || !_ordersData) return;
+  const { byDate, ordered, nodate, sparesByPrimary } = _ordersData;
+  const agenda = ordered.map(d => orderDayBlock(d, byDate[d])).join('');
+  const nod = nodate.length ? `<div class="oday" id="day-nodate">
+      <div class="oday-h"><div class="oday-date">${lang ==='th'?'ยังไม่ระบุวัน':'No date yet'}</div></div>
+      ${nodate.map(r => orderCard(r, sparesByPrimary[r.rental_id] || [])).join('')}
+    </div>` : '';
+  body.innerHTML = ordersCalendar() + `<div class="oagenda">${agenda}${nod}</div>`;
+}
+function ordersCalendar() {
+  const { byDate, calY, calM } = _ordersData;
+  const th = lang === 'th';
+  const months = th ? ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']
+    : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dow = th ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const startDow = new Date(calY, calM, 1).getDay();
+  const daysIn = new Date(calY, calM + 1, 0).getDate();
+  const now = new Date(); const todayKey = _ymdKey(now.getFullYear(), now.getMonth(), now.getDate());
+  let cells = '';
+  for (let i = 0; i < startDow; i++) cells += '<div class="ocal-cell empty"></div>';
+  for (let d = 1; d <= daysIn; d++) {
+    const key = _ymdKey(calY, calM, d);
+    const rows = byDate[key];
+    const has = !!(rows && rows.length);
+    // ชื่อชุดหลักตัวแรกของวันนั้น เป็น caption ใต้เลขวันที่
+    const label = has ? ((rows.find(r => (r.role || 'primary') !== 'backup') || rows[0]).name || '') : '';
+    cells += `<div class="ocal-cell${has ? ' has' : ''}${key === todayKey ? ' today' : ''}"${has ? ` onclick="ordersJump('${key}')"` : ''}>
+      <span class="ocal-d">${d}</span>${has ? `<span class="ocal-tag">${label}</span>` : ''}</div>`;
+  }
+  const yr = th ? calY + 543 : calY;
+  return `<div class="ocal">
+    <div class="ocal-head">
+      <button class="ocal-nav" onclick="ordersCalNav(-1)" aria-label="prev">‹</button>
+      <div class="ocal-title">${months[calM]} ${yr}</div>
+      <button class="ocal-nav" onclick="ordersCalNav(1)" aria-label="next">›</button>
+    </div>
+    <div class="ocal-grid ocal-dow">${dow.map(x => `<div class="ocal-cell dow">${x}</div>`).join('')}</div>
+    <div class="ocal-grid">${cells}</div>
+  </div>`;
+}
+function ordersCalNav(delta) {
+  if (!_ordersData) return;
+  let m = _ordersData.calM + delta, y = _ordersData.calY;
+  if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; }
+  _ordersData.calM = m; _ordersData.calY = y;
+  drawOrders();
+}
+function ordersJump(key) {
+  // วันนั้นคนละเดือนกับปฏิทิน → เด้งปฏิทินไปเดือนนั้นก่อน
+  const m = parseInt(key.slice(5, 7), 10) - 1, y = parseInt(key.slice(0, 4), 10);
+  if (_ordersData && (m !== _ordersData.calM || y !== _ordersData.calY)) { _ordersData.calM = m; _ordersData.calY = y; drawOrders(); }
+  const el = document.getElementById('day-' + key); if (!el) return;
+  el.scrollIntoView({ behavior:'smooth', block:'start' });
+  el.classList.add('oday-flash'); setTimeout(() => el.classList.remove('oday-flash'), 1500);
+}
+// บล็อกรายวัน: หัววันที่ + ลุคของวันนั้น (ชุดหลัก พร้อมชุดสำรองแบบเปิด/ปิด)
+function orderDayBlock(dateKey, rows) {
+  const th = lang === 'th';
+  const d = new Date(dateKey + 'T00:00:00');
+  const wd = d.toLocaleDateString(th ? 'th-TH' : 'en-GB', { weekday:'long' });
+  const dnum = d.toLocaleDateString(th ? 'th-TH' : 'en-GB', { day:'numeric', month:'long' });
+  const cards = rows.map(r => orderCard(r, _ordersData.sparesByPrimary[r.rental_id] || [])).join('');
+  return `<div class="oday" id="day-${dateKey}">
+    <div class="oday-h">
+      <div class="oday-date">${dnum}</div>
+      <div class="oday-meta">${wd} · ${rows.length} ${th ? 'ลุค' : 'looks'}</div>
+    </div>
+    ${cards}
+  </div>`;
 }
 function orderCard(r, spareList) {
   const isSpare = (r.role || 'primary') === 'backup';
@@ -2198,14 +2289,20 @@ function orderCard(r, spareList) {
   const extendB = canExtend ?`<button class="obtn ghost" onclick="orderExtend('${r.rental_id}')">${lang ==='th'?'ต่อเวลา':'Extend'}</button>`:'';
   const cancelB = canCancelResched ?`<button class="obtn ghost" onclick="orderCancel('${r.rental_id}')">${lang ==='th'?'ยกเลิก':'Cancel'}</button>`:'';
   const actions = isSpare ? '' : `<div class="oactions">${reRent}${reschedB}${extendB}${cancelB}${review}</div>`;
-  // กล่องชุดสำรองที่ซ้อนใต้ชุดหลัก + อธิบายว่าเตรียมไว้เผื่ออะไร
+  // ชุดสำรองของวันนี้ — เปิด/ปิดเรียกดูได้ (ไม่รก แต่กดดูได้ว่าเตรียมตัวไหนไว้)
+  const spId = 'sp-' + r.rental_id;
   const sparesBox = (spareList && spareList.length) ? `
     <div class="ospares">
-      <div class="ospares-h">${lang==='th'?'ชุดสำรองเผื่อไว้ให้':'Spare(s) on standby'}</div>
-      ${spareList.map(s => `<div class="ospare"><span class="othumb sm" style="${orderThumb(s)}"></span><span class="osp-name">${s.name||'—'}</span></div>`).join('')}
-      <div class="ospares-why">${lang==='th'
-        ? 'ถ้าชุดหลักมีเหตุไม่พร้อมจริง ๆ (เช่น ผู้เช่าก่อนหน้าทำเสียหาย) เราสลับตัวสำรองให้ทันที ไม่มีค่าใช้จ่ายเพิ่ม'
-        : 'If your main piece can’t make it (e.g. damaged by a prior renter), we swap in a spare right away at no extra cost.'}</div>
+      <button type="button" class="ospares-toggle" onclick="toggleSpares('${spId}')">
+        <span>${lang==='th'?`ชุดสำรองวันนี้ · ${spareList.length} ตัว`:`Spare looks today · ${spareList.length}`}</span>
+        <span class="ospares-caret" id="${spId}-caret">▾</span>
+      </button>
+      <div class="ospares-body" id="${spId}" hidden>
+        ${spareList.map(s => `<div class="ospare"><span class="othumb sm" style="${orderThumb(s)}"></span><span class="osp-name">${s.name||'—'}</span></div>`).join('')}
+        <div class="ospares-why">${lang==='th'
+          ? 'ถ้าชุดหลักมีเหตุไม่พร้อมจริง ๆ (เช่น ผู้เช่าก่อนหน้าทำเสียหาย) เราสลับตัวสำรองให้ทันที ไม่มีค่าใช้จ่ายเพิ่ม'
+          : 'If your main piece can’t make it (e.g. damaged by a prior renter), we swap in a spare right away at no extra cost.'}</div>
+      </div>
     </div>` : '';
   return`<div class="ocard${isSpare?' ocard-spare':''}">
     <div class="otop">
@@ -2223,6 +2320,13 @@ function orderCard(r, spareList) {
     ${sparesBox}
     ${actions}
   </div>`;
+}
+function toggleSpares(id) {
+  const el = document.getElementById(id); if (!el) return;
+  const caret = document.getElementById(id + '-caret');
+  const opening = el.hasAttribute('hidden');
+  if (opening) { el.removeAttribute('hidden'); if (caret) caret.style.transform = 'rotate(180deg)'; }
+  else { el.setAttribute('hidden', ''); if (caret) caret.style.transform = ''; }
 }
 // ===== ยกเลิก / เลื่อน / ต่อเวลา (ลูกค้าทำเอง — ผ่าน gateway ที่เช็ค ownership) =====
 function _isYmd(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s); }
@@ -2267,21 +2371,89 @@ async function orderExtend(rentalId) {
   if (!res || !res.ok) { toast(lang ==='th'?'ต่อเวลาไม่สำเร็จค่ะ':'Extend failed'); return; }
   toast(lang ==='th'?'ต่อเวลาเรียบร้อยค่ะ':'Extended'); openOrders();
 }
+// ===== เลื่อนวัน — เลือกจากปฏิทินว่าง/ไม่ว่าง (แทนการพิมพ์วันเอง) =====
+let _resched = null;  // { rentalId, garmentId, span, booked:Set, pick }
+function _ymdLocal(dt) { return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; }
+function _addDays(ds, n) { const d = new Date(ds +'T00:00:00'); d.setDate(d.getDate()+n); return _ymdLocal(d); }
 async function orderReschedule(rentalId) {
   if (!rentalId) return;
-  const from = (prompt(lang ==='th'?'วันรับชุดใหม่? (รูปแบบ 2026-08-15)':'New use date? (YYYY-MM-DD)')||'').trim();
-  if (!from) return;
-  const to = (prompt(lang ==='th'?'วันคืนชุดใหม่? (รูปแบบ 2026-08-20)':'New return date? (YYYY-MM-DD)')||'').trim();
-  if (!to) return;
-  if (!_isYmd(from) || !_isYmd(to)) { toast(lang ==='th'?'รูปแบบวันที่ไม่ถูกต้องค่ะ':'Invalid date'); return; }
-  const res = await window.API.rescheduleRental(rentalId, from, to);
+  const r = _myRentals.find(x => x.rental_id === rentalId);
+  if (!r || !r.garment_id) { toast(lang ==='th'?'เปิดข้อมูลชุดไม่ได้ ลองรีเฟรชนะคะ':'Cannot load this piece'); return; }
+  // ระยะเวลาเดิม (วันคืน − วันรับ) คงไว้ → เลือกแค่วันรับใหม่ ระบบเลื่อนวันคืนให้เอง
+  const span = (r.use_date && r.due_at)
+    ? Math.max(0, Math.round((new Date(r.due_at+'T00:00:00') - new Date(r.use_date+'T00:00:00'))/86400000))
+    : Math.max(0, (r.rent_days||1) - 1);
+  let ranges = [];
+  try { ranges = await window.API.bookedRanges(r.garment_id, rentalId) || []; } catch (e) { /**/ }
+  const booked = new Set();
+  ranges.forEach(x => { let d = new Date(x.from_date+'T00:00:00'); const end = new Date(x.to_date+'T00:00:00');
+    for (; d <= end; d.setDate(d.getDate()+1)) booked.add(_ymdLocal(d)); });
+  _resched = { rentalId, garmentId: r.garment_id, name: r.name, span, booked, pick: null };
+  _renderResched();
+  $('#reschedOverlay').classList.add('open'); document.body.style.overflow ='hidden';
+  $('#reschedSheet').scrollTop = 0;
+}
+// ช่วง [from, from+span] ว่างทั้งช่วงไหม (ไม่ชนวันไม่ว่าง)
+function _spanFree(from) {
+  for (let i = 0; i <= _resched.span; i++) if (_resched.booked.has(_addDays(from, i))) return false;
+  return true;
+}
+function _renderResched() {
+  const th = lang ==='th', S = _resched;
+  const today = new Date(todayStr()+'T00:00:00');
+  const dow = th ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['S','M','T','W','T','F','S'];
+  let cal = '';
+  for (let mo = 0; mo < 3; mo++) {
+    const base = new Date(today.getFullYear(), today.getMonth()+mo, 1);
+    const monthName = base.toLocaleDateString(th?'th-TH':'en-US', { month:'long', year:'2-digit' });
+    const first = base.getDay(), days = new Date(base.getFullYear(), base.getMonth()+1, 0).getDate();
+    let cells = dow.map(d => `<span class="cdow">${d}</span>`).join('');
+    for (let i = 0; i < first; i++) cells += `<span></span>`;
+    for (let dn = 1; dn <= days; dn++) {
+      const ds = `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-${String(dn).padStart(2,'0')}`;
+      const past = new Date(ds+'T00:00:00') < today;
+      const ok = !past && _spanFree(ds);                  // วันเริ่มที่จองทั้งช่วงได้
+      const inSel = S.pick && ds >= S.pick && ds <= _addDays(S.pick, S.span);
+      const cls = past ? 'past' : ok ? 'free' : 'bk';
+      const onclick = ok ? ` onclick="pickReschedDate('${ds}')"` : '';
+      cells += `<span class="cday ${cls} ${inSel?'sel':''}"${onclick}>${dn}</span>`;
+    }
+    cal += `<div class="calmonth"><div class="calhd">${monthName}</div><div class="calgrid">${cells}</div></div>`;
+  }
+  let summary = '';
+  if (S.pick) {
+    const to = _addDays(S.pick, S.span);
+    summary = `<div class="rsd-sum">${th?'รับ':'Use'} <b>${fmtDate(S.pick)}</b> · ${th?'คืน':'Return'} <b>${fmtDate(to)}</b> <i>(${S.span+1} ${th?'วัน':'days'})</i></div>`;
+  }
+  $('#reschedSheet').innerHTML = `
+    <button class="close" onclick="closeResched()">×</button>
+    <div class="rsd-head">${th?'เลื่อนวันเช่า':'Reschedule'}</div>
+    <div class="rsd-name">${S.name||''}</div>
+    <div class="rsd-hint">${th?'เลือกวันรับใหม่จากวันที่ว่าง — ระบบเลื่อนวันคืนให้อัตโนมัติ':'Pick a new start date from the free days — return date moves automatically'}</div>
+    <div class="rsd-cal">${cal}</div>
+    <div class="callegend"><span><i class="lfree"></i>${th?'ว่าง':'free'}</span><span><i class="lbk"></i>${th?'ไม่ว่าง':'booked'}</span></div>
+    <div class="calnote">${th?'วันไม่ว่างรวมเวลาส่ง+ซัก+รีดของชุดด้วย เพื่อให้คุณได้ชุดสะอาดตรงวัน':'Booked days include shipping + cleaning time'}</div>
+    ${summary}
+    <button class="rvsubmit" id="rsdGo" ${S.pick?'':'disabled'} onclick="confirmResched()">${th?'ยืนยันเลื่อนวัน':'Confirm reschedule'}</button>`;
+}
+function pickReschedDate(ds) { _resched.pick = ds; _renderResched(); }
+function closeResched() { $('#reschedOverlay').classList.remove('open'); document.body.style.overflow =''; _resched = null; }
+async function confirmResched() {
+  if (!_resched || !_resched.pick) return;
+  const { rentalId, pick, span } = _resched;
+  const to = _addDays(pick, span);
+  const btn = $('#rsdGo'); if (btn) { btn.disabled = true; btn.textContent = lang ==='th'?'กำลังเลื่อน…':'Rescheduling…'; }
+  const res = await window.API.rescheduleRental(rentalId, pick, to);
   if (!res || !res.ok) {
     const er = res && res.error;
     const m = er ==='limit_reached'?(lang ==='th'?'เลื่อนครบจำนวนครั้งที่กำหนดแล้วค่ะ':'Reschedule limit reached')
-      : (er ==='date_unavailable'|| er ==='new_garment_unavailable')?(lang ==='th'?'ชุดไม่ว่างในวันที่เลือกค่ะ':'Not available')
+      : (er ==='date_unavailable'|| er ==='new_garment_unavailable')?(lang ==='th'?'ชุดเพิ่งถูกจองวันนั้นพอดี ลองวันอื่นนะคะ':'Just got booked — try another date')
       : (lang ==='th'?'เลื่อนไม่สำเร็จค่ะ':'Reschedule failed');
-    toast(m); return;
+    toast(m);
+    if (er ==='date_unavailable'|| er ==='new_garment_unavailable') { return orderReschedule(rentalId); }  // โหลดปฏิทินใหม่
+    closeResched(); return;
   }
+  closeResched();
   const xtra = (res.fee||0) + (res.extra_charge||0);
   toast(lang ==='th'?(xtra>0?`เลื่อนแล้ว · เก็บเพิ่ม ฿${xtra} (รอชำระ)`:'เลื่อนวันให้แล้ว ฟรีค่ะ'):(xtra>0?`Rescheduled · +฿${xtra}`:'Rescheduled')); openOrders();
 }
