@@ -170,7 +170,7 @@
   }
 
   try{
-    if(!C.SUPABASE_URL || !window.supabase){ grid.innerHTML = '<div class="loading">ตั้งค่า config.js ก่อน</div>'; return; }
+    if(!C.SUPABASE_URL || !window.supabase){ grid.innerHTML = `<div class="loading">${NAV.t('ตั้งค่า config.js ก่อน','Configure config.js first')}</div>`; return; }
     const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
     const { data, error } = await sb.from('garments')
       .select('id,code,name,rate_1d,rental_price,photos,status,color_name,times_rented')
@@ -180,10 +180,12 @@
     if(error) throw error;
     grid.innerHTML = (data && data.length)
       ? data.map(card).join('')
-      : '<div class="loading">ยังไม่มีชุดพร้อมเช่า</div>';
+      : `<div class="loading">${NAV.t('ยังไม่มีชุดพร้อมเช่า','No pieces available to rent yet')}</div>`;
   }catch(e){
-    grid.innerHTML = '<div class="loading">โหลดชุดไม่สำเร็จ</div>';
+    grid.innerHTML = `<div class="loading">${NAV.t('โหลดชุดไม่สำเร็จ','Couldn’t load pieces')}</div>`;
   }
+
+  window.addEventListener('lloop:lang', function(){ location.reload(); });
 })();
 </script>
 </body>

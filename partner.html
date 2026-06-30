@@ -959,7 +959,11 @@
     document.documentElement.lang=plang;
     const th=$('thBtn'), en=$('enBtn'); if(th)th.classList.toggle('on',plang!=='en'); if(en)en.classList.toggle('on',plang==='en');
   }
-  function setPLang(l){ plang=l; localStorage.setItem('partnerLang',l); applyLang(); }
+  function setPLang(l){ plang=l; localStorage.setItem('partnerLang',l); applyLang();
+    // sync แถบ topbar ร่วม (กัน recursion ผ่าน _syncingLang)
+    if(!_syncingLang && window.NAV && NAV.lang!==l){ _syncingLang=true; try{ NAV.setLang(l); }catch(e){} _syncingLang=false; } }
+  // แถบ topbar ร่วมสลับภาษา → ขับเครื่องแปลเดิม (ไม่ reload เพราะ partner แปลสด)
+  window.addEventListener('lloop:lang', function(e){ if(_syncingLang) return; const l=(e.detail&&e.detail.lang)||'th'; if(l!==plang){ _syncingLang=true; setPLang(l); _syncingLang=false; } });
   collectI18n(); applyLang();
   initGate();
 </script>

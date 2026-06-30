@@ -451,15 +451,15 @@ async function createGroupFlow(){
 function memberCard(m){
   const tags=[`<span class="tag">${AGE_TH[m.age]||m.age}</span>`];
   if(m.gen) tags.push(`<span class="tag">${GEN_TH[m.gen]}</span>`);
-  if(m.season) tags.push(`<span class="tag sage">โทน${({autumn:'ออทัม',winter:'วินเทอร์',spring:'สปริง',summer:'ซัมเมอร์'})[m.season]||m.season}</span>`);
-  if(m.managed) tags.push(`<span class="tag gold">ผู้ปกครองดูแล</span>`);
-  if(m.pend) tags.unshift(`<span class="pendtag">รอตอบรับ</span>`);
+  if(m.season) tags.push(`<span class="tag sage">${NAV.t('โทน','Tone ')}${({autumn:NAV.t('ออทัม','Autumn'),winter:NAV.t('วินเทอร์','Winter'),spring:NAV.t('สปริง','Spring'),summer:NAV.t('ซัมเมอร์','Summer')})[m.season]||m.season}</span>`);
+  if(m.managed) tags.push(`<span class="tag gold">${NAV.t('ผู้ปกครองดูแล','Managed by guardian')}</span>`);
+  if(m.pend) tags.unshift(`<span class="pendtag">${NAV.t('รอตอบรับ','Pending')}</span>`);
   return `<div class="mcard" style="${m.pend?'opacity:.72':''}">
-    ${m.role==='owner'?'<span class="badge">หัวหน้ากลุ่ม</span>':''}
+    ${m.role==='owner'?'<span class="badge">'+NAV.t('หัวหน้ากลุ่ม','Group lead')+'</span>':''}
     ${avaHtml(m.picture, m.id, m.name)}
-    <div><div class="mname">${m.name}</div><div class="mrel">${m.rel|| (m.role==='owner'?'ตัวคุณเอง':'สมาชิก')}</div></div>
+    <div><div class="mname">${m.name}</div><div class="mrel">${m.rel|| (m.role==='owner'?NAV.t('ตัวคุณเอง','You'):NAV.t('สมาชิก','Member'))}</div></div>
     <div class="tags">${tags.join('')}</div>
-    ${m.id===ME.id?`<button class="picpriv" onclick="togglePicHide()">${MY_HIDE?'· แสดงรูปฉัน':'· ซ่อนรูปฉันจากกลุ่ม'}</button>`:''}
+    ${m.id===ME.id?`<button class="picpriv" onclick="togglePicHide()">${MY_HIDE?NAV.t('· แสดงรูปฉัน','· Show my photo'):NAV.t('· ซ่อนรูปฉันจากกลุ่ม','· Hide my photo from the group')}</button>`:''}
   </div>`;
 }
 // privacy: เปิด/ปิดการซ่อนรูปโปรไฟล์ของฉัน
@@ -477,20 +477,20 @@ window.togglePicHide = async function(){
 function renderMembers(){
   const g=curGroup();
   if(!g){
-    $('#grpName').textContent='ยังไม่มีกลุ่ม';
+    $('#grpName').textContent=NAV.t('ยังไม่มีกลุ่ม','No groups yet');
     $('#grpCap').textContent='';
     $('#memberBody').innerHTML=`<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
-      <h4>ยังไม่มีกลุ่มของคุณ</h4>
-      <p>เริ่มจากสร้างกลุ่มครอบครัวหรือแก๊งเพื่อน แล้วเพิ่มสมาชิก — เราจะช่วยจัดชุดเข้าตีมให้</p>
+      <h4>${NAV.t('ยังไม่มีกลุ่มของคุณ','You don\'t have a group yet')}</h4>
+      <p>${NAV.t('เริ่มจากสร้างกลุ่มครอบครัวหรือแก๊งเพื่อน แล้วเพิ่มสมาชิก — เราจะช่วยจัดชุดเข้าตีมให้','Start by creating a family or friends group and adding members — we\'ll style everyone in one theme.')}</p>
       <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
-        <button class="btn sage" onclick="createGroupFlow()">+ สร้างกลุ่มใหม่</button>
+        <button class="btn sage" onclick="createGroupFlow()">${NAV.t('+ สร้างกลุ่มใหม่','+ New group')}</button>
       </div></div>`;
     return;
   }
   $('#grpName').textContent=g.name;
   const oth=others(g);
-  $('#grpCap').textContent=`${g.members.length} คน · ${oth.length} สมาชิกที่ผูกไว้`;
+  $('#grpCap').textContent=NAV.t(`${g.members.length} คน · ${oth.length} สมาชิกที่ผูกไว้`,`${g.members.length} people · ${oth.length} linked members`);
   const body=$('#memberBody');
 
   if(oth.length===0){

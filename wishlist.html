@@ -620,7 +620,10 @@ const LIFF_ID = CFG.LIFF_ID;
 const sb = window.supabase.createClient(SB_URL, SB_KEY);
 
 const $ = id => document.getElementById(id);
-const STATUS_TH = { pending:'รอตรวจ', sourcing:'กำลังหา', added:'มีแล้ว', rejected:'หาไม่ได้' };
+const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
+const STATUS_TH = window.NAV && window.NAV.lang === 'en'
+  ? { pending:'In review', sourcing:'Sourcing', added:'Available', rejected:'Not found' }
+  : { pending:'รอตรวจ', sourcing:'กำลังหา', added:'มีแล้ว', rejected:'หาไม่ได้' };
 
 let uid = null;
 let selectedFile = null;
@@ -679,7 +682,7 @@ async function uploadImage(file) {
   });
   if (!res.ok) {
     const err = await res.text();
-    throw new Error('Upload ไม่สำเร็จ: ' + err);
+    throw new Error(T('Upload ไม่สำเร็จ: ', 'Upload failed: ') + err);
   }
   return `${SB_URL}/storage/v1/object/public/wishlist-images/${fileName}`;
 }
@@ -699,20 +702,20 @@ async function loadPrevRequests() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    $('prevList').innerHTML = '<div class="loading-msg">โหลดไม่สำเร็จ</div>';
+    $('prevList').innerHTML = '<div class="loading-msg">' + T('โหลดไม่สำเร็จ', 'Could not load') + '</div>';
     return;
   }
   if (!data || data.length === 0) {
-    $('prevList').innerHTML = '<div class="empty-msg">ยังไม่มีคำขอ</div>';
+    $('prevList').innerHTML = '<div class="empty-msg">' + T('ยังไม่มีคำขอ', 'No requests yet') + '</div>';
     return;
   }
 
   $('prevList').innerHTML = data.map(r => {
     const dateStr = new Date(r.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' });
     const meta = [
-      r.size ? 'ไซส์ ' + r.size : null,
+      r.size ? T('ไซส์ ', 'Size ') + r.size : null,
       r.occasion || null,
-      r.budget_max ? 'งบ ฿' + Number(r.budget_max).toLocaleString() + '/วัน' : null,
+      r.budget_max ? T('งบ ฿', 'Budget ฿') + Number(r.budget_max).toLocaleString() + T('/วัน', '/day') : null,
       dateStr,
     ].filter(Boolean);
     const statusKey = r.status || 'pending';
@@ -742,12 +745,12 @@ $('wishForm').addEventListener('submit', async e => {
   e.preventDefault();
   showErr('');
 
-  if (!selectedFile) { showErr('กรุณาเลือกรูปชุดที่ต้องการก่อน'); return; }
-  if (!uid) { showErr('กรุณาเข้าสู่ระบบก่อน'); return; }
+  if (!selectedFile) { showErr(T('กรุณาเลือกรูปชุดที่ต้องการก่อน', 'Please choose a photo first')); return; }
+  if (!uid) { showErr(T('กรุณาเข้าสู่ระบบก่อน', 'Please sign in first')); return; }
 
   const btn = $('submitBtn');
   btn.disabled = true;
-  btn.textContent = 'กำลัง upload รูป…';
+  btn.textContent = T('กำลัง upload รูป…', 'Uploading photo…');
 
   let imageUrl = null;
   try {
