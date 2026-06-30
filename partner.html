@@ -13,27 +13,31 @@
   .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
   .bar h1{font-family:var(--display);font-size:18px;font-weight:700}
   .bar .tag{font-size:12px;background:#3a3a3a;padding:3px 10px;border-radius:20px}
-  .wrap{max-width:660px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 18px 22px;scroll-margin-top:64px}
+  .wrap{max-width:660px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 18px 24px;scroll-margin-top:64px}
   .card h2{font-family:var(--display);font-size:15px;margin-bottom:3px}
-  .card .sub{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+  .card .sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
   /* กลุ่มหัวข้อย่อยในการ์ดเดียว — แบ่งสายตาไม่ให้เป็นกำแพงช่องกรอก */
-  .grp{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
-  .grp.first{margin-top:4px;padding-top:0;border-top:none}
-  .grp .gt{font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.3px;margin-bottom:2px}
-  label{display:block;font-size:13px;color:var(--muted);margin:14px 0 5px;font-weight:500}
-  .grp .gt + label{margin-top:6px}
-  input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-size:16px;font-family:var(--sans);background:#fff}
+  .grp{margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
+  .grp.first{margin-top:6px;padding-top:0;border-top:none}
+  .grp .gt{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:.3px;margin-bottom:4px}
+  label{display:block;font-size:13px;color:var(--muted);margin:16px 0 6px;font-weight:500}
+  .grp .gt + label{margin-top:8px}
+  /* min-width:0 + box-sizing → ทุกช่องย่อพอดีคอลัมน์ ขนาดเท่ากันเป๊ะ (กันช่องวันที่/ตัวเลขดันคอลัมน์) */
+  input,select,textarea{width:100%;min-width:0;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-size:16px;font-family:var(--sans);background:#fff;height:48px}
+  textarea{height:auto;min-height:64px;resize:vertical;line-height:1.5}
+  input[type=date],input[type=time]{-webkit-appearance:none;appearance:none}
+  input[type=file],input[type=color]{height:auto}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ok)}
-  textarea{min-height:62px;resize:vertical;line-height:1.5}
   .scan{display:flex;gap:10px}.scan input{flex:1;text-transform:uppercase;font-size:20px;letter-spacing:2px}
   .btn{border:none;border-radius:10px;padding:13px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--sans)}
-  .btn.dark{background:var(--ink);color:#fff}.btn.ok{background:var(--ok);color:#fff;width:100%;padding:16px}
-  .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 10px}
+  .btn.dark{background:var(--ink);color:#fff;height:48px}.btn.ok{background:var(--ok);color:#fff;width:100%;padding:16px;height:auto}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 12px}
+  .g2>div,.g3>div{min-width:0}
   /* ตารางวัดตัว — ช่องตัวเลขสั้น จัด 3 คอลัมน์ เว้นแถวให้หายใจ ป้ายไม่ชนกัน */
-  .gm{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
-  .gm>div{min-width:0}.gm label{margin:0 0 5px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gm{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 12px}
+  .gm>div{min-width:0}.gm label{margin:0 0 6px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .gm input{padding:11px 8px;text-align:center}
   /* หน่วยกำกับในช่อง (ซม./กก./นิ้ว) — ไม่กินที่ ไม่ทับตัวเลข */
   .uin{position:relative}
