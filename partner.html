@@ -464,6 +464,15 @@
       const m=(error&&error.message)||'';
       const needLogin = /LINE|เข้าสู่ระบบ|idToken|unauthorized|เซสชัน/i.test(m);
       $('gate').style.display='block'; $('main').style.display='none';
+      // ----- diagnostic (เปิดด้วย ?diag) — โชว์สาเหตุจริงบนจอ -----
+      if(/[?&]diag/i.test(location.search)){
+        let s={};
+        try{ s={ inClient:liff.isInClient(), loggedIn:liff.isLoggedIn(), hasIdTok:!!liff.getIDToken(), os:(liff.getOS&&liff.getOS()), ver:(liff.getLineVersion&&liff.getLineVersion()) }; }
+        catch(e){ s={ liffErr:(e&&e.message)||String(e) }; }
+        $('gateTitle').textContent='DIAG';
+        $('gateMsg').textContent='err="'+m+'" · data='+JSON.stringify(data)+' · '+JSON.stringify(s);
+        return;
+      }
       if(needLogin){
         $('gateTitle').textContent='เปิดหน้านี้ผ่าน LINE';
         $('gateMsg').textContent='กรุณาเปิดลิงก์พอร์ทัลจากแชต LINE ของ LLOOP เพื่อยืนยันตัวตนค่ะ';
