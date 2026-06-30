@@ -609,6 +609,17 @@
         <li data-i18n="<strong>1-day rentals:</strong> if confirmed after 13:00, dispatch moves to the next business day <strong>at no extra charge</strong>, and the day you receive it counts as the rental day. If it no longer fits your event, you may cancel for a full refund."><strong>เช่า 1 วัน:</strong> หากยืนยันหลัง 13:00 น. จะเลื่อนส่งเป็นวันทำการถัดไป <strong>โดยไม่คิดเพิ่ม</strong> และถือวันที่ได้รับเป็นวันเช่า หากไม่ทันโอกาสใช้งาน ยกเลิกรับเงินคืนเต็มได้</li>
         <li data-i18n="Delivery timing depends on the courier; LLOOP is not liable for courier delays or force majeure.">เวลาที่ได้รับขึ้นอยู่กับผู้ให้บริการขนส่ง ร้านไม่รับผิดต่อความล่าช้าจากขนส่งหรือเหตุสุดวิสัย</li>
       </ul>
+      <table class="info-table" style="margin-top:8px;">
+        <thead>
+          <tr><th data-i18n="Confirmed at">เวลายืนยัน</th><th data-i18n="1-day rental">เช่า 1 วัน</th><th data-i18n="3/5-day (keep pick-up)">เช่า 3/5 วัน (คงวันรับ)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>จ. 12:59 น.</td><td data-i18n="Ships same day">ส่งออกวันเดียวกัน</td><td data-i18n="Same day, no extra">ส่งวันเดียวกัน ไม่บวกวัน</td></tr>
+          <tr><td>จ. 13:01 น.</td><td data-i18n="Ships Tue, no extra; if too late, cancel for full refund">ส่ง อ. ไม่คิดเพิ่ม · ไม่ทันงาน ยกเลิกคืนเต็ม</td><td data-i18n="Ships Tue = +1 rental day (or move pick-up)">ส่ง อ. = เช่าเพิ่ม 1 วัน (หรือเลื่อนวันรับ)</td></tr>
+          <tr><td data-i18n="Fri 15:00">ศ. 15:00 น.</td><td data-i18n="Ships Mon (skips weekend)">ส่ง จ. (ข้ามเสาร์–อาทิตย์)</td><td data-i18n="Ships Mon = +1 rental day">ส่ง จ. = เช่าเพิ่ม 1 วัน</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:12px;color:var(--muted);margin-top:6px;" data-i18n="Business day = Mon–Fri 09:00–18:00 (Thailand), excluding public holidays. Cut-off applies to express only; advance bookings are unaffected.">วันทำการ = จ.–ศ. 09:00–18:00 น. (เวลาไทย) ไม่รวมวันหยุดนักขัตฤกษ์ · รอบตัดส่งใช้เฉพาะส่งด่วน การจองล่วงหน้าไม่กระทบ</p>
     </div>
 
     <div class="sub-section">
@@ -663,6 +674,16 @@
     </div>
 
     <p data-i18n="LLOOP inspects items immediately upon return and notifies the customer of the results within 24 hours. Compensation is assessed according to the following criteria.">LLOOP จะตรวจสอบสภาพชุดทันทีหลังได้รับคืน และแจ้งผลการตรวจสอบให้ลูกค้าทราบภายใน 24 ชั่วโมง ค่าชดใช้ประเมินตามหลักเกณฑ์ดังต่อไปนี้</p>
+
+    <div class="sub-section">
+      <h3 data-i18n="Assessment &amp; Your Right to Dispute">การประเมินและสิทธิโต้แย้ง</h3>
+      <ul class="styled-list">
+        <li data-i18n="LLOOP notifies you within 24 hours (business days) with damage photos and an itemized assessment.">ร้านแจ้งผลภายใน 24 ชั่วโมง (วันทำการ) พร้อมภาพถ่ายความเสียหายและรายการค่าเสียหายแบบแยกรายการ</li>
+        <li data-i18n="You may dispute the assessment within 3 days with supporting evidence; otherwise it is deemed accepted."><strong>คุณมีสิทธิโต้แย้งภายใน 3 วัน</strong> พร้อมหลักฐาน หากไม่โต้แย้งถือว่ายอมรับผล</li>
+        <li data-i18n="If unresolved, an independent assessor may evaluate, with the cost split equally (unless one party is found to have acted in bad faith).">หากตกลงกันไม่ได้ ใช้ผู้ประเมินอิสระ แบ่งค่าใช้จ่ายคนละครึ่ง (เว้นแต่ฝ่ายใดไม่สุจริต ฝ่ายนั้นรับผิดชอบทั้งหมด)</li>
+        <li data-i18n="Any balance after deducting the deposit is due within 7 days.">ส่วนต่างที่เกินมัดจำ ต้องชำระภายใน 7 วันนับแต่วันแจ้งยอด</li>
+      </ul>
+    </div>
 
     <!-- 4.1 Minor -->
     <div class="sub-section">
@@ -1024,7 +1045,7 @@
 </div><!-- end .wrap -->
 
 <footer>
-  <span data-i18n="LLOOP &nbsp;&middot;&nbsp; Rental Agreement (version rental-2026d) &nbsp;&middot;&nbsp; Updated June 2026">LLOOP &nbsp;&middot;&nbsp; ข้อตกลงการเช่าชุด (เวอร์ชัน rental-2026d) &nbsp;&middot;&nbsp; อัปเดต มิถุนายน 2569</span><br>
+  <span data-i18n="LLOOP &nbsp;&middot;&nbsp; Rental Agreement (version rental-2026d) &nbsp;&middot;&nbsp; Updated June 2026">LLOOP &nbsp;&middot;&nbsp; ข้อตกลงการเช่าชุด (เวอร์ชัน rental-2026e) &nbsp;&middot;&nbsp; อัปเดต มิถุนายน 2569</span><br>
   <span style="margin-top:4px;display:inline-block;"><a href="privacy.html" style="color:var(--sage);text-decoration:none;" data-i18n="Privacy Policy">นโยบายความเป็นส่วนตัว (Privacy)</a> &nbsp;&middot;&nbsp; thanchanok.khong@gmail.com</span>
 </footer>
 

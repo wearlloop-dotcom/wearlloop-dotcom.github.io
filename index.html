@@ -240,9 +240,10 @@
   .filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .tone{font-size:12px;border:1px solid var(--sage);color:#0c3a33;background:var(--sage-bg);padding:6px 12px;border-radius:30px}
   .tone.off{background:#fff;color:var(--muted);border-color:var(--line)}
-  .swrow{display:flex;gap:6px}
-  .swatchbtn{width:20px;height:20px;border-radius:50%;border:1px solid var(--line);padding:0}
-  .swatchbtn.active{outline:2px solid var(--ink);outline-offset:1px}
+  .swrow{display:flex;gap:7px;flex-wrap:wrap}
+  .swatchbtn{width:24px;height:24px;border-radius:50%;border:1px solid var(--line);padding:0;cursor:pointer;transition:transform .12s,box-shadow .12s}
+  .swatchbtn:hover{transform:scale(1.08)}
+  .swatchbtn.active{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
   .brandsel{font-family:var(--sans);font-size:13px;border:1px solid var(--line);border-radius:2px;padding:7px 9px;background:#fff}
   .brandrow{width:100%;margin-top:2px}
   .brandrow-h{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-family:var(--sans);font-weight:600;margin:8px 0 7px}
@@ -1290,6 +1291,6 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=71"></script>
+<script src="app.js?v=72"></script>
 </body>
 </html>

@@ -37,7 +37,15 @@
       '  border-radius:20px;overflow:hidden;background:#fff}',
       '.lloop-topbar .tb-lang button{border:0;background:none;padding:4px 10px;cursor:pointer;',
       '  font-family:var(--sans,inherit);font-size:11px;font-weight:600;letter-spacing:.5px;color:var(--muted,#8C8B86)}',
-      '.lloop-topbar .tb-lang button.on{background:var(--ink,#1A1A1A);color:#fff}'
+      '.lloop-topbar .tb-lang button.on{background:var(--ink,#1A1A1A);color:#fff}',
+      // ── โหมดมืด: ใส่ data-theme="dark" บน .lloop-topbar (สำหรับหน้าพื้นเข้ม เช่น about) ──
+      '.lloop-topbar[data-theme="dark"]{background:rgba(12,11,8,.72);backdrop-filter:blur(8px);border-bottom-color:rgba(242,236,221,.14)}',
+      '.lloop-topbar[data-theme="dark"] .tb-back{color:rgba(242,236,221,.7)}',
+      '.lloop-topbar[data-theme="dark"] .tb-back:hover{color:#F2ECDD}',
+      '.lloop-topbar[data-theme="dark"] .tb-logo{color:#F2ECDD}',
+      '.lloop-topbar[data-theme="dark"] .tb-lang{border-color:rgba(242,236,221,.22);background:transparent}',
+      '.lloop-topbar[data-theme="dark"] .tb-lang button{color:rgba(242,236,221,.7)}',
+      '.lloop-topbar[data-theme="dark"] .tb-lang button.on{background:#F2ECDD;color:#14130F}'
     ].join('');
     document.head.appendChild(s);
   }

@@ -245,14 +245,41 @@ function renderDiscover(){
 function pickOccasion(tg){ setOccasion(fOccasion===tg?null:tg); const a=document.querySelector('.ed-eyebrow'); window.scrollTo({ top: a? a.offsetTop-16 : 380, behavior:'smooth' }); }
 function setMood(k){ fMood = k || null; renderDiscover(); renderGrid(); }
 
+// เฉดสีสำรองตาม personal-color season — ใช้เมื่อชุดยังไม่ได้แท็กสีจริง (color_hex ว่าง)
+// เพื่อให้แถบกรองสีมีเฉดให้เลือกเสมอ ไม่ใช่วงเทา placeholder วงเดียว
+const SEASON_SHADE = {
+  spring:  ['พีชอุ่น', '#E7A977'],
+  summer:  ['ฟ้าหม่น', '#A9B8C9'],
+  autumn:  ['เทอราคอตต้า', '#C77B4E'],
+  winter:  ['น้ำเงินหมึก', '#15233F'],
+  neutral: ['เบจครีม', '#D8C8AE'],
+};
+const PLACEHOLDER_HEX = '#E7E2DA';
+// เติมสีให้ชุดที่ยังไม่มี color_hex จริง (เหลือเป็นเทา default) ด้วยเฉดตามโทนสี
+function normalizeGarmentColors() {
+  GARMENTS.forEach(g => {
+    const real = (g.colors || []).filter(c => c && c[1] && c[1] !== PLACEHOLDER_HEX && c[0] !== '—');
+    if (real.length) { g.colors = real; return; }
+    const sh = SEASON_SHADE[g.season];
+    if (sh) g.colors = [sh.slice()];        // fallback ตามโทนสีส่วนตัวของชุด
+  });
+}
+
 function renderFilters() {
-  const hexes = [...new Set(GARMENTS.flatMap(g => g.colors.map(c => c[1])))];
+  // เก็บเฉดสีจริงจากคลัง (ตัดเทา placeholder ทิ้ง) พร้อมชื่อสีไว้โชว์เป็น tooltip
+  const shadeMap = new Map();
+  GARMENTS.forEach(g => (g.colors || []).forEach(c => {
+    const nm = c[0], hex = c[1];
+    if (!hex || hex === PLACEHOLDER_HEX || nm === '—' || shadeMap.has(hex)) return;
+    shadeMap.set(hex, nm || '');
+  }));
   const brands = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
-  const sw = hexes.map(h =>`<button class="swatchbtn ${fColor === h?'active':''}" style="background:${h}" onclick="setColor('${h}')" aria-label="filter colour"></button>`).join('');
+  const sw = [...shadeMap].map(([h, nm]) =>
+    `<button class="swatchbtn ${fColor === h?'active':''}" style="background:${h}" onclick="setColor('${h}')" title="${nm}" aria-label="${(lang==='th'?'กรองสี ':'filter colour ')+nm}"></button>`).join('');
   const opts = [`<option value="">${t('allBrands')}</option>`].concat(brands.map(b =>`<option value="${b}"${fBrand === b?'selected':''}>${b}</option>`)).join('');
   $('#filters').innerHTML =`
     <button class="tone ${fToneOnly?'':'off'}" onclick="toggleTone()">● ${t('myTone')}</button>
-    <div class="swrow">${sw}</div>
+    ${sw ? `<div class="swrow">${sw}</div>` : ''}
     <select class="brandsel" onchange="setBrand(this.value)">${opts}</select>`;
   renderBrandChips();
   renderQuickFilters();
@@ -562,12 +589,14 @@ async function askVenue() {
   const hasPlace = !!(window.SELECTED_PLACE && window.SELECTED_PLACE.name);
   if (!q && !hasPlace) { el.classList.remove('show'); return; }
   if (q) window.track?.('stylist_ask', q, { occasion: window.gQuizOccasion || (EVENT && EVENT.occasion) || null, date: gUseDate || null });
-  // ต้องล็อกอินก่อน (โควต้าผูกกับบัญชี + กันยิง resolve-place เปลือง Google API) — เช็กก่อนเรียกอะไรที่มีค่าใช้จ่าย
-  if (!CUSTOMER.id) {
+  // บังคับล็อกอิน + ยอมรับข้อตกลงก่อน (โควต้าผูกกับบัญชี + กันยิง resolve-place เปลือง Google API)
+  if (!_isLoggedIn()) {
     el.className = 'vresult show';
     el.innerHTML = `<div class="note"><b style="color:var(--ink)">${t('vLoginNeed')}</b></div>`;
+    try { window.LiffAuth && LiffAuth.signIn(); } catch (_e) {}
     return;
   }
+  if (!(await ensureTermsAccepted())) { el.classList.remove('show'); return; }
   // วางลิงค์ Google Maps → แปลงเป็นสถานที่จริงก่อน (มิฉะนั้น AI จะได้สตริงลิงค์ดิบ ๆ)
   if (MAPS_URL_RE.test(q) && !hasPlace) {
     el.className = 'vresult show';
@@ -971,6 +1000,7 @@ function mockLook(g) {
 }
 async function loadLook(code, occasion) {
   const box = $('#lookbox'); if (!box) return;
+  if (!(await ensureAtelierAccess())) return;   // บังคับล็อกอิน + ยอมรับข้อตกลงก่อน
   box.innerHTML = `<div class="lookloading">${lang ==='th'?'กำลังจัดลุคให้คุณ…':'styling your look…'}</div>`;
   const g = GARMENTS.find(x => (x.code || x.id) === code) || {};
   let look = null;
@@ -1263,6 +1293,7 @@ function onBackupSearch(v) { _bpQuery = v; renderBackupGrid(); }
 // ลูกค้ากด → ส่งชุดหลัก + ชุดที่เลือกได้ ไปให้ LLOOP Atelier เรียง "สลับแทนได้เนียนสุด" ก่อน
 async function aiRankBackups() {
   if (_bpRanking || !_bpPrimary || !_bpPool.length) return;
+  if (!(await ensureAtelierAccess())) return;   // บังคับล็อกอิน + ยอมรับข้อตกลงก่อน
   const btn = $('#bpAiBtn');
   const reset = () => { if (btn) { btn.disabled = false; btn.textContent = lang ==='th'?'✦ ให้ LLOOP Atelier ช่วยเรียงให้':'✦ Let LLOOP Atelier rank these'; } };
   _bpRanking = true;
@@ -3361,6 +3392,33 @@ async function acceptTermsClick() {
   try { await window.API.acceptTerms(CUSTOMER, _termsVersion); } catch (e) { console.warn(e); }
   maybeOnboard();
 }
+// ===== ประตู LLOOP Atelier — บังคับล็อกอิน LINE + ยอมรับข้อตกลง ก่อนใช้ฟีเจอร์ AI =====
+function _isLoggedIn() {
+  let tok = null; try { tok = window.liff && liff.getIDToken && liff.getIDToken(); } catch (_e) {}
+  return !!(CUSTOMER && CUSTOMER.id) || !!tok;
+}
+// ต้องยอมรับข้อตกลงเวอร์ชันล่าสุดก่อน → ถ้ายังไม่ยอมรับ เปิดให้กดยอมรับแล้วคืน false
+async function ensureTermsAccepted() {
+  let terms; try { terms = await window.API.getTerms?.(); } catch (_e) { return true; } // ดึงไม่ได้ → ไม่บล็อกการใช้งาน
+  if (!terms || !terms.version) return true;
+  let ls = null; try { ls = localStorage.getItem('lloop_terms_v'); } catch (_e) {}
+  if (CUSTOMER.terms_accepted_version === terms.version || ls === terms.version) return true;
+  _termsVersion = terms.version;
+  const tb = $('#termsBody'); if (tb) tb.textContent = terms.body;
+  $('#termsOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  toast(lang ==='th'?'ยอมรับข้อตกลงก่อนเริ่มใช้ LLOOP Atelier นะคะ':'Please accept the terms to use LLOOP Atelier');
+  return false;
+}
+// ล็อกอิน + ยอมรับข้อตกลง — เรียกหน้าฟีเจอร์ AI ทุกตัว (คืน true เมื่อผ่านทั้งคู่)
+async function ensureAtelierAccess() {
+  if (!_isLoggedIn()) {
+    toast(lang ==='th'?'เข้าสู่ระบบด้วย LINE ก่อนใช้ LLOOP Atelier นะคะ':'Sign in with LINE to use LLOOP Atelier');
+    try { window.LiffAuth && LiffAuth.signIn(); } catch (_e) {}
+    return false;
+  }
+  return await ensureTermsAccepted();
+}
 // ต้อนรับครั้งแรก: login ผ่าน LINE แล้ว แต่ยังไม่มีข้อมูลสำคัญ → เด้งฟอร์มกรอกครั้งเดียว
 function maybeOnboard() {
   const c = CUSTOMER;
@@ -3502,6 +3560,7 @@ async function boot() {
   try { s = await window.API.init(); }
   catch (e) { console.warn('init failed, fallback to mock', e); s = window.MOCK; }
   OCCASIONS = s.OCCASIONS; CUSTOMER = s.CUSTOMER; EVENT = s.EVENT; GARMENTS = s.GARMENTS;
+  normalizeGarmentColors();   // เติมเฉดสีให้ชุดที่ยังไม่ได้แท็กสี → แถบกรองสีเลือกได้จริง
   STAFF_PCT = Number(s.staff_pct) || 0;   // พนักงาน → โชว์ราคาลด + ป้าย
   VENUES = window.MOCK.VENUES;
   // มีโปรไฟล์ (ไซส์/โทนสี/สไตล์จากพาร์ทเนอร์) เปิด"แนะนำสำหรับคุณ"เป็นค่าเริ่มต้น
