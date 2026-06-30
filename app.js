@@ -864,9 +864,9 @@ async function renderQuote(id, date) {
     ${q.deposit > 0 ? row(TH ? 'มัดจำ (คืนหลังตรวจชุด)' : 'Deposit (refundable)', baht(q.deposit)) : ''}
     ${row(TH ? 'ค่าส่ง' : 'Shipping', q.shipping > 0 ? baht(q.shipping) : (TH ? 'ส่งฟรี' : 'Free'))}
     ${row(TH ? 'รวมโอน' : 'Total', baht(q.total), true)}
-    <div class="qdates qspan">${TH ? 'วันแรก (วันรับ/ใช้งาน)' : 'Day 1 (pickup/use)'}: <b>${fmtDate(q.use_date)}</b> · ${TH ? `เช่า ${q.days} วัน` : `${q.days} days`}</div>
-    <div class="qdates">${TH ? 'จัดส่งราว' : 'Ships ~'} ${fmtDate(q.ship_date)} · ${TH ? 'กำหนดคืน' : 'Return by'} <b>${fmtDate(q.return_date)}${q.return_by ? (TH ? ` ก่อน ${q.return_by} น.` : ` by ${q.return_by}`) : ''}</b></div>
-    <div class="qdates">${TH ? 'คืนตรงเวลาช่วยให้ชุดพร้อมส่งคิวถัดไปทัน · ค่าส่งคืนผู้เช่าออกเอง' : 'On-time return keeps the next booking on track · return shipping paid by renter'}</div>
+    <div class="qdates qspan">${TH ? 'วันรับชุด (นับเป็นวันแรก)' : 'Day 1 (you receive it)'}: <b>${fmtDate(q.use_date)}</b> · ${TH ? `เช่า ${q.days} วัน` : `${q.days} days`}</div>
+    <div class="qdates">${TH ? 'กำหนดคืน' : 'Return by'} <b>${fmtDate(q.return_date)}${q.return_by ? (TH ? ` ก่อน ${q.return_by} น.` : ` by ${q.return_by}`) : ''}</b> ${TH ? `(วันที่ ${q.days} ของการเช่า)` : `(day ${q.days})`}</div>
+    <div class="qdates">${TH ? 'เราจัดส่งให้ของถึงมือคุณตรงวันรับ · คืนตรงเวลาช่วยให้ชุดพร้อมคิวถัดไปทัน · ค่าส่งคืนผู้เช่าออกเอง' : 'We ship so it arrives on your Day 1 · on-time return keeps the next booking on track · return shipping paid by renter'}</div>
     ${kyc}
     ${creditBtn}
     ${payBlock}`;
@@ -2192,10 +2192,8 @@ async function openOrders() {
 }
 function closeOrders() { $('#ordersOverlay').classList.remove('open'); document.body.style.overflow =''; }
 let _myRentals = [];
-// state ของปฏิทิน + agenda (ให้ปุ่มเปลี่ยนเดือน/แตะวัน เรนเดอร์ซ้ำได้)
+// state ของ rail วันที่ + agenda (ให้แตะวันแล้วเรนเดอร์ซ้ำ/เลื่อนได้)
 let _ordersData = null;
-function _pad2(n) { return String(n).padStart(2, '0'); }
-function _ymdKey(y, m, d) { return `${y}-${_pad2(m + 1)}-${_pad2(d)}`; }
 function renderOrders(rentals) {
   _myRentals = rentals || [];
   const body = $('#ordersBody'); if (!body) return;
@@ -2222,10 +2220,7 @@ function renderOrders(rentals) {
   const upcoming = allDates.filter(d => !isPast(d));
   const past = allDates.filter(isPast).reverse();
   const ordered = upcoming.concat(past);
-  // เดือนเริ่มต้นของปฏิทิน = เดือนของวันใกล้ที่สุดที่กำลังจะถึง (ไม่มีก็เดือนล่าสุด/เดือนนี้)
-  const pick = upcoming[0] || (allDates.length ? allDates[allDates.length - 1] : null);
-  const anchor = pick ? new Date(pick + 'T00:00:00') : today;
-  _ordersData = { sparesByPrimary, byDate, ordered, nodate, calY: anchor.getFullYear(), calM: anchor.getMonth() };
+  _ordersData = { sparesByPrimary, byDate, ordered, nodate };
   drawOrders();
 }
 function drawOrders() {
@@ -2236,50 +2231,34 @@ function drawOrders() {
       <div class="oday-h"><div class="oday-date">${lang ==='th'?'ยังไม่ระบุวัน':'No date yet'}</div></div>
       ${nodate.map(r => orderCard(r, sparesByPrimary[r.rental_id] || [])).join('')}
     </div>` : '';
-  body.innerHTML = ordersCalendar() + `<div class="oagenda">${agenda}${nod}</div>`;
+  body.innerHTML = ordersRail() + `<div class="oagenda">${agenda}${nod}</div>`;
 }
-function ordersCalendar() {
-  const { byDate, calY, calM } = _ordersData;
+// ปฏิทินแบบโชว์เฉพาะ "วันที่มีออเดอร์" เป็นชิปเรียงให้เห็นครบทุกวันในทีเดียว
+function ordersRail() {
+  const { byDate, ordered } = _ordersData;
   const th = lang === 'th';
   const months = th ? ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']
     : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const dow = th ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['Su','Mo','Tu','We','Th','Fr','Sa'];
-  const startDow = new Date(calY, calM, 1).getDay();
-  const daysIn = new Date(calY, calM + 1, 0).getDate();
-  const now = new Date(); const todayKey = _ymdKey(now.getFullYear(), now.getMonth(), now.getDate());
-  let cells = '';
-  for (let i = 0; i < startDow; i++) cells += '<div class="ocal-cell empty"></div>';
-  for (let d = 1; d <= daysIn; d++) {
-    const key = _ymdKey(calY, calM, d);
+  const dows = th ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const chips = ordered.map((key, i) => {
+    const d = new Date(key + 'T00:00:00');
     const rows = byDate[key];
-    const has = !!(rows && rows.length);
-    // ชื่อชุดหลักตัวแรกของวันนั้น เป็น caption ใต้เลขวันที่
-    const label = has ? ((rows.find(r => (r.role || 'primary') !== 'backup') || rows[0]).name || '') : '';
-    cells += `<div class="ocal-cell${has ? ' has' : ''}${key === todayKey ? ' today' : ''}"${has ? ` onclick="ordersJump('${key}')"` : ''}>
-      <span class="ocal-d">${d}</span>${has ? `<span class="ocal-tag">${label}</span>` : ''}</div>`;
-  }
-  const yr = th ? calY + 543 : calY;
-  return `<div class="ocal">
-    <div class="ocal-head">
-      <button class="ocal-nav" onclick="ordersCalNav(-1)" aria-label="prev">‹</button>
-      <div class="ocal-title">${months[calM]} ${yr}</div>
-      <button class="ocal-nav" onclick="ordersCalNav(1)" aria-label="next">›</button>
-    </div>
-    <div class="ocal-grid ocal-dow">${dow.map(x => `<div class="ocal-cell dow">${x}</div>`).join('')}</div>
-    <div class="ocal-grid">${cells}</div>
+    const main = rows.find(r => (r.role || 'primary') !== 'backup') || rows[0];
+    const extra = rows.length > 1 ? ` +${rows.length - 1}` : '';
+    return `<button type="button" class="orail-chip${i === 0 ? ' on' : ''}" data-key="${key}" onclick="ordersJump('${key}')">
+      <span class="orail-dow">${dows[d.getDay()]}</span>
+      <span class="orail-day">${d.getDate()}</span>
+      <span class="orail-mon">${months[d.getMonth()]}</span>
+      <span class="orail-name">${(main.name || '—')}${extra}</span>
+    </button>`;
+  }).join('');
+  return `<div class="orail-wrap">
+    <div class="orail-head">${th ? `วันที่มีออเดอร์ · ${ordered.length} วัน` : `${ordered.length} rental days`}</div>
+    <div class="orail">${chips}</div>
   </div>`;
 }
-function ordersCalNav(delta) {
-  if (!_ordersData) return;
-  let m = _ordersData.calM + delta, y = _ordersData.calY;
-  if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; }
-  _ordersData.calM = m; _ordersData.calY = y;
-  drawOrders();
-}
 function ordersJump(key) {
-  // วันนั้นคนละเดือนกับปฏิทิน → เด้งปฏิทินไปเดือนนั้นก่อน
-  const m = parseInt(key.slice(5, 7), 10) - 1, y = parseInt(key.slice(0, 4), 10);
-  if (_ordersData && (m !== _ordersData.calM || y !== _ordersData.calY)) { _ordersData.calM = m; _ordersData.calY = y; drawOrders(); }
+  document.querySelectorAll('.orail-chip').forEach(c => c.classList.toggle('on', c.dataset.key === key));
   const el = document.getElementById('day-' + key); if (!el) return;
   el.scrollIntoView({ behavior:'smooth', block:'start' });
   el.classList.add('oday-flash'); setTimeout(() => el.classList.remove('oday-flash'), 1500);

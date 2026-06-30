@@ -596,23 +596,17 @@
   .ocard .oactions{display:flex;gap:8px;margin-top:12px}
   .ocard .obtn{flex:1;background:var(--ink);color:#fff;border:none;padding:10px;font-size:12px;letter-spacing:.5px;border-radius:6px;font-family:var(--sans);font-weight:500}
   .ocard .obtn.ghost{background:#fff;color:#3B362C;border:1px solid #E2D6BF}
-  /* ===== ปฏิทินออเดอร์ ===== */
-  .ocal{background:#fff;border:1px solid #EADFCB;border-radius:8px;padding:14px 14px 16px;margin-bottom:18px;box-shadow:0 2px 10px rgba(80,64,38,.06)}
-  .ocal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .ocal-title{font-family:var(--display);font-size:15px;font-weight:600;color:#3B362C}
-  .ocal-nav{width:30px;height:30px;border:1px solid #E2D6BF;background:#FBF7EE;border-radius:50%;color:#7C7361;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-  .ocal-nav:active{background:#EFE6D4}
-  .ocal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-  .ocal-dow{margin-bottom:4px}
-  .ocal-cell{position:relative;min-height:46px;border-radius:6px;display:flex;flex-direction:column;align-items:center;padding:5px 2px 3px;overflow:hidden}
-  .ocal-cell.dow{min-height:0;padding:0 0 2px;font-size:10px;letter-spacing:.3px;color:#A39472}
-  .ocal-cell.empty{background:transparent;grid-column:auto;min-height:0}
-  .ocal-cell .ocal-d{font-size:12px;color:#6B6452;font-variant-numeric:tabular-nums}
-  .ocal-cell.today{outline:1px solid #C9A86A;outline-offset:-1px}
-  .ocal-cell.has{background:#F4EEE1;cursor:pointer;transition:transform .12s ease, background .15s ease}
-  .ocal-cell.has:active{transform:scale(.94)}
-  .ocal-cell.has .ocal-d{color:#3B362C;font-weight:600}
-  .ocal-cell .ocal-tag{margin-top:2px;font-size:8.5px;line-height:1.15;color:#8A7A5E;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  /* ===== rail วันที่ออเดอร์ (โชว์เฉพาะวันที่มีจอง ครบทุกวันในทีเดียว) ===== */
+  .orail-wrap{margin-bottom:18px}
+  .orail-head{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#A39472;margin:0 2px 10px}
+  .orail{display:flex;flex-wrap:wrap;gap:8px}
+  .orail-chip{flex:0 0 calc(25% - 6px);box-sizing:border-box;background:#fff;border:1px solid #EADFCB;border-radius:8px;padding:9px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;box-shadow:0 2px 8px rgba(80,64,38,.05);font-family:var(--sans);transition:transform .12s ease, border-color .15s ease, background .15s ease}
+  .orail-chip:active{transform:scale(.95)}
+  .orail-chip.on{border-color:#C9A86A;background:#FBF3E2;box-shadow:0 3px 12px rgba(176,143,80,.16)}
+  .orail-dow{font-size:10px;letter-spacing:.5px;color:#A39472}
+  .orail-day{font-family:var(--display);font-size:23px;font-weight:700;color:#3B362C;line-height:1.05;font-variant-numeric:tabular-nums}
+  .orail-mon{font-size:11px;color:#7C7361;margin-bottom:3px}
+  .orail-name{font-size:9.5px;line-height:1.2;color:#8A7A5E;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   /* ===== agenda รายวัน ===== */
   .oday{margin-bottom:22px;scroll-margin-top:14px}
   .oday-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:0 2px 10px;border-bottom:1px solid #EADFCB;margin-bottom:14px}
