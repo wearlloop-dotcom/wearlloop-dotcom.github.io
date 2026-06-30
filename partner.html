@@ -73,6 +73,35 @@
   .jump button:hover{border-color:var(--ink)}
   .draftnote{background:#EEF3FB;border:1px solid #C9D7EC;border-radius:9px;padding:9px 12px;font-size:13px;color:#2c4a6e;margin-top:10px;display:none}
   .draftnote.show{display:block}
+  /* แท็บสลับมุมมองพอร์ทัล */
+  .pnav{position:sticky;top:0;z-index:6;display:flex;gap:6px;overflow-x:auto;background:#F2F1EE;padding:8px 0;margin:2px 0 6px}
+  .pnav button{flex:none;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:8px 16px;font-size:14px;color:var(--ink);cursor:pointer;font-family:var(--sans);white-space:nowrap}
+  .pnav button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .view{display:none;flex-direction:column;gap:14px}
+  .view.on{display:flex}
+  .savebar{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+  .pubtoggle{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);font-weight:600;cursor:pointer;margin:0}
+  .pubtoggle input{width:18px;height:18px}
+  /* ปฏิทินเวลาว่าง */
+  .cal{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+  .daygrp{margin-top:8px}
+  .daygrp .dh{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:5px}
+  .slot{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff}
+  .slot .tm{font-weight:600;font-size:14px}
+  .slot .st{font-size:12px;color:var(--muted);margin-left:auto}
+  .slot.booked{background:#F6F3EE;border-color:#D8CFC0}
+  .slot.booked .st{color:#8a6d3b}
+  .slot .rm{border:none;background:none;color:#b03a3a;cursor:pointer;font-size:13px;padding:2px 6px}
+  /* คิวจอง */
+  .bookings{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .bkrow{border:1.5px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+  .bkrow .bt{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
+  .bkrow .bt .bcode{margin-left:auto;font-size:12px;color:var(--muted);font-weight:400}
+  .bkrow .bn{font-size:13px;color:var(--muted);margin-top:5px}
+  .bkrow .bact{display:flex;gap:8px;margin-top:10px}
+  .bkrow .bact button{flex:1;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-size:13px;background:#fff;cursor:pointer;font-family:var(--sans)}
+  .bkrow .bact .done{background:var(--ok);color:#fff;border-color:var(--ok)}
+  .bkrow.is-done{opacity:.6}
 </style>
 </head>
 <body>
@@ -95,6 +124,14 @@
     <div class="hello" id="hello"></div>
   </section>
 
+  <nav class="pnav" id="pnav">
+    <button class="on" data-v="clients" onclick="switchView('clients')">ลูกค้า</button>
+    <button data-v="profile" onclick="switchView('profile')">โปรไฟล์</button>
+    <button data-v="calendar" onclick="switchView('calendar')">เวลาว่าง</button>
+    <button data-v="bookings" onclick="switchView('bookings')">คิวจอง</button>
+  </nav>
+
+  <div class="view on" id="view-clients">
   <div class="card" id="myclientsCard">
     <h2>ลูกค้าของฉัน</h2>
     <div class="sub">ลูกค้าที่เคยบันทึกไว้ — แตะเพื่อเปิดแก้ไขต่อ (ไม่ต้องจำรหัส)</div>
@@ -296,6 +333,66 @@
 
   <button class="btn ok" onclick="save()">บันทึกโปรไฟล์ลูกค้า</button>
   </fieldset>
+  </div><!-- /view-clients -->
+
+  <!-- ===== โปรไฟล์สไตลิสต์ (กรอกเอง + เผยแพร่เอง) ===== -->
+  <div class="view" id="view-profile">
+    <div class="card">
+      <h2>โปรไฟล์สไตลิสต์ของฉัน</h2>
+      <div class="sub">ข้อมูลนี้จะแสดงให้ลูกค้าเห็นบนแอป LLOOP เมื่อเปิด "เผยแพร่" — เป็นหน้าที่ลูกค้าใช้เลือกคุณตอนจอง Personal Color</div>
+      <div class="g2">
+        <div><label>ชื่อที่แสดง</label><input id="pf_display" placeholder="ชื่อ-เล่น/ชื่อมืออาชีพ"></div>
+        <div><label>ชื่อสตูดิโอ</label><input id="pf_studio" placeholder="ถ้ามี"></div>
+      </div>
+      <label>พาดหัวสั้น ๆ</label><input id="pf_headline" placeholder="เช่น ผู้เชี่ยวชาญ Personal Color 12-season">
+      <label>แนะนำตัว</label><textarea id="pf_bio" placeholder="ประสบการณ์ แนวการวิเคราะห์ และสิ่งที่ลูกค้าจะได้รับ"></textarea>
+      <div class="g2">
+        <div><label>พื้นที่ให้บริการ</label><input id="pf_area" placeholder="เช่น สุขุมวิท / ออนไลน์"></div>
+        <div><label>ความเชี่ยวชาญ (คั่นด้วย ,)</label><input id="pf_specialties" placeholder="Personal Color, Makeup, Body Styling"></div>
+      </div>
+      <label>รายละเอียดบริการ / สิ่งที่ลูกค้าจะได้</label><textarea id="pf_session" placeholder="เช่น วิเคราะห์สี 12 ฤดู + พาเลตส่วนตัว + แนะนำการแต่งหน้า ~90 นาที"></textarea>
+      <label>รูปโปรไฟล์</label>
+      <input type="file" id="pf_photo_up" accept="image/*" onchange="uploadProfilePhoto(this)">
+      <input id="pf_photo" placeholder="หรือวางลิงก์รูป https://...">
+      <div class="files" id="pf_photo_thumb"></div>
+      <div class="savebar">
+        <label class="pubtoggle"><input type="checkbox" id="pf_public"> เผยแพร่ให้ลูกค้าเห็น</label>
+        <button class="btn ok" onclick="saveProfile()">บันทึกโปรไฟล์</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== เวลาว่าง (ปฏิทิน) ===== -->
+  <div class="view" id="view-calendar">
+    <div class="card">
+      <h2>เปิดเวลาว่าง</h2>
+      <div class="sub">ตั้งช่วงเวลาในแต่ละวัน ระบบจะแบ่งเป็นช่อง ๆ ให้ลูกค้าจองเองได้เลย</div>
+      <div class="g3">
+        <div><label>วันที่</label><input id="av_date" type="date"></div>
+        <div><label>เริ่ม</label><input id="av_start" type="time" value="13:00"></div>
+        <div><label>ถึง</label><input id="av_end" type="time" value="17:00"></div>
+      </div>
+      <div class="g2">
+        <div><label>ความยาวต่อคิว (นาที)</label><select id="av_interval">
+          <option>60</option><option>90</option><option>120</option><option>45</option><option>30</option></select></div>
+        <div style="display:flex;align-items:flex-end"><button class="btn dark" style="width:100%" onclick="addSlots()">เพิ่มช่องเวลา</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>ปฏิทินของฉัน</h2>
+      <div class="sub">ช่องที่ว่าง = ลูกค้ายังจองได้ · ลบได้เฉพาะช่องที่ยังไม่มีคนจอง</div>
+      <div class="cal" id="calList"><div class="empty">ยังไม่มีช่องเวลา</div></div>
+    </div>
+  </div>
+
+  <!-- ===== คิวที่ถูกจอง ===== -->
+  <div class="view" id="view-bookings">
+    <div class="card">
+      <h2>คิวที่ถูกจอง</h2>
+      <div class="sub">ลูกค้าที่จองเข้ามา — เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ</div>
+      <div class="bookings" id="bookList"><div class="empty">ยังไม่มีคิว</div></div>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -357,6 +454,141 @@
       });
     }catch(e){ /* เงียบไว้ — ลิสต์ไม่ขึ้นไม่กระทบการค้นหา */ }
   }
+
+  // ============================================================
+  // สลับมุมมอง: ลูกค้า / โปรไฟล์ / เวลาว่าง / คิวจอง
+  // ============================================================
+  let _profileLoaded=false;
+  function switchView(v){
+    document.querySelectorAll('#pnav button').forEach(b=>b.classList.toggle('on', b.dataset.v===v));
+    document.querySelectorAll('.view').forEach(el=>el.classList.toggle('on', el.id==='view-'+v));
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(v==='profile' && !_profileLoaded){ loadProfile(); }
+    if(v==='calendar'){ loadCalendar(); }
+    if(v==='bookings'){ loadBookings(); }
+  }
+
+  // ---------- โปรไฟล์ ----------
+  async function loadProfile(){
+    try{
+      const { data, error } = await window.meRpc('partner_profile_self', {});
+      if(error || !data || data.error){ return; }
+      $('pf_display').value   = data.display_name||'';
+      $('pf_studio').value    = data.studio_name||'';
+      $('pf_headline').value  = data.headline||'';
+      $('pf_bio').value       = data.bio||'';
+      $('pf_area').value      = data.area||'';
+      $('pf_specialties').value = (data.specialties||[]).join(', ');
+      $('pf_session').value   = data.session_note||'';
+      $('pf_photo').value     = data.photo_url||'';
+      $('pf_public').checked  = !!data.is_public;
+      renderProfilePhoto();
+      _profileLoaded=true;
+    }catch(e){}
+  }
+  function renderProfilePhoto(){
+    const url=($('pf_photo').value||'').trim(), box=$('pf_photo_thumb'); if(!box) return;
+    box.innerHTML = url ? '<div class="th"><img src="'+url+'" alt=""></div>' : '';
+  }
+  async function uploadProfilePhoto(input){
+    const file=input.files&&input.files[0]; if(!file) return;
+    const path=`partner/${Date.now()}-${file.name}`.replace(/\s+/g,'_');
+    try{
+      const { error:upErr } = await sb.storage.from('uploads').upload(path, file, { upsert:false });
+      if(upErr) throw upErr;
+      const { data:pub } = sb.storage.from('uploads').getPublicUrl(path);
+      $('pf_photo').value = (pub&&pub.publicUrl)||''; renderProfilePhoto(); toast('อัปโหลดรูปแล้ว');
+    }catch(e){ toast('อัปโหลดไม่ได้ — วางลิงก์รูปแทนได้'); }
+    input.value='';
+  }
+  async function saveProfile(){
+    const data={
+      display_name:$('pf_display').value.trim(),
+      studio_name:$('pf_studio').value.trim(),
+      headline:$('pf_headline').value.trim(),
+      bio:$('pf_bio').value.trim(),
+      area:$('pf_area').value.trim(),
+      session_note:$('pf_session').value.trim(),
+      photo_url:$('pf_photo').value.trim(),
+      specialties:($('pf_specialties').value||'').split(',').map(s=>s.trim()).filter(Boolean),
+      is_public:$('pf_public').checked
+    };
+    const { data:res, error } = await window.meRpc('partner_profile_save', { p_data:data });
+    if(error || (res&&res.error)){ toast('บันทึกไม่สำเร็จ'); return; }
+    toast($('pf_public').checked ? 'บันทึก + เผยแพร่แล้ว' : 'บันทึกแล้ว (ยังไม่เผยแพร่)');
+  }
+
+  // ---------- เวลาว่าง / ปฏิทิน ----------
+  const fmtDay=d=>new Date(d).toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
+  const fmtTime=d=>new Date(d).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  async function addSlots(){
+    const p_date=$('av_date').value;
+    if(!p_date){ toast('เลือกวันที่ก่อนค่ะ'); return; }
+    const { data, error } = await window.meRpc('partner_slots_add', {
+      p_date, p_start:$('av_start').value||'13:00', p_end:$('av_end').value||'17:00', p_interval:Number($('av_interval').value)||60 });
+    if(error || (data&&data.error)){ toast('เพิ่มไม่สำเร็จ'); return; }
+    toast('เพิ่ม '+((data&&data.added)||0)+' ช่อง'); loadCalendar();
+  }
+  async function loadCalendar(){
+    const box=$('calList');
+    try{
+      const { data } = await window.meRpc('partner_calendar_self', {});
+      const arr=Array.isArray(data)?data:[];
+      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีช่องเวลา — เพิ่มด้านบนได้เลย</div>'; return; }
+      const groups={};
+      arr.forEach(s=>{ const k=new Date(s.starts_at).toDateString(); (groups[k]=groups[k]||[]).push(s); });
+      box.innerHTML='';
+      Object.keys(groups).forEach(k=>{
+        const g=document.createElement('div'); g.className='daygrp';
+        g.innerHTML='<div class="dh">'+fmtDay(groups[k][0].starts_at)+'</div>';
+        groups[k].forEach(s=>{
+          const row=document.createElement('div'); row.className='slot'+(s.status==='booked'?' booked':'');
+          let right = s.status==='booked'
+            ? '<span class="st">จองแล้ว · '+(s.customer||'ลูกค้า')+'</span>'
+            : '<span class="st">ว่าง</span><button class="rm" onclick="removeSlot(\''+s.id+'\')">ลบ</button>';
+          row.innerHTML='<span class="tm">'+fmtTime(s.starts_at)+'</span>'+right;
+          g.appendChild(row);
+        });
+        box.appendChild(g);
+      });
+    }catch(e){ box.innerHTML='<div class="empty">โหลดปฏิทินไม่สำเร็จ</div>'; }
+  }
+  async function removeSlot(id){
+    const { data } = await window.meRpc('partner_slot_remove', { p_id:id });
+    if(data==='booked'){ toast('ช่องนี้มีคนจองแล้ว ลบไม่ได้'); return; }
+    toast('ลบช่องแล้ว'); loadCalendar();
+  }
+
+  // ---------- คิวที่ถูกจอง ----------
+  async function loadBookings(){
+    const box=$('bookList');
+    try{
+      const { data } = await window.meRpc('partner_bookings_self', {});
+      const arr=Array.isArray(data)?data:[];
+      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีคิว — เปิดเวลาว่างไว้ ลูกค้าจะจองเข้ามาเอง</div>'; return; }
+      box.innerHTML='';
+      arr.forEach(b=>{
+        const div=document.createElement('div'); div.className='bkrow'+(b.status==='done'?' is-done':'');
+        const when=new Date(b.starts_at).toLocaleString('th-TH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+        let html='<div class="bt">'+(b.customer||'ลูกค้า')+'<span class="bcode">'+(b.code?('รหัส '+b.code):'')+'</span></div>'+
+          '<div class="bn">'+when+(b.customer_note?(' · “'+b.customer_note+'”'):'')+'</div>';
+        if(b.status==='confirmed'){
+          html+='<div class="bact">'+
+            (b.code?'<button onclick="goAnalyse(\''+b.code+'\')">กรอกผลวิเคราะห์</button>':'')+
+            '<button class="done" onclick="bookingAction(\''+b.id+'\',\'done\')">เสร็จงาน</button>'+
+            '<button onclick="bookingAction(\''+b.id+'\',\'cancel\')">ยกเลิก</button></div>';
+        }else{ html+='<div class="bn">เสร็จงานแล้ว</div>'; }
+        div.innerHTML=html; box.appendChild(div);
+      });
+    }catch(e){ box.innerHTML='<div class="empty">โหลดคิวไม่สำเร็จ</div>'; }
+  }
+  async function bookingAction(id, action){
+    if(action==='cancel' && !confirm('ยกเลิกคิวนี้? ระบบจะคืนช่องเวลาให้ว่างอีกครั้ง')) return;
+    const { data } = await window.meRpc('partner_booking_update', { p_id:id, p_action:action });
+    if(data!=='ok'){ toast('ทำรายการไม่สำเร็จ'); return; }
+    toast(action==='done'?'บันทึกว่าเสร็จงานแล้ว':'ยกเลิกคิวแล้ว'); loadBookings();
+  }
+  function goAnalyse(code){ switchView('clients'); $('code').value=code; lookup(); }
 
   // 12-season type -> base season (enum 4) สำหรับระบบ fit/For You
   function autoSeason(){

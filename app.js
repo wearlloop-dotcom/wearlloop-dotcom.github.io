@@ -704,24 +704,25 @@ async function checkAvail(id) {
   } else {
     msg.className ='availmsg busy';
     const lbl = lang ==='th'?`✕ ไม่ว่าง ${fmtDate(date)} ลองวันอื่น`:`✕ Booked on ${fmtDate(date)}`;
-    // ต่อคิว: ถ้าชุดกลับมาว่าง จะแจ้งให้เลือกวันก่อนใคร
-    msg.innerHTML = `${lbl} <button class="queuebtn" onclick="joinQueue('${id}')">${lang==='th'?'ต่อคิว · แจ้งเมื่อว่าง':'Join waitlist'}</button>`;
+    // ต่อคิว "วันนี้": พอวันนี้เปิดจริง จะแจ้งให้เลือกก่อนใคร (date-aware)
+    msg.innerHTML = `${lbl} <button class="queuebtn" onclick="joinQueue('${id}','${date}')">${lang==='th'?`ต่อคิววันนี้ · แจ้งเมื่อว่าง`:'Notify me for this date'}</button>`;
   }
   renderQuote(id, date);
   return free;
 }
 
-// ต่อคิวชุด — ของกลับมาว่างเมื่อไร ได้สิทธิ์เลือกวันก่อนใคร
-async function joinQueue(id) {
+// ต่อคิวชุดสำหรับ "วันที่เลือก" — พอวันนั้นเปิดจริง ได้สิทธิ์เลือกก่อนใคร
+async function joinQueue(id, date) {
   if (!CUSTOMER || !CUSTOMER.id) { toast(lang==='th'?'เข้าสู่ระบบก่อนนะคะ':'Please sign in first'); return; }
-  const r = await window.API.joinWaitlist?.(id);
+  const r = await window.API.joinWaitlist?.(id, date || null);
   if (!r || r.ok !== true) { toast(lang==='th'?'ต่อคิวไม่สำเร็จ ลองใหม่นะคะ':'Could not join — try again'); return; }
-  window.track?.('waitlist_join', (GARMENTS.find(x=>x.id===id)||{}).code || id);
+  window.track?.('waitlist_join', (GARMENTS.find(x=>x.id===id)||{}).code || id, { date });
+  const dlabel = date ? fmtDate(date) : '';
   const msg = $('#availMsg'); if (msg) {
     msg.className = 'availmsg ok';
     msg.textContent = r.already
-      ? (lang==='th'?`อยู่ในคิวแล้ว · คุณคิวที่ ${r.position} จาก ${r.total}`:`Already queued · #${r.position} of ${r.total}`)
-      : (lang==='th'?`ต่อคิวแล้ว · คุณคิวที่ ${r.position} — ของว่างเมื่อไรเราแจ้งให้เลือกวันก่อนใครค่ะ`:`Queued · you're #${r.position} — we'll notify you first when it opens`);
+      ? (lang==='th'?`อยู่ในคิว ${dlabel} แล้ว · คุณคิวที่ ${r.position}/${r.total}`:`Already queued for ${dlabel} · #${r.position}/${r.total}`)
+      : (lang==='th'?`ต่อคิว ${dlabel} แล้ว · คิวที่ ${r.position} — พอวันนี้ว่างเราแจ้งให้เลือกก่อนใครค่ะ`:`Queued for ${dlabel} · #${r.position} — we'll notify you first when this date opens`);
   }
 }
 
@@ -2353,6 +2354,9 @@ function routeDeepLink() {
     if (ref && window.API && window.API.logRef) { try { window.API.logRef(ref, gcode); } catch (e) {} }
     if (gcode) {
       const g = GARMENTS.find(x => (x.code || '').toLowerCase() === gcode.toLowerCase());
+      // ?date=YYYY-MM-DD (จากการ์ด waitlist "ถึงคิวคุณ") → เปิด detail พร้อมเติมวันที่ให้เลย
+      const wd = qs.get('date') || (ls && ls.get('date'));
+      if (wd && /^\d{4}-\d{2}-\d{2}$/.test(wd)) gUseDate = wd;
       if (g) { setTimeout(() => openDetail(g.id), 80); return; }
     }
     // โค้ดชวนเพื่อนจากลิงก์ (?ref=CODE) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿200 ทั้งคู่ เข้ากระเป๋า LLOOP)

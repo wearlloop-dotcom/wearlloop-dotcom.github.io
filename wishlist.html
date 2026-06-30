@@ -802,14 +802,17 @@ async function loadMyQueue() {
   catch (e) { return; }
   if (!rows.length) { $('queueSection').style.display = 'none'; return; }
   $('queueSection').style.display = 'block';
+  const fmtD = s => { if (!s) return ''; try { return new Date(s).toLocaleDateString('th-TH', { day:'numeric', month:'short' }); } catch(e) { return s; } };
   $('queueList').innerHTML = rows.map(r => {
     const open = r.status === 'notified' || r.available_now;
+    const dlabel = r.want_date ? fmtD(r.want_date) : '';
     const pill = open
-      ? `<span class="pos-pill open">${r.status === 'notified' ? 'ถึงคิวคุณ · เลือกวันได้เลย' : 'ว่างแล้ว'}</span>`
+      ? `<span class="pos-pill open">${r.status === 'notified' ? 'ถึงคิวคุณ · เลือกก่อนใคร' : 'วันนี้ว่างแล้ว'}</span>`
       : `<span class="pos-pill">คิวที่ ${r.position}/${r.total}</span>`;
     const thumb = r.photo
       ? `<img class="rc-thumb" src="${esc(r.photo)}" alt="" loading="lazy">`
       : `<div class="rc-thumb"></div>`;
+    const dParam = r.want_date ? `&date=${esc(r.want_date)}` : '';
     return `<div class="request-card">
       ${thumb}
       <div class="rc-body">
@@ -817,22 +820,23 @@ async function loadMyQueue() {
           <div>
             ${r.brand ? `<div class="rc-brand">${esc(r.brand)}</div>` : ''}
             <div class="rc-desc">${esc(r.name || r.code || '')}</div>
+            ${dlabel ? `<div class="rc-brand">วันที่อยากได้ · ${dlabel}</div>` : ''}
           </div>
           ${pill}
         </div>
         <div class="rc-meta">
           ${r.price != null ? `<span>฿${Number(r.price).toLocaleString()}/วัน</span>` : ''}
-          <span style="cursor:pointer;color:var(--sage)" onclick="leaveQueue('${r.garment_id}')">ออกจากคิว</span>
-          ${open ? `<a href="index.html?garment=${esc(r.code||'')}" style="color:var(--sage);text-decoration:none;font-weight:600">จองเลย →</a>` : ''}
+          <span style="cursor:pointer;color:var(--sage)" onclick="leaveQueue('${r.garment_id}','${esc(r.want_date||'')}')">ออกจากคิว</span>
+          ${open ? `<a href="index.html?garment=${esc(r.code||'')}${dParam}" style="color:var(--sage);text-decoration:none;font-weight:600">เลือกวัน + จอง →</a>` : ''}
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-async function leaveQueue(garmentId) {
+async function leaveQueue(garmentId, wantDate) {
   if (!window.meRpc) return;
-  try { await window.meRpc('leave_waitlist', { p_garment: garmentId }); } catch (e) {}
+  try { await window.meRpc('leave_waitlist', { p_garment: garmentId, p_date: wantDate || null }); } catch (e) {}
   await loadMyQueue();
 }
 

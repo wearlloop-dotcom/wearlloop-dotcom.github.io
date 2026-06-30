@@ -280,8 +280,11 @@ async function onBook(){
   const okBooked = res && !res.error && data && !data.error && !((data.unavailable || []).length);
   if (okBooked){
     booked = true;
-    window.track?.('booked', G.code, { total: lastQuote && lastQuote.total });
-    renderDone(from, to);
+    // ยอดจ่ายจริงจาก book_cart (สะท้อนสิทธิ์สมาชิก/ของที่จองได้จริง) — ไม่ใช่ยอด quote ก่อนจอง
+    const total = (data && typeof data.total === 'number') ? data.total : (lastQuote && lastQuote.total);
+    const covered = !!(data && Array.isArray(data.items) && data.items.length && data.items.every(it => it.included));
+    window.track?.('booked', G.code, { total });
+    renderDone(from, to, total, covered);
   } else {
     if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
     toast('ชุดนี้เพิ่งถูกจองช่วงนั้นพอดี ลองวันอื่นนะคะ');
@@ -290,11 +293,12 @@ async function onBook(){
   }
 }
 
-function renderDone(from, to){
-  const q = lastQuote;
+function renderDone(from, to, total, covered){
   const hasPP = PAY && (PAY.pay_promptpay_id || PAY.pay_promptpay_qr);
-  const total = q ? q.total : null;
-  const payBlock = !(hasPP && total) ? '' : `
+  // สมาชิกที่แพ็กคลุมชุดนี้ → ไม่ต้องจ่าย (จองสำเร็จเลย)
+  const payBlock = covered
+    ? `<div class="paybox"><div class="paynote" style="text-align:center">ชุดนี้รวมอยู่ในแพ็กสมาชิกของคุณแล้ว — ไม่ต้องโอนเพิ่ม จัดส่งตามวันที่เลือกค่ะ</div></div>`
+    : !(hasPP && total) ? '' : `
     <div class="paybox">
       <div class="qhd">โอนเพื่อยืนยัน</div>
       ${PAY.pay_promptpay_id ? `<div id="ppqr2"></div>`

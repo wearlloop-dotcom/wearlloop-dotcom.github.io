@@ -318,19 +318,19 @@ window.API = (function () {
   }
 
   // ===== ต่อคิวชุด (waitlist) + โหวตให้ซื้อ — ผ่าน me-rpc gateway (กัน IDOR) =====
-  // ต่อคิวชุดที่ไม่ว่าง → { ok, position, total, already }
-  async function joinWaitlist(garmentId) {
+  // ต่อคิวชุดสำหรับ "วันที่อยากได้" → { ok, position, total, already, want_date }
+  async function joinWaitlist(garmentId, wantDate) {
     if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
-    const { data, error } = await window.meRpc('join_waitlist', { p_garment: garmentId });
+    const { data, error } = await window.meRpc('join_waitlist', { p_garment: garmentId, p_date: wantDate || null });
     return error ? { ok: false, error } : (data || { ok: false });
   }
-  // ออกจากคิว
-  async function leaveWaitlist(garmentId) {
+  // ออกจากคิว (ระบุวันได้ · ไม่ระบุ = ออกทุกคิวของชุดนี้)
+  async function leaveWaitlist(garmentId, wantDate) {
     if (CONFIG.USE_MOCK || !window.meRpc) return { ok: false };
-    const { data } = await window.meRpc('leave_waitlist', { p_garment: garmentId });
+    const { data } = await window.meRpc('leave_waitlist', { p_garment: garmentId, p_date: wantDate || null });
     return data || { ok: false };
   }
-  // คิวทั้งหมดของฉัน → array {garment_id, code, name, photo, status, position, total, hold_until, available_now}
+  // คิวทั้งหมดของฉัน → array {garment_id, code, name, photo, want_date, status, position, total, hold_until, available_now}
   async function myWaitlist() {
     if (CONFIG.USE_MOCK || !window.meRpc) return [];
     const { data } = await window.meRpc('my_waitlist', {});
