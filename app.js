@@ -690,7 +690,7 @@ function gridCardHtml(g) {
           <div class="try">${lang ==='th'?'ลองดูเลย':'View'} ›</div>
           <div class="sizes">
             ${fit!= null?`<span>${t('fitGood')} ${fit}%</span>`:''}
-            <span>${g.occasion_tags[0] ? occName(g.occasion_tags[0]) : ''}</span>
+            ${(g.occasion_tags && g.occasion_tags[0]) ? `<span>${occName(g.occasion_tags[0])}</span>` : ''}
             <span>${money(staffPrice(g.price))}</span>
           </div>
         </div>
@@ -914,7 +914,8 @@ function openDetail(id) {
   window.track?.('view_item', g.code || g.id, { name: g.name, price: g.price, occasion: (g.occasion_tags||[])[0] || null });
   const fit = fitConfidence(CUSTOMER, g);
   const match = g.season === CUSTOMER.my_color_season;
-  const credit = Math.min(CUSTOMER.credit_balance || 0, Math.round(g.price * 0.5));
+  const effPrice = staffPrice(g.price);   // ราคาจริงที่โชว์บนปุ่ม (คิดส่วนลดพนักงานแล้ว) — ใช้ให้ตรงกับบรรทัดเครดิต
+  const credit = Math.min(CUSTOMER.credit_balance || 0, Math.round(effPrice * 0.5));
   const fabric = lang ==='th'? g.fabric : (g.fabric_en || g.fabric);
   const tipList = lang ==='th'? (g.styling_tips || []) : (g.tips_en || g.styling_tips || []);
   const fabricTags = [
@@ -1025,7 +1026,7 @@ function openDetail(id) {
       : ''}
     ${subCovers(g)
       ? `<div class="creditline">${lang==='th'?`ใช้สิทธิ์สมาชิก ${CUSTOMER._sub.plan_name} · เหลือ ${CUSTOMER._sub.remaining} ชุดรอบนี้ · ส่งฟรีขาไป`:`Using ${CUSTOMER._sub.plan_name} · ${CUSTOMER._sub.remaining} left · free outbound`}</div>`
-      : `<div class="creditline">${t('creditPre')}${credit}${t('creditMid')}${g.price - credit}</div>`}`;
+      : `<div class="creditline">${t('creditPre')}${money(credit)}${t('creditMid')}${money(effPrice - credit)}</div>`}`;
   $('#overlay').classList.add('open');
   document.body.style.overflow ='hidden';
   renderAvailCalendar(g.id);
@@ -3770,11 +3771,11 @@ function maybeOnboard() {
   const c = CUSTOMER;
   const loggedIn =!!(c.line_uid || c.display_name || c.picture_url);
   if (!loggedIn) return;
-  if (sessionStorage.getItem('lloop_onboarded')) return;
+  if (localStorage.getItem('lloop_onboarded')) return;   // localStorage: กันฟอร์มเด้งซ้ำเมื่อ LINE เปิด webview ใหม่ (sessionStorage โดนล้าง)
   if ($('#termsOverlay').classList.contains('open')) return; // รอยอมรับ terms ก่อน
   const incomplete =!c.phone ||!c.address; // ยังกรอกไม่ครบช่องจำเป็น (เบอร์/ที่อยู่จัดส่ง) → ชวนกรอกต่อ
   if (!incomplete) return;
-  sessionStorage.setItem('lloop_onboarded','1');
+  localStorage.setItem('lloop_onboarded','1');
   setTimeout(() => openProfile(true), 450);
 }
 // การ์ดอิมแพกต์รักษ์โลก (โชว์ในโปรไฟล์)
