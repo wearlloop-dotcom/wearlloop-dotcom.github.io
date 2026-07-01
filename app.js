@@ -127,7 +127,7 @@ const weightName = w => (lang ==='th'? w : (window.I18N.en.weight[w] || w));
 const stretchLabel = s => s ==='none'? t('noStretch') : s ==='slight'? t('slight') : t('stretchy');
 
 function enterApp() {
-  try { sessionStorage.setItem('lloop_entered', '1'); } catch (e) {}  // จำว่าเข้าแล้ว → กลับหน้าหลักไม่ต้องคั่น intro ซ้ำ
+  try { localStorage.setItem('lloop_entered', '1'); } catch (e) {}  // จำถาวรว่าเข้าแล้ว → เปิดครั้งหน้า/สลับหน้าไม่ต้องคั่น intro ซ้ำ (localStorage อยู่รอดแม้ LINE เปิด webview ใหม่)
   const el = $('#intro');
   el.classList.add('hide');
   setTimeout(() => { el.style.display ='none'; }, 900);
@@ -975,7 +975,7 @@ function openDetail(id) {
         <div style="font-size:11px;color:var(--ok)">${t('fitFromPre')} ${g.stretch!=='none'? t('stretchHelp') : t('noStretchHelp')}</div></div></div>`:''}
       ${tips?`<div class="sec">${t('secWear')}</div><div class="tips">${tips}</div>`:''}
       <div class="sec">${lang ==='th'?'ครบลุค — ทรงผม & เครื่องประดับ':'Complete the look'}</div>
-      <div id="lookbox" class="lookbox"><button class="lookbtn" onclick="loadLook('${g.code || g.id}','${(g.occasion_tags||[])[0]||''}')">${lang ==='th'?'ดูทรงผม & เครื่องประดับที่เข้ากับชุดนี้':'See hair & accessories for this look'}</button></div>
+      <div class="lookteaser">${lang ==='th'?'จองชุดนี้แล้ว รับ “ครบลุค” ให้เลย — LLOOP Atelier จะจัดทรงผม & เครื่องประดับที่เข้ากับชุด แล้วส่งเข้าแชต LINE ให้หลังชำระเงิน':'Book this dress and LLOOP Atelier styles your complete look — hair & accessories, sent to your LINE chat after payment'}</div>
       <div id="ugcWrap" style="display:none"><div class="sec">${lang ==='th'?'รูปจริงจากลูกค้า':'Real customer photos'}</div><div id="ugcbox" class="ugcbox"></div></div>
       <div class="sec secrow">${t('secSize')}<span class="munit">${['in','cm'].map(u=>`<button data-u="${u}" class="${gMUnit===u?'on':''}" onclick="setMUnit('${u}')">${u==='in'?(lang==='th'?'นิ้ว':'inch'):(lang==='th'?'ซม.':'cm')}</button>`).join('')}</span></div>
       <div class="measure" id="measureBox">${measureCells(g)}</div>
@@ -1218,27 +1218,85 @@ function mockLook(g) {
   const shoes = formal ? 'รองเท้าส้นสูงสีนู้ด ช่วยยืดขา' : 'รองเท้าส้นเตี้ย/รัดส้นโทนเดียวกับชุด';
   return { hair, jewelry, accessories, shoes, note: 'แนะนำเบื้องต้น — LLOOP Atelier ตัวเต็มจะวิเคราะห์ละเอียดตามรูปหน้า/หุ่นของคุณ' };
 }
-async function loadLook(code, occasion) {
-  const box = $('#lookbox'); if (!box) return;
-  if (!(await ensureAtelierAccess())) return;   // บังคับล็อกอิน + ยอมรับข้อตกลงก่อน
-  box.innerHTML = `<div class="lookloading">${lang ==='th'?'กำลังจัดลุคให้คุณ…':'styling your look…'}</div>`;
-  const g = GARMENTS.find(x => (x.code || x.id) === code) || {};
+// ครบลุค — เรียก AI *หลังชำระเงินสำเร็จ* เท่านั้น: สรุปทรงผม/เครื่องประดับให้ + ส่ง Flex เข้าแชต LINE
+// (ย้ายมาจากตอนเลือกชุด เพื่อไม่เปลือง AI/โทเคนกับคนที่แค่กดดูแต่ยังไม่จอง)
+async function deliverLookAfterPay(g, occasion) {
+  if (!g) return;
+  const occ = occasion || (g.occasion_tags || [])[0] || '';
   let look = null;
-  try { look = await window.API.hairStyle?.(code, occasion); } catch (e) { /**/ }
+  try { look = await window.API.hairStyle?.(g.code || g.id, occ); } catch (e) { /**/ }
   const noQuota = look && look.error === 'no_quota';
-  if (!look || !look.hair) look = mockLook(g);
-  // โควต้า LLOOP Atelier หมด → ยังโชว์คำแนะนำเบื้องต้นให้ แต่บอกเหตุผล
-  if (noQuota) look = { ...look, note: lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว — นี่คือคำแนะนำเบื้องต้น · เช่าชุดรับเพิ่ม 3 ครั้ง':'LLOOP Atelier quota used up — these are basic suggestions · rent for +3 more' };
+  if (!look || !look.hair) look = mockLook(g);   // AI ล่ม/โควตาหมด → คำแนะนำเบื้องต้นแทน (ไม่กินโทเคน)
+  if (noQuota) look = { ...look, note: lang ==='th'?'โควตา LLOOP Atelier หมดแล้ว — นี่คือคำแนะนำเบื้องต้นให้ก่อนนะคะ':'LLOOP Atelier quota used up — here are basic suggestions for now' };
+  showLookSummary(g, look);
+  try { await sendLookFlex(g, look); } catch (e) { /**/ }
+}
+
+// การ์ดสรุป "ครบลุค" บนหน้าจอ หลังจ่ายเงิน (ใช้สไตล์เดิม .lookcard/.lookrow)
+function showLookSummary(g, look) {
+  const th = lang === 'th';
   const row = (label, items) => (items && items.length)
     ? `<div class="lookrow"><span class="lk">${label}</span><div class="lv">${(Array.isArray(items) ? items : [items]).map(x => `<i>${x}</i>`).join('')}</div></div>` : '';
-  box.innerHTML = `
-    <div class="lookcard">
-      ${row(lang ==='th'?'ทรงผม':'Hair', look.hair)}
-      ${row(lang ==='th'?'ต่างหู/สร้อย':'Jewelry', look.jewelry)}
-      ${row(lang ==='th'?'เครื่องประดับ':'Accessories', look.accessories)}
-      ${row(lang ==='th'?'รองเท้า':'Shoes', look.shoes)}
-      ${look.note ? `<div class="looknote">${look.note}</div>` : ''}
+  const old = document.getElementById('lookSummaryOverlay'); if (old) old.remove();
+  const ov = document.createElement('div');
+  ov.id = 'lookSummaryOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(26,26,26,.55);display:flex;align-items:flex-end;justify-content:center';
+  ov.onclick = (e) => { if (e.target === ov) ov.remove(); };
+  ov.innerHTML = `
+    <div style="background:#fff;width:100%;max-width:440px;border-radius:18px 18px 0 0;padding:22px 20px 26px;max-height:92vh;overflow:auto">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:15px;font-weight:600;color:#0F6E56">${th ? 'ครบลุคของคุณ พร้อมแล้ว' : 'Your complete look is ready'}</div>
+        <div style="font-size:13px;color:var(--muted,#8C8B86);margin-top:3px">${g.name}${th ? ' · จัดสไตล์โดย LLOOP Atelier' : ' · styled by LLOOP Atelier'}</div>
+      </div>
+      <div class="lookcard">
+        ${row(th ? 'ทรงผม' : 'Hair', look.hair)}
+        ${row(th ? 'ต่างหู/สร้อย' : 'Jewelry', look.jewelry)}
+        ${row(th ? 'เครื่องประดับ' : 'Accessories', look.accessories)}
+        ${row(th ? 'รองเท้า' : 'Shoes', look.shoes)}
+        ${look.note ? `<div class="looknote">${look.note}</div>` : ''}
+      </div>
+      <button onclick="document.getElementById('lookSummaryOverlay').remove()" style="width:100%;margin-top:16px;border:1px solid var(--ink,#1A1A1A);background:#fff;border-radius:12px;padding:11px;font-weight:600;cursor:pointer">${th ? 'เยี่ยมเลย' : 'Great'}</button>
     </div>`;
+  document.body.appendChild(ov);
+}
+
+// สร้าง LINE Flex bubble สรุปครบลุค
+function buildLookFlex(g, look) {
+  const th = lang === 'th';
+  const line = (label, items) => {
+    const val = Array.isArray(items) ? items.join(' · ') : (items || '');
+    if (!val) return null;
+    return { type: 'box', layout: 'baseline', spacing: 'sm', contents: [
+      { type: 'text', text: label, color: '#A39472', size: 'sm', flex: 2 },
+      { type: 'text', text: val, wrap: true, color: '#4A4438', size: 'sm', flex: 5 },
+    ] };
+  };
+  const rows = [
+    line(th ? 'ทรงผม' : 'Hair', look.hair),
+    line(th ? 'ต่างหู/สร้อย' : 'Jewelry', look.jewelry),
+    line(th ? 'เครื่องประดับ' : 'Accessories', look.accessories),
+    line(th ? 'รองเท้า' : 'Shoes', look.shoes),
+  ].filter(Boolean);
+  const body = { type: 'box', layout: 'vertical', spacing: 'md', contents: [
+    { type: 'text', text: th ? 'ครบลุคของคุณ' : 'Your complete look', weight: 'bold', size: 'lg', color: '#0F6E56' },
+    { type: 'text', text: g.name || '', size: 'sm', color: '#8C8B86', wrap: true },
+    { type: 'separator', margin: 'md' },
+    ...rows,
+  ] };
+  if (look.note) body.contents.push({ type: 'text', text: look.note, size: 'xs', color: '#A39472', wrap: true, margin: 'md' });
+  return {
+    type: 'flex',
+    altText: th ? `ครบลุคของคุณ — ${g.name || ''}` : `Your complete look — ${g.name || ''}`,
+    contents: { type: 'bubble', body },
+  };
+}
+
+// ส่ง Flex เข้าแชต LINE (เฉพาะตอนเปิดในแอป LINE ที่ส่งข้อความเข้าแชตได้)
+async function sendLookFlex(g, look) {
+  try {
+    if (!(window.liff && liff.isInClient && liff.isInClient() && liff.sendMessages)) return;
+    await liff.sendMessages([buildLookFlex(g, look)]);
+  } catch (e) { /* ไม่มีสิทธิ์ส่ง/ไม่ได้เปิดจากแชต → ข้ามไป มีสรุปบนจอให้แล้ว */ }
 }
 
 function todayStr() {
@@ -1634,6 +1692,7 @@ async function reserve(id, useCredit) {
       closeDetail();
       const depNote = (d.deposit_due > 0) ? (lang ==='th'?` · มัดจำ ฿${Math.round(d.deposit_due)} เก็บตอนรับชุด`:` · deposit ฿${Math.round(d.deposit_due)} at pickup`) : '';
       toast((lang ==='th'?`จ่ายด้วยเครดิตสำเร็จ · ${g.name}`:`Paid with credit · ${g.name}`) + depNote);
+      deliverLookAfterPay(g);   // จ่ายสำเร็จแล้วค่อยจัด "ครบลุค" ให้ + ส่ง Flex เข้าแชต (ไม่เปลืองโทเคนตอนแค่กดดู)
       return;
     }
     // เครดิตไม่พอ/ผิดพลาด → จองยังค้างเป็น hold ให้ไปจ่าย QR แทน
@@ -1682,6 +1741,7 @@ async function bdayBook(id) {
   toast(lang === 'th'
     ? (Number(res.pay) > 0 ? `จองวันเกิดสำเร็จ จ่ายเพิ่ม ฿${res.pay} · สุขสันต์วันเกิดค่ะ` : 'จองวันเกิดสำเร็จ เช่าฟรี! สุขสันต์วันเกิดค่ะ')
     : (Number(res.pay) > 0 ? `Birthday booking done · pay ฿${res.pay}` : 'Birthday booking done · free! Happy birthday'));
+  deliverLookAfterPay(g);   // จองยืนยันแล้ว → จัด "ครบลุค" ให้ + ส่ง Flex เข้าแชต
   } finally { _bdayBooking = false; if (_bdayBtn) _bdayBtn.disabled = false; }
 }
 
