@@ -146,6 +146,9 @@
     else if(r.error!=='ยกเลิก'){ $('hint').textContent='รูปไม่สำเร็จ: '+r.error; }
   }
   $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') load(); });
+  // รับ ?code= จาก deep-link (เช่น today.html แถว 'ต้องส่งวันนี้') แล้วเตรียมให้อัตโนมัติ
+  const _q=new URLSearchParams(location.search).get('code');
+  if(_q){ $('code').value=_q; load(); }
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>

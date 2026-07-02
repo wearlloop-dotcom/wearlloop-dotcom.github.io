@@ -171,8 +171,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=38"></script>
-<script src="liffAuth.js?v=38"></script>
-<script src="me-api.js?v=54"></script>
+<script src="liffAuth.js?v=56"></script>
+<script src="me-api.js?v=56"></script>
 <script src="api.js?v=54"></script>
 <script src="nav.js?v=1"></script>
 <script>
@@ -210,6 +210,10 @@ function readToken(){
     if(!t){
       const st=sp.get('liff.state');
       if(st){ const inner=new URLSearchParams(st.replace(/^\?/,'')); t=inner.get('token'); }
+    }
+    // หลัง LINE login redirectUri (baseUrl) ตัด ?token ทิ้ง → กู้คืนจาก sessionStorage ที่ stash ไว้ก่อน signIn
+    if(!t){
+      try{ t=sessionStorage.getItem('joinToken')||null; }catch(_e){} // ไม่ลบตรงนี้ — เก็บไว้ให้รอด reload/สลับภาษา ลบหลัง join สำเร็จแทน
     }
     return t||null;
   }catch(_e){ return null; }
@@ -299,6 +303,8 @@ async function doJoin(){
   // บังคับยืนยันด้วย LINE เสมอ — ยังไม่ล็อกอิน → พาไป LINE login (ไม่มีโหมดเดโมข้าม)
   if(!CUSTOMER || !CUSTOMER.id){
     btn.disabled=true; btn.innerHTML='<span class="spin"></span>'+NAV.t('กำลังพาไปยืนยันด้วย LINE…','Taking you to verify with LINE…');
+    // stash token ไว้กู้คืนหลัง LINE login (redirectUri=baseUrl ตัด ?token ทิ้ง) — readToken จะอ่านคืน
+    try{ if(TOKEN) sessionStorage.setItem('joinToken', TOKEN); }catch(_e){}
     try{ await window.LiffAuth.signIn(); }
     catch(_e){ btn.disabled=false; btn.textContent=NAV.t('เข้าร่วมกลุ่ม','Join group');
       alert(NAV.t('กรุณาเปิดลิงก์นี้ในแอป LINE เพื่อยืนยันตัวตนก่อนเข้าร่วมกลุ่มนะคะ','Please open this link in the LINE app to verify your identity before joining the group.')); }
@@ -309,9 +315,11 @@ async function doJoin(){
     const r=unwrap(await window.API.joinGroup(TOKEN, CUSTOMER));
     if(r && r.error) throw { message:r.error };
     show('doneView');
+    try{ sessionStorage.removeItem('joinToken'); }catch(_e){} // join สำเร็จแล้ว → เคลียร์ token ที่ stash ไว้
     const gname=(r && r.group_name) || (PREVIEW && PREVIEW.name) || NAV.t('กลุ่ม','the group');
-    $('#doneMsg').textContent=NAV.t('ยินดีต้อนรับสู่ “'+gname+'” · กำลังพาเข้ากลุ่ม…','Welcome to "'+gname+'" · taking you to the group…');
-    setTimeout(()=>{ location.href='family.html'; }, 1200);
+    // ให้ลูกค้ากดไปเอง (เดิม auto-redirect 1.2 วิ — จอเด้งเองต่อจาก LINE login กลายเป็นหลายเด้งติดกัน)
+    $('#doneMsg').innerHTML=NAV.t('ยินดีต้อนรับสู่ “'+gname+'”','Welcome to "'+gname+'"')
+      +'<br><a href="family.html" style="display:inline-block;margin-top:14px;background:#1A1A1A;color:#fff;border-radius:12px;padding:11px 22px;font-weight:600;text-decoration:none">'+NAV.t('ไปที่กลุ่มของฉัน','Go to my group')+'</a>';
   }catch(e){
     btn.disabled=false; btn.textContent=NAV.t('เข้าร่วมกลุ่ม','Join group');
     const code=(e && e.message) || '';

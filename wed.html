@@ -41,14 +41,15 @@
 </style>
 </head>
 <body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="wrap" id="app"><div class="center">กำลังโหลด…</div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=51"></script>
 <script src="data.js?v=51"></script>
-<script src="liffAuth.js?v=51"></script>
-<script src="me-api.js?v=54"></script>
+<script src="liffAuth.js?v=56"></script>
+<script src="me-api.js?v=56"></script>
 <script src="api.js?v=55"></script>
 <script src="nav.js?v=1"></script>
 <script>
@@ -158,8 +159,8 @@ function renderEvent(){
     a.addEventListener('click', async (e) => {
       e.preventDefault();
       const code = a.dataset.code;
-      if (CUSTOMER) { try { await window.API.wedSharePick(CUSTOMER, SUMMARY.code, code, 'reserved'); } catch (err) {} }
-      // ไปหน้าจองชุดตัวนี้ (g.html อ่าน ?code=)
+      if (CUSTOMER) { try { await window.API.wedSharePick(CUSTOMER, SUMMARY.code, code, 'eyeing'); } catch (err) {} }
+      // ไปหน้าจองชุดตัวนี้ (g.html อ่าน ?code=) — ส่ง 'eyeing' (กำลังดู) ไม่ล็อกชุด; ให้ backend อัปเป็น 'reserved' เมื่อจองสำเร็จจริง
       location.href = 'g.html?code=' + encodeURIComponent(code);
     });
   });

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · สรุปสไตล์ของฉัน</title>
+<meta name="description" content="Style Passport — สรุปสีผิว รูปหน้า หุ่น ไซส์ และลุคแต่งตัวเฉพาะบุคคล โดย LLOOP">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBFAF7;--paper:#fff;--ink:#1A1A1A;--soft:#F5F4F2;--line:#E7E5E1;--muted:#86857F;
+    --sage:#6FB3A6;--sage-bg:#E4F0EC;--ok:#0F6E56;--gold:#C9A86A;--gold-bg:#F6EFDF;--sand:#F2ECDD;--clay:#A75F3A;
+    --display:'Poppins','Prompt',sans-serif;--sans:'Inter','Prompt',-apple-system,sans-serif;--num:'Poppins',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:36px}
+  .wrap{max-width:640px;margin:0 auto;padding:0 18px}
+  a{color:inherit;text-decoration:none}button{font-family:inherit;cursor:pointer}
+  svg.ico{stroke:#4a4136;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+  header{position:sticky;top:0;z-index:40;background:rgba(251,250,247,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .hbar{max-width:640px;margin:0 auto;padding:0 18px;height:52px;display:flex;align-items:center;justify-content:space-between}
+  .logo{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:1.5px}
+  .back{font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:5px;padding:8px 4px;margin:-8px -4px}
+  .back svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9}
+
+  .hero{background:radial-gradient(130% 80% at 85% 0%,var(--gold-bg),transparent 60%),radial-gradient(120% 90% at 0% 100%,var(--sage-bg),transparent 55%),var(--bg);border-bottom:1px solid var(--line)}
+  .hero .wrap{padding:26px 18px 22px}
+  .kick{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:33px;line-height:1.06;margin:8px 0 8px}
+  .hero h1 span{color:var(--clay)}
+  .hline{font-size:15px;color:#4a453d;line-height:1.5;max-width:470px}
+  .hline b{color:var(--ink);font-weight:600}
+  .who{font-size:12.5px;color:var(--muted);margin-top:9px}
+  .stack{display:flex;gap:5px;margin-top:16px}
+  .stack i{flex:1;height:9px;border-radius:4px}
+
+  /* summary */
+  .sum{margin-top:22px}
+  .sumhd{display:flex;align-items:center;gap:9px;font-family:var(--display);font-size:13.5px;font-weight:600;color:var(--ok);margin-bottom:13px}
+  .sumhd .pill{font-size:11px;background:var(--sage-bg);color:var(--ok);padding:4px 11px;border-radius:20px;font-weight:600}
+  .tk{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:12px;display:flex;gap:14px}
+  .tk .tkic{width:44px;height:44px;border-radius:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .tk .tkic.g{background:var(--sand)}.tk .tkic.r{background:#F7ECE6}.tk .tkic.s{background:var(--sage-bg)}.tk .tkic.b{background:var(--gold-bg)}
+  .tk .tkic svg{width:22px;height:22px}
+  .tk .tkic.g svg{stroke:var(--clay)}.tk .tkic.r svg{stroke:var(--clay)}.tk .tkic.s svg{stroke:var(--ok)}.tk .tkic.b svg{stroke:#8a6d2e}
+  .tk .body{flex:1;min-width:0}
+  .tk .body h3{font-family:var(--display);font-size:16px;font-weight:600;line-height:1.2}
+  .tk .body .say{font-size:13px;color:#5b564e;margin-top:4px;line-height:1.5}
+  .tk .body .say b{color:var(--clay);font-weight:600}
+  .swn{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
+  .swn .u{text-align:center;width:46px;cursor:pointer}
+  .swn .u i{display:block;width:46px;height:42px;border-radius:11px;border:1px solid rgba(0,0,0,.06)}
+  .swn .u small{display:block;font-size:9.5px;color:var(--muted);margin-top:4px;line-height:1.15}
+  .smallsw{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+  .smallsw i{width:30px;height:30px;border-radius:8px;border:1px solid rgba(0,0,0,.08)}
+  .ddline{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+  .ddline span{font-size:12px;font-weight:600;padding:6px 11px;border-radius:20px}
+  .ddline .yes{background:var(--sage-bg);color:var(--ok)}.ddline .no{background:#F7ECE6;color:var(--clay)}
+  .matchrow{margin-top:11px;font-size:12px;color:#5b564e}.matchrow b{color:var(--ink)}
+  .dots{display:flex;gap:6px;margin-top:11px;align-items:center}
+  .dots i{width:26px;height:26px;border-radius:50%;border:1px solid rgba(0,0,0,.08)}.dots i.hair{border-radius:8px}
+
+  /* looks */
+  .looks{margin-top:26px}
+  .lkhd{font-family:var(--display);font-size:18px;font-weight:600}
+  .lksub{font-size:13px;color:var(--muted);margin:3px 0 14px}
+  .lkscroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin:0 -18px;padding-left:18px;padding-right:18px}
+  .lkscroll::-webkit-scrollbar{display:none}
+  .lkcard{flex:0 0 176px;background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .lkcard .flat{height:186px;background:linear-gradient(160deg,#FCFBF8,#F4EEE2);display:flex;align-items:center;justify-content:center;position:relative}
+  .lkcard .flat .mood{position:absolute;top:10px;left:10px;font-size:10px;font-weight:600;background:rgba(255,255,255,.85);color:#7c5a1e;padding:3px 9px;border-radius:20px}
+  .lkcard .info{padding:12px 13px 14px}
+  .lkcard .info b{font-family:var(--display);font-size:14px;font-weight:600;display:block;line-height:1.25}
+  .lkcard .info .pcs{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.4}
+  .lkcard .info .shop{margin-top:9px;font-size:11.5px;font-weight:600;color:var(--ok);display:flex;align-items:center;gap:5px;background:none;border:none;padding:0}
+  .lkcard .info .shop svg{width:13px;height:13px;stroke:var(--ok);fill:none;stroke-width:1.7}
+  .garment{stroke:rgba(0,0,0,.14);stroke-width:1;stroke-linejoin:round}
+  .bystyl{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 13px;background:var(--paper);border:1px solid var(--line);border-radius:14px}
+  .bystyl .av{width:34px;height:34px;border-radius:50%;background:conic-gradient(from 210deg,var(--clay),var(--gold),var(--sage),var(--clay));color:#fff;font-family:var(--display);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .bystyl .t{font-size:12.5px;line-height:1.4}.bystyl .t b{font-weight:600}.bystyl .t span{color:var(--muted)}
+
+  /* progressive-disclosure detail */
+  .more{margin-top:28px}
+  .more .mh{font-family:var(--display);font-size:18px;font-weight:600;margin-bottom:3px}
+  .more .ms{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .fold{border:1px solid var(--line);border-radius:16px;margin-bottom:11px;background:var(--paper);overflow:hidden}
+  .fold>summary{list-style:none;cursor:pointer;padding:15px 16px;display:flex;align-items:center;gap:13px}
+  .fold>summary::-webkit-details-marker{display:none}
+  .fold>summary .ti{width:42px;height:42px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .fold>summary .ti svg{width:22px;height:22px}
+  .fold>summary .st b{font-family:var(--display);font-size:15px;font-weight:600;display:block}
+  .fold>summary .st small{font-size:11.5px;color:var(--muted)}
+  .fold>summary .cx{margin-left:auto;color:var(--muted);font-size:20px;transition:transform .2s;flex-shrink:0}
+  .fold[open]>summary .cx{transform:rotate(45deg)}
+  .fold[open]>summary{border-bottom:1px solid var(--line)}
+  .fold .fb{padding:16px}
+  .fold .fb .lead{color:#5b564e;font-size:13px;margin-bottom:12px;line-height:1.55}
+  .fold .fb .lead b{color:var(--ink)}
+
+  /* palette detail */
+  .best{display:flex;gap:8px;flex-wrap:wrap}
+  .bchip{display:flex;align-items:center;gap:8px;background:var(--soft);border-radius:11px;padding:7px 12px 7px 8px;font-size:12.5px;font-weight:600;cursor:pointer}
+  .bchip i{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.06)}
+  .avoid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .achip{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#7a5a52;background:#F7ECE7;border-radius:11px;padding:6px 11px 6px 7px}
+  .achip i{width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.06)}
+  .subh{font-family:var(--display);font-size:13.5px;font-weight:600;margin:16px 0 8px}
+  .neu{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .neu .n{text-align:center;cursor:pointer}
+  .neu .n i{display:block;width:100%;aspect-ratio:1;border-radius:11px;border:1px solid rgba(0,0,0,.06)}
+  .neu .n b{display:block;font-size:9.5px;margin-top:5px;font-weight:600}.neu .n small{font-size:9px;color:var(--muted)}
+  .hxt{font-size:12.5px;color:var(--clay);font-weight:600;display:inline-flex;gap:5px;margin:16px 0 9px;padding:6px 2px}
+  .fam{margin-bottom:13px}
+  .fam .fh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:7px}
+  .fam .fh b{font-family:var(--display);font-size:13px;font-weight:600}.fam .fh small{font-size:11px;color:var(--muted)}
+  .swrow{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+  .sw{aspect-ratio:1;border-radius:8px;position:relative;border:1px solid rgba(0,0,0,.05);cursor:pointer}
+  .sw .hx{position:absolute;inset:auto 0 0 0;font-size:7px;text-align:center;padding:1px 0;color:#fff;opacity:0;background:rgba(0,0,0,.36);border-radius:0 0 7px 7px}
+  .swwrap.show .sw .hx{opacity:1}
+
+  /* makeup */
+  .mk{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .mk .m{background:var(--soft);border-radius:14px;padding:13px}
+  .mk .m .mh{font-family:var(--display);font-size:13px;font-weight:600;margin-bottom:9px}
+  .mkdots{display:flex;gap:5px;flex-wrap:wrap}.mkdots i{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.07)}
+  .mk .m p{font-size:12px;color:#5b564e;margin-top:8px;line-height:1.45}
+  .prodlist{margin-top:6px}
+  .prodlist h4{font-family:var(--display);font-size:12.5px;font-weight:600;margin:12px 0 2px}
+  .prodlist .p{display:flex;align-items:center;gap:11px;padding:9px 0;border-top:1px dashed var(--line)}
+  .prodlist .p i{width:16px;height:16px;border-radius:5px;flex-shrink:0;border:1px solid rgba(0,0,0,.08)}
+  .prodlist .p .pn{font-size:12.5px;font-weight:600;line-height:1.3}.prodlist .p .pn span{display:block;font-weight:400;color:var(--muted);font-size:11px}
+
+  /* body */
+  .dd{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .dd .col{border-radius:14px;padding:14px;border:1px solid var(--line)}
+  .dd .do{background:linear-gradient(180deg,var(--sage-bg),#fff)}.dd .dont{background:linear-gradient(180deg,#F7ECE6,#fff)}
+  .dd h4{font-family:var(--display);font-size:13px;font-weight:600;margin-bottom:9px}.dd .do h4{color:var(--ok)}.dd .dont h4{color:var(--clay)}
+  .dd ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .dd li{font-size:12.5px;line-height:1.4;padding-left:17px;position:relative;color:#453f38}
+  .dd .do li::before{content:'✓';position:absolute;left:0;color:var(--ok);font-weight:700}
+  .dd .dont li::before{content:'✕';position:absolute;left:0;color:var(--clay);font-weight:700}
+  @media(max-width:440px){.dd,.mk{grid-template-columns:1fr}}
+  .acc2{border:1px solid var(--line);border-radius:12px;margin-top:9px;overflow:hidden}
+  .acc2>summary{list-style:none;cursor:pointer;padding:12px 14px;font-family:var(--display);font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .acc2>summary::-webkit-details-marker{display:none}
+  .acc2>summary .cx{margin-left:auto;color:var(--muted);font-size:17px;transition:transform .2s}
+  .acc2[open]>summary .cx{transform:rotate(45deg)}
+  .acc2 .b2{padding:0 14px 13px}
+  .pills{display:flex;gap:7px;flex-wrap:wrap}
+  .pill{background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:7px 13px;font-size:12.5px;font-weight:500;color:#453f38}
+  .pill.key{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45}.note b{color:var(--clay);font-weight:600}
+
+  /* size */
+  .sizehero{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:13px}
+  .sizehero .sc{border-radius:16px;padding:15px 12px;text-align:center;color:#fff}
+  .sizehero .sc.a{background:linear-gradient(160deg,#B27C4A,#8a5a30)}.sizehero .sc.b{background:linear-gradient(160deg,#6FB3A6,#3f8073)}.sizehero .sc.c{background:linear-gradient(160deg,#A75F3A,#7c3f24)}
+  .sizehero .sc .k{font-size:11px;letter-spacing:1px;text-transform:uppercase;opacity:.85;font-weight:600}
+  .sizehero .sc .v{font-family:var(--display);font-size:28px;font-weight:700;line-height:1.05;margin-top:3px}
+  .sizehero .sc .u{font-size:11px;opacity:.85;margin-top:2px}
+  .fitgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}
+  @media(max-width:480px){.fitgrid{grid-template-columns:1fr}}
+  .figure{background:var(--soft);border-radius:16px;padding:14px;display:flex;justify-content:center}
+  .figure svg{width:100%;max-width:170px}
+  .mtag{fill:#7a746a;font-size:9px}.mval{fill:var(--ink);font-size:10px;font-weight:600;font-family:'Poppins',sans-serif}
+  .mlist .mr{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
+  .mlist .mr:first-child{border-top:none}.mlist .mr .ml{color:#5b564e}.mlist .mr .mv{font-family:var(--display);font-weight:600}
+  .mlist .mr .mv small{font-family:var(--sans);font-weight:400;color:var(--muted);font-size:11px}
+  .ctable{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .ctable th,.ctable td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line)}
+  .ctable th{background:var(--soft);font-weight:600;font-size:11.5px;color:#5b564e}
+  .ctable td:first-child,.ctable th:first-child{text-align:left;padding-left:12px;font-weight:600}
+  .ctable tr:last-child td{border-bottom:none}
+  .ctable td.hit{background:var(--gold-bg);color:#7c5a1e;font-weight:700}
+  .ctips{font-size:12px;color:var(--muted);margin-top:9px;line-height:1.5}.ctips b{color:var(--ink)}
+
+  /* character */
+  .barrow{display:flex;align-items:center;gap:10px;margin:10px 0}
+  .barrow .bl{font-size:12.5px;font-weight:600;width:128px;flex-shrink:0}.barrow .bl small{display:block;font-weight:400;color:var(--muted);font-size:10px}
+  .barrow .bt{flex:1;height:9px;border-radius:6px;background:var(--soft);overflow:hidden}
+  .barrow .bt i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--gold),var(--clay))}
+  .barrow .bv{font-family:var(--display);font-size:15px;font-weight:600;width:28px;text-align:right}
+  .personas{display:flex;gap:9px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}.personas::-webkit-scrollbar{display:none}
+  .pcard{flex:0 0 148px;border:1px solid var(--line);border-radius:15px;padding:14px;background:var(--soft)}
+  .pcard .pi svg{width:22px;height:22px}
+  .pcard b{display:block;font-family:var(--display);font-size:13.5px;font-weight:600;margin:7px 0 4px}.pcard p{font-size:12px;color:var(--muted);line-height:1.45}
+
+  .cta{background:linear-gradient(150deg,#20463c,#0F6E56);color:#EAF3F0;border-radius:20px;padding:24px 22px;margin:24px 0 8px;text-align:center}
+  .cta h3{font-family:var(--display);font-size:20px;font-weight:600;color:#fff;margin-bottom:7px}
+  .cta p{font-size:13px;color:#C9E0D8;max-width:400px;margin:0 auto 15px}
+  .cta .btn{display:inline-block;background:#fff;color:#0F6E56;font-weight:700;font-size:14px;padding:12px 24px;border-radius:11px}
+  .cta .alt{display:block;margin-top:11px;font-size:12px;color:#A9CEC3}
+  footer{text-align:center;padding:24px 18px 6px;color:var(--muted);font-size:12px;line-height:1.7}footer b{color:var(--ink)}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:22px;font-size:13px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header><div class="hbar">
+  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> กลับ</a>
+  <a class="logo" href="index.html">LLOOP</a><span style="width:42px"></span>
+</div></header>
+
+<div class="hero"><div class="wrap">
+  <div class="kick">My Style Passport</div>
+  <h1>คุณคือ <span id="h_season">Warm Autumn</span></h1>
+  <div class="hline" id="h_line"></div>
+  <div class="who" id="h_who"></div>
+  <div class="stack" id="h_stack"></div>
+
+  <div class="sum">
+    <div class="sumhd"><span class="pill">อ่าน 30 วิ</span> จำแค่ 4 เรื่องนี้ก็สวยแล้ว</div>
+    <div id="summary"></div>
+  </div>
+
+  <div class="looks">
+    <div class="lkhd">ลุคจัดไว้ให้คุณ</div>
+    <div class="lksub" id="lksub">จัดโดยสไตลิสต์ของคุณ</div>
+    <div class="lkscroll" id="lkscroll"></div>
+    <div class="bystyl" id="bystyl"></div>
+  </div>
+
+  <div class="more">
+    <div class="mh">อยากรู้ลึกขึ้น?</div>
+    <div class="ms">แตะเฉพาะเรื่องที่สนใจ ไม่ต้องอ่านหมดก็ได้</div>
+    <div id="folds"></div>
+  </div>
+
+  <div class="cta">
+    <h3>อยากลองชุดจริงตามนี้?</h3>
+    <p>ให้สไตลิสต์ LLOOP จัดลุคแล้วเช่าได้เลย ไม่ต้องซื้อขาด</p>
+    <a class="btn" href="looks.html">ดูลุคที่แมตช์กับฉัน →</a>
+    <span class="alt">Personal Color Analysis โดย Classis · @classis.personalcolor</span>
+  </div>
+</div></div>
+
+<footer><b>LLOOP</b> · My Style Passport — สรุปจากผลวิเคราะห์เฉพาะบุคคล<br>พาเลตต์/เมคอัพอ้างอิง Classis Personal Color · ไซส์และการจัดสไตล์โดย LLOOP</footer>
+<div class="toast" id="toast">คัดลอกแล้ว</div>
+
+<script>
+/* =========================================================================
+   PROFILE — โครงเดียวกับที่ partner.html บันทึก (partner_portal_save)
+   style.looks[] = ลุคที่สไตลิสต์จัด (Look Builder). ว่าง = ใช้ลุคเริ่มต้นของฤดู+หุ่น
+   ========================================================================= */
+const PROFILE = {
+  name:"คุณลูกค้า", initial:"C", analyst:"Classis Studio", date:"02 ก.ค. 2026",
+  color:{ type_12:"Warm Autumn", undertone:"Warm", depth:"Medium", metals:["ทอง","มุก"] },
+  face:{ shape:"รูปไข่" },
+  body:{ type:"นาฬิกาทราย" },
+  measurements:{ height_cm:null, weight_kg:null, dress_size:"XS–S",
+    bust_in:31.5, waist_in:24, hip_in:34.5, shoulder_in:34.5, shoe_size:"38 (EU)", ring_size:"52 มม." },
+  personality:[
+    {t:"สดใส เข้ากับคนง่าย",sub:"Bright / Playful",v:4,max:6},
+    {t:"อ่อนโยน ประณีต",sub:"Soft / Gentle",v:6,max:6},
+    {t:"ตรงไปตรงมา เด็ดขาด",sub:"Bold / Natural",v:5.5,max:6},
+    {t:"มีระเบียบ เฉียบคม",sub:"Chic / Modern",v:6,max:6}
+  ],
+  looks:[]   // ← เว้นว่าง: report จะดึงลุคเริ่มต้น 15 ลุคของ Warm Autumn × Hourglass มาแสดง
+};
+
+/* ========================= LIBRARY ========================= */
+const LIBRARY = {
+  seasons:{ "Warm Autumn":{
+    line:"โทนอุ่นละมุน — <b>อ่อนโยนแต่มีความเฉียบในคนเดียว</b> ใส่สีดินอบอุ่นเมื่อไหร่ ผิวสว่างและดูแพงขึ้นทันที",
+    colorSay:"โทนดินอบอุ่นแบบ<b>ใบไม้ร่วง</b> — ยิ่งใส่ผิวยิ่งดูสุขภาพดี",
+    avoidSay:"ฟ้าพาสเทล ชมพูสด เทาเงิน ขาว-ดำจัด — จะทำให้ผิว<b>ดูซีดหมอง</b>",
+    families:[
+      {name:"Warm Neutrals",th:"นิวทรัลอุ่น",colors:["#F6F3E1","#F1E2B6","#DACB9A","#E0BBA2","#CCAF90","#CDA278","#BA9C70","#AE9379"]},
+      {name:"Deep Browns",th:"น้ำตาลเข้ม",colors:["#666050","#464740","#42413D","#8A4421","#7B4827","#614428","#473028","#3E120D"]},
+      {name:"Blues & Teals",th:"ฟ้า–เขียวน้ำทะเล",colors:["#70ABC5","#6DADBF","#377885","#367F80","#365F99","#334A76","#2E3666","#473C8B"]},
+      {name:"Greens",th:"เขียวมะกอก–ป่า",colors:["#B6B36A","#8C9963","#7B7945","#4E5327","#9FC57C","#5B784A","#314F37","#1B4225"]},
+      {name:"Golds & Ochre",th:"ทอง–ออกเกอร์",colors:["#D7C144","#D3A843","#A07D29","#936928","#B0773E","#965536","#EE7E37","#F2A83A"]},
+      {name:"Terracotta & Coral",th:"ดินเผา–คอรัล",colors:["#D26136","#D9713E","#C66F33","#B25B22","#A64A21","#E78A85","#EA8686","#EC8679"]},
+      {name:"Warm Reds & Berry",th:"แดงอุ่น–เบอร์รี",colors:["#D57862","#CD402A","#A2322A","#9A3431","#73180E","#76150C","#831924","#5F1624"]}
+    ],
+    best:[{c:"#B25B22",n:"ดินเผา"},{c:"#7B7945",n:"มะกอก"},{c:"#A07D29",n:"ทอง"},{c:"#367F80",n:"ทีล"},{c:"#831924",n:"แดงอิฐ"},{c:"#CDA278",n:"คาเมล"}],
+    avoid:[{c:"#8FD0EA",n:"ฟ้าพาสเทล"},{c:"#E85FA0",n:"ชมพูสด"},{c:"#C9CBD1",n:"เทาเงิน"},{c:"#FFFFFF",n:"ขาวจั๊วะ"},{c:"#111111",n:"ดำสนิท"}],
+    neutrals:[
+      {c:"#F6F3E1",n:"Ivory"},{c:"#F2EBD8",n:"Cream"},{c:"#C0AD8C",n:"Beige"},{c:"#D5B58E",n:"Camel"},{c:"#9F7652",n:"Tan"},
+      {c:"#7B7945",n:"Olive"},{c:"#664324",n:"Coffee"},{c:"#8C4513",n:"Terra"},{c:"#450B06",n:"Oxblood"},{c:"#334A76",n:"Denim"}
+    ],
+    makeup:[
+      {t:"รองพื้น",dots:["#F1E2B6","#E7CFA0","#D6B080","#C69A6A","#9C6F42"],p:"เบสเหลือง (Yellow base) โทนอุ่น ผิวกลืนธรรมชาติ"},
+      {t:"ริมฝีปาก",dots:["#9A3431","#B25B22","#C66F33","#D57862","#CD402A"],p:"อิฐ ส้มดินเผา พีชนู้ด น้ำตาลอุ่น"},
+      {t:"บลัช",dots:["#D57862","#E78A85","#C66F33","#B25B22","#CDA278"],p:"คอรัล พีช โรสบราวน์ ดินเผา"},
+      {t:"อายแชโดว์",dots:["#F1E2B6","#CDA278","#B0773E","#8A4421","#614428"],p:"นู้ดน้ำตาล–ทอง ประกายแชมเปญ"},
+      {t:"สีผม",dots:["#7B4827","#8A5A2B","#A9743F","#C79A5E","#5A3B22"],p:"น้ำตาลทอง คาราเมล เกาลัด"},
+      {t:"เล็บ",dots:["#EFDCC9","#D8B79A","#B25B22","#7A1F1A","#4B2E1E"],p:"มิลค์กี้นู้ด ดินเผา อิฐเข้ม"}
+    ],
+    products:{
+      "บลัช":[{c:"#C77B5E",n:"Romand Better Than Cheek",s:"#C04"},{c:"#B67159",n:"Peripera Sunshine Cheek",s:"#17 Rosy Brown"},{c:"#C46A4A",n:"MAC Glow Play",s:"So Natural"},{c:"#C86A55",n:"Rare Beauty",s:"Virtue"}],
+      "ลิป":[{c:"#B4735A",n:"Romand Juicy Tint",s:"#10 Nudy Peanut"},{c:"#B85A3E",n:"Amuse Jel Fit",s:"#07 Caramel"},{c:"#9C5A48",n:"Dior Addict",s:"#616 Nude Mitzah"},{c:"#8C2A28",n:"YSL Rouge Pur",s:"#01 Re Rouge"}],
+      "อายแชโดว์":[{c:"#C6A279",n:"Dasique Palette",s:"#01 Warm Basic"},{c:"#8A5A3A",n:"Romand Better Than",s:"Mahogany Garden"},{c:"#B5885C",n:"3CE Mood Recipe",s:"Plot Twist"}]
+    }
+  }},
+  bodies:{ "นาฬิกาทราย":{ en:"Hourglass",
+    do:["เข้ารูปช่วงเอว / คาดเข็มขัด","เอวสูง (High-waist) เก็บชายเข้าใน","ทรงเสื้อ Wrap & Peplum","เสื้อนอก Single-breasted มีเข็มขัด","ผ้าทิ้งตัว รับส่วนเว้าโค้ง"],
+    dont:["ทรงตรง / Boxy กลบเอว","เอวต่ำ (Low-rise)","ดีเทล/กระเป๋าเยอะเฉพาะจุด","Empire / Drop-waist ไม่คาดเอว","ผ้าแข็งหนา ไม่รับสัดส่วน"],
+    silhouettes:[
+      {t:"คอเสื้อ",en:"Necklines",items:["Sweet Heart*","Scoop*","Square","Off-shoulder","V-Neck"],avoid:"คอกว้าง+สูงมาก ดีเทลเยอะรอบคอ/ไหล่"},
+      {t:"เสื้อ",en:"Tops",items:["Fitted Wrap*","Peplum*","Fitted T","Fitted Shirt","Belted"],avoid:"ระบาย/โบว์/ผ้าหนาช่วงเอว"},
+      {t:"เดรส",en:"Dresses",items:["Wrap*","Nipped*","Belted","Panelled Waist","Bias"],avoid:"ทรงตรง/Boxy ดีเทลเฉพาะจุด"},
+      {t:"กางเกง/ยีนส์",en:"Trousers",items:["Straight (High-rise)*","Wide (Mid-rise)","Bootcut","Flare","Slim"],avoid:"เอวต่ำ ทรงหลวมเกินจนสะโพกใหญ่"},
+      {t:"กระโปรง",en:"Skirts",items:["Pencil (High-waist)*","Gored","A-line","Satin","Full"],avoid:"ทรงตรงผ้าแข็ง กระเป๋าใหญ่ เอวต่ำ"},
+      {t:"เสื้อนอก/โค้ต",en:"Outerwear",items:["Belted Blazer*","Wrap Coat*","Fitted Leather","Trench","Princess"],avoid:"ทรงตรง/Boxy ดีเทลหนาช่วงบน"}
+    ]},
+  },
+  faces:{ "รูปไข่":{ pills:["ผมสั้น–ยาวได้หมด","ผ่ากลาง / ปัดข้าง","ซีเคิร์ฟ (Curve)","แว่นทรงมน","Cat-eye","Oval frame"],
+    note:"หน้ารูปไข่สมดุลที่สุด ทำได้เกือบทุกทรง — เลี่ยงกรอบแว่นเหลี่ยมใหญ่หนักที่ตัดกับเส้นโค้งของหน้า" } },
+  personas:[
+    {t:"Feminine",p:"เดรสเข้ารูป มุก ทองชิ้นเล็ก"},{t:"Elegant",p:"จั๊มสูทครีม เข็มขัด กระเป๋าโครง"},
+    {t:"Cool Casual",p:"แท็งก์ท็อป + ยีนส์ทรงสวย"},{t:"Masculine",p:"เชิ้ตยีนส์ผูกเอว + กางเกงทรงสวย"},{t:"Cute",p:"มินิเดรสเหลืองครีม โบว์"}
+  ],
+
+  /* ลุคเริ่มต้น 15 ลุค — โครงสร้าง pieces เดียวกับที่ Look Builder ของ partner บันทึก */
+  looksByKey:{ "Warm Autumn|นาฬิกาทราย":[
+    {mood:"ทำงาน · Elegant",title:"จั๊มสูทครีมคาดเอว",note:"ทรง Nipped เน้นเอว โชว์สัดส่วน Hourglass",pieces:[
+      {role:"จั๊มสูท",sw:"#F2EBD8",desc:"จั๊มสูทครีม belted",buy:"COS"},{role:"เข็มขัด",sw:"#4B2E1E",desc:"เข็มขัดหนัง",buy:"C&K"},{role:"กระเป๋า",sw:"#8A5A2B",desc:"กระเป๋าโครง",buy:"Polène"},{role:"รองเท้า",sw:"#EFE7D6",desc:"คัตชูครีม",buy:"C&K"}]},
+    {mood:"ออกเดต · Feminine",title:"เดรส Wrap เทอร์ราคอตต้า",note:"Terracotta คือ Power Color + ทรง Wrap เก็บเอว",pieces:[
+      {role:"เดรส",sw:"#B25B22",desc:"เดรส wrap ดินเผา",buy:"Zara / Pomelo"},{role:"กระเป๋า",sw:"#8A4421",desc:"กระเป๋า hobo",buy:"Coach"},{role:"รองเท้า",sw:"#EFE7D6",desc:"ส้นครีม",buy:"C&K"}]},
+    {mood:"ลำลอง · Weekend",title:"แท็งก์ + ยีนส์เอวสูง",note:"ยีนส์ High-rise ยืดขา เก็บชายโชว์เอว",pieces:[
+      {role:"เสื้อ",sw:"#7B4827",desc:"แท็งก์ rib",buy:"Uniqlo"},{role:"กางเกง",sw:"#334A76",desc:"ยีนส์ straight",buy:"Levi's"},{role:"รองเท้า",sw:"#7B4827",desc:"loafers",buy:"C&K"}]},
+    {mood:"ออฟฟิศ · Chic",title:"เบลเซอร์มะกอก + Pencil",note:"เลี่ยง Boxy — เบลเซอร์ single-breasted เข้ารูป",pieces:[
+      {role:"เสื้อนอก",sw:"#7B7945",desc:"เบลเซอร์คาดเข็มขัด",buy:"Massimo Dutti"},{role:"กระโปรง",sw:"#464740",desc:"Pencil เอวสูง",buy:"Jaspal"},{role:"รองเท้า",sw:"#4B2E1E",desc:"คัตชู",buy:"C&K"}]},
+    {mood:"สังสรรค์ · Statement",title:"มัสตาร์ด × ทีล",note:"จับ Mustard Gold คู่ Teal สองสีเด่นของคุณ",pieces:[
+      {role:"เสื้อ",sw:"#A07D29",desc:"เสื้อ satin",buy:"& Other Stories"},{role:"กางเกง",sw:"#367F80",desc:"กางเกง wide",buy:"Zara"},{role:"กระเป๋า",sw:"#831924",desc:"กระเป๋าอิฐ",buy:"C&K"}]},
+    {mood:"งานกลางคืน · Bold",title:"เดรส Oxblood",note:"สีเข้มลึก เพิ่มความ luxe",pieces:[
+      {role:"เดรส",sw:"#5F1624",desc:"เดรสเข้ารูป",buy:"Maje"},{role:"กระเป๋า",sw:"#C9A24B",desc:"คลัตช์ทอง",buy:"Mango"},{role:"รองเท้า",sw:"#2b2b2b",desc:"ส้นดำ",buy:"C&K"}]},
+    {mood:"คาเฟ่ · Cute",title:"เดรสคาเมลหวาน",note:"A-line + เอวสูง ดูละมุน",pieces:[
+      {role:"เดรส",sw:"#D5B58E",desc:"เดรส A-line",buy:"Pomelo"},{role:"กระเป๋า",sw:"#EFE7D6",desc:"กระเป๋าครีม",buy:"C&K"},{role:"รองเท้า",sw:"#8A4421",desc:"Mary Jane",buy:"Jipi Japa"}]},
+    {mood:"สมาร์ทแคชชวล",title:"สูทสับ Rust + ครีม",note:"เอิร์ธโทนดูแพง ใส่ทำงานก็ได้",pieces:[
+      {role:"เสื้อนอก",sw:"#8C4513",desc:"เสื้อนอกสนิม",buy:"Massimo Dutti"},{role:"กางเกง",sw:"#F2EBD8",desc:"กางเกงครีม",buy:"Uniqlo"},{role:"รองเท้า",sw:"#7B4827",desc:"ส้นน้ำตาล",buy:"C&K"}]},
+    {mood:"มินิมอล · Daily",title:"ครีม × มะกอก",note:"เบสิกคุมโทน ใส่ได้ทุกวัน",pieces:[
+      {role:"เสื้อ",sw:"#F6F3E1",desc:"เสื้อไหมพรมครีม",buy:"Uniqlo"},{role:"กระโปรง",sw:"#7B7945",desc:"กระโปรงมะกอก",buy:"COS"},{role:"กระเป๋า",sw:"#8A5A2B",desc:"กระเป๋าหนัง",buy:"Longchamp"}]},
+    {mood:"ทางการ · Formal",title:"เดรสฟอเรสต์กรีน",note:"เขียวเข้มดูภูมิฐาน + ทองตัด",pieces:[
+      {role:"เดรส",sw:"#314F37",desc:"เดรสยาว",buy:"Jaspal"},{role:"กระเป๋า",sw:"#C9A24B",desc:"คลัตช์ทอง",buy:"Sandro"},{role:"รองเท้า",sw:"#D5B58E",desc:"ส้นนู้ด",buy:"C&K"}]},
+    {mood:"สายลุย · Utility",title:"โอเวอร์ไซส์คุมโทน",note:"เลเยอร์เอิร์ธโทน อย่าลืมคาดเอว",pieces:[
+      {role:"เสื้อนอก",sw:"#666050",desc:"เสื้อนอกมะกอกเข้ม",buy:"Uniqlo"},{role:"กางเกง",sw:"#C0AD8C",desc:"กางเกงแทน",buy:"Zara"},{role:"รองเท้า",sw:"#4B2E1E",desc:"บูทน้ำตาล",buy:"C&K"}]},
+    {mood:"บรันช์ · Soft",title:"เดรสมัสตาร์ดอ่อน",note:"โทนหวานอบอุ่น รับแดดสวย",pieces:[
+      {role:"เดรส",sw:"#D3A843",desc:"เดรส A-line",buy:"Pomelo"},{role:"กระเป๋า",sw:"#8A5A2B",desc:"กระเป๋าน้ำตาล",buy:"C&K"},{role:"รองเท้า",sw:"#EFE7D6",desc:"ส้นครีม",buy:"C&K"}]},
+    {mood:"ช้อปปิ้ง · Casual",title:"เทอร์ราคอตต้า + ยีนส์",note:"สบาย ๆ แต่คุมโทนอุ่น",pieces:[
+      {role:"เสื้อ",sw:"#C66F33",desc:"เสื้อดินเผา",buy:"Uniqlo"},{role:"กางเกง",sw:"#334A76",desc:"ยีนส์",buy:"Levi's"},{role:"กระเป๋า",sw:"#CDA278",desc:"กระเป๋าคาเมล",buy:"Longchamp"}]},
+    {mood:"เที่ยว/ทริป · Relax",title:"เซ็ตสนิม-ครีม",note:"ใส่สบาย เดินทั้งวันไม่เหนื่อย",pieces:[
+      {role:"เสื้อ",sw:"#8C4513",desc:"เสื้อสนิม",buy:"Uniqlo"},{role:"กางเกง",sw:"#F2EBD8",desc:"กางเกงครีม",buy:"Uniqlo"},{role:"รองเท้า",sw:"#EFE7D6",desc:"sneakers",buy:"adidas"}]},
+    {mood:"ปาร์ตี้ · Glam",title:"เดรสแดงอิฐ",note:"Brick Red สดใสแบบมีคลาส",pieces:[
+      {role:"เดรส",sw:"#831924",desc:"เดรสเข้ารูป",buy:"Maje"},{role:"กระเป๋า",sw:"#C9A24B",desc:"คลัตช์ทอง",buy:"Mango"},{role:"รองเท้า",sw:"#2b2b2b",desc:"ส้นดำ",buy:"C&K"}]}
+  ] }
+};
+
+/* size conversions */
+const CONV = {
+  dress:{ head:["ไซส์","อก(นิ้ว)","เอว(นิ้ว)","สะโพก(นิ้ว)","US","EU"],
+    rows:[["XS","30–31","23–24","33–34","0–2","32–34"],["S","32–33","25–26","35–36","4–6","36–38"],["M","34–35","27–28","37–38","8–10","40–42"],["L","37–39","30–32","40–42","12–14","44–46"]] },
+  shoe:{ head:["EU","US","UK","ซม."], rows:[["36","5.5","3","23"],["37","6.5","4","23.5"],["38","7.5","5","24"],["39","8.5","6","25"],["40","9","7","25.5"]] },
+  ring:{ head:["รอบนิ้ว(มม.)","US","EU/JP","ไซส์"], rows:[["48","4.5","8","เล็ก"],["50","5.25","10","เล็ก-กลาง"],["52","6","12","กลาง"],["54","6.75","14","กลาง-ใหญ่"],["56","7.5","16","ใหญ่"]] }
+};
+
+/* ========================= ICONS + FLAT-LAY ========================= */
+const ICO={
+  palette:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.6 0 1.9-1.2 1.1-2.1-.8-.9-.3-2.2 1-2.2H17a4 4 0 0 0 4-4c0-4.8-4-9.5-9-9.5Z"/><circle cx="7.7" cy="12.4" r="1"/><circle cx="9.6" cy="8.3" r="1"/><circle cx="14.4" cy="8.3" r="1"/></svg>',
+  cross:'<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>',
+  dress:'<svg class="ico" viewBox="0 0 24 24"><path d="M9.5 4l2.5 1.6L14.5 4M9.5 4v2.4L7.5 10.5h9L14.5 6.4V4M8 10.5 6.7 18.6a1 1 0 0 0 1 1.2h8.6a1 1 0 0 0 1-1.2L16 10.5"/></svg>',
+  droplet:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 4.2c2.9 3.6 5.2 6.2 5.2 9a5.2 5.2 0 0 1-10.4 0c0-2.8 2.3-5.4 5.2-9Z"/></svg>',
+  ruler:'<svg class="ico" viewBox="0 0 24 24"><rect x="3.2" y="8.2" width="17.6" height="7.6" rx="1"/><path d="M7.3 8.2v3M11 8.2v4M14.7 8.2v3M18.4 8.2v4"/></svg>',
+  hanger:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 5.2a1.8 1.8 0 1 1 1.3 1.7c-.5.2-.9.6-.9 1.1v.5"/><path d="M12 8.5 4.2 15c-.7.6-.3 1.9.6 1.9h14.4c.9 0 1.3-1.3.6-1.9L12 8.5Z"/></svg>',
+  face:'<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="9" r="4"/><path d="M5 20c0-3.4 3-5.4 7-5.4s7 2 7 5.4"/></svg>',
+  spark:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 4l1.5 4.8L18 10l-4.5 1.5L12 16l-1.5-4.5L6 10l4.5-1.2L12 4Z"/></svg>',
+  bag:'<svg class="ico" viewBox="0 0 24 24"><path d="M6.5 8h11l-.9 11.2a1 1 0 0 1-1 .8H8.4a1 1 0 0 1-1-.8L6.5 8Z"/><path d="M9.2 8V6.4a2.8 2.8 0 0 1 5.6 0V8"/></svg>'
+};
+const SHAPE={
+  dress:'M13 3 L21 7 L29 3 L27 15 L33 20 L30 22 L30 52 L12 52 L12 22 L9 20 L15 15 Z',
+  top:'M9 9 L18 4 Q21 8 24 4 L33 9 L29 18 L26 15 L26 38 L16 38 L16 15 L13 18 Z',
+  jacket:'M9 8 L17 4 L21 8 L25 4 L33 8 L29 17 L26 14 L26 46 L16 46 L16 14 L13 17 Z',
+  pants:'M11 4 L31 4 L29 52 L23 52 L21 26 L20 52 L13 52 Z',
+  skirt:'M12 6 L30 6 L36 40 L6 40 Z',
+  bag:'M8 18 L34 18 L37 42 L5 42 Z',
+  shoe:'M4 12 L24 12 Q37 12 39 21 L4 21 Z'
+};
+const BAGH='M13 18 Q13 7 21 7 Q29 7 29 18';
+// role (ไทย) → รูปทรง flat-lay  — ให้ลุคที่สไตลิสต์จัดวาดภาพได้อัตโนมัติ
+function shapeFor(role){
+  const r=role||'';
+  if(/เดรส|จั๊มสูท|จัมพ์|jumpsuit/i.test(r))return 'dress';
+  if(/เสื้อนอก|เบลเซอร์|แจ็?ค|คาร์ดิแกน|สูท|โค้?ต|coat|blazer|jacket/i.test(r))return 'jacket';
+  if(/กระโปรง|skirt/i.test(r))return 'skirt';
+  if(/กางเกง|ยีนส์|pants|jean|trouser|short/i.test(r))return 'pants';
+  if(/รองเท้า|ส้น|คัตชู|บูท|loafer|sneaker|heel|shoe/i.test(r))return 'shoe';
+  if(/กระเป๋า|คลัตช์|bag|clutch/i.test(r))return 'bag';
+  if(/เสื้อ|แท็ง|ท็อป|top|tank|shirt/i.test(r))return 'top';
+  return null; // เครื่องประดับ/เข็มขัด/เลเยอร์ ฯลฯ — ไม่วาด
+}
+function garment(t,c,x,y,s){
+  let p=`<path class="garment" transform="translate(${x},${y}) scale(${s})" fill="${c||'#C9A86A'}" d="${SHAPE[t]}"/>`;
+  if(t==='bag') p+=`<path transform="translate(${x},${y}) scale(${s})" fill="none" stroke="rgba(0,0,0,.2)" stroke-width="1.4" d="${BAGH}"/>`;
+  return p;
+}
+function flatlay(pieces){
+  const draw=pieces.map(p=>({s:shapeFor(p.role),c:p.sw})).filter(x=>x.s).slice(0,3);
+  if(!draw.length) draw.push({s:'dress',c:'#CDA278'});
+  const pos=[[52,20,1.5],[14,118,1.05],[108,120,1.05]];
+  const g=draw.map((d,i)=>garment(d.s,d.c,pos[i][0],pos[i][1],pos[i][2])).join('');
+  return `<svg viewBox="0 0 176 186" width="176" height="186">${g}</svg>`;
+}
+
+/* ========================= RENDER ========================= */
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const S=LIBRARY.seasons[PROFILE.color.type_12]||LIBRARY.seasons["Warm Autumn"];
+const B=LIBRARY.bodies[PROFILE.body.type]||LIBRARY.bodies["นาฬิกาทราย"];
+const F=LIBRARY.faces[PROFILE.face.shape]||LIBRARY.faces["รูปไข่"];
+const M=PROFILE.measurements;
+
+// hero
+$("#h_season").textContent=PROFILE.color.type_12;
+$("#h_line").innerHTML=S.line;
+$("#h_who").textContent=`${PROFILE.name} · หุ่น${PROFILE.body.type} · หน้า${PROFILE.face.shape} · วิเคราะห์โดย ${PROFILE.analyst}`;
+S.best.forEach(b=>{const i=el("i");i.style.cssText=`background:${b.c}`;$("#h_stack").appendChild(i);});
+
+// summary (4 cards)
+const yes=B.do.slice(0,3).map(x=>`<span class="yes">✓ ${x.split(' /')[0].split(' (')[0]}</span>`).join('');
+const metals=(PROFILE.color.metals||["ทอง"]).join(' · ');
+$("#summary").innerHTML=`
+  <div class="tk"><div class="tkic g">${ICO.palette}</div><div class="body">
+    <h3>ใส่สีนี้แล้วหน้าสว่าง</h3><div class="say">${S.colorSay}</div>
+    <div class="swn" id="sum_best"></div></div></div>
+  <div class="tk"><div class="tkic r">${ICO.cross}</div><div class="body">
+    <h3>เลี่ยงสีโทนเย็นจัด</h3><div class="say">${S.avoidSay}</div>
+    <div class="smallsw" id="sum_avoid"></div></div></div>
+  <div class="tk"><div class="tkic s">${ICO.dress}</div><div class="body">
+    <h3>จุดเด่นหุ่น: โชว์ “เอว”</h3><div class="say">หุ่น${PROFILE.body.type} เอวคอดสวยอยู่แล้ว โชว์เอวไว้ = สวยชัวร์</div>
+    <div class="ddline">${yes}<span class="no">✕ ทรงหลวมกลบเอว</span></div>
+    <div class="matchrow">ของแมตช์: <b>${metals}</b> (เลี่ยงเงิน)</div></div></div>
+  <div class="tk"><div class="tkic b">${ICO.droplet}</div><div class="body">
+    <h3>แต่งหน้า &amp; ผม โทนอุ่น</h3><div class="say">เบสเหลือง ปาก<b>อิฐ / ส้มดินเผา</b> · ผมน้ำตาลทอง-คาราเมล</div>
+    <div class="dots" id="sum_mk"></div></div></div>`;
+S.best.forEach(b=>{const u=el("div","u",`<i style="background:${b.c}"></i><small>${b.n}</small>`);u.onclick=()=>copy(b.c);$("#sum_best").appendChild(u);});
+S.avoid.forEach(a=>{const i=el("i");i.style.background=a.c;$("#sum_avoid").appendChild(i);});
+S.makeup[1].dots.slice(0,4).concat(S.makeup[4].dots.slice(0,2)).forEach((c,idx)=>{const i=el("i",idx>=4?"hair":"");i.style.background=c;$("#sum_mk").appendChild(i);});
+
+// looks (from partner data or default)
+const LOOKS=(PROFILE.looks&&PROFILE.looks.length)?PROFILE.looks:(LIBRARY.looksByKey[PROFILE.color.type_12+"|"+PROFILE.body.type]||[]);
+$("#lksub").textContent=`จัดโดยสไตลิสต์ของคุณ · ${LOOKS.length} ลุค · เลื่อนดูได้ →`;
+LOOKS.forEach(lk=>{
+  const pcs=(lk.pieces||[]).map(p=>p.desc||p.role).filter(Boolean).slice(0,3).join(" + ");
+  const shop=lk.shop || [...new Set((lk.pieces||[]).map(p=>p.buy).filter(Boolean))].slice(0,2).join(" / ");
+  const card=el("div","lkcard");
+  card.innerHTML=`<div class="flat"><span class="mood">${lk.mood||''}</span>${flatlay(lk.pieces||[])}</div>`+
+    `<div class="info"><b>${lk.title||''}</b><div class="pcs">${pcs}</div>`+
+    (shop?`<button class="shop" data-shop="${shop.replace(/"/g,'')}">${ICO.bag.replace('class="ico"','')}ช้อป: ${shop}</button>`:'')+`</div>`;
+  $("#lkscroll").appendChild(card);
+});
+$("#lkscroll").addEventListener("click",e=>{const b=e.target.closest(".shop");if(b)copy("ช้อป: "+b.dataset.shop);});
+$("#bystyl").innerHTML=`<div class="av">${PROFILE.initial}</div><div class="t"><b>ลุคทั้งหมดจัดโดย ${PROFILE.analyst}</b><br><span>สไตลิสต์เลือกให้ตามสี–หุ่น–ไซส์ของคุณ · เพิ่มลุคใหม่ได้ไม่จำกัด</span></div>`;
+
+// ===== progressive-disclosure detail folds =====
+function fold(icon,title,sub,bodyHtml,open){
+  const d=el("details","fold"); if(open)d.open=true;
+  d.innerHTML=`<summary><span class="ti">${icon}</span><span class="st"><b>${title}</b><small>${sub}</small></span><span class="cx">＋</span></summary><div class="fb">${bodyHtml}</div>`;
+  return d;
+}
+const folds=$("#folds");
+
+// palette fold
+let famHtml='';
+S.families.forEach(f=>{famHtml+=`<div class="fam"><div class="fh"><b>${f.name}</b><small>${f.th}</small></div><div class="swrow">`+f.colors.map(c=>`<div class="sw" data-c="${c}" style="background:${c}"><div class="hx">${c}</div></div>`).join('')+`</div></div>`;});
+const paletteBody=`<div class="lead">คุณคือ <b>${PROFILE.color.type_12}</b> — สีอุ่นหม่นแบบสีดินคือเพื่อนซี้ของผิวคุณ</div>
+  <div class="best" id="d_best"></div>
+  <div class="subh">สีที่ควรเลี่ยง</div><div class="avoid" id="d_avoid"></div>
+  <div class="subh">สีเบส 10 สี (แทนขาว-ดำ-เทา)</div><div class="neu" id="d_neu"></div>
+  <a class="hxt" id="hxt">◑ ดูพาเลตต์ทั้งหมด 56 เฉด (แตะดูโค้ดสี)</a><div class="swwrap" id="swwrap">${famHtml}</div>`;
+folds.appendChild(fold(ICO.palette,"พาเลตต์ทั้งหมด","64 เฉดที่ใส่ได้ + สีเบสมิกซ์",paletteBody,false));
+
+// makeup fold
+let mkHtml='<div class="mk">'+S.makeup.map(m=>`<div class="m"><div class="mh">${m.t}</div><div class="mkdots">`+m.dots.map(c=>`<i style="background:${c}"></i>`).join('')+`</div><p>${m.p}</p></div>`).join('')+'</div>';
+mkHtml+='<div class="prodlist">'+Object.entries(S.products).map(([cat,list])=>`<h4>${cat} — ของแนะนำ</h4>`+list.map(p=>`<div class="p"><i style="background:${p.c}"></i><div class="pn">${p.n}<span>${p.s}</span></div></div>`).join('')).join('')+'</div>';
+folds.appendChild(fold(ICO.droplet,"เมคอัพ & ทรงผม","สีปาก แก้ม ตา สีผม + ของแนะนำ",mkHtml,false));
+
+// body fold
+let bodyHtml=`<div class="dd"><div class="col do"><h4>◇ ทำเลย</h4><ul>`+B.do.map(x=>`<li>${x}</li>`).join('')+`</ul></div><div class="col dont"><h4>◇ เลี่ยง</h4><ul>`+B.dont.map(x=>`<li>${x}</li>`).join('')+`</ul></div></div>`;
+B.silhouettes.forEach(s=>{
+  const pills=s.items.map(it=>{const k=it.endsWith('*');return `<span class="pill${k?' key':''}">${it.replace('*','')}</span>`;}).join('');
+  bodyHtml+=`<details class="acc2"><summary>${ICO.hanger} ${s.t} · ${s.en}<span class="cx">＋</span></summary><div class="b2"><div class="pills">${pills}</div><p class="note"><b>เลี่ยง:</b> ${s.avoid}</p></div></details>`;
+});
+folds.appendChild(fold(ICO.hanger,"แต่งตามหุ่น & ทรงเสื้อผ้า",`${B.en} · Do/Don't + ทรงที่ใช่`,bodyHtml,false));
+
+// size fold
+const setf=v=>v?('"'+v):'–';
+const mrows=[["รอบอก",M.bust_in,'นิ้ว'],["รอบเอว",M.waist_in,'นิ้ว'],["สะโพก",M.hip_in,'นิ้ว'],["ไหล่",M.shoulder_in,'นิ้ว'],["ส่วนสูง",M.height_cm,'ซม.'],["น้ำหนัก",M.weight_kg,'กก.'],["ไซส์เดรส",M.dress_size,''],["เบอร์รองเท้า",M.shoe_size,''],["ไซส์แหวน",M.ring_size,'']];
+let sizeHtml=`<div class="sizehero">
+  <div class="sc a"><div class="k">Dress</div><div class="v">${M.dress_size||'–'}</div><div class="u">ไซส์เสื้อผ้า</div></div>
+  <div class="sc b"><div class="k">Shoe</div><div class="v">${(M.shoe_size||'–').replace(' (EU)','')}</div><div class="u">EU · รองเท้า</div></div>
+  <div class="sc c"><div class="k">Ring</div><div class="v">${(M.ring_size||'–').replace(' มม.','')}</div><div class="u">มม. · แหวน</div></div></div>
+  <div class="fitgrid"><div class="figure"><svg viewBox="0 0 200 300">
+    <path d="M100 20 C112 20 120 30 120 42 C120 54 112 62 100 62 C88 62 80 54 80 42 C80 30 88 20 100 20 Z" fill="#EFE7D6" stroke="#D9CDB4"/>
+    <path d="M100 64 C120 64 150 74 150 98 L146 120 C146 120 128 112 128 128 C128 150 138 180 132 210 C128 236 122 250 100 250 C78 250 72 236 68 210 C62 180 72 150 72 128 C72 112 54 120 54 120 L50 98 C50 74 80 64 100 64 Z" fill="#F4EEE2" stroke="#D9CDB4"/>
+    <g stroke="#C9A86A" stroke-dasharray="3 3" stroke-width="1"><line x1="42" y1="86" x2="158" y2="86"/><line x1="52" y1="150" x2="148" y2="150"/><line x1="46" y1="196" x2="154" y2="196"/></g>
+    <text class="mtag" x="18" y="83">ไหล่</text><text class="mval" x="18" y="96">${setf(M.shoulder_in)}</text>
+    <text class="mtag" x="150" y="147">อก</text><text class="mval" x="150" y="160">${setf(M.bust_in)}</text>
+    <text class="mtag" x="14" y="147">เอว</text><text class="mval" x="14" y="160">${setf(M.waist_in)}</text>
+    <text class="mtag" x="150" y="193">สะโพก</text><text class="mval" x="150" y="206">${setf(M.hip_in)}</text>
+  </svg></div><div><div class="mlist">`+
+  mrows.filter(([l,v])=>v!=null&&v!=='').map(([l,v,u])=>`<div class="mr"><span class="ml">${l}</span><span class="mv">${v}${u?` <small>${u}</small>`:''}</span></div>`).join('')+
+  `</div></div></div>`;
+function ctab(data,hit){return `<table class="ctable"><tr>`+data.head.map(h=>`<th>${h}</th>`).join('')+`</tr>`+data.rows.map(r=>`<tr>`+r.map((c,i)=>`<td${(hit&&hit(r)&&i===0)?' class="hit"':''}>${c}</td>`).join('')+`</tr>`).join('')+`</table>`;}
+sizeHtml+=`<div class="subh">เทียบไซส์เสื้อผ้า</div>`+ctab(CONV.dress,r=>String(r[0]).toUpperCase()===String(M.dress_size||'').split('–')[0].toUpperCase());
+sizeHtml+=`<div class="ctips">ตัวเลขของคุณ: อก <b>${M.bust_in||'–'}</b> · เอว <b>${M.waist_in||'–'}</b> · สะโพก <b>${M.hip_in||'–'}</b> นิ้ว → ใกล้เคียง <b>${M.dress_size||'–'}</b></div>`;
+sizeHtml+=`<div class="subh">เทียบไซส์รองเท้า</div>`+ctab(CONV.shoe,r=>r[0]===String(M.shoe_size||'').replace(/\D/g,''));
+sizeHtml+=`<div class="subh">เทียบไซส์แหวน</div>`+ctab(CONV.ring,r=>r[0]===String(M.ring_size||'').replace(/\D/g,''));
+sizeHtml+=`<div class="ctips"><b>วิธีวัดแหวน:</b> พันด้ายรอบโคนนิ้ว วัดความยาว (มม.) แล้วเทียบตาราง หรือให้พาร์ทเนอร์ LLOOP วัดให้</div>`;
+folds.appendChild(fold(ICO.ruler,"ไซส์ตัวของฉัน","เสื้อ · รองเท้า · แหวน + ตารางเทียบ",sizeHtml,false));
+
+// character fold
+let charHtml=`<div class="lead">หน้าทรง <b>${PROFILE.face.shape}</b> สมดุล ทำได้เกือบทุกทรงผม/แว่น</div><div class="pills">`+F.pills.map(p=>`<span class="pill">${p}</span>`).join('')+`</div><p class="note">${F.note}</p>`;
+charHtml+=`<div class="subh">บุคลิกของคุณ</div>`+PROFILE.personality.map(p=>{const pct=Math.round(p.v/p.max*100);return `<div class="barrow"><div class="bl">${p.t}<small>${p.sub}</small></div><div class="bt"><i style="width:${pct}%"></i></div><div class="bv">${p.v}</div></div>`;}).join('');
+charHtml+=`<div class="subh">5 มู้ดที่เล่นได้</div><div class="personas">`+LIBRARY.personas.map(p=>`<div class="pcard"><div class="pi">${ICO.spark}</div><b>${p.t}</b><p>${p.p}</p></div>`).join('')+`</div>`;
+folds.appendChild(fold(ICO.face,"ใบหน้า & คาแรกเตอร์","ทรงผม แว่น บุคลิก มู้ดสไตล์",charHtml,false));
+
+// palette-detail interactions (best/avoid/neutrals + hex toggle) — after DOM inserted
+S.best.forEach(b=>{const c=el("span","bchip",`<i style="background:${b.c}"></i>${b.n}`);c.onclick=()=>copy(b.c);$("#d_best").appendChild(c);});
+S.avoid.forEach(a=>$("#d_avoid").appendChild(el("span","achip",`<i style="background:${a.c}"></i>${a.n}`)));
+S.neutrals.forEach(n=>{const d=el("div","n",`<i style="background:${n.c}"></i><b>${n.n}</b><small>${n.c}</small>`);d.onclick=()=>copy(n.c);$("#d_neu").appendChild(d);});
+$("#hxt").onclick=()=>$("#swwrap").classList.toggle("show");
+$("#swwrap").addEventListener("click",e=>{const s=e.target.closest(".sw");if(s)copy(s.dataset.c);});
+
+// copy + toast
+let tt;
+function copy(text){
+  const done=()=>{const t=$("#toast");t.textContent="คัดลอก "+text+" แล้ว";t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),1300);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(done);}
+  else{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();done();}
+}
+</script>
+</body>
+</html>

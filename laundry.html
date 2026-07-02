@@ -117,7 +117,11 @@
   async function checkin(){
     const code=$('code').value.trim().toLowerCase(); if(!code){ toast('ใส่โค้ดก่อนค่ะ'); return; }
     const { data, error } = await sb.rpc('care_checkin',{ p_code: code });
-    if(error||!data||data.error){ $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">ไม่พบชุด ${code}</div>`; return; }
+    if(error){
+      if(error.message==='redirecting_to_login') return;   // opsLogin กำลังพาไป LINE login
+      $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">${error.message||('ไม่พบชุด '+code)}</div>`; return;
+    }
+    if(!data||data.error){ $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">ไม่พบชุด ${code}</div>`; return; }
     current=code; renderPanel(data); loadQueue();
   }
   // แตะ NFC ที่ป้ายชุด → หาโค้ดจากแท็ก → รับเข้าอัตโนมัติ (Android Chrome รองรับ Web NFC)
@@ -186,7 +190,9 @@
           ${j.days>=2?`<div class="late"> ค้าง ${j.days} วัน</div>`:''}</div>
         <div style="text-align:right">
           <div class="tag ${s[1]}">${s[0]}</div>
-          <div><button class="btn" style="background:var(--soft);margin-top:6px;padding:8px 12px;font-size:14px" onclick="pick('${j.code}')">เปิด</button></div>
+          <div>${j.stage==='repair'
+            ? `<a class="btn" href="/repair.html" style="background:var(--soft);margin-top:6px;padding:8px 12px;font-size:14px;display:inline-block;text-decoration:none;color:var(--ink)">ไปหน้าซ่อม ›</a>`
+            : `<button class="btn" style="background:var(--soft);margin-top:6px;padding:8px 12px;font-size:14px" onclick="pick('${j.code}')">เปิด</button>`}</div>
         </div>
       </div>`; }).join('');
   }
