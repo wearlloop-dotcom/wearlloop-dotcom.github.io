@@ -12,6 +12,7 @@
 | 2 | `02_fit_dna.sql` | Fit DNA — feedback ความพอดีหลังคืนชุด | `fit.html` |
 | 3 | `03_closet_day.sql` | LLOOP Day — วันเปลี่ยนตู้/กล่องประจำเดือน | `closet-day.html` |
 | 4 | `04_drop_points.sql` | จุดรับ-ส่งใกล้บ้าน + ชุดฉุกเฉิน | `drop-points.html` |
+| 5 | `05_wrapped.sql` | Loop Wrapped — สรุปปีของลูกค้า + การ์ดแชร์ IG | `wrapped.html` |
 
 ## สิ่งที่ต้องปรับก่อนใช้จริง
 
@@ -40,7 +41,7 @@
    (เหมือนที่ทำกับ `p_customer`/`p_line_uid`):
    `my_events` `upsert_event` `delete_event` · `fit_feedback_pending` `submit_fit_feedback` `my_fit_profile` ·
    `closet_day_get` `closet_day_set` `closet_box_swap` `closet_box_confirm` `closet_box_skip` `closet_box_unskip` ·
-   `drop_point_interest` `express_request`
+   `drop_point_interest` `express_request` · `my_wrapped`
 2. **หลัง allowlist ใช้งานจริงแล้ว** ค่อย `revoke execute ... from anon, authenticated` กับฟังก์ชันด้านบน
    → เส้นยิงตรง (ที่เชื่อ p_uid จาก client) ตายสนิท เหลือแต่เส้น gateway ที่ปลอม uid ไม่ได้
    (`drop_points_list` เป็นข้อมูลสาธารณะ คง anon ไว้ได้)

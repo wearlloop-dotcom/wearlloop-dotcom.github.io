@@ -2117,6 +2117,7 @@ function openMenu() {
     <div class="msec">
       <div class="ml">${en ? 'The LLOOP world' : 'โลกของ LLOOP'}</div>
       ${item(I.impact, en ? 'Your impact' : 'ผลกระทบรักษ์โลกของคุณ', 'openImpact()')}
+      ${item(I.gift, en ? 'Loop Wrapped · your year' : 'Loop Wrapped · สรุปปีของคุณ', "location.href='wrapped.html'")}
       ${item(I.about, en ? 'About us' : 'เกี่ยวกับเรา', "location.href='about.html'")}
     </div>
 

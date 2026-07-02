@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · Loop Wrapped — สรุปปีของคุณ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* โทนแบรนด์ LLOOP (craft sage + ทอง) — ตรงกับ forecast/fit/home */
+  :root{ --bg:#FBFAF7; --card:#FFFFFF; --ink:#1A1A1A; --muted:#8C8B86; --line:#E7E5E1;
+    --teal:#6FB3A6; --sage-bg:#E4F0EC; --gold:#C9A86A; --ok:#0F6E56;
+    --sans:'Inter','Prompt',-apple-system,sans-serif; --disp:'Poppins','Prompt',sans-serif }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+  .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .brand{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:1px;color:var(--ink)}
+  .sub{font-size:12px;color:var(--muted)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin-bottom:14px}
+  .card h2{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .hidden{display:none}
+
+  /* ---- soft login (pattern เดียวกับ fit.html) ---- */
+  .login-soft{display:flex;align-items:center;gap:12px;background:var(--sage-bg);border:1px solid var(--teal);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+  .login-soft p{flex:1;font-size:13px;color:var(--ok)}
+  .login-soft button{flex:0 0 auto;background:#06C755;color:#fff;border:none;border-radius:9px;padding:9px 14px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer}
+
+  /* ---- hero ---- */
+  .hero{padding:22px 16px 20px}
+  .kicker{display:flex;align-items:center;gap:8px;font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  .chip-demo{font-family:var(--sans);letter-spacing:0;text-transform:none;background:var(--sage-bg);color:var(--ok);font-size:11px;font-weight:600;border-radius:12px;padding:2px 9px}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:24px;line-height:1.25;color:var(--ink)}
+  .hero .yr{color:var(--teal)}
+  .hero .lede{font-size:13.5px;color:var(--muted);margin-top:6px}
+
+  /* ---- stats ---- */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 13px}
+  .stat .n{font-family:var(--disp);font-weight:700;font-size:27px;line-height:1.15;color:var(--ink)}
+  .stat .n small{font-family:var(--sans);font-weight:400;font-size:12px;color:var(--muted);margin-left:3px}
+  .stat.save .n{color:var(--ok)}
+  .stat .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .stat.season{grid-column:1 / -1;background:var(--sage-bg);border-color:var(--teal)}
+  .stat.season .n{font-size:21px;color:var(--ok)}
+  .foot{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+
+  /* ---- top-3 ลุคแห่งปี ---- */
+  .looks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:430px){ .looks{grid-template-columns:1fr 1fr} }
+  .look{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+  .look .blk{height:96px;display:flex;align-items:flex-start;justify-content:flex-end;padding:8px}
+  .look .rank{background:rgba(255,255,255,.88);color:var(--ink);font-family:var(--disp);font-weight:600;font-size:11px;border-radius:10px;padding:2px 8px}
+  .look .bd{padding:9px 11px 11px}
+  .look .nm{font-family:var(--disp);font-weight:600;font-size:13px;color:var(--ink);line-height:1.3}
+  .look .br{font-size:11px;color:var(--muted)}
+  .look .tm{display:inline-block;margin-top:6px;background:var(--sage-bg);color:var(--ok);font-size:11px;font-weight:600;border-radius:10px;padding:2px 8px}
+
+  /* ---- share ---- */
+  .dlbtn{width:100%;background:var(--ink);color:#fff;border:none;padding:13px;font-family:var(--sans);font-size:14px;font-weight:600;border-radius:10px;cursor:pointer}
+  .dlbtn:active{transform:scale(.99)}
+  .dlbtn:disabled{opacity:.6;cursor:default}
+  .dlhint{font-size:11.5px;color:var(--muted);margin-top:8px;text-align:center}
+
+  /* ---- CTA row ---- */
+  .cta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:430px){ .cta{grid-template-columns:1fr} }
+  .cta a{display:block;background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 14px;text-decoration:none}
+  .cta a:hover{border-color:var(--teal)}
+  .cta .ct{font-family:var(--disp);font-weight:600;font-size:13.5px;color:var(--ink)}
+  .cta .cd{font-size:12px;color:var(--muted);margin-top:2px}
+  .cta .go{display:inline-block;margin-top:7px;font-size:12px;font-weight:600;color:var(--ok)}
+
+  /* ===== การ์ดแชร์ IG 1080×1350 — ซ่อนนอกจอ (ห้าม display:none — html2canvas วาดไม่ได้) ===== */
+  #shareCard{position:fixed;left:-12000px;top:0;width:1080px;height:1350px;background:var(--bg);
+    display:flex;flex-direction:column;padding:84px 88px 76px;font-family:var(--sans)}
+  #shareCard .s-top{display:flex;justify-content:space-between;align-items:center}
+  #shareCard .s-mark{font-family:var(--disp);font-weight:700;font-size:44px;letter-spacing:9px;color:var(--ink)}
+  #shareCard .s-ring{width:52px;height:52px;border-radius:50%;border:4px solid var(--gold)}
+  #shareCard .s-kick{margin-top:64px;font-family:var(--disp);font-weight:600;font-size:30px;letter-spacing:7px;text-transform:uppercase;color:var(--gold)}
+  #shareCard .s-name{font-family:var(--disp);font-weight:700;font-size:64px;line-height:1.2;color:var(--ink);margin-top:14px}
+  #shareCard .s-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:58px}
+  #shareCard .s-stat{background:#fff;border:2px solid var(--line);border-radius:24px;padding:34px 36px 30px}
+  #shareCard .s-stat .n{font-family:var(--disp);font-weight:700;font-size:72px;line-height:1.1;color:var(--ink)}
+  #shareCard .s-stat .n small{font-family:var(--sans);font-weight:400;font-size:28px;color:var(--muted);margin-left:6px}
+  #shareCard .s-stat.save{background:var(--sage-bg);border-color:var(--teal)}
+  #shareCard .s-stat.save .n{color:var(--ok)}
+  #shareCard .s-stat .l{font-size:27px;color:var(--muted);margin-top:6px}
+  #shareCard .s-season{margin-top:30px;font-size:30px;color:var(--ink)}
+  #shareCard .s-season b{font-family:var(--disp);color:var(--ok)}
+  #shareCard .s-foot{margin-top:auto}
+  #shareCard .s-note{font-size:26px;color:var(--ok);line-height:1.6}
+  #shareCard .s-cta{margin-top:26px;background:var(--ink);color:#F2ECDD;text-align:center;border-radius:16px;padding:30px;font-size:31px;letter-spacing:1.5px;font-family:var(--sans)}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition:none!important} }
+</style>
+</head>
+<body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
+
+<div class="wrap">
+  <div class="top">
+    <span class="brand">LLOOP</span>
+    <span class="sub" data-i18n="Loop Wrapped · your year in review">Loop Wrapped · สรุปปีของคุณ</span>
+  </div>
+
+  <!-- soft login (แสดงเมื่อยังไม่ล็อกอิน — หน้ายังใช้ได้ด้วยข้อมูลตัวอย่าง) -->
+  <div class="login-soft hidden" id="loginSoft">
+    <p data-i18n="You're viewing sample data — sign in with LINE to see your real year">ตอนนี้ดูข้อมูลตัวอย่างอยู่นะคะ — เข้าสู่ระบบด้วย LINE เพื่อดูสรุปปีจริงของคุณ</p>
+    <button onclick="LiffAuth.signIn()" data-i18n="Sign in with LINE">เข้าสู่ระบบด้วย LINE</button>
+  </div>
+
+  <!-- hero -->
+  <div class="card hero">
+    <div class="kicker">LOOP WRAPPED <span class="chip-demo hidden" id="demoChip" data-i18n="Sample">ตัวอย่าง</span></div>
+    <h1><span data-i18n="Your year with LLOOP">ปีนี้ของคุณกับ LLOOP</span> <span class="yr" id="heroYear"></span></h1>
+    <p class="lede" data-i18n="A beautiful year where your closet kept looping — no new buys needed.">สรุปปีสวย ๆ ที่ตู้เสื้อผ้าคุณหมุนเวียน ไม่ต้องซื้อเพิ่มค่ะ</p>
+  </div>
+
+  <!-- stats -->
+  <div class="card" id="statsCard">
+    <h2 data-i18n="Your numbers this year">ตัวเลขของคุณปีนี้</h2>
+    <div class="stats" id="statGrid"></div>
+    <div class="foot" data-i18n="* Savings vs buying — estimated from the average full retail price of pieces at the same tier (≈ 6× the rent when retail isn’t on file).">* ประหยัดเทียบซื้อ — ประมาณจากราคาเต็มเฉลี่ยของชุดระดับเดียวกัน (≈ 6 เท่าของค่าเช่า เมื่อไม่มีราคาเต็มในระบบ)</div>
+  </div>
+
+  <!-- top-3 ลุคแห่งปี -->
+  <div class="card">
+    <h2 data-i18n="Looks of the year">ลุคแห่งปี</h2>
+    <div class="looks" id="topLooks"></div>
+  </div>
+
+  <!-- share -->
+  <div class="card">
+    <h2 data-i18n="Share your year">อวดปีนี้ให้เพื่อนดู</h2>
+    <button class="dlbtn" id="dlBtn" onclick="downloadShareCard()" data-i18n="Download IG share card (1080×1350)">ดาวน์โหลดการ์ดแชร์ IG (1080×1350)</button>
+    <div class="dlhint" data-i18n="A 1080×1350 PNG for IG feed/story — tag @lloop so we can share it back 💚">ได้ไฟล์ PNG 1080×1350 สำหรับ IG ฟีด/สตอรี่ — แท็ก @lloop ให้เราแชร์ต่อได้นะคะ 💚</div>
+  </div>
+
+  <!-- end CTA -->
+  <div class="cta">
+    <a href="my-events.html">
+      <div class="ct" data-i18n="Let your stylist prep next year’s looks">ปีหน้าให้สไตลิสต์เตรียมลุคล่วงหน้า</div>
+      <div class="cd" data-i18n="Drop your event calendar with us">ฝากปฏิทินงานไว้กับเราค่ะ</div>
+      <span class="go" data-i18n="Add my events →">ฝากปฏิทินงาน →</span>
+    </a>
+    <a href="closet-day.html">
+      <div class="ct" data-i18n="Start LLOOP Day">เริ่ม LLOOP Day</div>
+      <div class="cd" data-i18n="A fresh box every month, picked for you">กล่องใหม่ทุกเดือน จัดให้ตามโปรไฟล์คุณ</div>
+      <span class="go" data-i18n="Pick my day →">เลือกวันของฉัน →</span>
+    </a>
+  </div>
+</div>
+
+<!-- การ์ดแชร์จริง 1080×1350 (ซ่อนนอกจอ — เรนเดอร์ด้วย JS) -->
+<div id="shareCard" aria-hidden="true"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=38"></script>
+<script src="analytics.js?v=38"></script>
+<script src="nav.js?v=1"></script>
+<script src="liffAuth.js"></script>
+<script src="me-api.js"></script>
+<script src="data.js"></script>
+<script>
+// ===== Loop Wrapped — สรุปปีของลูกค้า (แชร์ลง IG ได้) =====
+// backend RPC my_wrapped ยังไม่มีจริง → try/catch แล้ว fallback ข้อมูลตัวอย่างจาก MOCK
+const $ = id => document.getElementById(id);
+const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
+const NF = new Intl.NumberFormat('th-TH');
+function esc(s){ if(s==null) return ''; return String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+
+let sb = null;
+function client(){ if(!window.supabase) throw new Error('supabase sdk not loaded'); if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
+
+// เรียกผ่าน gateway me-rpc ก่อน (verify LINE idToken ฝั่ง server — ปลอม uid ไม่ได้)
+// gateway ยังไม่ allowlist ฟังก์ชัน → fallback ยิงตรงตาม convention เดิม (ขั้นตอนปิดถาวรดู db/README)
+async function gwRpc(name, args){
+  if (window.meRpc && UID) {
+    const r = await window.meRpc(name, args);
+    if (!r.error) return r;
+  }
+  return client().rpc(name, args);
+}
+
+let UID = null;            // LINE userId (null = โหมดตัวอย่าง)
+let NAME = null;           // displayName จาก LINE (โหมดตัวอย่าง = มายา)
+let W = null;              // ข้อมูล wrapped ปัจจุบัน (จาก RPC หรือ demo)
+let statsAnimated = false; // นับเลขวิ่งแล้วหรือยัง (วิ่งครั้งเดียวพอ)
+
+// ปี: ค่าเริ่ม = ปีปัจจุบัน · override ได้ด้วย ?year=2025
+const YEAR = (function(){
+  const q = parseInt(new URLSearchParams(location.search).get('year'), 10);
+  return (q >= 2020 && q <= 2100) ? q : new Date().getFullYear();
+})();
+
+// โทนสีประจำตัว → ป้ายสวย ๆ
+const SEASONS = {
+  winter: { name:'Cool Winter',  th:'โทนเย็น คมชัด',    en:'cool & crisp'  },
+  summer: { name:'Soft Summer',  th:'โทนเย็น ละมุน',    en:'cool & soft'   },
+  spring: { name:'Warm Spring',  th:'โทนอุ่น สดใส',     en:'warm & bright' },
+  autumn: { name:'Warm Autumn',  th:'โทนเอิร์ธ อบอุ่น', en:'warm & earthy' },
+};
+function seasonLabel(key){
+  const s = SEASONS[String(key || '').toLowerCase()];
+  if(!s) return T('กำลังค้นหาโทนของคุณ','Still discovering yours');
+  return s.name + ' · ' + T(s.th, s.en);
+}
+
+// ---- demo data (โหมดตัวอย่าง — สร้างจาก MOCK.GARMENTS ให้ดูน่าเชื่อ) ----
+// ประหยัด = ค่าเช่ารวม ×5 (ราคาเต็ม ≈ ค่าเช่า ×6): ใช้ ฿6,280 → ประหยัด ฿31,400
+function demoWrapped(){
+  const G = (window.MOCK && MOCK.GARMENTS) || [];
+  const g = i => G[i] || {};
+  return {
+    year: YEAR, rentals: 18, occasions: 11, spent: 6280, saved_vs_buy: 31400,
+    top_garments: [
+      { code:g(1).id || 'g2', name:g(1).name || 'Céleste chiffon midi', brand:g(1).brand || 'Maison',        bg:g(1).bg || '#EFE4E8', times:4 },
+      { code:g(0).id || 'g1', name:g(0).name || 'Maple satin slip',     brand:g(0).brand || 'Lookbook',      bg:g(0).bg || '#E7E2DA', times:3 },
+      { code:g(5).id || 'g6', name:g(5).name || 'Azure halter gown',    brand:g(5).brand || 'Azur',          bg:g(5).bg || '#CFD8E6', times:2 },
+    ],
+    color_season: (window.MOCK && MOCK.CUSTOMER && MOCK.CUSTOMER.my_color_season) || 'winter',
+    member_since: (YEAR - 1) + '-03',
+  };
+}
+
+// ---- นับเลขวิ่ง (count-up) — เคารพ prefers-reduced-motion ----
+const REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function countUp(el, to, prefix, suffix){
+  const dur = 1100, t0 = performance.now();
+  (function step(t){
+    const p = Math.min(1, (t - t0)/dur), e = 1 - Math.pow(1-p, 3);
+    el.textContent = prefix + NF.format(Math.round(to*e));
+    if(p < 1) requestAnimationFrame(step);
+    else el.innerHTML = prefix + NF.format(to) + suffix;
+  })(t0);
+}
+function runCountUps(){
+  document.querySelectorAll('#statGrid .n[data-to]').forEach(el => {
+    const to = Number(el.getAttribute('data-to')) || 0;
+    const prefix = el.getAttribute('data-prefix') || '';
+    const suffix = el.getAttribute('data-suffix') || '';
+    if(REDUCED){ el.innerHTML = prefix + NF.format(to) + suffix; return; }
+    countUp(el, to, prefix, suffix);
+  });
+}
+
+// ---- render: สถิติ ----
+function statTile(cls, to, prefix, sufHtml, label){
+  const final = statsAnimated || REDUCED;
+  const shown = final ? (prefix + NF.format(to) + sufHtml) : (prefix + '0');
+  return `<div class="stat ${cls}">
+    <div class="n" data-to="${to}" data-prefix="${esc(prefix)}" data-suffix="${esc(sufHtml)}">${shown}</div>
+    <div class="l">${esc(label)}</div>
+  </div>`;
+}
+function renderStats(){
+  $('statGrid').innerHTML =
+    statTile('', W.rentals, '', T('<small>ตัว</small>','<small>pieces</small>'), T('ชุดที่ใส่ปีนี้','Pieces worn this year'))
+  + statTile('', W.occasions, '', T('<small>งาน</small>','<small>events</small>'), T('งานที่ไป','Events you showed up for'))
+  + statTile('save', W.saved_vs_buy, '฿', '', T('ประหยัดเทียบซื้อ *','Saved vs buying *'))
+  + statTile('', W.rentals, '', T('<small>ชิ้น</small>','<small>items</small>'), T('เสื้อผ้าใหม่ที่ไม่ต้องผลิต','New garments not produced'))
+  + `<div class="stat season"><div class="n">${esc(seasonLabel(W.color_season))}</div>
+     <div class="l">${T('โทนสีประจำตัวของคุณ','Your color season')}</div></div>`;
+  if(statsAnimated && !REDUCED){
+    // เคยวิ่งไปแล้ว (เช่น สลับภาษา) → โชว์เลขจบเลย ไม่วิ่งซ้ำ
+    document.querySelectorAll('#statGrid .n[data-to]').forEach(el => {
+      el.innerHTML = (el.getAttribute('data-prefix')||'') + NF.format(Number(el.getAttribute('data-to'))||0) + (el.getAttribute('data-suffix')||'');
+    });
+  }
+}
+// เริ่มนับเมื่อการ์ดสถิติเลื่อนเข้าจอ (ครั้งเดียว)
+const io = ('IntersectionObserver' in window) ? new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if(en.isIntersecting && !statsAnimated){
+      statsAnimated = true;
+      runCountUps();
+      io.unobserve(en.target);
+    }
+  });
+}, { threshold: 0.35 }) : null;
+
+// ---- render: top-3 ลุคแห่งปี ----
+function renderTopLooks(){
+  const box = $('topLooks');
+  const list = (W.top_garments || []).slice(0, 3);
+  if(!list.length){
+    box.innerHTML = `<div class="foot" style="grid-column:1/-1;margin:0">${T('ปีนี้ยังไม่มีลุคเลยค่ะ — เริ่มเช่าชุดแรกแล้วปีหน้ามาดูกันนะคะ','No looks yet this year — rent your first piece and come back next year')}</div>`;
+    return;
+  }
+  box.innerHTML = list.map((g, i) => `<div class="look">
+    <div class="blk" style="background:${esc(g.bg || '#E4F0EC')}"><span class="rank">#${i+1}</span></div>
+    <div class="bd">
+      <div class="nm">${esc(g.name || g.code || '')}</div>
+      <div class="br">${esc(g.brand || '')}</div>
+      <span class="tm">${T('ใส่ ' + (g.times||1) + ' ครั้ง','Worn ' + (g.times||1) + '×')}</span>
+    </div>
+  </div>`).join('');
+}
+
+// ---- render: การ์ดแชร์ 1080×1350 (IG portrait — แบบเดียวกับ ig-card.html) ----
+function renderShareCard(){
+  const first = String(NAME || 'มายา').trim().split(/\s+/)[0];
+  const sLabel = seasonLabel(W.color_season);
+  $('shareCard').innerHTML = `
+    <div class="s-top"><div class="s-mark">LLOOP</div><div class="s-ring"></div></div>
+    <div class="s-kick">Loop Wrapped ${W.year || YEAR}</div>
+    <div class="s-name">${T('ปีนี้ของ' + esc(first), esc(first) + '&rsquo;s year in the loop')}</div>
+    <div class="s-grid">
+      <div class="s-stat"><div class="n">${NF.format(W.rentals)}<small>${T('ตัว','pieces')}</small></div><div class="l">${T('ชุดที่ใส่ปีนี้','worn this year')}</div></div>
+      <div class="s-stat"><div class="n">${NF.format(W.occasions)}<small>${T('งาน','events')}</small></div><div class="l">${T('งานที่ไป','shown up for')}</div></div>
+      <div class="s-stat save"><div class="n">฿${NF.format(W.saved_vs_buy)}</div><div class="l">${T('ประหยัดเทียบซื้อ','saved vs buying')}</div></div>
+      <div class="s-stat"><div class="n">${NF.format(W.rentals)}<small>${T('ชิ้น','items')}</small></div><div class="l">${T('เสื้อผ้าใหม่ที่ไม่ต้องผลิต','new garments not produced')}</div></div>
+    </div>
+    <div class="s-season">${T('โทนสีประจำตัว','Color season')} · <b>${esc(sLabel)}</b></div>
+    <div class="s-foot">
+      <div class="s-note">${T('ตู้เสื้อผ้าที่หมุนเวียน ไม่ต้องซื้อเพิ่ม 💚','A closet that loops — no new buys 💚')}</div>
+      <div class="s-cta">LLOOP · ${T('เช่าชุดสวยทุกงาน — ทักแชต LINE เลยค่ะ','rent a beautiful look for every event')}</div>
+    </div>`;
+}
+
+// ---- ดาวน์โหลดการ์ด — โหลด html2canvas ตอนกดเท่านั้น (หน้าเบา) ----
+let _h2cP = null;
+function ensureH2C(){
+  if(window.html2canvas) return Promise.resolve();
+  if(!_h2cP) _h2cP = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload = res;
+    s.onerror = () => { _h2cP = null; rej(new Error('load html2canvas failed')); };
+    document.head.appendChild(s);
+  });
+  return _h2cP;
+}
+async function downloadShareCard(){
+  window.track?.('wrapped_share');
+  const btn = $('dlBtn'), old = btn.textContent;
+  btn.disabled = true; btn.textContent = T('กำลังเตรียมการ์ด…','Preparing your card…');
+  try {
+    await ensureH2C();
+    renderShareCard();
+    const card = $('shareCard');
+    let canvas;
+    try{ canvas = await html2canvas(card,{scale:1,width:1080,height:1350,backgroundColor:'#FBFAF7',useCORS:true}); }
+    catch(e){ alert(T('ดาวน์โหลดการ์ดไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Couldn’t create the card — please try again')); return; }
+    const a = document.createElement('a');
+    a.download = 'lloop-wrapped-' + (W.year || YEAR) + '.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } catch(e){
+    alert(T('โหลดตัวสร้างการ์ดไม่สำเร็จ เช็กอินเทอร์เน็ตแล้วลองใหม่นะคะ','Couldn’t load the card maker — check your connection and try again'));
+  } finally {
+    btn.disabled = false; btn.textContent = old;
+  }
+}
+
+// ---- โหลดข้อมูล (RPC จริง → fallback demo) ----
+async function loadWrapped(){
+  if(!UID){ W = demoWrapped(); return; }            // โหมดตัวอย่าง — ไม่ยิง RPC (ห้ามส่ง uid ปลอม)
+  try {
+    const { data, error } = await gwRpc('my_wrapped', { p_uid: UID, p_year: YEAR });
+    if(error) throw error;
+    if(!data || typeof data.rentals !== 'number') throw new Error('no data');
+    W = data;
+  } catch(e){
+    console.warn('my_wrapped fallback → demo:', e && e.message || e);
+    W = demoWrapped();
+  }
+}
+
+function renderAll(){
+  $('heroYear').textContent = YEAR;
+  renderStats();
+  renderTopLooks();
+  renderShareCard();
+}
+
+// ---- boot: LIFF login แบบนุ่ม ๆ — ไม่ล็อกอินก็ดูได้ (demo data) ----
+async function boot(){
+  try {
+    const p = await LiffAuth.login();
+    if(p){ UID = p.userId; NAME = p.displayName; }
+  } catch(e){ console.warn('LIFF skipped:', e); }
+  $('loginSoft').classList.toggle('hidden', !!UID);
+  $('demoChip').classList.toggle('hidden', !!UID);
+  // วาดจากข้อมูลตัวอย่างก่อนทันที — network ช้าแค่ไหนหน้าก็ไม่ค้างว่าง
+  W = demoWrapped();
+  renderAll();
+  if(io) io.observe($('statsCard'));
+  else { statsAnimated = true; runCountUps(); }
+  await loadWrapped();
+  renderAll();
+}
+boot();
+
+// สลับภาษา → re-render เนื้อหา dynamic (เลขไม่วิ่งซ้ำ)
+window.addEventListener('lloop:lang', renderAll);
+</script>
+</body>
+</html>
