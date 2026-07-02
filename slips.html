@@ -105,7 +105,6 @@
 <div id="toast" class="toast"></div>
 
 <script>
-  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const baht=n=>n==null?'—':'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -125,16 +124,10 @@
   };
   const resOf=r=>RES[r]||{th:r||'-',cls:'warn',grp:'problem'};
 
-  async function authHeader(){
-    if(!(await window.opsLogin())) throw new Error('redirecting');
-    return 'Bearer '+liff.getIDToken();
-  }
-  async function api(action, extra){
-    const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
-      body:JSON.stringify(Object.assign({action},extra||{}))});
-    if(r.status===401||r.status===403){ toast('ไม่มีสิทธิ์เข้าดูสลิป (เฉพาะเจ้าของ/ผู้จัดการ)'); throw new Error('unauth'); }
-    return r.json();
-  }
+  const api=(action,extra)=>window.opsAcct(action,extra).catch(e=>{
+    if(e.message==='unauth') toast('ไม่มีสิทธิ์เข้าดูสลิป (เฉพาะเจ้าของ/ผู้จัดการ)');
+    throw e;
+  });
   function logout(){ try{ liff.logout(); }catch(e){} $('app').classList.add('hide'); $('gate').classList.remove('hide'); }
 
   let ROWS=[]; let filter='all';

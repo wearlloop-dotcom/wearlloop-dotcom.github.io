@@ -44,16 +44,13 @@
 <div class="doc" id="doc"><div class="muted" style="text-align:center;padding:60px">เลือกประเภท + วาง ID แล้วกด "รวบรวมหลักฐาน"<br><span style="font-size:12px">เข้าระบบด้วย LINE (เฉพาะเจ้าของ/ผู้จัดการ)</span></div></div>
 
 <script>
-  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null||s==='')?'—':String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   const dt=s=>s?new Date(s).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'—';
   const baht=n=>n==null?'—':'฿'+Number(n).toLocaleString('th-TH');
   async function api(action,extra){
-    if(!(await window.opsLogin())) throw new Error('redirecting');
-    const r=await fetch(FN,{method:'POST',headers:{'Authorization':'Bearer '+liff.getIDToken(),'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action},extra))});
-    if(r.status===401||r.status===403){throw new Error('ไม่มีสิทธิ์ (เฉพาะเจ้าของ/ผู้จัดการ)');}
-    return r.json();
+    try{ return await window.opsAcct(action,extra); }
+    catch(e){ throw (e&&e.message==='unauth')?new Error('ไม่มีสิทธิ์ (เฉพาะเจ้าของ/ผู้จัดการ)'):e; }
   }
   const rows=(arr,cols)=>!arr||!arr.length?'<div class="muted">— ไม่มี —</div>':
     `<table><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr>${arr.map(o=>`<tr>${cols.map(c=>`<td>${c[1](o)}</td>`).join('')}</tr>`).join('')}</table>`;

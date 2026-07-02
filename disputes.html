@@ -142,7 +142,6 @@
 </div>
 
 <script>
-  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null||s==='')?'—':String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   const dt=s=>s?new Date(s).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'—';
@@ -151,10 +150,8 @@
   const STATUS={open:'เปิด',notice_sent:'ส่งหนังสือแล้ว',negotiating:'เจรจา',police:'แจ้งความ',court:'ฟ้องศาล',settled:'ตกลงได้',closed:'ปิดคดี'};
 
   async function api(action,extra){
-    if(!(await window.opsLogin())) throw new Error('redirecting');
-    const r=await fetch(FN,{method:'POST',headers:{'Authorization':'Bearer '+liff.getIDToken(),'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action},extra))});
-    if(r.status===401||r.status===403) throw new Error('ไม่มีสิทธิ์ (เฉพาะเจ้าของ/ผู้จัดการ)');
-    const j=await r.json(); if(j.error) throw new Error(j.error); return j;
+    try{ return await window.opsAcct(action,extra); }
+    catch(e){ throw (e&&e.message==='unauth')?new Error('ไม่มีสิทธิ์ (เฉพาะเจ้าของ/ผู้จัดการ)'):e; }
   }
 
   async function openCase(){

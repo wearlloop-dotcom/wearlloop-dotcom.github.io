@@ -76,14 +76,14 @@
 <div id="toast" class="toast"></div>
 
 <script>
-  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH');
   const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  async function authHeader(){ if(!(await window.opsLogin())) throw new Error('redirecting'); return 'Bearer '+liff.getIDToken(); }
-  async function api(action,extra){const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action},extra||{}))});
-    if(r.status===401||r.status===403){toast('ไม่มีสิทธิ์เข้าระบบจัดซื้อ (เฉพาะเจ้าของ/ผู้จัดการ)');throw new Error('unauth');}return r.json();}
+  const api=(action,extra)=>window.opsAcct(action,extra).catch(e=>{
+    if(e.message==='unauth'){toast('ไม่มีสิทธิ์เข้าระบบจัดซื้อ (เฉพาะเจ้าของ/ผู้จัดการ)');throw e;}
+    if(e.message==='redirecting')throw e;
+    return {ok:false,error:e.message};});
   function logout(){ try{ liff.logout(); }catch(e){} $('app').classList.add('hide');$('gate').classList.remove('hide');}
 
   let tab='restock', SUPPLIERS=[], SUPPLIES=[];
