@@ -20,6 +20,7 @@
     hanger:   I('<path d="M12 9V8.2c0-1 .9-1.5 1.6-2A2 2 0 1 0 10 4.6"/><path d="M12 9 3.6 15.4a1.3 1.3 0 0 0 .8 2.3h15.2a1.3 1.3 0 0 0 .8-2.3L12 9z"/>'),
     swap:     I('<path d="M7 8h13l-3.5-3.5M17 16H4l3.5 3.5"/>'),
     updown:   I('<path d="M8 19.5V5M8 5 4.8 8.2M8 5l3.2 3.2M16 4.5V19M16 19l-3.2-3.2M16 19l3.2-3.2"/>'),
+    inbox:    I('<path d="M12 3.5V12M12 12 8.5 8.5M12 12l3.5-3.5"/><path d="M4 14.5h4.5l1.5 2h4l1.5-2H20"/><path d="M4 14.5V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4.5"/>'),
     trend:    I('<path d="M4 9.5c2-2.6 4-2.6 6 0s4 2.6 6 0M4 15c2-2.6 4-2.6 6 0s4 2.6 6 0"/>'),
     speaker:  I('<path d="M3 10v4h3l5 5V5L6 10H3z"/><path d="M16 9a5 5 0 0 1 0 6"/>'),
     play:     I('<circle cx="12" cy="12" r="8.5"/><path d="M10 9v6l5.5-3L10 9z"/>'),
@@ -62,6 +63,7 @@
       { href: 'stock.html',    label: 'สต๊อก',         icon: 'grid', roles: ['care','stock','manager'] },
       { href: 'garment.html',  label: 'ชุด',           icon: 'hanger', roles: ['care','stock','manager'] },
       { href: 'seller.html',   label: 'รับซื้อมือสอง',  icon: 'swap', roles: ['care','manager'] },
+      { href: 'acquisitions.html', label: 'จัดการรับซื้อ', icon: 'inbox', roles: ['care','manager'] },
       { href: 'csv.html',      label: 'CSV ชุด (นำเข้า/ส่งออก)', icon: 'updown', roles: ['stock','manager'] },
     ] },
     { section: 'การตลาด', items: [

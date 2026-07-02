@@ -114,8 +114,8 @@
   async function render(){
     const v=$('view'); v.innerHTML='<div class="muted" style="padding:30px;text-align:center">กำลังโหลด…</div>';
     try{
-      if(tab==='overview') return renderOverview(v);
-      if(tab==='pnl') return renderPnl(v);
+      if(tab==='overview') return await renderOverview(v);
+      if(tab==='pnl') return await renderPnl(v);
       if(tab==='balance') return renderBalance(v, (await api('balance')).rows);
       if(tab==='trial') return renderTrial(v, (await api('trial')).rows);
       if(tab==='vat') return renderVat(v, (await api('vat')).rows);

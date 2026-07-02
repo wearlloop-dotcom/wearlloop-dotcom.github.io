@@ -136,7 +136,7 @@
       const isBulk = x.mode==='bulk';
       const label = isBulk ? ('ขายเหมา '+(x.count||0)+' ตัว') : 'เสนอขาย';
       const cls = isBulk ? 'bulk' : 'offer';
-      return rowLink(null, esc(x.name||('คำขอ #'+esc(x.id))), x.seller?'ผู้ขาย '+esc(x.seller):'', `<span class="tag ${cls}">${esc(label)}</span>`);
+      return rowLink('acquisitions.html?id='+encodeURIComponent(x.id), esc(x.name||('คำขอ #'+esc(x.id))), x.seller?'ผู้ขาย '+esc(x.seller):'', `<span class="tag ${cls}">${esc(label)}</span>`);
     }).join('');
 
     $('out').innerHTML =
