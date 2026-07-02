@@ -129,14 +129,14 @@
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
-const esc = s => s==null ? '' : String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const esc = s => s==null ? '' : String(s).replace(/[<>&"'\\]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;','\\':'&#92;'}[c]));
 
 // ---------- ค่าคงที่ ----------
 const TH_M = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const EN_M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const LSK = {                                     // localStorage (fallback ระหว่างรอ backend)
   day:     'lloop_closetday_day',                 // วันเปลี่ยนตู้ที่เลือก (1–28)
-  box:     'lloop_closetday_box_',                // + 'YYYY-MM' → {items:[code], status, swaps_used}
+  box:     'lloop_closetday_box_',                // + 'YYYY-MM' → {items:[{code,name,brand,tier,season,bg}], status, swaps_used}
   history: 'lloop_closetday_history',             // โค้ดชุดที่เคยอยู่ในกล่องแล้ว (กันจัดซ้ำ)
 };
 const MAX_SWAPS = 2;
@@ -149,7 +149,7 @@ let RANKED = [];            // ผลจัดอันดับจาก MOCK (
 let swapOpenFor = null;     // code ของการ์ดที่กำลังกางตัวเลือกสลับ
 
 function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
-function ym(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+function ym(){ return new Date().toISOString().slice(0,7); }   // UTC — ให้ตรงกับ month key ฝั่ง SQL
 
 // RPC ทุกตัวยังไม่มีบน backend — ห่อ try/catch แล้ว fallback localStorage เสมอ
 async function rpcTry(name, args){
@@ -163,6 +163,26 @@ async function rpcTry(name, args){
     return null;
   }
 }
+// เขียนขึ้น server: ถ้า server ตอบ {error:...} (data-level) → server ไม่รับ — ดึงความจริงจาก server มาทับแล้ว re-render
+// (transport error ยังคง fallback localStorage ตามเดิมผ่าน rpcTry)
+async function rpcWrite(name, args){
+  const data = await rpcTry(name, args);
+  if(data && data.error){
+    console.warn('[closet-day] rpc ' + name + ' rejected by server:', data.error);
+    await loadState();
+    renderAll();
+    toast(NAV.t('ซิงก์กับระบบใหม่ให้แล้วค่ะ', 'Re-synced with the system'));
+  }
+  return data;
+}
+function toast(msg){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:10px 16px;border-radius:10px;z-index:99;opacity:0;transition:opacity .3s';
+  document.body.appendChild(t);
+  requestAnimationFrame(function(){ t.style.opacity = '1'; });
+  setTimeout(function(){ t.style.opacity = '0'; setTimeout(function(){ t.remove(); }, 350); }, 2600);
+}
 
 // ---------- วันที่ ----------
 // รอบถัดไปของ "วันเปลี่ยนตู้": ถ้าวันนั้นผ่านไปแล้วเดือนนี้ → เดือนหน้า
@@ -173,7 +193,7 @@ function nextOccurrence(day){
   return new Date(y, m, day);
 }
 function fmtDate(d){ return NAV.t(d.getDate() + ' ' + TH_M[d.getMonth()], EN_M[d.getMonth()] + ' ' + d.getDate()); }
-// ยืนยันอัตโนมัติ 5 วันก่อนวันเปลี่ยนตู้ → เหลืออีกกี่วัน
+// รอบจัดส่งตัดยอด 5 วันก่อนวันเปลี่ยนตู้ → เหลืออีกกี่วัน
 function daysUntilAutoConfirm(){
   if(!S.day) return null;
   const cutoff = nextOccurrence(S.day);
@@ -213,7 +233,8 @@ function alternatives(){
 // ---------- load / save ----------
 function saveBoxLocal(){
   try{
-    localStorage.setItem(LSK.box + ym(), JSON.stringify({ items: S.box.map(b => b.code), status: S.status, swaps_used: S.swaps_used }));
+    // เก็บ object เต็ม — กล่องจริงจาก server จะกู้คืน offline ได้ ไม่โดน MOCK ทับ
+    localStorage.setItem(LSK.box + ym(), JSON.stringify({ items: S.box, status: S.status, swaps_used: S.swaps_used }));
   }catch(e){}
 }
 function loadLocal(){
@@ -226,8 +247,11 @@ function loadLocal(){
     if(rec && Array.isArray(rec.items)){
       S.status = rec.status || 'draft';
       S.swaps_used = rec.swaps_used || 0;
-      S.box = rec.items.map(code => RANKED.find(g => g.code === code)).filter(Boolean);
-      if(S.box.length === 3) return;
+      // รูปแบบใหม่เก็บ object เต็ม — ใช้ตรง ๆ · รายการเก่าที่เป็น code อย่างเดียวค่อยเทียบจาก RANKED
+      S.box = rec.items
+        .map(it => (it && typeof it === 'object') ? it : RANKED.find(g => g.code === it))
+        .filter(Boolean);
+      if(S.box.length) return;
     }
   }catch(e){}
   // ยังไม่มีกล่องเดือนนี้ → คัด top 3 ให้เลย
@@ -254,7 +278,7 @@ async function setDay(d){
   S.day = d;
   try{ localStorage.setItem(LSK.day, String(d)); }catch(e){}
   renderAll();
-  await rpcTry('closet_day_set', { p_uid: UID, p_day: d });
+  await rpcWrite('closet_day_set', { p_uid: UID, p_day: d });
 }
 function openSwap(code){
   if(S.status !== 'draft' || S.swaps_used >= MAX_SWAPS) return;
@@ -270,7 +294,7 @@ async function doSwap(outCode, inCode){
   swapOpenFor = null;
   saveBoxLocal();
   renderAll();
-  await rpcTry('closet_box_swap', { p_uid: UID, p_out_code: outCode, p_in_code: inCode });
+  await rpcWrite('closet_box_swap', { p_uid: UID, p_out_code: outCode, p_in_code: inCode });
 }
 async function confirmBox(){
   S.status = 'confirmed';
@@ -280,7 +304,7 @@ async function confirmBox(){
   try{ localStorage.setItem(LSK.history, JSON.stringify(hist)); }catch(e){}
   saveBoxLocal();
   renderAll();
-  await rpcTry('closet_box_confirm', { p_uid: UID });
+  await rpcWrite('closet_box_confirm', { p_uid: UID });
 }
 async function skipBox(){
   const ok = window.confirm(NAV.t(
@@ -291,14 +315,14 @@ async function skipBox(){
   swapOpenFor = null;
   saveBoxLocal();
   renderAll();
-  await rpcTry('closet_box_skip', { p_uid: UID });
+  await rpcWrite('closet_box_skip', { p_uid: UID });
 }
-function undoSkip(){
-  // ยังไม่มี RPC สำหรับยกเลิกการข้าม — บันทึกฝั่ง client ไปก่อน (backend ค่อยเก็บจาก closet_day_get รอบถัดไป)
-  console.warn('[closet-day] undo skip — local only (no backend RPC yet)');
+async function undoSkip(){
   S.status = 'draft';
   saveBoxLocal();
   renderAll();
+  // ล็อกอินอยู่ → บอก server ให้เลิกข้ามด้วย (ไม่ล็อกอิน rpcWrite จะไม่ยิงเอง — local อย่างเดียวตามเดิม)
+  await rpcWrite('closet_box_unskip', { p_uid: UID });
 }
 
 // ---------- render ----------
@@ -319,17 +343,17 @@ function renderDay(){
   }
 }
 function renderBox(){
-  // countdown ยืนยันอัตโนมัติ
+  // countdown ก่อนรอบจัดส่ง
   const n = daysUntilAutoConfirm();
   const cl = $('countLine');
   if(S.status !== 'draft' || n == null){
     cl.textContent = '';
   }else if(n > 0){
-    cl.textContent = NAV.t('ยืนยันอัตโนมัติในอีก ' + n + ' วัน — ไม่ต้องกดอะไรถ้าถูกใจแล้วค่ะ',
-                           'Auto-confirms in ' + n + ' day' + (n > 1 ? 's' : '') + " — nothing to do if you already love it.");
+    cl.textContent = NAV.t('อีก ' + n + ' วัน ก่อนรอบจัดส่ง — กดยืนยันเพื่อล็อกกล่องนี้ หรือรอสไตลิสต์ทัก LINE ไปยืนยันก่อนส่งนะคะ',
+                           n + ' day' + (n > 1 ? 's' : '') + ' to dispatch — confirm to lock this box, or our stylist will confirm with you on LINE before shipping');
   }else{
-    cl.textContent = NAV.t('กล่องนี้พร้อมยืนยันอัตโนมัติแล้วค่ะ — ไม่ต้องกดอะไรถ้าถูกใจแล้วนะคะ',
-                           "This box is ready to auto-confirm — nothing to do if you already love it.");
+    cl.textContent = NAV.t('ถึงรอบจัดส่งแล้วค่ะ — กดยืนยันเพื่อล็อกกล่องนี้ หรือรอสไตลิสต์ทัก LINE ไปยืนยันก่อนส่งนะคะ',
+                           'Dispatch time — confirm to lock this box, or our stylist will confirm with you on LINE before shipping');
   }
 
   const swapsLeft = MAX_SWAPS - S.swaps_used;

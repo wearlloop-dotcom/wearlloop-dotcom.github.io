@@ -287,14 +287,16 @@ async function submitFit(i){
   btn.disabled = true; btn.textContent = T('กำลังส่ง…','Sending…');
   const note = (p.noteVal || '').trim() || null;
 
-  // ยิง RPC จริงก่อน — backend ยังไม่มี → พังก็ไม่เป็นไร เก็บ local ให้หน้าใช้งานได้เต็ม
-  try {
-    const { error } = await client().rpc('submit_fit_feedback', {
-      p_uid: UID || 'demo', p_rental: p.rental_id, p_garment: p.garment_code,
-      p_bust: p.sel.bust, p_waist: p.sel.waist, p_hip: p.sel.hip, p_length: p.sel.length, p_note: note,
-    });
-    if(error) throw error;
-  } catch(e){ console.warn('submit_fit_feedback fallback → localStorage:', e && e.message || e); }
+  // ยิง RPC จริงเฉพาะตอนล็อกอิน — โหมดตัวอย่างเก็บ local อย่างเดียว (ห้ามส่ง uid ปลอม)
+  if(UID){
+    try {
+      const { error } = await client().rpc('submit_fit_feedback', {
+        p_uid: UID, p_rental: p.rental_id, p_garment: p.garment_code,
+        p_bust: p.sel.bust, p_waist: p.sel.waist, p_hip: p.sel.hip, p_length: p.sel.length, p_note: note,
+      });
+      if(error) throw error;
+    } catch(e){ console.warn('submit_fit_feedback fallback → localStorage:', e && e.message || e); }
+  }
 
   // เก็บ local เสมอ (cache) — โปรไฟล์แม่นขึ้นทันทีแม้ backend ยังไม่มา
   const entry = {
@@ -359,19 +361,24 @@ function renderInsights(){
 
 // ---- โหลดข้อมูล (RPC จริง → fallback localStorage + MOCK) ----
 async function loadProfile(){
+  if(!UID){                                        // โหมดตัวอย่าง — ไม่ยิง RPC (ห้ามส่ง uid ปลอม)
+    FEEDBACK = demoFeedback().concat(lsGet(LS_FB));
+    return;
+  }
   try {
-    const { data, error } = await client().rpc('my_fit_profile', { p_uid: UID || 'demo' });
+    const { data, error } = await client().rpc('my_fit_profile', { p_uid: UID });
     if(error) throw error;
     if(!data || !Array.isArray(data.feedback)) throw new Error('no data');
     FEEDBACK = data.feedback;
   } catch(e){
-    console.warn('my_fit_profile fallback → localStorage/MOCK:', e && e.message || e);
-    FEEDBACK = (UID ? [] : demoFeedback()).concat(lsGet(LS_FB));
+    console.warn('my_fit_profile fallback → localStorage:', e && e.message || e);
+    FEEDBACK = lsGet(LS_FB);
   }
 }
 async function loadPending(){
+  if(!UID){ PENDING = demoPending(); return; }     // โหมดตัวอย่าง — ไม่ยิง RPC
   try {
-    const { data, error } = await client().rpc('fit_feedback_pending', { p_uid: UID || 'demo' });
+    const { data, error } = await client().rpc('fit_feedback_pending', { p_uid: UID });
     if(error) throw error;
     if(!Array.isArray(data)) throw new Error('no data');
     PENDING = data;
