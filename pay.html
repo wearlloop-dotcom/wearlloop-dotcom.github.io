@@ -111,7 +111,6 @@
     <div class="sec"><div class="empty"><p data-i18n="Loading your bill…">กำลังโหลดบิล…</p></div></div>
   </div>
 
-  <div class="demo" id="demo" data-i18n="LLOOP per-person payment page · live via Supabase through &lt;b&gt;liff/api.js&lt;/b&gt; (group_order_summary / group_pay_confirm)">หน้าจ่ายเงินรายคน LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (group_order_summary / group_pay_confirm)</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -216,7 +215,7 @@ async function boot(){
   } else {
     // โหมดพรีวิว / mock
     SUMMARY = JSON.parse(JSON.stringify(MOCK_SUMMARY));
-    $('#demo').innerHTML = NAV.t('โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อจ่ายกับ Supabase','Preview mode (mock) · open via LINE to pay through Supabase');
+    const _demo = $('#demo'); if (_demo) _demo.innerHTML = NAV.t('โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อจ่ายกับ Supabase','Preview mode (mock) · open via LINE to pay through Supabase');
   }
 
   // โหลดช่องทางชำระ (payInfo คืน data ตรง ไม่ห่อ ok/data)

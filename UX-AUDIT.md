@@ -1,5 +1,9 @@
 # UX/UI Audit — มุมมองลูกค้า end-to-end (ก.ค. 2026)
 
+> **สถานะการแก้ (2 ก.ค. 2026):** แก้แล้ว — C1 (browse-first ไม่บังคับ login ก่อนดูร้าน + ประตู login ปิดได้), C2 (จำชุด/วัน/ตัวสำรองก่อนเด้ง LINE แล้วเปิดชีตเดิมให้ต่อ + redirectUri คง query), C3 (ลิงก์ตาย links.html), C4 (ประตู "สำหรับทีมงาน" บนหน้า ops), M1 (ปุ่มเปิดแชต LINE ส่งสลิปใน confirm ทั้ง index/g.html), M7 (topbar ใน wed.html), M8 (guard ปุ่มจองสำหรับ guest), ข้อ 4 ของ TL;DR (wishlist/review เลิกเด้ง login ตอนเปิดหน้า, join เลิก auto-redirect), debug text ใน pay.html
+> ยังไม่ได้แก้ (งานใหญ่/ตัดสินใจเชิงธุรกิจ): M2 (หน้า "ออเดอร์ของฉัน" แบบเต็ม — ตอนนี้มีใน sheet ของ index อยู่แล้ว), M3 (กวาด catch เงียบทั้งระบบ), M4 (รวม date picker), M6 (ชะตากรรม shop.html), เปลี่ยนชื่อ garment.html
+> หมายเหตุ M5: ตรวจแล้วทั้งสองระบบภาษาใช้ localStorage key `lloop_lang` ร่วมกันอยู่แล้ว — ไม่เป็นปัญหาจริง
+
 วิธีตรวจ: ไล่อ่านโค้ดทุกหน้า customer-facing + เปิดหน้าเว็บจริงด้วย browser จำลองมือถือ (iPhone viewport) ตั้งแต่หน้าแรก → เลือกชุด → จอง → จ่าย → หลังเช่า
 
 ---

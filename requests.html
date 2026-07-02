@@ -259,7 +259,7 @@ const SUPABASE_URL = CFG.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.
 const SUPABASE_KEY = CFG.SUPABASE_ANON_KEY || '';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 if (window.opsRpc) sb.rpc = window.opsRpc;
-if (window.opsLogin) window.opsLogin().catch(() => {});
+if (window.opsGuard) window.opsGuard();
 
 const $ = id => document.getElementById(id);
 const esc = s => s == null ? '' : String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));

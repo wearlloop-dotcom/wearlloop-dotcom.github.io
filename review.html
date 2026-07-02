@@ -772,7 +772,8 @@ async function loadProfile() {
 $('submitBtn').addEventListener('click', async () => {
   showErr('');
 
-  if (!uid) { showErr(T('กรุณาเข้าสู่ระบบก่อน', 'Please sign in first')); return; }
+  // guest กดส่ง → พาไปล็อกอิน LINE ต่อเลย (แทน error ค้างที่ไปต่อไม่ได้)
+  if (!uid) { showErr(T('พาไปเข้าสู่ระบบ LINE ก่อนนะคะ แล้วกลับมาส่งได้เลย…', 'Signing you in with LINE first…')); liff.login({ redirectUri: window.location.href }); return; }
   if (!score) { showErr(T('กรุณาให้คะแนนชุดก่อน', 'Please rate the piece first')); return; }
 
   const btn = $('submitBtn');
@@ -842,6 +843,18 @@ $('submitBtn').addEventListener('click', async () => {
   }, 1200);
 });
 
+// guest เห็นหน้ารีวิวได้ก่อน — แบนเนอร์ชวนล็อกอินแทนการเด้งไป LINE ทันทีที่เปิดหน้า
+function showSignInBar() {
+  if (document.getElementById('signinBar')) return;
+  const d = document.createElement('div');
+  d.id = 'signinBar';
+  d.style.cssText = 'margin:12px 16px 0;padding:12px 14px;background:#fff;border:1px solid var(--line,#E7E5E1);border-radius:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:13px';
+  d.innerHTML = '<span>' + T('เข้าสู่ระบบด้วย LINE เพื่อรีวิวชุดและรับเครดิต', 'Sign in with LINE to review and earn credit') + '</span>'
+    + '<button type="button" style="flex:0 0 auto;background:#06C755;color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;font-family:inherit" onclick="liff.login({redirectUri:location.href})">' + T('เข้าสู่ระบบ', 'Sign in') + '</button>';
+  const bar = document.querySelector('.lloop-topbar');
+  if (bar && bar.parentNode) bar.parentNode.insertBefore(d, bar.nextSibling); else document.body.prepend(d);
+}
+
 // --- Init ---
 async function init() {
   populateGarmentBar();
@@ -849,7 +862,8 @@ async function init() {
   try {
     await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
     if (!liff.isLoggedIn()) {
-      liff.login({ redirectUri: window.location.href });
+      // guest ดูหน้าได้ก่อน ค่อยล็อกอินตอนกดส่งรีวิว (เดิมเด้งไป LINE ก่อนเห็นเนื้อหา)
+      showSignInBar();
       return;
     }
     const profile = await liff.getProfile();

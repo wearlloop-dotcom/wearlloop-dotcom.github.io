@@ -166,7 +166,7 @@
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // วิ่งผ่าน gateway (LINE login + role)
-  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  if(window.opsGuard) window.opsGuard();
   const BROADCAST_URL=SUPABASE_URL+'/functions/v1/live-broadcast';
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));

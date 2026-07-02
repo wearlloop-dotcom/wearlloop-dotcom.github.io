@@ -52,4 +52,30 @@
   window.opsIdToken = function () { try { return (window.liff && liff.getIDToken && liff.getIDToken()) || ''; } catch (e) { return ''; } };
   window.opsLogin = opsLogin;
   window.opsRpc = opsRpc;
+
+  // ประตูหน้า ops: ลูกค้า/คนไม่ล็อกอินหลงเข้ามา → โชว์ "หน้านี้สำหรับทีมงาน" + ปุ่มกลับร้าน (แทนหน้าค้างครึ่ง ๆ)
+  function showStaffGate() {
+    if (document.getElementById('opsStaffGate')) return;
+    const d = document.createElement('div');
+    d.id = 'opsStaffGate';
+    d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#FBFAF7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center';
+    d.innerHTML = '<div style="max-width:340px;font-family:system-ui,sans-serif">'
+      + '<div style="font-size:22px;font-weight:700;letter-spacing:1px;margin-bottom:10px">LLOOP</div>'
+      + '<div style="font-size:15px;font-weight:600;margin-bottom:6px">หน้านี้สำหรับทีมงาน LLOOP ค่ะ</div>'
+      + '<div style="font-size:13px;color:#8C8B86;margin-bottom:18px">ถ้าคุณเป็นลูกค้า กดปุ่มด้านล่างเพื่อไปเลือกชุดได้เลยนะคะ</div>'
+      + '<a href="index.html" style="display:block;background:#1A1A1A;color:#fff;border-radius:12px;padding:12px;font-size:14px;font-weight:600;text-decoration:none;margin-bottom:10px">ไปหน้าเลือกชุด</a>'
+      + '<button type="button" onclick="sessionStorage.removeItem(\'opsLoginTried\');location.reload()" style="background:none;border:none;color:#8C8B86;font-size:12.5px;text-decoration:underline;cursor:pointer">เป็นทีมงาน — เข้าสู่ระบบอีกครั้ง</button>'
+      + '</div>';
+    document.body.appendChild(d);
+  }
+  // เรียกตอนเปิดหน้า ops แทน opsLogin().catch(()=>{}) — login ไม่ผ่าน (กลับมาแล้วยังไม่ติด) → โชว์ประตู
+  window.opsGuard = async function () {
+    const triedBefore = !!sessionStorage.getItem('opsLoginTried');
+    try {
+      const ok = await opsLogin();
+      // ok=false รอบแรก = กำลัง redirect ไป LINE (ไม่ต้องโชว์) · เคย redirect แล้วยังไม่ติด = ไม่ใช่ staff/ยกเลิก
+      if (!ok && triedBefore) showStaffGate();
+      return ok;
+    } catch (_e) { showStaffGate(); return false; }
+  };
 })();

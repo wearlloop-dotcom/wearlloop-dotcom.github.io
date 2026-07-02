@@ -582,13 +582,13 @@ function toggleForYou() { fForYou =!fForYou; renderCatnav(); renderGrid(); if (f
 function setForYouOff() { fForYou = false; }
 function setWishOff() { fWishOnly = false; }
 function toggleWishOnly() {
-  if (!CUSTOMER.id) { toast(lang ==='th'?'เข้าผ่าน LINE เพื่อดูข้อมูลส่วนตัว':'Sign in via LINE to see your saved looks'); return; }
+  if (!CUSTOMER.id) { toast(lang ==='th'?'เข้าผ่าน LINE เพื่อดูข้อมูลส่วนตัว':'Sign in via LINE to see your saved looks'); showLoginGate(); return; }
   fWishOnly =!fWishOnly; renderCatnav(); renderGrid();
 }
 // กดหัวใจที่การ์ดสินค้า — บันทึก/ยกเลิก wishlist
 async function toggleWish(garmentId, event) {
   event.stopPropagation();
-  if (!CUSTOMER.id) { toast(lang ==='th'?'เข้าผ่าน LINE เพื่อบันทึกที่หมายตา':'Sign in via LINE to save looks'); return; }
+  if (!CUSTOMER.id) { toast(lang ==='th'?'เข้าผ่าน LINE เพื่อบันทึกที่หมายตา':'Sign in via LINE to save looks'); showLoginGate(); return; }
   const btn = event.currentTarget;
   const wasOn = gWish.has(garmentId);
   // optimistic toggle
@@ -1385,9 +1385,10 @@ function showPayConfirm({ g, date, total, pay, backups }) {
         ${total != null ? `<div style="font-size:15px;font-weight:600;margin-top:10px">${TH ? 'โอน' : 'Transfer'} ฿${total}</div>` : ''}
       </div>
       <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center;font-weight:600">
-        ${TH ? 'โอนแล้ว แนบสลิปในแชต LINE นี้' : 'After paying, send the slip in this LINE chat'}
-        <div style="font-weight:400;font-size:12px;margin-top:3px">${TH ? 'ระบบตรวจสลิปและยืนยันออเดอร์ให้อัตโนมัติ' : 'We verify the slip and confirm your order automatically'}</div>
-      </div>` : `
+        ${TH ? 'โอนแล้วส่งสลิปในแชต LINE ของ LLOOP' : 'After paying, send the slip in the LLOOP LINE chat'}
+        <div style="font-weight:400;font-size:12px;margin-top:3px">${TH ? 'ระบบตรวจสลิปและยืนยันออเดอร์ให้อัตโนมัติ — ตามสถานะได้ที่ "ออเดอร์ของฉัน"' : 'We verify the slip and confirm automatically — track it in "My orders"'}</div>
+      </div>
+      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;background:#06C755;color:#fff;border-radius:12px;padding:11px;font-weight:600;text-decoration:none">${TH ? 'เปิดแชต LINE เพื่อส่งสลิป' : 'Open LINE chat to send the slip'}</a>` : `
       <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center">${TH ? 'จองไว้ให้แล้ว · ทีมงานจะส่งวิธีชำระเงินให้ในแชต LINE นี้ค่ะ' : 'Reserved — we’ll send payment details in this LINE chat'}</div>`}
       <button onclick="closePayConfirm();openOrders()" style="width:100%;margin-top:16px;border:1px solid var(--ink,#1A1A1A);background:#fff;border-radius:12px;padding:11px;font-weight:600;cursor:pointer">${TH ? 'ดูออเดอร์ของฉัน' : 'View my order'}</button>
       <button onclick="closePayConfirm()" style="width:100%;margin-top:8px;border:none;background:none;color:var(--muted,#8C8B86);padding:8px;cursor:pointer">${TH ? 'ปิด' : 'Close'}</button>
@@ -1564,6 +1565,13 @@ async function reserve(id, useCredit) {
     const dp = document.querySelector('.datepick'), cont = dp && (dp.closest('.sheet') || dp.parentElement);
     if (dp && cont) { const top = dp.getBoundingClientRect().top - cont.getBoundingClientRect().top + cont.scrollTop - 12; cont.scrollTo({ top, behavior:'smooth' }); }
     if (di) try { di.focus(); } catch (e) { /**/ }
+    return;
+  }
+  // guest กดจอง → จำชุด/วัน/ตัวสำรองไว้ แล้วชวนล็อกอิน (กลับมาแล้วเปิดชีตเดิมให้ต่อ ไม่ต้องเลือกใหม่)
+  if (!_isLoggedIn()) {
+    saveResume({ kind: 'detail', code: g.code || g.id, date, dur: gDur, backups: _backupPicks.slice() });
+    toast(lang === 'th' ? 'เข้าสู่ระบบด้วย LINE แล้วกลับมาจองต่อได้เลย — จำชุดและวันที่ไว้ให้แล้วค่ะ' : 'Sign in with LINE — we saved your pick and dates for you');
+    showLoginGate();
     return;
   }
   // ต้องมีที่อยู่จัดส่งก่อนจอง — กันจ่ายเงินแล้วไม่มีที่ส่งของ
@@ -1984,6 +1992,14 @@ async function bookCartNow() {
   const TH = lang === 'th';
   const date = $('#cartDate') && $('#cartDate').value;
   if (!date) { toast(TH ? 'เลือกวันที่ก่อนนะคะ' : 'Pick a date'); return; }
+  // guest กดจองตะกร้า → ชวนล็อกอิน (ตะกร้าอยู่ใน localStorage อยู่แล้ว กลับมาแล้วเปิดตะกร้าให้ต่อ)
+  if (!_isLoggedIn()) {
+    saveResume({ kind: 'cart', date, dur: gDur });
+    toast(TH ? 'เข้าสู่ระบบด้วย LINE แล้วกลับมาจองต่อได้เลย — ของในตะกร้ายังอยู่ครบค่ะ' : 'Sign in with LINE — your cart is saved');
+    closeCart();
+    showLoginGate();
+    return;
+  }
   // ต้องมีที่อยู่จัดส่งก่อนจอง
   if (!requireAddress()) { closeCart(); return; }
   // ด่าน KYC — เต็มเฉพาะถ้ามีชุดพรีเมียม/ดีไซเนอร์ในตะกร้า
@@ -3610,18 +3626,42 @@ async function acceptTermsClick() {
   try { await window.API.acceptTerms(CUSTOMER, _termsVersion); } catch (e) { console.warn(e); }
   maybeOnboard();
 }
-// ประตูล็อกอินเต็มหน้า — บังคับเข้าสู่ระบบก่อนใช้งานทั้งเว็บ (เรียกตอน boot ถ้าเป็น guest)
+// ประตูล็อกอิน — โชว์เมื่อ guest กดจุดที่ต้องมีบัญชี (จอง/ตะกร้า/ที่หมายตา) · ปิดได้ กลับไปเลือกชุดต่อ
 function showLoginGate() {
   const gate = $('#loginGate'); if (!gate) return;
   if (lang === 'en') {
     const set = (id, tx) => { const e = $('#' + id); if (e) e.textContent = tx; };
     set('lgTitle', 'Welcome');
-    set('lgSub', 'Sign in with LINE to browse pieces and use LLOOP Atelier');
+    set('lgSub', 'Sign in with LINE to book pieces and use LLOOP Atelier');
     set('lgBtnLabel', 'Sign in with LINE');
     set('lgNote', 'Signing in means you accept the Terms of Service and Privacy Policy');
+    set('lgBrowse', 'Keep browsing first');
   }
   gate.classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+function closeLoginGate() {
+  const gate = $('#loginGate'); if (!gate) return;
+  gate.classList.remove('open');
+  document.body.style.overflow = '';
+}
+// จำสิ่งที่ guest ทำค้างไว้ก่อนเด้งไป LINE login → กลับมาแล้วเปิดต่อให้เอง (แก้ "เด้งแล้วของหาย")
+function saveResume(data) { try { sessionStorage.setItem('lloop_resume', JSON.stringify(data)); } catch (_e) {} }
+function applyResume() {
+  let r = null;
+  try { r = JSON.parse(sessionStorage.getItem('lloop_resume') || 'null'); } catch (_e) {}
+  if (!r) return;
+  if (!_isLoggedIn()) return;   // ยังไม่ได้ล็อกอิน (กดปิด gate) — เก็บไว้เผื่อรอบหน้า
+  try { sessionStorage.removeItem('lloop_resume'); } catch (_e) {}
+  if (r.dur) gDur = r.dur;
+  if (r.date) gUseDate = r.date;
+  if (r.kind === 'cart') { setTimeout(() => openCart(), 300); return; }
+  if (r.kind === 'detail' && r.code) {
+    const g = GARMENTS.find(x => (x.code || x.id) == r.code);
+    if (!g) return;
+    if (Array.isArray(r.backups)) _backupPicks = r.backups.slice(0, BACKUP_MAX);
+    setTimeout(() => openDetail(g.id), 250);
+  }
 }
 // ===== ประตู LLOOP Atelier — บังคับล็อกอิน LINE + ยอมรับข้อตกลง ก่อนใช้ฟีเจอร์ AI =====
 function _isLoggedIn() {
@@ -3803,9 +3843,8 @@ async function boot() {
   fForYou =!!(CUSTOMER.bust_in!= null || CUSTOMER.my_color_season || (CUSTOMER.style_profile && Object.keys(CUSTOMER.style_profile).length));
   // สถานะล็อกอิน: มี lineUid = ล็อกอินผ่าน LINE แล้ว → โชว์เครดิตจริง; ไม่มี = guest → โชว์ปุ่มเข้าสู่ระบบ
   const loggedIn =!!s.lineUid;
-  // บังคับล็อกอินทั้งเว็บก่อนใช้งาน (เว้นโหมดเดโม/localhost) — guest เห็นแค่ประตูล็อกอิน ไม่โหลด/ไม่ track ต่อ
+  // browse-first: guest เดินดูร้านได้เลย — ชวนล็อกอินตอนกดจอง/บันทึกที่หมายตา (จุดที่จำเป็นจริง)
   const _isLocalDev = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname);
-  if (!loggedIn && !(window.CONFIG && CONFIG.USE_MOCK) && !_isLocalDev) { showLoginGate(); return; }
   const loginBtn = $('#loginBtn'); const creditEl = document.querySelector('.credit');
   if (loginBtn) loginBtn.hidden = loggedIn;
   if (creditEl) creditEl.hidden =!loggedIn;
@@ -3823,8 +3862,8 @@ async function boot() {
     if (window.BDAY && window.BDAY.voucher && window.BDAY.voucher.active)
       setTimeout(() => toast(lang === 'th' ? `ของขวัญวันเกิด: เช่าฟรี 1 ชุด (ถึง ฿${window.BDAY.voucher.value_cap}) เลือกชุดได้เลย` : `Birthday gift: 1 free rental — pick a dress`), 1200);
   } catch (e) { window.BDAY = null; }
-  // เดโม: ยังไม่ได้ล็อกอินผ่าน LINE (เปิดบน localhost) ใส่ตัวอย่างให้หน้าผลกระทบดูมีชีวิต
-  if (!CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
+  // เดโม (เฉพาะ localhost/mock): ใส่ตัวอย่างให้หน้าผลกระทบดูมีชีวิต — guest จริงบนโปรดักชันไม่ปนตัวเลขปลอม
+  if (!CUSTOMER._impact && (_isLocalDev || (window.CONFIG && CONFIG.USE_MOCK))) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   // เครดิตใกล้หมดอายุ: โชว์ banner กระตุ้นให้กลับมาใช้
   // กันเหนียว: รีเซ็ตซ่อน+ล้างข้อความก่อนเสมอ แล้วโชว์เฉพาะเมื่อมีเครดิตจริง + ข้อความไม่ว่าง
   const _eb = $('#expiryBanner'), _em = $('#expiryMsg');
@@ -3865,6 +3904,7 @@ async function boot() {
   await maybeShowTerms();
   maybeOnboard();
   routeDeepLink();
+  applyResume();   // กลับจาก LINE login → เปิดชีตจอง/ตะกร้าที่ค้างไว้ให้ต่อ
   applyPendingReferral();
 }
 // มาจาก flex ที่แชร์ลิงค์สถานที่เข้า LINE → เติมสถานที่ให้ + เปิดสไตลิสต์ทันที

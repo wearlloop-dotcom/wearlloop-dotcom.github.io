@@ -7,8 +7,8 @@ window.LiffAuth = (function () {
     if (!_initP) _initP = liff.init({ liffId: CONFIG.LIFF_ID });
     return _initP;
   }
-  // base URL (ไม่มี query) — ใช้เป็น redirectUri ให้ตรง LIFF endpoint + กลับมาสะอาด
-  function baseUrl() { return location.origin + location.pathname; }
+  // redirectUri = URL ปัจจุบันพร้อม query — กลับจาก LINE แล้วไม่หลุดหน้า/ไม่ทิ้ง ?code= ?garment= ที่เปิดอยู่
+  function baseUrl() { return location.origin + location.pathname + location.search; }
 
   async function login() {
     try {
