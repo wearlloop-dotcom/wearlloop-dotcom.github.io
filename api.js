@@ -38,6 +38,9 @@ window.API = (function () {
       id: r.id, code: r.code, name: r.name || r.code, brand: r.brand, tier: r.tier, price: r.rental_price, category: r.category,
       retail: r.replacement_value != null ? Number(r.replacement_value) : null,  // มูลค่าชุด (โชว์ความคุ้ม)
       grade: r.condition_grade || null, washCount: r.wash_count ?? null,         // ความสะอาด/ดูแล
+      defectNote: r.defect_note || null,                                          // ตำหนิ (แจ้งลูกค้าตรง ๆ)
+      defectPhotos: Array.isArray(r.defect_photos) ? r.defect_photos : [],        // รูปจุดตำหนิ (กดดูได้)
+      priceRegular: r.regular_price != null ? Number(r.regular_price) : null,     // เรทปกติก่อนลดเพราะตำหนิ (โชว์ขีดฆ่า)
       timesRented: r.times_rented ?? 0,
       photo: (Array.isArray(r.photos) && r.photos[0]) || r.photo || null,
       photos: Array.isArray(r.photos) ? r.photos : [],
