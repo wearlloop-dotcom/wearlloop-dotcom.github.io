@@ -61,10 +61,9 @@
     d.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#FBFAF7;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center';
     d.innerHTML = '<div style="max-width:340px;font-family:system-ui,sans-serif">'
       + '<div style="font-size:22px;font-weight:700;letter-spacing:1px;margin-bottom:10px">LLOOP</div>'
-      + '<div style="font-size:15px;font-weight:600;margin-bottom:6px">หน้านี้สำหรับทีมงาน LLOOP ค่ะ</div>'
-      + '<div style="font-size:13px;color:#8C8B86;margin-bottom:18px">ถ้าคุณเป็นลูกค้า กดปุ่มด้านล่างเพื่อไปเลือกชุดได้เลยนะคะ</div>'
+      + '<div style="font-size:15px;font-weight:600;margin-bottom:18px">สำหรับทีมงาน LLOOP</div>'
       + '<a href="index.html" style="display:block;background:#1A1A1A;color:#fff;border-radius:12px;padding:12px;font-size:14px;font-weight:600;text-decoration:none;margin-bottom:10px">ไปหน้าเลือกชุด</a>'
-      + '<button type="button" onclick="sessionStorage.removeItem(\'opsLoginTried\');location.reload()" style="background:none;border:none;color:#8C8B86;font-size:12.5px;text-decoration:underline;cursor:pointer">เป็นทีมงาน — เข้าสู่ระบบอีกครั้ง</button>'
+      + '<button type="button" onclick="sessionStorage.removeItem(\'opsLoginTried\');location.reload()" style="background:none;border:none;color:#8C8B86;font-size:12.5px;text-decoration:underline;cursor:pointer">เข้าสู่ระบบทีมงาน</button>'
       + '</div>';
     document.body.appendChild(d);
   }

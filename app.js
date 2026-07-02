@@ -1385,10 +1385,10 @@ function showPayConfirm({ g, date, total, pay, backups }) {
         ${total != null ? `<div style="font-size:15px;font-weight:600;margin-top:10px">${TH ? 'โอน' : 'Transfer'} ฿${total}</div>` : ''}
       </div>
       <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center;font-weight:600">
-        ${TH ? 'โอนแล้วส่งสลิปในแชต LINE ของ LLOOP' : 'After paying, send the slip in the LLOOP LINE chat'}
-        <div style="font-weight:400;font-size:12px;margin-top:3px">${TH ? 'ระบบตรวจสลิปและยืนยันออเดอร์ให้อัตโนมัติ — ตามสถานะได้ที่ "ออเดอร์ของฉัน"' : 'We verify the slip and confirm automatically — track it in "My orders"'}</div>
+        ${TH ? 'โอนแล้วส่งสลิปในแชต LINE' : 'After paying, send the slip on LINE'}
+        <div style="font-weight:400;font-size:12px;margin-top:3px">${TH ? 'ตรวจสลิปและยืนยันให้อัตโนมัติ' : 'Verified and confirmed automatically'}</div>
       </div>
-      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;background:#06C755;color:#fff;border-radius:12px;padding:11px;font-weight:600;text-decoration:none">${TH ? 'เปิดแชต LINE เพื่อส่งสลิป' : 'Open LINE chat to send the slip'}</a>` : `
+      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;background:#06C755;color:#fff;border-radius:12px;padding:11px;font-weight:600;text-decoration:none">${TH ? 'ส่งสลิปใน LINE' : 'Send slip on LINE'}</a>` : `
       <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center">${TH ? 'จองไว้ให้แล้ว · ทีมงานจะส่งวิธีชำระเงินให้ในแชต LINE นี้ค่ะ' : 'Reserved — we’ll send payment details in this LINE chat'}</div>`}
       <button onclick="closePayConfirm();openOrders()" style="width:100%;margin-top:16px;border:1px solid var(--ink,#1A1A1A);background:#fff;border-radius:12px;padding:11px;font-weight:600;cursor:pointer">${TH ? 'ดูออเดอร์ของฉัน' : 'View my order'}</button>
       <button onclick="closePayConfirm()" style="width:100%;margin-top:8px;border:none;background:none;color:var(--muted,#8C8B86);padding:8px;cursor:pointer">${TH ? 'ปิด' : 'Close'}</button>
@@ -1570,7 +1570,6 @@ async function reserve(id, useCredit) {
   // guest กดจอง → จำชุด/วัน/ตัวสำรองไว้ แล้วชวนล็อกอิน (กลับมาแล้วเปิดชีตเดิมให้ต่อ ไม่ต้องเลือกใหม่)
   if (!_isLoggedIn()) {
     saveResume({ kind: 'detail', code: g.code || g.id, date, dur: gDur, backups: _backupPicks.slice() });
-    toast(lang === 'th' ? 'เข้าสู่ระบบด้วย LINE แล้วกลับมาจองต่อได้เลย — จำชุดและวันที่ไว้ให้แล้วค่ะ' : 'Sign in with LINE — we saved your pick and dates for you');
     showLoginGate();
     return;
   }
@@ -1995,7 +1994,6 @@ async function bookCartNow() {
   // guest กดจองตะกร้า → ชวนล็อกอิน (ตะกร้าอยู่ใน localStorage อยู่แล้ว กลับมาแล้วเปิดตะกร้าให้ต่อ)
   if (!_isLoggedIn()) {
     saveResume({ kind: 'cart', date, dur: gDur });
-    toast(TH ? 'เข้าสู่ระบบด้วย LINE แล้วกลับมาจองต่อได้เลย — ของในตะกร้ายังอยู่ครบค่ะ' : 'Sign in with LINE — your cart is saved');
     closeCart();
     showLoginGate();
     return;
@@ -3213,9 +3211,9 @@ function orderCard(r, spareList) {
   const returnBox = (!isSpare && r.status === 'out') ? `
     <div class="oreturn">
       <b>${th ? 'วิธีคืนชุด' : 'How to return'}</b>
-      ${th ? 'แพ็กชุดใส่บรรจุภัณฑ์เดิม แล้วทักแชต LINE เพื่อรับที่อยู่ส่งคืนหรือนัดรับ — คืนตรงเวลา มัดจำคืนไวหลังตรวจชุดค่ะ'
-           : 'Pack the piece in its original packaging and message us on LINE for the return address or pickup — deposit refunded after inspection.'}
-      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" class="oreturn-btn">${th ? 'ทักแชต LINE เรื่องคืนชุด' : 'Message us on LINE'}</a>
+      ${th ? 'แพ็กใส่บรรจุภัณฑ์เดิม แล้วทักแชตเพื่อนัดส่งคืน · มัดจำคืนหลังตรวจชุด'
+           : 'Pack in the original packaging and message us to arrange the return · deposit refunded after inspection'}
+      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" class="oreturn-btn">${th ? 'ทักแชต LINE' : 'Message on LINE'}</a>
     </div>` : '';
   return`<div class="ocard${isSpare?' ocard-spare':''}">
     <div class="otop">

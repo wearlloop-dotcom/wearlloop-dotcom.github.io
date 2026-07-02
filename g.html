@@ -322,8 +322,8 @@ function renderDone(from, to, total, covered){
       ${PAY.pay_promptpay_id ? `<div id="ppqr2"></div>`
         : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
       <div class="payamt">${NAV.t('สแกนแล้วโอน','Scan and transfer')} <b>${baht(total)}</b></div>
-      <div class="paynote">${NAV.t('โอนแล้วส่งสลิปในแชต LINE ของ LLOOP — ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ','Transfer, then send the slip in the LLOOP LINE chat — once confirmed, the piece is yours, shipped on your chosen date.')}</div>
-      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;background:#06C755;color:#fff;border-radius:12px;padding:11px;font-weight:600;text-decoration:none">${NAV.t('เปิดแชต LINE เพื่อส่งสลิป','Open LINE chat to send the slip')}</a>
+      <div class="paynote">${NAV.t('โอนแล้วส่งสลิปในแชต LINE — ยืนยันแล้วจัดส่งตามวันที่เลือก','Transfer, send the slip on LINE — confirmed and shipped on your date')}</div>
+      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;background:#06C755;color:#fff;border-radius:12px;padding:11px;font-weight:600;text-decoration:none">${NAV.t('ส่งสลิปใน LINE','Send slip on LINE')}</a>
     </div>`;
   $('#root').innerHTML = `
     <div class="sec">

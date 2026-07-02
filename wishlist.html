@@ -747,7 +747,7 @@ $('wishForm').addEventListener('submit', async e => {
 
   if (!selectedFile) { showErr(T('กรุณาเลือกรูปชุดที่ต้องการก่อน', 'Please choose a photo first')); return; }
   // guest กดส่ง → พาไปล็อกอิน LINE ต่อเลย (แทน error ค้างที่ไปต่อไม่ได้)
-  if (!uid) { showErr(T('พาไปเข้าสู่ระบบ LINE ก่อนนะคะ แล้วกลับมาส่งได้เลย…', 'Signing you in with LINE first…')); liff.login({ redirectUri: window.location.href }); return; }
+  if (!uid) { showErr(T('กำลังพาไปเข้าสู่ระบบ LINE…', 'Signing in with LINE…')); liff.login({ redirectUri: window.location.href }); return; }
 
   const btn = $('submitBtn');
   btn.disabled = true;
@@ -896,7 +896,7 @@ function showSignInBar() {
   const d = document.createElement('div');
   d.id = 'signinBar';
   d.style.cssText = 'margin:12px 16px 0;padding:12px 14px;background:#fff;border:1px solid var(--line,#E7E5E1);border-radius:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:13px';
-  d.innerHTML = '<span>' + T('เข้าสู่ระบบด้วย LINE เพื่อส่งคำขอและดูรายการของคุณ', 'Sign in with LINE to submit requests and see yours') + '</span>'
+  d.innerHTML = '<span>' + T('เข้าสู่ระบบเพื่อส่งคำขอ', 'Sign in to submit') + '</span>'
     + '<button type="button" style="flex:0 0 auto;background:#06C755;color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;font-family:inherit" onclick="liff.login({redirectUri:location.href})">' + T('เข้าสู่ระบบ', 'Sign in') + '</button>';
   const bar = document.querySelector('.lloop-topbar');
   if (bar && bar.parentNode) bar.parentNode.insertBefore(d, bar.nextSibling); else document.body.prepend(d);
