@@ -170,7 +170,7 @@ const $ = s => document.querySelector(s);
 const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
 const initial = n => (n||'?').trim().charAt(0);
 const avaColor = id => AVA[Math.abs([...String(id||'?')].reduce((a,c)=>a+c.charCodeAt(0),0))%AVA.length];
-const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const esc = s => String(s==null?'':s).replace(/[<>&"'`]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
 function avaHtml(picture, id, name){
   return picture
     ? `<img class="ava" src="${esc(picture)}" alt="${esc(initial(name))}" referrerpolicy="no-referrer">`
@@ -259,8 +259,11 @@ async function load(isRefresh){
       const r = await window.API.groupEventStatus(EVENT_GROUP, CUSTOMER);
       if(r && r.error){ st = { error:(r.error.message||String(r.error)) }; }
       else st = (r && r.data) || { error:'not_found' };
-    } else {
+    } else if(window.CONFIG && window.CONFIG.USE_MOCK){
       st = JSON.parse(JSON.stringify(MOCK_STATUS));
+    } else {
+      // production (USE_MOCK=false) แต่ยังไม่ได้ล็อกอิน → อย่าโชว์สถานะ mock (จ่ายแล้ว) เป็นของจริง
+      st = { error:'signin' };
     }
   }catch(e){ st = { error:'network' }; }
   finally{ if(isRefresh){ btn.disabled=false; btn.textContent=NAV.t('รีเฟรช','Refresh'); } }
@@ -278,6 +281,12 @@ function renderStatus(st){
   if(!st){ edgeState(NAV.t('โหลดข้อมูลไม่สำเร็จ','Couldn\'t load data'),NAV.t('ลองกดรีเฟรชอีกครั้งนะคะ','Please tap refresh and try again.')); return; }
 
   // ---- errors ----
+  if(st.error==='signin'){
+    edgeState(NAV.t('เข้าสู่ระบบเพื่อดูสถานะการจ่าย','Sign in to see payment status'),
+      NAV.t('เปิดหน้านี้ผ่าน LINE และเข้าสู่ระบบ เพื่อดูว่าใครในตีมจ่ายแล้วหรือยังค่ะ','Open this page through LINE and sign in to see who in the theme has paid.'),
+      NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
+    return;
+  }
   if(st.error==='denied'){
     edgeState(NAV.t('ดูได้เฉพาะสมาชิกกลุ่ม','Group members only'),
       NAV.t('หน้านี้สำหรับหัวหน้ากลุ่มและสมาชิกในตีมเท่านั้น — ขอให้คนที่จัดตีมเปิดลิงก์นี้ให้ หรือชวนคุณเข้ากลุ่มก่อนค่ะ','This page is for the group lead and theme members only — ask whoever set up the theme to open this link for you, or to invite you into the group first.'),

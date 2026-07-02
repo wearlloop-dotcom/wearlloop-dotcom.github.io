@@ -376,7 +376,7 @@ let MY_HIDE = false;   // ซ่อนรูปโปรไฟล์ของฉ
 // LIVE=true → ต่อ Supabase จริงผ่าน window.API; LIVE=false → ใช้ mock arrays ด้านบน (พรีวิว)
 let LIVE = false;
 const SEASONS = ['autumn','winter','spring','summer'];
-function escHtml(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function escHtml(s){ return String(s==null?'':s).replace(/[<>&"'`]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c])); }
 function toast(msg){ try{ alert(msg); }catch(_e){} }
 // unwrap { ok, data, error } จาก window.API; คืน data หรือโยน error แบบนุ่ม
 function unwrap(res){
@@ -430,7 +430,7 @@ function renderSwitch(){
   GROUPS.forEach(g=>{
     const b=document.createElement('button');
     b.className='gchip'+(g.id===active?' on':'');
-    b.innerHTML=`<span class="k">${g.kind==='friends'?NAV.t('เพื่อน','Friends'):g.kind==='couple'?NAV.t('คู่','Couple'):NAV.t('ครอบครัว','Family')}</span>${g.name}`;
+    b.innerHTML=`<span class="k">${g.kind==='friends'?NAV.t('เพื่อน','Friends'):g.kind==='couple'?NAV.t('คู่','Couple'):NAV.t('ครอบครัว','Family')}</span>${escHtml(g.name)}`;
     b.onclick=()=>{active=g.id;selRel=null;render();};
     el.appendChild(b);
   });
@@ -467,7 +467,7 @@ function memberCard(m){
   return `<div class="mcard" style="${m.pend?'opacity:.72':''}">
     ${m.role==='owner'?'<span class="badge">'+NAV.t('หัวหน้ากลุ่ม','Group lead')+'</span>':''}
     ${avaHtml(m.picture, m.id, m.name)}
-    <div><div class="mname">${m.name}</div><div class="mrel">${m.rel|| (m.role==='owner'?NAV.t('ตัวคุณเอง','You'):NAV.t('สมาชิก','Member'))}</div></div>
+    <div><div class="mname">${escHtml(m.name)}</div><div class="mrel">${escHtml(m.rel)|| (m.role==='owner'?NAV.t('ตัวคุณเอง','You'):NAV.t('สมาชิก','Member'))}</div></div>
     <div class="tags">${tags.join('')}</div>
     ${m.id===ME.id?`<button class="picpriv" onclick="togglePicHide()">${MY_HIDE?NAV.t('· แสดงรูปฉัน','· Show my photo'):NAV.t('· ซ่อนรูปฉันจากกลุ่ม','· Hide my photo from the group')}</button>`:''}
   </div>`;
@@ -798,8 +798,8 @@ function renderInvites(){
     <div class="ib-h"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--ok);fill:none;stroke-width:1.7"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
       ${NAV.t('คำเชิญรอคุณตอบรับ','Invitations awaiting you')} (${INVITES.length})</div>
     ${INVITES.map(iv=>`<div class="invrow">
-      <div class="ir-t"><div class="ir-n">${iv.name}</div>
-        <div class="ir-f"><span class="ir-k">${iv.kind==='friends'?NAV.t('เพื่อน','Friends'):NAV.t('ครอบครัว','Family')}</span> · ${NAV.t(iv.from+' ชวนคุณเข้าร่วม',iv.from+' invited you to join')}</div></div>
+      <div class="ir-t"><div class="ir-n">${escHtml(iv.name)}</div>
+        <div class="ir-f"><span class="ir-k">${iv.kind==='friends'?NAV.t('เพื่อน','Friends'):NAV.t('ครอบครัว','Family')}</span> · ${NAV.t(escHtml(iv.from)+' ชวนคุณเข้าร่วม',escHtml(iv.from)+' invited you to join')}</div></div>
       <button class="mini yes" onclick="respondInvite('${iv.group_id}',true)">${NAV.t('ตอบรับ','Accept')}</button>
       <button class="mini no" onclick="respondInvite('${iv.group_id}',false)">${NAV.t('ปฏิเสธ','Decline')}</button>
     </div>`).join('')}
@@ -927,6 +927,23 @@ function friendlyErr(code){
 
 function render(){ renderInvites(); renderSwitch(); renderMembers(); renderThemeSrc(); renderTheme(false); }
 
+// production (USE_MOCK=false) แต่ยังไม่มี session จริง → โชว์สถานะ "เข้าสู่ระบบ" แทนข้อมูลตัวอย่าง (ไม่โชว์ mock เป็นของจริง)
+function renderSignIn(){
+  const inv=$('#invites'); if(inv) inv.innerHTML='';
+  const sw=$('#switch'); if(sw) sw.innerHTML='';
+  $('#grpName').textContent=NAV.t('ยังไม่ได้เข้าสู่ระบบ','You\'re not signed in');
+  $('#grpCap').textContent='';
+  $('#memberBody').innerHTML=`<div class="empty">
+    <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
+    <h4>${NAV.t('เข้าสู่ระบบเพื่อดูกลุ่มของคุณ','Sign in to see your groups')}</h4>
+    <p>${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อดูกลุ่มครอบครัวและเพื่อนของคุณ แล้วจัดชุดเข้าตีมด้วยกัน','Sign in with LINE to see your family and friend groups and style everyone in one theme.')}</p>
+    <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
+      <button class="btn sage" onclick="doSignIn()">${NAV.t('เข้าสู่ระบบด้วย LINE','Sign in with LINE')}</button>
+    </div></div>`;
+  const themeResult=$('#themeResult'); if(themeResult) themeResult.innerHTML='';
+}
+window.doSignIn=function(){ try{ if(window.LiffAuth && LiffAuth.signIn){ LiffAuth.signIn(); return; } }catch(_e){} location.reload(); };
+
 // อ่าน ?join=<token> จาก URL หรือ liff.state → ถ้ามีและ LIVE ให้เข้ากลุ่มแล้วล้าง URL
 function readJoinToken(){
   try{
@@ -991,6 +1008,12 @@ document.addEventListener('DOMContentLoaded',async ()=>{
         LiffAuth.signIn(); return;   // redirect ไป LINE login แล้วกลับมา process token ต่อ
       }
     }
+  }
+
+  // production (USE_MOCK=false) แต่ init/auth ไม่สำเร็จ → อย่าโชว์ mock groups/invites เป็นของจริง
+  if(!LIVE && window.CONFIG && !window.CONFIG.USE_MOCK){
+    renderSignIn();
+    return;
   }
 
   render();

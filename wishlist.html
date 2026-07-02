@@ -689,7 +689,7 @@ async function uploadImage(file) {
 
 function esc(s) {
   if (s == null) return '';
-  return String(s).replace(/[<>&"]/g, c => ({ '<':'&lt;', '>':'&gt;', '&':'&amp;', '"':'&quot;' }[c]));
+  return String(s).replace(/[<>&"'`]/g, c => ({ '<':'&lt;', '>':'&gt;', '&':'&amp;', '"':'&quot;', "'":'&#39;', '`':'&#96;' }[c]));
 }
 
 async function loadPrevRequests() {
@@ -732,7 +732,7 @@ async function loadPrevRequests() {
             ${r.brand ? `<div class="rc-brand">${esc(r.brand)}</div>` : ''}
             <div class="rc-desc">${esc(r.item_description)}</div>
           </div>
-          <span class="status-badge ${statusKey}">${STATUS_TH[statusKey] || statusKey}</span>
+          <span class="status-badge ${esc(statusKey)}">${STATUS_TH[statusKey] || esc(statusKey)}</span>
         </div>
         ${meta.length ? `<div class="rc-meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>` : ''}
         ${r.ops_note ? `<div style="margin-top:8px;font-size:13px;color:var(--muted);font-weight:300;border-top:1px solid var(--line);padding-top:8px;">${esc(r.ops_note)}</div>` : ''}
@@ -828,7 +828,7 @@ async function loadMyQueue() {
         </div>
         <div class="rc-meta">
           ${r.price != null ? `<span>฿${Number(r.price).toLocaleString()}${T('/วัน', '/day')}</span>` : ''}
-          <span style="cursor:pointer;color:var(--sage)" onclick="leaveQueue('${r.garment_id}','${esc(r.want_date||'')}')">${T('ออกจากคิว', 'Leave queue')}</span>
+          <span style="cursor:pointer;color:var(--sage)" onclick="leaveQueue('${esc(r.garment_id)}','${esc(r.want_date||'')}')">${T('ออกจากคิว', 'Leave queue')}</span>
           ${open ? `<a href="index.html?garment=${esc(r.code||'')}${dParam}" style="color:var(--sage);text-decoration:none;font-weight:600">${T('เลือกวัน + จอง →', 'Pick a date + book →')}</a>` : ''}
         </div>
       </div>
@@ -859,7 +859,7 @@ async function loadTrending() {
     const meta = [r.size ? T('ไซส์ ', 'Size ') + r.size : null, r.occasion || null].filter(Boolean);
     const btn = r.mine
       ? `<button class="vote-btn voted" disabled title="${T('คำขอของคุณ', 'Your request')}"><span class="vc">${r.votes}</span><span class="vl">${T('ของคุณ', 'Yours')}</span></button>`
-      : `<button class="vote-btn ${r.voted ? 'voted' : ''}" id="vb_${r.id}" onclick="doVote('${r.id}')"><span class="vc">${r.votes}</span><span class="vl">${T('อยากได้', 'Want')}</span></button>`;
+      : `<button class="vote-btn ${r.voted ? 'voted' : ''}" id="vb_${esc(r.id)}" onclick="doVote('${esc(r.id)}')"><span class="vc">${r.votes}</span><span class="vl">${T('อยากได้', 'Want')}</span></button>`;
     return `<div class="request-card">
       ${thumb}
       <div class="rc-body">
