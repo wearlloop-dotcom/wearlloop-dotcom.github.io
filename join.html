@@ -213,7 +213,7 @@ function readToken(){
     }
     // หลัง LINE login redirectUri (baseUrl) ตัด ?token ทิ้ง → กู้คืนจาก sessionStorage ที่ stash ไว้ก่อน signIn
     if(!t){
-      try{ t=sessionStorage.getItem('joinToken')||null; if(t) sessionStorage.removeItem('joinToken'); }catch(_e){}
+      try{ t=sessionStorage.getItem('joinToken')||null; }catch(_e){} // ไม่ลบตรงนี้ — เก็บไว้ให้รอด reload/สลับภาษา ลบหลัง join สำเร็จแทน
     }
     return t||null;
   }catch(_e){ return null; }
@@ -315,6 +315,7 @@ async function doJoin(){
     const r=unwrap(await window.API.joinGroup(TOKEN, CUSTOMER));
     if(r && r.error) throw { message:r.error };
     show('doneView');
+    try{ sessionStorage.removeItem('joinToken'); }catch(_e){} // join สำเร็จแล้ว → เคลียร์ token ที่ stash ไว้
     const gname=(r && r.group_name) || (PREVIEW && PREVIEW.name) || NAV.t('กลุ่ม','the group');
     $('#doneMsg').textContent=NAV.t('ยินดีต้อนรับสู่ “'+gname+'” · กำลังพาเข้ากลุ่ม…','Welcome to "'+gname+'" · taking you to the group…');
     setTimeout(()=>{ location.href='family.html'; }, 1200);

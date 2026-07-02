@@ -704,7 +704,7 @@
         const row=document.createElement('div'); row.className='clientrow';
         const nm=c.name||'ลูกค้า';
         const av=c.picture
-          ? '<div class="av2" style="background-image:url(&quot;'+esc(c.picture)+'&quot;)"></div>'
+          ? '<div class="av2" style="background-image:url(&quot;'+encodeURI(String(c.picture)).replace(/"/g,'%22')+'&quot;)"></div>'
           : '<div class="av2">'+esc(nm.trim().charAt(0).toUpperCase()||'?')+'</div>';
         row.innerHTML=av+'<div><div class="nm">'+esc(nm)+'</div><div class="cd">'+esc(c.code||'')+'</div></div>'+
           '<div class="hl">'+esc(c.headline||'')+'</div>';

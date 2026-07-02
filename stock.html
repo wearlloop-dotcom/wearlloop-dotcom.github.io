@@ -62,7 +62,7 @@
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
   let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',3000);}
-  const ST_TH={available:'ว่าง',reserved:'จองแล้ว',out:'ออกไป',returned:'รับคืนแล้ว',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',lost:'หาย',needs_review:'รอตรวจ'};
+  const ST_TH={available:'ว่าง',reserved:'จองแล้ว',out:'อยู่กับลูกค้า',returned:'รับคืนแล้ว',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',lost:'หาย',needs_review:'รอตรวจ'};
 
   async function loadSummary(){
     const {data,error}=await sb.rpc('stock_summary');
@@ -88,7 +88,7 @@
     html+=leaks.filter(l=>l.count>0).map(l=>{
       const rows=(l.rows||[]).slice(0,8).map(r=>{
         const code=r.code||r.rental_id||'';
-        const extra=[r.status?esc(r.status):'',r.due?'กำหนด '+esc(r.due):'',r.since?'ตั้งแต่ '+esc(r.since):''].filter(Boolean).join(' · ');
+        const extra=[r.status?esc(ST_TH[r.status]||r.status):'',r.due?'กำหนด '+esc(r.due):'',r.since?'ตั้งแต่ '+esc(r.since):''].filter(Boolean).join(' · ');
         const link=r.code?`<a href="/garment.html?code=${encodeURIComponent(r.code)}">เปิด ›</a>`:'';
         return `<div class="r"><span>${esc(code)}${r.name?' · '+esc(r.name):''}${extra?' — '+extra:''}</span>${link}</div>`;
       }).join('');
