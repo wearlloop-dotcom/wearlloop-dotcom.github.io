@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · Fit DNA — โปรไฟล์ที่รู้ใจคุณ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* โทนแบรนด์ LLOOP (craft sage + ทอง) — ตรงกับ forecast/home */
+  :root{ --bg:#FBFAF7; --card:#FFFFFF; --ink:#1A1A1A; --muted:#8C8B86; --line:#E7E5E1;
+    --teal:#6FB3A6; --sage-bg:#E4F0EC; --gold:#C9A86A; --ok:#0F6E56;
+    --sans:'Inter','Prompt',-apple-system,sans-serif; --disp:'Poppins','Prompt',sans-serif }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+  .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .brand{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:1px;color:var(--ink)}
+  .sub{font-size:12px;color:var(--muted)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin-bottom:14px}
+  .card h2{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .hidden{display:none}
+
+  /* ---- soft login ---- */
+  .login-soft{display:flex;align-items:center;gap:12px;background:var(--sage-bg);border:1px solid var(--teal);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+  .login-soft p{flex:1;font-size:13px;color:var(--ok)}
+  .login-soft button{flex:0 0 auto;background:#06C755;color:#fff;border:none;border-radius:9px;padding:9px 14px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer}
+
+  /* ---- hero: ความแม่นของโปรไฟล์ ---- */
+  .hero{display:flex;align-items:center;gap:18px}
+  .ring{position:relative;width:128px;height:128px;flex:0 0 auto}
+  .ring svg{width:128px;height:128px;transform:rotate(-90deg)}
+  .ring .bgc{fill:none;stroke:var(--line);stroke-width:10}
+  .ring .fgc{fill:none;stroke:var(--teal);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.22,1,.36,1)}
+  .ring .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring .pct b{font-family:var(--disp);font-weight:700;font-size:30px;color:var(--ink);line-height:1}
+  .ring .pct span{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:.5px}
+  .hero-txt{flex:1;min-width:0}
+  .hero-txt .big{font-family:var(--disp);font-weight:600;font-size:16px;color:var(--ink);margin-bottom:4px}
+  .hero-txt .soft{font-size:13px;color:var(--muted)}
+  .hero-txt .up{display:inline-block;margin-top:8px;background:var(--sage-bg);color:var(--ok);font-size:12px;font-weight:600;border-radius:14px;padding:3px 10px;opacity:0;transform:translateY(4px);transition:all .5s}
+  .hero-txt .up.show{opacity:1;transform:none}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .chips .chip{background:#fff;border:1px solid var(--line);border-radius:11px;padding:8px 12px;flex:1;min-width:130px}
+  .chips .chip .l{font-size:11px;color:var(--muted)}
+  .chips .chip .v{font-family:var(--disp);font-weight:600;font-size:15px;color:var(--ink);margin-top:1px}
+  .chips .chip .v small{font-family:var(--sans);font-weight:400;font-size:11px;color:var(--muted)}
+
+  /* ---- pending feedback ---- */
+  .pend{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:#fff}
+  .pend:last-child{margin-bottom:0}
+  .pend .gname{font-family:var(--disp);font-weight:600;font-size:15px;color:var(--ink)}
+  .pend .gmeta{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .arearow{margin-bottom:11px}
+  .arearow .al{font-size:12.5px;color:var(--ink);font-weight:500;margin-bottom:5px}
+  .arearow .al small{color:var(--muted);font-weight:400;margin-left:4px}
+  .seg{display:flex;gap:6px}
+  .seg button{flex:1;font-family:var(--sans);font-size:12.5px;font-weight:500;padding:8px 4px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:9px;cursor:pointer;transition:all .12s}
+  .seg button.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+  .seg button:active{transform:scale(.96)}
+  .pend input.note{width:100%;font-family:var(--sans);font-size:13px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);margin:2px 0 11px}
+  .pend input.note:focus{outline:none;border-color:var(--teal)}
+  .pend .send{width:100%;background:var(--ink);color:#fff;border:none;padding:11px;font-family:var(--sans);font-size:13.5px;font-weight:600;border-radius:9px;cursor:pointer}
+  .pend .send:disabled{opacity:.5;cursor:default}
+  .pend .thanks{text-align:center;padding:18px 8px}
+  .pend .thanks .tk{width:40px;height:40px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+  .pend .thanks .tk svg{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+  .pend .thanks p{font-size:14px;font-weight:500;color:var(--ok)}
+  .empty{font-size:13px;color:var(--muted);text-align:center;padding:16px 8px;border:1px dashed var(--line);border-radius:10px}
+
+  /* ---- insights ---- */
+  .ins{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
+  .ins:last-of-type{border-bottom:none}
+  .ins .dot{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--sage-bg);display:flex;align-items:center;justify-content:center;font-size:14px}
+  .ins .tt{font-size:13.5px;font-weight:600;color:var(--ink)}
+  .ins .dd{font-size:12.5px;color:var(--muted)}
+  .moat{margin-top:14px;background:var(--sage-bg);border-radius:10px;padding:11px 13px;font-size:12.5px;color:var(--ok);line-height:1.6}
+</style>
+</head>
+<body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
+
+<div class="wrap">
+  <div class="top">
+    <span class="brand">LLOOP</span>
+    <span class="sub" data-i18n="Fit DNA · a profile that knows you">Fit DNA · โปรไฟล์ที่รู้ใจคุณ</span>
+  </div>
+
+  <!-- soft login (แสดงเมื่อยังไม่ล็อกอิน — หน้ายังใช้ได้ด้วยข้อมูลตัวอย่าง) -->
+  <div class="login-soft hidden" id="loginSoft">
+    <p data-i18n="You're viewing sample data — sign in with LINE to see your real profile">ตอนนี้ดูข้อมูลตัวอย่างอยู่นะคะ — เข้าสู่ระบบด้วย LINE เพื่อดูโปรไฟล์จริงของคุณ</p>
+    <button onclick="LiffAuth.signIn()" data-i18n="Sign in with LINE">เข้าสู่ระบบด้วย LINE</button>
+  </div>
+
+  <!-- a) ความแม่นของโปรไฟล์ -->
+  <div class="card">
+    <h2 data-i18n="Profile accuracy">ความแม่นของโปรไฟล์</h2>
+    <div class="hero">
+      <div class="ring">
+        <svg viewBox="0 0 128 128">
+          <circle class="bgc" cx="64" cy="64" r="54"></circle>
+          <circle class="fgc" id="ringFg" cx="64" cy="64" r="54" style="stroke-dasharray:339.3;stroke-dashoffset:339.3"></circle>
+        </svg>
+        <div class="pct"><b id="accNum">60%</b><span data-i18n="ACCURACY">ความแม่น</span></div>
+      </div>
+      <div class="hero-txt">
+        <div class="big" data-i18n="Your stylist is learning your shape">สไตลิสต์กำลังเรียนรู้สัดส่วนของคุณ</div>
+        <div class="soft" data-i18n="It gets more accurate every time you rent and tell us">แม่นขึ้นทุกครั้งที่คุณเช่าและบอกเรานะคะ</div>
+        <span class="up" id="accUp"></span>
+      </div>
+    </div>
+    <div class="chips" id="statChips"></div>
+  </div>
+
+  <!-- b) ฟีดแบ็กชุดล่าสุด -->
+  <div class="card">
+    <h2 data-i18n="Tell us — how was your latest piece?">บอกเราหน่อย ชุดล่าสุดเป็นยังไงคะ</h2>
+    <div id="pendingList"></div>
+  </div>
+
+  <!-- c) สิ่งที่สไตลิสต์เรียนรู้ -->
+  <div class="card">
+    <h2 data-i18n="What your stylist has learned about you">สิ่งที่สไตลิสต์เรียนรู้เกี่ยวกับคุณ</h2>
+    <div id="insightList"></div>
+    <div class="moat" data-i18n="This data lives only in your profile here — the longer you rent with us, the better your stylist knows you.">ข้อมูลนี้อยู่กับโปรไฟล์คุณที่เดียว ยิ่งเช่านาน สไตลิสต์ยิ่งรู้ใจค่ะ</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=38"></script>
+<script src="analytics.js?v=38"></script>
+<script src="nav.js?v=1"></script>
+<script src="liffAuth.js"></script>
+<script src="data.js"></script>
+<script>
+// ===== Fit DNA — ฟีดแบ็กความพอดีหลังคืนชุด → โปรไฟล์แม่นขึ้นทุกครั้ง =====
+// backend RPC ยังไม่มีจริง → ทุก rpc() ห่อ try/catch แล้ว fallback localStorage ('lloop_fit_*') + MOCK
+const $ = id => document.getElementById(id);
+const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
+function esc(s){ if(s==null) return ''; return String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+
+let sb = null;
+function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
+
+// ---- localStorage store (fallback เมื่อ backend ยังไม่มี) ----
+const LS_FB   = 'lloop_fit_feedback';  // ฟีดแบ็กที่ผู้ใช้เคยส่ง (cache ฝั่งเครื่อง)
+const LS_DONE = 'lloop_fit_done';      // rental_id ที่ส่งแล้ว — ซ่อนการ์ด pending
+function lsGet(k){ try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e){ return []; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+
+let UID = null;          // LINE userId (null = โหมดตัวอย่าง)
+let FEEDBACK = [];       // ฟีดแบ็กสะสมทั้งหมด (จาก RPC หรือ fallback)
+let PENDING = [];        // ชุดที่เพิ่งคืน รอบอกความพอดี
+let lastAcc = null;      // ค่าความแม่นก่อนหน้า (ใช้แอนิเมตตอนส่งฟีดแบ็ก)
+
+const AREAS = [
+  { key:'bust',   th:'อก',      en:'Bust',   opts:[['tight','คับ','Tight'],['fit','พอดี','Fits'],['loose','หลวม','Loose']] },
+  { key:'waist',  th:'เอว',     en:'Waist',  opts:[['tight','คับ','Tight'],['fit','พอดี','Fits'],['loose','หลวม','Loose']] },
+  { key:'hip',    th:'สะโพก',   en:'Hip',    opts:[['tight','คับ','Tight'],['fit','พอดี','Fits'],['loose','หลวม','Loose']] },
+  { key:'length', th:'ความยาว', en:'Length', opts:[['short','สั้นไป','Too short'],['fit','พอดี','Just right'],['long','ยาวไป','Too long']] },
+];
+const AREA_TH = { bust:'อก', waist:'เอว', hip:'สะโพก', length:'ความยาว' };
+const AREA_EN = { bust:'Bust', waist:'Waist', hip:'Hip', length:'Length' };
+
+// ---- demo data (โชว์ตอนยังไม่ล็อกอิน — โปรไฟล์ดู "มีชีวิต" ทันที) ----
+function demoFeedback(){
+  const G = (window.MOCK && MOCK.GARMENTS) || [];
+  const g = i => G[i] || {};
+  return [
+    { rental_id:'demo-p1', garment_code:g(1).id, garment_name:g(1).name, brand:g(1).brand, fabric:g(1).fabric, bust:'fit', waist:'tight', hip:'fit', length:'fit', note:'', created_at:'2026-05-02' },
+    { rental_id:'demo-p2', garment_code:g(3).id, garment_name:g(3).name, brand:g(3).brand, fabric:g(3).fabric, bust:'fit', waist:'fit', hip:'fit', length:'fit', note:'', created_at:'2026-05-20' },
+    { rental_id:'demo-p3', garment_code:g(0).id, garment_name:g(0).name, brand:g(0).brand, fabric:g(0).fabric, bust:'fit', waist:'fit', hip:'fit', length:'fit', note:'', created_at:'2026-06-08' },
+    { rental_id:'demo-p4', garment_code:g(1).id, garment_name:g(1).name, brand:g(1).brand, fabric:g(1).fabric, bust:'fit', waist:'tight', hip:'fit', length:'fit', note:'เอวแน่นนิดนึงค่ะ', created_at:'2026-06-21' },
+  ];
+}
+function demoPending(){
+  const G = (window.MOCK && MOCK.GARMENTS) || [];
+  return [0,1].filter(i => G[i]).map((i,n) => ({
+    rental_id:'demo-r'+(n+1), garment_code:G[i].id, garment_name:G[i].name,
+    brand:G[i].brand, fabric:G[i].fabric, returned_at:'2026-06-28',
+  }));
+}
+
+// ---- สูตรความแม่น: เริ่ม 60% · +4 ต่อฟีดแบ็ก 1 ครั้ง · โบนัส +5 ต่อชุดที่พอดีทุกจุด · เพดาน 98% ----
+function isPerfect(f){ return f.bust==='fit' && f.waist==='fit' && f.hip==='fit' && f.length==='fit'; }
+function accuracy(list){
+  const perfect = list.filter(isPerfect).length;
+  return Math.min(98, 60 + list.length*4 + perfect*5);
+}
+
+// จุดที่ต้องเผื่อ — ตอบ "คับ" ซ้ำ ≥2 ครั้งในจุดเดียวกัน
+function adjustAreas(list){
+  const out = [];
+  ['bust','waist','hip'].forEach(k => {
+    const tight = list.filter(f => f[k]==='tight').length;
+    if(tight >= 2) out.push(T(AREA_TH[k]+': เผื่อ +1 นิ้ว', AREA_EN[k]+': allow +1 in'));
+  });
+  const short_ = list.filter(f => f.length==='short').length;
+  if(short_ >= 2) out.push(T('ความยาว: เลือกรุ่นยาวขึ้น','Length: go longer'));
+  return out;
+}
+
+// ---- render: hero + สถิติ ----
+const RING_C = 2 * Math.PI * 54; // เส้นรอบวง ring
+function drawRing(pct){
+  const fg = $('ringFg');
+  fg.style.strokeDasharray = RING_C;
+  fg.style.strokeDashoffset = RING_C * (1 - pct/100);
+}
+function animateAcc(from, to){
+  drawRing(to);
+  const el = $('accNum'), dur = 900, t0 = performance.now();
+  (function step(t){
+    const p = Math.min(1, (t - t0)/dur), e = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.round(from + (to-from)*e) + '%';
+    if(p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+function renderHero(animate){
+  const acc = accuracy(FEEDBACK);
+  if(animate && lastAcc != null && acc > lastAcc){
+    animateAcc(lastAcc, acc);
+    const up = $('accUp');
+    up.textContent = '+' + (acc - lastAcc) + '% ✨';
+    up.classList.add('show');
+    setTimeout(() => up.classList.remove('show'), 3200);
+  } else {
+    $('accNum').textContent = acc + '%';
+    drawRing(acc);
+  }
+  lastAcc = acc;
+
+  const brands = [...new Set(FEEDBACK.map(f => f.brand).filter(Boolean))];
+  const adj = adjustAreas(FEEDBACK);
+  $('statChips').innerHTML =
+    chip(T('จำนวนครั้งที่บอกเรา','Times you told us'), FEEDBACK.length + T(' ครั้ง',''))
+  + chip(T('แบรนด์ที่เรียนรู้แล้ว','Brands learned'), brands.length + T(' แบรนด์',''), brands.slice(0,3).join(' · '))
+  + chip(T('จุดที่ต้องเผื่อ','Where to allow room'), adj.length ? adj[0] : T('ยังไม่พบ — ดีมากค่ะ','None yet — great!'), adj.slice(1).join(' · '));
+}
+function chip(l, v, sub){
+  return `<div class="chip"><div class="l">${esc(l)}</div><div class="v">${esc(v)}${sub ? ` <small>${esc(sub)}</small>` : ''}</div></div>`;
+}
+
+// ---- render: การ์ด pending + ฟอร์ม 20 วินาที ----
+function renderPending(){
+  const box = $('pendingList');
+  const done = lsGet(LS_DONE);
+  const items = PENDING.filter(p => !done.includes(p.rental_id));
+  if(!items.length){
+    box.innerHTML = `<div class="empty">${T('ตอนนี้ไม่มีชุดที่รอฟีดแบ็กค่ะ ไว้เช่าครั้งหน้ามาบอกเราอีกนะคะ 💚','No pieces waiting for feedback right now — tell us again after your next rental 💚')}</div>`;
+    return;
+  }
+  box.innerHTML = items.map((p, i) => {
+    p.sel = p.sel || { bust:'fit', waist:'fit', hip:'fit', length:'fit' }; // ค่าเริ่ม "พอดี" — ปรับเฉพาะจุดที่ไม่พอดี = เร็ว
+    const rows = AREAS.map(a => `
+      <div class="arearow">
+        <div class="al">${T(a.th, a.en)}</div>
+        <div class="seg">${a.opts.map(([v, th, en]) =>
+          `<button type="button" class="${p.sel[a.key]===v?'on':''}" onclick="pick(${i},'${a.key}','${v}')">${T(th, en)}</button>`).join('')}
+        </div>
+      </div>`).join('');
+    return `<div class="pend" id="pend_${i}">
+      <div class="gname">${esc(p.garment_name || p.garment_code || T('ชุดที่เช่าล่าสุด','Your latest rental'))}</div>
+      <div class="gmeta">${esc(p.brand || '')}${p.fabric ? ' · ' + esc(p.fabric) : ''}</div>
+      ${rows}
+      <input class="note" id="note_${i}" maxlength="140" placeholder="${T('อยากบอกอะไรเพิ่มมั้ยคะ (ไม่บังคับ)','Anything else? (optional)')}" value="${esc(p.noteVal || '')}" oninput="PENDING_ITEMS[${i}].noteVal = this.value">
+      <button class="send" onclick="submitFit(${i})">${T('ส่งให้สไตลิสต์เลยค่ะ','Send to my stylist')}</button>
+    </div>`;
+  }).join('');
+  window.PENDING_ITEMS = items; // อ้างอิงจาก onclick (index ตรงกับที่ render)
+}
+function pick(i, area, val){
+  const p = window.PENDING_ITEMS[i]; if(!p) return;
+  p.sel[area] = val;
+  const card = $('pend_' + i); if(!card) return;
+  const rowIdx = AREAS.findIndex(a => a.key === area);
+  const row = card.querySelectorAll('.arearow')[rowIdx];
+  row.querySelectorAll('button').forEach((b, bi) => b.classList.toggle('on', AREAS[rowIdx].opts[bi][0] === val));
+}
+
+async function submitFit(i){
+  const p = window.PENDING_ITEMS[i]; if(!p) return;
+  const card = $('pend_' + i);
+  const btn = card.querySelector('.send');
+  btn.disabled = true; btn.textContent = T('กำลังส่ง…','Sending…');
+  const note = (p.noteVal || '').trim() || null;
+
+  // ยิง RPC จริงก่อน — backend ยังไม่มี → พังก็ไม่เป็นไร เก็บ local ให้หน้าใช้งานได้เต็ม
+  try {
+    const { error } = await client().rpc('submit_fit_feedback', {
+      p_uid: UID || 'demo', p_rental: p.rental_id, p_garment: p.garment_code,
+      p_bust: p.sel.bust, p_waist: p.sel.waist, p_hip: p.sel.hip, p_length: p.sel.length, p_note: note,
+    });
+    if(error) throw error;
+  } catch(e){ console.warn('submit_fit_feedback fallback → localStorage:', e && e.message || e); }
+
+  // เก็บ local เสมอ (cache) — โปรไฟล์แม่นขึ้นทันทีแม้ backend ยังไม่มา
+  const entry = {
+    rental_id: p.rental_id, garment_code: p.garment_code, garment_name: p.garment_name,
+    brand: p.brand || null, fabric: p.fabric || null,
+    bust: p.sel.bust, waist: p.sel.waist, hip: p.sel.hip, length: p.sel.length,
+    note, created_at: new Date().toISOString(),
+  };
+  lsSet(LS_FB, lsGet(LS_FB).concat([entry]));
+  lsSet(LS_DONE, lsGet(LS_DONE).concat([p.rental_id]));
+  FEEDBACK.push(entry);
+
+  // thank-you state + ตัวเลขความแม่นวิ่งขึ้น
+  card.innerHTML = `<div class="thanks">
+    <div class="tk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <p>${T('ขอบคุณค่ะ โปรไฟล์คุณแม่นขึ้นอีกขั้นแล้ว ✨','Thank you — your profile just got smarter ✨')}</p>
+  </div>`;
+  renderHero(true);
+  renderInsights();
+}
+
+// ---- render: สิ่งที่สไตลิสต์เรียนรู้ (กติกาง่าย ๆ ฝั่ง client) ----
+function renderInsights(){
+  const box = $('insightList');
+  if(!FEEDBACK.length){
+    box.innerHTML = `<div class="empty">${T('ยังไม่มีข้อมูลค่ะ — บอกเราหลังคืนชุดครั้งแรก แล้วสไตลิสต์จะเริ่มจำสัดส่วนคุณได้เลยนะคะ','No data yet — tell us after your first return and your stylist starts learning your shape')}</div>`;
+    return;
+  }
+  const rows = [];
+
+  // ต่อแบรนด์: มี "คับ" ≥1 จุดไหน → แนะนำเผื่อ · มี "หลวม" ≥1 → เลือกเล็กลงได้
+  const byBrand = {};
+  FEEDBACK.forEach(f => { if(f.brand){ (byBrand[f.brand] = byBrand[f.brand] || []).push(f); } });
+  Object.keys(byBrand).forEach(brand => {
+    const list = byBrand[brand];
+    ['bust','waist','hip'].forEach(k => {
+      const tight = list.filter(f => f[k]==='tight').length;
+      const loose = list.filter(f => f[k]==='loose').length;
+      if(tight >= 1) rows.push({ ic:'📏',
+        tt: T(`แบรนด์ ${brand} — ${AREA_TH[k]}เล็กกว่าป้าย`, `${brand} — ${AREA_EN[k].toLowerCase()} runs small`),
+        dd: T('แนะนำเผื่อ 1 ไซซ์นะคะ','We suggest sizing up 1') });
+      else if(loose >= 1) rows.push({ ic:'📐',
+        tt: T(`แบรนด์ ${brand} — ${AREA_TH[k]}ใหญ่กว่าป้าย`, `${brand} — ${AREA_EN[k].toLowerCase()} runs big`),
+        dd: T('เลือกเล็กลงได้เลยค่ะ','You can size down') });
+    });
+    const short_ = list.filter(f => f.length==='short').length;
+    const long_  = list.filter(f => f.length==='long').length;
+    if(short_ >= 1) rows.push({ ic:'✂️', tt: T(`แบรนด์ ${brand} — ทรงสั้นกว่าที่คิด`, `${brand} — runs shorter than expected`), dd: T('เลือกรุ่นยาวขึ้นให้นะคะ','We\'ll pick longer cuts for you') });
+    else if(long_ >= 1) rows.push({ ic:'✂️', tt: T(`แบรนด์ ${brand} — ทรงยาวกว่าที่คิด`, `${brand} — runs longer than expected`), dd: T('เลือกรุ่นสั้นลง หรือเผื่อเก็บชายให้ค่ะ','We\'ll go shorter or hem it for you') });
+  });
+
+  // ต่อเนื้อผ้า: ผ้ายืด (สแปนเด็กซ์/ยืด) ที่ตอบพอดีทุกครั้ง → ใส่พอดีตัวได้เลย
+  const stretchy = FEEDBACK.filter(f => f.fabric && /ยืด|สแปนเด็กซ์|spandex/i.test(f.fabric));
+  if(stretchy.length && stretchy.every(f => f.bust!=='tight' && f.waist!=='tight' && f.hip!=='tight')){
+    rows.push({ ic:'🧵', tt: T('ผ้ายืด — ใส่พอดีตัวได้เลย','Stretch fabrics — true to size on you'), dd: T('ทุกครั้งที่ใส่ผ้ายืด คุณบอกว่าพอดีค่ะ','Every stretch piece so far fit you well') });
+  }
+
+  box.innerHTML = rows.length
+    ? rows.map(r => `<div class="ins"><div class="dot">${r.ic}</div><div><div class="tt">${esc(r.tt)}</div><div class="dd">${esc(r.dd)}</div></div></div>`).join('')
+    : `<div class="ins"><div class="dot">💚</div><div><div class="tt">${T('ทุกชุดที่ผ่านมาพอดีตัวคุณหมดเลยค่ะ','Everything so far has fit you perfectly')}</div><div class="dd">${T('สไตลิสต์จะเลือกไซซ์เดิมให้ต่อไปนะคะ','Your stylist will keep picking the same sizes')}</div></div></div>`;
+}
+
+// ---- โหลดข้อมูล (RPC จริง → fallback localStorage + MOCK) ----
+async function loadProfile(){
+  try {
+    const { data, error } = await client().rpc('my_fit_profile', { p_uid: UID || 'demo' });
+    if(error) throw error;
+    if(!data || !Array.isArray(data.feedback)) throw new Error('no data');
+    FEEDBACK = data.feedback;
+  } catch(e){
+    console.warn('my_fit_profile fallback → localStorage/MOCK:', e && e.message || e);
+    FEEDBACK = (UID ? [] : demoFeedback()).concat(lsGet(LS_FB));
+  }
+}
+async function loadPending(){
+  try {
+    const { data, error } = await client().rpc('fit_feedback_pending', { p_uid: UID || 'demo' });
+    if(error) throw error;
+    if(!Array.isArray(data)) throw new Error('no data');
+    PENDING = data;
+  } catch(e){
+    console.warn('fit_feedback_pending fallback → MOCK:', e && e.message || e);
+    PENDING = demoPending();
+  }
+}
+
+// ---- boot: LIFF login แบบนุ่ม ๆ — ไม่ล็อกอินก็ใช้หน้าได้ (demo data) ----
+async function boot(){
+  try {
+    const p = await LiffAuth.login();
+    if(p) UID = p.userId;
+  } catch(e){ console.warn('LIFF skipped:', e); }
+  $('loginSoft').classList.toggle('hidden', !!UID);
+  await Promise.all([loadProfile(), loadPending()]);
+  renderHero(false);
+  renderPending();
+  renderInsights();
+}
+boot();
+
+// สลับภาษา → re-render เนื้อหา dynamic (ไม่แอนิเมต)
+window.addEventListener('lloop:lang', function(){
+  renderHero(false);
+  renderPending();
+  renderInsights();
+});
+</script>
+</body>
+</html>
