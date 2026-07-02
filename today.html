@@ -148,6 +148,42 @@
       section('รับซื้อรอจัดการ', (d.acq||[]).length, false, acq, 'acq');
   }
 
+  // ===== งานลูกค้าใกล้ถึง (T-14) — สไตลิสต์เตรียมลุคก่อนวันงานลูกค้า =====
+  const t=(th,en)=>(window.NAV&&NAV.t)?NAV.t(th,en):th; // data-i18n/NAV.t convention (fallback ไทยถ้าหน้าไม่มี nav.js)
+  const OCC={wedding_guest:'งานแต่ง',dinner:'ดินเนอร์',party:'งานเลี้ยง',work:'ทำงาน',cafe:'คาเฟ่',graduation:'รับปริญญา',merit:'งานบุญ',festival:'เทศกาล',trip:'ทริป'};
+  function eventsSection(list){
+    const title=t('งานลูกค้าใกล้ถึง (14 วัน)','Customer events (next 14 days)');
+    if(!list){ // RPC ยังไม่พร้อม/พัง — โชว์ empty-state เงียบ ๆ ไม่ให้ล้มทั้งหน้า
+      return `<div class="card" id="s-events"><h2><span class="badge">0</span> ${title}</h2><div class="empty">ยังไม่มีข้อมูลงานลูกค้า (รอเปิดระบบปฏิทิน)</div></div>`;
+    }
+    const items=list.slice().sort((a,b)=>((a.pinged_at?1:0)-(b.pinged_at?1:0))||String(a.date||'').localeCompare(String(b.date||'')));
+    const unpinged=items.filter(x=>!x.pinged_at).length;
+    const today0=new Date(); today0.setHours(0,0,0,0);
+    const rows=items.map(x=>{
+      const days=Math.round((new Date(x.date)-today0)/864e5);
+      const cd=`<span class="tag${days<=3?' over':''}">${days<=0?'วันนี้':'อีก '+days+' วัน'}</span>`;
+      const uid=x.line_uid?String(x.line_uid).slice(0,6)+'…':'';
+      const meta=[dt(x.date), x.venue?esc(x.venue):'', x.dress_code?'ดรสโค้ด '+esc(x.dress_code):'', uid?'ลูกค้า '+esc(uid):''].filter(Boolean).join(' · ');
+      const status=x.pinged_at
+        ? `<span class="tag washing">ทักแล้ว ✓ ${dt(x.pinged_at)}</span>`
+        : `<button class="btn" style="padding:7px 13px;font-size:13px;width:auto" onclick="markEventPinged('${esc(String(x.id))}',this)">จัดลุค + ทักแล้ว</button>`;
+      return `<div class="row" id="ev-${esc(String(x.id))}">
+        <div>${cd} <span class="code">${esc(OCC[x.occasion]||x.occasion||'งาน')}</span><div class="meta">${meta}</div></div>
+        <div style="text-align:right">${status}</div>
+      </div>`;
+    }).join('');
+    const chip=`<span class="tag" style="margin-left:auto">${items.length} งาน · ยังไม่ทัก ${unpinged}</span>`;
+    return `<div class="card" id="s-events"><h2><span class="${unpinged>0?'badge hot':'badge'}">${items.length}</span> ${title} ${chip}</h2>${rows||'<div class="empty">ไม่มี</div>'}</div>`;
+  }
+  async function markEventPinged(id, btn){
+    btn.disabled=true; const old=btn.textContent; btn.textContent='กำลังบันทึก…';
+    try{
+      const { error } = await sb.rpc('mark_event_pinged', { p_id: id });
+      if(error) throw error;
+      btn.outerHTML=`<span class="tag washing">ทักแล้ว ✓ ${dt(new Date().toISOString())}</span>`;
+    }catch(e){ alert('บันทึกไม่ได้: '+esc((e&&e.message)||'ลองใหม่อีกครั้ง')); btn.disabled=false; btn.textContent=old; }
+  }
+
   // อนุมัติชุด needs_review → ready (ขึ้นหน้าลูกค้า + ยิงโซเชียล/new_arrival อัตโนมัติ)
   async function approveGarment(code, btn){
     btn.disabled=true; const old=btn.textContent; btn.textContent='กำลังอนุมัติ…';
@@ -173,6 +209,11 @@
         $('out').innerHTML += section('ชุดไม่ถูกสแกนเกิน 14 วัน (กันหาย)', miss.length, true, rows);
       }
     }catch(e){}
+    // งานลูกค้าใกล้ถึง (T-14 ping) — ถ้า RPC ยังไม่เปิด แสดง empty-state ไม่ให้กระทบส่วนอื่น
+    try{
+      const { data: ev, error: evErr } = await sb.rpc('upcoming_customer_events', { p_days: 14 });
+      $('out').innerHTML += eventsSection(evErr ? null : (ev||[]));
+    }catch(e){ $('out').innerHTML += eventsSection(null); }
     $('when').textContent='อัปเดต '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
   }
   load();

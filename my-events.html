@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ปฏิทินงานของฉัน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* โทนแบรนด์ LLOOP (craft sage + ทอง) — ตรงกับ forecast/home */
+  :root{--bg:#FBFAF7;--card:#FFFFFF;--ink:#1A1A1A;--muted:#8C8B86;--line:#E7E5E1;--teal:#6FB3A6;--sage-bg:#E4F0EC;--gold:#C9A86A;--ok:#0F6E56;--sans:'Inter','Prompt',-apple-system,sans-serif;--disp:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+  h1{font-family:var(--disp);font-weight:600;font-size:22px;color:var(--ink);margin:6px 0 4px}
+  .sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin-bottom:14px}
+  .card h2{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .f{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+  .f label{font-size:12px;color:var(--muted)}
+  .f input,.f select{font-family:var(--sans);font-size:16px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%;appearance:none;-webkit-appearance:none}
+  .f input:focus,.f select:focus{outline:none;border-color:var(--teal)}
+  .f select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238C8B86' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:var(--sans);font-size:13px;font-weight:500;padding:8px 14px;border:1px solid var(--line);border-radius:20px;background:#fff;color:var(--ink);cursor:pointer;transition:all .12s}
+  .chip.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+  .chip:active{transform:scale(.96)}
+  .vtip{display:none;font-size:12.5px;color:var(--ok);background:var(--sage-bg);border:1px solid var(--teal);border-radius:8px;padding:8px 11px;margin-top:8px;line-height:1.5}
+  .vtip.show{display:block}
+  .savebtn{width:100%;background:var(--ink);color:#fff;border:none;border-radius:10px;padding:13px;font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer}
+  .savebtn:active{transform:scale(.985)}
+  .savebtn:disabled{opacity:.55;cursor:default}
+  .ferr{display:none;font-size:12.5px;color:#B4543A;margin-top:8px}
+  .ferr.show{display:block}
+  /* soft login */
+  .loginrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .loginrow p{flex:1;min-width:200px;font-size:13px;color:var(--muted);line-height:1.6}
+  .linebtn{flex:0 0 auto;background:#06C755;color:#fff;border:none;border-radius:9px;padding:10px 16px;font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer}
+  /* event rows */
+  .ev{display:flex;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .ev:last-child{border-bottom:none;padding-bottom:2px}
+  .ev .dt{flex:0 0 auto;width:52px;height:56px;background:var(--sage-bg);border:1px solid var(--teal);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.15}
+  .ev .dt b{font-family:var(--disp);font-weight:600;font-size:19px;color:var(--ok)}
+  .ev .dt span{font-size:10.5px;color:var(--ok)}
+  .ev .info{flex:1;min-width:0}
+  .ev .l1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ev .l1 b{font-weight:600;font-size:15px}
+  .cd{font-size:11.5px;font-weight:600;color:var(--gold);background:#F7F1E4;border-radius:14px;padding:2px 9px;white-space:nowrap}
+  .ev .venue{font-size:13px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis}
+  .dcchip{display:inline-block;font-size:11px;font-weight:600;color:var(--ok);background:var(--sage-bg);border-radius:12px;padding:2px 9px;margin-top:4px}
+  .stat{font-size:12.5px;margin-top:5px;line-height:1.5}
+  .stat.prep{color:var(--muted)}
+  .stat.ready{color:var(--ok)}
+  .acts{display:flex;align-items:center;gap:14px;margin-top:7px}
+  .seebtn{display:inline-block;font-size:12.5px;font-weight:600;color:#fff;background:var(--teal);border-radius:16px;padding:6px 14px;text-decoration:none}
+  .delbtn{background:none;border:none;font-family:var(--sans);font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;padding:2px}
+  .delbtn:hover{color:#B4543A}
+  .empty{text-align:center;font-size:13.5px;color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:22px 14px;line-height:1.7}
+  /* past section */
+  details.card summary{list-style:none;cursor:pointer;font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:8px}
+  details.card summary::-webkit-details-marker{display:none}
+  details.card summary::after{content:"";width:7px;height:7px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(45deg);margin-left:auto;transition:transform .15s}
+  details[open].card summary::after{transform:rotate(-135deg)}
+  .pastnote{font-size:12.5px;color:var(--muted);background:var(--sage-bg);border-radius:8px;padding:9px 12px;margin:12px 0 4px;line-height:1.6}
+  .pastnote a{color:var(--ok);font-weight:600;text-decoration:none}
+  .ev.past{opacity:.72}
+  .ev.past .dt{background:#F3F2EF;border-color:var(--line)}
+  .ev.past .dt b,.ev.past .dt span{color:var(--muted)}
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;font-size:13.5px;padding:11px 20px;border-radius:24px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:60;max-width:88vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
+
+<div class="wrap">
+  <h1 data-i18n="My event calendar">ปฏิทินงานของฉัน</h1>
+  <p class="sub" data-i18n="Tell us what’s coming up, and your stylist will have a look ready 2 weeks ahead">บอกเราว่ามีงานอะไร แล้วสไตลิสต์จะจัดลุคไว้ให้ล่วงหน้า 2 สัปดาห์นะคะ</p>
+
+  <!-- soft login (โชว์เฉพาะตอนยังไม่ล็อกอิน — หน้าใช้ได้ปกติ ข้อมูลเก็บในเครื่องก่อน) -->
+  <div class="card hidden" id="loginCard">
+    <div class="loginrow">
+      <p data-i18n="Sign in with LINE so your stylist can see your calendar and message you when your look is ready — for now everything is saved on this device">เข้าสู่ระบบด้วย LINE เพื่อให้สไตลิสต์เห็นปฏิทินของคุณ และทักไปหาเมื่อลุคพร้อมนะคะ — ตอนนี้ข้อมูลบันทึกไว้ในเครื่องนี้ก่อนค่ะ</p>
+      <button class="linebtn" onclick="LiffAuth.signIn()" data-i18n="Sign in with LINE">เข้าสู่ระบบด้วย LINE</button>
+    </div>
+  </div>
+
+  <!-- add-event form (30 วินาทีเสร็จ) -->
+  <div class="card">
+    <h2 data-i18n="Add an event">เพิ่มงานใหม่</h2>
+    <div class="f">
+      <label data-i18n="Date">วันที่</label>
+      <input type="date" id="fDate">
+    </div>
+    <div class="f">
+      <label data-i18n="Occasion">ประเภทงาน</label>
+      <div class="chips" id="occChips"></div>
+    </div>
+    <div class="f">
+      <label><span data-i18n="Event / venue">ชื่องาน/สถานที่</span> <span style="color:var(--muted)" data-i18n="(optional)">(ไม่บังคับ)</span></label>
+      <input type="text" id="fVenue" placeholder="เช่น งานแต่งพี่ฝน โรงแรมริมทะเล" data-i18n-ph="e.g. Fon’s wedding at a beach hotel">
+      <div class="vtip" id="venueTip"></div>
+    </div>
+    <div class="f">
+      <label><span data-i18n="Dress code">เดรสโค้ด</span> <span style="color:var(--muted)" data-i18n="(optional)">(ไม่บังคับ)</span></label>
+      <select id="fDress">
+        <option value="" data-i18n="-- Not sure yet --">-- ยังไม่แน่ใจ --</option>
+        <option value="ค็อกเทล" data-i18n="Cocktail">ค็อกเทล</option>
+        <option value="ทางการ" data-i18n="Formal">ทางการ</option>
+        <option value="สมาร์ทแคชชวล" data-i18n="Smart casual">สมาร์ทแคชชวล</option>
+        <option value="ลำลอง" data-i18n="Casual">ลำลอง</option>
+        <option value="ตีมสี" data-i18n="Colour theme">ตีมสี</option>
+      </select>
+    </div>
+    <button class="savebtn" id="saveBtn" onclick="submitEvent()" data-i18n="Save this event">บันทึกงานนี้</button>
+    <div class="ferr" id="formErr"></div>
+  </div>
+
+  <!-- upcoming -->
+  <div class="card">
+    <h2 data-i18n="Upcoming events">งานที่กำลังจะมาถึง</h2>
+    <div id="evList"></div>
+  </div>
+
+  <!-- past (collapsed) -->
+  <details class="card hidden" id="pastCard">
+    <summary id="pastSummary" data-i18n="Past events">งานที่ผ่านมา</summary>
+    <p class="pastnote"><a href="looks.html"><span data-i18n="Got photos from the event? Post them on Loop Looks and earn credit →">ถ่ายรูปในงานมาลง Loop Looks ได้เครดิตนะคะ →</span></a></p>
+    <div id="pastList"></div>
+  </details>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=38"></script>
+<script src="analytics.js?v=38"></script>
+<script src="nav.js?v=1"></script>
+<script src="liffAuth.js"></script>
+<script src="data.js?v=38"></script>
+<script>
+// ===== ปฏิทินงานของฉัน — ลูกค้าบอกงานล่วงหน้า → สไตลิสต์เตรียมลุคเชิงรุก =====
+// Backend RPC (my_events / upsert_event / delete_event) อาจยังไม่ deploy —
+// ทุก call ห่อ try/catch แล้ว fallback ลง localStorage ('lloop_events_v1') ให้หน้าใช้ได้เต็มรูปแบบทันที
+const $ = id => document.getElementById(id);
+const T = (th, en) => (window.NAV ? NAV.t(th, en) : th);
+const LS_KEY = 'lloop_events_v1';           // prefix 'lloop_events_' ตามข้อตกลง
+const PENDING_KEY = 'lloop_pending_event';  // ควิซฝากงานไว้ให้ import
+
+// 9 ประเภทงาน — อิง MOCK.OCCASIONS ใน data.js (มี fallback เผื่อโหลดไม่ขึ้น)
+const OCCS = (window.MOCK && MOCK.OCCASIONS) || {
+  wedding_guest:'งานแต่ง', dinner:'ดินเนอร์', party:'งานเลี้ยง',
+  work:'ทำงาน', cafe:'คาเฟ่', graduation:'รับปริญญา',
+  merit:'งานบุญ', festival:'เทศกาล', trip:'ทริป',
+};
+const OCC_EN = {
+  wedding_guest:'Wedding', dinner:'Dinner', party:'Party',
+  work:'Work', cafe:'Café', graduation:'Graduation',
+  merit:'Merit', festival:'Festival', trip:'Trip',
+};
+const VENUES = (window.MOCK && MOCK.VENUES) || [];
+
+let sb = null, uid = null, serverOK = false;
+let events = [];              // [{id,date,occasion,venue,dress_code,status}]
+let pickedOcc = null;
+let dressTouched = false;     // ผู้ใช้เลือกเดรสโค้ดเองแล้ว → ไม่ auto-suggest ทับ
+
+function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
+function esc(s){ if(s==null) return ''; return String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function todayStr(){ const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function addDays(iso, n){ const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function daysUntil(iso){ return Math.round((new Date(iso+'T00:00:00') - new Date(todayStr()+'T00:00:00')) / 86400000); }
+
+// ---------- local store (fallback) ----------
+function localGet(){ try{ const a = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function localSet(a){ try{ localStorage.setItem(LS_KEY, JSON.stringify(a)); }catch(e){} }
+
+// ---------- toast ----------
+let _toastT = null;
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(_toastT); _toastT = setTimeout(()=>t.classList.remove('show'), 3200); }
+
+// ---------- server + sync ----------
+async function rpc(name, args){ const { data, error } = await client().rpc(name, args); if(error) throw error; return data; }
+
+// ล็อกอิน + RPC ใช้ได้ → ดันของที่เคยบันทึกในเครื่องขึ้น server ครั้งเดียว แล้วเคลียร์เครื่อง
+async function syncLocalUp(){
+  const loc = localGet();
+  if(!loc.length) return;
+  const failed = [];
+  for(const ev of loc){
+    try{
+      await rpc('upsert_event', { p_uid: uid, p_id: null, p_date: ev.date, p_occasion: ev.occasion, p_venue: ev.venue || null, p_dress_code: ev.dress_code || null });
+    }catch(e){ console.warn('sync local event failed', e); failed.push(ev); }
+  }
+  if(failed.length) localSet(failed);
+  else localStorage.removeItem(LS_KEY);
+}
+
+async function loadEvents(){
+  if(uid){
+    try{
+      let rows = await rpc('my_events', { p_uid: uid });
+      serverOK = true;
+      if(localGet().length){
+        await syncLocalUp();
+        try{ rows = await rpc('my_events', { p_uid: uid }); }catch(e){ /* ใช้รอบแรก */ }
+      }
+      events = Array.isArray(rows) ? rows : [];
+      return;
+    }catch(e){ console.warn('my_events RPC ยังไม่พร้อม — ใช้ข้อมูลในเครื่อง', e); serverOK = false; }
+  }
+  events = localGet();
+}
+
+// บันทึกงาน (server ก่อน — ล้มเมื่อไหร่ค่อยลงเครื่อง)
+async function persistEvent(ev){
+  if(uid){
+    try{
+      await rpc('upsert_event', { p_uid: uid, p_id: null, p_date: ev.date, p_occasion: ev.occasion, p_venue: ev.venue || null, p_dress_code: ev.dress_code || null });
+      serverOK = true;
+      await loadEvents();
+      return;
+    }catch(e){ console.warn('upsert_event RPC ยังไม่พร้อม — บันทึกลงเครื่อง', e); serverOK = false; }
+  }
+  const row = { id: 'loc_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), status: 'planned',
+                date: ev.date, occasion: ev.occasion, venue: ev.venue || '', dress_code: ev.dress_code || '' };
+  const loc = localGet(); loc.push(row); localSet(loc);
+  if(!events.some(x => x.id === row.id)) events.push(row);
+}
+
+async function removeEvent(id){
+  if(!confirm(T('ลบงานนี้ใช่ไหมคะ?','Delete this event?'))) return;
+  if(String(id).indexOf('loc_') === 0){
+    localSet(localGet().filter(e => e.id !== id));
+  } else {
+    try{ await rpc('delete_event', { p_uid: uid, p_id: id }); }
+    catch(e){ console.warn('delete_event RPC ยังไม่พร้อม', e); }
+  }
+  events = events.filter(e => e.id !== id);
+  render();
+  toast(T('ลบงานแล้วค่ะ','Event deleted'));
+}
+
+// ---------- ควิซฝากงานไว้ → import ----------
+async function importPending(){
+  let raw = null;
+  try{ raw = localStorage.getItem(PENDING_KEY); }catch(e){}
+  if(!raw) return;
+  try{ localStorage.removeItem(PENDING_KEY); }catch(e){}
+  try{
+    const p = JSON.parse(raw);
+    if(p && p.occasion && OCCS[p.occasion]){
+      const date = (p.date && /^\d{4}-\d{2}-\d{2}$/.test(p.date) && p.date >= todayStr()) ? p.date : addDays(todayStr(), 14);
+      await persistEvent({ date, occasion: p.occasion, venue: p.note || '', dress_code: '' });
+      toast(T('เพิ่มงานจากควิซให้แล้วค่ะ','Added your event from the quiz'));
+    }
+  }catch(e){ console.warn('pending event import failed', e); }
+}
+
+// ---------- form ----------
+function renderChips(){
+  $('occChips').innerHTML = Object.keys(OCCS).map(k =>
+    `<button type="button" class="chip${pickedOcc===k?' on':''}" data-k="${k}">${esc(NAV.lang==='en' ? (OCC_EN[k]||OCCS[k]) : OCCS[k])}</button>`
+  ).join('');
+  $('occChips').querySelectorAll('.chip').forEach(b => {
+    b.addEventListener('click', () => { pickedOcc = b.getAttribute('data-k'); renderChips(); });
+  });
+}
+
+// สถานที่ตรงคีย์เวิร์ด (โรงแรม/งานแต่ง/คาเฟ่/ทะเล/ออฟฟิศ/รับปริญญา) → แนะนำเดรสโค้ด + photo tip
+function matchVenue(text){
+  if(!text) return null;
+  const t = text.toLowerCase();
+  for(const v of VENUES){ if((v.match || []).some(k => t.indexOf(String(k).toLowerCase()) !== -1)) return v; }
+  return null;
+}
+function onVenueInput(){
+  const v = matchVenue($('fVenue').value.trim());
+  const tip = $('venueTip');
+  if(v){
+    tip.innerHTML = T(`สถานที่แบบนี้แนะนำเดรสโค้ด <b>${esc(v.dress_code)}</b> นะคะ · ${esc(v.photo_tip)}`,
+                      `For a venue like this we suggest the <b>${esc(v.dress_code)}</b> dress code · ${esc(v.photo_tip)}`);
+    tip.classList.add('show');
+    if(!dressTouched) $('fDress').value = v.dress_code;   // auto-suggest (ยังแก้เองได้)
+  } else {
+    tip.classList.remove('show'); tip.innerHTML = '';
+    if(!dressTouched) $('fDress').value = '';
+  }
+}
+function formErr(msg){ const e = $('formErr'); e.textContent = msg || ''; e.classList.toggle('show', !!msg); }
+
+async function submitEvent(){
+  formErr('');
+  const date = $('fDate').value;
+  if(!date){ formErr(T('เลือกวันที่ก่อนนะคะ','Please pick a date first')); return; }
+  if(date < todayStr()){ formErr(T('เลือกวันที่ตั้งแต่วันนี้เป็นต้นไปนะคะ','Please pick today or a future date')); return; }
+  if(!pickedOcc){ formErr(T('เลือกประเภทงานก่อนนะคะ','Please pick an occasion first')); return; }
+  const btn = $('saveBtn'); btn.disabled = true;
+  await persistEvent({ date, occasion: pickedOcc, venue: $('fVenue').value.trim(), dress_code: $('fDress').value });
+  btn.disabled = false;
+  // reset ฟอร์มให้พร้อมงานถัดไป
+  $('fDate').value = ''; $('fVenue').value = ''; $('fDress').value = '';
+  pickedOcc = null; dressTouched = false;
+  $('venueTip').classList.remove('show'); $('venueTip').innerHTML = '';
+  renderChips();
+  render();
+  toast(T('บันทึกงานให้แล้วค่ะ สไตลิสต์จะเตรียมลุคไว้ให้นะคะ','Event saved — your stylist will start preparing a look'));
+}
+
+// ---------- render list ----------
+function occLabel(k){ return NAV.lang==='en' ? (OCC_EN[k] || OCCS[k] || k) : (OCCS[k] || k); }
+function fmtDay(iso){ try{ return new Date(iso+'T00:00:00').getDate(); }catch(e){ return '–'; } }
+function fmtMon(iso){
+  try{ return new Date(iso+'T00:00:00').toLocaleDateString(NAV.lang==='en' ? 'en-GB' : 'th-TH', { month:'short' }); }
+  catch(e){ return ''; }
+}
+function cdText(days){
+  if(days === 0) return T('วันนี้เลยค่ะ','Today');
+  if(days === 1) return T('พรุ่งนี้','Tomorrow');
+  return T('อีก '+days+' วัน','in '+days+' days');
+}
+
+function rowHTML(e, isPast){
+  const days = daysUntil(e.date);
+  const status = isPast ? '' : (days > 14
+    ? `<div class="stat prep">${T('สไตลิสต์กำลังเตรียมลุคให้ค่ะ','Your stylist is preparing a look for you')}</div>`
+    : `<div class="stat ready">${T('ลุคของคุณพร้อมแล้ว — สไตลิสต์จะทักไปทาง LINE นะคะ','Your look is ready — your stylist will message you on LINE')}</div>`);
+  const seeBtn = (!isPast && days <= 14)
+    ? `<a class="seebtn" href="index.html#shop?occasion=${encodeURIComponent(e.occasion)}">${T('ดูชุดที่แนะนำ','See suggested pieces')}</a>` : '';
+  return `<div class="ev${isPast?' past':''}">
+    <div class="dt"><b>${fmtDay(e.date)}</b><span>${esc(fmtMon(e.date))}</span></div>
+    <div class="info">
+      <div class="l1"><b>${esc(occLabel(e.occasion))}</b>${isPast ? '' : `<span class="cd">${cdText(days)}</span>`}</div>
+      ${e.venue ? `<div class="venue">${esc(e.venue)}</div>` : ''}
+      ${e.dress_code ? `<div class="dcchip">${esc(e.dress_code)}</div>` : ''}
+      ${status}
+      <div class="acts">${seeBtn}<button class="delbtn" onclick="removeEvent('${esc(e.id)}')">${T('ลบ','Delete')}</button></div>
+    </div>
+  </div>`;
+}
+
+function render(){
+  const today = todayStr();
+  const upcoming = events.filter(e => e.date >= today).sort((a,b) => a.date < b.date ? -1 : 1);
+  const past = events.filter(e => e.date < today).sort((a,b) => a.date > b.date ? -1 : 1);
+
+  $('evList').innerHTML = upcoming.length
+    ? upcoming.map(e => rowHTML(e, false)).join('')
+    : `<div class="empty">${T('ยังไม่มีงานในปฏิทินเลยค่ะ<br>เพิ่มงานแรกด้านบน แล้วสไตลิสต์จะเตรียมลุคไว้ให้เลยนะคะ','No events yet.<br>Add your first one above and your stylist will start preparing a look.')}</div>`;
+
+  $('pastCard').classList.toggle('hidden', !past.length);
+  if(past.length){
+    $('pastSummary').textContent = T('งานที่ผ่านมา','Past events') + ' (' + past.length + ')';
+    $('pastList').innerHTML = past.map(e => rowHTML(e, true)).join('');
+  }
+}
+
+// ---------- boot ----------
+async function boot(){
+  $('fDate').min = todayStr();
+  renderChips();
+  $('fVenue').addEventListener('input', onVenueInput);
+  $('fDress').addEventListener('change', () => { dressTouched = !!$('fDress').value; });
+
+  // LIFF login แบบนุ่ม ๆ — ไม่ล็อกอินก็ใช้หน้าได้ (เก็บในเครื่อง)
+  try{
+    const p = await LiffAuth.login();
+    if(p && p.userId) uid = p.userId;
+  }catch(e){ console.warn('LIFF login skipped', e); }
+  $('loginCard').classList.toggle('hidden', !!uid);
+
+  await loadEvents();
+  await importPending();
+  render();
+}
+boot();
+
+// สลับภาษา → re-render เนื้อหา dynamic
+window.addEventListener('lloop:lang', function(){ renderChips(); onVenueInput(); render(); });
+</script>
+</body>
+</html>
