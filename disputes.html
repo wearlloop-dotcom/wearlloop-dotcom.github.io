@@ -176,7 +176,10 @@
   }
   function renderList(rows){
     if(!rows.length){$('listBox').innerHTML='<div class="muted" style="padding:16px;text-align:center">— ไม่มีคดี —</div>';return;}
-    $('listBox').innerHTML='<table><tr><th>เลขคดี</th><th>ชนิด</th><th>คู่กรณี</th><th>มูลค่า</th><th>สถานะ</th><th>เปิดเมื่อ</th></tr>'+
+    const active=rows.filter(o=>!['closed','settled'].includes(o.status));
+    const totalClaim=active.reduce((s,o)=>s+(Number(o.damage_amount)||0),0);
+    $('listBox').innerHTML='<div class="kv" style="margin-bottom:8px"><b>มูลค่าเรียกร้องรวม (คดีที่ยังไม่ปิด):</b> ฿'+totalClaim.toLocaleString('th-TH')+' จาก '+active.length+' คดี</div>'+
+      '<table><tr><th>เลขคดี</th><th>ชนิด</th><th>คู่กรณี</th><th>มูลค่า</th><th>สถานะ</th><th>เปิดเมื่อ</th></tr>'+
       rows.map(o=>`<tr class="click" onclick="openDetail('${o.id}')"><td>${esc(o.case_no)}</td><td>${esc(TYPES[o.dispute_type]||o.dispute_type)}</td><td>${esc(o.party_name)}</td><td>${baht(o.damage_amount)}</td><td><span class="badge ${['police','court'].includes(o.status)?'red':''}">${esc(STATUS[o.status]||o.status)}</span></td><td>${dt(o.created_at)}</td></tr>`).join('')+'</table>';
   }
 
@@ -201,6 +204,7 @@
       <div class="toolbar" style="margin-top:12px">
         <button class="p sm" onclick="genLetter()">สร้างหนังสือทวงถาม</button>
         <button class="sm" onclick="markDemandSent()">บันทึก: ส่งหนังสือแล้ว</button>
+        ${c.party_ref&&['customer','contract','seller'].includes(c.party_type)?`<a href="case-file.html?type=${encodeURIComponent(c.party_type)}&ref=${encodeURIComponent(c.party_ref)}" style="display:inline-block;padding:5px 10px;border:1px solid var(--navy);border-radius:4px;font-size:12.5px;color:var(--navy);text-decoration:none;background:#fff">เปิดแฟ้มหลักฐาน →</a>`:''}
       </div>
 
       <h2 style="margin-top:14px">บันทึกความเคลื่อนไหว</h2>

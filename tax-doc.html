@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ใบกำกับภาษี/ใบเสร็จรับเงิน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--canvas:#FBFAF8;--surface:#fff;--ink:#262320;--stone:#7C7361;--hair:#E7E5E1;--soft:#F5F4F2;--line:#E7E5E1;
+    --forest:#0C3A33;--gold:#C9A86A;--danger:#A75F3A;
+    --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:14px}
+  .bar{background:linear-gradient(135deg,#0C3A33,#2E4A3A);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar h1{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:1px}
+  .bar .tag{font-size:11px;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px;letter-spacing:1px}
+  .wrap{max-width:640px;margin:24px auto;padding:0 14px}
+  .doc{background:var(--surface);border:1px solid var(--line);border-radius:2px;padding:28px 26px}
+  .doc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:2px solid var(--forest);padding-bottom:14px;margin-bottom:16px}
+  .brand{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:2px;color:var(--forest)}
+  .brand-sub{font-size:11px;color:var(--stone);letter-spacing:1px;margin-top:2px}
+  .doc-title{text-align:right}
+  .doc-title h2{font-family:var(--sans);font-size:18px;font-weight:700}
+  .doc-title .en{font-size:11px;color:var(--stone);letter-spacing:.5px}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:18px}
+  .meta .l{font-size:11px;color:var(--stone);letter-spacing:.5px;text-transform:uppercase}
+  .meta .v{font-size:14px;font-weight:600;margin-top:2px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td{padding:10px 6px;border-bottom:1px solid var(--line)}
+  td.n{text-align:right;font-variant-numeric:tabular-nums}
+  tr.tot td{font-weight:700;border-top:2px solid var(--forest);border-bottom:none;font-size:16px}
+  .foot{margin-top:18px;font-size:11px;color:var(--stone);line-height:1.6}
+  .btn{border:none;border-radius:2px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--forest);color:#fff}
+  .actions{margin:16px 0;display:flex;gap:10px}
+  .muted{color:var(--stone);font-size:13px}
+  .err{background:#FBF6EC;border:1px solid #ECDDBD;border-radius:2px;padding:16px;color:#6b5a2e;line-height:1.6}
+  .hide{display:none!important}
+  @media print{
+    body{background:#fff}
+    .bar,.actions{display:none!important}
+    .wrap{margin:0;max-width:none;padding:0}
+    .doc{border:none;padding:0}
+  }
+</style>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+</head>
+<body>
+<div class="bar"><h1>LLOOP</h1><span class="tag">เอกสารภาษี</span></div>
+
+<div class="wrap">
+  <div class="actions no-print">
+    <button class="btn" onclick="window.print()">พิมพ์เอกสาร</button>
+    <button class="btn" style="background:none;border:1px solid var(--line);color:var(--stone)" onclick="window.close()">ปิดหน้านี้</button>
+  </div>
+  <div id="out"><div class="muted" style="padding:30px;text-align:center">กำลังโหลดเอกสาร…</div></div>
+</div>
+
+<script>
+  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
+  const $=id=>document.getElementById(id);
+  const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const esc=s=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+  function showErr(msg){
+    $('out').innerHTML='<div class="err"><b>เปิดเอกสารไม่สำเร็จ</b><br>'+esc(msg)+'<br>'
+      +'<span class="muted">กลับไปหน้าบัญชีแล้วกด "พิมพ์" จากรายการใบกำกับอีกครั้ง หรือติดต่อผู้ดูแลระบบ</span></div>';
+  }
+
+  async function authHeader(){
+    if(!(await window.opsLogin())) throw new Error('ยังไม่ได้เข้าสู่ระบบ LINE (เฉพาะเจ้าของ/ผู้จัดการ)');
+    return 'Bearer '+liff.getIDToken();
+  }
+  async function api(action, extra){
+    const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({action},extra||{}))});
+    if(r.status===401||r.status===403) throw new Error('ไม่มีสิทธิ์เข้าระบบบัญชี (เฉพาะเจ้าของ/ผู้จัดการ)');
+    return r.json();
+  }
+
+  function renderDoc(r, type){
+    const isReceipt = type==='receipt';
+    const title = isReceipt ? 'ใบเสร็จรับเงิน' : 'ใบกำกับภาษี / ใบเสร็จรับเงิน';
+    const titleEn = isReceipt ? 'RECEIPT' : 'TAX INVOICE / RECEIPT';
+    $('out').innerHTML=`
+      <div class="doc">
+        <div class="doc-head">
+          <div>
+            <div class="brand">LLOOP</div>
+            <div class="brand-sub">บริการเช่าเสื้อผ้า · WEARLLOOP</div>
+          </div>
+          <div class="doc-title"><h2>${title}</h2><div class="en">${titleEn}</div></div>
+        </div>
+        <div class="meta">
+          <div><div class="l">เลขที่เอกสาร</div><div class="v">${esc(r.number||'-')}</div></div>
+          <div><div class="l">วันที่ออก</div><div class="v">${esc((r.issue_date||'').slice(0,10)||'-')}</div></div>
+          <div style="grid-column:1/-1"><div class="l">ชื่อลูกค้า</div><div class="v">${esc(r.customer_name||'-')}</div></div>
+          ${r.customer_tax_id?`<div style="grid-column:1/-1"><div class="l">เลขประจำตัวผู้เสียภาษี</div><div class="v">${esc(r.customer_tax_id)}</div></div>`:''}
+        </div>
+        <table>
+          <tr><td>มูลค่าก่อน VAT</td><td class="n">${baht(r.base)}</td></tr>
+          <tr><td>ภาษีมูลค่าเพิ่ม (VAT 7%)</td><td class="n">${baht(r.vat)}</td></tr>
+          <tr class="tot"><td>ยอดรวมทั้งสิ้น</td><td class="n">${baht(r.total)}</td></tr>
+        </table>
+        <div class="foot">เอกสารนี้ออกโดยระบบบัญชี LLOOP · โปรดเก็บไว้เป็นหลักฐานการชำระเงิน</div>
+      </div>`;
+    document.title='LLOOP · '+title+' '+(r.number||'');
+  }
+
+  async function boot(){
+    try{
+      const q=new URLSearchParams(location.search);
+      const id=(q.get('id')||'').trim();
+      const type=(q.get('type')||'invoice').trim();
+      if(!id){ showErr('ไม่พบเลขที่เอกสารใน URL (ต้องมี ?id=...)'); return; }
+      const ok = await window.opsLogin().catch(()=>false);
+      if(!ok){ showErr('ยังไม่ได้เข้าสู่ระบบ LINE — รีเฟรชหน้านี้เพื่อลองใหม่'); return; }
+      const res = await api('invoices');
+      const rows = (res&&res.rows)||[];
+      const row = rows.find(r=>String(r.id)===id || String(r.number)===id);
+      if(!row){ showErr('ไม่พบใบกำกับเลขที่/รหัส "'+id+'" ในระบบ'); return; }
+      renderDoc(row, type);
+    }catch(e){
+      showErr(e&&e.message?e.message:'เกิดข้อผิดพลาดในการโหลดข้อมูล');
+    }
+  }
+  boot();
+</script>
+</body>
+</html>

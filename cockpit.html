@@ -48,7 +48,7 @@
 <body>
 <div class="bar">
   <h1>คอกพิตเจ้าของ</h1>
-  <div class="nav"><a href="/today.html">งานวันนี้</a><a href="/accounting.html">บัญชี</a><a href="/analytics.html">โฆษณา</a></div>
+  <div class="nav"><a href="/today.html">งานวันนี้</a><a href="/accounting.html">บัญชี</a><a href="/analytics.html">การตลาด</a></div>
 </div>
 <div class="wrap">
   <section class="phead">
@@ -78,6 +78,16 @@
   const baht=n=>'฿'+Math.round(Number(n)||0).toLocaleString('th-TH');
   const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'—';
 
+  // เรียก edge function acct (แบบเดียวกับหน้า accounting/purchasing) — auth ผ่าน LINE idToken
+  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
+  async function authHeader(){ if(!(await window.opsLogin())) throw new Error('redirecting'); return 'Bearer '+liff.getIDToken(); }
+  async function api(action,extra){
+    const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({action},extra||{}))});
+    if(r.status===401||r.status===403) throw new Error('unauth');
+    return r.json();
+  }
+
   let ROI=[];          // เก็บ fleet_roi ไว้สลับมุมมอง
   let roiView='idle';  // idle = ทุนยังไม่คืน/ชุดนิ่ง · top = ทำเงินสูงสุด
 
@@ -98,7 +108,7 @@
     const f=c.fleet||{}, util=f.util_30d_pct||0;
     return `<div class="card"><h2>คลัง &amp; อัตราหมุน <span class="hint">30 วันล่าสุด</span></h2>
       <div class="kpis">
-        ${kpi(util+'%', 'หมุนใน 30 วัน', `${f.total||0} ตัวในคลัง`, util>=50?'good':(util>=25?'warn':'hot'))}
+        ${kpi(util+'%', '% ชุดถูกเช่าใน 30 วัน', `${f.total||0} ตัวในคลัง`, util>=50?'good':(util>=25?'warn':'hot'))}
         ${kpi(f.idle_30d||0, 'ชุดนิ่ง', 'ว่างแต่ไม่ถูกเช่า', (f.idle_30d>0)?'warn':'zero')}
         ${kpi(c.rentals.out_now||0, 'ออกไปอยู่', (c.rentals.overdue>0?`เลยกำหนด ${c.rentals.overdue}`:'ตรงเวลา'), c.rentals.overdue>0?'hot':'')}
       </div>
@@ -118,6 +128,49 @@
         ${kpi(baht(c.credit_liability),'เครดิตลูกค้าค้าง','หนี้สินที่ต้องส่งมอบ', c.credit_liability>0?'warn':'zero')}
         ${kpi(baht(ab.remaining),'งบซื้อเหลือเดือนนี้', `ใช้ไป ${baht((ab.paid||0)+(ab.committed||0))}`, '')}
       </div></div>`;
+  }
+
+  // วันนี้ & ของเลยกำหนด — จาก ops_today (null = โหลดไม่ได้ แสดง — ไม่ใช่ 0)
+  function todayCard(t){
+    const fail = s => kpi('—', s, 'โหลดไม่ได้', 'zero');
+    if(!t) return `<div class="card"><h2>วันนี้ &amp; ของเลยกำหนด <span class="hint">จากหน้างานวันนี้</span></h2>
+      <div class="kpis">${fail('เลยกำหนด')}${fail('ต้องส่งวันนี้')}${fail('ครบกำหนดคืนวันนี้')}</div></div>`;
+    const k=t.kpi||{};
+    const items=(t.overdue||[]).slice(0,8);
+    const list = items.length ? items.map(x=>`<div class="row">
+        <div><div class="code">${esc(x.code)} · ${esc(x.name||'')}</div>
+        <div class="meta">${x.customer?'ลูกค้า '+esc(x.customer):'—'}</div></div>
+        <span class="tag bad">เลย ${x.days||0} วัน</span></div>`).join('')
+      : '<div class="empty">ไม่มีของเลยกำหนด 🎉</div>';
+    return `<div class="card"><h2>วันนี้ &amp; ของเลยกำหนด <span class="hint">จากหน้างานวันนี้</span></h2>
+      <div class="kpis">
+        ${kpi(k.overdue||0, 'เลยกำหนด', '', (k.overdue>0)?'hot':'zero')}
+        ${kpi(k.to_ship||0, 'ต้องส่งวันนี้', '', (k.to_ship>0)?'warn':'zero')}
+        ${kpi(k.due_today||0, 'ครบกำหนดคืนวันนี้', '', (k.due_today>0)?'warn':'zero')}
+      </div>
+      <div style="margin-top:12px">${list}</div></div>`;
+  }
+
+  // ค้างจ่าย & หนี้สิน — เจ้าหนี้บิล (acct:ap) + PO ค้างจ่าย (acct:po_unpaid) + ค่าตอบแทนสไตลิสต์ค้าง (ops_partner_payouts)
+  // แต่ละแหล่ง: null = โหลดไม่ได้ (แสดง — ไม่ใช่ 0)
+  function payablesCard(ap, po, payouts){
+    const apSum  = ap==null ? null : ap.reduce((s,r)=>s+Number(r.amount||0),0);
+    const poSum  = po==null ? null : po.reduce((s,r)=>s+Number(r.total||0),0);
+    const paySum = payouts==null ? null : payouts.reduce((s,r)=>s+Number(r.accrued||0),0);
+    const tile=(sum,label,sub)=> sum==null ? kpi('—', label, 'โหลดไม่ได้', 'zero')
+      : kpi(baht(sum), label, sub, sum>0?'warn':'zero');
+    const loaded=[apSum,poSum,paySum].filter(v=>v!=null);
+    const anyFail = loaded.length<3;
+    const totalTxt = loaded.length===0 ? '—' : baht(loaded.reduce((s,v)=>s+v,0));
+    return `<div class="card"><h2>ค้างจ่าย &amp; หนี้สิน <span class="hint">ภาระที่ต้องจ่ายออก</span></h2>
+      <div class="kpis">
+        ${tile(apSum, 'เจ้าหนี้บิล (AP)', ap?`${ap.length} รายการ`:'')}
+        ${tile(poSum, 'PO ค้างจ่าย', po?`${po.length} ใบ`:'')}
+        ${tile(paySum, 'ค่าตอบแทนสไตลิสต์ค้าง', payouts?`${payouts.filter(p=>Number(p.accrued||0)>0).length} คน`:'')}
+      </div>
+      <div class="row" style="margin-top:12px"><div class="code">รวมค้างจ่าย</div>
+        <div style="font-weight:600">${totalTxt}${anyFail&&loaded.length?' <span style="font-size:12px;color:var(--muted);font-weight:400">(ไม่รวมส่วนที่โหลดไม่ได้)</span>':''}</div></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px">ยังไม่รวมเงินมัดจำลูกค้าที่ถือไว้ — ต้องเพิ่มข้อมูลจากฝั่งระบบก่อน</div></div>`;
   }
 
   function roiCard(){
@@ -144,14 +197,19 @@
   async function load(){
     $('out').innerHTML='<div class="loading">กำลังโหลด…</div>';
     try{
-      const [{data:c,error:e1},{data:roi,error:e2}] = await Promise.all([
+      // โหลดทุกแหล่งพร้อมกัน — แหล่งใหม่ตัวไหนพังให้เป็น null (แสดง — โหลดไม่ได้) ไม่ล้มทั้งหน้า
+      const [{data:c,error:e1},{data:roi,error:e2},today,ap,po,payouts] = await Promise.all([
         sb.rpc('owner_cockpit'),
-        sb.rpc('fleet_roi',{p_limit:60})
+        sb.rpc('fleet_roi',{p_limit:60}),
+        sb.rpc('ops_today').then(({data,error})=>{ if(error) throw error; return data||{}; }).catch(()=>null),
+        api('ap').then(d=>Array.isArray(d.rows)?d.rows:[]).catch(()=>null),
+        api('po_unpaid').then(d=>Array.isArray(d.rows)?d.rows:[]).catch(()=>null),
+        sb.rpc('ops_partner_payouts',{}).then(({data,error})=>{ if(error) throw error; return Array.isArray(data)?data:[]; }).catch(()=>null)
       ]);
       if(e1) throw e1;
       ROI = Array.isArray(roi)?roi:[];
       $('when').textContent='อัปเดต '+new Date().toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-      $('out').innerHTML = moneyCard(c)+fleetCard(c)+bizCard(c)+`<div id="roi">${roiCard()}</div>`;
+      $('out').innerHTML = todayCard(today)+moneyCard(c)+fleetCard(c)+bizCard(c)+payablesCard(ap,po,payouts)+`<div id="roi">${roiCard()}</div>`;
     }catch(err){
       $('out').innerHTML=`<div class="card"><div class="empty">โหลดไม่ได้: ${esc(err.message||err)}<br>เข้าได้เฉพาะเจ้าของ (owner) — ลองล็อกอินใหม่ผ่าน LINE</div></div>`;
     }

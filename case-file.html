@@ -139,6 +139,14 @@
       ${rows(cf.consents,[['วัตถุประสงค์',o=>esc(o.purpose)],['ยินยอมเมื่อ',o=>dt(o.granted_at)]])}
     `);
   }
+
+  // deep-link: case-file.html?type=customer|contract|seller&ref=<uuid> → เติมค่าแล้วดึงหลักฐานอัตโนมัติ
+  (function(){
+    const q=new URLSearchParams(location.search), type=q.get('type'), ref=(q.get('ref')||'').trim();
+    if(type&&ref&&['customer','contract','seller'].includes(type)){
+      $('stype').value=type; $('sref').value=ref; loadCase();
+    }
+  })();
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>

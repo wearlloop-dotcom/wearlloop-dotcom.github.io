@@ -143,6 +143,7 @@
     const cash=bal(d.balance,'1010'), assets=d.balance.filter(r=>r.type==='asset').reduce((s,r)=>s+Number(r.balance||0),0);
     const liab=d.balance.filter(r=>r.type==='liability').reduce((s,r)=>s+Number(r.balance||0),0);
     v.innerHTML=`
+      <div class="muted" style="margin-bottom:10px">ข้อมูล ณ ปัจจุบันจากระบบบัญชี — ยังเลือกงวดย้อนหลังไม่ได้ (รอฝั่งระบบ)</div>
       <div class="big">
         <div class="kpi"><div class="l">รายได้รวม</div><div class="v">${baht(rev)}</div></div>
         <div class="kpi"><div class="l">ค่าใช้จ่ายรวม</div><div class="v">${baht(exp)}</div></div>
@@ -153,7 +154,29 @@
         <div class="kpi"><div class="l">สินทรัพย์รวม</div><div class="v">${baht(assets)}</div></div>
         <div class="kpi"><div class="l">หนี้สินรวม</div><div class="v">${baht(liab)}</div></div>
       </div>
+      <div id="hrCost"></div>
       ${rev||exp?'':'<div class="note">ยังไม่มีรายการเงินในระบบ — งบจะขึ้นเองเมื่อมีการเช่า/ชำระ/รับซื้อ (ระบบลงบัญชีคู่ให้อัตโนมัติ)</div>'}`;
+    loadHrCost();
+  }
+  // ต้นทุนคนจาก HR gateway — ถ้าเรียกไม่ได้ (เช่น ไม่มีสิทธิ์) ซ่อนการ์ดไปเลย ไม่ให้หน้าพัง
+  async function loadHrCost(){
+    try{
+      if(!window.opsRpc) return;
+      const {data,error}=await window.opsRpc('hr_daily_brief',{});
+      if(error) return;
+      let base=data&&data.labor_cost_base;
+      if(base==null){ // เผื่อ brief ไม่มีตัวเลขต้นทุน — ลองดึงจาก hr_analytics (ตัวเดียวกับหน้า HR)
+        const r2=await window.opsRpc('hr_analytics',{p_period:null});
+        if(r2.error) return;
+        base=r2.data&&r2.data.labor_cost_base;
+      }
+      if(base==null||isNaN(Number(base))) return;
+      const el=$('hrCost'); if(!el) return;
+      el.innerHTML=`<div class="card"><h2>ต้นทุนคน (จาก HR)</h2>
+        <div class="l" style="font-size:11px;color:var(--stone);letter-spacing:1px;text-transform:uppercase">ฐานเงินเดือนรวม/เดือน</div>
+        <div style="font-family:var(--display);font-size:24px;font-weight:700;margin-top:4px">${baht(base)}</div>
+        <div class="muted" style="margin-top:8px">ฐานเงินเดือน — ยังไม่รวม OT/โบนัส/ประกันสังคม และยังไม่ลงงบบัญชีอัตโนมัติ</div></div>`;
+    }catch(e){ /* เงียบ — การ์ดนี้เป็นข้อมูลเสริม */ }
   }
   const sum=(rows,type)=>rows.filter(r=>r.type===type).reduce((s,r)=>s+Number(r.amount||0),0);
   const bal=(rows,code)=>{const r=rows.find(x=>x.code===code);return r?Number(r.balance||0):0;};
@@ -193,7 +216,7 @@
   }
   function renderInvoices(v,rows){
     v.innerHTML=`<div class="card"><h2>ใบกำกับภาษีที่ออก</h2><table><tr><th>เลขที่</th><th>วันที่</th><th>ลูกค้า</th><th class="n">ฐาน</th><th class="n">VAT</th><th class="n">รวม</th><th></th></tr>
-      ${rows.length?rows.map(r=>`<tr><td>${esc(r.number)}</td><td>${esc((r.issue_date||'').slice(0,10))}</td><td>${esc(r.customer_name||'-')}</td><td class="n">${baht(r.base)}</td><td class="n">${baht(r.vat)}</td><td class="n">${baht(r.total)}</td><td><a href="tax-doc.html?type=invoice&id=${r.id}" target="_blank" style="color:var(--navy)">พิมพ์</a></td></tr>`).join(''):'<tr><td class="muted" colspan="7">ยังไม่มีใบกำกับ</td></tr>'}</table></div>`;
+      ${rows.length?rows.map(r=>`<tr><td>${esc(r.number)}</td><td>${esc((r.issue_date||'').slice(0,10))}</td><td>${esc(r.customer_name||'-')}</td><td class="n">${baht(r.base)}</td><td class="n">${baht(r.vat)}</td><td class="n">${baht(r.total)}</td><td><a href="tax-doc.html?type=invoice&id=${encodeURIComponent(r.id||r.number||'')}" target="_blank" style="color:var(--navy)">พิมพ์</a></td></tr>`).join(''):'<tr><td class="muted" colspan="7">ยังไม่มีใบกำกับ</td></tr>'}</table></div>`;
   }
 
   function renderAr(v,rows){
