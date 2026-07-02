@@ -21,6 +21,7 @@
       { href: 'stock.html',    label: 'สต๊อก',         icon: '▦', roles: ['care','stock','manager'] },
       { href: 'garment.html',  label: 'ชุด',           icon: '❖', roles: ['care','stock','manager'] },
       { href: 'seller.html',   label: 'รับซื้อมือสอง',  icon: '⇄', roles: ['care','manager'] },
+      { href: 'csv.html',      label: 'CSV ชุด (นำเข้า/ส่งออก)', icon: '⇅', roles: ['stock','manager'] },
     ] },
     { section: 'การตลาด', items: [
       { href: 'marketing.html',  label: 'การตลาด',       icon: '◆', roles: ['marketing','manager'] },
@@ -34,6 +35,7 @@
     { section: 'ธุรกิจ', items: [
       { href: 'cockpit.html',    label: 'คอกพิตเจ้าของ', icon: '◉', roles: ['owner'] },
       { href: 'analytics.html',  label: 'วิเคราะห์',     icon: '▲', roles: ['manager','owner'] },
+      { href: 'forecast.html',   label: 'ประมาณการ',     icon: '◔', roles: ['owner'] },
       { href: 'accounting.html', label: 'บัญชี',         icon: '฿', roles: ['owner','manager'] },
       { href: 'slips.html',      label: 'สลิปโอน',       icon: '⊞', roles: ['owner','manager'] },
       { href: 'purchasing.html', label: 'จัดซื้อ',       icon: '⛬', roles: ['owner','manager'] },
