@@ -11,11 +11,11 @@
   async function ensureInit() {
     if (_inited) return;
     if (!window.liff || !LIFF_ID) throw new Error('ยังไม่ได้ตั้งค่า LINE Login');
-    // ใช้ shared promise ของ LiffAuth ถ้ามี — กัน liff.init() ซ้ำบน SDK instance เดียว (ทำ SDK throw)
-    if (window.LiffAuth && window.LiffAuth.ensureInit) {
+    // ใช้ init promise ตัวเดียวกับ LiffAuth ถ้ามี — กัน liff.init() วิ่งซ้ำสองที่บนหน้าเดียว ที่ทำ SDK throw (ปุ่มเงียบ/RPC ค้าง)
+    if (window.LiffAuth && typeof window.LiffAuth.ensureInit === 'function') {
       await window.LiffAuth.ensureInit();
     } else {
-      await liff.init({ liffId: LIFF_ID });
+      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
     }
     _inited = true;
   }
