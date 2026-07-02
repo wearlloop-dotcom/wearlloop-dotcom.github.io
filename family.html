@@ -874,9 +874,11 @@ function bindInvite(){
               { type:'text', text:gname, weight:'bold', size:'xl', wrap:true, color:'#1A1A1A', margin:'md' },
               { type:'text', text:NAV.t('มาจัดชุดเข้าตีมเดียวกัน แล้วเช่าพร้อมกันในออเดอร์เดียว','Let\'s dress in one theme and rent together in a single order'), size:'sm', color:'#8C8B86', wrap:true }
             ]},
-            footer:{ type:'box', layout:'vertical', contents:[
+            footer:{ type:'box', layout:'vertical', spacing:'sm', contents:[
               { type:'button', style:'primary', color:'#6FB3A6',
-                action:{ type:'uri', label:NAV.t('เข้าร่วมกลุ่ม','Join the group'), uri: inviteUrl } } ]}
+                action:{ type:'uri', label:NAV.t('เข้าร่วมกลุ่ม','Join the group'), uri: inviteUrl } },
+              { type:'button', style:'link', height:'sm',
+                action:{ type:'uri', label:NAV.t('ดูชุดให้เช่าก่อน','Browse dresses first'), uri:'https://liff.line.me/'+((window.CONFIG&&window.CONFIG.LIFF_ID)||'') } } ]}
           }}]);
           return;
         }
