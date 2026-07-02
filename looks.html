@@ -634,7 +634,7 @@ async function openShare(){
     <div class="shhd"><div class="shtitle">${T('แชร์ลุคของคุณ','Share your look')}</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
     <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-top:8px">
       <div style="font-size:12.5px;font-weight:600">${T('ลิงก์ชวนเช่าของคุณ','Your referral link')}</div>
-      <div class="muted" style="margin:2px 0 9px">${T('แชร์ลิงก์นี้ที่ไหนก็ได้ (IG/โพสต์) — ใครเช่าผ่านลิงก์ คุณได้ส่วนแบ่งเครดิต '+esc(String(REF_PCT))+'% ของค่าเช่า','Share this link anywhere (IG/posts) — when someone rents through it you earn '+esc(String(REF_PCT))+'% of the rental in credit')}</div>
+      <div class="muted" style="margin:2px 0 9px">${T('ใครเช่าผ่านลิงก์นี้ คุณได้เครดิต '+esc(String(REF_PCT))+'% ของค่าเช่า','Anyone who rents through this link earns you '+esc(String(REF_PCT))+'% of the rental in credit')}</div>
       <div style="display:flex;gap:8px">
         <button class="btn ghost" style="font-size:13px;padding:10px;flex:1" onclick="copyRef()">${T('คัดลอกลิงก์ชวนเช่า','Copy referral link')}</button>
         <button class="btn ghost" style="font-size:13px;padding:10px;flex:1" onclick="closeOv('#ovShare');openEarnings()">${T('รายได้ของฉัน','My earnings')}</button>
@@ -665,7 +665,7 @@ async function openShare(){
       <option value="true">${T('พอดีตัว','True to size')}</option><option value="large">${T('เผื่อ/ใหญ่นิดหน่อย','Roomy / slightly big')}</option><option value="small">${T('ฟิต/เล็กนิดหน่อย','Fitted / slightly small')}</option></select>
     <label class="lbl" style="display:flex;align-items:flex-start;gap:9px;font-weight:500;margin-top:14px">
       <input type="checkbox" id="shCross" style="width:auto;margin-top:3px">
-      <span>${T('ยินยอมให้ LLOOP นำลุคนี้ไปรีโพสต์ในไอจี/เพจของแบรนด์ เพื่อช่วยให้มีคนเห็น (เปิดเผยสู่สาธารณะ)','I allow LLOOP to repost this look on the brand IG/page for more reach (made public)')}</span>
+      <span>${T('ให้ LLOOP รีโพสต์ลุคนี้ใน IG/เพจได้ (เปิดสาธารณะ)','LLOOP may repost this look on IG/page (made public)')}</span>
     </label>
     <button class="btn" id="shSubmit" style="margin-top:16px">${T('แชร์ลุค','Share look')}</button>`;
   $('#shSubmit').onclick = submitShare;

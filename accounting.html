@@ -207,7 +207,7 @@
       </div>
       ${supported
         ?`<div class="muted" style="margin-bottom:10px">งวด ${esc(pnlPeriod)}</div>`
-        :'<div class="note" style="margin:0 0 10px">ระบบบัญชียังไม่รองรับการเลือกงวด — ตัวเลขด้านล่างคือข้อมูลปัจจุบัน (ดูสเปกใน BACKEND-SPEC.md)</div>'}
+        :'<div class="note" style="margin:0 0 10px">ยังเลือกงวดย้อนหลังไม่ได้ — ตัวเลขด้านล่างคือข้อมูลปัจจุบัน</div>'}
       ${mom}
       <div class="card"><h2>งบกำไรขาดทุน</h2><table>
       <tr><td class="sec" colspan="2">รายได้</td></tr>${rev.map(line).join('')||'<tr><td class="muted">—</td><td></td></tr>'}

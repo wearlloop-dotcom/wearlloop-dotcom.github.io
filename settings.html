@@ -40,6 +40,7 @@
   .status.ok{color:var(--ok)}.status.err{color:var(--danger)}
   .loading{color:var(--muted);text-align:center;padding:34px}
   .hint{font-size:12.5px;color:var(--muted);line-height:1.55;background:var(--soft);border-radius:10px;padding:12px 14px}
+  .inf{display:inline-flex;width:15px;height:15px;border-radius:50%;border:1px solid var(--muted);color:var(--muted);font-size:10px;align-items:center;justify-content:center;vertical-align:1px;margin-left:6px;cursor:help}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
 </head>
@@ -116,12 +117,11 @@
 
   <div class="card" id="partnerCard" style="display:none">
     <h2>พาร์ทเนอร์สไตลิสต์ลงทะเบียนเอง</h2>
-    <div class="desc">เปิด = ใครก็ตามที่เปิดหน้าพอร์ทัลสไตลิสต์ผ่าน LINE จะเห็นปุ่ม “สมัครเป็นพาร์ทเนอร์” กรอกชื่อแล้วเข้าใช้พอร์ทัลได้ทันที (ผูกบัญชี LINE เป็นพาร์ทเนอร์) · ปิด = รับเฉพาะคนที่ออกสัญญาให้จากหลังบ้านเท่านั้น</div>
+    <div class="desc">เปิดให้สไตลิสต์สมัครเป็นพาร์ทเนอร์เองผ่าน LINE<span class="inf" title="เปิด = ใครเปิดพอร์ทัลสไตลิสต์ผ่าน LINE จะเห็นปุ่ม “สมัครเป็นพาร์ทเนอร์” กรอกชื่อแล้วใช้ได้ทันที · ปิด = รับเฉพาะคนที่ออกสัญญาจากหลังบ้าน">i</span></div>
     <div class="feat">
       <div class="info">
         <div class="name">เปิดรับสมัครพาร์ทเนอร์ด้วยตนเอง</div>
-        <div class="note">เหมาะตอนเปิดรับสไตลิสต์ใหม่จำนวนมาก · ปิดสวิตช์ไม่ถอนสิทธิ์คนที่สมัครไปแล้ว (เพิกถอนรายตัวที่หน้าสัญญา)</div>
-        <div class="need">ผู้สมัครจะถูกบันทึกเป็นสัญญา self-register — ตรวจ/เพิกถอนได้ที่ contracts.html</div>
+        <div class="note">ปิดสวิตช์ไม่ถอนสิทธิ์คนที่สมัครแล้ว — ตรวจ/เพิกถอนรายตัวที่หน้าสัญญา</div>
       </div>
       <label class="sw" data-key="partner_self_register_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
     </div>
@@ -129,13 +129,12 @@
 
   <div class="card" id="premiumCard" style="display:none">
     <h2>ระบบคุ้มครองชุดออกงาน (ชุดแพง)</h2>
-    <div class="desc">เปิดเมื่อพร้อมเริ่มปล่อยเช่าชุดราคาแพง — พอเปิด ระบบจะ “เตือนเจ้าของอัตโนมัติ” ทุกครั้งที่ชุดแพงถูกจอง ให้ทำขั้นตอนคุ้มครอง (วิดีโอก่อนแพค/ตอนแกะของ ฯลฯ) ลดความผิดพลาดของคน · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก</div>
+    <div class="desc">เตือนเจ้าของให้ทำขั้นตอนคุ้มครองทุกครั้งที่ชุดแพงถูกจอง<span class="inf" title="ขั้นตอนคุ้มครอง เช่น วิดีโอก่อนแพค/ตอนแกะของ · ควรมีหน้าเก็บวิดีโอ มัดจำ pre-auth และประกันความเสียหายก่อนเปิดใช้จริง · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก">i</span></div>
 
     <div class="feat">
       <div class="info">
         <div class="name">เปิดระบบคุ้มครองชุดแพง</div>
-        <div class="note">สวิตช์หลัก — เปิดทั้งโมดูล เตือนเจ้าของ + บังคับขั้นตอนคุ้มครองสำหรับชุดที่เข้าข่ายแพง</div>
-        <div class="need">ต้องมี: หน้าเก็บวิดีโอแกะของ / มัดจำ pre-auth / ประกันความเสียหาย ก่อนเปิดใช้จริง</div>
+        <div class="note">เตือนเจ้าของ + บังคับขั้นตอนคุ้มครองสำหรับชุดที่เข้าเกณฑ์</div>
       </div>
       <label class="sw" data-key="premium_protection_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
     </div>
@@ -158,7 +157,7 @@
 
   <div class="card" id="financeCard" style="display:none">
     <h2>กองทุนซื้อชุดใหม่ &amp; กำไรต่อชุด</h2>
-    <div class="desc">ทุกการเช่ากันเงินส่วนหนึ่งไว้ “ซื้อชุดใหม่” อัตโนมัติ (restock) — คลังโตเองไม่ต้องเติมทุน · เช็กกำไรสุทธิต่อชุดได้รายตัว (หักค่าซักตามคลาสผ้า + ค่าคน/ส่ง/แพ็ก/กันสำรอง/restock)</div>
+    <div class="desc">ทุกการเช่ากันเงินส่วนหนึ่งไว้ซื้อชุดใหม่อัตโนมัติ · เช็กกำไรสุทธิต่อชุดได้รายตัว<span class="inf" title="กำไรสุทธิหักค่าซักตามคลาสผ้า + ค่าคน/ส่ง/แพ็ก/กันสำรอง/restock">i</span></div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 14px">
       <div style="text-align:center"><div id="rsBal" style="font-size:20px;font-weight:700">–</div><div class="sub">คงเหลือในกอง</div></div>
       <div style="text-align:center"><div id="rsProv" style="font-size:20px;font-weight:700">–</div><div class="sub">กันสะสมทั้งหมด</div></div>
@@ -221,10 +220,7 @@
     </div>
   </div>
 
-  <div class="hint" id="hint" style="display:none">
-    หมายเหตุ: สวิตช์เป็นแค่ “สวิตช์เปิดไฟ” — โค้ดหน้าจอ/edge function/ฮาร์ดแวร์ที่อ่านค่านี้ต้องสร้างก่อนถึงจะเห็นผลจริง
-    ค่าทั้งหมดเก็บใน app_settings และอ่านในระบบผ่าน get_setting() · แก้ไขได้เฉพาะเจ้าของ
-  </div>
+  <div class="hint" id="hint" style="display:none">แก้ไขได้เฉพาะเจ้าของ</div>
 
   <div id="loading" class="loading">กำลังโหลด…</div>
 </div>
