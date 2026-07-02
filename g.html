@@ -129,7 +129,7 @@
 // ============================================================
 const $ = s => document.querySelector(s);
 const baht = n => '฿' + Number(n || 0).toLocaleString('th-TH');
-function addDays(s, n){ const d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
+function addDays(s, n){ const d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; } // local (กัน toISOString เลื่อนโซน +7)
 function fmtDate(s){ try { return new Date(s + 'T00:00:00').toLocaleDateString('th-TH', { day:'numeric', month:'short' }); } catch(e){ return s; } }
 function todayStr(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
 let _tt; function toast(m){ const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2600); }
@@ -356,7 +356,7 @@ async function onBook(){
   window.fbTrack?.('InitiateCheckout', { content_ids:[G.code || G.id], content_name: G.name, value: G.price, currency:'THB' });
   const btn = $('#bookBtn'); if (btn){ btn.disabled = true; btn.textContent = NAV.t('กำลังจอง…','Booking…'); }
   // เช็กว่างวันแรกอีกชั้น (กันชนนาทีสุดท้าย) — book_cart เป็นคนตัดสินจริง
-  let free = true; try { free = await window.API.availableOn(G.id, from); } catch (e) {}
+  let free = true; try { free = await window.API.availableRange(G.id, from, to); } catch (e) {}
   if (free === false){
     if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
     try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) {}
