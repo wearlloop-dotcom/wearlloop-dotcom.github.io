@@ -2024,6 +2024,10 @@ function openMenu() {
     about: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>',
     terms: '<svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 13h5M10 17h5"/></svg>',
     privacy: '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 15l2.5 2.5L15 13"/></svg>',
+    box: '<svg viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v9l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v9"/></svg>',
+    pin: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>',
+    fit: '<svg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M12 3v18"/><path d="M8.5 7.5h7M8.5 16.5h7"/></svg>',
   };
   const item = (icon, label, act, sub) =>
     `<button class="mitem" onclick="closeMenu();${act}">${icon}<span>${label}</span>${sub ? `<span class="msublab">${sub}</span>` : ''}</button>`;
@@ -2047,6 +2051,8 @@ function openMenu() {
       ${item(I.wallet, en ? 'LLOOP wallet' : 'กระเป๋า LLOOP', 'openWallet()', signedIn && c.credit_balance ? '฿' + Math.round(c.credit_balance) : '')}
       ${item(I.cart, en ? 'Cart' : 'ตะกร้า', 'openCart()', cartN ? String(cartN) : '')}
       ${item(I.member, en ? 'Membership & perks' : 'สมาชิก & สิทธิ์', 'openMembership()')}
+      ${item(I.box, en ? 'LLOOP Day · monthly closet swap' : 'วันเปลี่ยนตู้ · กล่องประจำเดือน', "location.href='closet-day.html'")}
+      ${item(I.pin, en ? 'Drop points near you · express dress' : 'จุดรับ-ส่งใกล้บ้าน · ชุดฉุกเฉิน', "location.href='drop-points.html'")}
     </div>
 
     <div class="msec">
@@ -2054,6 +2060,7 @@ function openMenu() {
       ${item(I.foryou, en ? 'For you' : 'แนะนำเฉพาะคุณ', 'if(!fForYou)toggleForYou()')}
       ${signedIn ? item(I.foryou, en ? 'What you love' : 'สิ่งที่คุณชอบ', 'openTaste()') : ''}
       ${item(I.stylist, en ? 'What to wear? — card game' : 'งานนี้ใส่อะไรดี — เพื่อนสาวช่วยเลือก', "location.href='quiz.html'")}
+      ${item(I.calendar, en ? 'My event calendar' : 'ปฏิทินงานของฉัน', "location.href='my-events.html'")}
       ${item(I.stylist, en ? 'LLOOP Atelier by venue' : 'LLOOP Atelier ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
       ${item(I.findwish, en ? 'Wish for a piece — tell us' : 'อยากได้ชุดไหน บอกเราได้', "location.href='wishlist.html'")}
@@ -2065,6 +2072,7 @@ function openMenu() {
     <div class="msec">
       <div class="ml">${en ? 'My account' : 'บัญชีของฉัน'}</div>
       ${item(I.verify, en ? 'Verify identity (KYC)' : 'ยืนยันตัวตน (KYC)', "openKyc('')")}
+      ${item(I.fit, en ? 'Fit DNA · your size profile' : 'Fit DNA · โปรไฟล์ไซซ์ที่แม่นขึ้นเอง', "location.href='fit.html'")}
       ${item(I.gift, en ? 'Invite friends · get credit' : 'ชวนเพื่อน · รับเครดิต', 'openWallet(true)')}
     </div>
 
