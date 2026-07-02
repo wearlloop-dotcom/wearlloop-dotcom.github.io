@@ -30,22 +30,30 @@ on conflict (key) do nothing;
 -- ตัวอ่าน "ประวัติการเช่าที่จบแล้ว" ของลูกค้า 1 คน — ทุกอย่างที่เหลือ derive จากนี่
 -- แก้ชื่อตาราง/คอลัมน์ในบล็อกนี้ให้ตรงกับตารางเช่าจริง แล้วส่วน 3–4 ใช้ได้เลย
 -- ─────────────────────────────────────────────────────────────────────────────
+-- ตรงกับ schema จริงของตาราง rentals (ตรวจกับ information_schema ก.ค. 2026):
+--   · ครบกำหนด = due_at · "คืนแล้ว" = returned_at is not null (ไม่อิงค่า status)
+--   · ตรงเวลา: นับวันที่ลูกค้าส่งคืน (return_shipped_at) ถ้ามี — ไม่ลงโทษความช้าของขนส่ง
+--   · QC proxy v1: ถูกหักมัดจำ = สภาพไม่ผ่าน (deposit_refund_amount < deposit)
+--     ต่อท่อ QC จริง/ตารางพิพาท (dispute_*) ได้ภายหลังโดยแก้ฟังก์ชันนี้ฟังก์ชันเดียว
 create or replace function trust_history(p_customer uuid)
 returns table (
   on_time  boolean,   -- คืนภายในกำหนด
-  qc_ok    boolean,   -- สภาพผ่าน QC ตอนรับคืน
-  disputed boolean,   -- มีเคส/พิพาท
+  qc_ok    boolean,   -- สภาพผ่าน (proxy: ไม่ถูกหักมัดจำ)
+  disputed boolean,   -- มีเคส/พิพาท (v1: ยังไม่ต่อท่อ — false ไว้ก่อน)
   ended_at timestamptz
 )
 language sql stable security definer set search_path = public as $$
   select
-    (r.returned_at::date <= r.return_date::date)          as on_time,   -- ★ ปรับชื่อคอลัมน์
-    coalesce(r.return_qc_passed, true)                    as qc_ok,     -- ★ ปรับชื่อคอลัมน์
-    coalesce(r.disputed, false)                           as disputed,  -- ★ ปรับชื่อคอลัมน์
-    r.returned_at                                         as ended_at
-  from rentals r                                                        -- ★ ปรับชื่อตาราง
+    (coalesce(r.return_shipped_at, r.returned_at)::date <= r.due_at::date) as on_time,
+    not (coalesce(r.deposit, 0) > 0
+         and r.deposit_refund_amount is not null
+         and r.deposit_refund_amount < r.deposit)                          as qc_ok,
+    false                                                                  as disputed,
+    r.returned_at                                                          as ended_at
+  from rentals r
   where r.customer_id = p_customer
-    and r.status = 'returned'                                           -- ★ ปรับค่าสถานะ
+    and r.returned_at is not null
+    and r.cancelled_at is null
 $$;
 
 
