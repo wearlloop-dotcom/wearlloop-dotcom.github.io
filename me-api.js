@@ -11,17 +11,17 @@
   async function ensureInit() {
     if (_inited) return;
     if (!window.liff || !LIFF_ID) throw new Error('ยังไม่ได้ตั้งค่า LINE Login');
-    // ใช้ shared promise ของ LiffAuth ถ้ามี — กัน liff.init() ซ้ำบน SDK instance เดียว (ทำ SDK throw)
-    if (window.LiffAuth && window.LiffAuth.ensureInit) {
+    // ใช้ init promise ตัวเดียวกับ LiffAuth ถ้ามี — กัน liff.init() วิ่งซ้ำสองที่บนหน้าเดียว ที่ทำ SDK throw (ปุ่มเงียบ/RPC ค้าง)
+    if (window.LiffAuth && typeof window.LiffAuth.ensureInit === 'function') {
       await window.LiffAuth.ensureInit();
     } else {
-      await liff.init({ liffId: LIFF_ID });
+      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
     }
     _inited = true;
   }
 
-  // base URL (ไม่มี query) — redirectUri ให้ตรง LIFF endpoint + กลับมาสะอาด
-  function baseUrl() { return location.origin + location.pathname; }
+  // redirectUri = URL ปัจจุบันพร้อม query — กลับจาก LINE แล้วไม่หลุดหน้าเดิม (deep-link ?garment= ?code= ยังอยู่)
+  function baseUrl() { return location.origin + location.pathname + location.search; }
 
   // เด้งเข้า LINE login เอง พร้อมกัน redirect loop: ลองได้ครั้งเดียวต่อ session
   // ถ้ากลับมาแล้วยัง unauthorized อีก (login ไม่ติด/ยกเลิก) → ไม่เด้งซ้ำ ปล่อยให้โชว์ error แทน

@@ -114,8 +114,8 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=51"></script>
 <script src="data.js?v=52"></script>
-<script src="liffAuth.js?v=51"></script>
-<script src="me-api.js?v=54"></script>
+<script src="liffAuth.js?v=56"></script>
+<script src="me-api.js?v=56"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=51"></script>
 <script src="api.js?v=60"></script>
@@ -394,7 +394,8 @@ function renderDone(from, to, total, covered){
       ${PAY.pay_promptpay_id ? `<div id="ppqr2"></div>`
         : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
       <div class="payamt">${NAV.t('สแกนแล้วโอน','Scan and transfer')} <b>${baht(total)}</b></div>
-      <div class="paynote">${NAV.t('โอนแล้วแนบสลิปในแชต LLOOP — ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ','Transfer and attach the slip in LLOOP chat — once the team confirms, the piece is yours, shipped on your chosen date.')}</div>
+      <div class="paynote">${NAV.t('โอนแล้วส่งสลิปในแชต LINE — ยืนยันแล้วจัดส่งตามวันที่เลือก','Transfer, send the slip on LINE — confirmed and shipped on your date')}</div>
+      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;background:#06C755;color:#fff;border-radius:12px;padding:11px;font-weight:600;text-decoration:none">${NAV.t('ส่งสลิปใน LINE','Send slip on LINE')}</a>
     </div>`;
   $('#root').innerHTML = `
     <div class="sec">

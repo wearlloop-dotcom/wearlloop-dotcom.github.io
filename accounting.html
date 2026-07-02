@@ -97,23 +97,15 @@
 <div id="toast" class="toast"></div>
 
 <script>
-  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
   const esc=s=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
-  // auth ผ่าน LINE idToken (gateway-style): owner/manager เท่านั้น
-  async function authHeader(){
-    if(!(await window.opsLogin())) throw new Error('redirecting');
-    return 'Bearer '+liff.getIDToken();
-  }
-  async function api(action, extra){
-    const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
-      body:JSON.stringify(Object.assign({action},extra||{}))});
-    if(r.status===401||r.status===403){ toast('ไม่มีสิทธิ์เข้าระบบบัญชี (เฉพาะเจ้าของ/ผู้จัดการ)'); throw new Error('unauth'); }
-    return r.json();
-  }
+  // เรียก acct ผ่าน helper กลาง window.opsAcct (ops-api.js) — โยน Error('unauth') เมื่อ 401/403, 'redirecting' ระหว่าง login
+  const api=(action,extra)=>window.opsAcct(action,extra);
+  // catch มาตรฐานของปุ่มทำรายการ: unauth = toast สิทธิ์ · redirecting = เงียบ (กำลังพาไป login) · อื่น ๆ = ไม่สำเร็จ
+  function errToast(e){ if(e.message!=='redirecting') toast(e.message==='unauth'?'ไม่มีสิทธิ์เข้าระบบบัญชี (เฉพาะเจ้าของ/ผู้จัดการ)':'ไม่สำเร็จ: '+e.message); }
   function logout(){ try{ liff.logout(); }catch(e){} $('app').classList.add('hide'); $('gate').classList.remove('hide'); }
 
   let tab='overview';
@@ -123,7 +115,7 @@
     const v=$('view'); v.innerHTML='<div class="muted" style="padding:30px;text-align:center">กำลังโหลด…</div>';
     try{
       if(tab==='overview') return renderOverview(v);
-      if(tab==='pnl') return renderPnl(v, (await api('pnl')).rows);
+      if(tab==='pnl') return renderPnl(v);
       if(tab==='balance') return renderBalance(v, (await api('balance')).rows);
       if(tab==='trial') return renderTrial(v, (await api('trial')).rows);
       if(tab==='vat') return renderVat(v, (await api('vat')).rows);
@@ -134,7 +126,8 @@
       if(tab==='cit') return renderCit(v, (await api('cit',{year:String(new Date().getFullYear())})).cit);
       if(tab==='ai') return renderAi(v);
       if(tab==='actions') return renderActions(v);
-    }catch(e){ v.innerHTML='<div class="card">โหลดไม่สำเร็จ: '+esc(e.message)+'</div>'; }
+    }catch(e){ if(e.message==='unauth') toast('ไม่มีสิทธิ์เข้าระบบบัญชี (เฉพาะเจ้าของ/ผู้จัดการ)');
+      v.innerHTML='<div class="card">โหลดไม่สำเร็จ: '+esc(e.message)+'</div>'; }
   }
 
   async function renderOverview(v){
@@ -143,6 +136,7 @@
     const cash=bal(d.balance,'1010'), assets=d.balance.filter(r=>r.type==='asset').reduce((s,r)=>s+Number(r.balance||0),0);
     const liab=d.balance.filter(r=>r.type==='liability').reduce((s,r)=>s+Number(r.balance||0),0);
     v.innerHTML=`
+      <div class="muted" style="margin-bottom:10px">ข้อมูล ณ ปัจจุบันจากระบบบัญชี — เลือกงวดย้อนหลังได้ที่แท็บ "งบกำไรขาดทุน" (เมื่อระบบรองรับ)</div>
       <div class="big">
         <div class="kpi"><div class="l">รายได้รวม</div><div class="v">${baht(rev)}</div></div>
         <div class="kpi"><div class="l">ค่าใช้จ่ายรวม</div><div class="v">${baht(exp)}</div></div>
@@ -153,16 +147,69 @@
         <div class="kpi"><div class="l">สินทรัพย์รวม</div><div class="v">${baht(assets)}</div></div>
         <div class="kpi"><div class="l">หนี้สินรวม</div><div class="v">${baht(liab)}</div></div>
       </div>
+      <div id="hrCost"></div>
       ${rev||exp?'':'<div class="note">ยังไม่มีรายการเงินในระบบ — งบจะขึ้นเองเมื่อมีการเช่า/ชำระ/รับซื้อ (ระบบลงบัญชีคู่ให้อัตโนมัติ)</div>'}`;
+    loadHrCost();
+  }
+  // ต้นทุนคนจาก HR gateway — ถ้าเรียกไม่ได้ (เช่น ไม่มีสิทธิ์) ซ่อนการ์ดไปเลย ไม่ให้หน้าพัง
+  let _hrCostHtml=null;   // ตัวเลขนิ่งภายในเซสชัน — ไม่ยิงซ้ำทุกครั้งที่กลับมาแท็บภาพรวม
+  async function loadHrCost(){
+    try{
+      const el=$('hrCost'); if(!el) return;
+      if(_hrCostHtml!=null){ el.innerHTML=_hrCostHtml; return; }
+      if(!window.opsRpc) return;
+      const {data,error}=await window.opsRpc('hr_analytics',{p_period:null});   // แหล่งเดียวกับหน้า HR (labor_cost_base)
+      if(error) return;
+      const base=data&&data.labor_cost_base;
+      if(base==null||isNaN(Number(base))) return;
+      _hrCostHtml=`<div class="card"><h2>ต้นทุนคน (จาก HR)</h2>
+        <div class="l" style="font-size:11px;color:var(--stone);letter-spacing:1px;text-transform:uppercase">ฐานเงินเดือนรวม/เดือน</div>
+        <div style="font-family:var(--display);font-size:24px;font-weight:700;margin-top:4px">${baht(base)}</div>
+        <div class="muted" style="margin-top:8px">ฐานเงินเดือน — ยังไม่รวม OT/โบนัส/ประกันสังคม และยังไม่ลงงบบัญชีอัตโนมัติ</div></div>`;
+      el.innerHTML=_hrCostHtml;
+    }catch(e){ /* เงียบ — การ์ดนี้เป็นข้อมูลเสริม */ }
   }
   const sum=(rows,type)=>rows.filter(r=>r.type===type).reduce((s,r)=>s+Number(r.amount||0),0);
   const bal=(rows,code)=>{const r=rows.find(x=>x.code===code);return r?Number(r.balance||0):0;};
 
-  function renderPnl(v,rows){
+  // ---- งวด P&L: เลือกเดือนได้เฉพาะเมื่อ backend "echo" period กลับมา (สเปกใน BACKEND-SPEC.md) ----
+  // เข้มงวด: ไม่ echo = ไม่รองรับ → ห้ามติดป้ายงวดกับข้อมูลปัจจุบัน + ปิด picker กันเข้าใจผิด
+  let pnlPeriod=(d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'))(new Date());
+  const prevPeriod=p=>{const [y,m]=p.split('-').map(Number);const d=new Date(y,m-2,1);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');};
+  function setPnlPeriod(val){ if(!val) return; pnlPeriod=val; render(); }
+  async function renderPnl(v){
+    const d=await api('pnl',{period:pnlPeriod});
+    const supported=(d.period===pnlPeriod);   // backend ต้อง echo งวดที่ขอกลับมาเท่านั้นถึงถือว่ารองรับ
+    const rows=d.rows||[];
     const rev=rows.filter(r=>r.type==='revenue'), exp=rows.filter(r=>r.type==='expense');
-    const tr=rev.reduce((s,r)=>s+Number(r.amount||0),0), te=exp.reduce((s,r)=>s+Number(r.amount||0),0);
+    const tr=sum(rows,'revenue'), te=sum(rows,'expense');
+    // เทียบเดือนก่อน — ยิงคำขอที่สองเฉพาะเมื่อยืนยันแล้วว่ารองรับงวด
+    let mom='';
+    if(supported){
+      const pv=prevPeriod(pnlPeriod);
+      try{
+        const p=await api('pnl',{period:pv});
+        if(p.period===pv){
+          const ptr=sum(p.rows||[],'revenue'), pte=sum(p.rows||[],'expense');
+          const dif=(cur,prv)=>{const df=cur-prv,sg=df<0?'-':'+';
+            return sg+baht(Math.abs(df))+(prv?' ('+sg+Math.abs(df/prv*100).toFixed(1)+'%)':'');};
+          mom=`<div class="muted" style="margin-bottom:10px">เทียบเดือนก่อน (${esc(pv)}): รายได้ ${dif(tr,ptr)} · ค่าใช้จ่าย ${dif(te,pte)} · กำไร ${dif(tr-te,ptr-pte)}</div>`;
+        }
+      }catch(e){ /* เทียบไม่ได้ก็ข้าม — ตัวเลขงวดหลักยังถูกต้อง */ }
+    }
     const line=r=>`<tr><td>${esc(r.code)} ${esc(r.name)}</td><td class="n">${baht(r.amount)}</td></tr>`;
-    v.innerHTML=`<div class="card"><h2>งบกำไรขาดทุน</h2><table>
+    v.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <label for="pnlMonth" style="margin:0;white-space:nowrap">งวด (เดือน)</label>
+        <input type="month" id="pnlMonth" value="${esc(pnlPeriod)}" onchange="setPnlPeriod(this.value)"
+          style="width:auto${supported?'':';opacity:.5'}"${supported?'':' disabled'}>
+      </div>
+      ${supported
+        ?`<div class="muted" style="margin-bottom:10px">งวด ${esc(pnlPeriod)}</div>`
+        :'<div class="note" style="margin:0 0 10px">ระบบบัญชียังไม่รองรับการเลือกงวด — ตัวเลขด้านล่างคือข้อมูลปัจจุบัน (ดูสเปกใน BACKEND-SPEC.md)</div>'}
+      ${mom}
+      <div class="card"><h2>งบกำไรขาดทุน</h2><table>
       <tr><td class="sec" colspan="2">รายได้</td></tr>${rev.map(line).join('')||'<tr><td class="muted">—</td><td></td></tr>'}
       <tr class="tot"><td>รวมรายได้</td><td class="n">${baht(tr)}</td></tr>
       <tr><td class="sec" colspan="2">ค่าใช้จ่าย</td></tr>${exp.map(line).join('')||'<tr><td class="muted">—</td><td></td></tr>'}
@@ -193,14 +240,15 @@
   }
   function renderInvoices(v,rows){
     v.innerHTML=`<div class="card"><h2>ใบกำกับภาษีที่ออก</h2><table><tr><th>เลขที่</th><th>วันที่</th><th>ลูกค้า</th><th class="n">ฐาน</th><th class="n">VAT</th><th class="n">รวม</th><th></th></tr>
-      ${rows.length?rows.map(r=>`<tr><td>${esc(r.number)}</td><td>${esc((r.issue_date||'').slice(0,10))}</td><td>${esc(r.customer_name||'-')}</td><td class="n">${baht(r.base)}</td><td class="n">${baht(r.vat)}</td><td class="n">${baht(r.total)}</td><td><a href="tax-doc.html?type=invoice&id=${r.id}" target="_blank" style="color:var(--navy)">พิมพ์</a></td></tr>`).join(''):'<tr><td class="muted" colspan="7">ยังไม่มีใบกำกับ</td></tr>'}</table></div>`;
+      ${rows.length?rows.map(r=>`<tr><td>${esc(r.number)}</td><td>${esc((r.issue_date||'').slice(0,10))}</td><td>${esc(r.customer_name||'-')}</td><td class="n">${baht(r.base)}</td><td class="n">${baht(r.vat)}</td><td class="n">${baht(r.total)}</td><td><a href="tax-doc.html?type=invoice&id=${encodeURIComponent(r.id||r.number||'')}&n=${encodeURIComponent(r.number||'')}&d=${encodeURIComponent((r.issue_date||'').slice(0,10))}&cu=${encodeURIComponent(r.customer_name||'')}&b=${Number(r.base)||0}&v=${Number(r.vat)||0}&t=${Number(r.total)||0}" target="_blank" style="color:var(--navy)">พิมพ์</a></td></tr>`).join(''):'<tr><td class="muted" colspan="7">ยังไม่มีใบกำกับ</td></tr>'}</table></div>`;
   }
 
   function renderAr(v,rows){
     v.innerHTML=`<div class="card"><h2>ลูกหนี้ (ใบกำกับยังไม่ชำระ)</h2><table><tr><th>เลขที่</th><th>วันที่</th><th>ลูกค้า</th><th class="n">ยอด</th><th class="n">ค้าง(วัน)</th><th></th></tr>
       ${rows.length?rows.map(r=>`<tr><td>${esc(r.number)}</td><td>${esc((r.issue_date||'').slice(0,10))}</td><td>${esc(r.customer_name||'-')}</td><td class="n">${baht(r.total)}</td><td class="n">${r.days_overdue}</td><td><button class="mini" style="border:none;background:none;color:var(--navy);text-decoration:underline;cursor:pointer" onclick="markPaid('${r.id}')">รับชำระ</button></td></tr>`).join(''):'<tr><td class="muted" colspan="6">ไม่มีลูกหนี้ค้าง</td></tr>'}</table></div>`;
   }
-  async function markPaid(id){ const r=await api('invoice_paid',{id}); toast(r.ok?'บันทึกรับชำระแล้ว':'ไม่สำเร็จ'); render(); }
+  async function markPaid(id){ const r=await api('invoice_paid',{id}).catch(errToast); if(!r) return;
+    toast(r.ok?'บันทึกรับชำระแล้ว':'ไม่สำเร็จ'); render(); }
   function renderAp(v,rows){
     v.innerHTML=`<div class="card"><h2>เจ้าหนี้ (บิลค้างจ่าย)</h2><table><tr><th>ผู้ขาย</th><th>รายการ</th><th class="n">ยอด</th><th>ครบกำหนด</th><th class="n">ค้าง(วัน)</th></tr>
       ${rows.length?rows.map(r=>`<tr><td>${esc(r.vendor_name||'-')}</td><td>${esc(r.description||'')}</td><td class="n">${baht(r.amount)}</td><td>${esc((r.due_date||'').slice(0,10)||'-')}</td><td class="n">${r.days_overdue}</td></tr>`).join(''):'<tr><td class="muted" colspan="5">ไม่มีบิลค้างจ่าย</td></tr>'}</table></div>`;
@@ -227,8 +275,10 @@
     if(!f){ toast('เลือกรูปก่อน'); return; }
     $('ocrOut').innerHTML='<div class="muted">AI กำลังอ่านเอกสาร…</div>';
     const dataUrl=await readFileB64(f);
-    const OCR_FN=FN+'-ocr';
-    const r=await fetch(OCR_FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
+    // endpoint acct-ocr แยกจาก acct — opsAcct ใช้ไม่ได้ เลย fetch ตรงด้วย idToken เดิม
+    if(!(await window.opsLogin())) throw new Error('redirecting');
+    const OCR_FN=((window.CONFIG||{}).SUPABASE_URL||'https://rprwilsbjptdnvsibjgi.supabase.co')+'/functions/v1/acct-ocr';
+    const r=await fetch(OCR_FN,{method:'POST',headers:{'Authorization':'Bearer '+liff.getIDToken(),'Content-Type':'application/json'},
       body:JSON.stringify({image:dataUrl,media_type:f.type,auto_post:autoPost})}).then(x=>x.json());
     if(r.error){ $('ocrOut').innerHTML='<div class="note">อ่านไม่สำเร็จ: '+esc(r.error)+(r.detail?(' — '+esc(r.detail)):'')+'</div>'; return; }
     const e=r.extracted||{}; _lastDoc=e;
@@ -264,15 +314,15 @@
         <div class="note">ปกติระบบรันรับรู้รายได้/ค่าเสื่อมให้อัตโนมัติทุกวันที่ 1 — ปุ่มนี้ไว้รันเพิ่มเอง</div></div>`;
   }
   const today=()=>new Date().toISOString().slice(0,10);
-  async function doInvoice(){ const r=await api('issue_invoice',{invoice:{base:Number($('iv_base').value),customer_name:$('iv_name').value,customer_tax_id:$('iv_tax').value}});
+  async function doInvoice(){ const r=await api('issue_invoice',{invoice:{base:Number($('iv_base').value),customer_name:$('iv_name').value,customer_tax_id:$('iv_tax').value}}).catch(errToast); if(!r) return;
     toast(r.ok?('ออกใบกำกับ '+r.invoice.number+' · รวม '+baht(r.invoice.total)):'ไม่สำเร็จ: '+(r.error||'')); }
-  async function doPay(){ const r=await api('pay_partner',{payment:{base:Number($('pp_base').value),payee_name:$('pp_name').value,wht_rate:Number($('pp_rate').value)}});
+  async function doPay(){ const r=await api('pay_partner',{payment:{base:Number($('pp_base').value),payee_name:$('pp_name').value,wht_rate:Number($('pp_rate').value)}}).catch(errToast); if(!r) return;
     toast(r.ok?('บันทึกแล้ว · หัก '+baht(r.result.wht)+' จ่ายสุทธิ '+baht(r.result.paid)):'ไม่สำเร็จ: '+(r.error||'')); }
-  async function doAcquire(){ const r=await api('acquire',{desc:$('aq_desc').value,gross:Number($('aq_gross').value),kind:$('aq_kind').value});
+  async function doAcquire(){ const r=await api('acquire',{desc:$('aq_desc').value,gross:Number($('aq_gross').value),kind:$('aq_kind').value}).catch(errToast); if(!r) return;
     toast(r.ok?'บันทึกรับซื้อแล้ว':'ไม่สำเร็จ: '+(r.error||'')); }
-  async function doClose(){ const r=await api('close_period',{period:$('cp').value}); toast(r.ok?'ปิดงวด '+$('cp').value+' แล้ว':'ไม่สำเร็จ: '+(r.error||'')); }
-  async function doRecognize(){ const r=await api('recognize'); toast(r.ok?('รับรู้รายได้ '+r.count+' รายการ'):'ไม่สำเร็จ'); }
-  async function doDepreciate(){ const r=await api('depreciate'); toast(r.ok?('ตัดค่าเสื่อม '+r.count+' รายการ'):'ไม่สำเร็จ'); }
+  async function doClose(){ const r=await api('close_period',{period:$('cp').value}).catch(errToast); if(!r) return; toast(r.ok?'ปิดงวด '+$('cp').value+' แล้ว':'ไม่สำเร็จ: '+(r.error||'')); }
+  async function doRecognize(){ const r=await api('recognize').catch(errToast); if(!r) return; toast(r.ok?('รับรู้รายได้ '+r.count+' รายการ'):'ไม่สำเร็จ'); }
+  async function doDepreciate(){ const r=await api('depreciate').catch(errToast); if(!r) return; toast(r.ok?('ตัดค่าเสื่อม '+r.count+' รายการ'):'ไม่สำเร็จ'); }
 
   async function boot(){
     const ok = await window.opsLogin().catch(()=>false);

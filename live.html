@@ -9,7 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
-<script src="ops-api.js"></script>
+<script src="ops-api.js?v=3"></script>
 <style>
   :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -167,7 +167,7 @@
   const SUPABASE_KEY=(window.CONFIG&&CONFIG.SUPABASE_ANON_KEY)||'sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // วิ่งผ่าน gateway (LINE login + role)
-  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  if(window.opsGuard) window.opsGuard();
   const BROADCAST_URL=SUPABASE_URL+'/functions/v1/live-broadcast';
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));

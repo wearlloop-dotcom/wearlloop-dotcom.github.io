@@ -4,7 +4,7 @@ window.LiffAuth = (function () {
   let _initP = null;
   function ensureInit() {
     if (!window.liff || !CONFIG.LIFF_ID) return Promise.reject(new Error('LIFF SDK/ID missing'));
-    if (!_initP) _initP = liff.init({ liffId: CONFIG.LIFF_ID });
+    if (!_initP) _initP = liff.init({ liffId: CONFIG.LIFF_ID, withLoginOnExternalBrowser: true });  // ให้ re-auth บนเบราว์เซอร์ปกติ (นอกแอป LINE) กลับเข้าได้ ไม่ค้าง unauthenticated
     return _initP;
   }
   // base URL (ไม่มี query) — ใช้เป็น redirectUri ให้ตรง LIFF endpoint + กลับมาสะอาด

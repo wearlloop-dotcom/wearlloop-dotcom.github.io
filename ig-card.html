@@ -65,7 +65,7 @@
   .c-rates{margin-top:22px; display:flex; gap:34px; font-size:28px; color:#3a342c;}
   .c-rates b{font-family:'Poppins'; font-weight:500;}
   .c-rates .best{color:var(--sage);}
-  .c-foot{margin-top:auto;}
+  .c-foot{margin-top:auto;display:flex;align-items:flex-end;}
   .c-note{font-size:25px; color:var(--sage); line-height:1.6;}
   .c-cta{margin-top:24px; background:var(--ink); color:var(--cream); text-align:center;
     border-radius:14px; padding:30px; font-size:32px; letter-spacing:1.5px;}
@@ -142,6 +142,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   const $ = id => document.getElementById(id);
   const v = id => $(id).value;
@@ -182,10 +183,24 @@
           <span>5 วัน <b>${baht(d5)}</b></span>
         </div>
         <div class="c-foot">
-          <div class="c-note">มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
-          <div class="c-cta">ทักแชต LLOOP เพื่อจอง</div>
+          <div style="flex:1">
+            <div class="c-note">มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
+            <div class="c-cta">ทักแชต LLOOP เพื่อจอง</div>
+          </div>
+          <div id="c-qrwrap" style="display:none;flex:0 0 auto;text-align:center;margin-left:20px">
+            <div id="c-qr" style="background:#fff;padding:8px;border-radius:10px;display:inline-block"></div>
+            <div style="font-size:20px;color:var(--ink,#2a2a2a);margin-top:6px;font-weight:600">สแกนเช่าเลย</div>
+          </div>
         </div>
       </div>`;
+    // QR → หน้าเช่าชุดนี้ (g.html?c=<code>) ใช้รหัสชุดจริงจากช่อง f-code หรือท้าย meta (brand · code)
+    const qrCode = (v('f-code') || (meta.split('·').pop() || '')).trim();
+    const qrWrap = $('c-qrwrap'), qrEl = $('c-qr');
+    if (qrEl && qrCode && window.QRCode) {
+      qrEl.innerHTML = '';
+      new QRCode(qrEl, { text: 'https://wearlloop-dotcom.github.io/g.html?c=' + encodeURIComponent(qrCode), width: 132, height: 132, correctLevel: QRCode.CorrectLevel.M });
+      if (qrWrap) qrWrap.style.display = 'block';
+    } else if (qrWrap) { qrWrap.style.display = 'none'; }
     fit();
   }
 

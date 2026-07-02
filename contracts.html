@@ -40,6 +40,8 @@
   .pill.draft{color:var(--stone)}.pill.sent{color:var(--navy);border-color:#C5D2DE}
   .pill.viewed{color:var(--champ);border-color:#E3D6BE}.pill.signed{color:var(--ok);border-color:#BFE0D4;background:#EAF4EF}
   .pill.declined{color:var(--danger);border-color:#E6C9C9}.pill.void{color:#999;text-decoration:line-through}
+  .pill.expired{color:var(--danger);border-color:#E6C9C9;background:#F9EDED}
+  .pill.expiring{color:#8A6D1F;border-color:#E3D6BE;background:#FBF3E2}
   .mini{font-size:12px;color:var(--navy);background:none;border:none;cursor:pointer;text-decoration:underline;padding:2px 4px;font-family:var(--sans)}
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:9;font-size:14px}
   .toast.show{opacity:1}
@@ -71,6 +73,8 @@
       <div class="kpi"><span class="n" id="kpiTotal">—</span><span class="l">สัญญาทั้งหมด</span></div>
       <div class="kpi warn"><span class="n" id="kpiPending">—</span><span class="l">รอลงนาม</span></div>
       <div class="kpi ok"><span class="n" id="kpiSigned">—</span><span class="l">ลงนามแล้ว</span></div>
+      <div class="kpi warn"><span class="n" id="kpiExpiring">—</span><span class="l">ใกล้หมดอายุ (30 วัน)</span></div>
+      <div class="kpi bad"><span class="n" id="kpiExpired">—</span><span class="l">หมดอายุแล้ว</span></div>
     </div>
   </section>
 
@@ -179,6 +183,7 @@
       <span class="tab" data-s="sent" onclick="setTab(this)">รอลงนาม</span>
       <span class="tab" data-s="viewed" onclick="setTab(this)">เปิดอ่านแล้ว</span>
       <span class="tab" data-s="signed" onclick="setTab(this)">ลงนามแล้ว</span>
+      <span class="tab" data-s="expiring" onclick="setTab(this)">ใกล้หมดอายุ</span>
       <span class="tab" data-s="declined" onclick="setTab(this)">ขอแก้ไข</span>
     </div>
     <div style="overflow-x:auto">
@@ -293,25 +298,50 @@
     return `<span class="pill ${s}">${th}</span>`; }
   function dt(s){ return s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'—'; }
 
+  // จำนวนวันก่อนสัญญาหมดอายุ (null = ไม่กำหนดวันสิ้นสุด / ไม่มีข้อมูล)
+  function daysLeft(c){
+    const e=c.end_date||(c.vars&&c.vars.end_date)||null;
+    if(!e) return null;
+    const d=new Date(e); if(isNaN(d)) return null;
+    d.setHours(0,0,0,0);
+    const today=new Date(); today.setHours(0,0,0,0);
+    return Math.round((d-today)/86400000);
+  }
+  // สถานะหมดอายุ — นับเฉพาะสัญญาที่ลงนามแล้ว (นิยามเดียว ใช้ทั้ง KPI / แท็บ / ป้าย)
+  function expState(c){
+    if(c.status!=='signed') return null;
+    const d=daysLeft(c); if(d==null) return null;
+    return d<0 ? 'expired' : (d<=30 ? 'expiring' : null);
+  }
+  function expTag(c){
+    const s=expState(c); if(!s) return '';
+    return s==='expired' ? ' <span class="pill expired">หมดอายุแล้ว</span>'
+                         : ` <span class="pill expiring">เหลือ ${daysLeft(c)} วัน</span>`;
+  }
+
   async function load(){
-    const { data, error } = await sb.rpc('contract_list',{ p_status:curStatus||null });
+    const isExp=curStatus==='expiring';               // แท็บ "ใกล้หมดอายุ" = กรองฝั่งหน้าเว็บ ไม่ส่ง status ไป server
+    const { data, error } = await sb.rpc('contract_list',{ p_status:(isExp?null:curStatus)||null });
     const tb=$('rows');
     if(error){ tb.innerHTML=`<tr><td colspan="5" style="color:var(--danger);padding:16px">โหลดไม่ได้: ${error.message}</td></tr>`; return; }
-    const list=data||[];
-    if(curStatus===''){
-      const sg=$('kpiSigned'), pd=$('kpiPending'), tt=$('kpiTotal');
+    let list=data||[];
+    if(curStatus===''||isExp){
+      const sg=$('kpiSigned'), pd=$('kpiPending'), tt=$('kpiTotal'), ex=$('kpiExpiring'), xp=$('kpiExpired');
       if(tt) tt.textContent=list.length;
       if(pd) pd.textContent=list.filter(c=>c.status==='sent'||c.status==='viewed').length;
       if(sg) sg.textContent=list.filter(c=>c.status==='signed').length;
+      if(ex) ex.textContent=list.filter(c=>expState(c)==='expiring').length;
+      if(xp) xp.textContent=list.filter(c=>expState(c)==='expired').length;
     }
-    if(!list.length){ tb.innerHTML='<tr><td colspan="5" style="color:var(--stone);padding:20px">ยังไม่มีสัญญา</td></tr>'; return; }
+    if(isExp) list=list.filter(c=>expState(c)!=null);   // = ใกล้หมดอายุ + หมดอายุแล้ว (เท่ากับผลรวมสอง KPI)
+    if(!list.length){ tb.innerHTML=`<tr><td colspan="5" style="color:var(--stone);padding:20px">${isExp?'ไม่มีสัญญาใกล้หมดอายุ':'ยังไม่มีสัญญา'}</td></tr>`; return; }
     tb.innerHTML=list.map(c=>{
       const url=SIGN_BASE+'?token='+c.token;
       const when = c.signed_at||c.sent_at||c.created_at;
       return `<tr>
         <td><b>${c.contract_no||'—'}</b></td>
         <td>${c.partner_name||'—'}${c.partner_org?`<br><span style="color:var(--stone);font-size:11px">${c.partner_org}</span>`:''}</td>
-        <td>${pill(c.status)}</td>
+        <td>${pill(c.status)}${expTag(c)}</td>
         <td>${dt(when)}</td>
         <td style="white-space:nowrap">
           <a class="mini" href="${url}" target="_blank">เปิด</a>
