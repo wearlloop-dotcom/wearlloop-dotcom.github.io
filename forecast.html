@@ -134,7 +134,7 @@
           <div class="f"><label data-i18n="Minimum acceptable margin (%)">มาร์จิ้นขั้นต่ำที่ยอมรับ (%)</label><input type="number" step="1" id="i_minmargin" value="10" oninput="loadPlanMargin()"></div>
         </div>
         <div id="planMargin" style="font-size:13px;color:var(--muted)" data-i18n="Loading…">กำลังโหลด…</div>
-        <div class="note" data-i18n="Calculated at full quota + highest tier + shipping every time + damage buffer (worst-case margin) · normal wear is already in the per-rental cost — this field is an extra buffer for heavy damage/loss · 🔴 = below threshold, consider raising the price">คิดแบบใช้เต็มโควต้า + ชั้นชุดสูงสุด + ค่าส่งทุกครั้ง + เผื่อชุดเสีย (มาร์จิ้นขั้นต่ำสุด) · ค่าชำรุดปกติอยู่ในต้นทุนต่อการเช่าแล้ว — ช่องนี้คือกันชน "เสียหนัก/หาย" เพิ่ม · 🔴 = ต่ำกว่าเกณฑ์ ควรปรับราคา</div>
+        <div class="note" data-i18n="Calculated at full quota + highest tier + shipping every time + damage buffer (worst-case margin) · normal wear is already in the per-rental cost — this field is an extra buffer for heavy damage/loss · red marker = below threshold, consider raising the price">คิดแบบใช้เต็มโควต้า + ชั้นชุดสูงสุด + ค่าส่งทุกครั้ง + เผื่อชุดเสีย (มาร์จิ้นขั้นต่ำสุด) · ค่าชำรุดปกติอยู่ในต้นทุนต่อการเช่าแล้ว — ช่องนี้คือกันชน "เสียหนัก/หาย" เพิ่ม · เครื่องหมายแดง = ต่ำกว่าเกณฑ์ ควรปรับราคา</div>
 
         <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px">
           <div style="font-size:12px;color:var(--muted);margin-bottom:8px" data-i18n="Edit pack prices — saves to the live system (affects the customer side instantly)">แก้ราคาแพ็ก — บันทึกเข้าระบบจริง (มีผลกับหน้าลูกค้าทันที)</div>
@@ -311,14 +311,14 @@ async function loadPlanMargin(){
     const color = below ? '#B4543A' : (pct < 25 ? '#C99A5B' : '#0F7B5A');
     const inst = p.installment_per_month ? `฿${NF.format(p.installment_per_month)}/ด ×${p.installment_months}` : '—';
     return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)">
-      <div style="flex:1"><div style="color:var(--ink);font-weight:500">${below?'🔴 ':''}${p.name}</div>
+      <div style="flex:1"><div style="color:var(--ink);font-weight:500">${below?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B4543A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px" aria-hidden="true"><path d="M12 3.5 2.8 19.5h18.4L12 3.5z"/><path d="M12 10v4M12 16.8v.2"/></svg> ':''}${p.name}</div>
         <div style="font-size:11px">฿${NF.format(p.price_per_month)}${NAV.t('/เดือน','/mo')} · ${p.rentals_per_cycle} ${NAV.t('ชุด/รอบ','pieces/cycle')} · ${NAV.t('ค่าส่ง','shipping')} ฿${NF.format(Math.round(p.rentals_per_cycle*ship))} · ${NAV.t('เผื่อเสีย','buffer')} ฿${NF.format(Math.round(reserve))}</div></div>
       <div style="text-align:right;min-width:96px"><div style="color:${color};font-weight:600">฿${NF.format(marginMo)}${NAV.t('/ด','/mo')}</div>
         <div style="font-size:11px;color:${color}">${NAV.t('มาร์จิ้น','margin')} ${pct}%</div></div>
       <div style="text-align:right;min-width:84px;font-size:11px;color:var(--muted)">${NAV.t('ผ่อน','Instalment')}<br>${inst}</div>
     </div>`;
   }).join('') +
-    `<div style="margin-top:10px;font-size:12px;font-weight:600;color:${belowCount?'#B4543A':'#0F7B5A'}">${belowCount ? NAV.t(`🔴 ${belowCount} แพ็กต่ำกว่าเกณฑ์ ${minMargin}% — ควรขึ้นราคา/ลดส่วนลด/จำกัดชุดพรีเมียม`,`🔴 ${belowCount} pack(s) below the ${minMargin}% threshold — raise prices / cut discounts / limit premium pieces`) : NAV.t(`ทุกแพ็กผ่านเกณฑ์มาร์จิ้น ≥ ${minMargin}%`,`All packs meet the ≥ ${minMargin}% margin threshold`)}</div>`;
+    `<div style="margin-top:10px;font-size:12px;font-weight:600;color:${belowCount?'#B4543A':'#0F7B5A'}">${belowCount ? NAV.t(`${belowCount} แพ็กต่ำกว่าเกณฑ์ ${minMargin}% — ควรขึ้นราคา/ลดส่วนลด/จำกัดชุดพรีเมียม`,`${belowCount} pack(s) below the ${minMargin}% threshold — raise prices / cut discounts / limit premium pieces`) : NAV.t(`ทุกแพ็กผ่านเกณฑ์มาร์จิ้น ≥ ${minMargin}%`,`All packs meet the ≥ ${minMargin}% margin threshold`)}</div>`;
   populatePpSelect();
 }
 function populatePpSelect(){

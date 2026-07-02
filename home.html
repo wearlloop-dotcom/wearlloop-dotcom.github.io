@@ -231,13 +231,13 @@ async function init(){
   // tools ตาม role
   const nav=window.opsVisibleNav(role,isOwner);
   const box=$('#sections');
-  box.innerHTML=`<a class="tile primary" href="today.html"><span class="ic">◷</span><span class="lb">เริ่มงานวันนี้</span></a>`;
+  box.innerHTML=`<a class="tile primary" href="today.html"><span class="ic">${window.OPS_ICONS.clock}</span><span class="lb">เริ่มงานวันนี้</span></a>`;
   let count=0;
   for(const sec of nav){
     const items=sec.items.filter(it=>it.href!=='today.html');
     if(!items.length) continue;
     count+=items.length;
-    const tiles=items.map(it=>`<a class="tile" href="${it.href}"><span class="ic">${it.icon||'•'}</span><span class="lb">${it.label}</span></a>`).join('');
+    const tiles=items.map(it=>`<a class="tile" href="${it.href}"><span class="ic">${window.OPS_ICONS[it.icon]||window.OPS_ICONS.dot}</span><span class="lb">${it.label}</span></a>`).join('');
     const el=document.createElement('div'); el.className='sec';
     el.innerHTML=`<div class="t">${sec.section}</div><div class="grid">${tiles}</div>`;
     box.appendChild(el);

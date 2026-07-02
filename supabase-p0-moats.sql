@@ -2,7 +2,7 @@
 -- LLOOP · P0 Moat Migration — กรกฎาคม 2026
 -- คู่กับรายงาน audit-moats-2026-07.md — รันใน Supabase SQL Editor
 --
--- ⚠️ สำคัญ: schema จริงอยู่นอก repo นี้ — ชื่อตาราง/คอลัมน์ด้านล่างอนุมานจาก
+-- สำคัญ: schema จริงอยู่นอก repo นี้ — ชื่อตาราง/คอลัมน์ด้านล่างอนุมานจาก
 --    contract ที่ frontend เรียกใช้ (add_review, care_qc, seller_submit, ฯลฯ)
 --    ก่อนรัน ตรวจชื่อจริงด้วย:  select table_name from information_schema.tables;
 --    จุดที่ต้องเช็คชื่อ มีคอมเมนต์ [CHECK] กำกับทุกจุด

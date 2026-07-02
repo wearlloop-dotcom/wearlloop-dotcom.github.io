@@ -83,7 +83,7 @@
       <div class="ph">${l.photo?`<img src="${esc(l.photo)}">`:''}${l.featured?'<span class="fg">ลุคเด่น</span>':''}</div>
       <div class="bd">
         <div class="who">${esc(l.creator||'Loop')}</div>
-        <div class="meta">${esc(l.garment||'-')} · ♥ ${l.likes||0} · 💬 ${l.comments||0} · เช่าตาม ${l.rented||0}${l.status!=='published'?` · <b>${esc(l.status)}</b>`:''}</div>
+        <div class="meta">${esc(l.garment||'-')} · <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1.5px" aria-hidden="true"><path d="M12 20s-7.2-4.7-9.4-9.2A5.4 5.4 0 0 1 12 6.4a5.4 5.4 0 0 1 9.4 4.4C19.2 15.3 12 20 12 20z"/></svg> ${l.likes||0} · <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1.5px" aria-hidden="true"><path d="M21 11.5a7.5 7.5 0 0 1-7.5 7.5H4l2.2-3A7.5 7.5 0 1 1 21 11.5z"/></svg> ${l.comments||0} · เช่าตาม ${l.rented||0}${l.status!=='published'?` · <b>${esc(l.status)}</b>`:''}</div>
         ${l.caption?`<div class="cap">${esc(l.caption)}</div>`:''}
         <div class="acts">
           <button class="${l.featured?'':'pri'}" onclick="feature('${l.id}', ${l.featured?'false':'true'})">${l.featured?'เลิกชู':'ชูเป็นลุคเด่น'}</button>

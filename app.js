@@ -534,7 +534,7 @@ function openColorModal(){
     <div class="cmpal">${pal}</div>
     <div class="cmor">${lang==='th'?'หรือดูดสีจากรูป — เช่น การ์ดงานแต่ง / ธีมงาน':'or pick from a photo — e.g. a wedding card'}</div>
     <label class="cmupload">${lang==='th'?'＋ อัปโหลดรูป':'＋ Upload image'}<input type="file" accept="image/*" onchange="onCardImage(this)" hidden></label>
-    <div id="cmcanvaswrap" style="display:none"><div class="cmhint">${lang==='th'?'แตะที่รูปเพื่อดูดสี หรือเลือกจากสีในการ์ดด้านล่าง 🖌️':'Tap the photo, or pick from card colours below 🖌️'}</div><canvas id="cmcanvas" onclick="onCanvasClick(event)"></canvas><div id="cmsugg" class="cmsugg"></div><div id="cmresult" class="cmresult"></div></div>
+    <div id="cmcanvaswrap" style="display:none"><div class="cmhint">${lang==='th'?'แตะที่รูปเพื่อดูดสี หรือเลือกจากสีในการ์ดด้านล่าง':'Tap the photo, or pick from card colours below'}</div><canvas id="cmcanvas" onclick="onCanvasClick(event)"></canvas><div id="cmsugg" class="cmsugg"></div><div id="cmresult" class="cmresult"></div></div>
     <div class="cmfoot"><button class="cmclear" onclick="clearColors()">${lang==='th'?'ล้างสี':'Clear'}</button><button class="cmdone" onclick="closeColorModal()">${lang==='th'?'ดูชุด':'Show dresses'}</button></div>
   </div>`;
   document.body.appendChild(m);
@@ -589,7 +589,7 @@ function renderCatnav() {
     { label: occName('cafe'), on: fOccasion ==='cafe', act:`setOccasion('cafe')`},
 ];
   // หมายเหตุ: รายการบัญชี/นำทาง (ครอบครัว/ออเดอร์/สมาชิก/impact/โปรไฟล์) ย้ายไปอยู่ใน
-  // เมนูรวม (☰ openMenu) แล้ว — catnav เหลือเฉพาะ "ฟิลเตอร์สินค้า" เพื่อไม่ให้ปนหน้าที่กัน
+  // เมนูรวม (openMenu) แล้ว — catnav เหลือเฉพาะ "ฟิลเตอร์สินค้า" เพื่อไม่ให้ปนหน้าที่กัน
   el.innerHTML = items.map(i =>`<a onclick="${i.act}" style="${i.on?'border-bottom:2px solid var(--ink);padding-bottom:2px':''}">${i.label}</a>`).join('');
 }
 function setToneOff() { fToneOnly = false; }

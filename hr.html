@@ -348,7 +348,7 @@
             <button class="btn ghost sm" onclick="cp('${verifyUrl}')">คัดลอกลิงก์</button>
             ${e.verified?'':`<button class="btn ghost sm" onclick="resendVerify('${e.id}')">ส่งลิงก์ใหม่</button>
             <button class="btn ghost sm" onclick="bindUid('${e.id}')">ผูก UID เอง</button>`}
-            <span class="hint" style="align-self:center">${e.verified?'✓ ยืนยันแล้ว — เข้าทำงานได้':'⚠ ยังไม่ยืนยัน — ยังเข้าทำงานไม่ได้'}</span>
+            <span class="hint" style="align-self:center">${e.verified?'✓ ยืนยันแล้ว — เข้าทำงานได้':'✕ ยังไม่ยืนยัน — ยังเข้าทำงานไม่ได้'}</span>
           </div>
         </div>`:''}`;
       fillShiftBranch();
