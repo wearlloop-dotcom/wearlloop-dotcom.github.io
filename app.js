@@ -3928,7 +3928,15 @@ function routeDeepLink() {
       if (go === 'stylist' && (pid || pv)) { startVenueFromLink(pid, pv); return; }
       if (go === 'menu') openMenu();
       else if (go === 'foryou') { if (!fForYou) toggleForYou(); }
-      else if (go === 'orders') openOrders();
+      else if (go === 'orders') {
+        // จากการ์ด LINE (เตือนคืน/เลยกำหนด/ต่อเวลา): ?go=orders&return=RENTAL_ID | &extend=RENTAL_ID → เปิดออเดอร์แล้วเด้ง flow นั้นต่อเลย
+        const actReturn = qs.get('return') || (ls && ls.get('return'));
+        const actExtend = qs.get('extend') || (ls && ls.get('extend'));
+        Promise.resolve(openOrders()).then(() => {
+          if (actReturn) orderReturnShip(actReturn);
+          else if (actExtend) orderExtend(actExtend);
+        });
+      }
       else if (go === 'membership') openMembership();
       else if (go === 'impact') openImpact();
       else if (go === 'profile') openProfile();
