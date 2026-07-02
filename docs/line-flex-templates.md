@@ -334,6 +334,321 @@ altText: `สำเนาสัญญาของคุณ · {{CONTRACT_NO}}`
 
 ---
 
+# ภาค 2 — เติมให้ครบทั้ง customer journey
+
+เทมเพลต 14–27: ปิดช่องที่เหลือของวงจรลูกค้า (ต้อนรับ → จ่าย → ใช้ → คืน → กลับมาใหม่)
+
+## 14. `welcome_kyc_approved` — ยืนยันตัวตนผ่านแล้ว (หลัง KYC อนุมัติ)
+
+altText: `ยืนยันตัวตนผ่านแล้ว เช่าได้เลยค่ะ 🎉`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "ยืนยันตัวตนผ่านแล้ว ✓", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "ยินดีต้อนรับสู่ LLOOP ค่ะ {{FIRST_NAME}}", "weight": "bold", "size": "lg", "wrap": true, "margin": "md" },
+    { "type": "text", "text": "เช่าได้ทุกชุดในร้านทันที — ลองทำควิซสไตล์ให้เราแนะนำชุดที่ใช่ก่อนก็ได้นะคะ", "size": "sm", "color": "#8C8B86", "wrap": true }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "เริ่มเลือกชุดเลย", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "ทำควิซสไตล์ (2 นาที)", "uri": "https://liff.line.me/{{LIFF_ID}}/quiz.html" } }
+  ]}
+}
+```
+
+## 15. `pay_deadline_reminder` — ใกล้หมดเวลาถือคิว (ออเดอร์ hold ยังไม่จ่าย)
+
+altText: `อีก {{HOURS_LEFT}} ชม. คิวชุดจะหลุดนะคะ · {{GARMENT_NAME}}`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "คิวของคุณใกล้หมดเวลา ⏳", "size": "xs", "color": "#C0564A", "weight": "bold" },
+    { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true, "margin": "md" },
+    { "type": "text", "text": "ถือคิวให้ถึง {{HOLD_UNTIL}} (อีก {{HOURS_LEFT}} ชม.) — ยอด {{AMOUNT}} บาท", "size": "sm", "color": "#1A1A1A", "wrap": true },
+    { "type": "text", "text": "เลยเวลาแล้วคิวจะเปิดให้คนถัดไปนะคะ", "size": "xs", "color": "#8C8B86", "wrap": true, "margin": "md" }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ชำระเงินตอนนี้", "uri": "https://liff.line.me/{{LIFF_ID}}/pay.html?order={{ORDER_ID}}" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "ยกเลิกการจอง", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me" } }
+  ]}
+}
+```
+
+## 16. `booking_changed` — ยืนยันยกเลิก / เลื่อนวัน / ต่อเวลา (หลัง `cancel_rental` / `reschedule_rental` / `extend_rental`)
+
+altText: `{{CHANGE_TITLE}} เรียบร้อยค่ะ · {{GARMENT_NAME}}`
+(`{{CHANGE_TITLE}}` = "ยกเลิกการเช่า" / "เลื่อนวันเช่า" / "ต่อวันเช่า")
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "{{CHANGE_TITLE}} สำเร็จ ✓", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "lg", "wrap": true, "margin": "md" },
+    { "type": "text", "text": "{{CHANGE_DETAIL}}", "size": "sm", "color": "#1A1A1A", "wrap": true },
+    { "type": "text", "text": "{{REFUND_LINE}}", "size": "xs", "color": "#8C8B86", "wrap": true, "margin": "md" }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ดูออเดอร์ของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me" } }
+  ]}
+}
+```
+`{{CHANGE_DETAIL}}` เช่น "วันใช้ใหม่ 14 ก.พ. · คืน 16 ก.พ." · `{{REFUND_LINE}}` เช่น "คืนค่าเช่า ฿430 เป็นเครดิตแล้วค่ะ" (เว้นว่างได้)
+
+## 17. `spare_swap_notice` — ชุดหลักไม่พร้อม สลับชุดสำรองให้ (จุดขายของระบบ backup — ลูกค้าต้องรู้ก่อนวันงาน)
+
+altText: `เราสลับชุดสำรองให้แล้วค่ะ · {{SPARE_NAME}}`
+
+```json
+{
+  "type": "bubble",
+  "hero": { "type": "image", "url": "{{SPARE_PHOTO_URL}}", "size": "full", "aspectRatio": "3:4", "aspectMode": "cover" },
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "สลับเป็นชุดสำรองให้แล้วค่ะ", "size": "xs", "color": "#C0564A", "weight": "bold" },
+    { "type": "text", "text": "{{SPARE_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
+    { "type": "text", "text": "ชุดหลัก ({{PRIMARY_NAME}}) {{REASON}} — เราสลับตัวสำรองที่คุณเลือกไว้ให้ทันที ไม่มีค่าใช้จ่ายเพิ่ม ส่งตามกำหนดเดิมค่ะ", "size": "sm", "color": "#1A1A1A", "wrap": true, "margin": "md" }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ดูชุดที่จะได้รับ", "uri": "https://liff.line.me/{{LIFF_ID}}/g.html?code={{SPARE_CODE}}" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "คุยกับแอดมิน", "uri": "{{OA_CHAT_URL}}" } }
+  ]}
+}
+```
+
+## 18. `overdue_notice` — เลยกำหนดคืน (inbox kind `late` มีอยู่แล้ว — ส่งวันที่ +1, +3 หลังครบกำหนด)
+
+altText: `เลยกำหนดคืนชุดแล้วนะคะ · {{GARMENT_NAME}}`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "เลยกำหนดคืนแล้ว {{DAYS_LATE}} วัน", "size": "xs", "color": "#C0564A", "weight": "bold" },
+    { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true, "margin": "md" },
+    { "type": "text", "text": "กำหนดคืน {{END_DATE}} · ค่าปรับล่าช้า {{LATE_FEE_PER_DAY}} บาท/วัน (ตอนนี้ {{LATE_FEE_TOTAL}} บาท)", "size": "sm", "color": "#1A1A1A", "wrap": true },
+    { "type": "text", "text": "ส่งแล้วแค่กรอกเลขพัสดุ ค่าปรับหยุดนับทันทีค่ะ · ติดขัดอะไรทักมาคุยได้เลยนะคะ", "size": "xs", "color": "#8C8B86", "wrap": true, "margin": "md" }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "กรอกเลขพัสดุส่งคืน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&return={{RENTAL_ID}}" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "ต่อวันเช่าแทน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&extend={{RENTAL_ID}}" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "คุยกับแอดมิน", "uri": "{{OA_CHAT_URL}}" } }
+  ]}
+}
+```
+
+## 19. `deposit_refunded` — คืนมัดจำ/เงินคืนโอนแล้วจริง (ปิดจบเรื่องเงิน — ใบ #6 บอกว่า "กำลังคืน" ใบนี้ยืนยันว่า "คืนแล้ว")
+
+altText: `คืนมัดจำ {{AMOUNT}} บาทเรียบร้อยค่ะ ✓`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "คืนเงินเรียบร้อย ✓", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "{{AMOUNT}} บาท", "weight": "bold", "size": "xl", "margin": "md" },
+    { "type": "text", "text": "{{REFUND_KIND}} · {{METHOD}} · {{REFUNDED_AT}}", "size": "sm", "color": "#8C8B86", "wrap": true },
+    { "type": "text", "text": "ขอบคุณที่เช่ากับ LLOOP นะคะ แล้วพบกันลุคหน้าค่ะ 💚", "size": "sm", "color": "#1A1A1A", "wrap": true, "margin": "md" }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ดูชุดใหม่เข้าร้าน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?sort=new" } }
+  ]}
+}
+```
+`{{REFUND_KIND}}` = "มัดจำ" / "ค่าเช่า (ยกเลิก)" · `{{METHOD}}` = "โอนคืนบัญชีเดิม" / "เครดิต LLOOP"
+
+## 20. `new_arrival` — ชุดใหม่เข้าตรงสไตล์คุณ (ยิงจาก `mark_garment_ready` — จับคู่ตามสี/ไซส์/ควิซ)
+
+altText: `ชุดใหม่เข้าร้าน ตรงสไตล์คุณเลยค่ะ · {{GARMENT_NAME}}`
+
+```json
+{
+  "type": "bubble",
+  "hero": { "type": "image", "url": "{{PHOTO_URL}}", "size": "full", "aspectRatio": "3:4", "aspectMode": "cover" },
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "เข้าใหม่ · ตรงสไตล์ที่คุณชอบ", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
+    { "type": "text", "text": "{{BRAND}} · ไซส์ {{SIZE}} · เช่า {{PRICE}} บาท · มูลค่าชุด {{RETAIL}} บาท", "size": "sm", "color": "#8C8B86", "wrap": true },
+    { "type": "text", "text": "{{MATCH_REASON}}", "size": "xs", "color": "#8C8B86", "wrap": true, "margin": "md" }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ดูชุดนี้", "uri": "https://liff.line.me/{{LIFF_ID}}/g.html?code={{GARMENT_CODE}}" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "ดูของเข้าใหม่ทั้งหมด", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?sort=new" } }
+  ]}
+}
+```
+`{{MATCH_REASON}}` เช่น "โทน autumn เหมือนผลวิเคราะห์สีของคุณ" — ใส่เหตุผลให้รู้ว่าไม่ใช่สแปม · ส่งเป็น carousel ได้ (หลาย bubble ในข้อความเดียว สูงสุด 12 ใบ)
+
+## 21. `credit_expiring` — เครดิตใกล้หมดอายุ (inbox kind `credit_expiring` มีแล้ว)
+
+altText: `เครดิต {{AMOUNT}} บาทจะหมดอายุ {{EXPIRE_DATE}} นะคะ`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "เครดิตใกล้หมดอายุ", "size": "xs", "color": "#C0564A", "weight": "bold" },
+    { "type": "text", "text": "฿{{AMOUNT}}", "weight": "bold", "size": "xl", "margin": "md" },
+    { "type": "text", "text": "ใช้ได้ถึง {{EXPIRE_DATE}} — เอาไปหักค่าเช่าชุดไหนก็ได้เลยค่ะ", "size": "sm", "color": "#1A1A1A", "wrap": true }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ใช้เครดิตเลือกชุด", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html" } }
+  ]}
+}
+```
+
+## 22. `birthday_free_rental` — สิทธิ์เช่าฟรีวันเกิด (มี flow `birthday_reserve` ในแอปแล้ว — ใบนี้คือตัวพาเข้า)
+
+altText: `สุขสันต์วันเกิดค่ะ 🎂 รับสิทธิ์เช่าฟรี 1 ชุด`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "สุขสันต์วันเกิดค่ะ 🎂", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "เช่าฟรี 1 ชุด เดือนเกิดนี้", "weight": "bold", "size": "xl", "wrap": true, "margin": "md" },
+    { "type": "text", "text": "เลือกชุดได้ถึง {{BUDGET}} บาท ใช้สิทธิ์ได้ถึง {{VALID_UNTIL}} — ให้ลุควันเกิดปีนี้เป็นหน้าที่เรานะคะ", "size": "sm", "color": "#1A1A1A", "wrap": true }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ใช้สิทธิ์วันเกิดเลย", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?birthday=1" } }
+  ]}
+}
+```
+
+## 23. `referral_credit` — ได้เครดิตจากชวนเพื่อน (inbox kind `referral_credit` มีแล้ว)
+
+altText: `เพื่อนของคุณเช่าครั้งแรกแล้ว รับเครดิต {{AMOUNT}} บาทค่ะ 🎁`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "เครดิตชวนเพื่อนเข้าแล้ว 🎁", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "+฿{{AMOUNT}}", "weight": "bold", "size": "xl", "margin": "md" },
+    { "type": "text", "text": "{{FRIEND_NAME}} เช่าครั้งแรกสำเร็จ — เครดิตเข้ากระเป๋าคุณแล้ว ชวนต่อได้ไม่จำกัดค่ะ", "size": "sm", "color": "#1A1A1A", "wrap": true }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ใช้เครดิตเลือกชุด", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "แชร์โค้ดชวนเพื่อนต่อ", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&referral=1" } }
+  ]}
+}
+```
+
+## 24. `style_ready` — ผลวิเคราะห์สี/สไตล์เสร็จแล้ว (inbox kind `style_ready` มีแล้ว — จาก Personal Color)
+
+altText: `ผลวิเคราะห์สีของคุณเสร็จแล้วค่ะ ✨ คุณคือโทน {{SEASON}}`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "ผลวิเคราะห์เสร็จแล้ว ✨", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "คุณคือโทน {{SEASON}}", "weight": "bold", "size": "xl", "wrap": true, "margin": "md" },
+    { "type": "text", "text": "เราคัดชุดที่ตรงโทนสีของคุณไว้ให้แล้ว — เปิดดูผลเต็ม พร้อมพาเลตต์สีที่ใช่ได้เลยค่ะ", "size": "sm", "color": "#8C8B86", "wrap": true }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ดูผลวิเคราะห์ของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?style=result" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "ดูชุดตรงโทนของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?season={{SEASON_KEY}}" } }
+  ]}
+}
+```
+
+## 25. `stylist_appointment` — ยืนยัน/เตือนนัดสไตลิสต์ (หลัง `pc_book_slot` + เตือนก่อนนัด 1 วัน)
+
+altText: `{{KIND}}นัดสไตลิสต์ · {{APPT_DATE}} {{APPT_TIME}}` (`{{KIND}}` = "ยืนยัน" / "พรุ่งนี้")
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "{{KIND}}นัดสไตลิสต์ ✓", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "{{STYLIST_NAME}}", "weight": "bold", "size": "lg", "wrap": true, "margin": "md" },
+    { "type": "text", "text": "{{APPT_DATE}} · {{APPT_TIME}} · {{MODE}}", "size": "sm", "color": "#1A1A1A" },
+    { "type": "text", "text": "{{LOCATION_OR_LINK_NOTE}}", "size": "xs", "color": "#8C8B86", "wrap": true, "margin": "md" }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ดูนัดของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&appt={{APPT_ID}}" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "เลื่อน / ยกเลิกนัด", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&appt={{APPT_ID}}&manage=1" } }
+  ]}
+}
+```
+
+## 26. `group_invite_accepted` — เพื่อนตอบรับเข้ากลุ่มแล้ว (ปิดคำสัญญาใน `family.html:827` — แจ้งหัวหน้ากลุ่ม)
+
+altText: `{{FRIEND_NAME}} เข้ากลุ่ม {{GROUP_NAME}} แล้วค่ะ 🎉`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "สมาชิกใหม่เข้ากลุ่ม 🎉", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "{{FRIEND_NAME}} ตอบรับแล้ว", "weight": "bold", "size": "lg", "wrap": true, "margin": "md" },
+    { "type": "text", "text": "กลุ่ม {{GROUP_NAME}} ตอนนี้มี {{MEMBER_COUNT}} คน — ชวนครบแล้วจัดธีมและจองพร้อมกันได้เลยค่ะ (ยิ่งหลายคน ส่วนลดกลุ่มยิ่งเพิ่ม)", "size": "sm", "color": "#8C8B86", "wrap": true }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "จัดธีมกลุ่มเลย", "uri": "https://liff.line.me/{{LIFF_ID}}/family.html?group={{GROUP_ID}}" } }
+  ]}
+}
+```
+
+## 27. `abandon_checkout` — ตะกร้าค้าง/จองไม่จบ (inbox kind `abandon_checkout` มีแล้ว — ส่งหลังทิ้งตะกร้า ~3 ชม.)
+
+altText: `ชุดในตะกร้ายังรออยู่นะคะ · {{GARMENT_NAME}}`
+
+```json
+{
+  "type": "bubble",
+  "hero": { "type": "image", "url": "{{PHOTO_URL}}", "size": "full", "aspectRatio": "3:4", "aspectMode": "cover" },
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "ยังเก็บไว้ให้อยู่นะคะ", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
+    { "type": "text", "text": "วันที่ {{DATE_RANGE}} ยังว่างอยู่ — แต่ชุดยอดนิยมมักถูกจองไวค่ะ", "size": "sm", "color": "#8C8B86", "wrap": true }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "จองต่อให้จบเลย", "uri": "https://liff.line.me/{{LIFF_ID}}/g.html?code={{GARMENT_CODE}}&resume=1" } }
+  ]}
+}
+```
+> kinds ที่เหลือ (`reengagement`, `winback`, `event_suggest`, `charity_update`) เป็นแคมเปญการตลาด — ใช้โครงเดียวกับ #20/#27 เปลี่ยนข้อความได้เลย ไม่ต้องมีเทมเพลตแยก
+
+---
+
 ## หมายเหตุการต่อระบบ
 
 1. **จุดยิงที่แนะนำ:** DB trigger (pg_net) หรือ Edge Function หลัง RPC สำเร็จ — ตาราง/ฟังก์ชันที่เกี่ยว: `book_with_backups`, `book_cart`, `care_qc`, `care_checkin`, `mark_garment_ready`, `notify_customer_wishlist`, `contract_sign`, `group_pay_confirm`, `return_tracking_submit`
