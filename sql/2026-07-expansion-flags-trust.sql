@@ -136,8 +136,9 @@ end $$;
 --
 --      (กติกา KYC เดิมคงไว้เป็นชั้นแรกเสมอ — trust แค่ "ลดเพิ่ม" ไม่แทนที่)
 --
--- 5.3  (เฟสถัดไป) me-rpc gateway: เพิ่ม 'trust_me' เข้า allowlist ของ edge function
---      เมื่อจะเปิดหน้า "สมุดพกของฉัน" ให้ลูกค้า
+-- 5.3  me-rpc gateway: เพิ่ม 'trust_me' เข้า allowlist ของ edge function
+--      (หน้าลูกค้า trust.html "สมุดพกของฉัน" พร้อมแล้ว — เรียก meRpc('trust_me', {})
+--       gateway เติมตัวตนจาก idToken เอง จึงไม่ต้องส่ง p_customer จากหน้าเว็บ)
 --
 -- ทดสอบเร็ว ๆ หลังติดตั้ง:
 --   select trust_score_get(id) from customers limit 5;      -- คะแนนย้อนหลังต้องมาทันที
