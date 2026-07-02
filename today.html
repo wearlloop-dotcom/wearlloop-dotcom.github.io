@@ -73,7 +73,7 @@
   if(window.opsRpc) sb.rpc=window.opsRpc;            // R-4: RPC ผ่าน gateway (LINE idToken + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});
   const $=id=>document.getElementById(id);
-  const esc=s=>(s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
   const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'';
   const STAGE={qc:['รอตรวจ','qc'],washing:['กำลังซัก','washing'],repair:['รอซ่อม','repair'],checkin:['รับเข้า','qc']};
 

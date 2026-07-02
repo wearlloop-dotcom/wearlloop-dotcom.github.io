@@ -203,6 +203,23 @@ let POINTS = [];             // จุดรับ-ส่งทั้งหม�
 let ZONE = null;             // { postal, province, district, districts:Set } จากรหัสไปรษณีย์
 let _postalData = null;      // th-postal.json (โหลดขี้เกียจ — เฉพาะตอนพิมพ์ครบ 5 หลัก)
 let _postalP = null;
+const INTEREST_SENT = new Map();  // postal -> count — กันกดสนใจซ้ำหลังสลับภาษา
+let EX_QUEUED = false;            // true = คำขอฉุกเฉินถูกคิวไว้ในเครื่อง (backend ยังไม่รับ)
+let EX_STASH_POINT = null;        // จุดรับที่กู้จาก stash — รอ options โหลดเสร็จ
+
+function toast(msg){
+  let el = document.getElementById('lloopToast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'lloopToast';
+    el.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1A1A1A;color:#fff;font-size:14px;padding:10px 18px;border-radius:9px;z-index:999;max-width:90%;transition:opacity .3s';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { el.style.opacity = '0'; }, 3500);
+}
 
 // ===== demo data — ใช้เมื่อ backend RPC ยังไม่พร้อม (มาร์กเป็น "เร็ว ๆ นี้" แบบเนียน ๆ) =====
 const DEMO_POINTS = [
@@ -236,7 +253,7 @@ async function loadPoints(){
 }
 
 function dpCard(p, matched){
-  const tl = TYPE_LABEL[p.type] || [p.type, p.type];
+  const tl = TYPE_LABEL[p.type] || [esc(p.type), esc(p.type)];
   const svcs = (p.services || []).map(s => {
     const l = SVC_LABEL[s]; return l ? `<span class="chip svc">${T(l[0], l[1])}</span>` : '';
   }).join('');
@@ -314,7 +331,15 @@ async function onPostalInput(){
   zb.textContent = T('กำลังหาโซนของคุณ…','Finding your zone…');
   const data = await loadPostalData();
   if($('postal').value.replace(/\D/g, '') !== raw) return;   // ผู้ใช้พิมพ์ต่อระหว่างโหลด
-  const rows = data && data[raw];
+  if(!data){
+    // th-postal.json โหลดไม่สำเร็จ — ไม่ใช่ "รหัสผิด" และไม่ชวนกดสนใจโซน
+    ZONE = null;
+    zb.className = 'zone miss';
+    zb.textContent = T('โหลดข้อมูลโซนไม่สำเร็จ ลองใหม่อีกครั้งนะคะ',"Couldn't load zone data — try again");
+    renderPoints();                                          // ZONE = null → ซ่อน empty-zone CTA
+    return;
+  }
+  const rows = data[raw];
   if(rows && rows.length){
     const districts = new Set(rows.map(r => String(r[1]).trim()));
     ZONE = { postal: raw, province: rows[0][0], district: rows[0][1], districts };
@@ -326,12 +351,26 @@ async function onPostalInput(){
     zb.className = 'zone miss';
     zb.textContent = T('ไม่พบรหัสไปรษณีย์นี้ค่ะ — ลองเช็คอีกครั้งนะคะ','Postal code not found — please double-check');
   }
-  $('interestOk').style.display = 'none';
-  $('interestBtn').style.display = '';
+  if(INTEREST_SENT.has(raw)){
+    // ส่งสนใจโซนนี้ไปแล้ว — โชว์คำยืนยันเดิม กันกดส่งซ้ำ (เช่น หลังสลับภาษา)
+    $('interestBtn').style.display = 'none';
+    const ok = $('interestOk');
+    ok.style.display = 'block';
+    ok.textContent = interestOkText(INTEREST_SENT.get(raw));
+  }else{
+    $('interestOk').style.display = 'none';
+    $('interestBtn').style.display = '';
+  }
   renderPoints();
 }
 
-// ===== "สนใจให้เปิดโซนนี้" — RPC → fallback localStorage =====
+// ===== "สนใจให้เปิดโซนนี้" — RPC สำเร็จ / server ปฏิเสธ / fallback localStorage =====
+function interestOkText(count){
+  return count != null
+    ? T(`รับเรื่องแล้วค่ะ 💚 มีคนสนใจโซนนี้แล้ว ${count} คน — ยิ่งเยอะ ยิ่งเปิดไว`, `Got it 💚 ${count} people want this zone — the more, the faster we open`)
+    : T('รับเรื่องแล้วค่ะ 💚 ยิ่งมีคนสนใจเยอะ เรายิ่งเปิดโซนนี้ไวขึ้นนะคะ','Got it 💚 the more interest, the faster we open this zone');
+}
+
 async function sendInterest(){
   if(!ZONE) return;
   const btn = $('interestBtn');
@@ -339,7 +378,15 @@ async function sendInterest(){
   let count = null;
   try{
     const { data, error } = await client().rpc('drop_point_interest', { p_uid: UID, p_postal: ZONE.postal });
-    if(error) throw error;
+    if(error) throw error;                       // transport/RPC ยังไม่ deploy → คิวใน catch
+    if(data && data.error){
+      // ถึง server แล้วแต่ถูกปฏิเสธ — บอกตรง ๆ ไม่โชว์ success ปลอม ไม่เก็บ localStorage
+      btn.disabled = false;
+      const ok = $('interestOk');
+      ok.style.display = 'block';
+      ok.textContent = T('ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Request failed — please try again');
+      return;
+    }
     if(data && data.count != null) count = data.count;
   }catch(e){
     console.warn('drop_point_interest not ready — saving locally:', e && e.message ? e.message : e);
@@ -350,13 +397,12 @@ async function sendInterest(){
       localStorage.setItem(k, JSON.stringify(arr));
     }catch(_e){}
   }
+  INTEREST_SENT.set(ZONE.postal, count);         // กันส่งซ้ำเมื่อ onPostalInput รันใหม่
   btn.disabled = false;
   btn.style.display = 'none';
   const ok = $('interestOk');
   ok.style.display = 'block';
-  ok.textContent = count != null
-    ? T(`รับเรื่องแล้วค่ะ 💚 มีคนสนใจโซนนี้แล้ว ${count} คน — ยิ่งเยอะ ยิ่งเปิดไว`, `Got it 💚 ${count} people want this zone — the more, the faster we open`)
-    : T('รับเรื่องแล้วค่ะ 💚 ยิ่งมีคนสนใจเยอะ เรายิ่งเปิดโซนนี้ไวขึ้นนะคะ','Got it 💚 the more interest, the faster we open this zone');
+  ok.textContent = interestOkText(count);
 }
 
 // ===== express form =====
@@ -367,12 +413,56 @@ function fillPointSelect(){
     .filter(p => !p.services || p.services.includes('pickup') || p.services.includes('express'))
     .map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
   if(cur && [...sel.options].some(o => o.value === cur)) sel.value = cur;
+  if(EX_STASH_POINT && [...sel.options].some(o => o.value === EX_STASH_POINT)){
+    sel.value = EX_STASH_POINT; EX_STASH_POINT = null;   // จุดรับที่กู้จาก stash หลังล็อกอิน
+  }
 }
 
 function showExMsg(msg){
   const el = $('exMsg');
   el.className = 'form-msg' + (msg ? ' err' : '');
   el.textContent = msg || '';
+}
+
+// เก็บฟอร์มไว้ก่อน redirect ไปล็อกอิน LINE — กลับมาแล้วกรอกให้เหมือนเดิม
+function stashExpress(date){
+  try{
+    sessionStorage.setItem('lloop_express_stash', JSON.stringify({
+      date,
+      occasion: $('exOccasion').value,
+      point: $('exPoint').value,
+      size: $('exSize').value,
+      postal: $('postal').value.replace(/\D/g, ''),
+    }));
+  }catch(_e){}
+}
+
+function restoreExpressStash(){
+  let s = null;
+  try{ s = JSON.parse(sessionStorage.getItem('lloop_express_stash') || 'null'); }catch(_e){}
+  if(!s) return;
+  try{ sessionStorage.removeItem('lloop_express_stash'); }catch(_e){}
+  if(s.date) $('exDate').value = s.date;
+  if(s.occasion) $('exOccasion').value = s.occasion;
+  if(s.size) $('exSize').value = s.size;
+  if(s.point){
+    EX_STASH_POINT = s.point;                    // ถ้า options ยังไม่มา fillPointSelect จะเซ็ตให้
+    const sel = $('exPoint');
+    if([...sel.options].some(o => o.value === s.point)){ sel.value = s.point; EX_STASH_POINT = null; }
+  }
+  if(s.postal){ $('postal').value = s.postal; onPostalInput(); }
+  $('expressCard').scrollIntoView({ behavior:'smooth', block:'center' });
+  toast(T('กรอกไว้ให้เหมือนเดิมแล้วค่ะ กดส่งได้เลย','Restored your form — tap submit'));
+}
+
+// copy ของกล่องสำเร็จ — ถ้าเป็นคิวในเครื่อง ห้ามสัญญาว่าจะทักกลับใน 30 นาที
+function applyExpressOkCopy(){
+  if(!EX_QUEUED) return;                         // สำเร็จผ่าน RPC → ใช้ copy เดิม (data-i18n)
+  const p = $('expressOk').querySelector('p');
+  if(!p) return;
+  p.removeAttribute('data-i18n');                // สลับภาษาผ่าน lloop:lang เอง
+  p.textContent = T("รับเรื่องไว้แล้วค่ะ 💚 แอด LINE ของ LLOOP แล้วทักคำว่า 'ชุดฉุกเฉิน' เพื่อยืนยันด่วนนะคะ",
+                    "Got it 💚 Add LLOOP on LINE and message 'express' to confirm right away");
 }
 
 $('expressForm').addEventListener('submit', async e => {
@@ -389,6 +479,7 @@ $('expressForm').addEventListener('submit', async e => {
     if(p && p.userId){ UID = p.userId; }
     else{
       showExMsg(T('ขอล็อกอิน LINE ก่อนนะคะ จะได้ทักไปยืนยันชุดได้ 💚','Please sign in with LINE first so we can confirm your dress 💚'));
+      stashExpress(date);                        // เก็บฟอร์มไว้ก่อน redirect
       LiffAuth.signIn();
       return;
     }
@@ -397,6 +488,7 @@ $('expressForm').addEventListener('submit', async e => {
   const btn = $('exSubmit');
   btn.disabled = true;
   btn.textContent = T('กำลังส่ง…','Sending…');
+  const resetBtn = () => { btn.disabled = false; btn.textContent = T('สั่งชุดฉุกเฉินเลยค่ะ','Order an emergency dress'); };
   const payload = {
     p_uid: UID,
     p_date: date,
@@ -406,10 +498,24 @@ $('expressForm').addEventListener('submit', async e => {
   };
   try{
     const { data, error } = await client().rpc('express_request', payload);
-    if(error) throw error;
-    if(data && data.error) throw new Error(data.error);
+    if(error) throw error;                       // transport/RPC ยังไม่ deploy → คิวไว้ใน catch
+    if(data && data.error){
+      // ถึง server แล้วแต่ถูกปฏิเสธ — บอกผู้ใช้ตรง ๆ ไม่เก็บคิว ไม่โชว์ success
+      resetBtn();
+      if(data.error === 'point_not_found'){
+        showExMsg(T('จุดรับนี้เพิ่งปิดไปค่ะ เลือกจุดอื่นนะคะ','This pickup point just closed — please pick another one'));
+      }else if(data.error === 'login_required'){
+        showExMsg(T('ขอล็อกอิน LINE ก่อนนะคะ จะได้ทักไปยืนยันชุดได้ 💚','Please sign in with LINE first so we can confirm your dress 💚'));
+        stashExpress(date);
+        LiffAuth.signIn();
+      }else{
+        showExMsg(T('ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Request failed — please try again'));
+      }
+      return;
+    }
+    EX_QUEUED = false;                           // สำเร็จจริงจาก server → สัญญา 30 นาทีได้
   }catch(err){
-    // backend ยังไม่พร้อม → เก็บคิวไว้ในเครื่องก่อน (ทีมงานตามเก็บทีหลัง)
+    // backend ยังไม่พร้อม/เน็ตหลุด → เก็บคิวไว้ในเครื่องก่อน (ทีมงานตามเก็บทีหลัง)
     console.warn('express_request not ready — queueing locally:', err && err.message ? err.message : err);
     try{
       const k = 'lloop_express_queue';
@@ -417,9 +523,10 @@ $('expressForm').addEventListener('submit', async e => {
       q.push({ ...payload, at: new Date().toISOString() });
       localStorage.setItem(k, JSON.stringify(q));
     }catch(_e){}
+    EX_QUEUED = true;                            // คิวในเครื่อง → copy ต้องไม่สัญญาว่าจะทักกลับ
   }
-  btn.disabled = false;
-  btn.textContent = T('สั่งชุดฉุกเฉินเลยค่ะ','Order an emergency dress');
+  resetBtn();
+  applyExpressOkCopy();
   $('expressFormWrap').style.display = 'none';
   $('expressOk').style.display = 'block';
   $('expressCard').scrollIntoView({ behavior:'smooth', block:'center' });
@@ -437,7 +544,7 @@ async function boot(){
   loadPoints();                                  // จุดรับ-ส่งเป็นข้อมูลสาธารณะ — ไม่ต้องรอล็อกอิน
   try{
     const p = await LiffAuth.login();            // เงียบ ๆ — ไม่ล็อกอินหน้าก็ยังใช้ได้ครบ
-    if(p && p.userId) UID = p.userId;
+    if(p && p.userId){ UID = p.userId; restoreExpressStash(); }
   }catch(e){ console.warn('LIFF login skipped:', e); }
 }
 boot();
@@ -446,6 +553,7 @@ boot();
 window.addEventListener('lloop:lang', function(){
   renderPoints();
   fillPointSelect();
+  applyExpressOkCopy();
   if(ZONE) onPostalInput();
 });
 </script>
