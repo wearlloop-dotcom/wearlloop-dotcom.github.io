@@ -181,5 +181,14 @@ $$;
 grant execute on function public.my_events(text)                                   to anon, authenticated;
 grant execute on function public.upsert_event(text, uuid, date, text, text, text)  to anon, authenticated;
 grant execute on function public.delete_event(text, uuid)                          to anon, authenticated;
-grant execute on function public.upcoming_customer_events(int)                     to anon, authenticated;
-grant execute on function public.mark_event_pinged(uuid)                           to anon, authenticated;
+
+-- ----------------------------------------------------------------------------
+-- ⚠️ ฝั่ง ops เท่านั้น: upcoming_customer_events / mark_event_pinged
+-- สองฟังก์ชันนี้เห็นปฏิทิน + LINE UID ของลูกค้า "ทุกคน" และเปลี่ยนสถานะ pinged ได้
+-- ห้ามให้ anon/authenticated เรียกเด็ดขาด — ต้องเรียกผ่าน ops-rpc edge function
+-- (service role) gateway เท่านั้นค่ะ (today.html เรียกผ่าน gateway ตัวนี้อยู่แล้ว)
+-- ----------------------------------------------------------------------------
+revoke execute on function public.upcoming_customer_events(int) from public, anon, authenticated;
+revoke execute on function public.mark_event_pinged(uuid)       from public, anon, authenticated;
+grant  execute on function public.upcoming_customer_events(int) to service_role;
+grant  execute on function public.mark_event_pinged(uuid)       to service_role;

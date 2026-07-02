@@ -112,8 +112,15 @@ begin
     return jsonb_build_object('error', 'invalid_postal');
   end if;
 
+  -- ยังไม่ล็อกอิน (p_uid null) → dedupe ไม่ได้เลย กดรัว ๆ ตัวเลขจะบวมไม่มีเพดาน
+  -- จึง "ไม่ insert" — ตอบ ok + จำนวนคนสนใจปัจจุบันของโซนนี้กลับไปเฉย ๆ ค่ะ
+  if p_uid is null then
+    select count(*) into v_count from drop_point_interest i where i.postal = p_postal;
+    return jsonb_build_object('ok', true, 'count', v_count);
+  end if;
+
   -- คนเดิมกดซ้ำโซนเดิม → ไม่บันทึกเพิ่ม (นับ 1 คนต่อโซน)
-  if p_uid is not null and exists (
+  if exists (
     select 1 from drop_point_interest i
     where i.line_uid = p_uid and i.postal = p_postal
   ) then
@@ -177,8 +184,12 @@ grant execute on function express_request(text, date, text, uuid, text)       to
 -- Seed: จุดตัวอย่าง 3 จุด (ชุดเดียวกับ demo บนหน้าเว็บ)
 -- ⚠️ หมายเหตุ: ตรงนี้เป็น "จุดตัวอย่าง" — แก้ชื่อ/ที่อยู่/พิกัด/เวลาเปิด
 --    ให้เป็นจุดพาร์ทเนอร์จริงก่อนเปิดใช้งานจริงนะคะ
+-- (idempotent: seed เฉพาะตอนตารางยังว่าง — รันสคริปต์ซ้ำจะไม่เพิ่มจุดซ้ำค่ะ)
 -- ---------------------------------------------------------------------------
-insert into drop_points (name, type, address, district, postal, lat, lng, hours, services) values
-  ('ร้านซักพาร์ทเนอร์ ลาดพร้าว',   'laundry', 'ปากซอยลาดพร้าว 23 (ใกล้ MRT ลาดพร้าว)',   'จตุจักร', '10900', 13.8160, 100.5610, '09:00–20:00 ทุกวัน', '{return,pickup,express}'),
-  ('คาเฟ่พาร์ทเนอร์ อารีย์',        'cafe',    'ซอยอารีย์ 1 (เดิน 3 นาทีจาก BTS อารีย์)', 'พญาไท',   '10400', 13.7795, 100.5447, '08:00–19:00 ทุกวัน', '{return,pickup}'),
-  ('ร้านซักพาร์ทเนอร์ สุขุมวิท 49', 'laundry', 'สุขุมวิท 49 (ใกล้ BTS ทองหล่อ)',           'วัฒนา',   '10110', 13.7330, 100.5735, '09:00–20:00 ทุกวัน', '{return,pickup,express}');
+insert into drop_points (name, type, address, district, postal, lat, lng, hours, services)
+select * from (values
+  ('ร้านซักพาร์ทเนอร์ ลาดพร้าว',   'laundry', 'ปากซอยลาดพร้าว 23 (ใกล้ MRT ลาดพร้าว)',   'จตุจักร', '10900', 13.8160, 100.5610, '09:00–20:00 ทุกวัน', '{return,pickup,express}'::text[]),
+  ('คาเฟ่พาร์ทเนอร์ อารีย์',        'cafe',    'ซอยอารีย์ 1 (เดิน 3 นาทีจาก BTS อารีย์)', 'พญาไท',   '10400', 13.7795, 100.5447, '08:00–19:00 ทุกวัน', '{return,pickup}'::text[]),
+  ('ร้านซักพาร์ทเนอร์ สุขุมวิท 49', 'laundry', 'สุขุมวิท 49 (ใกล้ BTS ทองหล่อ)',           'วัฒนา',   '10110', 13.7330, 100.5735, '09:00–20:00 ทุกวัน', '{return,pickup,express}'::text[])
+) as seed(name, type, address, district, postal, lat, lng, hours, services)
+where not exists (select 1 from drop_points);

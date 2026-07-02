@@ -138,6 +138,21 @@ begin
     return jsonb_build_object('error', 'missing uid');
   end if;
 
+  -- ตรวจค่าความพอดีก่อน insert — กันค่าเพี้ยนไปชน check constraint แล้ว raise exception
+  -- (ให้ตอบเป็น JSON สวย ๆ แทน: bust/waist/hip = tight|fit|loose · length = short|fit|long)
+  if nullif(p_bust,'')   is not null and p_bust   not in ('tight','fit','loose') then
+    return jsonb_build_object('error', 'bad_fit_value');
+  end if;
+  if nullif(p_waist,'')  is not null and p_waist  not in ('tight','fit','loose') then
+    return jsonb_build_object('error', 'bad_fit_value');
+  end if;
+  if nullif(p_hip,'')    is not null and p_hip    not in ('tight','fit','loose') then
+    return jsonb_build_object('error', 'bad_fit_value');
+  end if;
+  if nullif(p_length,'') is not null and p_length not in ('short','fit','long') then
+    return jsonb_build_object('error', 'bad_fit_value');
+  end if;
+
   -- กันส่งซ้ำ rental เดิม — ครั้งใหม่ทับความหมายครั้งเก่าไม่ได้ ให้ตอบว่าเคยส่งแล้ว
   if p_rental is not null and exists (
     select 1 from fit_feedback where line_uid = p_uid and rental_id = p_rental

@@ -5,7 +5,7 @@
 -- จากโปรไฟล์ให้อัตโนมัติ (opt-out: ไม่กดอะไร = ยืนยันอัตโนมัติ) สลับได้ 2 ชิ้น/กล่อง
 -- ข้ามเดือนได้แบบไม่เสียสิทธิ์
 --
--- หน้าเว็บ: closet-day.html เรียก RPC 5 ตัวด้านล่าง (ถ้า RPC ล้ม จะ fallback
+-- หน้าเว็บ: closet-day.html เรียก RPC 6 ตัวด้านล่าง (ถ้า RPC ล้ม จะ fallback
 -- localStorage + MOCK ฝั่ง client เอง)
 -- รันใน Supabase SQL editor ได้เลยค่ะ
 -- ============================================================================
@@ -172,6 +172,19 @@ begin
     return jsonb_build_object('error', 'swap_limit'); -- สลับได้ 2 ชิ้นต่อกล่องนะคะ
   end if;
 
+  -- สลับชิ้นเดิมกับตัวเอง = เสียสิทธิ์สลับฟรี ๆ — ไม่ให้ค่ะ
+  if p_in_code = p_out_code then
+    return jsonb_build_object('error', 'same_code');
+  end if;
+
+  -- ชิ้นที่จะเอาเข้า "อยู่ในกล่องอยู่แล้ว" → กันชุดซ้ำในกล่องเดียวกัน
+  if exists (
+    select 1 from jsonb_array_elements(v_box.items) e
+    where e->>'code' = p_in_code and e->>'code' <> p_out_code
+  ) then
+    return jsonb_build_object('error', 'already_in_box');
+  end if;
+
   -- ตัดชิ้นที่เอาออก — ต้องอยู่ในกล่องจริง
   select coalesce(jsonb_agg(e), '[]'::jsonb)
     into v_kept
@@ -265,6 +278,40 @@ begin
 end;
 $$;
 
+-- ============================================================================
+-- RPC 6: closet_box_unskip(p_uid) → เปลี่ยนใจหลังกดข้าม (skipped → draft)
+--   หน้าเว็บ closet-day.html เรียก supabase.rpc('closet_box_unskip', { p_uid })
+-- ============================================================================
+create or replace function public.closet_box_unskip(p_uid text)
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_month text := to_char(now(), 'YYYY-MM');
+  v_box   public.closet_boxes%rowtype;
+begin
+  if p_uid is null or p_uid = '' then
+    return json_build_object('error', 'missing_uid');
+  end if;
+
+  select * into v_box from public.closet_boxes
+   where line_uid = p_uid and month = v_month
+   for update;                                       -- ล็อกแถวกันกดรัว (สไตล์เดียวกับ swap)
+
+  if v_box.id is null or v_box.status <> 'skipped' then
+    return json_build_object('error', 'no_skipped_box');  -- เดือนนี้ไม่มีกล่องที่ข้ามไว้ค่ะ
+  end if;
+
+  update public.closet_boxes
+     set status = 'draft'
+   where id = v_box.id;
+
+  return json_build_object('ok', true, 'status', 'draft');
+end;
+$$;
+
 -- ---------------------------------------------------------------------------
 -- สิทธิ์: หน้าเว็บเรียกด้วย anon key → grant execute ให้ anon (และ authenticated)
 -- ---------------------------------------------------------------------------
@@ -273,3 +320,4 @@ grant execute on function public.closet_day_set(text, int)         to anon, auth
 grant execute on function public.closet_box_swap(text, text, text) to anon, authenticated;
 grant execute on function public.closet_box_confirm(text)          to anon, authenticated;
 grant execute on function public.closet_box_skip(text)             to anon, authenticated;
+grant execute on function public.closet_box_unskip(text)           to anon, authenticated;
