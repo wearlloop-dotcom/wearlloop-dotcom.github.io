@@ -20,8 +20,8 @@
     _inited = true;
   }
 
-  // base URL (ไม่มี query) — redirectUri ให้ตรง LIFF endpoint + กลับมาสะอาด
-  function baseUrl() { return location.origin + location.pathname; }
+  // redirectUri = URL ปัจจุบันพร้อม query — กลับจาก LINE แล้วไม่หลุดหน้าเดิม (deep-link ?garment= ?code= ยังอยู่)
+  function baseUrl() { return location.origin + location.pathname + location.search; }
 
   // เด้งเข้า LINE login เอง พร้อมกัน redirect loop: ลองได้ครั้งเดียวต่อ session
   // ถ้ากลับมาแล้วยัง unauthorized อีก (login ไม่ติด/ยกเลิก) → ไม่เด้งซ้ำ ปล่อยให้โชว์ error แทน
