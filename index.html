@@ -1143,59 +1143,71 @@
   .introsub{animation-delay:1.25s}
   .enterbtn{animation-delay:1.45s}
 
-  /* ============ INTRO REDESIGN · 2026-07-02 — monogram reveal โทนเดียวกับ hero (espresso + ทอง) ============ */
-  .intro{background:
-      radial-gradient(62% 42% at 50% 40%,rgba(201,168,106,.15),transparent 72%),
-      var(--espresso);
-    transition:opacity .7s ease,transform .7s ease}
-  .intro::before{content:"";position:absolute;inset:0;opacity:.05;pointer-events:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-  .intro.hide{transform:scale(1.03)}
-  .ihouse{font-family:var(--display);font-weight:600;font-size:10px;letter-spacing:.5em;color:var(--gold)}
-  .loopstage{width:300px;height:300px;margin:28px 0 6px}
-  .loopstage::before{background:radial-gradient(circle,rgba(201,168,106,.15),transparent 70%)}
-  .ring{animation-duration:11s}
-  .ring .track{stroke:rgba(244,238,224,.10)}
-  .ring .arc{stroke:var(--gold);stroke-width:1.6;stroke-dasharray:150 470}
-  .ring .bead{fill:var(--gold);r:2.6}
-  .intrologo{font-family:var(--serif);font-weight:500;font-size:44px;color:var(--ivory);
-    letter-spacing:.22em;padding-left:.22em;/* ชดเชย tracking ให้กึ่งกลางจริง */
-    animation:logotrack 1.5s cubic-bezier(.2,.6,.2,1) .25s both}
-  @keyframes logotrack{from{opacity:0;letter-spacing:.5em;filter:blur(3px)}to{opacity:1;letter-spacing:.22em;filter:none}}
-  .cyc{background:var(--espresso);font-family:var(--display);font-weight:500;font-size:10px;
-    letter-spacing:.24em;text-transform:uppercase;color:rgba(244,238,224,.66);padding:2px 8px}
-  .introtag{font-family:var(--serif);font-style:italic;font-weight:500;font-size:19px;color:var(--gold);margin-top:20px}
-  .introsub{font-size:11px;letter-spacing:.14em;color:rgba(244,238,224,.55)}
-  .enterbtn{background:transparent;color:var(--ivory);border-bottom:1px solid rgba(244,238,224,.5);
-    padding:10px 6px;margin-top:22px;letter-spacing:.24em}
+  /* ============ INTRO V2 · 2026-07-02 — campaign film wall: คลิป 4 ช่องเล่นพร้อมกัน + การ์ดโลโก้เล็ก ============ */
+  .intro{background:#F6F3EC;padding:0;transition:opacity .7s ease,transform .7s ease}
+  .intro.hide{transform:scale(1.02)}
+  .ipanels{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr)}
+  @media(max-width:600px){.ipanels{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr)}}
+  .ip{position:relative;overflow:hidden;transform:translateY(101%);animation:iprise .7s cubic-bezier(.7,0,.2,1) forwards}
+  .ip1{background:linear-gradient(170deg,#D9C6A8,#C2A87F);animation-delay:.05s}
+  .ip2{background:linear-gradient(170deg,#8A5A40,#5E3423);animation-delay:.18s}
+  .ip3{background:linear-gradient(170deg,#41454F,#23262E);animation-delay:.31s}
+  .ip4{background:linear-gradient(170deg,#A9BCCB,#7E96A8);animation-delay:.44s}
+  @keyframes iprise{to{transform:none}}
+  .ip video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease}
+  .ip.hasvid video{opacity:1}
+  .ip .ipw{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:2;
+    font-family:var(--display);font-weight:500;font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+    color:rgba(255,255,255,.92);text-shadow:0 1px 12px rgba(0,0,0,.4);opacity:0;animation:fadeIn .5s .8s forwards}
+  .imark{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;padding:20px}
+  .ichip{background:#F8F5EE;color:var(--ink);text-align:center;padding:24px 38px 22px;max-width:88vw;
+    box-shadow:0 30px 70px -28px rgba(40,30,15,.5);opacity:0;animation:ichippop .7s .85s cubic-bezier(.2,.7,.3,1) forwards}
+  @keyframes ichippop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+  .ichip .ihouse{font-family:var(--display);font-weight:600;font-size:8.5px;letter-spacing:.42em;color:var(--gold);animation:none;opacity:1}
+  .intrologo{font-family:var(--serif);font-weight:500;font-size:34px;letter-spacing:.16em;padding-left:.16em;color:var(--ink);margin-top:5px}
+  .introtag{font-family:var(--serif);font-style:italic;font-weight:500;font-size:15px;color:var(--gold);margin-top:4px;animation-delay:.2s}
+  .introsub{font-size:10px;letter-spacing:.16em;color:#8C8579;margin-top:8px;animation-delay:.35s}
+  .enterbtn{background:transparent;color:var(--ink);border:none;border-bottom:1px solid var(--ink);
+    padding:8px 4px;margin-top:16px;font-size:10.5px;letter-spacing:.24em;animation-delay:.5s}
   .enterbtn:hover{color:var(--gold);border-bottom-color:var(--gold)}
-  /* เส้นทองไล่เต็มจอล่าง = นับถอยหลังเข้าคอลเลกชันเอง (2.2s) */
-  .intro::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--gold);
+  /* introtag/introsub/enterbtn อยู่ในการ์ด — ให้เฟดตามการ์ด ไม่ใช่ตามดีเลย์เก่าของฉากมืด */
+  .ichip .introtag,.ichip .introsub,.ichip .enterbtn{animation-name:fadeIn;animation-duration:.5s;animation-fill-mode:forwards}
+  .ichip .introtag{animation-delay:1.1s}.ichip .introsub{animation-delay:1.25s}.ichip .enterbtn{animation-delay:1.4s}
+  /* เส้นทองล่างจอ = นับถอยหลังเข้าคอลเลกชันเอง (2.2s · มีคลิป = 4s) */
+  .intro::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--gold);z-index:4;
     transform:scaleX(0);transform-origin:left;animation:introprog 2.05s linear .15s forwards}
+  .intro.longplay::after{animation-duration:3.85s}
   .intro.hide::after{display:none}
   @keyframes introprog{to{transform:scaleX(1)}}
-  @media(prefers-reduced-motion:reduce){.intrologo{animation:none}.intro::after{animation:none}}
+  @media(prefers-reduced-motion:reduce){.ip{animation-duration:.01s}.intro::after{animation:none}}
 </style>
 </head>
 <body>
 
 <div class="intro" id="intro">
-  <div class="ihouse" id="introHouse">circular fashion house</div>
-  <div class="loopstage">
-    <svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle class="track" cx="100" cy="100" r="92"/><circle class="arc" cx="100" cy="100" r="92"/><circle class="bead" cx="100" cy="8" r="3.6"/></svg>
-    <div class="intrologo">LLOOP</div>
-    <span class="cyc cyc-t" id="cyc0">เช่า</span><span class="cyc cyc-r" id="cyc1">ใส่</span><span class="cyc cyc-b" id="cyc2">คืน</span><span class="cyc cyc-l" id="cyc3">ส่งต่อ</span>
+  <!-- campaign film wall — 4 ช่อง = คลิป 4 คลิปเล่นพร้อมกัน (CONFIG.INTRO_VIDEOS) · ไม่มีคลิป = แผ่นสีผ้า -->
+  <div class="ipanels" aria-hidden="true">
+    <div class="ip ip1"><video muted playsinline loop preload="auto"></video><span class="ipw" id="cyc0">เช่า</span></div>
+    <div class="ip ip2"><video muted playsinline loop preload="auto"></video><span class="ipw" id="cyc1">ใส่</span></div>
+    <div class="ip ip3"><video muted playsinline loop preload="auto"></video><span class="ipw" id="cyc2">คืน</span></div>
+    <div class="ip ip4"><video muted playsinline loop preload="auto"></video><span class="ipw" id="cyc3">ส่งต่อ</span></div>
   </div>
-  <div class="introtag" id="introTag">love + loop</div>
-  <div class="introsub" id="introSub">share the look, save the planet</div>
-  <button class="enterbtn" id="introEnter" onclick="enterApp()">เปิดคอลเลกชัน</button>
+  <div class="imark">
+    <div class="ichip">
+      <div class="ihouse" id="introHouse">circular fashion house</div>
+      <div class="intrologo">LLOOP</div>
+      <div class="introtag" id="introTag">love + loop</div>
+      <div class="introsub" id="introSub">share the look, save the planet</div>
+      <button class="enterbtn" id="introEnter" onclick="enterApp()">เข้าสู่คอลเลกชัน</button>
+    </div>
+  </div>
 </div>
 <script>
   /* intro โชว์แค่ครั้งแรกของ session — กลับหน้าหลักจากหน้าอื่นเข้าคอลเลกชันเลย ไม่คั่นซ้ำ
      ทำแบบ synchronous ตรงนี้ (ก่อน intro paint) กัน flash */
   try {
     if (sessionStorage.getItem('lloop_entered') === '1') document.getElementById('intro').style.display = 'none';
-    else setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 2200);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — สั้นลงเพราะ hero วิดีโอคือฉากเปิดตัวจริง
+    else window.__introTimer = setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 2200);  // เข้าคอลเลกชันเอง — ถ้ามีคลิป intro จะขยายเวลาให้ (ดูสคริปต์หลัง config.js)
   } catch (e) {}
 </script>
 
@@ -1418,8 +1430,25 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=45"></script>
-<script>/* ผู้ใช้ตั้งค่าลดอนิเมชัน → ไม่เล่นวิดีโอ hero (คงฉาก poster มืดไว้) */
-try{if(matchMedia('(prefers-reduced-motion: reduce)').matches&&window.CONFIG)window.CONFIG.HERO_VIDEO=[];}catch(e){}</script>
+<script>
+/* ผู้ใช้ตั้งค่าลดอนิเมชัน → ไม่เล่นวิดีโอ hero/intro (คงฉากนิ่งไว้) */
+try{if(matchMedia('(prefers-reduced-motion: reduce)').matches&&window.CONFIG){window.CONFIG.HERO_VIDEO=[];window.CONFIG.INTRO_VIDEOS=[];}}catch(e){}
+/* intro film wall — เสียบคลิปลง 4 ช่อง เล่นพร้อมกัน · โหลดไม่ได้ = คงแผ่นสีผ้า */
+try{(function(){
+  var intro=document.getElementById('intro');
+  if(!intro||intro.style.display==='none')return;
+  var iv=(window.CONFIG&&window.CONFIG.INTRO_VIDEOS)||[];if(!iv.length)return;
+  document.querySelectorAll('.ipanels .ip').forEach(function(p,i){
+    var v=p.querySelector('video');if(!v||!iv[i])return;
+    v.src=iv[i];v.muted=true;
+    v.addEventListener('loadeddata',function(){p.classList.add('hasvid');},{once:true});
+    if(v.play)v.play().catch(function(){});
+  });
+  /* มีคลิป → ยืดเวลาชมเป็น 4 วิ (ยังกดข้ามได้ตลอด) */
+  if(window.__introTimer){clearTimeout(window.__introTimer);
+    window.__introTimer=setTimeout(function(){if(typeof enterApp==='function'&&intro.style.display!=='none')enterApp();},4000);
+    intro.classList.add('longplay');}
+})();}catch(e){}</script>
 <script src="analytics.js?v=45"></script>
 <script src="pixel.js?v=45"></script>
 <script src="i18n.js?v=52"></script>

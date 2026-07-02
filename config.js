@@ -18,6 +18,16 @@ window.CONFIG = {
   ],
   HERO_POSTER:'', // รูป poster ระหว่างวิดีโอโหลด (เว้นว่าง = พื้นหลังไล่สี)
 
+  // ===== วิดีโอหน้า intro (campaign film wall) — คลิป 4 ช่องเล่นพร้อมกันก่อนเข้าคอลเลกชัน =====
+  // ใส่ได้สูงสุด 4 คลิป (เรียงตามช่อง เช่า/ใส่/คืน/ส่งต่อ) · คลิปสั้น 5-10 วิ แนวตั้ง เล่นวนเงียบ
+  // เว้นว่าง = ใช้แผ่นสีผ้าแบบนิ่งแทน · มีคลิป = intro ยืดเป็น 4 วิ (กดข้ามได้เสมอ)
+  INTRO_VIDEOS:[
+    // 'https://<storage>/lloop-intro-rent.mp4',
+    // 'https://<storage>/lloop-intro-wear.mp4',
+    // 'https://<storage>/lloop-intro-return.mp4',
+    // 'https://<storage>/lloop-intro-pass.mp4',
+  ],
+
   // ===== วิดีโอหน้า About (story) — เว้นว่างไว้ = โชว์ poster placeholder สวย ๆ พร้อมเสียบลิงก์ทีหลัง =====
   // hero = วิดีโอพื้นหลังหัวเรื่อง (ambient, เล่นเงียบวนลูป) · story = คลิปสั้นแทรกในบท "the loop"
   ABOUT_HERO_VIDEO:'',   // เช่น 'https://<storage>/lloop-story-hero.mp4'  (เว้นว่าง = ใช้พื้นหลังไล่สีเดิม)
