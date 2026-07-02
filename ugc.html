@@ -104,7 +104,7 @@ async function loadQueue(){
   if (error){ box.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
   const rows = data || [];
   $('#rqn').textContent = rows.length ? rows.length+' รายการ' : '';
-  if (!rows.length){ box.innerHTML = `<div class="empty">ไม่มีรูปค้างรีวิว 🎉</div>`; return; }
+  if (!rows.length){ box.innerHTML = `<div class="empty">ไม่มีรูปค้างรีวิว — เคลียร์หมดแล้ว ✓</div>`; return; }
   box.innerHTML = rows.map(r => {
     const reasons = (r.audit && r.audit.reasons || []).join(' · ');
     const bk = r.bucket==='pass_unpaid' ? 'ผ่าน · รอจ่าย (เกินเพดาน)' : (r.bucket==='failed' ? 'ตกออดิท' : esc(r.bucket));

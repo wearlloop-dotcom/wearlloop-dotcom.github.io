@@ -149,7 +149,7 @@
       let html=`<div class="top"><span class="when">${when} น.</span><span class="badge ${a.status}">${STLABEL[a.status]||a.status}</span></div>`;
       html+=`<div class="who">สไตลิสต์ <b>${esc(a.partner||'—')}</b>${a.studio?` · ${esc(a.studio)}`:''}</div>`;
       html+=`<div class="meta">ลูกค้า ${esc(a.customer||'—')}`+
-        (a.customer_phone?` · ☎ ${esc(a.customer_phone)}`:'')+
+        (a.customer_phone?` · โทร ${esc(a.customer_phone)}`:'')+
         (a.code?` · รหัส ${esc(a.code)}`:'')+`</div>`;
       if(a.customer_note) html+=`<div class="note">โน้ตลูกค้า: ${esc(a.customer_note)}</div>`;
       if(a.partner_note)  html+=`<div class="note">โน้ตสไตลิสต์: ${esc(a.partner_note)}</div>`;
