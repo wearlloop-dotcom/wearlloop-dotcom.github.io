@@ -1,0 +1,20 @@
+-- =============================================================================
+-- LLOOP · โมเดลขยายเฟส 1 — feature flags + trust score v1
+--
+-- ⚠ ไฟล์นี้ย้ายบ้านแล้ว — ฉบับจริง (canonical) อยู่ที่ repo backend:
+--     wearlloop-dotcom/lloop → supabase/trust_score.sql
+--   รันด้วย:  bash scripts/sbql.sh supabase/trust_score.sql
+--
+-- เหตุผลที่ย้าย: ฉบับแรกในไฟล์นี้เขียนโดยเดา schema (get_setting แบบ 1 อาร์กิวเมนต์
+-- และ patch ที่ quote_rental) — พอเห็นซอร์สจริงใน lloop พบว่า get_setting รับ
+-- (key, default) 2 อาร์กิวเมนต์ และจุดคำนวณมัดจำจุดเดียวของระบบคือ deposit_for
+-- (quote_rental / reserve_garment_dates / book_with_backups / book_cart วิ่งผ่านหมด)
+-- ฉบับจริงจึง patch ที่ deposit_for และแก้ get_setting ให้ถูกต้องแล้ว
+--
+-- สิ่งที่เหลือให้ทำหลังรันไฟล์ฉบับจริง:
+--   1. hub_settings_set: เพิ่ม 5 คีย์เข้า allowlist (trust_show_enabled,
+--      trust_pricing_enabled, passport_public_enabled, consign_open_enabled,
+--      trust_waive_min_returns) — ฟังก์ชันนี้สร้างตรงใน dashboard ไม่มีซอร์สในรีโป
+--   2. deploy edge function:  supabase functions deploy me-rpc
+--      (allowlist 'trust_me' ถูกเพิ่มใน supabase/functions/me-rpc/index.ts แล้ว)
+-- =============================================================================

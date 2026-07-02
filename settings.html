@@ -174,6 +174,53 @@
     <div id="mgOut" class="sub" style="margin-top:8px;line-height:1.6"></div>
   </div>
 
+  <div class="card" id="expansionCard" style="display:none">
+    <h2>โมเดลขยายเฟส 1 — Trust score &amp; สมุดพกชุด</h2>
+    <div class="desc">สวิตช์ของแผนขยาย (docs/expansion-strategy.md) — ระบบเก็บประวัติเช่า-คืน-QC อยู่ตลอดไม่ว่าสวิตช์จะเปิดหรือปิด (คะแนนสะสมเงียบ ๆ ตั้งแต่วันนี้) สวิตช์คุมแค่ “การแสดงผล” กับ “ผลต่อราคา” — เปิดเมื่อพร้อม ปิดได้ทันที</div>
+
+    <div class="feat">
+      <div class="info">
+        <div class="name">แสดงสมุดพกลูกค้า (trust tier)</div>
+        <div class="note">ลูกค้าเห็นระดับความเชื่อใจ + สิทธิ์ถัดไปของตัวเองใน LINE · เปิดวันไหน ลูกค้าเก่าเห็นคะแนนสะสมย้อนหลังทันที ไม่เริ่มนับศูนย์</div>
+        <div class="need">หน้า trust.html พร้อมแล้ว — ต้องมี: ติดตั้ง sql/2026-07-expansion-flags-trust.sql + เพิ่ม trust_me เข้า allowlist ของ me-rpc</div>
+      </div>
+      <label class="sw" data-key="trust_show_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+
+    <div class="feat">
+      <div class="info">
+        <div class="name">คะแนนมีผลกับมัดจำจริง</div>
+        <div class="note">quote_rental ยกเว้น/ลดมัดจำอัตโนมัติให้ลูกค้าที่ประวัติผ่านเกณฑ์ (เช็ค flag ฝั่ง server เท่านั้น — หน้าเว็บปลดเองไม่ได้) · ถ้าเปิดแล้วเคลมพุ่ง ปิดสวิตช์นี้ได้ทันทีโดยสมุดพกยังแสดงอยู่</div>
+        <div class="need">ต้องมี: patch quote_rental ตามตัวอย่างในไฟล์ SQL + KYC ยังบังคับเสมอ</div>
+      </div>
+      <label class="sw" data-key="trust_pricing_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+
+    <div class="feat">
+      <div class="info">
+        <div class="name">สมุดพกชุดสาธารณะ (garment passport)</div>
+        <div class="note">หน้า timeline ประวัติซัก-ซ่อม-รอบใส่ต่อชุด เปิดจากการแตะ NFC / สแกน (tag_lookup) ให้คนนอกดูได้ — จุดขายความโปร่งใส + ฐานราคาขายต่อ</div>
+        <div class="need">ต้องมี: หน้า passport สาธารณะ (เริ่มจากชุด top-50 ที่หมุนบ่อย)</div>
+      </div>
+      <label class="sw" data-key="passport_public_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+
+    <div class="feat">
+      <div class="info">
+        <div class="name">เปิดรับฝากเช่า (เฟส 2)</div>
+        <div class="note">แสดงปุ่ม/หน้าเชิญฝากตู้ให้ลูกค้า tier สูง (invite-only ก่อน) · ปิดไว้จนกว่าเฟส 1 ผ่านเกณฑ์</div>
+        <div class="need">ต้องมี: โฟลว์ประเมินชุด + สัญญาฝาก + dashboard เจ้าของตู้</div>
+      </div>
+      <label class="sw" data-key="consign_open_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+
+    <div class="disc">
+      <label>ยกเว้นมัดจำเมื่อคืนสมบูรณ์ครบ<div class="sub">จำนวนครั้งขั้นต่ำที่คืนตรงเวลา + สภาพผ่าน QC (มีผลเมื่อเปิด “คะแนนมีผลกับมัดจำจริง”)</div></label>
+      <input id="trustWaive" type="number" min="1" max="50" step="1" inputmode="numeric">
+      <span class="unit">ครั้ง</span>
+    </div>
+  </div>
+
   <div class="hint" id="hint" style="display:none">
     หมายเหตุ: สวิตช์เป็นแค่ “สวิตช์เปิดไฟ” — โค้ดหน้าจอ/edge function/ฮาร์ดแวร์ที่อ่านค่านี้ต้องสร้างก่อนถึงจะเห็นผลจริง
     ค่าทั้งหมดเก็บใน app_settings และอ่านในระบบผ่าน get_setting() · แก้ไขได้เฉพาะเจ้าของ
@@ -202,6 +249,7 @@ function paint(s){
   $('#premVal').value = s.premium_value_threshold ?? '3000';
   $('#premRetail').value = s.premium_retail_threshold ?? '8000';
   $('#premTiers').value = s.premium_tiers ?? 'Premium,Luxury';
+  $('#trustWaive').value = s.trust_waive_min_returns ?? '3';
 }
 
 async function load(){
@@ -214,6 +262,7 @@ async function load(){
   $('#partnerCard').style.display = '';
   $('#premiumCard').style.display = '';
   $('#financeCard').style.display = '';
+  $('#expansionCard').style.display = '';
   $('#hint').style.display = '';
   loadFinance();
 }
@@ -286,6 +335,11 @@ $('#premRetail').addEventListener('change', (e) => {
 });
 $('#premTiers').addEventListener('change', (e) => {
   save('premium_tiers', (e.target.value || '').trim() || 'Premium,Luxury');
+});
+// เกณฑ์ยกเว้นมัดจำ trust score (1–50 ครั้ง)
+$('#trustWaive').addEventListener('change', (e) => {
+  const v = String(Math.min(50, Math.max(1, parseInt(e.target.value || '3', 10) || 3)));
+  save('trust_waive_min_returns', v);
 });
 
 load();

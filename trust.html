@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สมุดพกของฉัน — LLOOP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="me-api.js"></script>
+<script src="analytics.js"></script>
+<script src="nav.js?v=1"></script>
+<style>
+  :root {
+    --cream: #FBFAF7;
+    --cream2: #F5F4F2;
+    --line: #E7E5E1;
+    --ink: #1A1A1A;
+    --muted: #8C8B86;
+    --sage: #6FB3A6;
+    --sage-light: #E4F0EC;
+    --warm: #C9A86A;
+    --bronze: #B08D57;
+    --silver: #9BA3AB;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', 'Prompt', -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .back-link { color: var(--muted); text-decoration: none; font-size: 13px; letter-spacing: .5px; }
+  .back-link::before { content: '←'; margin-right: 6px; }
+  header h1 { font-family: 'Poppins','Prompt',sans-serif; font-size: 17px; font-weight: 600; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 70px; display: flex; flex-direction: column; gap: 16px; }
+  .state { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 14px; }
+
+  /* ===== passbook card ===== */
+  .book {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px;
+    padding: 28px 22px 22px; text-align: center; position: relative; overflow: hidden;
+  }
+  .book .halo { position: absolute; width: 220px; height: 220px; border-radius: 50%; right: -90px; top: -90px; opacity: .5; background: var(--tint, var(--cream2)); }
+  .book .eyebrow { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); position: relative; }
+  .tierName { font-family: 'Poppins','Prompt',sans-serif; font-size: 30px; font-weight: 700; margin-top: 8px; color: var(--tone, var(--ink)); position: relative; }
+  .tierTh { font-size: 13.5px; color: var(--muted); margin-top: 2px; position: relative; }
+  .scoreRow { display: flex; justify-content: center; align-items: baseline; gap: 6px; margin-top: 14px; position: relative; }
+  .scoreRow .n { font-family: 'Poppins',sans-serif; font-size: 40px; font-weight: 700; }
+  .scoreRow .u { font-size: 13px; color: var(--muted); }
+  .benefit {
+    margin-top: 16px; padding: 13px 14px; border-radius: 12px; font-size: 14px; font-weight: 500;
+    background: var(--cream2); color: var(--ink); position: relative; line-height: 1.55;
+  }
+  .benefit.on { background: var(--sage-light); color: #23554B; }
+
+  /* ===== progress ===== */
+  .prog { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+  .prog .t { font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: baseline; }
+  .prog .t .c { color: var(--muted); font-weight: 400; font-size: 12.5px; }
+  .bar { height: 8px; background: var(--cream2); border-radius: 6px; margin-top: 12px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--sage); border-radius: 6px; transition: width .5s ease; }
+  .prog .next { font-size: 13px; color: var(--muted); margin-top: 10px; }
+
+  /* ===== stats ===== */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 8px; text-align: center; }
+  .stat .n { font-family: 'Poppins',sans-serif; font-size: 22px; font-weight: 700; }
+  .stat .l { font-size: 11.5px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+
+  /* ===== rules ===== */
+  .rules { background: var(--cream2); border-radius: 14px; padding: 16px 18px; font-size: 12.5px; color: var(--muted); line-height: 1.8; }
+  .rules b { color: var(--ink); font-weight: 600; }
+  .rules .h { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <a class="back-link" href="shop.html">กลับ</a>
+  <h1>สมุดพกของฉัน</h1>
+</header>
+
+<div class="wrap">
+  <div id="loading" class="state">กำลังเปิดสมุดพก…</div>
+
+  <div id="off" class="state" style="display:none">
+    สมุดพกความเชื่อใจกำลังจะเปิดเร็ว ๆ นี้<br>
+    ทุกการเช่า-คืนของคุณถูกบันทึกไว้แล้ว — วันที่เปิด คะแนนสะสมย้อนหลังจะแสดงทันทีค่ะ
+  </div>
+
+  <div id="err" class="state" style="display:none"></div>
+
+  <div id="main" style="display:none; flex-direction:column; gap:16px">
+    <div class="book" id="book">
+      <span class="halo"></span>
+      <div class="eyebrow">LLOOP TRUST</div>
+      <div class="tierName" id="tierName">–</div>
+      <div class="tierTh" id="tierTh"></div>
+      <div class="scoreRow"><span class="n" id="score">0</span><span class="u">คะแนน</span></div>
+      <div class="benefit" id="benefit"></div>
+    </div>
+
+    <div class="prog" id="prog">
+      <div class="t">สิทธิ์ไม่วางมัดจำ <span class="c" id="progCount"></span></div>
+      <div class="bar"><i id="progBar" style="width:0%"></i></div>
+      <div class="next" id="next"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n" id="stPerfect" style="color:#23554B">0</div><div class="l">คืนสมบูรณ์</div></div>
+      <div class="stat"><div class="n" id="stLate">0</div><div class="l">คืนช้า</div></div>
+      <div class="stat"><div class="n" id="stDamage">0</div><div class="l">สภาพไม่ผ่าน</div></div>
+    </div>
+
+    <div class="rules">
+      <div class="h">คะแนนคิดยังไง</div>
+      คืนตรงเวลา + สภาพเรียบร้อย <b>+10</b> · คืนช้า <b>−15</b> · สภาพไม่ผ่าน <b>−20</b> · มีเคสพิพาท <b>−40</b><br>
+      ระดับ: <b>Bronze</b> เริ่มสะสม · <b>Silver</b> 50 คะแนน · <b>Gold</b> 120 คะแนน (ไม่มีเคสใน 12 เดือน)<br>
+      สิทธิ์ไม่วางมัดจำ: ยืนยันตัวตนแล้ว + คืนสมบูรณ์ครบตามเกณฑ์ + ไม่มีเคสใน 6 เดือน
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const TIERS = {
+  NEW:    { th: 'เพื่อนใหม่ — เช่าครั้งแรกเมื่อไหร่ เริ่มสะสมทันที', tone: '#8C8B86', tint: '#F5F4F2' },
+  BRONZE: { th: 'บรอนซ์ — กำลังสะสมความเชื่อใจ',                    tone: '#B08D57', tint: '#F6EFE4' },
+  SILVER: { th: 'ซิลเวอร์ — ลูกค้าประวัติดี',                        tone: '#78828C', tint: '#EEF1F4' },
+  GOLD:   { th: 'โกลด์ — ระดับสูงสุดของความเชื่อใจ',                 tone: '#C9A86A', tint: '#F9F2E3' },
+};
+
+function paint(d) {
+  const t = TIERS[d.tier] || TIERS.NEW;
+  const book = $('#book');
+  book.style.setProperty('--tone', t.tone);
+  book.style.setProperty('--tint', t.tint);
+  $('#tierName').textContent = d.tier;
+  $('#tierTh').textContent = t.th;
+  $('#score').textContent = d.score ?? 0;
+
+  const ben = $('#benefit');
+  if (d.waive_deposit) {
+    ben.classList.add('on');
+    ben.textContent = 'เช่าโดยไม่ต้องวางมัดจำแล้วค่ะ — ขอบคุณที่ดูแลชุดเสมอมา';
+  } else {
+    ben.textContent = d.next_step || 'เริ่มเช่าเพื่อสะสมคะแนนความเชื่อใจ';
+  }
+
+  const perfect = d.perfect_returns | 0, min = Math.max(1, d.waive_min | 0);
+  $('#progCount').textContent = `${Math.min(perfect, min)}/${min} ครั้ง`;
+  $('#progBar').style.width = Math.min(100, Math.round(perfect / min * 100)) + '%';
+  $('#next').textContent = d.waive_deposit ? 'รักษาระดับ: คืนตรงเวลาและไม่มีเคสต่อเนื่อง' : (d.next_step || '');
+
+  $('#stPerfect').textContent = perfect;
+  $('#stLate').textContent = d.late | 0;
+  $('#stDamage').textContent = d.damage | 0;
+}
+
+async function load() {
+  const { data, error } = await window.meRpc('trust_me', {});
+  if (error) {
+    if (error.message === 'redirecting_to_login') return; // กำลังเด้งเข้า LINE login
+    $('#loading').style.display = 'none';
+    $('#err').style.display = '';
+    $('#err').textContent = 'เปิดสมุดพกไม่สำเร็จ: ' + error.message;
+    return;
+  }
+  $('#loading').style.display = 'none';
+  if (!data || data.enabled === false) { $('#off').style.display = ''; return; }
+  paint(data);
+  $('#main').style.display = 'flex';
+}
+load();
+</script>
+</body>
+</html>
