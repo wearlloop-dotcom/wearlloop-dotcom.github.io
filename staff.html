@@ -89,6 +89,7 @@
   if(window.meRpc) sb.rpc=window.meRpc;   // route ทุก rpc ผ่าน gateway me-rpc (override p_line_uid จาก idToken — กัน IDOR)
   const LIFF_ID=CONFIG.LIFF_ID;
   const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const wrap=$('wrap');
   const qs=new URLSearchParams(location.search);
   const verifyToken=qs.get('token');   // ผูก/ยืนยัน UID
@@ -246,11 +247,11 @@
       ['วันเริ่มงาน',v.start_date],['วันสิ้นสุด',v.end_date],
       ['บอกเลิกล่วงหน้า',v.notice_days?(v.notice_days+' วัน'):null],
     ].filter(r=>r[1]);
-    const extra=(c.extra_clauses||[]).map((x,i)=>`<div class="clause"><b>${i+1}. ${x.h||''}</b><p>${x.body||''}</p></div>`).join('');
-    return `<h3>${c.title||defaultTitle(c.template)}</h3>
-      <p>เลขที่สัญญา ${c.contract_no} · ทำขึ้นระหว่าง บริษัท LLOOP ("นายจ้าง") กับ <b>${c.emp_name}</b> ("ลูกจ้าง")</p>
-      ${c.scope?`<div class="clause"><b>ขอบเขตหน้าที่</b><p>${c.scope}</p></div>`:''}
-      <div style="margin:10px 0">${rows.map(r=>`<div class="kv"><span class="k">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div>
+    const extra=(c.extra_clauses||[]).map((x,i)=>`<div class="clause"><b>${i+1}. ${esc(x.h||'')}</b><p>${esc(x.body||'')}</p></div>`).join('');
+    return `<h3>${esc(c.title||defaultTitle(c.template))}</h3>
+      <p>เลขที่สัญญา ${esc(c.contract_no)} · ทำขึ้นระหว่าง บริษัท LLOOP ("นายจ้าง") กับ <b>${esc(c.emp_name)}</b> ("ลูกจ้าง")</p>
+      ${c.scope?`<div class="clause"><b>ขอบเขตหน้าที่</b><p>${esc(c.scope)}</p></div>`:''}
+      <div style="margin:10px 0">${rows.map(r=>`<div class="kv"><span class="k">${r[0]}</span><span>${esc(r[1])}</span></div>`).join('')}</div>
       ${extra}
       <p style="margin-top:10px;color:var(--stone)">ลูกจ้างตกลงปฏิบัติตามระเบียบบริษัท รักษาความลับทางการค้า และดูแลทรัพย์สิน/ชุดเช่าด้วยความระมัดระวัง การลงนามอิเล็กทรอนิกส์นี้มีผลผูกพันตามกฎหมาย</p>`;
   }
@@ -491,7 +492,7 @@
     const list=(data&&!data.error)?data:[];
     if(!list.length){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ยังไม่มีสลิปเงินเดือนค่ะ</p></div>';return;}
     b.innerHTML=list.map(s=>`<div class="card">
-      <div class="sub">งวด ${s.period} · ${s.status==='paid'?'โอนแล้ว':'ออกสลิปแล้ว'}</div>
+      <div class="sub">งวด ${s.period} · ${s.status==='paid'?'โอนแล้ว':(s.status==='draft'?'ร่าง (ยังไม่ออก)':'ออกสลิปแล้ว')}</div>
       <div class="big" style="color:var(--sageDeep)">฿${Number(s.net).toLocaleString()}</div><div class="sub">ยอดสุทธิ</div>
       <div class="kv"><span class="k">เงินเดือนฐาน</span><span>฿${Number(s.base_salary).toLocaleString()}</span></div>
       ${(s.additions||[]).map(a=>`<div class="kv"><span class="k">+ ${a.label}</span><span>฿${Number(a.amount).toLocaleString()}</span></div>`).join('')}
@@ -619,9 +620,10 @@
 
   // ---------- boot ----------
   async function boot(){
-    try{ await liff.init({liffId:LIFF_ID});
-      if(liff.isLoggedIn()){const p=await liff.getProfile();lineUid=p.userId;lineName=p.displayName;}
-      else if(liff.isInClient()){liff.login();return;}
+    try{ await liff.init({liffId:LIFF_ID, withLoginOnExternalBrowser:true});
+      if(liff.isLoggedIn()){sessionStorage.removeItem('staffLoginTried');const p=await liff.getProfile();lineUid=p.userId;lineName=p.displayName;}
+      // ยังไม่ login → เด้งเข้า LINE login แม้เปิดนอกแอป (withLoginOnExternalBrowser) กัน loop: ลองครั้งเดียวต่อ session
+      else if(!sessionStorage.getItem('staffLoginTried')){sessionStorage.setItem('staffLoginTried','1');liff.login({redirectUri:location.href});return;}
     }catch(e){/* เบราว์เซอร์ปกติ — lineUid ว่าง */}
     buildLangSel(); applyStatic();
     if(verifyToken){ activeRender=showVerify; return showVerify(); }

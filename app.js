@@ -3929,9 +3929,12 @@ function routeDeepLink() {
     // มาจากฟีดชุมชน (?look=ID) → log attribution ให้ครีเอเตอร์ได้ส่วนแบ่งเมื่อเช่าตาม
     const lookId = qs.get('look') || (ls && ls.get('look'));
     if (lookId && window.API && window.API.logLookView) { try { window.API.logLookView(lookId, gcode); } catch (e) {} }
-    // มาจากลิงก์ชวนเช่าของครีเอเตอร์ (?ref=handle) → log affiliate (แชร์นอกแอปก็ได้เครดิต)
+    // ?ref มี 2 ความหมายคนละระบบ: โค้ดชวนเพื่อนขึ้นต้น 'LOOP-' (เช่น LOOP-AB12) vs handle ครีเอเตอร์
+    // แยก branch ก่อนยิง ไม่ให้ ref เดียวถูกนับเป็นทั้ง creator_ref และ apply_referral พร้อมกัน
     const ref = qs.get('ref') || (ls && ls.get('ref'));
-    if (ref && window.API && window.API.logRef) { try { window.API.logRef(ref, gcode); } catch (e) {} }
+    const isFriendCode = !!(ref && /^loop-/i.test(ref.trim()));
+    // มาจากลิงก์ชวนเช่าของครีเอเตอร์ (?ref=handle) → log affiliate (แชร์นอกแอปก็ได้เครดิต)
+    if (ref && !isFriendCode && window.API && window.API.logRef) { try { window.API.logRef(ref, gcode); } catch (e) {} }
     if (gcode) {
       const g = GARMENTS.find(x => (x.code || '').toLowerCase() === gcode.toLowerCase());
       // ?date=YYYY-MM-DD (จากการ์ด waitlist "ถึงคิวคุณ") → เปิด detail พร้อมเติมวันที่ให้เลย
@@ -3941,8 +3944,8 @@ function routeDeepLink() {
       // ลิงก์มาถึงชุดที่ไม่ ready/ถูกจองเต็ม/ถูกลบ (ไม่อยู่ใน GARMENTS) → แจ้งลูกค้าแทนตกหน้าแรกเงียบ ๆ
       setTimeout(() => toast(lang === 'th' ? 'ชุดนี้ไม่ว่างตอนนี้ — ลองดูชุดคล้ายกันนะคะ' : 'This dress is unavailable right now — try similar ones'), 400);
     }
-    // โค้ดชวนเพื่อนจากลิงก์ (?ref=CODE) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿50 ทั้งคู่ เมื่อเช่าครั้งแรก)
-    if (ref) { try { localStorage.setItem('lloop_ref', ref.trim()); } catch (_e) {} applyPendingReferral(); }
+    // โค้ดชวนเพื่อนจากลิงก์ (?ref=LOOP-XXXX) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿50 ทั้งคู่ เมื่อเช่าครั้งแรก)
+    if (ref && isFriendCode) { try { localStorage.setItem('lloop_ref', ref.trim()); } catch (_e) {} applyPendingReferral(); }
     // มาจากการ์ดเกม quiz.html (?occasion=KEY&mood=...) → จำโอกาสไว้ให้ LLOOP Atelier ใช้ + กรองคลังให้ตรงงาน
     const occ = qs.get('occasion') || (ls && ls.get('occasion'));
     if (occ && OCCASIONS && Object.prototype.hasOwnProperty.call(window.I18N[lang].occ || {}, occ)) {

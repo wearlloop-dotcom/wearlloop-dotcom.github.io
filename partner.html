@@ -852,7 +852,10 @@
             (b.code?'<button onclick="goAnalyse(\''+b.code+'\')">กรอกผลวิเคราะห์</button>':'')+
             '<button class="done" onclick="bookingAction(\''+b.id+'\',\'done\')">เสร็จงาน</button>'+
             '<button onclick="bookingAction(\''+b.id+'\',\'cancel\')">ยกเลิก</button></div>';
-        }else{ html+='<div class="bn">เสร็จงานแล้ว</div>'; }
+        }else{
+          const STLABEL={done:'เสร็จงานแล้ว',cancelled:'ยกเลิก',canceled:'ยกเลิก',no_show:'ไม่มา'};
+          html+='<div class="bn">'+esc(STLABEL[b.status]||'เสร็จงานแล้ว')+'</div>';
+        }
         div.innerHTML=html; box.appendChild(div);
       });
     }catch(e){ box.innerHTML='<div class="empty">โหลดคิวไม่สำเร็จ</div>'; }

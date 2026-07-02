@@ -122,7 +122,8 @@
       x.customer?'ลูกค้า '+esc(x.customer):'',
       '')).join('');
     const wash=(d.wash||[]).map(x=>{ const s=STAGE[x.stage]||[x.stage||'',''];
-      return rowLink('/laundry.html', esc(x.code)+' · '+esc(x.name||''), '', `<span class="tag ${s[1]}">${esc(s[0])}</span>`); }).join('');
+      const href = x.stage==='repair' ? '/repair.html' : '/laundry.html';
+      return rowLink(href, esc(x.code)+' · '+esc(x.name||''), '', `<span class="tag ${s[1]}">${esc(s[0])}</span>`); }).join('');
     const review=(d.review||[]).map(x=>{
       const code=esc(x.code);
       return `<div class="row" id="rv-${code}">
