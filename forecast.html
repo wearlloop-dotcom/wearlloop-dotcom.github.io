@@ -100,13 +100,13 @@
           <button id="ttRev" class="on" onclick="setTarget('rev')" data-i18n="Revenue">ยอดขาย</button>
           <button id="ttNet" onclick="setTarget('net')" data-i18n="Net profit">กำไรสุทธิ</button>
         </div>
-        <button class="pullbtn" id="pullAll" onclick="applyReal('all')" data-i18n="Pull this month’s actuals (rev/rental · util · rentals/customer)">ดึงตัวเลขจริงเดือนนี้มาใส่ (รายได้/การเช่า · util · เช่า/ลูกค้า)</button>
+        <button class="pullbtn" id="pullAll" onclick="applyReal('all')" data-i18n="Pull this month’s actuals (rev/rental · avg cycles/piece · rentals/customer)">ดึงตัวเลขจริงเดือนนี้มาใส่ (รายได้/การเช่า · รอบเช่าเฉลี่ย/ชุด/เดือน · เช่า/ลูกค้า)</button>
         <div class="grid">
           <div class="f"><label id="lb_target" data-i18n="Revenue target / month (THB)">เป้ายอดขาย / เดือน (บาท)</label><input type="number" id="i_target" value="300000"></div>
           <div class="f"><label data-i18n="Avg revenue / rental">รายได้เฉลี่ย / การเช่า</label><input type="number" id="i_rpr" value="286"><button class="rbtn off" id="rb_rpr" onclick="applyReal('rpr')">จริง: —</button></div>
           <div class="f"><label data-i18n="Rentals / customer / month">เช่า / ลูกค้า / เดือน</label><input type="number" id="i_freq" value="2"><button class="rbtn off" id="rb_freq" onclick="applyReal('freq')">จริง: —</button></div>
           <div class="f"><label data-i18n="Gross profit / rental">กำไรขั้นต้น / การเช่า</label><input type="number" id="i_contrib" value="174"></div>
-          <div class="f"><label data-i18n="Rentals / piece / month (util)">เช่า / ชุด / เดือน (util)</label><input type="number" step="0.1" id="i_util" value="2.7"><button class="rbtn off" id="rb_util" onclick="applyReal('util')">จริง: —</button></div>
+          <div class="f"><label data-i18n="Avg rental cycles / piece / month">รอบเช่าเฉลี่ย/ชุด/เดือน</label><input type="number" step="0.1" id="i_util" value="2.7"><button class="rbtn off" id="rb_util" onclick="applyReal('util')">จริง: —</button></div>
           <div class="f"><label data-i18n="Customers one handler can manage">ลูกค้าที่ 1 คนจับชุดดูแลได้</label><input type="number" id="i_cap" value="190"></div>
           <div class="f"><label data-i18n="Salary / handler">เงินเดือน / คนจับชุด</label><input type="number" id="i_ops" value="18000"></div>
           <div class="f"><label data-i18n="Support team salary (stylist + content)">เงินเดือนทีมเสริม (สไตลิสต์+คอนเทนต์)</label><input type="number" id="i_support" value="18000"></div>
@@ -164,7 +164,7 @@
         <div class="prog"><i id="rProg"></i></div>
         <div class="note" id="rProgTxt" style="margin:0 0 10px"></div>
         <div id="gapRows"></div>
-        <div class="note" data-i18n="Uses revenue/rental and util from this month’s actuals (falls back to the forecast if no data yet). Cost/salary assumptions are editable on the “Forecast” tab.">ใช้รายได้/การเช่า และ util จากของจริงเดือนนี้ (ถ้ายังไม่มีข้อมูล ใช้ค่าประมาณการ). สมมติฐานค่าใช้จ่าย/เงินเดือน ปรับได้ในแท็บ "ประมาณการ".</div>
+        <div class="note" data-i18n="Uses revenue/rental and avg rental cycles/piece from this month’s actuals (falls back to the forecast if no data yet). Cost/salary assumptions are editable on the “Forecast” tab.">ใช้รายได้/การเช่า และ รอบเช่าเฉลี่ย/ชุด/เดือน จากของจริงเดือนนี้ (ถ้ายังไม่มีข้อมูล ใช้ค่าประมาณการ). สมมติฐานค่าใช้จ่าย/เงินเดือน ปรับได้ในแท็บ "ประมาณการ".</div>
       </div>
     </div>
   </div>
@@ -173,6 +173,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=38"></script>
+<script src="ops-api.js"></script>
 <script src="analytics.js?v=38"></script>
 <script src="nav.js?v=1"></script>
 <script>
@@ -182,6 +183,22 @@ let sb = null, OWNER_UID = null, ACT = null;
 
 function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
 function num(id){ return Number(document.getElementById(id).value) || 0; }
+
+// ---------- RPC ผ่าน gateway ops-rpc (ทางหลัก) + fallback เรียกตรงแบบเดิม ----------
+// ลอง window.opsRpc ก่อน (LINE idToken → edge fn ops-rpc, เช็คสิทธิ์เจ้าของฝั่งเซิร์ฟเวอร์)
+// ถ้า gateway ไม่รับ — เคสหลักคือ fn ยังไม่อยู่ใน allowlist ('คำสั่งนี้ไม่อนุญาต') รวมถึง
+// login LINE ไม่สำเร็จ/เรียก gateway ไม่ถึง — ให้ถอยไปเรียก supabase ตรงแบบเดิม (ส่ง p_uid เหมือนเดิม)
+// เพื่อให้หน้ายังใช้งานได้ครบ (ตัว RPC ตรวจสิทธิ์จาก p_uid ฝั่งเซิร์ฟเวอร์อยู่แล้ว)
+async function gwRpc(fn, args){
+  if (window.opsRpc){
+    try{
+      const r = await window.opsRpc(fn, args || {});
+      if (!r.error) return r;
+      // มี error จาก gateway → fallback ด้านล่าง (หน้าเดิมต้องทำงานต่อได้เสมอ)
+    }catch(e){ /* ops-api มีปัญหา → ใช้ทางตรง */ }
+  }
+  return client().rpc(fn, args);
+}
 
 // ---------- core math ----------
 let gTargetType = 'rev';   // 'rev' = เป้ายอดขาย · 'net' = เป้ากำไรสุทธิ
@@ -290,7 +307,7 @@ function renderPlan(){
 let _planEcon = null;
 async function loadPlanMargin(){
   const el = document.getElementById('planMargin'); if(!el) return;
-  if(!_planEcon){ try { const { data } = await client().rpc('plan_economics'); _planEcon = data || []; } catch(e){ _planEcon = []; } }
+  if(!_planEcon){ try { const { data } = await gwRpc('plan_economics'); _planEcon = data || []; } catch(e){ _planEcon = []; } }
   const plans = _planEcon;
   if(!plans.length){ el.textContent = NAV.t('ยังไม่มีแพ็กเกจ','No packs yet'); return; }
   const ship = num('i_ship');
@@ -337,7 +354,7 @@ async function savePlanPrice(){
   const rentals = Number(document.getElementById('ppRentals').value) || null;
   if(!code || price <= 0){ msg.style.color='#B4543A'; msg.textContent=NAV.t('ใส่ราคาให้ถูกต้องก่อนนะคะ','Please enter a valid price first'); return; }
   msg.style.color='var(--color-text-secondary)'; msg.style.color='#7C8694'; msg.textContent=NAV.t('กำลังบันทึก…','Saving…');
-  const { data, error } = await client().rpc('update_plan_price', { p_uid: OWNER_UID, p_code: code, p_price: price, p_rentals: rentals });
+  const { data, error } = await gwRpc('update_plan_price', { p_uid: OWNER_UID, p_code: code, p_price: price, p_rentals: rentals });
   if(error || !data || data.error){ msg.style.color='#B4543A'; msg.textContent=NAV.t('บันทึกไม่สำเร็จ','Save failed') + (data&&data.error?(' ('+data.error+')'):''); return; }
   _planEcon = null;                                  // refetch ราคาใหม่
   await loadPlanMargin();
@@ -354,7 +371,7 @@ function renderReal(){
   + statHTML(NAV.t('ครั้งเช่า','Rentals'), NF.format(a.rentals||0)+NAV.t(' ครั้ง',''), (a.customers||0)+NAV.t(' ลูกค้า',' customers'))
   + statHTML(NAV.t('ชุดพร้อมเช่า','Pieces ready'), NF.format(a.dresses_ready||0)+NAV.t(' ตัว',''), NAV.t('ทั้งหมด ','total ')+NF.format(a.dresses_total||0))
   + statHTML(NAV.t('รายได้/การเช่า','Revenue/rental'), a.avg_rev_per_rental? baht(a.avg_rev_per_rental):'—', NAV.t('เฉลี่ยจริง','actual average'))
-  + statHTML(NAV.t('เช่า/ชุด (util)','Rentals/piece (util)'), (a.util!=null? a.util:'—'), NAV.t('รอบเช่าต่อชุด','rental cycles per piece'))
+  + statHTML(NAV.t('รอบเช่าเฉลี่ย/ชุด/เดือน','Avg rental cycles/piece/month'), (a.util!=null? a.util:'—'), NAV.t('เฉลี่ยเดือนนี้','avg this month'))
   + statHTML(NAV.t('ลูกค้า','Customers'), NF.format(a.customers||0)+NAV.t(' คน',''), NAV.t('เดือนนี้','this month'))
   + statHTML(NAV.t('กันชนชุดเสีย (กองทุน)','Damage buffer (fund)'), baht((a.reserve&&a.reserve.balance)||0), NAV.t(`ตั้งสำรอง ${(a.reserve&&a.reserve.pct)||5}% ของค่าเช่า`,`reserves ${(a.reserve&&a.reserve.pct)||5}% of rental`), 'good');
 
@@ -405,7 +422,7 @@ function bindInputs(){
   document.getElementById('r_target').addEventListener('input', renderGap);
 }
 async function loadActuals(uid){
-  const { data, error } = await client().rpc('forecast_actuals', { p_uid: uid });
+  const { data, error } = await gwRpc('forecast_actuals', { p_uid: uid });
   if(error || !data) return null;
   return data;
 }
@@ -432,9 +449,13 @@ async function unlock(){
   else showLock(NAV.t('UID นี้ไม่ใช่เจ้าของ ลองใหม่อีกครั้ง','That UID isn’t an owner — try again'), true);
 }
 async function boot(){
+  // login ฝั่ง ops (LIFF หลังบ้าน) เพื่อให้ RPC วิ่งผ่าน gateway ops-rpc — ถ้าไม่สำเร็จไม่เป็นไร
+  // gwRpc จะ fallback ไปเรียกตรงแบบเดิมเอง (แพทเทิร์นเดียวกับ cockpit.html)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
   let uid = null;
   try{
-    await liff.init({ liffId: CONFIG.LIFF_ID });
+    // ถ้า ops-api init LIFF ไปแล้ว init ซ้ำด้วย LIFF ลูกค้าอาจ fail — กันไว้ให้ยังอ่านโปรไฟล์ได้
+    try{ await liff.init({ liffId: CONFIG.LIFF_ID }); }catch(e){ /* init ไปแล้วด้วย LIFF ฝั่ง ops */ }
     if(liff.isLoggedIn()){ const p = await liff.getProfile(); uid = p.userId; }
     else if(liff.isInClient()){ liff.login(); return; }
   }catch(e){ /* นอก LINE */ }
