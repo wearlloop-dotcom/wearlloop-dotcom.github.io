@@ -120,13 +120,38 @@ altText: `พรุ่งนี้วันคืนชุดแล้วนะ�
     { "type": "text", "text": "เตือนคืนชุด ⏰", "size": "xs", "color": "#C0564A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true, "margin": "md" },
     { "type": "text", "text": "กำหนดคืน {{END_DATE}} — ส่งกลับด้วยถุง+ใบปะหน้าที่แนบไปในกล่องได้เลยค่ะ", "size": "sm", "color": "#1A1A1A", "wrap": true },
-    { "type": "text", "text": "ใส่สนุกอยู่? ต่อวันเช่าได้จากปุ่มด้านล่างเลย", "size": "xs", "color": "#8C8B86", "wrap": true, "margin": "md" }
+    { "type": "text", "text": "ส่งแล้วอย่าลืมกรอกเลขพัสดุใน \"ออเดอร์ของฉัน\" นะคะ · ใส่สนุกอยู่? ต่อวันเช่าได้เลย", "size": "xs", "color": "#8C8B86", "wrap": true, "margin": "md" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
     { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "กรอกเลขพัสดุส่งคืน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&return={{RENTAL_ID}}" } },
+    { "type": "button", "style": "link", "height": "sm",
       "action": { "type": "uri", "label": "ต่อวันเช่า", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&extend={{RENTAL_ID}}" } },
     { "type": "button", "style": "link", "height": "sm",
       "action": { "type": "uri", "label": "วิธีคืนชุด", "uri": "https://liff.line.me/{{LIFF_ID}}/rental-terms.html#return" } }
+  ]}
+}
+```
+
+## 5.1 `return_tracking_received` — รับเลขพัสดุส่งคืนแล้ว (หลังลูกค้ากรอกเลขพัสดุผ่านปุ่ม "แจ้งส่งคืน · กรอกเลขพัสดุ" ใน "ออเดอร์ของฉัน" → RPC `return_tracking_submit`)
+
+altText: `รับเลขพัสดุส่งคืนแล้วค่ะ · {{RETURN_TRACKING_NO}}`
+
+```json
+{
+  "type": "bubble",
+  "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "text", "text": "LLOOP", "weight": "bold", "size": "lg", "color": "#1A1A1A" },
+    { "type": "text", "text": "รับเลขพัสดุส่งคืนแล้ว ✓", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "lg", "wrap": true, "margin": "md" },
+    { "type": "text", "text": "{{RETURN_COURIER}} · {{RETURN_TRACKING_NO}}", "size": "sm", "color": "#8C8B86" },
+    { "type": "text", "text": "ชุดถึงร้านแล้วเราจะตรวจสภาพและแจ้งผล+คืนมัดจำให้ทาง LINE เลยค่ะ", "size": "sm", "color": "#1A1A1A", "wrap": true, "margin": "md" }
+  ]},
+  "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
+    { "type": "button", "style": "primary", "color": "#6FB3A6",
+      "action": { "type": "uri", "label": "ติดตามพัสดุขากลับ", "uri": "{{RETURN_TRACKING_URL}}" } },
+    { "type": "button", "style": "link", "height": "sm",
+      "action": { "type": "uri", "label": "ดูออเดอร์ของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me" } }
   ]}
 }
 ```
@@ -311,6 +336,7 @@ altText: `สำเนาสัญญาของคุณ · {{CONTRACT_NO}}`
 
 ## หมายเหตุการต่อระบบ
 
-1. **จุดยิงที่แนะนำ:** DB trigger (pg_net) หรือ Edge Function หลัง RPC สำเร็จ — ตาราง/ฟังก์ชันที่เกี่ยว: `book_with_backups`, `book_cart`, `care_qc`, `care_checkin`, `mark_garment_ready`, `notify_customer_wishlist`, `contract_sign`, `group_pay_confirm`
+1. **จุดยิงที่แนะนำ:** DB trigger (pg_net) หรือ Edge Function หลัง RPC สำเร็จ — ตาราง/ฟังก์ชันที่เกี่ยว: `book_with_backups`, `book_cart`, `care_qc`, `care_checkin`, `mark_garment_ready`, `notify_customer_wishlist`, `contract_sign`, `group_pay_confirm`, `return_tracking_submit`
+   - **RPC ใหม่ที่ backend ต้องสร้าง:** `return_tracking_submit(p_rental, p_courier, p_tracking_no)` — frontend เรียกผ่าน me-rpc gateway แล้ว (ปุ่ม "แจ้งส่งคืน · กรอกเลขพัสดุ" ใน "ออเดอร์ของฉัน") ให้บันทึกเป็น timeline event `return_shipped` (มี enum นี้อยู่แล้วใน `garment_timeline`) แล้วยิงเทมเพลต 5.1 กลับหาลูกค้า และ `my_rentals` ต้องส่งฟิลด์ `return_courier`, `return_tracking_no` เพิ่ม
 2. `webhooks.js` ในรีโปนี้เป็น stub n8n ที่**ไม่มีใครเรียกใช้** และ `N8N_BASE_URL` ยังว่าง — ถ้าจะใช้เส้นทาง n8n ต้องใส่ URL ใน `config.js` และเรียก `webhooks.orderConfirmed(...)` ฯลฯ จาก handler จริง (แต่แนะนำยิงจาก backend มากกว่า เพราะ frontend เชื่อถือไม่ได้/ปิดหน้าก่อนได้)
 3. ทุกเทมเพลตควร insert ลง notification inbox ในแอปด้วย (kinds ที่มีอยู่แล้ว: `wishlist_available`, `new_arrival`, `review_request`, `late` ฯลฯ) เพื่อให้กระดิ่งในแอปตรงกับ LINE

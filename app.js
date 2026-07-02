@@ -3106,6 +3106,12 @@ function orderCard(r, spareList) {
     <div class="orow"><span>${lang ==='th'?'ขนส่ง':'Courier'}</span>${
       url?`<a href="${url}" target="_blank" rel="noopener">${r.courier} · ${r.tracking_no}</a>`:`${r.courier} · ${r.tracking_no}`
     }${r.eta?` <i class="oeta">${lang ==='th'?'ถึงราว':'eta'} ${fmtDate(r.eta)}</i>`:''}</div>`:'';
+  // ขากลับ — โชว์เลขพัสดุส่งคืนที่ลูกค้ากรอกไว้ (กดตามพัสดุได้เหมือนขาไป)
+  const rurl = (r.return_courier && r.return_tracking_no) ? trackUrl(r.return_courier, r.return_tracking_no) : null;
+  const shipBack = r.return_tracking_no ?`
+    <div class="orow"><span>${lang ==='th'?'ส่งคืน':'Return'}</span>${
+      rurl?`<a href="${rurl}" target="_blank" rel="noopener">${r.return_courier} · ${r.return_tracking_no}</a>`:`${r.return_courier?r.return_courier+' · ':''}${r.return_tracking_no}`
+    }</div>`:'';
   // ราคา/มัดจำ — ให้รายละเอียดครบ ไม่ใช่การ์ดเปล่า
   const priceLine = r.covered_by_sub
     ? `<div class="orow"><span>${lang==='th'?'ค่าเช่า':'Rental'}</span>${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}</div>`
@@ -3123,7 +3129,10 @@ function orderCard(r, spareList) {
   const reschedB = canCancelResched ?`<button class="obtn ghost" onclick="orderReschedule('${r.rental_id}')">${lang ==='th'?'เลื่อนวัน':'Reschedule'}</button>`:'';
   const extendB = canExtend ?`<button class="obtn ghost" onclick="orderExtend('${r.rental_id}')">${lang ==='th'?'ต่อเวลา':'Extend'}</button>`:'';
   const cancelB = canCancelResched ?`<button class="obtn ghost" onclick="orderCancel('${r.rental_id}')">${lang ==='th'?'ยกเลิก':'Cancel'}</button>`:'';
-  const actions = isSpare ? '' : `<div class="oactions">${payB}${r.status==='hold'?'':reRent}${reschedB}${extendB}${cancelB}${review}</div>`;
+  // ชุดอยู่กับลูกค้า (out) — ปุ่มแจ้งส่งคืน+กรอกเลขพัสดุขากลับ (หายไปเมื่อกรอกแล้ว)
+  const returnB = (!isSpare && r.status ==='out'&& !r.return_tracking_no)
+    ?`<button class="obtn" onclick="orderReturnShip('${r.rental_id}')">${lang ==='th'?'แจ้งส่งคืน · กรอกเลขพัสดุ':'Shipped it back? Add tracking'}</button>`:'';
+  const actions = isSpare ? '' : `<div class="oactions">${payB}${returnB}${r.status==='hold'?'':reRent}${reschedB}${extendB}${cancelB}${review}</div>`;
   // ชุดสำรองของวันนี้ — เปิด/ปิดเรียกดูได้ (ไม่รก แต่กดดูได้ว่าเตรียมตัวไหนไว้)
   const spId = 'sp-' + r.rental_id;
   const sparesBox = (spareList && spareList.length) ? `
@@ -3167,9 +3176,29 @@ function orderCard(r, spareList) {
     ${occLine}
     ${priceLine}
     ${ship}
+    ${shipBack}
     ${sparesBox}
     ${actions}
   </div>`;
+}
+// แจ้งส่งชุดคืน — กรอกเลขพัสดุขากลับ (เลข ปณ./แทร็กกิ้ง) แล้วบันทึกผ่าน gateway
+async function orderReturnShip(rentalId) {
+  const r = _myRentals.find(x => x.rental_id === rentalId); if (!r) return;
+  const th = lang === 'th';
+  const no = prompt(th ? 'เลขพัสดุที่ส่งคืน (เช่น EMS: EB123456789TH)' : 'Return tracking number (e.g. EB123456789TH)', '');
+  if (no === null) return;                          // กดยกเลิก
+  const trackingNo = no.trim().toUpperCase().replace(/\s+/g, '').slice(0, 40);
+  if (!trackingNo) { toast(th ? 'ใส่เลขพัสดุก่อนนะคะ' : 'Please enter the tracking number'); return; }
+  // เดาขนส่งจากรูปแบบเลข (EMS ไปรษณีย์ไทย: XX#########TH) ไม่งั้นใช้ขนส่งขาไป
+  const guess = /^[A-Z]{2}\d{9}TH$/.test(trackingNo) ? 'thaipost' : ((r.courier || 'flash').toLowerCase());
+  const c = prompt(th ? 'ส่งกับขนส่งไหนคะ? (thaipost / flash / kerry / jt / ninja)' : 'Which courier? (thaipost / flash / kerry / jt / ninja)', guess);
+  if (c === null) return;
+  const courier = (c.trim().toLowerCase() || guess).slice(0, 20);
+  const res = await window.API.submitReturnTracking(rentalId, courier, trackingNo);
+  if (!res || !res.ok) { toast(th ? 'บันทึกไม่สำเร็จ ลองใหม่อีกครั้งนะคะ' : 'Save failed — please try again'); return; }
+  r.return_courier = courier; r.return_tracking_no = trackingNo;   // อัปเดต state ในมือ แล้ววาดใหม่
+  drawOrders();
+  toast(th ? 'รับเลขพัสดุแล้ว ขอบคุณค่ะ — ชุดถึงร้านแล้วจะแจ้งผลตรวจ+คืนมัดจำทาง LINE' : 'Got it — we\'ll confirm the QC result and deposit on LINE once it arrives');
 }
 function toggleSpares(id) {
   const el = document.getElementById(id); if (!el) return;
