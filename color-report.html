@@ -15,7 +15,7 @@
     --muted:#86857F; --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56;
     --gold:#C9A86A; --gold-bg:#F6EFDF; --sand:#F2ECDD; --clay:#A75F3A;
     --display:'Poppins','Prompt',sans-serif;
-    --sans:'Prompt','Inter',-apple-system,sans-serif;
+    --sans:'Inter','Prompt',-apple-system,sans-serif;
     --num:'Poppins',sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -62,7 +62,15 @@
   /* section */
   section{padding:30px 0 4px;scroll-margin-top:104px}
   .shead{display:flex;align-items:center;gap:11px;margin-bottom:5px}
-  .shead .ic{width:38px;height:38px;border-radius:11px;background:var(--sand);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+  .shead .ic{width:38px;height:38px;border-radius:11px;background:var(--sand);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  /* line-art icons (brand style: stroke, no fill) */
+  svg.ico{stroke:#4a4136;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .shead .ic svg.ico{width:20px;height:20px}
+  .ci svg.ico{width:17px;height:17px}
+  .brandgrp .bt svg.ico{width:16px;height:16px;stroke:var(--clay)}
+  .pc .buy svg.ico{width:13px;height:13px;stroke:currentColor;vertical-align:-2px}
+  .mean svg.ico{width:16px;height:16px;stroke:var(--ok);flex-shrink:0;margin-top:1px}
+  .pcard .pi svg.ico{width:22px;height:22px}
   .shead .no{font-family:var(--display);font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:600;text-transform:uppercase}
   .shead h2{font-family:var(--display);font-size:22px;font-weight:600;line-height:1.1}
   .lead{color:#5b564e;font-size:14px;margin:6px 0 16px;line-height:1.6}
@@ -242,13 +250,13 @@
     <span style="width:42px"></span>
   </div>
   <nav class="jump" id="jump">
-    <a href="#colors" class="on">🎨 สีของฉัน</a>
-    <a href="#beauty">💄 เมคอัพ</a>
-    <a href="#body">👗 แต่งตามหุ่น</a>
-    <a href="#looks">✨ ลุคของฉัน</a>
-    <a href="#shop">🛍️ ช้อป/แบรนด์</a>
-    <a href="#size">📏 ไซส์ตัว</a>
-    <a href="#character">✦ คาแรกเตอร์</a>
+    <a href="#colors" class="on">สีของฉัน</a>
+    <a href="#beauty">เมคอัพ</a>
+    <a href="#body">แต่งตามหุ่น</a>
+    <a href="#looks">ลุคของฉัน</a>
+    <a href="#shop">ช้อป / แบรนด์</a>
+    <a href="#size">ไซส์ตัว</a>
+    <a href="#character">คาแรกเตอร์</a>
   </nav>
 </header>
 
@@ -280,11 +288,11 @@
   <!-- 01 COLORS -->
   <section id="colors">
     <div class="shead">
-      <div class="ic">🎨</div>
+      <div class="ic"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.6 0 1.9-1.2 1.1-2.1-.8-.9-.3-2.2 1-2.2H17a4 4 0 0 0 4-4c0-4.8-4-9.5-9-9.5Z"/><circle cx="7.7" cy="12.4" r="1"/><circle cx="9.6" cy="8.3" r="1"/><circle cx="14.4" cy="8.3" r="1"/></svg></div>
       <div><div class="no">01 · Personal Color</div><h2>สีที่ทำให้คุณดูดีที่สุด</h2></div>
     </div>
     <p class="lead">คุณคือ <b id="l_season">Warm Autumn</b> — โทน<b>อุ่น</b> อันเดอร์โทนเหลืองทอง ความเข้มระดับกลางค่อนไปทางนุ่มนวล</p>
-    <div class="mean"><span class="mi">💡</span><div id="l_meaning"><b>แปลว่า</b> สีที่มี “ความอุ่น” และ “ความหม่นนิด ๆ” แบบสีดิน ใบไม้ร่วง ทอง จะทำให้ผิวคุณดูสว่างสุขภาพดี ส่วนสีจัด ๆ โทนเย็น จะกลบผิวให้ดูซีด</div></div>
+    <div class="mean"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v4.6"/><circle cx="12" cy="7.9" r=".7" fill="currentColor" stroke="none"/></svg><div id="l_meaning"><b>แปลว่า</b> สีที่มี “ความอุ่น” และ “ความหม่นนิด ๆ” แบบสีดิน ใบไม้ร่วง ทอง จะทำให้ผิวคุณดูสว่างสุขภาพดี ส่วนสีจัด ๆ โทนเย็น จะกลบผิวให้ดูซีด</div></div>
 
     <a class="hxt" id="hxt">◑ แสดงโค้ดสี (HEX)</a>
     <div class="swwrap" id="swwrap"></div>
@@ -300,7 +308,7 @@
   <!-- 02 NEUTRALS -->
   <section id="neutrals" style="padding-top:6px">
     <div class="shead">
-      <div class="ic">🧺</div>
+      <div class="ic"><svg class="ico" viewBox="0 0 24 24"><path d="M12 5.2a1.8 1.8 0 1 1 1.3 1.7c-.5.2-.9.6-.9 1.1v.5"/><path d="M12 8.5 4.2 15c-.7.6-.3 1.9.6 1.9h14.4c.9 0 1.3-1.3.6-1.9L12 8.5Z"/></svg></div>
       <div><div class="no">02 · Everyday Base</div><h2>สีเบสไว้ใส่ทุกวัน</h2></div>
     </div>
     <p class="lead">10 สีนี้ใช้แทน ขาว–ดำ–เทา ที่ไม่เข้ากับโทนอุ่น มิกซ์กันเองได้ทุกคู่ เป็นแกนตู้เสื้อผ้า</p>
@@ -314,7 +322,7 @@
   <!-- 03 BEAUTY -->
   <section id="beauty">
     <div class="shead">
-      <div class="ic">💄</div>
+      <div class="ic"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4.2c2.9 3.6 5.2 6.2 5.2 9a5.2 5.2 0 0 1-10.4 0c0-2.8 2.3-5.4 5.2-9Z"/></svg></div>
       <div><div class="no">03 · Beauty</div><h2>เมคอัพ · ผม · เล็บ</h2></div>
     </div>
     <p class="lead">โทนที่กลืนกับผิวอุ่นของคุณ เน้นเบสเหลือง ปากอิฐ/ส้มดินเผา และตาโทนน้ำตาลทอง</p>
@@ -324,11 +332,11 @@
   <!-- 04 BODY -->
   <section id="body">
     <div class="shead">
-      <div class="ic">👗</div>
+      <div class="ic"><svg class="ico" viewBox="0 0 24 24"><path d="M9.5 4l2.5 1.6L14.5 4M9.5 4v2.4L7.5 10.5h9L14.5 6.4V4M8 10.5 6.7 18.6a1 1 0 0 0 1 1.2h8.6a1 1 0 0 0 1-1.2L16 10.5"/></svg></div>
       <div><div class="no">04 · Body Styling</div><h2>แต่งตัวตามหุ่นของคุณ</h2></div>
     </div>
     <p class="lead">หุ่น <b id="l_body">นาฬิกาทราย (Hourglass)</b> — ไหล่ ≈ สะโพก และเอวคอดชัด สัดส่วนสวยสมดุลอยู่แล้ว</p>
-    <div class="mean"><span class="mi">💡</span><div><b>หัวใจของคุณคือ</b> “เน้นเอว และรักษาบาลานซ์บน–ล่าง” — อะไรที่โชว์เอวหรือทรงเข้ารูปจะสวยกับคุณเสมอ</div></div>
+    <div class="mean"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v4.6"/><circle cx="12" cy="7.9" r=".7" fill="currentColor" stroke="none"/></svg><div><b>หัวใจของคุณคือ</b> “เน้นเอว และรักษาบาลานซ์บน–ล่าง” — อะไรที่โชว์เอวหรือทรงเข้ารูปจะสวยกับคุณเสมอ</div></div>
 
     <div class="dd">
       <div class="col do"><h4>◇ ทำเลย</h4><ul id="do_list"></ul></div>
@@ -342,7 +350,7 @@
   <!-- 05 YOUR LOOKS -->
   <section id="looks">
     <div class="shead">
-      <div class="ic">✨</div>
+      <div class="ic"><svg class="ico" viewBox="0 0 24 24"><path d="M11 3.5l1.5 4.6L17 9.6l-4.5 1.5L11 15.7 9.5 11.1 5 9.6l4.5-1.5L11 3.5Z"/><path d="M17.5 15l.6 1.9 1.9.6-1.9.6-.6 1.9-.6-1.9-1.9-.6 1.9-.6.6-1.9Z"/></svg></div>
       <div><div class="no">05 · Your Looks</div><h2>ลุคที่จัดไว้ให้คุณ</h2></div>
     </div>
     <p class="lead">สไตลิสต์เลือกชิ้นที่เข้ากับ <b>สี · หุ่น · ไซส์</b> ของคุณครบทุกลุค — แตะ “ช้อปชิ้นนี้” เพื่อดูรุ่น/แบรนด์ที่แนะนำ</p>
@@ -352,13 +360,13 @@
   <!-- 06 SHOP / BRANDS -->
   <section id="shop" style="padding-top:6px">
     <div class="shead">
-      <div class="ic">🛍️</div>
+      <div class="ic"><svg class="ico" viewBox="0 0 24 24"><path d="M6.5 8h11l-.9 11.2a1 1 0 0 1-1 .8H8.4a1 1 0 0 1-1-.8L6.5 8Z"/><path d="M9.2 8V6.4a2.8 2.8 0 0 1 5.6 0V8"/></svg></div>
       <div><div class="no">06 · Shop the Palette</div><h2>ซื้ออะไร · แบรนด์ไหน</h2></div>
     </div>
     <p class="lead">แบรนด์ที่มีสีและทรงเข้ากับ Warm Autumn × Hourglass — เริ่มจากที่นี่แล้วไม่พลาด</p>
     <div id="brandbox"></div>
     <details class="acc" style="margin-top:6px">
-      <summary><span class="ci">💄</span> เมคอัพที่แนะนำ (Add to Cart)<span class="cx">＋</span></summary>
+      <summary><span class="ci"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4.2c2.9 3.6 5.2 6.2 5.2 9a5.2 5.2 0 0 1-10.4 0c0-2.8 2.3-5.4 5.2-9Z"/></svg></span> เมคอัพที่แนะนำ (Add to Cart)<span class="cx">＋</span></summary>
       <div class="body" id="mkprods"></div>
     </details>
   </section>
@@ -366,7 +374,7 @@
   <!-- 07 SIZE & FIT PASSPORT -->
   <section id="size">
     <div class="shead">
-      <div class="ic">📏</div>
+      <div class="ic"><svg class="ico" viewBox="0 0 24 24"><rect x="3.2" y="8.2" width="17.6" height="7.6" rx="1"/><path d="M7.3 8.2v3M11 8.2v4M14.7 8.2v3M18.4 8.2v4"/></svg></div>
       <div><div class="no">07 · Size &amp; Fit Passport</div><h2>ไซส์ตัวของฉัน</h2></div>
     </div>
     <p class="lead">ไซส์จริงของคุณ พร้อมตารางเทียบไซส์สากล — พกไว้ช้อป/เช่า/สั่งตัดได้เลย ไม่ต้องวัดใหม่</p>
@@ -401,16 +409,16 @@
 
     <div class="conv">
       <div class="card">
-        <h3>👗 เทียบไซส์เสื้อผ้า</h3>
+        <h3><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-2px"><path d="M9.5 4l2.5 1.6L14.5 4M9.5 4v2.4L7.5 10.5h9L14.5 6.4V4M8 10.5 6.7 18.6a1 1 0 0 0 1 1.2h8.6a1 1 0 0 0 1-1.2L16 10.5"/></svg> เทียบไซส์เสื้อผ้า</h3>
         <table class="ctable" id="dresstable"></table>
         <div class="ctips" id="dresstip"></div>
       </div>
       <div class="card">
-        <h3>👠 เทียบไซส์รองเท้า</h3>
+        <h3><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-2px"><path d="M3 7v8h13c2.5 0 4-1.2 4-2.8 0-1.2-.9-1.8-2.2-2.2-2.1-.6-3.6-1.4-4.6-2.6-.5-.6-1.5-.2-1.5.6V8c0 .6-.5 1-1 1H3Z"/></svg> เทียบไซส์รองเท้า</h3>
         <table class="ctable" id="shoetable"></table>
       </div>
       <div class="card">
-        <h3>💍 เทียบไซส์แหวน (ไซส์นิ้ว)</h3>
+        <h3><svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:-2px"><circle cx="12" cy="14.5" r="4.5"/><path d="M9.7 10.2 10.5 5h3l.8 5.2"/></svg> เทียบไซส์แหวน (ไซส์นิ้ว)</h3>
         <table class="ctable" id="ringtable"></table>
         <div class="ctips"><b>วิธีวัดง่าย ๆ:</b> พันด้ายรอบโคนนิ้วกลาง วัดความยาว (มม.) แล้วเทียบตาราง หรือให้พาร์ทเนอร์ LLOOP วัดให้ตอนเข้ารับบริการ</div>
       </div>
@@ -420,7 +428,7 @@
   <!-- 06 CHARACTER -->
   <section id="character">
     <div class="shead">
-      <div class="ic">✦</div>
+      <div class="ic"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="9" r="4"/><path d="M5 20c0-3.4 3-5.4 7-5.4s7 2 7 5.4"/></svg></div>
       <div><div class="no">08 · Character</div><h2>ใบหน้า &amp; คาแรกเตอร์</h2></div>
     </div>
     <p class="lead">หน้าทรง <b id="l_face">รูปไข่ (Oval)</b> สมดุล ทำได้เกือบทุกทรงผม/แว่น เลือกตามมู้ดที่อยากสื่อได้เลย</p>
@@ -512,12 +520,12 @@ const LIBRARY = {
         {c:"var(--gold)",n:"Warm Denim",d:"ยีนส์เข้ม (indigo) + ครีม + ทองแดง แทนคู่ยีนส์–ขาว"}
       ],
       makeup:[
-        {em:"🧴",t:"รองพื้น",dots:["#F1E2B6","#E7CFA0","#D6B080","#C69A6A","#9C6F42"],p:"เบสเหลือง (Yellow base) โทน warm ให้ผิวกลืนเป็นธรรมชาติ"},
-        {em:"💄",t:"ริมฝีปาก",dots:["#9A3431","#B25B22","#C66F33","#D57862","#CD402A"],p:"อิฐ ส้มดินเผา พีชนู้ด น้ำตาลอุ่น แดงอมส้ม"},
-        {em:"🌸",t:"บลัช",dots:["#D57862","#E78A85","#C66F33","#B25B22","#CDA278"],p:"คอรัล พีช โรสบราวน์ ดินเผา"},
-        {em:"👁️",t:"อายแชโดว์",dots:["#F1E2B6","#CDA278","#B0773E","#8A4421","#614428"],p:"เนื้อนู้ดน้ำตาล–ทอง ประกายแชมเปญ"},
-        {em:"💇‍♀️",t:"สีผม",dots:["#7B4827","#8A5A2B","#A9743F","#C79A5E","#5A3B22"],p:"น้ำตาลทอง คาราเมล เกาลัด แชมเปญบราวน์"},
-        {em:"💅",t:"เล็บ",dots:["#EFDCC9","#D8B79A","#B25B22","#7A1F1A","#4B2E1E"],p:"มิลค์กี้นู้ด ดินเผา อิฐเข้ม (ใช้ได้ทุกสีในพาเลตต์)"}
+        {t:"รองพื้น",dots:["#F1E2B6","#E7CFA0","#D6B080","#C69A6A","#9C6F42"],p:"เบสเหลือง (Yellow base) โทน warm ให้ผิวกลืนเป็นธรรมชาติ"},
+        {t:"ริมฝีปาก",dots:["#9A3431","#B25B22","#C66F33","#D57862","#CD402A"],p:"อิฐ ส้มดินเผา พีชนู้ด น้ำตาลอุ่น แดงอมส้ม"},
+        {t:"บลัช",dots:["#D57862","#E78A85","#C66F33","#B25B22","#CDA278"],p:"คอรัล พีช โรสบราวน์ ดินเผา"},
+        {t:"อายแชโดว์",dots:["#F1E2B6","#CDA278","#B0773E","#8A4421","#614428"],p:"เนื้อนู้ดน้ำตาล–ทอง ประกายแชมเปญ"},
+        {t:"สีผม",dots:["#7B4827","#8A5A2B","#A9743F","#C79A5E","#5A3B22"],p:"น้ำตาลทอง คาราเมล เกาลัด แชมเปญบราวน์"},
+        {t:"เล็บ",dots:["#EFDCC9","#D8B79A","#B25B22","#7A1F1A","#4B2E1E"],p:"มิลค์กี้นู้ด ดินเผา อิฐเข้ม (ใช้ได้ทุกสีในพาเลตต์)"}
       ]
     }
   },
@@ -527,17 +535,17 @@ const LIBRARY = {
       do:["เข้ารูปช่วงเอว / คาดเข็มขัด","เอวสูง (High-waist) เก็บชายเข้าใน","ทรงเสื้อ Wrap & Peplum","เสื้อนอก Single-breasted มีเข็มขัด","ผ้าทิ้งตัว รับกับส่วนเว้าโค้ง"],
       dont:["ทรงตรง / Boxy ที่กลบเอว","เอวต่ำ (Low-rise)","ดีเทล/กระเป๋าเยอะเฉพาะจุด","Empire / Drop-waist ไม่คาดเอว","ผ้าแข็งหนา ไม่รับสัดส่วน"],
       silhouettes:[
-        {icon:"👗",t:"คอเสื้อ",en:"Necklines",items:["Sweet Heart*","Scoop*","Square","Off-shoulder","V-Neck"],avoid:"คอกว้าง+สูงมาก และดีเทลเยอะรอบคอ/ไหล่"},
-        {icon:"👚",t:"แขนเสื้อ",en:"Sleeves",items:["Fitted*","Set-in*","3/4","Sleeveless","Bishop"],avoid:"แขนกว้าง/พองมากที่ดึงสายตาไปช่วงบน"},
-        {icon:"👔",t:"เสื้อ",en:"Tops & Shirts",items:["Fitted Wrap*","Peplum*","Fitted T","Fitted Shirt","Belted"],avoid:"ระบาย/โบว์/ผ้าหนาช่วงเอว ที่กลบเอวคอด"},
-        {icon:"🧥",t:"เสื้อนอก",en:"Jackets",items:["Belted Blazer*","Belt Jacket*","Fitted Leather","Belted Cardigan","Short"],avoid:"ทรงตรง/Boxy และดีเทลหนาช่วงบน"},
-        {icon:"🧥",t:"โค้ต",en:"Coats",items:["Wrap*","Princess*","Trench","A-line","Long Coachman"],avoid:"Boxy, Empire line, Drop-waist ที่ไม่คาดเอว"},
-        {icon:"👗",t:"เดรส",en:"Dresses",items:["Wrap*","Nipped*","Belted","Panelled Waist","Bias"],avoid:"ทรงตรง/Boxy และดีเทลเฉพาะจุดที่ไหล่/สะโพก"},
-        {icon:"👖",t:"กางเกงขายาว",en:"Trousers",items:["Wide (Mid-rise)*","Straight","Bootcut","Flare","Slim"],avoid:"เอวต่ำ และทรงหลวม/กว้างเกินจนสะโพกใหญ่"},
-        {icon:"👖",t:"ยีนส์",en:"Jeans",items:["Straight (High-rise)*","Wide","Bootcut","Flared","Slim"],avoid:"Low-rise ที่ทำให้สะโพกกว้าง ขาสั้นลง"},
-        {icon:"👗",t:"กระโปรง",en:"Skirts",items:["Pencil (High-waist)*","Gored","A-line","Satin","Full"],avoid:"ทรงตรงผ้าแข็ง กระเป๋าใหญ่ และเอวต่ำ"},
-        {icon:"🩳",t:"กางเกงขาสั้น",en:"Shorts",items:["High-waist*","Structured","Waistband","Flared","Loose"],avoid:"เอวต่ำทรงตรง และดีเทลหนา ๆ"},
-        {icon:"🕴️",t:"จั๊มสูท",en:"Jumpsuit",items:["Belted*","Waist details*","Wide leg","Strapless","Simple"],avoid:"ดีเทลเยอะไม่สมดุล ที่ดึงสายตาเฉพาะจุด"}
+        {t:"คอเสื้อ",en:"Necklines",items:["Sweet Heart*","Scoop*","Square","Off-shoulder","V-Neck"],avoid:"คอกว้าง+สูงมาก และดีเทลเยอะรอบคอ/ไหล่"},
+        {t:"แขนเสื้อ",en:"Sleeves",items:["Fitted*","Set-in*","3/4","Sleeveless","Bishop"],avoid:"แขนกว้าง/พองมากที่ดึงสายตาไปช่วงบน"},
+        {t:"เสื้อ",en:"Tops & Shirts",items:["Fitted Wrap*","Peplum*","Fitted T","Fitted Shirt","Belted"],avoid:"ระบาย/โบว์/ผ้าหนาช่วงเอว ที่กลบเอวคอด"},
+        {t:"เสื้อนอก",en:"Jackets",items:["Belted Blazer*","Belt Jacket*","Fitted Leather","Belted Cardigan","Short"],avoid:"ทรงตรง/Boxy และดีเทลหนาช่วงบน"},
+        {t:"โค้ต",en:"Coats",items:["Wrap*","Princess*","Trench","A-line","Long Coachman"],avoid:"Boxy, Empire line, Drop-waist ที่ไม่คาดเอว"},
+        {t:"เดรส",en:"Dresses",items:["Wrap*","Nipped*","Belted","Panelled Waist","Bias"],avoid:"ทรงตรง/Boxy และดีเทลเฉพาะจุดที่ไหล่/สะโพก"},
+        {t:"กางเกงขายาว",en:"Trousers",items:["Wide (Mid-rise)*","Straight","Bootcut","Flare","Slim"],avoid:"เอวต่ำ และทรงหลวม/กว้างเกินจนสะโพกใหญ่"},
+        {t:"ยีนส์",en:"Jeans",items:["Straight (High-rise)*","Wide","Bootcut","Flared","Slim"],avoid:"Low-rise ที่ทำให้สะโพกกว้าง ขาสั้นลง"},
+        {t:"กระโปรง",en:"Skirts",items:["Pencil (High-waist)*","Gored","A-line","Satin","Full"],avoid:"ทรงตรงผ้าแข็ง กระเป๋าใหญ่ และเอวต่ำ"},
+        {t:"กางเกงขาสั้น",en:"Shorts",items:["High-waist*","Structured","Waistband","Flared","Loose"],avoid:"เอวต่ำทรงตรง และดีเทลหนา ๆ"},
+        {t:"จั๊มสูท",en:"Jumpsuit",items:["Belted*","Waist details*","Wide leg","Strapless","Simple"],avoid:"ดีเทลเยอะไม่สมดุล ที่ดึงสายตาเฉพาะจุด"}
       ]
     }
   },
@@ -546,11 +554,11 @@ const LIBRARY = {
       note:"หน้ารูปไข่สมดุลที่สุด ทำได้เกือบทุกทรง — เลี่ยงกรอบแว่นเหลี่ยมใหญ่หนักที่ตัดกับเส้นโค้งของหน้าเท่านั้น" }
   },
   personas:[
-    {i:"🎀",t:"Feminine",p:"เดรสเข้ารูป มุก ทองชิ้นเล็ก"},
-    {i:"🕶️",t:"Elegant",p:"จั๊มสูทครีม เข็มขัด กระเป๋าโครง"},
-    {i:"🧢",t:"Cool Casual",p:"แท็งก์ท็อป + ยีนส์ทรงสวย"},
-    {i:"👔",t:"Masculine",p:"เชิ้ตยีนส์ผูกเอว + กางเกงทรงสวย"},
-    {i:"🌼",t:"Cute",p:"มินิเดรสเหลืองครีม โบว์ มู้ดหวาน"}
+    {t:"Feminine",p:"เดรสเข้ารูป มุก ทองชิ้นเล็ก"},
+    {t:"Elegant",p:"จั๊มสูทครีม เข็มขัด กระเป๋าโครง"},
+    {t:"Cool Casual",p:"แท็งก์ท็อป + ยีนส์ทรงสวย"},
+    {t:"Masculine",p:"เชิ้ตยีนส์ผูกเอว + กางเกงทรงสวย"},
+    {t:"Cute",p:"มินิเดรสเหลืองครีม โบว์ มู้ดหวาน"}
   ],
 
   /* ลุคเริ่มต้นตามฤดู+หุ่น (ใช้เมื่อพาร์ทเนอร์ยังไม่กำหนดลุคเอง) */
@@ -596,14 +604,14 @@ const LIBRARY = {
   },
 
   brands:[
-    {e:"👗",t:"เสื้อผ้า (สี & ทรงเข้ารูป)",items:[
+    {t:"เสื้อผ้า (สี & ทรงเข้ารูป)",items:[
       ["Uniqlo","เบสิกครีม/คาเมล/มะกอก"],["COS","ทรงเรียบ ผ้าทิ้งตัว"],["Massimo Dutti","เอิร์ธโทนพรีเมียม"],
       ["Zara","เทรนด์เทอร์ราคอตต้า"],["Pomelo","ทรงเข้ารูป ราคาน่ารัก"],["Jaspal","ออฟฟิศชิค"],["& Other Stories","สีอุ่นครบ"]
     ]},
-    {e:"👠",t:"รองเท้า & กระเป๋า",items:[
+    {t:"รองเท้า & กระเป๋า",items:[
       ["Charles & Keith","ครีม/น้ำตาล ครบ"],["Longchamp","หนังคาราเมล"],["Polène","กระเป๋าโครงมินิมอล"],["Coach","หนังน้ำตาลคลาสสิก"]
     ]},
-    {e:"✦",t:"เครื่องประดับ (โทนทอง)",items:[
+    {t:"เครื่องประดับ (โทนทอง)",items:[
       ["Pandora Gold","ทองชิ้นเล็ก"],["Local Gold","ทองแท้ไทย"],["Mango","ต่างหูทองชิ้นใหญ่"]
     ]}
   ],
@@ -642,6 +650,12 @@ const CONV = {
 
 /* ============================================================ RENDER ============================================================ */
 const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+// line-art icons (brand style: stroke, no fill)
+const ICO={
+  hanger:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 5.2a1.8 1.8 0 1 1 1.3 1.7c-.5.2-.9.6-.9 1.1v.5"/><path d="M12 8.5 4.2 15c-.7.6-.3 1.9.6 1.9h14.4c.9 0 1.3-1.3.6-1.9L12 8.5Z"/></svg>',
+  spark:'<svg class="ico" viewBox="0 0 24 24"><path d="M12 4l1.5 4.8L18 10l-4.5 1.5L12 16l-1.5-4.5L6 10l4.5-1.2L12 4Z"/></svg>',
+  bag:'<svg class="ico" viewBox="0 0 24 24"><path d="M6.5 8h11l-.9 11.2a1 1 0 0 1-1 .8H8.4a1 1 0 0 1-1-.8L6.5 8Z"/><path d="M9.2 8V6.4a2.8 2.8 0 0 1 5.6 0V8"/></svg>'
+};
 const S = LIBRARY.seasons[PROFILE.color.type_12] || LIBRARY.seasons["Warm Autumn"];
 const B = LIBRARY.bodies[PROFILE.body.type] || LIBRARY.bodies["นาฬิกาทราย"];
 const F = LIBRARY.faces[PROFILE.face.shape] || LIBRARY.faces["รูปไข่"];
@@ -684,7 +698,7 @@ S.formulas.forEach(f=>{const li=el("li",null,"<b style='color:"+f.c+"'>"+f.n+"</
 // makeup
 S.makeup.forEach(m=>{
   const dots=m.dots.map(c=>"<i style='background:"+c+"'></i>").join("");
-  $("#mk").appendChild(el("div","m","<div class='mh'><span class='em'>"+m.em+"</span>"+m.t+"</div><div class='dots'>"+dots+"</div><p>"+m.p+"</p>"));
+  $("#mk").appendChild(el("div","m","<div class='mh'>"+m.t+"</div><div class='dots'>"+dots+"</div><p>"+m.p+"</p>"));
 });
 
 // body do/dont + silhouettes
@@ -694,7 +708,7 @@ const sil=$("#silhouettes");
 B.silhouettes.forEach((s,i)=>{
   const d=el("details","acc"); if(i===0)d.open=true;
   const pills=s.items.map(it=>{const k=it.endsWith("*");return "<span class='pill"+(k?" key":"")+"'>"+it.replace("*","")+"</span>";}).join("");
-  d.innerHTML="<summary><span class='ci'>"+s.icon+"</span>"+s.t+" · "+s.en+"<span class='cx'>＋</span></summary><div class='body'><div class='pills'>"+pills+"</div><p class='note'><b>เลี่ยง:</b> "+s.avoid+"</p></div>";
+  d.innerHTML="<summary><span class='ci'>"+ICO.hanger+"</span>"+s.t+" · "+s.en+"<span class='cx'>＋</span></summary><div class='body'><div class='pills'>"+pills+"</div><p class='note'><b>เลี่ยง:</b> "+s.avoid+"</p></div>";
   sil.appendChild(d);
 });
 
@@ -707,7 +721,7 @@ looks.forEach((lk,i)=>{
   const pieces=(lk.pieces||[]).map(p=>
     "<div class='pc'><span class='pcsw' style='background:"+(p.sw||'#eee')+"'></span>"+
     "<div class='pcm'><div class='role'>"+(p.role||'')+"</div><div class='desc'>"+(p.desc||'')+"</div></div>"+
-    (p.buy?"<button class='buy' data-buy=\""+p.buy.replace(/"/g,'')+"\">🛍️ "+p.buy+"</button>":"")+"</div>"
+    (p.buy?"<button class='buy' data-buy=\""+p.buy.replace(/"/g,'')+"\">"+ICO.bag+" "+p.buy+"</button>":"")+"</div>"
   ).join("");
   card.innerHTML="<div class='lh'><span class='ln'>"+(i+1)+"</span><div class='lt'>"+lk.title+
     "<span>"+(lk.mood||'')+"</span></div>"+(lk.mood?"<span class='lmood'>"+lk.mood+"</span>":"")+"</div>"+
@@ -719,7 +733,7 @@ $("#looklist").addEventListener("click",e=>{const b=e.target.closest(".buy");if(
 // ===== SHOP / BRANDS =====
 LIBRARY.brands.forEach(g=>{
   const chips=g.items.map(([n,d])=>"<span class='brandchip'>"+n+"<small>"+d+"</small></span>").join("");
-  $("#brandbox").appendChild(el("div","brandgrp","<div class='bt'><span class='be'>"+g.e+"</span>"+g.t+"</div><div class='brandchips'>"+chips+"</div>"));
+  $("#brandbox").appendChild(el("div","brandgrp","<div class='bt'>"+g.t+"</div><div class='brandchips'>"+chips+"</div>"));
 });
 const mkp=$("#mkprods");
 Object.entries(LIBRARY.mkProducts).forEach(([cat,list])=>{
@@ -765,7 +779,7 @@ PROFILE.personality.forEach(p=>{
   const pct=Math.round(p.v/p.max*100);
   $("#bars").appendChild(el("div","barrow","<div class='bl'>"+p.t+"<small>"+p.sub+"</small></div><div class='bt'><i style='width:"+pct+"%'></i></div><div class='bv'>"+p.v+"</div>"));
 });
-LIBRARY.personas.forEach(p=>$("#personas").appendChild(el("div","pcard","<div class='pi'>"+p.i+"</div><b>"+p.t+"</b><p>"+p.p+"</p>")));
+LIBRARY.personas.forEach(p=>$("#personas").appendChild(el("div","pcard","<div class='pi'>"+ICO.spark+"</div><b>"+p.t+"</b><p>"+p.p+"</p>")));
 
 // jump nav active state
 const links=[...document.querySelectorAll('.jump a')];
