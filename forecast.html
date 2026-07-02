@@ -173,7 +173,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=38"></script>
-<script src="ops-api.js"></script>
 <script src="analytics.js?v=38"></script>
 <script src="nav.js?v=1"></script>
 <script>
@@ -184,21 +183,9 @@ let sb = null, OWNER_UID = null, ACT = null;
 function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
 function num(id){ return Number(document.getElementById(id).value) || 0; }
 
-// ---------- RPC ผ่าน gateway ops-rpc (ทางหลัก) + fallback เรียกตรงแบบเดิม ----------
-// ลอง window.opsRpc ก่อน (LINE idToken → edge fn ops-rpc, เช็คสิทธิ์เจ้าของฝั่งเซิร์ฟเวอร์)
-// ถ้า gateway ไม่รับ — เคสหลักคือ fn ยังไม่อยู่ใน allowlist ('คำสั่งนี้ไม่อนุญาต') รวมถึง
-// login LINE ไม่สำเร็จ/เรียก gateway ไม่ถึง — ให้ถอยไปเรียก supabase ตรงแบบเดิม (ส่ง p_uid เหมือนเดิม)
-// เพื่อให้หน้ายังใช้งานได้ครบ (ตัว RPC ตรวจสิทธิ์จาก p_uid ฝั่งเซิร์ฟเวอร์อยู่แล้ว)
-async function gwRpc(fn, args){
-  if (window.opsRpc){
-    try{
-      const r = await window.opsRpc(fn, args || {});
-      if (!r.error) return r;
-      // มี error จาก gateway → fallback ด้านล่าง (หน้าเดิมต้องทำงานต่อได้เสมอ)
-    }catch(e){ /* ops-api มีปัญหา → ใช้ทางตรง */ }
-  }
-  return client().rpc(fn, args);
-}
+// หมายเหตุ: หน้านี้ยังเรียก RPC ตรง (ตรวจสิทธิ์ด้วย p_uid ฝั่งเซิร์ฟเวอร์) — จะย้ายเข้า gateway ops-rpc ได้
+// ต่อเมื่อ backend เพิ่ม forecast_actuals / plan_economics / update_plan_price เข้า allowlist
+// และหน้าเลิกใช้ LIFF ลูกค้า (สอง LIFF init พร้อมกันบน liff object เดียวไม่ได้)
 
 // ---------- core math ----------
 let gTargetType = 'rev';   // 'rev' = เป้ายอดขาย · 'net' = เป้ากำไรสุทธิ
@@ -307,7 +294,7 @@ function renderPlan(){
 let _planEcon = null;
 async function loadPlanMargin(){
   const el = document.getElementById('planMargin'); if(!el) return;
-  if(!_planEcon){ try { const { data } = await gwRpc('plan_economics'); _planEcon = data || []; } catch(e){ _planEcon = []; } }
+  if(!_planEcon){ try { const { data } = await client().rpc('plan_economics'); _planEcon = data || []; } catch(e){ _planEcon = []; } }
   const plans = _planEcon;
   if(!plans.length){ el.textContent = NAV.t('ยังไม่มีแพ็กเกจ','No packs yet'); return; }
   const ship = num('i_ship');
@@ -354,7 +341,7 @@ async function savePlanPrice(){
   const rentals = Number(document.getElementById('ppRentals').value) || null;
   if(!code || price <= 0){ msg.style.color='#B4543A'; msg.textContent=NAV.t('ใส่ราคาให้ถูกต้องก่อนนะคะ','Please enter a valid price first'); return; }
   msg.style.color='var(--color-text-secondary)'; msg.style.color='#7C8694'; msg.textContent=NAV.t('กำลังบันทึก…','Saving…');
-  const { data, error } = await gwRpc('update_plan_price', { p_uid: OWNER_UID, p_code: code, p_price: price, p_rentals: rentals });
+  const { data, error } = await client().rpc('update_plan_price', { p_uid: OWNER_UID, p_code: code, p_price: price, p_rentals: rentals });
   if(error || !data || data.error){ msg.style.color='#B4543A'; msg.textContent=NAV.t('บันทึกไม่สำเร็จ','Save failed') + (data&&data.error?(' ('+data.error+')'):''); return; }
   _planEcon = null;                                  // refetch ราคาใหม่
   await loadPlanMargin();
@@ -422,7 +409,7 @@ function bindInputs(){
   document.getElementById('r_target').addEventListener('input', renderGap);
 }
 async function loadActuals(uid){
-  const { data, error } = await gwRpc('forecast_actuals', { p_uid: uid });
+  const { data, error } = await client().rpc('forecast_actuals', { p_uid: uid });
   if(error || !data) return null;
   return data;
 }
@@ -449,13 +436,9 @@ async function unlock(){
   else showLock(NAV.t('UID นี้ไม่ใช่เจ้าของ ลองใหม่อีกครั้ง','That UID isn’t an owner — try again'), true);
 }
 async function boot(){
-  // login ฝั่ง ops (LIFF หลังบ้าน) เพื่อให้ RPC วิ่งผ่าน gateway ops-rpc — ถ้าไม่สำเร็จไม่เป็นไร
-  // gwRpc จะ fallback ไปเรียกตรงแบบเดิมเอง (แพทเทิร์นเดียวกับ cockpit.html)
-  if(window.opsLogin) window.opsLogin().catch(()=>{});
   let uid = null;
   try{
-    // ถ้า ops-api init LIFF ไปแล้ว init ซ้ำด้วย LIFF ลูกค้าอาจ fail — กันไว้ให้ยังอ่านโปรไฟล์ได้
-    try{ await liff.init({ liffId: CONFIG.LIFF_ID }); }catch(e){ /* init ไปแล้วด้วย LIFF ฝั่ง ops */ }
+    await liff.init({ liffId: CONFIG.LIFF_ID });
     if(liff.isLoggedIn()){ const p = await liff.getProfile(); uid = p.userId; }
     else if(liff.isInClient()){ liff.login(); return; }
   }catch(e){ /* นอก LINE */ }

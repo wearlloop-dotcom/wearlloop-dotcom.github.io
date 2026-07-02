@@ -79,13 +79,14 @@
   const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'—';
 
   // เรียก edge function acct (แบบเดียวกับหน้า accounting/purchasing) — auth ผ่าน LINE idToken
-  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
+  const FN=((window.CONFIG&&window.CONFIG.SUPABASE_URL)||'https://rprwilsbjptdnvsibjgi.supabase.co')+'/functions/v1/acct';
   async function authHeader(){ if(!(await window.opsLogin())) throw new Error('redirecting'); return 'Bearer '+liff.getIDToken(); }
   async function api(action,extra){
     const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
       body:JSON.stringify(Object.assign({action},extra||{}))});
-    if(r.status===401||r.status===403) throw new Error('unauth');
-    return r.json();
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||j.error) throw new Error(j.error||('acct '+r.status));   // error body ต้อง throw ไม่ใช่กลายเป็นข้อมูลว่าง
+    return j;
   }
 
   let ROI=[];          // เก็บ fleet_roi ไว้สลับมุมมอง
@@ -202,8 +203,8 @@
         sb.rpc('owner_cockpit'),
         sb.rpc('fleet_roi',{p_limit:60}),
         sb.rpc('ops_today').then(({data,error})=>{ if(error) throw error; return data||{}; }).catch(()=>null),
-        api('ap').then(d=>Array.isArray(d.rows)?d.rows:[]).catch(()=>null),
-        api('po_unpaid').then(d=>Array.isArray(d.rows)?d.rows:[]).catch(()=>null),
+        api('ap').then(d=>Array.isArray(d.rows)?d.rows:null).catch(()=>null),
+        api('po_unpaid').then(d=>Array.isArray(d.rows)?d.rows:null).catch(()=>null),
         sb.rpc('ops_partner_payouts',{}).then(({data,error})=>{ if(error) throw error; return Array.isArray(data)?data:[]; }).catch(()=>null)
       ]);
       if(e1) throw e1;

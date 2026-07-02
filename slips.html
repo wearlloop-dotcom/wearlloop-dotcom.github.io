@@ -158,20 +158,23 @@
   function renderSummary(rows){
     const today=keyOf(new Date()), mon=today.slice(0,7);
     let tSum=0,tN=0,mSum=0,mN=0,pSum=0,pN=0,prob=0,dup=0;
+    // ยอดวันนี้/เดือนนี้ คิดจากทุกรายการที่โหลดมา — ไม่ผูกกับช่วงวันที่ที่เลือกกรอง
+    ROWS.forEach(r=>{
+      if(resOf(r.result).grp!=='confirmed') return;
+      const k=dayKey(r.created_at), a=amtOf(r);
+      if(k===today){ tSum+=a; tN++; }
+      if(k&&k.slice(0,7)===mon){ mSum+=a; mN++; }
+    });
     rows.forEach(r=>{
-      const g=resOf(r.result).grp, k=dayKey(r.created_at), a=amtOf(r);
-      if(g==='confirmed'){
-        if(k===today){ tSum+=a; tN++; }
-        if(k&&k.slice(0,7)===mon){ mSum+=a; mN++; }
-      }else if(g==='pending'){ pSum+=a; pN++; }
-      else if(r.result==='duplicate_slip'){ dup++; }
-      else if(g==='problem'){ prob++; }
+      const g=resOf(r.result).grp, a=amtOf(r);
+      if(g==='pending'){ pSum+=a; pN++; }
+      else if(g==='problem'){ prob++; if(r.result==='duplicate_slip') dup++; }   // ซ้ำ = ส่วนหนึ่งของตรวจไม่ผ่าน (ตรงกับแท็บ)
     });
     $('sum').innerHTML=`<div class="sumgrid">
       <div class="sumcard"><div class="lb">ยอดยืนยันแล้ววันนี้</div><div class="v">${baht(tSum)}</div><div class="n">${tN} ใบ</div></div>
       <div class="sumcard"><div class="lb">ยอดยืนยันแล้วเดือนนี้</div><div class="v">${baht(mSum)}</div><div class="n">${mN} ใบ</div></div>
       <div class="sumcard"><div class="lb">รอยืนยัน</div><div class="v">${baht(pSum)}</div><div class="n">${pN} ใบ</div></div>
-      <div class="sumcard"><div class="lb">มีปัญหา</div><div class="v">${prob}</div><div class="n">ใบ</div></div>
+      <div class="sumcard"><div class="lb">ตรวจไม่ผ่าน</div><div class="v">${prob}</div><div class="n">ใบ (รวมสลิปซ้ำ)</div></div>
       <div class="sumcard"><div class="lb">สลิปซ้ำ</div><div class="v">${dup}</div><div class="n">ใบ</div></div>
     </div>`;
   }

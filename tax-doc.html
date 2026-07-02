@@ -59,7 +59,7 @@
 </div>
 
 <script>
-  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
+  const FN=((window.CONFIG&&window.CONFIG.SUPABASE_URL)||'https://rprwilsbjptdnvsibjgi.supabase.co')+'/functions/v1/acct';
   const $=id=>document.getElementById(id);
   const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
   const esc=s=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -77,7 +77,9 @@
     const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
       body:JSON.stringify(Object.assign({action},extra||{}))});
     if(r.status===401||r.status===403) throw new Error('ไม่มีสิทธิ์เข้าระบบบัญชี (เฉพาะเจ้าของ/ผู้จัดการ)');
-    return r.json();
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||j.error) throw new Error(j.error||('ระบบบัญชีตอบกลับผิดพลาด ('+r.status+')'));
+    return j;
   }
 
   function renderDoc(r, type){
@@ -115,11 +117,14 @@
       const id=(q.get('id')||'').trim();
       const type=(q.get('type')||'invoice').trim();
       if(!id){ showErr('ไม่พบเลขที่เอกสารใน URL (ต้องมี ?id=...)'); return; }
-      const ok = await window.opsLogin().catch(()=>false);
-      if(!ok){ showErr('ยังไม่ได้เข้าสู่ระบบ LINE — รีเฟรชหน้านี้เพื่อลองใหม่'); return; }
       const res = await api('invoices');
       const rows = (res&&res.rows)||[];
-      const row = rows.find(r=>String(r.id)===id || String(r.number)===id);
+      let row = rows.find(r=>String(r.id)===id || String(r.number)===id);
+      if(!row && q.get('n')){
+        // สำรอง: ใช้ข้อมูลที่หน้าบัญชีแนบมากับลิงก์ (กรณีรายการเก่าเกินหน้าต่างที่ระบบส่งกลับ)
+        row={ number:q.get('n'), issue_date:q.get('d')||'', customer_name:q.get('cu')||'',
+              base:q.get('b'), vat:q.get('v'), total:q.get('t') };
+      }
       if(!row){ showErr('ไม่พบใบกำกับเลขที่/รหัส "'+id+'" ในระบบ'); return; }
       renderDoc(row, type);
     }catch(e){

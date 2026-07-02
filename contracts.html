@@ -307,11 +307,16 @@
     const today=new Date(); today.setHours(0,0,0,0);
     return Math.round((d-today)/86400000);
   }
+  // สถานะหมดอายุ — นับเฉพาะสัญญาที่ลงนามแล้ว (นิยามเดียว ใช้ทั้ง KPI / แท็บ / ป้าย)
+  function expState(c){
+    if(c.status!=='signed') return null;
+    const d=daysLeft(c); if(d==null) return null;
+    return d<0 ? 'expired' : (d<=30 ? 'expiring' : null);
+  }
   function expTag(c){
-    const d=daysLeft(c); if(d==null) return '';
-    if(d<0) return ' <span class="pill expired">หมดอายุแล้ว</span>';
-    if(d<=30) return ` <span class="pill expiring">เหลือ ${d} วัน</span>`;
-    return '';
+    const s=expState(c); if(!s) return '';
+    return s==='expired' ? ' <span class="pill expired">หมดอายุแล้ว</span>'
+                         : ` <span class="pill expiring">เหลือ ${daysLeft(c)} วัน</span>`;
   }
 
   async function load(){
@@ -325,10 +330,10 @@
       if(tt) tt.textContent=list.length;
       if(pd) pd.textContent=list.filter(c=>c.status==='sent'||c.status==='viewed').length;
       if(sg) sg.textContent=list.filter(c=>c.status==='signed').length;
-      if(ex) ex.textContent=list.filter(c=>{const d=daysLeft(c);return c.status==='signed'&&d!=null&&d>=0&&d<=30;}).length;
-      if(xp) xp.textContent=list.filter(c=>{const d=daysLeft(c);return c.status==='signed'&&d!=null&&d<0;}).length;
+      if(ex) ex.textContent=list.filter(c=>expState(c)==='expiring').length;
+      if(xp) xp.textContent=list.filter(c=>expState(c)==='expired').length;
     }
-    if(isExp) list=list.filter(c=>{const d=daysLeft(c);return c.status==='signed'&&d!=null&&d<=30;});
+    if(isExp) list=list.filter(c=>expState(c)!=null);   // = ใกล้หมดอายุ + หมดอายุแล้ว (เท่ากับผลรวมสอง KPI)
     if(!list.length){ tb.innerHTML=`<tr><td colspan="5" style="color:var(--stone);padding:20px">${isExp?'ไม่มีสัญญาใกล้หมดอายุ':'ยังไม่มีสัญญา'}</td></tr>`; return; }
     tb.innerHTML=list.map(c=>{
       const url=SIGN_BASE+'?token='+c.token;
