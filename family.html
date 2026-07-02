@@ -868,11 +868,11 @@ function bindInvite(){
           // การ์ด flex สวย ๆ + ปุ่ม "เข้าร่วมกลุ่ม" ในตัว → เลือกกลุ่ม/เพื่อนใน LINE ส่งได้เลย
           liff.shareTargetPicker([{ type:'flex', altText:NAV.t('ชวนเข้ากลุ่ม '+gname+' บน LLOOP','Join '+gname+' on LLOOP'), contents:{
             type:'bubble',
+            hero:{ type:'image', url:'https://wearlloop-dotcom.github.io/line-flex/group.png', size:'full', aspectRatio:'2:1', aspectMode:'cover' },
             body:{ type:'box', layout:'vertical', spacing:'sm', contents:[
-              { type:'text', text:'LLOOP', weight:'bold', size:'lg', color:'#1A1A1A' },
-              { type:'text', text:NAV.t('ชวนเข้ากลุ่ม · จัดชุดเข้าตีม','Group invite · dress in one theme'), size:'xs', color:'#8C8B86' },
-              { type:'text', text:gname, weight:'bold', size:'xl', wrap:true, color:'#1A1A1A', margin:'md' },
-              { type:'text', text:NAV.t('มาจัดชุดเข้าตีมเดียวกัน แล้วเช่าพร้อมกันในออเดอร์เดียว','Let\'s dress in one theme and rent together in a single order'), size:'sm', color:'#8C8B86', wrap:true }
+              { type:'text', text:NAV.t('ชวนเข้ากลุ่ม','Group invite'), size:'xs', color:'#6FB3A6', weight:'bold' },
+              { type:'text', text:gname, weight:'bold', size:'xl', wrap:true, color:'#1A1A1A' },
+              { type:'text', text:NAV.t('จัดชุดเข้าตีม เช่าพร้อมกันออเดอร์เดียว','Dress in one theme, rent in one order'), size:'sm', color:'#8C8B86', wrap:true }
             ]},
             footer:{ type:'box', layout:'vertical', spacing:'sm', contents:[
               { type:'button', style:'primary', color:'#6FB3A6',
