@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · จุดรับ-ส่งใกล้บ้าน + ชุดฉุกเฉิน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* โทนแบรนด์ LLOOP (craft sage+ทอง) — ตรงกับ forecast/home */
+  :root{ --bg:#FBFAF7; --card:#FFFFFF; --ink:#1A1A1A; --muted:#8C8B86; --line:#E7E5E1;
+    --teal:#6FB3A6; --sage-bg:#E4F0EC; --gold:#C9A86A; --ok:#0F6E56;
+    --sans:'Inter','Prompt',-apple-system,sans-serif; --disp:'Poppins','Prompt',sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+
+  /* hero */
+  .hero{text-align:center;padding:26px 8px 22px}
+  .hero .eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .hero h1{font-family:var(--disp);font-weight:600;font-size:22px;line-height:1.4;margin-bottom:8px}
+  .hero p{font-size:14px;color:var(--muted)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin-bottom:14px}
+  .card h2{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+
+  /* postal finder */
+  .pfind{display:flex;gap:8px}
+  .pfind input{flex:1;font-family:var(--sans);font-size:16px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);letter-spacing:2px}
+  .pfind input:focus{outline:none;border-color:var(--teal)}
+  .zone{margin-top:10px;font-size:13px;color:var(--ok);background:var(--sage-bg);border:1px solid var(--teal);border-radius:9px;padding:8px 12px;display:none}
+  .zone.miss{color:#8A7355;background:#F5F0E8;border-color:#E3D6BE}
+  .pnote{font-size:12px;color:var(--muted);margin-top:8px}
+
+  /* empty zone */
+  .empty-zone{display:none;text-align:center;padding:18px 10px 6px}
+  .empty-zone p{font-size:14px;color:var(--ink);margin-bottom:12px;line-height:1.7}
+  .btn{display:inline-block;width:100%;background:var(--ink);color:#fff;border:none;padding:13px 18px;font-family:var(--sans);font-size:14px;font-weight:600;border-radius:9px;cursor:pointer;letter-spacing:.3px}
+  .btn.sage{background:var(--teal)}
+  .btn:disabled{opacity:.55;cursor:default}
+  .btn.ghost{background:#fff;border:1px solid var(--teal);color:var(--ok)}
+  .interest-ok{display:none;font-size:14px;font-weight:600;color:var(--ok);background:var(--sage-bg);border:1px solid var(--teal);border-radius:9px;padding:11px 14px;margin-top:10px}
+
+  /* drop point card */
+  .dp{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 14px;margin-bottom:10px}
+  .dp.match{border-color:var(--teal);background:#FDFEFD}
+  .dp .row1{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .dp .nm{font-weight:600;font-size:15px;line-height:1.45}
+  .dp .chips{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0 2px}
+  .chip{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .chip.type{background:var(--sage-bg);border-color:transparent;color:var(--ok)}
+  .chip.svc{background:var(--bg)}
+  .chip.soon{background:#F5F0E8;border-color:#E3D6BE;color:#8A7355}
+  .dp .adr{font-size:13px;color:var(--muted);margin-top:2px}
+  .dp .hrs{font-size:12px;color:var(--muted);margin-top:2px}
+  .dp .maplink{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--ok);text-decoration:none;margin-top:8px}
+  .dp .maplink svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .sec-label{font-size:12px;color:var(--muted);margin:2px 0 8px}
+
+  /* express card */
+  .express{border:1px solid var(--gold);background:linear-gradient(180deg,#FFFDF8, #fff)}
+  .express h2{color:var(--gold)}
+  .express .lead{font-size:15px;font-weight:500;line-height:1.7;margin-bottom:14px}
+  .f{margin-bottom:12px}
+  .f label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+  .f input,.f select{width:100%;font-family:var(--sans);font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);appearance:none;-webkit-appearance:none}
+  .f select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238C8B86' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
+  .f input:focus,.f select:focus{outline:none;border-color:var(--teal)}
+  .f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:430px){.f2{grid-template-columns:1fr}}
+  .form-msg{display:none;font-size:13px;border-radius:9px;padding:10px 13px;margin-top:10px}
+  .form-msg.err{display:block;background:#FEF2F2;border:1px solid #FECACA;color:#B91C1C}
+  .express-ok{display:none;text-align:center;padding:14px 8px 6px}
+  .express-ok .check{width:42px;height:42px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+  .express-ok .check svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+  .express-ok p{font-size:15px;font-weight:500;line-height:1.75}
+
+  /* how it works */
+  .steps{display:flex;flex-direction:column;gap:12px}
+  .step{display:flex;gap:12px;align-items:flex-start}
+  .step .n{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--sage-bg);color:var(--ok);font-family:var(--disp);font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center}
+  .step .tx{font-size:14px;line-height:1.65;padding-top:3px}
+  .step .tx b{font-weight:600}
+  .step .tx .sm{font-size:12px;color:var(--muted)}
+
+  .loading-msg{text-align:center;color:var(--muted);font-size:13px;padding:14px 0}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
+
+<div class="wrap">
+
+  <!-- 1) HERO -->
+  <div class="hero">
+    <div class="eyebrow">drop points</div>
+    <h1 data-i18n="Return your dress near home — no post office queue">คืนชุดใกล้บ้าน ไม่ต้องรอไปรษณีย์</h1>
+    <p data-i18n="Stop by a partner point, scan the QR on the garment tag, and just leave it with us">แวะจุดพาร์ทเนอร์ สแกน QR ที่ป้ายชุด วางไว้ได้เลยค่ะ</p>
+  </div>
+
+  <!-- 2) POSTAL FINDER -->
+  <div class="card">
+    <h2 data-i18n="Find a point near you">หาจุดใกล้บ้านคุณ</h2>
+    <div class="pfind">
+      <input id="postal" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="5"
+             placeholder="รหัสไปรษณีย์ 5 หลัก เช่น 10900" data-i18n-ph="5-digit postal code, e.g. 10900">
+    </div>
+    <div class="zone" id="zoneBox"></div>
+    <div class="pnote" data-i18n="Type your postal code — we'll pick the points closest to your zone">พิมพ์รหัสไปรษณีย์ แล้วเราจะเลือกจุดที่ใกล้โซนคุณที่สุดให้นะคะ</div>
+
+    <!-- warm empty state เมื่อโซนยังไม่มีจุด -->
+    <div class="empty-zone" id="emptyZone">
+      <p data-i18n="This zone is getting a drop point very soon — tap below and we'll open it faster for you 💚">โซนนี้กำลังจะมีจุดรับ-ส่งเร็ว ๆ นี้ค่ะ — กดสนใจไว้ แล้วเราจะรีบเปิดให้ไวขึ้น 💚</p>
+      <button class="btn ghost" id="interestBtn" onclick="sendInterest()" data-i18n="I want this zone opened">สนใจให้เปิดโซนนี้</button>
+      <div class="interest-ok" id="interestOk"></div>
+    </div>
+  </div>
+
+  <!-- 3) DROP POINT LIST -->
+  <div class="card">
+    <h2 data-i18n="Partner drop points">จุดรับ-ส่งพาร์ทเนอร์</h2>
+    <div id="dpList"><div class="loading-msg" data-i18n="Loading…">กำลังโหลด…</div></div>
+  </div>
+
+  <!-- 4) EXPRESS DRESS (flagship) -->
+  <div class="card express" id="expressCard">
+    <h2 data-i18n="Emergency dress">ชุดฉุกเฉิน</h2>
+    <div id="expressFormWrap">
+      <p class="lead" data-i18n="Event tomorrow but no dress yet? Order before 15:00 and pick up at a point near you within 3 hours.">มีงานพรุ่งนี้ แต่ยังไม่มีชุด? สั่งก่อน 15:00 รับที่จุดใกล้บ้านภายใน 3 ชั่วโมงค่ะ</p>
+      <form id="expressForm" novalidate>
+        <div class="f2">
+          <div class="f">
+            <label for="exDate" data-i18n="Date you need it">วันที่ต้องใส่</label>
+            <input type="date" id="exDate">
+          </div>
+          <div class="f">
+            <label for="exOccasion" data-i18n="Occasion">ประเภทงาน</label>
+            <select id="exOccasion">
+              <option value="งานแต่ง" data-i18n="Wedding">งานแต่ง</option>
+              <option value="ดินเนอร์" data-i18n="Dinner">ดินเนอร์</option>
+              <option value="งานเลี้ยง" data-i18n="Party">งานเลี้ยง</option>
+              <option value="ทำงาน" data-i18n="Work">ทำงาน</option>
+              <option value="รับปริญญา" data-i18n="Graduation">รับปริญญา</option>
+              <option value="อื่น ๆ" data-i18n="Other">อื่น ๆ</option>
+            </select>
+          </div>
+        </div>
+        <div class="f2">
+          <div class="f">
+            <label for="exPoint" data-i18n="Convenient pickup point">จุดรับที่สะดวก</label>
+            <select id="exPoint"></select>
+          </div>
+          <div class="f">
+            <label for="exSize" data-i18n="Approximate size">ไซซ์โดยประมาณ</label>
+            <select id="exSize">
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+              <option value="profile" data-i18n="I already have a profile">มีโปรไฟล์แล้ว</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn sage" id="exSubmit" data-i18n="Order an emergency dress">สั่งชุดฉุกเฉินเลยค่ะ</button>
+        <div class="form-msg" id="exMsg"></div>
+      </form>
+    </div>
+    <div class="express-ok" id="expressOk">
+      <div class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <p data-i18n="All received! Our stylist is picking your dress — we'll confirm on LINE within 30 minutes 💚">รับเรื่องแล้วค่ะ! สไตลิสต์กำลังเลือกชุด จะทัก LINE ไปยืนยันภายใน 30 นาทีนะคะ 💚</p>
+    </div>
+  </div>
+
+  <!-- 5) HOW IT WORKS -->
+  <div class="card">
+    <h2 data-i18n="How returning works">คืนชุดยังไง</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div class="tx"><b data-i18n="Stop by a partner point">แวะจุดพาร์ทเนอร์</b></div></div>
+      <div class="step"><div class="n">2</div><div class="tx"><b data-i18n="Scan the QR on the garment tag">สแกน QR ที่ป้ายชุด</b><br><span class="sm" data-i18n="the system checks it in automatically">ระบบเช็คอินอัตโนมัติ</span></div></div>
+      <div class="step"><div class="n">3</div><div class="tx"><b data-i18n="Done — nothing to fill in">เสร็จเลย ไม่ต้องกรอกอะไร</b></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=38"></script>
+<script src="analytics.js?v=38"></script>
+<script src="nav.js?v=1"></script>
+<script src="liffAuth.js?v=38"></script>
+<script>
+const $ = id => document.getElementById(id);
+const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
+const esc = s => (s == null ? '' : String(s)).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+let sb = null;
+function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
+
+let UID = null;              // LINE uid (null = ยังไม่ล็อกอิน — หน้ายังใช้ได้ครบ)
+let POINTS = [];             // จุดรับ-ส่งทั้งหมด
+let ZONE = null;             // { postal, province, district, districts:Set } จากรหัสไปรษณีย์
+let _postalData = null;      // th-postal.json (โหลดขี้เกียจ — เฉพาะตอนพิมพ์ครบ 5 หลัก)
+let _postalP = null;
+
+// ===== demo data — ใช้เมื่อ backend RPC ยังไม่พร้อม (มาร์กเป็น "เร็ว ๆ นี้" แบบเนียน ๆ) =====
+const DEMO_POINTS = [
+  { id:'demo-ladprao', name:'ร้านซักพาร์ทเนอร์ ลาดพร้าว', type:'laundry',
+    address:'ปากซอยลาดพร้าว 23 (ใกล้ MRT ลาดพร้าว)', district:'จตุจักร', postal:'10900',
+    lat:13.8160, lng:100.5610, hours:'09:00–20:00 ทุกวัน', services:['return','pickup','express'], demo:true },
+  { id:'demo-ari', name:'คาเฟ่พาร์ทเนอร์ อารีย์', type:'cafe',
+    address:'ซอยอารีย์ 1 (เดิน 3 นาทีจาก BTS อารีย์)', district:'พญาไท', postal:'10400',
+    lat:13.7795, lng:100.5447, hours:'08:00–19:00 ทุกวัน', services:['return','pickup'], demo:true },
+  { id:'demo-suk49', name:'ร้านซักพาร์ทเนอร์ สุขุมวิท 49', type:'laundry',
+    address:'สุขุมวิท 49 (ใกล้ BTS ทองหล่อ)', district:'วัฒนา', postal:'10110',
+    lat:13.7330, lng:100.5735, hours:'09:00–20:00 ทุกวัน', services:['return','pickup','express'], demo:true },
+];
+
+const TYPE_LABEL = { laundry:['ร้านซัก','Laundry'], cafe:['คาเฟ่','Café'], locker:['ล็อกเกอร์','Locker'] };
+const SVC_LABEL  = { return:['คืนชุด','Return'], pickup:['รับชุด','Pick up'], express:['ชุดฉุกเฉิน','Emergency dress'] };
+
+// ===== โหลดจุดรับ-ส่ง (RPC → fallback demo) =====
+async function loadPoints(){
+  try{
+    const { data, error } = await client().rpc('drop_points_list');
+    if(error) throw error;
+    if(Array.isArray(data) && data.length) POINTS = data;
+    else POINTS = DEMO_POINTS;
+  }catch(e){
+    console.warn('drop_points_list not ready — using demo points:', e && e.message ? e.message : e);
+    POINTS = DEMO_POINTS;
+  }
+  renderPoints();
+  fillPointSelect();
+}
+
+function dpCard(p, matched){
+  const tl = TYPE_LABEL[p.type] || [p.type, p.type];
+  const svcs = (p.services || []).map(s => {
+    const l = SVC_LABEL[s]; return l ? `<span class="chip svc">${T(l[0], l[1])}</span>` : '';
+  }).join('');
+  const soon = p.demo ? `<span class="chip soon">${T('เร็ว ๆ นี้','Coming soon')}</span>` : '';
+  const map = (p.lat != null && p.lng != null)
+    ? `<a class="maplink" target="_blank" rel="noopener" href="https://maps.google.com/?q=${encodeURIComponent(p.lat + ',' + p.lng)}">
+         <svg viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+         ${T('เปิดแผนที่','Open map')}</a>`
+    : '';
+  return `<div class="dp${matched ? ' match' : ''}">
+    <div class="row1"><div class="nm">${esc(p.name)}</div><span class="chip type">${T(tl[0], tl[1])}</span></div>
+    <div class="adr">${esc(p.address || '')}${p.district ? ' · ' + esc(p.district) : ''}</div>
+    ${p.hours ? `<div class="hrs">${T('เวลาเปิด','Hours')} ${esc(p.hours)}</div>` : ''}
+    <div class="chips">${svcs}${soon}</div>
+    ${map}
+  </div>`;
+}
+
+function inZone(p){
+  if(!ZONE) return false;
+  if(p.postal && String(p.postal) === ZONE.postal) return true;
+  if(p.district && ZONE.districts.has(String(p.district).trim())) return true;
+  return false;
+}
+
+function renderPoints(){
+  const el = $('dpList');
+  if(!POINTS.length){
+    el.innerHTML = `<div class="loading-msg">${T('ยังไม่มีจุดรับ-ส่งค่ะ — กำลังทยอยเปิดเร็ว ๆ นี้','No drop points yet — opening very soon')}</div>`;
+    return;
+  }
+  if(ZONE){
+    const near = POINTS.filter(inZone);
+    const rest = POINTS.filter(p => !inZone(p));
+    $('emptyZone').style.display = near.length ? 'none' : 'block';
+    let h = '';
+    if(near.length){
+      h += `<div class="sec-label">${T('จุดในโซนของคุณ','Points in your zone')}</div>` + near.map(p => dpCard(p, true)).join('');
+      if(rest.length) h += `<div class="sec-label" style="margin-top:12px">${T('จุดอื่น ๆ ใกล้เคียง','Other points nearby')}</div>` + rest.map(p => dpCard(p, false)).join('');
+    }else{
+      h += `<div class="sec-label">${T('จุดที่เปิดอยู่ตอนนี้','Points open right now')}</div>` + POINTS.map(p => dpCard(p, false)).join('');
+    }
+    el.innerHTML = h;
+  }else{
+    $('emptyZone').style.display = 'none';
+    el.innerHTML = POINTS.map(p => dpCard(p, false)).join('');
+  }
+}
+
+// ===== postal finder — โหลด th-postal.json ขี้เกียจ (เฉพาะตอนครบ 5 หลัก) =====
+function loadPostalData(){
+  if(_postalData) return Promise.resolve(_postalData);
+  if(!_postalP){
+    _postalP = fetch('th-postal.json')
+      .then(r => { if(!r.ok) throw new Error('postal ' + r.status); return r.json(); })
+      .then(d => (_postalData = d))
+      .catch(e => { console.warn('th-postal.json load failed:', e); _postalP = null; return null; });
+  }
+  return _postalP;
+}
+
+const shortProv = p => p === 'กรุงเทพมหานคร' ? 'กรุงเทพฯ' : p;
+
+async function onPostalInput(){
+  const raw = $('postal').value.replace(/\D/g, '');
+  if($('postal').value !== raw) $('postal').value = raw;
+  const zb = $('zoneBox');
+  if(raw.length < 5){
+    ZONE = null; zb.style.display = 'none';
+    $('emptyZone').style.display = 'none';
+    renderPoints();
+    return;
+  }
+  zb.style.display = 'block'; zb.className = 'zone';
+  zb.textContent = T('กำลังหาโซนของคุณ…','Finding your zone…');
+  const data = await loadPostalData();
+  if($('postal').value.replace(/\D/g, '') !== raw) return;   // ผู้ใช้พิมพ์ต่อระหว่างโหลด
+  const rows = data && data[raw];
+  if(rows && rows.length){
+    const districts = new Set(rows.map(r => String(r[1]).trim()));
+    ZONE = { postal: raw, province: rows[0][0], district: rows[0][1], districts };
+    const dList = [...districts].slice(0, 2).join(' · ');
+    zb.className = 'zone';
+    zb.textContent = T(`โซนของคุณ: ${dList} ${shortProv(ZONE.province)}`, `Your zone: ${dList}, ${ZONE.province}`);
+  }else{
+    ZONE = { postal: raw, province: '', district: '', districts: new Set() };
+    zb.className = 'zone miss';
+    zb.textContent = T('ไม่พบรหัสไปรษณีย์นี้ค่ะ — ลองเช็คอีกครั้งนะคะ','Postal code not found — please double-check');
+  }
+  $('interestOk').style.display = 'none';
+  $('interestBtn').style.display = '';
+  renderPoints();
+}
+
+// ===== "สนใจให้เปิดโซนนี้" — RPC → fallback localStorage =====
+async function sendInterest(){
+  if(!ZONE) return;
+  const btn = $('interestBtn');
+  btn.disabled = true;
+  let count = null;
+  try{
+    const { data, error } = await client().rpc('drop_point_interest', { p_uid: UID, p_postal: ZONE.postal });
+    if(error) throw error;
+    if(data && data.count != null) count = data.count;
+  }catch(e){
+    console.warn('drop_point_interest not ready — saving locally:', e && e.message ? e.message : e);
+    try{
+      const k = 'lloop_dp_interest';
+      const arr = JSON.parse(localStorage.getItem(k) || '[]');
+      arr.push({ postal: ZONE.postal, at: new Date().toISOString() });
+      localStorage.setItem(k, JSON.stringify(arr));
+    }catch(_e){}
+  }
+  btn.disabled = false;
+  btn.style.display = 'none';
+  const ok = $('interestOk');
+  ok.style.display = 'block';
+  ok.textContent = count != null
+    ? T(`รับเรื่องแล้วค่ะ 💚 มีคนสนใจโซนนี้แล้ว ${count} คน — ยิ่งเยอะ ยิ่งเปิดไว`, `Got it 💚 ${count} people want this zone — the more, the faster we open`)
+    : T('รับเรื่องแล้วค่ะ 💚 ยิ่งมีคนสนใจเยอะ เรายิ่งเปิดโซนนี้ไวขึ้นนะคะ','Got it 💚 the more interest, the faster we open this zone');
+}
+
+// ===== express form =====
+function fillPointSelect(){
+  const sel = $('exPoint');
+  const cur = sel.value;
+  sel.innerHTML = POINTS
+    .filter(p => !p.services || p.services.includes('pickup') || p.services.includes('express'))
+    .map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+  if(cur && [...sel.options].some(o => o.value === cur)) sel.value = cur;
+}
+
+function showExMsg(msg){
+  const el = $('exMsg');
+  el.className = 'form-msg' + (msg ? ' err' : '');
+  el.textContent = msg || '';
+}
+
+$('expressForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  showExMsg('');
+  const date = $('exDate').value;
+  if(!date){ showExMsg(T('เลือกวันที่ต้องใส่ก่อนนะคะ','Please pick the date you need it')); return; }
+  if(date < todayStr()){ showExMsg(T('เลือกวันตั้งแต่วันนี้เป็นต้นไปนะคะ','Please pick today or a later date')); return; }
+  if(!$('exPoint').value){ showExMsg(T('เลือกจุดรับที่สะดวกก่อนนะคะ','Please pick a pickup point')); return; }
+
+  // ต้องล็อกอิน LINE ก่อนส่ง — จะได้ทักกลับไปยืนยันได้
+  if(!UID){
+    const p = await LiffAuth.login();
+    if(p && p.userId){ UID = p.userId; }
+    else{
+      showExMsg(T('ขอล็อกอิน LINE ก่อนนะคะ จะได้ทักไปยืนยันชุดได้ 💚','Please sign in with LINE first so we can confirm your dress 💚'));
+      LiffAuth.signIn();
+      return;
+    }
+  }
+
+  const btn = $('exSubmit');
+  btn.disabled = true;
+  btn.textContent = T('กำลังส่ง…','Sending…');
+  const payload = {
+    p_uid: UID,
+    p_date: date,
+    p_occasion: $('exOccasion').value,
+    p_point: $('exPoint').value,
+    p_size: $('exSize').value,
+  };
+  try{
+    const { data, error } = await client().rpc('express_request', payload);
+    if(error) throw error;
+    if(data && data.error) throw new Error(data.error);
+  }catch(err){
+    // backend ยังไม่พร้อม → เก็บคิวไว้ในเครื่องก่อน (ทีมงานตามเก็บทีหลัง)
+    console.warn('express_request not ready — queueing locally:', err && err.message ? err.message : err);
+    try{
+      const k = 'lloop_express_queue';
+      const q = JSON.parse(localStorage.getItem(k) || '[]');
+      q.push({ ...payload, at: new Date().toISOString() });
+      localStorage.setItem(k, JSON.stringify(q));
+    }catch(_e){}
+  }
+  btn.disabled = false;
+  btn.textContent = T('สั่งชุดฉุกเฉินเลยค่ะ','Order an emergency dress');
+  $('expressFormWrap').style.display = 'none';
+  $('expressOk').style.display = 'block';
+  $('expressCard').scrollIntoView({ behavior:'smooth', block:'center' });
+});
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// ===== boot =====
+async function boot(){
+  $('exDate').min = todayStr();
+  $('postal').addEventListener('input', onPostalInput);
+  loadPoints();                                  // จุดรับ-ส่งเป็นข้อมูลสาธารณะ — ไม่ต้องรอล็อกอิน
+  try{
+    const p = await LiffAuth.login();            // เงียบ ๆ — ไม่ล็อกอินหน้าก็ยังใช้ได้ครบ
+    if(p && p.userId) UID = p.userId;
+  }catch(e){ console.warn('LIFF login skipped:', e); }
+}
+boot();
+
+// re-render ข้อความที่ JS สร้างเมื่อสลับภาษา
+window.addEventListener('lloop:lang', function(){
+  renderPoints();
+  fillPointSelect();
+  if(ZONE) onPostalInput();
+});
+</script>
+</body>
+</html>
