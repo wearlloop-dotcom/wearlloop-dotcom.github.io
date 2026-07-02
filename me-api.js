@@ -11,7 +11,12 @@
   async function ensureInit() {
     if (_inited) return;
     if (!window.liff || !LIFF_ID) throw new Error('ยังไม่ได้ตั้งค่า LINE Login');
-    await liff.init({ liffId: LIFF_ID });
+    // ใช้ shared promise ของ LiffAuth ถ้ามี — กัน liff.init() ซ้ำบน SDK instance เดียว (ทำ SDK throw)
+    if (window.LiffAuth && window.LiffAuth.ensureInit) {
+      await window.LiffAuth.ensureInit();
+    } else {
+      await liff.init({ liffId: LIFF_ID });
+    }
     _inited = true;
   }
 

@@ -620,9 +620,11 @@ const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const RENTAL_ID   = params.get('rental_id')   || null;
 const GARMENT_ID  = params.get('garment_id')  || null;
-const GARMENT_NAME = decodeURIComponent(params.get('garment_name') || '');
-const SIZE        = decodeURIComponent(params.get('size') || '');
-const DATE_RANGE  = decodeURIComponent(params.get('date_range') || '');
+// URLSearchParams.get() ถอดรหัส URL ให้แล้วหนึ่งชั้น — ห้าม decodeURIComponent ซ้ำ
+// (ค่าที่มี '%' เช่น 'ผ้าไหม 100%' จะโยน URIError ทำให้สคริปต์ทั้งหน้าตาย)
+const GARMENT_NAME = params.get('garment_name') || '';
+const SIZE        = params.get('size') || '';
+const DATE_RANGE  = params.get('date_range') || '';
 
 let uid = null;
 let selectedFile = null;
@@ -813,7 +815,8 @@ $('submitBtn').addEventListener('click', async () => {
       }}),
     });
     const j = await r.json();
-    if (j.ok) data = j.data; else error = { message: j.message || j.error || T('ส่งรีวิวไม่สำเร็จ', 'Could not submit review') };
+    // me-rpc คืน contract {data, error} (ตาม me-api.js) — สำเร็จเมื่อ HTTP ok และไม่มี error
+    if (r.ok && !j.error) data = j.data; else error = { message: (j.error && j.error.message) || j.message || j.error || T('ส่งรีวิวไม่สำเร็จ', 'Could not submit review') };
   } catch (_e) { error = { message: 'network' }; }
 
   btn.disabled = false;
@@ -849,9 +852,17 @@ async function init() {
   try {
     await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
     if (!liff.isLoggedIn()) {
+      // กัน redirect loop: ลอง login ได้ครั้งเดียวต่อ session — ถ้ากลับมายัง not-logged-in
+      // (กด cancel หน้า consent / session persist ไม่ได้) ให้หยุดเด้งแล้วโชว์ error แทน
+      if (sessionStorage.getItem('reviewLoginTried')) {
+        showErr(T('เข้าสู่ระบบไม่สำเร็จ กรุณาเปิดลิงก์นี้ใหม่อีกครั้ง', 'Sign-in failed — please open this link again'));
+        return;
+      }
+      sessionStorage.setItem('reviewLoginTried', '1');
       liff.login({ redirectUri: window.location.href });
       return;
     }
+    sessionStorage.removeItem('reviewLoginTried'); // login สำเร็จ → เคลียร์ guard
     const profile = await liff.getProfile();
     uid = profile.userId;
 

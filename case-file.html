@@ -49,6 +49,9 @@
   const esc=s=>(s==null||s==='')?'—':String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   const dt=s=>s?new Date(s).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'—';
   const baht=n=>n==null?'—':'฿'+Number(n).toLocaleString('th-TH');
+  // map สถานะเป็นไทย (อ้างอิง contracts.html:pill และ app.js:rentalStatusLabel) — เอกสารทางการต้องเป็นไทย
+  const cStatusTh=s=>({draft:'ฉบับร่าง',sent:'รอลงนาม',viewed:'เปิดอ่าน',signed:'ลงนามแล้ว',declined:'ขอแก้ไข',void:'ยกเลิก'}[s]||s);
+  const rStatusTh=s=>({reserved:'จองแล้ว',hold:'รอชำระเงิน',out:'จัดส่ง/กำลังใช้',returned:'คืนแล้ว',cancelled:'ยกเลิก',backup:'ชุดสำรอง'}[s]||s);
   async function api(action,extra){
     if(!(await window.opsLogin())) throw new Error('redirecting');
     const r=await fetch(FN,{method:'POST',headers:{'Authorization':'Bearer '+liff.getIDToken(),'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action},extra))});
@@ -99,7 +102,7 @@
       <h3>3. การยอมรับสัญญาเช่า</h3>
       ${rows(cf.terms_accepted,[['เวอร์ชัน',o=>esc(o.version)],['ยอมรับเมื่อ',o=>dt(o.accepted_at)],['IP',o=>esc(o.ip)]])}
       <h3>4. ประวัติการเช่า</h3>
-      ${rows(cf.rentals,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['สถานะ',o=>esc(o.status)],['เช่า',o=>dt(o.reserved_at)],['กำหนดคืน',o=>dt(o.due_at)],['คืนเมื่อ',o=>o.returned_at?dt(o.returned_at):'<b>ยังไม่คืน</b>'],['ค่าเช่า',o=>baht(o.price)]])}
+      ${rows(cf.rentals,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['สถานะ',o=>esc(rStatusTh(o.status))],['เช่า',o=>dt(o.reserved_at)],['กำหนดคืน',o=>dt(o.due_at)],['คืนเมื่อ',o=>o.returned_at?dt(o.returned_at):'<b>ยังไม่คืน</b>'],['ค่าเช่า',o=>baht(o.price)]])}
       <h3>5. รูปสภาพชุด ก่อน-หลังเช่า (หลักฐานความเสียหาย)</h3>
       ${qcPhotos(cf.qc_photos)}
       <h3>6. การชำระเงิน</h3>
@@ -112,7 +115,7 @@
     const c=cf.contract||{}, a=cf.esign_audit||{};
     return shell('แฟ้มหลักฐาน — สัญญาพาร์ทเนอร์', `
       <h3>1. สัญญา</h3>
-      <div class="kv"><b>เลขที่:</b> ${esc(c.contract_no)} · <b style="min-width:auto">สถานะ:</b> ${esc(c.status)}</div>
+      <div class="kv"><b>เลขที่:</b> ${esc(c.contract_no)} · <b style="min-width:auto">สถานะ:</b> ${esc(cStatusTh(c.status))}</div>
       <div class="kv"><b>พาร์ทเนอร์:</b> ${esc(c.partner_name)} ${c.partner_org?'('+esc(c.partner_org)+')':''}</div>
       <h3>2. หลักฐานการลงนามอิเล็กทรอนิกส์</h3>
       <div class="kv"><b>ผู้ลงนาม:</b> ${esc(a.signer_name)}</div>

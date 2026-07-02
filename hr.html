@@ -126,7 +126,10 @@
           <option value="accounting">บัญชี/การเงิน</option>
           <option value="stylist">สไตลิสต์</option>
           <option value="sales">ขาย</option>
-          <option value="admin">แอดมิน</option></select></div>
+          <option value="admin">แอดมิน</option>
+          <option value="laundry">ซัก/ดูแลชุด</option>
+          <option value="repair">ช่างซ่อม</option>
+          <option value="shipping">จัดส่ง</option></select></div>
         <div><label>แผนก</label><input id="department" placeholder="เช่น คลัง/ดูแลชุด"></div>
         <div><label>ประเภทจ้าง</label><select id="emp_type">
           <option value="fulltime">ประจำ</option><option value="parttime">พาร์ทไทม์</option>
@@ -221,9 +224,10 @@
   // โค้ด sb.rpc('fn',{...}) เดิมไม่ต้องแก้ · gateway ใช้ secret key เรียก RPC ฝั่ง server
   if(window.opsRpc) sb.rpc = window.opsRpc;
   if(window.opsLogin) window.opsLogin().catch(()=>{}); // ให้ staff login ตั้งแต่เปิดหน้า
-  const STAFF_BASE=(location.origin.includes('http')?location.origin:'https://lloop.app').replace('lloop-ops','lloop')+'/liff/staff.html';
+  const STAFF_BASE=location.origin+'/staff.html';
 
   const $=id=>document.getElementById(id);
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const v=id=>$(id).value.trim();
   const numv=id=>{const x=$(id).value;return x===''?undefined:Number(x);};
   let curStatus='', curEmp=null, curKpiPeriod=thisPeriod();
@@ -269,8 +273,8 @@
       const working=['hired','probation','active'].includes(e.status);
       const vb=working?(e.verified?'<span class="vbadge y">ยืนยันแล้ว</span>':'<span class="vbadge n">ยังไม่ยืนยัน</span>'):'<span style="color:var(--stone)">—</span>';
       return `<tr class="click" onclick="openEmp('${e.id}')">
-        <td><b>${e.name}</b>${e.nickname?` <span style="color:var(--stone)">(${e.nickname})</span>`:''}${e.emp_no?`<br><span style="color:var(--stone);font-size:11px">${e.emp_no}</span>`:''}</td>
-        <td>${ROLE_TH[e.role]||e.role||'—'}</td>
+        <td><b>${esc(e.name)}</b>${e.nickname?` <span style="color:var(--stone)">(${esc(e.nickname)})</span>`:''}${e.emp_no?`<br><span style="color:var(--stone);font-size:11px">${esc(e.emp_no)}</span>`:''}</td>
+        <td>${ROLE_TH[e.role]||esc(e.role)||'—'}</td>
         <td>${pill(e.status)}</td>
         <td>${vb}</td>
         <td style="white-space:nowrap"><span class="mini">จัดการ ›</span></td>
@@ -298,8 +302,8 @@
     $('detail').style.display='block';
     $('detail').innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:start">
-        <div><h2>${e.name}${e.nickname?` (${e.nickname})`:''}</h2>
-        <div class="sub">${e.emp_no||'ยังไม่ออกรหัส'} · ${ROLE_TH[e.role]||e.role||'-'} · ${pill(e.status)}</div></div>
+        <div><h2>${esc(e.name)}${e.nickname?` (${esc(e.nickname)})`:''}</h2>
+        <div class="sub">${esc(e.emp_no)||'ยังไม่ออกรหัส'} · ${ROLE_TH[e.role]||esc(e.role)||'-'} · ${pill(e.status)}</div></div>
         <button class="mini" onclick="$('detail').style.display='none'">ปิด ✕</button>
       </div>
       <div class="seg" id="dseg" style="flex-wrap:wrap">
@@ -323,11 +327,11 @@
       const verifyUrl=STAFF_BASE+'?token='+e.verify_token;
       body.innerHTML=`
         <div class="g2">
-          <div><b>เบอร์</b> ${e.phone||'-'}</div><div><b>อีเมล</b> ${e.email||'-'}</div>
-          <div><b>ประเภทจ้าง</b> ${e.emp_type||'-'}</div><div><b>เงินเดือน</b> ${e.base_salary?('฿'+Number(e.base_salary).toLocaleString()):'-'}</div>
-          <div><b>เริ่มงาน</b> ${e.start_date||'-'}</div><div><b>คะแนนสัมภาษณ์</b> ${e.rating?e.rating+'/5':'-'}</div>
+          <div><b>เบอร์</b> ${esc(e.phone)||'-'}</div><div><b>อีเมล</b> ${esc(e.email)||'-'}</div>
+          <div><b>ประเภทจ้าง</b> ${esc(e.emp_type)||'-'}</div><div><b>เงินเดือน</b> ${e.base_salary?('฿'+Number(e.base_salary).toLocaleString()):'-'}</div>
+          <div><b>เริ่มงาน</b> ${esc(e.start_date)||'-'}</div><div><b>คะแนนสัมภาษณ์</b> ${e.rating?esc(e.rating)+'/5':'-'}</div>
         </div>
-        ${e.notes?`<p class="hint" style="margin-top:8px">${e.notes}</p>`:''}
+        ${e.notes?`<p class="hint" style="margin-top:8px">${esc(e.notes)}</p>`:''}
         <div class="g2">
           <div><label>กะประจำ</label><select id="empShift" onchange="assignShift()"><option value="">— ไม่กำหนด —</option></select></div>
           <div><label>สังกัดสาขา (เฟส 2)</label><select id="empBranch" onchange="assignBranch()"><option value="">— ไม่กำหนด —</option></select></div>

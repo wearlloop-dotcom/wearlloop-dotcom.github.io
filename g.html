@@ -35,10 +35,20 @@
   .gmeta{color:var(--muted);font-size:13px;margin-top:3px}
   .priceline{display:flex;align-items:baseline;gap:10px;margin-top:12px;flex-wrap:wrap}
   .priceline .now{font-family:var(--display);font-size:25px;font-weight:700;color:var(--ink)}
+  .priceline .was{font-size:15px;color:var(--muted)}
   .priceline .per{font-size:13px;color:var(--muted)}
   .priceline .worth{font-size:12.5px;color:var(--muted)}
   .priceline .worth b{color:var(--ink);font-weight:600}
   .trust{font-size:12px;color:var(--muted);margin-top:7px}
+  /* กล่องตำหนิ (แจ้งโปร่งใส) */
+  .defectbox{margin-top:14px;padding:12px 14px;background:#FBF3E4;border:1px solid #E8D5AC;border-radius:8px}
+  .defectbox .dftag{display:inline-block;font-size:11px;letter-spacing:.5px;font-weight:600;background:#8A5A00;color:#fff;padding:4px 10px;border-radius:30px}
+  .defectbox .dfoff{font-size:12.5px;color:#8A5A00;font-weight:500;margin-left:8px}
+  .defectbox .dfnote{font-size:13px;color:#5E4A22;line-height:1.55;margin-top:8px}
+  .defectbox .dfphotos{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-top:10px}
+  .defectbox .dfphotos::-webkit-scrollbar{display:none}
+  .defectbox .dfphotos img{height:110px;border-radius:6px;object-fit:cover;flex:0 0 auto;cursor:zoom-in;border:3px solid #fff;box-shadow:0 1px 6px rgba(80,64,38,.14)}
+  .defectbox .dfphotos img.zoom{height:auto;width:100%;cursor:zoom-out}
 
   .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:18px}
   .sectitle{font-family:var(--display);font-size:15px;font-weight:600;margin-bottom:3px}
@@ -103,12 +113,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=51"></script>
-<script src="data.js?v=51"></script>
+<script src="data.js?v=52"></script>
 <script src="liffAuth.js?v=51"></script>
 <script src="me-api.js?v=54"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=51"></script>
-<script src="api.js?v=54"></script>
+<script src="api.js?v=60"></script>
+<script src="pixel.js?v=45"></script>
 <script src="nav.js?v=1"></script>
 <script>
 // ============================================================
@@ -147,8 +158,45 @@ let gDur = 3, lastQuote = null, booked = false;
 function readCode(){
   const u = new URL(location.href);
   let c = u.searchParams.get('c') || u.searchParams.get('code') || '';
+  // เผื่อกลับจาก LINE login ผ่าน LIFF deep-link — รหัสถูกห่อไว้ใน liff.state (แบบ pay.html)
+  if (!c) {
+    const st = u.searchParams.get('liff.state');
+    if (st) { const inner = new URLSearchParams(st.replace(/^\?/,'')); c = inner.get('c') || inner.get('code') || ''; }
+  }
   if (!c) { const m = location.pathname.match(/\/g\/([^/?#]+)/); if (m) c = decodeURIComponent(m[1]); }
-  return (c || '').trim().toUpperCase();
+  c = (c || '').trim().toUpperCase();
+  // จำรหัสไว้ เผื่อ redirect กลับจาก LINE login แล้ว ?c หายไป (redirectUri เป็น baseUrl ตัด query)
+  try {
+    if (c) sessionStorage.setItem('gCode', c);
+    else c = (sessionStorage.getItem('gCode') || '').trim().toUpperCase();
+  } catch (_e) {}
+  return c;
+}
+
+// อ่าน ?ref (เหมือน readCode) — เก็บลง sessionStorage เผื่อ redirect กลับจาก LINE login แล้ว query หาย
+function readRef(){
+  const u = new URL(location.href);
+  let r = u.searchParams.get('ref') || '';
+  if (!r){ const st = u.searchParams.get('liff.state'); if (st){ const inner = new URLSearchParams(st.replace(/^\?/,'')); r = inner.get('ref') || ''; } }
+  r = (r || '').trim();
+  try { if (r) sessionStorage.setItem('gRef', r); else r = (sessionStorage.getItem('gRef') || '').trim(); } catch (_e) {}
+  return r;
+}
+
+// ?ref มี 2 ความหมายคนละระบบ (เหมือน app.js routeDeepLink): โค้ดชวนเพื่อนขึ้นต้น 'LOOP-' vs handle ครีเอเตอร์
+// แยก branch ก่อนยิง ไม่ให้ ref เดียวถูกนับเป็นทั้ง creator_ref และ apply_referral พร้อมกัน
+async function handleReferral(ref, code){
+  if (!ref) return;
+  if (/^loop-/i.test(ref)){
+    // โค้ดชวนเพื่อน → เก็บไว้ apply ตอน login (เครดิตทั้งคู่เมื่อเช่าครั้งแรก)
+    try { localStorage.setItem('lloop_ref', ref); } catch (_e) {}
+    if (CUSTOMER && CUSTOMER.id && window.API && window.API.applyReferral){
+      try { const res = await window.API.applyReferral(CUSTOMER, ref); if (res !== 'not_found'){ try { localStorage.removeItem('lloop_ref'); } catch (_e) {} } } catch (e) {}
+    }
+  } else if (window.API && window.API.logRef){
+    // ลิงก์ชวนเช่าของครีเอเตอร์ (?ref=handle) → log affiliate ให้ได้เครดิตแม้แชร์ลิงก์ชุดตรง
+    try { window.API.logRef(ref, code); } catch (e) {}
+  }
 }
 
 // ช่วงที่ถูกจองทับกับ [from,to] ไหม (UX hint — ตัวจริง book_cart เป็นคนตัดสิน)
@@ -171,6 +219,8 @@ function rangeBusy(from, to){
   G = (state.GARMENTS || []).find(x => String(x.code || '').toUpperCase() === code);
   if (!G) return renderEdge(NAV.t('ชุดนี้ยังไม่เปิดให้เช่า','This piece isn’t available yet'), NAV.t('อาจกำลังซัก/เตรียม หรือรหัสไม่ตรง — เลือกชุดอื่นในร้านได้เลยค่ะ','It may be in cleaning or prep, or the code doesn’t match — browse other pieces in the shop.'));
   window.track?.('view_item', G.code, { price: G.price });
+  window.fbTrack?.('ViewContent', { content_ids:[G.code || G.id], content_name: G.name, content_type:'product', value: G.price, currency:'THB' });
+  handleReferral(readRef(), G.code);
   try { PAY = await window.API.payInfo(); } catch (e) {}
   try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) { BOOKED = []; }
   renderItem();
@@ -187,6 +237,15 @@ function renderEdge(title, body){
 
 function renderItem(){
   const signedIn = !!(CUSTOMER && CUSTOMER.id);
+  // ตำหนิ (แจ้งโปร่งใส): ป้าย + ราคาขีดฆ่าจากเรทปกติ + รูปจุดตำหนิ (กดดูใกล้ ๆ ได้)
+  const hasDefect = !!(G.defectNote || (G.defectPhotos && G.defectPhotos.length));
+  const defOff = (hasDefect && G.priceRegular > G.price) ? Math.round((1 - G.price / G.priceRegular) * 100) : null;
+  const defPh = (G.defectPhotos || []).map(u => `<img src="${u}" loading="lazy" alt="${NAV.t('รูปจุดตำหนิ','flaw photo')}" referrerpolicy="no-referrer" onclick="this.classList.toggle('zoom')">`).join('');
+  const defectBox = hasDefect ? `<div class="defectbox">
+      <span class="dftag">${NAV.t('มีตำหนิเล็กน้อย','Minor flaw')}</span>${defOff ? `<span class="dfoff">-${defOff}%</span>` : ''}
+      ${G.defectNote ? `<div class="dfnote">${G.defectNote}</div>` : ''}
+      ${defPh ? `<div class="dfphotos">${defPh}</div>` : ''}
+    </div>` : '';
   const photo = G.photo
     ? `<img class="photo" src="${G.photo}" alt="${G.name}" referrerpolicy="no-referrer">`
     : `<div class="photo ph" style="background:${G.bg || '#EFEDE9'}">${(G.code || 'LLOOP')}</div>`;
@@ -205,11 +264,12 @@ function renderItem(){
     <h1 class="gname">${G.name || G.code}</h1>
     <div class="gmeta">${[G.brand, G.code].filter(Boolean).join(' · ')}</div>
     <div class="priceline">
-      <span class="now">${baht(G.price)}</span><span class="per">${NAV.t('/วัน เริ่มต้น','/day from')}</span>
+      ${defOff ? `<s class="was">${baht(G.priceRegular)}</s>` : ''}<span class="now">${baht(G.price)}</span><span class="per">${NAV.t('/วัน เริ่มต้น','/day from')}</span>
       ${worth}
     </div>
     <div class="trust">${rented} · ${NAV.t('มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป','Deposit refunded after inspection · free shipping on 3+ day rentals')}</div>
     <div class="trust" id="hygLine">${hygiene}</div>
+    ${defectBox}
 
     <div class="sec">
       <div class="sectitle">${NAV.t('เลือกวันที่จะใช้','Choose your date')}</div>
@@ -248,6 +308,11 @@ async function onPick(){
   }
   msg.className = 'availmsg free';
   msg.textContent = NAV.t('ว่างช่วงวันนี้ — จองได้เลย','Available on these dates — ready to book');
+  // ยังไม่ล็อกอิน: ไม่เรียก quote (meRpc จะ reauth เด้งออกไป LINE login กลางคัน ทั้งที่แค่ดูราคา) — ชวนล็อกอินก่อน
+  if (!(CUSTOMER && CUSTOMER.id)){
+    sum.innerHTML = `<div class="qdates">${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อดูสรุปยอดและจองค่ะ','Sign in with LINE to see the summary and book.')}</div>`;
+    return;
+  }
   let q = null;
   try { q = await window.API.quote(G.code, CUSTOMER, from, to); } catch (e) {}
   lastQuote = q;
@@ -285,6 +350,7 @@ async function onBook(){
   if (!from){ toast(NAV.t('เลือกวันก่อนนะคะ','Pick a date first')); return; }
   if (!(CUSTOMER && CUSTOMER.id)){ window.LiffAuth.signIn(); return; }
   const to = addDays(from, gDur - 1);
+  window.fbTrack?.('InitiateCheckout', { content_ids:[G.code || G.id], content_name: G.name, value: G.price, currency:'THB' });
   const btn = $('#bookBtn'); if (btn){ btn.disabled = true; btn.textContent = NAV.t('กำลังจอง…','Booking…'); }
   // เช็กว่างวันแรกอีกชั้น (กันชนนาทีสุดท้าย) — book_cart เป็นคนตัดสินจริง
   let free = true; try { free = await window.API.availableOn(G.id, from); } catch (e) {}
@@ -304,6 +370,7 @@ async function onBook(){
     const total = (data && typeof data.total === 'number') ? data.total : (lastQuote && lastQuote.total);
     const covered = !!(data && Array.isArray(data.items) && data.items.length && data.items.every(it => it.included));
     window.track?.('booked', G.code, { total });
+    window.fbTrack?.('Purchase', { content_ids:[G.code || G.id], content_name: G.name, value: (typeof total === 'number' ? total : G.price), currency:'THB' });
     renderDone(from, to, total, covered);
   } else {
     if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
