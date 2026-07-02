@@ -1,0 +1,246 @@
+{
+  "name": "LLOOP 04 · Fan-out ปฏิทินแขกทั้งกลุ่ม (ทุกชั่วโมง)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "wf4-trigger",
+      "name": "ทุกชั่วโมง",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// มองย้อนหลัง 65 นาที (เผื่อเหลื่อม 5 นาทีจากรอบก่อน — ยิงซ้ำได้ปลอดภัย เพราะ\n// upsert_event กันแถวซ้ำฝั่ง DB ด้วย unique index line_uid+date+occasion อยู่แล้ว)\nconst since = new Date(Date.now() - 65 * 60 * 1000).toISOString();\nreturn [{ json: { since } }];\n"
+      },
+      "id": "wf4-since",
+      "name": "คำนวณช่วง 65 นาทีที่ผ่านมา",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/group_bookings?created_at=gte.{{ $json.since }}&select=*",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf4-bookings",
+      "name": "⚠️ TODO: Supabase อ่าน booking กลุ่มล่าสุด — เช็คชื่อตาราง/คอลัมน์ก่อนเปิดใช้",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "notes": "⚠️ schema จริงของ booking กลุ่ม (book_group_cart/split) ยังไม่รู้ — ชื่อตาราง group_bookings เป็น placeholder ต้องแก้ให้ตรงตารางจริงก่อนเปิดใช้ (node ตั้ง onError=continue ไว้ workflow จะไม่ล้มถ้าตารางยังไม่มี)",
+      "notesInFlow": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// ⚠️ TODO: แก้ mapping ให้ตรง schema จริงของ booking กลุ่ม (ตอนนี้เดาโครงไว้)\n// เป้าหมาย: 1 item ต่อแขก 1 คน = { line_uid, date (YYYY-MM-DD), occasion }\n// ฝั่งหน้าเว็บ (group-checkout.html → saveGroupCalendar) บันทึกให้เฉพาะ \"หัวหน้ากลุ่ม\" แล้ว\n// job นี้เก็บตกสมาชิกที่เหลือของกลุ่มที่มี line_uid\nconst out = [];\nfor (const item of $input.all()) {\n  const b = item.json;\n  const members  = b.members || b.group_members || [];        // TODO: ชื่อฟิลด์รายชื่อสมาชิกจริง\n  const date     = b.event_date || b.date;                    // TODO: ชื่อฟิลด์วันงานจริง\n  const occasion = b.occasion || 'party';                     // TODO: ชื่อฟิลด์ occasion จริง\n  if (!date) continue;\n  for (const m of members) {\n    const uid = typeof m === 'string' ? m : (m && (m.line_uid || m.uid));\n    if (uid) out.push({ json: { line_uid: uid, date, occasion } });\n  }\n}\nreturn out; // ว่าง = ชั่วโมงนี้ไม่มี booking กลุ่มใหม่\n"
+      },
+      "id": "wf4-map",
+      "name": "⚠️ TODO: แปลง booking → รายชื่อแขก (แก้ชื่อฟิลด์)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "notes": "⚠️ ต้องแก้ชื่อฟิลด์ members/event_date/occasion ให้ตรง schema จริง — ดู README",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/upsert_event",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_uid: $json.line_uid, p_id: null, p_date: $json.date, p_occasion: $json.occasion, p_venue: null, p_dress_code: null }) }}"
+      },
+      "id": "wf4-upsert",
+      "name": "Supabase: upsert_event ต่อแขก (DB กันซ้ำให้เอง)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        0
+      ],
+      "notes": "รันซ้ำได้ปลอดภัย: unique index (line_uid, date, occasion) ใน customer_calendar กันแถวซ้ำฝั่ง DB",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\nfunction bubble(title, body, btnLabel, uri, extra) {\n  const bodyContents = [\n    { type: 'text', text: title, weight: 'bold', size: 'md', wrap: true, color: '#1F2A22' },\n    { type: 'text', text: body, size: 'sm', color: '#6B7A6E', wrap: true }\n  ];\n  if (extra) bodyContents.push({ type: 'text', text: extra, size: 'xs', color: '#8A9388', wrap: true, margin: 'md' });\n  return {\n    type: 'bubble',\n    header: { type: 'box', layout: 'vertical', backgroundColor: '#3E5C46', paddingAll: '16px',\n      contents: [ { type: 'text', text: 'LLOOP', color: '#FFFFFF', weight: 'bold', size: 'sm' } ] },\n    body: { type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: '20px', contents: bodyContents },\n    footer: { type: 'box', layout: 'vertical', paddingAll: '16px',\n      contents: [ { type: 'button', style: 'primary', color: '#3E5C46', height: 'sm',\n        action: { type: 'uri', label: btnLabel, uri: uri } } ] }\n  };\n}\n\n// สร้างข้อความ LINE ต่อแขก 1 คน (uid จาก node แปลง booking — n8n จับคู่ item ให้)\nconst guest = $('⚠️ TODO: แปลง booking → รายชื่อแขก (แก้ชื่อฟิลด์)').item.json;\nconst title = 'วันงานถูกบันทึกลงปฏิทินแล้วค่ะ';\nconst bodyText = 'สไตลิสต์จะเตรียมลุคให้ก่อนถึงวันงานนะคะ แตะดู/แก้รายละเอียดงานได้เลยค่ะ';\nconst contents = bubble(title, bodyText, 'ดูปฏิทินของฉัน',\n                        'https://wearlloop-dotcom.github.io/my-events.html');\nreturn { json: { lineBody: { to: guest.line_uid, messages: [{ type: 'flex',\n  altText: 'วันงานถูกบันทึกลงปฏิทินแล้ว สไตลิสต์จะเตรียมลุคให้ก่อนถึงวันค่ะ', contents }] } } };\n",
+        "mode": "runOnceForEachItem"
+      },
+      "id": "wf4-build",
+      "name": "สร้างข้อความ LINE ต่อแขก",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/push",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.LINE_CHANNEL_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.lineBody) }}"
+      },
+      "id": "wf4-push",
+      "name": "(ทางเลือก) LINE push แจ้งแขก — ปิด node นี้ได้ถ้ายังไม่อยากส่ง",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        0
+      ],
+      "notes": "ถ้ายังไม่อยากทักแขกอัตโนมัติ ให้ disable node นี้ — ปฏิทินก็ยังถูกบันทึกครบ",
+      "notesInFlow": true
+    }
+  ],
+  "connections": {
+    "ทุกชั่วโมง": {
+      "main": [
+        [
+          {
+            "node": "คำนวณช่วง 65 นาทีที่ผ่านมา",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "คำนวณช่วง 65 นาทีที่ผ่านมา": {
+      "main": [
+        [
+          {
+            "node": "⚠️ TODO: Supabase อ่าน booking กลุ่มล่าสุด — เช็คชื่อตาราง/คอลัมน์ก่อนเปิดใช้",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚠️ TODO: Supabase อ่าน booking กลุ่มล่าสุด — เช็คชื่อตาราง/คอลัมน์ก่อนเปิดใช้": {
+      "main": [
+        [
+          {
+            "node": "⚠️ TODO: แปลง booking → รายชื่อแขก (แก้ชื่อฟิลด์)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⚠️ TODO: แปลง booking → รายชื่อแขก (แก้ชื่อฟิลด์)": {
+      "main": [
+        [
+          {
+            "node": "Supabase: upsert_event ต่อแขก (DB กันซ้ำให้เอง)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: upsert_event ต่อแขก (DB กันซ้ำให้เอง)": {
+      "main": [
+        [
+          {
+            "node": "สร้างข้อความ LINE ต่อแขก",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "สร้างข้อความ LINE ต่อแขก": {
+      "main": [
+        [
+          {
+            "node": "(ทางเลือก) LINE push แจ้งแขก — ปิด node นี้ได้ถ้ายังไม่อยากส่ง",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Bangkok"
+  },
+  "pinData": {}
+}

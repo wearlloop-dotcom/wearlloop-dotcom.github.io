@@ -1,0 +1,67 @@
+{
+  "type": "bubble",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "backgroundColor": "#3E5C46",
+    "paddingAll": "16px",
+    "contents": [
+      {
+        "type": "text",
+        "text": "LLOOP",
+        "color": "#FFFFFF",
+        "weight": "bold",
+        "size": "sm"
+      }
+    ]
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "spacing": "sm",
+    "paddingAll": "20px",
+    "contents": [
+      {
+        "type": "text",
+        "text": "มีงานลูกค้าใกล้ถึง 3 งานค่ะ",
+        "weight": "bold",
+        "size": "md",
+        "wrap": true,
+        "color": "#1F2A22"
+      },
+      {
+        "type": "text",
+        "text": "เปิด today.html เพื่อจัดลุคและกด \"ทักแล้ว\" นะคะ",
+        "size": "sm",
+        "color": "#6B7A6E",
+        "wrap": true
+      },
+      {
+        "type": "text",
+        "text": "• 2026-07-10 — 2 งาน: wedding_guest @โรงแรมสยาม, dinner\n• 2026-07-14 — 1 งาน: party",
+        "size": "xs",
+        "color": "#8A9388",
+        "wrap": true,
+        "margin": "md"
+      }
+    ]
+  },
+  "footer": {
+    "type": "box",
+    "layout": "vertical",
+    "paddingAll": "16px",
+    "contents": [
+      {
+        "type": "button",
+        "style": "primary",
+        "color": "#3E5C46",
+        "height": "sm",
+        "action": {
+          "type": "uri",
+          "label": "เปิดคิวสไตลิสต์ (today.html)",
+          "uri": "https://wearlloop-dotcom.github.io/today.html"
+        }
+      }
+    ]
+  }
+}

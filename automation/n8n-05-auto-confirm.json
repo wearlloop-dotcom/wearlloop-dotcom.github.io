@@ -1,0 +1,227 @@
+{
+  "name": "LLOOP 05 · Auto-confirm กล่อง LLOOP Day (ทุกเช้า 07:30)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 7,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "wf5-trigger",
+      "name": "ทุกวัน 07:30 น. (Asia/Bangkok)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "เวลาอิง timezone ของ workflow = Asia/Bangkok (ตั้งไว้ใน settings แล้ว)",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/closet_day_prefs?select=line_uid,day",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf5-prefs",
+      "name": "Supabase: อ่าน closet_day_prefs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// คัดสมาชิกที่ \"วันเปลี่ยนตู้ครั้งถัดไป\" เหลือ ≤ 5 วัน (นับวันแบบเวลาไทย, รองรับข้ามเดือน)\nconst MS = 86400000;\nconst bkk = new Date(Date.now() + 7 * 3600 * 1000);   // Asia/Bangkok = UTC+7 ไม่มี DST\nconst todayUTC = Date.UTC(bkk.getUTCFullYear(), bkk.getUTCMonth(), bkk.getUTCDate());\n\nconst out = [];\nfor (const item of $input.all()) {\n  const line_uid = item.json.line_uid;\n  const day = Number(item.json.day);                   // 1–28 (บังคับที่ DB) → Date.UTC ปลอดภัยทุกเดือน\n  if (!line_uid || !day) continue;\n  let y = bkk.getUTCFullYear(), m = bkk.getUTCMonth();\n  let closet = Date.UTC(y, m, day);\n  if (closet < todayUTC) closet = Date.UTC(y, m + 1, day);   // เดือนนี้ผ่านไปแล้ว → เดือนหน้า\n  const daysLeft = Math.round((closet - todayUTC) / MS);\n  if (daysLeft > 5) continue;\n  const d = new Date(closet);\n  const month = d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0'); // 'YYYY-MM' ของกล่อง\n  out.push({ json: { line_uid, day, month, days_left: daysLeft, closet_date: d.toISOString().slice(0, 10) } });\n}\nreturn out;\n"
+      },
+      "id": "wf5-pick",
+      "name": "คัดสมาชิกที่เหลือ ≤ 5 วัน",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/closet_boxes?line_uid=eq.{{ $json.line_uid }}&month=eq.{{ $json.month }}&status=eq.draft",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ status: \"confirmed\" }) }}"
+      },
+      "id": "wf5-patch",
+      "name": "Supabase: PATCH closet_boxes draft → confirmed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "notes": "อัปเดตเฉพาะกล่อง status=draft ของเดือนนั้น — รันซ้ำทุกวันได้ ไม่ล็อกซ้ำ ไม่ทับ skipped/confirmed",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\nfunction bubble(title, body, btnLabel, uri, extra) {\n  const bodyContents = [\n    { type: 'text', text: title, weight: 'bold', size: 'md', wrap: true, color: '#1F2A22' },\n    { type: 'text', text: body, size: 'sm', color: '#6B7A6E', wrap: true }\n  ];\n  if (extra) bodyContents.push({ type: 'text', text: extra, size: 'xs', color: '#8A9388', wrap: true, margin: 'md' });\n  return {\n    type: 'bubble',\n    header: { type: 'box', layout: 'vertical', backgroundColor: '#3E5C46', paddingAll: '16px',\n      contents: [ { type: 'text', text: 'LLOOP', color: '#FFFFFF', weight: 'bold', size: 'sm' } ] },\n    body: { type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: '20px', contents: bodyContents },\n    footer: { type: 'box', layout: 'vertical', paddingAll: '16px',\n      contents: [ { type: 'button', style: 'primary', color: '#3E5C46', height: 'sm',\n        action: { type: 'uri', label: btnLabel, uri: uri } } ] }\n  };\n}\n\n// ส่ง LINE เฉพาะคนที่ \"เพิ่งถูกล็อกกล่องรอบนี้จริง ๆ\"\n// (PATCH ตั้ง Prefer: return=representation → ได้แถวที่อัปเดตกลับมา; [] = กล่องไม่ใช่ draft แล้ว\n//  เช่น confirm ไปแล้วเมื่อวาน / ลูกค้ากด skip → ไม่ส่งซ้ำ)\nconst byUid = {};\nfor (const m of $('คัดสมาชิกที่เหลือ ≤ 5 วัน').all()) byUid[m.json.line_uid] = m.json;\n\nconst out = [];\nfor (const item of $input.all()) {\n  const rows = item.json.body;                          // fullResponse → body = แถวที่ PATCH โดน\n  if (!Array.isArray(rows) || rows.length === 0) continue;\n  const uid = rows[0].line_uid;\n  const member = byUid[uid] || {};\n  const dayText = member.day ? String(member.day) : '';\n  const title = 'กล่องของคุณล็อกแล้วค่ะ';\n  const bodyText = 'เจอกันวันที่ ' + dayText + ' นะคะ 💚 ถ้าอยากปรับอะไรเพิ่ม ทัก LINE ทีมงานได้เลยค่ะ';\n  const contents = bubble(title, bodyText, 'ดูกล่องของฉัน',\n                          'https://wearlloop-dotcom.github.io/closet-day.html');\n  out.push({ json: { lineBody: { to: uid, messages: [{ type: 'flex',\n    altText: 'กล่องของคุณล็อกแล้ว เจอกันวันที่ ' + dayText + ' นะคะ 💚', contents }] } } });\n}\nreturn out;\n"
+      },
+      "id": "wf5-build",
+      "name": "สร้างข้อความเฉพาะกล่องที่เพิ่งล็อก",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/push",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.LINE_CHANNEL_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.lineBody) }}"
+      },
+      "id": "wf5-push",
+      "name": "LINE push แจ้งกล่องล็อกแล้ว",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "ทุกวัน 07:30 น. (Asia/Bangkok)": {
+      "main": [
+        [
+          {
+            "node": "Supabase: อ่าน closet_day_prefs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: อ่าน closet_day_prefs": {
+      "main": [
+        [
+          {
+            "node": "คัดสมาชิกที่เหลือ ≤ 5 วัน",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "คัดสมาชิกที่เหลือ ≤ 5 วัน": {
+      "main": [
+        [
+          {
+            "node": "Supabase: PATCH closet_boxes draft → confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: PATCH closet_boxes draft → confirmed": {
+      "main": [
+        [
+          {
+            "node": "สร้างข้อความเฉพาะกล่องที่เพิ่งล็อก",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "สร้างข้อความเฉพาะกล่องที่เพิ่งล็อก": {
+      "main": [
+        [
+          {
+            "node": "LINE push แจ้งกล่องล็อกแล้ว",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Bangkok"
+  },
+  "pinData": {}
+}

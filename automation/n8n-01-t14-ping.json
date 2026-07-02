@@ -1,0 +1,152 @@
+{
+  "name": "LLOOP 01 · T-14 ping สไตลิสต์ (ทุกเช้า 09:00)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "wf1-trigger",
+      "name": "ทุกวัน 09:00 น. (Asia/Bangkok)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "เวลาอิง timezone ของ workflow = Asia/Bangkok (ตั้งไว้ใน settings แล้ว)",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/upcoming_customer_events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_days: 14 }) }}"
+      },
+      "id": "wf1-rpc",
+      "name": "Supabase: upcoming_customer_events (14 วัน)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "notes": "ใช้ service_role key เท่านั้น (RPC ตัวนี้ revoke จาก anon แล้ว) — key อยู่ใน env ของ n8n ห้ามใส่ในหน้าเว็บ",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\nfunction bubble(title, body, btnLabel, uri, extra) {\n  const bodyContents = [\n    { type: 'text', text: title, weight: 'bold', size: 'md', wrap: true, color: '#1F2A22' },\n    { type: 'text', text: body, size: 'sm', color: '#6B7A6E', wrap: true }\n  ];\n  if (extra) bodyContents.push({ type: 'text', text: extra, size: 'xs', color: '#8A9388', wrap: true, margin: 'md' });\n  return {\n    type: 'bubble',\n    header: { type: 'box', layout: 'vertical', backgroundColor: '#3E5C46', paddingAll: '16px',\n      contents: [ { type: 'text', text: 'LLOOP', color: '#FFFFFF', weight: 'bold', size: 'sm' } ] },\n    body: { type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: '20px', contents: bodyContents },\n    footer: { type: 'box', layout: 'vertical', paddingAll: '16px',\n      contents: [ { type: 'button', style: 'primary', color: '#3E5C46', height: 'sm',\n        action: { type: 'uri', label: btnLabel, uri: uri } } ] }\n  };\n}\n\n// กรองเฉพาะงานที่ \"ยังไม่ทัก\" (pinged_at เป็น null) แล้วสรุปเป็นข้อความเดียวส่งหาสไตลิสต์/เจ้าของร้าน\n// Human-in-the-loop โดยตั้งใจ: workflow นี้แค่แจ้งทีมงาน — สไตลิสต์เป็นคนจัดลุคแล้วกด \"ทักแล้ว\"\n// ใน today.html เอง (ห้าม auto-mark pinged จากตรงนี้)\nconst events = $input.all().map(i => i.json).filter(e => !e.pinged_at);\nif (events.length === 0) { return []; } // ไม่มีงานค้างทัก → จบเงียบ ๆ ไม่ส่ง LINE\n\n// จัดกลุ่มตามวันที่ให้อ่านง่าย\nconst byDate = {};\nfor (const e of events) { (byDate[e.date] = byDate[e.date] || []).push(e); }\nconst lines = Object.keys(byDate).sort().map(d => {\n  const list = byDate[d];\n  const occ = list.map(e => e.occasion + (e.venue ? ' @' + e.venue : '')).join(', ');\n  return '• ' + d + ' — ' + list.length + ' งาน: ' + occ;\n});\nconst summary = lines.join('\\n').slice(0, 1500);\n\nconst to = $env.STYLIST_LINE_UID;\nif (!to) { throw new Error('ยังไม่ได้ตั้ง env STYLIST_LINE_UID (LINE userId ของสไตลิสต์/เจ้าของร้าน)'); }\n\nconst title = 'มีงานลูกค้าใกล้ถึง ' + events.length + ' งานค่ะ';\nconst bodyText = 'เปิด today.html เพื่อจัดลุคและกด \"ทักแล้ว\" นะคะ';\nconst contents = bubble(title, bodyText, 'เปิดคิวสไตลิสต์ (today.html)',\n                        'https://wearlloop-dotcom.github.io/today.html', summary);\nreturn [{ json: {\n  total: events.length,\n  lineBody: { to, messages: [{ type: 'flex',\n    altText: 'มีงานลูกค้าใกล้ถึง ' + events.length + ' งาน — เปิด today.html เพื่อจัดลุคและกดทักแล้ว',\n    contents }] }\n} }];\n"
+      },
+      "id": "wf1-code",
+      "name": "กรองยังไม่ทัก + สรุปเป็นข้อความเดียว",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "notes": "Human-in-the-loop: แจ้งสไตลิสต์เท่านั้น ไม่ auto-mark pinged — สไตลิสต์กด 'ทักแล้ว' ใน today.html",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/push",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.LINE_CHANNEL_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.lineBody) }}"
+      },
+      "id": "wf1-push",
+      "name": "LINE push หาสไตลิสต์ (STYLIST_LINE_UID)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "ทุกวัน 09:00 น. (Asia/Bangkok)": {
+      "main": [
+        [
+          {
+            "node": "Supabase: upcoming_customer_events (14 วัน)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: upcoming_customer_events (14 วัน)": {
+      "main": [
+        [
+          {
+            "node": "กรองยังไม่ทัก + สรุปเป็นข้อความเดียว",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "กรองยังไม่ทัก + สรุปเป็นข้อความเดียว": {
+      "main": [
+        [
+          {
+            "node": "LINE push หาสไตลิสต์ (STYLIST_LINE_UID)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Bangkok"
+  },
+  "pinData": {}
+}

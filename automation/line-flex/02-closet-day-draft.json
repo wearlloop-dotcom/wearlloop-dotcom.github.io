@@ -1,0 +1,59 @@
+{
+  "type": "bubble",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "backgroundColor": "#3E5C46",
+    "paddingAll": "16px",
+    "contents": [
+      {
+        "type": "text",
+        "text": "LLOOP",
+        "color": "#FFFFFF",
+        "weight": "bold",
+        "size": "sm"
+      }
+    ]
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "spacing": "sm",
+    "paddingAll": "20px",
+    "contents": [
+      {
+        "type": "text",
+        "text": "กล่องเดือนนี้จัดให้แล้วค่ะ 💚",
+        "weight": "bold",
+        "size": "md",
+        "wrap": true,
+        "color": "#1F2A22"
+      },
+      {
+        "type": "text",
+        "text": "แตะดูได้เลยนะคะ สลับชิ้นที่ไม่ถูกใจได้ถึงพรุ่งนี้ค่ะ (วันเปลี่ยนตู้ของคุณคือวันที่ 15)",
+        "size": "sm",
+        "color": "#6B7A6E",
+        "wrap": true
+      }
+    ]
+  },
+  "footer": {
+    "type": "box",
+    "layout": "vertical",
+    "paddingAll": "16px",
+    "contents": [
+      {
+        "type": "button",
+        "style": "primary",
+        "color": "#3E5C46",
+        "height": "sm",
+        "action": {
+          "type": "uri",
+          "label": "เปิดดูกล่องของฉัน",
+          "uri": "https://wearlloop-dotcom.github.io/closet-day.html"
+        }
+      }
+    ]
+  }
+}

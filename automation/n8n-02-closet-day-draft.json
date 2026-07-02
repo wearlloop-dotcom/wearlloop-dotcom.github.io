@@ -1,0 +1,220 @@
+{
+  "name": "LLOOP 02 · กล่อง LLOOP Day draft + แจ้งสมาชิก (ทุกเช้า 08:00)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 8,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "wf2-trigger",
+      "name": "ทุกวัน 08:00 น. (Asia/Bangkok)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "notes": "เวลาอิง timezone ของ workflow = Asia/Bangkok (ตั้งไว้ใน settings แล้ว)",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/closet_day_prefs?select=line_uid,day",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf2-prefs",
+      "name": "Supabase: อ่าน closet_day_prefs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "notes": "อ่านตารางตรงผ่าน PostgREST ด้วย service_role (ตารางปิด RLS สำหรับ anon)",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// หาสมาชิกที่ \"วันนี้ = วันเปลี่ยนตู้ - 5 วัน\" (T-5) ตามเวลาไทย\n// Asia/Bangkok = UTC+7 ตลอดปี (ไทยไม่มี DST) เลยเลื่อนเวลาแบบบวก 7 ชม. ได้ตรง ๆ\nconst bkk = new Date(Date.now() + 7 * 3600 * 1000);\nconst todayDOM = bkk.getUTCDate();\n// จำนวนวันของ \"เดือนนี้\" — ใช้ตอนวันทักตกไปปลายเดือน (เช่น day=3 → ทักวันที่ 29-31 ของเดือนนี้)\nconst daysInThisMonth = new Date(Date.UTC(bkk.getUTCFullYear(), bkk.getUTCMonth() + 1, 0)).getUTCDate();\n\nconst out = [];\nfor (const item of $input.all()) {\n  const line_uid = item.json.line_uid;\n  const day = Number(item.json.day);           // 1–28 (บังคับที่ DB แล้ว)\n  if (!line_uid || !day) continue;\n  let ping = day - 5;\n  if (ping < 1) ping += daysInThisMonth;       // day-5 < 1 → วนไปปลายเดือนปัจจุบัน (วันเปลี่ยนตู้อยู่เดือนหน้า)\n  if (ping === todayDOM) out.push({ json: { line_uid, day } });\n}\nreturn out; // ว่าง = วันนี้ไม่มีใครถึงรอบ → node ถัดไปไม่ทำงาน\n"
+      },
+      "id": "wf2-filter",
+      "name": "กรองสมาชิกที่วันนี้คือ T-5",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SUPABASE_URL }}/rest/v1/rpc/closet_day_get",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ p_uid: $json.line_uid }) }}"
+      },
+      "id": "wf2-get",
+      "name": "Supabase: closet_day_get (สร้างกล่อง draft ถ้ายังไม่มี)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "notes": "RPC ตัวนี้จัดกล่อง draft ของเดือนนี้ให้เองถ้ายังไม่มี — เรียกซ้ำได้ ไม่สร้างซ้ำ (unique line_uid+month) ⚠️ ต้อง deploy 03_closet_day.sql และมีตาราง garments จริงก่อน ไม่งั้น RPC error",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\nfunction bubble(title, body, btnLabel, uri, extra) {\n  const bodyContents = [\n    { type: 'text', text: title, weight: 'bold', size: 'md', wrap: true, color: '#1F2A22' },\n    { type: 'text', text: body, size: 'sm', color: '#6B7A6E', wrap: true }\n  ];\n  if (extra) bodyContents.push({ type: 'text', text: extra, size: 'xs', color: '#8A9388', wrap: true, margin: 'md' });\n  return {\n    type: 'bubble',\n    header: { type: 'box', layout: 'vertical', backgroundColor: '#3E5C46', paddingAll: '16px',\n      contents: [ { type: 'text', text: 'LLOOP', color: '#FFFFFF', weight: 'bold', size: 'sm' } ] },\n    body: { type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: '20px', contents: bodyContents },\n    footer: { type: 'box', layout: 'vertical', paddingAll: '16px',\n      contents: [ { type: 'button', style: 'primary', color: '#3E5C46', height: 'sm',\n        action: { type: 'uri', label: btnLabel, uri: uri } } ] }\n  };\n}\n\n// สร้างข้อความ LINE ต่อสมาชิก 1 คน — uid/day ดึงจาก node กรองสมาชิก (n8n จับคู่ item ให้อัตโนมัติ)\nconst member = $('กรองสมาชิกที่วันนี้คือ T-5').item.json;\nconst title = 'กล่องเดือนนี้จัดให้แล้วค่ะ 💚';\nconst bodyText = 'แตะดูได้เลยนะคะ สลับชิ้นที่ไม่ถูกใจได้ถึงพรุ่งนี้ค่ะ (วันเปลี่ยนตู้ของคุณคือวันที่ ' + member.day + ')';\nconst contents = bubble(title, bodyText, 'เปิดดูกล่องของฉัน',\n                        'https://wearlloop-dotcom.github.io/closet-day.html');\nreturn { json: { lineBody: { to: member.line_uid, messages: [{ type: 'flex',\n  altText: 'กล่องเดือนนี้จัดให้แล้วค่ะ — แตะดู สลับได้ถึงพรุ่งนี้', contents }] } } };\n",
+        "mode": "runOnceForEachItem"
+      },
+      "id": "wf2-build",
+      "name": "สร้างข้อความ LINE ต่อสมาชิก",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/push",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.LINE_CHANNEL_ACCESS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.lineBody) }}"
+      },
+      "id": "wf2-push",
+      "name": "LINE push หาสมาชิก",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "ทุกวัน 08:00 น. (Asia/Bangkok)": {
+      "main": [
+        [
+          {
+            "node": "Supabase: อ่าน closet_day_prefs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: อ่าน closet_day_prefs": {
+      "main": [
+        [
+          {
+            "node": "กรองสมาชิกที่วันนี้คือ T-5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "กรองสมาชิกที่วันนี้คือ T-5": {
+      "main": [
+        [
+          {
+            "node": "Supabase: closet_day_get (สร้างกล่อง draft ถ้ายังไม่มี)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: closet_day_get (สร้างกล่อง draft ถ้ายังไม่มี)": {
+      "main": [
+        [
+          {
+            "node": "สร้างข้อความ LINE ต่อสมาชิก",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "สร้างข้อความ LINE ต่อสมาชิก": {
+      "main": [
+        [
+          {
+            "node": "LINE push หาสมาชิก",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Bangkok"
+  },
+  "pinData": {}
+}

@@ -61,3 +61,5 @@
    บอกลูกค้าว่า "สไตลิสต์จะยืนยันทาง LINE ก่อนจัดส่ง" แทน auto-confirm
 
 `CONFIG.N8N_BASE_URL` ใน `config.js` เว้นไว้รองรับข้อ 1-5 แล้ว
+
+➡️ **workflow ทั้ง 5 ตัวสร้างไว้ให้แล้ว — import เข้า n8n ได้เลยที่โฟลเดอร์ [`automation/`](../automation/README.md)** (พร้อม LINE flex templates + คู่มือติดตั้ง)

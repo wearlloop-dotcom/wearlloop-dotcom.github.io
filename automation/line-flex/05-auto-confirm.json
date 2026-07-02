@@ -1,0 +1,59 @@
+{
+  "type": "bubble",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "backgroundColor": "#3E5C46",
+    "paddingAll": "16px",
+    "contents": [
+      {
+        "type": "text",
+        "text": "LLOOP",
+        "color": "#FFFFFF",
+        "weight": "bold",
+        "size": "sm"
+      }
+    ]
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "spacing": "sm",
+    "paddingAll": "20px",
+    "contents": [
+      {
+        "type": "text",
+        "text": "กล่องของคุณล็อกแล้วค่ะ",
+        "weight": "bold",
+        "size": "md",
+        "wrap": true,
+        "color": "#1F2A22"
+      },
+      {
+        "type": "text",
+        "text": "เจอกันวันที่ 15 นะคะ 💚 ถ้าอยากปรับอะไรเพิ่ม ทัก LINE ทีมงานได้เลยค่ะ",
+        "size": "sm",
+        "color": "#6B7A6E",
+        "wrap": true
+      }
+    ]
+  },
+  "footer": {
+    "type": "box",
+    "layout": "vertical",
+    "paddingAll": "16px",
+    "contents": [
+      {
+        "type": "button",
+        "style": "primary",
+        "color": "#3E5C46",
+        "height": "sm",
+        "action": {
+          "type": "uri",
+          "label": "ดูกล่องของฉัน",
+          "uri": "https://wearlloop-dotcom.github.io/closet-day.html"
+        }
+      }
+    ]
+  }
+}
