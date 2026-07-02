@@ -2956,6 +2956,7 @@ const COURIER_TRACK = {
   kex:'https://th.kerryexpress.com/th/track/?track=',
   jt:'https://www.jtexpress.co.th/index/query/gzquery.html?bills=',
   thaipost:'https://track.thailandpost.co.th/?trackNumber=',
+  ems:'https://track.thailandpost.co.th/?trackNumber=',
   ninja:'https://www.ninjavan.co/th-th/tracking?id=',
 };
 function trackUrl(courier, no) {

@@ -174,6 +174,9 @@ function renderItem(){
     : `<div class="photo ph" style="background:${G.bg || '#EFEDE9'}">${(G.code || 'LLOOP')}</div>`;
   const worth = G.retail ? `<span class="worth">${NAV.t('มูลค่าชุด','Retail value')} <b>${baht(G.retail)}</b></span>` : '';
   const rented = (G.timesRented > 0) ? NAV.t(`เคยถูกเช่า ${G.timesRented} ครั้ง`,`Rented ${G.timesRented} times`) : NAV.t('ชุดพร้อมเช่า','Ready to rent');
+  const hygiene = NAV.t('ซักและตรวจสภาพก่อนส่งทุกครั้ง','Cleaned & inspected before every rental')
+    + (G.washCount > 0 ? NAV.t(' · ดูแลมาแล้ว ' + G.washCount + ' รอบ', ' · ' + G.washCount + ' care cycles logged') : '')
+    + (G.grade ? ' · ' + NAV.t('เกรดสภาพ ', 'Condition grade ') + G.grade : '');
   const cta = signedIn
     ? `<button class="btn" id="bookBtn" onclick="onBook()" disabled>${NAV.t('เลือกวันก่อนนะคะ','Pick a date first')}</button>`
     : `<button class="btn sage" onclick="window.LiffAuth.signIn()">${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อจอง','Sign in with LINE to book')}</button>
@@ -188,6 +191,7 @@ function renderItem(){
       ${worth}
     </div>
     <div class="trust">${rented} · ${NAV.t('มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป','Deposit refunded after inspection · free shipping on 3+ day rentals')}</div>
+    <div class="trust">${hygiene}</div>
 
     <div class="sec">
       <div class="sectitle">${NAV.t('เลือกวันที่จะใช้','Choose your date')}</div>

@@ -66,7 +66,7 @@
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;
   if(window.opsLogin) window.opsLogin().catch(()=>{});
-  const COLS=['code','name','brand','tier','rental_price','category','dress_code','occasion_tags','color_name','color_hex','color_season','bust_min_in','bust_max_in','waist_min_in','waist_max_in','length_cm','stretch','fabric_composition','has_lining','is_sheer','fabric_weight','styling_tips','photos'];
+  const COLS=['code','name','brand','tier','rental_price','category','dress_code','occasion_tags','color_name','color_hex','color_season','size','condition','acquisition_cost','bust_min_in','bust_max_in','waist_min_in','waist_max_in','length_cm','stretch','fabric_composition','has_lining','is_sheer','fabric_weight','styling_tips','photos'];
   const MULTI=['occasion_tags','styling_tips','photos'];
   const $=id=>document.getElementById(id);
   function log(msg,cls){ const l=$('log'); l.className='log show'; l.textContent += msg+'\n'; if(cls)l.style.color=cls; }

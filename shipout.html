@@ -133,8 +133,8 @@
         </div>
         <div class="ret-note"> ถุงนี้สำหรับ <b>ส่งชุดกลับ LLOOP</b> — ใส่ชุดในถุงเดิม แปะใบนี้หน้าถุง แล้วส่งกลับภายในกำหนด ${d.due?'('+thdate(d.due)+')':''} · มีปัญหาแจ้งในแชต LINE ได้เลยค่ะ</div>
       </div>`;
-    new QRCode($('qrG'),{text:'https://lloop.app/g/'+g.code,width:96,height:96});
-    new QRCode($('qrR'),{text:'https://lloop.app/g/'+g.code,width:84,height:84});
+    new QRCode($('qrG'),{text:'https://wearlloop-dotcom.github.io/g.html?c='+g.code,width:96,height:96});
+    new QRCode($('qrR'),{text:'https://wearlloop-dotcom.github.io/g.html?c='+g.code,width:84,height:84});
     $('hint').textContent='พร้อมปริ้น — กด';
     qcCode=g.code; qcShotCount=0; const qb=$('qcBtn'); if(qb){ qb.style.display=''; $('qcShotN').textContent=''; }
   }
@@ -146,6 +146,9 @@
     else if(r.error!=='ยกเลิก'){ $('hint').textContent='รูปไม่สำเร็จ: '+r.error; }
   }
   $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') load(); });
+  // เปิดจาก today.html?code=<x> → เติมโค้ดและโหลดให้เลย
+  const qCode=new URLSearchParams(location.search).get('code');
+  if(qCode){ $('code').value=qCode; load(); }
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>

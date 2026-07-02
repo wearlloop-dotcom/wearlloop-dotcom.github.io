@@ -102,7 +102,7 @@
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
-  const CUSTOMER_SITE='https://lloop.app';          // หน้าลูกค้า: แตะ tag → เปิดหน้าชุด ?g=รหัส (รูป/สไตล์/เช่าชุดนี้)
+  const GARMENT_URL='https://wearlloop-dotcom.github.io/g.html?c=';  // หน้าลูกค้า: แตะ tag → เปิดหน้าชุด (g.html รับ ?c=<code>) · ใช้ github.io ที่ออนไลน์จริง (lloop.app ยังไม่ผูก DNS)
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // วิ่งผ่าน gateway (LINE login + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});
@@ -130,7 +130,7 @@
   }
   async function writeUrl(code){
     // เขียน URL หน้าลูกค้าลง tag → ลูกค้าแตะเฉย ๆ มือถือเด้งหน้าชุด (ไม่ใช่หลังบ้าน)
-    try{ const w=new NDEFReader(); await w.write({records:[{recordType:'url',data:CUSTOMER_SITE+'/?g='+encodeURIComponent(code)}]}); }catch(e){/* เขียนไม่ได้ไม่เป็นไร ผูกใน DB แล้ว */}
+    try{ const w=new NDEFReader(); await w.write({records:[{recordType:'url',data:GARMENT_URL+encodeURIComponent(code)}]}); }catch(e){/* เขียนไม่ได้ไม่เป็นไร ผูกใน DB แล้ว */}
   }
 
   async function startScan(mode){
