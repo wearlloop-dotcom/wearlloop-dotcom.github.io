@@ -21,6 +21,7 @@
       { href: 'stock.html',    label: 'สต๊อก',         icon: '▦', roles: ['care','stock','manager'] },
       { href: 'garment.html',  label: 'ชุด',           icon: '❖', roles: ['care','stock','manager'] },
       { href: 'seller.html',   label: 'รับซื้อมือสอง',  icon: '⇄', roles: ['care','manager'] },
+      { href: 'csv.html',      label: 'CSV ชุด (นำเข้า/ส่งออก)', icon: '⇅', roles: ['stock','manager'] },
     ] },
     { section: 'การตลาด', items: [
       { href: 'marketing.html',  label: 'การตลาด',       icon: '◆', roles: ['marketing','manager'] },
