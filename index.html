@@ -1142,6 +1142,39 @@
   .introtag{animation-delay:1.05s}
   .introsub{animation-delay:1.25s}
   .enterbtn{animation-delay:1.45s}
+
+  /* ============ INTRO REDESIGN · 2026-07-02 — monogram reveal โทนเดียวกับ hero (espresso + ทอง) ============ */
+  .intro{background:
+      radial-gradient(62% 42% at 50% 40%,rgba(201,168,106,.15),transparent 72%),
+      var(--espresso);
+    transition:opacity .7s ease,transform .7s ease}
+  .intro::before{content:"";position:absolute;inset:0;opacity:.05;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .intro.hide{transform:scale(1.03)}
+  .ihouse{font-family:var(--display);font-weight:600;font-size:10px;letter-spacing:.5em;color:var(--gold)}
+  .loopstage{width:300px;height:300px;margin:28px 0 6px}
+  .loopstage::before{background:radial-gradient(circle,rgba(201,168,106,.15),transparent 70%)}
+  .ring{animation-duration:11s}
+  .ring .track{stroke:rgba(244,238,224,.10)}
+  .ring .arc{stroke:var(--gold);stroke-width:1.6;stroke-dasharray:150 470}
+  .ring .bead{fill:var(--gold);r:2.6}
+  .intrologo{font-family:var(--serif);font-weight:500;font-size:44px;color:var(--ivory);
+    letter-spacing:.22em;padding-left:.22em;/* ชดเชย tracking ให้กึ่งกลางจริง */
+    animation:logotrack 1.5s cubic-bezier(.2,.6,.2,1) .25s both}
+  @keyframes logotrack{from{opacity:0;letter-spacing:.5em;filter:blur(3px)}to{opacity:1;letter-spacing:.22em;filter:none}}
+  .cyc{background:var(--espresso);font-family:var(--display);font-weight:500;font-size:10px;
+    letter-spacing:.24em;text-transform:uppercase;color:rgba(244,238,224,.66);padding:2px 8px}
+  .introtag{font-family:var(--serif);font-style:italic;font-weight:500;font-size:19px;color:var(--gold);margin-top:20px}
+  .introsub{font-size:11px;letter-spacing:.14em;color:rgba(244,238,224,.55)}
+  .enterbtn{background:transparent;color:var(--ivory);border-bottom:1px solid rgba(244,238,224,.5);
+    padding:10px 6px;margin-top:22px;letter-spacing:.24em}
+  .enterbtn:hover{color:var(--gold);border-bottom-color:var(--gold)}
+  /* เส้นทองไล่เต็มจอล่าง = นับถอยหลังเข้าคอลเลกชันเอง (2.2s) */
+  .intro::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--gold);
+    transform:scaleX(0);transform-origin:left;animation:introprog 2.05s linear .15s forwards}
+  .intro.hide::after{display:none}
+  @keyframes introprog{to{transform:scaleX(1)}}
+  @media(prefers-reduced-motion:reduce){.intrologo{animation:none}.intro::after{animation:none}}
 </style>
 </head>
 <body>
