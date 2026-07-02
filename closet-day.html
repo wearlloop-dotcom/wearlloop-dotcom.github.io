@@ -141,7 +141,18 @@ const LSK = {                                     // localStorage (fallback ร�
   history: 'lloop_closetday_history',             // โค้ดชุดที่เคยอยู่ในกล่องแล้ว (กันจัดซ้ำ)
 };
 const MAX_SWAPS = 2;
-const CUST = (window.MOCK && MOCK.CUSTOMER) || {};
+// โปรไฟล์ที่ใช้จัดกล่อง — เริ่มจาก MOCK แล้วทับด้วยโปรไฟล์จริงเมื่อล็อกอิน (pattern เดียวกับ api.js)
+let CUST = (window.MOCK && MOCK.CUSTOMER) || {};
+let CUST_REAL = false;                             // true = ใช้โปรไฟล์จริง → โชว์ชิป "เข้าโทนสีคุณ" ได้เต็มปาก
+async function loadRealProfile(){
+  if(!UID) return;
+  try{
+    const { data } = await client().from('customers')
+      .select('bust_in,waist_in,hip_in,height_cm,my_color_season')
+      .eq('line_uid', UID).maybeSingle();
+    if(data && (data.bust_in != null || data.my_color_season)){ CUST = data; CUST_REAL = true; }
+  }catch(e){ console.warn('[closet-day] โหลดโปรไฟล์จริงไม่สำเร็จ — ใช้ค่าตัวอย่าง:', (e && e.message) || e); }
+}
 
 // ---------- state ----------
 let sb = null, UID = null;
@@ -373,7 +384,9 @@ function renderBox(){
 
   $('boxList').innerHTML = S.box.map(b => {
     const tone = b.season === CUST.my_color_season
-      ? '<span class="chip tone">' + NAV.t('เข้าโทนสีคุณ', 'Matches your palette') + '</span>' : '';
+      ? '<span class="chip tone">' + (CUST_REAL
+          ? NAV.t('เข้าโทนสีคุณ', 'Matches your palette')
+          : NAV.t('โทนยอดนิยม', 'Popular tone')) + '</span>' : '';
     const btn = '<button type="button" class="swapbtn" ' + (canSwap ? '' : 'disabled ')
       + 'onclick="openSwap(\'' + esc(b.code) + '\')">' + NAV.t('สลับชิ้นนี้', 'Swap this piece') + '</button>';
     let card = '<div class="gcard">'
@@ -432,6 +445,7 @@ async function boot(){
     if(p) UID = p.userId;
   }catch(e){ console.warn('LIFF login skipped:', e); }
   $('demoCard').classList.toggle('hidden', !!UID);
+  await loadRealProfile();                         // โปรไฟล์จริงก่อนจัดกล่อง — คะแนนไซซ์/โทนสีถึงเป็นของลูกค้าจริง
   await loadState();
   renderAll();
 }

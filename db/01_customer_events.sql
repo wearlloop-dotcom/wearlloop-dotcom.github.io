@@ -3,6 +3,8 @@
 -- ปฏิทินงานของลูกค้า (feature "ปฏิทินงานของฉัน" — my-events.html)
 -- ลูกค้าบอกว่ามีงานอะไรล่วงหน้า → สไตลิสต์เตรียมลุคเชิงรุก แล้วทักไปทาง LINE
 -- รันใน Supabase SQL editor ได้เลย (idempotent เท่าที่ทำได้)
+-- ⚠️ ตารางชื่อ customer_calendar (ไม่ใช่ customer_events) — ระบบจริงมีตาราง
+--    customer_events อยู่แล้ว (โครงอื่น: customer_id/notified ใช้โดย api.js) ห้ามชนกัน
 -- ============================================================================
 
 -- gen_random_uuid() ต้องมี pgcrypto (โปรเจกต์ Supabase ส่วนใหญ่เปิดไว้แล้ว)
@@ -14,7 +16,7 @@ create extension if not exists pgcrypto;
 --   status     = 'planned' (เพิ่งบันทึก) · 'pinged' (สไตลิสต์ทักไปแล้ว)
 --   pinged_at  = เวลาที่สไตลิสต์ทักลูกค้าไปทาง LINE แล้ว (กันทักซ้ำ)
 -- ----------------------------------------------------------------------------
-create table if not exists public.customer_events (
+create table if not exists public.customer_calendar (
   id          uuid primary key default gen_random_uuid(),
   line_uid    text not null,
   date        date not null,
@@ -27,16 +29,16 @@ create table if not exists public.customer_events (
 );
 
 -- ดัชนีหลักตามรูปแบบการอ่าน: ดึงงานของลูกค้าคนหนึ่ง เรียงตามวันงาน
-create index if not exists customer_events_uid_date_idx
-  on public.customer_events (line_uid, date);
+create index if not exists customer_calendar_uid_date_idx
+  on public.customer_calendar (line_uid, date);
 
 -- ----------------------------------------------------------------------------
 -- ความปลอดภัย: เปิด RLS แต่ "ไม่สร้าง policy สาธารณะ" เลย
 -- → ตารางนี้อ่าน/เขียนตรงจาก client ไม่ได้ ทุกอย่างต้องผ่านฟังก์ชัน
 --   SECURITY DEFINER ด้านล่างเท่านั้น (ฟังก์ชันตรวจ line_uid ให้เอง)
 -- ----------------------------------------------------------------------------
-alter table public.customer_events enable row level security;
-revoke all on public.customer_events from anon, authenticated;
+alter table public.customer_calendar enable row level security;
+revoke all on public.customer_calendar from anon, authenticated;
 
 -- ----------------------------------------------------------------------------
 -- my_events(p_uid) — รายการงานทั้งหมดของลูกค้าคนนี้ เรียงตามวันงาน
@@ -49,7 +51,7 @@ security definer
 set search_path = public
 as $$
   select e.id, e.date, e.occasion, e.venue, e.dress_code, e.status
-  from customer_events e
+  from customer_calendar e
   where e.line_uid = p_uid
   order by e.date asc, e.created_at asc;
 $$;
@@ -86,12 +88,12 @@ begin
 
   if p_id is null then
     -- งานใหม่
-    insert into customer_events (line_uid, date, occasion, venue, dress_code)
+    insert into customer_calendar (line_uid, date, occasion, venue, dress_code)
     values (p_uid, p_date, p_occasion, nullif(trim(p_venue), ''), nullif(trim(p_dress_code), ''))
     returning id into v_id;
   else
     -- แก้งานเดิม — ต้องเป็นเจ้าของ (line_uid ตรง) เท่านั้น
-    update customer_events
+    update customer_calendar
        set date       = p_date,
            occasion   = p_occasion,
            venue      = nullif(trim(p_venue), ''),
@@ -120,7 +122,7 @@ as $$
 declare
   v_count int;
 begin
-  delete from customer_events
+  delete from customer_calendar
    where id = p_id and line_uid = p_uid;
   get diagnostics v_count = row_count;
   if v_count = 0 then
@@ -146,7 +148,7 @@ set search_path = public
 as $$
   select e.id, e.line_uid, e.date, e.occasion, e.venue,
          e.dress_code, e.status, e.pinged_at, e.created_at
-  from customer_events e
+  from customer_calendar e
   where e.date >= current_date
     and e.date <= current_date + p_days
   order by e.date asc, e.created_at asc;
@@ -163,7 +165,7 @@ security definer
 set search_path = public
 as $$
 begin
-  update customer_events
+  update customer_calendar
      set pinged_at = now(),
          status    = 'pinged'
    where id = p_id;
