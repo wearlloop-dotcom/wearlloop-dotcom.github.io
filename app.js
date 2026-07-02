@@ -3832,6 +3832,10 @@ async function boot() {
   fForYou =!!(CUSTOMER.bust_in!= null || CUSTOMER.my_color_season || (CUSTOMER.style_profile && Object.keys(CUSTOMER.style_profile).length));
   // สถานะล็อกอิน: มี lineUid = ล็อกอินผ่าน LINE แล้ว → โชว์เครดิตจริง; ไม่มี = guest → โชว์ปุ่มเข้าสู่ระบบ
   const loggedIn =!!s.lineUid;
+  // ล็อกอินแล้วแต่โหลดโปรไฟล์จริงไม่สำเร็จ (me_profile ล้ม) → แจ้งผู้ใช้ว่าข้อมูลอาจไม่ครบ (กันเข้าใจผิดว่าเครดิต 0/ไซส์ว่างคือของจริง)
+  if (loggedIn && CUSTOMER && CUSTOMER.profile_load_failed) {
+    toast(lang === 'th' ? 'โหลดโปรไฟล์ไม่สำเร็จ — บางข้อมูลอาจไม่ครบ ลองรีเฟรชอีกครั้งนะคะ' : 'Couldn’t load your profile — some info may be missing. Please refresh.');
+  }
   // บังคับล็อกอินทั้งเว็บก่อนใช้งาน (เว้นโหมดเดโม/localhost) — guest เห็นแค่ประตูล็อกอิน ไม่โหลด/ไม่ track ต่อ
   const _isLocalDev = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname);
   if (!loggedIn && !(window.CONFIG && CONFIG.USE_MOCK) && !_isLocalDev) { showLoginGate(); return; }

@@ -89,6 +89,8 @@
       for(const r of res.data){
         const p={...r};
         MULTI.forEach(c=> p[c]= (r[c]||'').split(';').map(s=>s.trim()).filter(Boolean));
+        // enum ที่เว้นว่างต้องเป็น null (ไม่ใช่ '') ให้ตรงกับ intake.html — กัน error invalid enum ตอน import
+        ['size','condition'].forEach(k=>{ if(p[k]==='') p[k]=null; });
         const { data, error } = await sb.rpc('intake_garment',{ p });
         if(error){ fail++; log(`✗ ${r.code||r.name||'(แถว)'} : ${error.message}`,'#A32D2D'); }
         else { ok++; log(`✓ ${data} · ${r.name||''}`); }
