@@ -278,10 +278,13 @@ function personalScore(g) {
   if (sp.avoid_colors && g.colors.some(col => sp.avoid_colors.includes(col[1]))) s -= 20;
   const pf = c.prefs || {};                    // สไตล์/สี/โอกาสที่ลูกค้ากรอกเองในโปรไฟล์
   if (Array.isArray(pf.occasions) && pf.occasions.length && g.occasion_tags.some(t => pf.occasions.includes(t))) s += 10;
-  const colorName = (g.colors[0] && g.colors[0][0]) || '';
+  const colorName = ((g.colors[0] && g.colors[0][0]) || '').toLowerCase();
   if (colorName && colorName !== 'สี' && colorName !== '—') {
-    if ((pf.avoid_colors || '').includes(colorName)) s -= 15;      // สีที่บอกว่าเลี่ยง (จับจากชื่อสี)
-    else if ((pf.fav_colors || '').includes(colorName)) s += 10;   // สีโปรด
+    // จับสองทาง ไม่สนตัวพิมพ์: "ส้ม" ในโปรไฟล์ต้องจับ "ส้มสด" ของชุดได้ และกลับกัน
+    const hit = txt => String(txt || '').toLowerCase().split(/[,\s·]+/).filter(Boolean)
+      .some(tok => tok.includes(colorName) || colorName.includes(tok));
+    if (hit(pf.avoid_colors)) s -= 15;      // สีที่บอกว่าเลี่ยง
+    else if (hit(pf.fav_colors)) s += 10;   // สีโปรด
   }
   if (EVENT && g.occasion_tags.includes(EVENT.occasion)) s += 12; // ตรงกับงานในปฏิทิน
   // ML-lite: รสนิยมที่เรียนจากพฤติกรรมจริง (category/brand/season ที่ลูกค้าสนใจเอง)
@@ -1088,9 +1091,9 @@ async function loadSizedReviews(g) {
   const _seq = window._detailSeq;
   const el = $('#sizedRev'); if (!el || !g || !g.code) return;
   try {
-    if (!window.CONFIG || !window.supabase) return;
+    const cli = kycSb();   // client กลางที่ cache ไว้แล้ว — ห้าม createClient ใหม่ทุกครั้งที่เปิดชุด
+    if (!cli) return;
     const c = CUSTOMER || {};
-    const cli = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
     const { data } = await cli.rpc('garment_reviews_sized', { p_code: g.code, p_height: c.height_cm || null, p_size: c.size || null });
     if (_seq !== window._detailSeq) return;  // สลับชุดไปแล้ว อย่าเขียนทับชีตชุดใหม่
     const revs = (data && data.reviews) || [];

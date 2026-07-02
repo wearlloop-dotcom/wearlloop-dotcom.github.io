@@ -87,7 +87,7 @@
   const missingRpc=e=>/function|not.*found|does not exist|404/i.test(e?.message||'');
 
   const ST_TH={new:'ใหม่',priced:'ตีราคาแล้ว',accepted:'ตกลงซื้อ',paid:'จ่ายแล้ว',rejected:'ไม่รับ',stocked:'เข้าคลังแล้ว'};
-  const COND_MAP={'ใหม่ป้ายห้อย':'new','new':'new','ดีมาก':'good','ดี':'good','good':'good','พอใช้':'fair','fair':'fair','poor':'poor'};
+  const COND_MAP={'ใหม่ป้ายห้อย':'new','new':'new','ดีมาก':'good','ดี':'good','good':'good','พอใช้':'fair','fair':'fair','ต้องซ่อม':'poor','ซ่อม':'poor','poor':'poor'};
   let TAB='pending', CUR=null;
 
   function setTab(s){ TAB=s; document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.s===s)); loadList(); }
@@ -152,12 +152,16 @@
   function intakeLink(o,d){
     const photo=(d.photos||o.photos||[])[0]||'';
     const q=new URLSearchParams({acq:o.id||'',name:o.name||'',brand:o.brand||'',size:o.size||'',
-      condition:COND_MAP[o.condition]||'',cost:(o.offered_price??o.asking_price)??'',color:o.color_name||'',fabric:o.fabric||'',photo});
+      condition:COND_MAP[o.condition]||'',cost:o.offered_price??'',color:o.color_name||'',fabric:o.fabric||'',photo});
+      // cost = ราคาที่เราตกลงซื้อเท่านั้น — ห้าม fallback ไป asking_price (ราคาขอของผู้ขาย) เดี๋ยวทุนเพี้ยน
     return 'intake.html?'+q.toString();
   }
 
+  function priceInput(){ const el=$('dPrice'); if(!el||el.value==='') return null;
+    const v=Number(el.value); return (Number.isFinite(v)&&v>=0)?v:NaN; }   // NaN = ค่าไม่ถูกต้อง (ติดลบ/ไม่ใช่ตัวเลข)
   async function savePrice(){
-    const v=Number($('dPrice').value); if(!v){ toast('ใส่ราคาก่อนค่ะ',true); return; }
+    const v=priceInput();
+    if(v==null||Number.isNaN(v)){ toast('ใส่ราคาที่ถูกต้องก่อนค่ะ (0 ขึ้นไป)',true); return; }
     const o=CUR.offer||CUR;
     const {error}=await sb.rpc('seller_offer_price',{p_id:o.id,p_offered:v});
     if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }
@@ -165,7 +169,15 @@
   }
   async function decide(decision){
     const o=CUR.offer||CUR;
-    if(decision==='accepted' && o.offered_price==null && !$('dPrice')?.value){ toast('ตีราคาเสนอซื้อก่อนตกลงค่ะ',true); return; }
+    if(decision==='accepted'){
+      const v=priceInput();
+      if(Number.isNaN(v)){ toast('ราคาที่พิมพ์ไว้ไม่ถูกต้องค่ะ',true); return; }
+      if(v==null && o.offered_price==null){ toast('ตีราคาเสนอซื้อก่อนตกลงค่ะ',true); return; }
+      if(v!=null && v!==o.offered_price){   // พิมพ์ราคาไว้แต่ยังไม่กดบันทึก → บันทึกให้ก่อนตกลง (กันราคาหายเงียบ)
+        const {error:pe}=await sb.rpc('seller_offer_price',{p_id:o.id,p_offered:v});
+        if(pe){ toast('บันทึกราคาไม่สำเร็จ: '+pe.message,true); return; }
+      }
+    }
     const note=decision==='rejected'?(prompt('เหตุผล (แจ้งผู้ขาย — เว้นว่างได้)','')||null):null;
     const {error}=await sb.rpc('seller_offer_decide',{p_id:o.id,p_decision:decision,p_note:note});
     if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }

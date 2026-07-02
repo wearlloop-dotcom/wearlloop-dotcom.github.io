@@ -7,9 +7,24 @@
 --    ก่อนรัน ตรวจชื่อจริงด้วย:  select table_name from information_schema.tables;
 --    จุดที่ต้องเช็คชื่อ มีคอมเมนต์ [CHECK] กำกับทุกจุด
 --
--- ลำดับ: §1 รีวิวติดไซซ์ · §2 สุขอนามัยตรวจสอบได้ · §3 ปฏิทินงานลูกค้า
---        §4 เครื่องยนต์รับซื้อ Closet Cash · §5 สิทธิ์การเรียกใช้
+-- ลำดับ: §0 ตรวจก่อนรัน · §1 รีวิวติดไซซ์ · §2 สุขอนามัยตรวจสอบได้
+--        §3 ปฏิทินงานลูกค้า · §4 เครื่องยนต์รับซื้อ Closet Cash · §5 สิทธิ์
+-- วิธีรัน: รันทีละส่วน (§) — ส่วนไหน error ให้ก๊อปข้อความ error ส่งกลับมา ส่วนอื่นรันต่อได้
 -- ============================================================================
+
+-- ============================================================================
+-- §0 ตรวจก่อนรัน — รัน 3 คำสั่งนี้ก่อน แล้วเทียบชื่อกับธง [CHECK] ข้างล่าง
+-- ============================================================================
+-- 0.1 มีตารางอะไรบ้าง:
+--   select table_name from information_schema.tables where table_schema='public' order by 1;
+-- 0.2 คอลัมน์ของตารางหลักที่สคริปต์นี้แตะ:
+--   select table_name, column_name, data_type from information_schema.columns
+--   where table_schema='public' and table_name in
+--     ('reviews','customers','garments','care_cycles','customer_events','acquisitions')
+--   order by table_name, ordinal_position;
+-- 0.3 ส่วนลดกลุ่มจริงตรงกับที่หน้าเว็บสัญญาไหม (family/group-checkout โชว์ 2→5% · 3→10% · 4→15%):
+--   select * from pg_proc where proname like '%group_discount%';   -- หรือดูค่าใน app_settings
+--   ถ้า DB ให้แบน 5% อย่างเดียว → ต้องแก้ DB หรือแก้หน้าเว็บ อย่าปล่อยให้สัญญาเกินจริง
 
 
 -- ============================================================================
@@ -148,6 +163,8 @@ $$;
 -- ============================================================================
 
 alter table acquisitions add column if not exists status text default 'new';  -- [CHECK] ชื่อตาราง acquisitions
+update acquisitions set status = 'new' where status is null;                   -- backfill แถวเก่า
+alter table acquisitions alter column status set not null;                     -- ตัดปัญหา NULL ทิ้งทั้งระบบ
 alter table acquisitions add column if not exists offered_price numeric;
 alter table acquisitions add column if not exists decision_note text;
 alter table acquisitions add column if not exists paid_at timestamptz;
@@ -159,21 +176,22 @@ create or replace function seller_offers_list(p_status text default 'pending')
 returns jsonb language sql stable security definer as $$
   with f as (
     select a.id, a.mode, a.name, a.brand, a.size, a.condition, a.item_count,
-           a.asking_price, a.offered_price, coalesce(a.status,'new') as status,
+           a.asking_price, a.offered_price, a.status,
            a.seller_name, a.seller_phone, a.created_at                      -- [CHECK] ชื่อคอลัมน์ผู้ขาย
     from acquisitions a
     where case p_status
-      when 'pending'  then coalesce(a.status,'new') in ('new','priced')
+      when 'pending'  then a.status in ('new','priced')
       when 'all'      then true
-      else coalesce(a.status,'new') = p_status end
+      else a.status = p_status end
     order by a.created_at desc limit 100
   )
   select jsonb_build_object(
     'offers', coalesce((select jsonb_agg(to_jsonb(f)) from f), '[]'::jsonb),
-    'kpi', jsonb_build_object(
-      'pending',  (select count(*) from acquisitions where coalesce(status,'new') in ('new','priced')),
-      'accepted', (select count(*) from acquisitions where status = 'accepted'),
-      'paid',     (select count(*) from acquisitions where status = 'paid')));
+    'kpi', (select jsonb_build_object(                       -- นับทุก KPI ในสแกนเดียว
+      'pending',  count(*) filter (where status in ('new','priced')),
+      'accepted', count(*) filter (where status = 'accepted'),
+      'paid',     count(*) filter (where status = 'paid'))
+      from acquisitions));
 $$;
 
 create or replace function seller_offer_get(p_id uuid)
@@ -190,8 +208,8 @@ create or replace function seller_offer_price(p_id uuid, p_offered numeric)
 returns jsonb language sql security definer as $$
   update acquisitions
      set offered_price = p_offered,
-         status = case when coalesce(status,'new') = 'new' then 'priced' else status end
-   where id = p_id and coalesce(status,'new') in ('new','priced')
+         status = case when status = 'new' then 'priced' else status end
+   where id = p_id and status in ('new','priced') and p_offered >= 0
   returning jsonb_build_object('ok', true, 'status', status);
 $$;
 
@@ -203,7 +221,7 @@ begin
   end if;
   update acquisitions
      set status = p_decision, decision_note = p_note
-   where id = p_id and coalesce(status,'new') in ('new','priced');
+   where id = p_id and status in ('new','priced');
   if not found then return jsonb_build_object('error','bad_state'); end if;
   -- TODO: แจ้งผู้ขายทาง LINE (ตอนนี้ผู้ขายได้แค่ "ทีมจะติดต่อกลับ" ครั้งเดียวแล้วเงียบ)
   return jsonb_build_object('ok', true, 'status', p_decision);
@@ -225,10 +243,14 @@ end $$;
 
 -- สะพานรับซื้อ→คลัง: ผูกชุดที่ intake กับ offer ต้นทาง (วัดต้นทุน-ผลตอบแทนรายดีลได้)
 alter table garments add column if not exists acquisition_id uuid;         -- [CHECK]
--- [CHECK] แพตช์ intake_garment: ถ้า p ? 'acquisition_id' →
---   1) set garments.acquisition_id
---   2) update acquisitions set status='stocked' where id=... and status='paid';
--- (หน้า acquisitions.html ส่ง ?acq=<id> ไป intake.html แล้ว — เหลือให้ intake_garment รับต่อ)
+-- [CHECK] แพตช์ intake_garment (สำคัญ — frontend ส่ง p->>'acquisition_id' มาแล้ว):
+--   ใน body ของ intake_garment เพิ่มหลัง insert garments สำเร็จ:
+--     if (p ? 'acquisition_id') and (p->>'acquisition_id') is not null then
+--       update garments set acquisition_id = (p->>'acquisition_id')::uuid where code = v_code;
+--       update acquisitions set status = 'stocked'
+--        where id = (p->>'acquisition_id')::uuid and status in ('paid','accepted');
+--     end if;
+--   (intake.html เก็บ ?acq= ไว้ใน payload แล้ว — ไม่แพตช์ = ดีลค้างสถานะ paid ตลอด)
 
 
 -- ============================================================================

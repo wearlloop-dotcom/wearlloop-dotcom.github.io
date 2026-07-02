@@ -151,7 +151,6 @@ const fmtShort = n => {
   if(a>=1e3) return s+'฿'+Math.round(a/1e3)+'k';
   return s+'฿'+a;
 };
-const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const NS = 'http://www.w3.org/2000/svg';
 function el(name, attrs, parent){
   const e = document.createElementNS(NS, name);
@@ -247,7 +246,8 @@ function makeChart(cardId, cfg){
   const dots = lineSeries.map(s => el('circle', {r:5, fill:`var(${s.color})`, stroke:'var(--surface)', 'stroke-width':2, opacity:0}, svg));
   const hit = el('rect', {x:M.l, y:M.t, width:PW, height:PH, fill:'transparent', tabindex:0}, svg);
   let idx = -1;
-  function show(i, px){
+  function show(i){
+    if (i === idx) return;   // เดือนเดิม — ไม่ต้องรื้อ tooltip ใหม่ทุก pointermove
     idx = i;
     const d = D[i];
     cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i)); cross.setAttribute('opacity', 1);

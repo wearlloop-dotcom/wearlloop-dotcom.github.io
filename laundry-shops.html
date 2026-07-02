@@ -106,7 +106,14 @@
   }
   async function doDone(){
     const code=up($('wdCode').value); if(!code) return;
-    const {data,error}=await sb.rpc('care_wash_done',{p_code:code,p_method:'ส่งร้านซักพาร์ทเนอร์',p_handler:(localStorage.getItem('lloop_handler')||null)});
+    // ผู้รับกลับ: ถามครั้งเดียวจำในเครื่อง (สตาฟบางคนใช้แต่หน้านี้ ไม่เคยเปิด laundry.html)
+    let _h=localStorage.getItem('lloop_handler');
+    if(!_h && !sessionStorage.getItem('handlerAsked')){
+      sessionStorage.setItem('handlerAsked','1');
+      _h=(prompt('ชื่อผู้รับชุดกลับ (บันทึกลงไทม์ไลน์ชุด — ใส่ครั้งเดียวจำให้ตลอด)','')||'').trim();
+      if(_h) localStorage.setItem('lloop_handler',_h);
+    }
+    const {data,error}=await sb.rpc('care_wash_done',{p_code:code,p_method:'ส่งร้านซักพาร์ทเนอร์',p_handler:(_h||null)});
     if(error||data?.error){ $('wdRes').innerHTML='<span style="color:var(--clay)">ไม่สำเร็จ: '+esc(error?.message||data.error)+'</span>'; return; }
     // ซักเสร็จ → ให้เก็บเข้าช่องต่อทันที (ปิดลูป)
     let h='ซัก <b>'+esc(data.name||code)+'</b> เสร็จ (ครั้งที่ '+data.wash_count+') — ชุดว่างพร้อมปล่อยเช่า';
