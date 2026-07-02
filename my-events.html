@@ -169,7 +169,7 @@ let events = [];              // [{id,date,occasion,venue,dress_code,status}]
 let pickedOcc = null;
 let dressTouched = false;     // ผู้ใช้เลือกเดรสโค้ดเองแล้ว → ไม่ auto-suggest ทับ
 
-function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
+function client(){ if(!window.supabase) throw new Error('supabase sdk not loaded'); if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
 function esc(s){ if(s==null) return ''; return String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c])); }
 function todayStr(){ const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function addDays(iso, n){ const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }

@@ -143,7 +143,7 @@ const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
 function esc(s){ if(s==null) return ''; return String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
 
 let sb = null;
-function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
+function client(){ if(!window.supabase) throw new Error('supabase sdk not loaded'); if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
 
 // ---- localStorage store (fallback เมื่อ backend ยังไม่มี) ----
 const LS_FB   = 'lloop_fit_feedback';  // ฟีดแบ็กที่ผู้ใช้เคยส่ง (cache ฝั่งเครื่อง)
@@ -405,6 +405,10 @@ async function boot(){
     if(p) UID = p.userId;
   } catch(e){ console.warn('LIFF skipped:', e); }
   $('loginSoft').classList.toggle('hidden', !!UID);
+  // วาดจากข้อมูลเครื่อง/ตัวอย่างก่อนทันที — network ช้าแค่ไหนหน้าก็ไม่ค้างว่าง
+  FEEDBACK = UID ? lsGet(LS_FB) : demoFeedback().concat(lsGet(LS_FB));
+  PENDING = UID ? [] : demoPending();
+  renderHero(false); renderPending(); renderInsights();
   await Promise.all([loadProfile(), loadPending()]);
   renderHero(false);
   renderPending();
