@@ -156,9 +156,9 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=38"></script>
 <script src="data.js?v=38"></script>
-<script src="liffAuth.js?v=56"></script>
-<script src="me-api.js?v=56"></script>
-<script src="api.js?v=54"></script>
+<script src="liffAuth.js?v=38"></script>
+<script src="me-api.js?v=61"></script>
+<script src="api.js?v=61"></script>
 <script src="nav.js?v=1"></script>
 <script>
 // ============================================================
@@ -339,7 +339,7 @@ function renderStatus(st){
   if(unpaid>0){
     rb.disabled = false;
     rb.onclick = async () => {   // คัดลอกข้อความเตือนสำเร็จรูป + ลิงก์หน้านี้ ไว้วางใน LINE กลุ่ม
-      const msg = NAV.t('เพื่อน ๆ ที่ยังไม่ได้จ่ายค่าชุด กดจ่ายในลิงก์นี้ได้เลยนะคะ 💛 ','Friends who haven\'t paid for the dresses yet — here\'s the link 💛 ') + location.href;
+      const msg = NAV.t('เพื่อน ๆ ที่ยังไม่ได้จ่ายค่าชุด กดจ่ายในลิงก์นี้ได้เลยนะคะ ','Friends who haven\'t paid for the dresses yet — here\'s the link ') + location.href;
       try { await navigator.clipboard.writeText(msg); alert(NAV.t('คัดลอกข้อความเตือนแล้ว — วางใน LINE กลุ่มได้เลยค่ะ (ระบบก็เตือนอัตโนมัติให้อีกทาง)','Reminder message copied — paste it in the group LINE chat (automatic reminders also go out).')); }
       catch(_e){ alert(NAV.t('ระบบเตือนอัตโนมัติให้แล้วค่ะ — คุณช่วยทักเพื่อนใน LINE กลุ่มได้อีกแรงค่ะ','Automatic reminders are already sent — a nudge to friends in the group LINE chat helps too.')); }
     };

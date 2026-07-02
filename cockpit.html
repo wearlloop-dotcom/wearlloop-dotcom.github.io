@@ -134,7 +134,7 @@
         <div><div class="code">${esc(x.code)} · ${esc(x.name||'')}</div>
         <div class="meta">${x.customer?'ลูกค้า '+esc(x.customer):'—'}</div></div>
         <span class="tag bad">เลย ${x.days||0} วัน</span></div>`).join('')
-      : '<div class="empty">ไม่มีของเลยกำหนด 🎉</div>';
+      : '<div class="empty">ไม่มีของเลยกำหนด ✓</div>';
     return `<div class="card"><h2>วันนี้ &amp; ของเลยกำหนด <span class="hint">จากหน้างานวันนี้</span></h2>
       <div class="kpis">
         ${kpi(k.overdue||0, 'เลยกำหนด', '', (k.overdue>0)?'hot':'zero')}
