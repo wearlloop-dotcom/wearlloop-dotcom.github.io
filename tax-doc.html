@@ -59,7 +59,6 @@
 </div>
 
 <script>
-  const FN=((window.CONFIG&&window.CONFIG.SUPABASE_URL)||'https://rprwilsbjptdnvsibjgi.supabase.co')+'/functions/v1/acct';
   const $=id=>document.getElementById(id);
   const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
   const esc=s=>(s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -69,23 +68,12 @@
       +'<span class="muted">กลับไปหน้าบัญชีแล้วกด "พิมพ์" จากรายการใบกำกับอีกครั้ง หรือติดต่อผู้ดูแลระบบ</span></div>';
   }
 
-  async function authHeader(){
-    if(!(await window.opsLogin())) throw new Error('ยังไม่ได้เข้าสู่ระบบ LINE (เฉพาะเจ้าของ/ผู้จัดการ)');
-    return 'Bearer '+liff.getIDToken();
-  }
-  async function api(action, extra){
-    const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
-      body:JSON.stringify(Object.assign({action},extra||{}))});
-    if(r.status===401||r.status===403) throw new Error('ไม่มีสิทธิ์เข้าระบบบัญชี (เฉพาะเจ้าของ/ผู้จัดการ)');
-    const j=await r.json().catch(()=>({}));
-    if(!r.ok||j.error) throw new Error(j.error||('ระบบบัญชีตอบกลับผิดพลาด ('+r.status+')'));
-    return j;
-  }
+  // เรียก edge function acct — ใช้ตัวกลางร่วมใน ops-api.js (throw 'unauth' เมื่อไม่มีสิทธิ์)
+  const api=(action,extra)=>window.opsAcct(action,extra);
 
-  function renderDoc(r, type){
-    const isReceipt = type==='receipt';
-    const title = isReceipt ? 'ใบเสร็จรับเงิน' : 'ใบกำกับภาษี / ใบเสร็จรับเงิน';
-    const titleEn = isReceipt ? 'RECEIPT' : 'TAX INVOICE / RECEIPT';
+  function renderDoc(r){
+    const title = 'ใบกำกับภาษี / ใบเสร็จรับเงิน';
+    const titleEn = 'TAX INVOICE / RECEIPT';
     $('out').innerHTML=`
       <div class="doc">
         <div class="doc-head">
@@ -115,20 +103,25 @@
     try{
       const q=new URLSearchParams(location.search);
       const id=(q.get('id')||'').trim();
-      const type=(q.get('type')||'invoice').trim();
       if(!id){ showErr('ไม่พบเลขที่เอกสารใน URL (ต้องมี ?id=...)'); return; }
-      const res = await api('invoices');
-      const rows = (res&&res.rows)||[];
-      let row = rows.find(r=>String(r.id)===id || String(r.number)===id);
+      // ทางหลัก: ดึงรายตัว (backend ใหม่) — ถ้ายังไม่มี/พัง ถอยไปหาในรายการทั้งหมดตามเดิม
+      let row = await api('invoice_get',{id})
+        .then(d=>(d&&d.row&&(d.row.number||d.row.total!=null))?d.row:null).catch(()=>null);
+      if(!row){
+        const res = await api('invoices');
+        const rows = (res&&res.rows)||[];
+        row = rows.find(r=>String(r.id)===id || String(r.number)===id);
+      }
       if(!row && q.get('n')){
         // สำรอง: ใช้ข้อมูลที่หน้าบัญชีแนบมากับลิงก์ (กรณีรายการเก่าเกินหน้าต่างที่ระบบส่งกลับ)
         row={ number:q.get('n'), issue_date:q.get('d')||'', customer_name:q.get('cu')||'',
               base:q.get('b'), vat:q.get('v'), total:q.get('t') };
       }
       if(!row){ showErr('ไม่พบใบกำกับเลขที่/รหัส "'+id+'" ในระบบ'); return; }
-      renderDoc(row, type);
+      renderDoc(row);
     }catch(e){
-      showErr(e&&e.message?e.message:'เกิดข้อผิดพลาดในการโหลดข้อมูล');
+      const m=e&&e.message;
+      showErr(m==='unauth'?'ไม่มีสิทธิ์เข้าระบบบัญชี (เฉพาะเจ้าของ/ผู้จัดการ)':(m||'เกิดข้อผิดพลาดในการโหลดข้อมูล'));
     }
   }
   boot();
