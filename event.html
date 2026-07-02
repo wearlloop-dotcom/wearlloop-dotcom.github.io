@@ -149,14 +149,15 @@
   <!-- edge / empty state -->
   <div class="sec hide" id="edgeSec"><div id="edgeBody"></div></div>
 
-  <div class="demo" id="demoNote" data-i18n="LLOOP payment-status page · production connects to Supabase via &lt;b&gt;liff/api.js&lt;/b&gt; (group_event_status returns the whole event's payment state)">หน้าสถานะการจ่าย LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (group_event_status คืนสถานะจ่ายของทั้งอีเวนต์)</div>
+  <div class="demo" id="demoNote" data-i18n="LLOOP payment-status page · production connects to Supabase via &lt;b&gt;api.js&lt;/b&gt; (group_event_status returns the whole event's payment state)">หน้าสถานะการจ่าย LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>api.js</b> (group_event_status คืนสถานะจ่ายของทั้งอีเวนต์)</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=38"></script>
-<script src="liffAuth.js?v=38"></script>
-<script src="me-api.js?v=54"></script>
+<script src="data.js?v=38"></script>
+<script src="liffAuth.js?v=56"></script>
+<script src="me-api.js?v=56"></script>
 <script src="api.js?v=54"></script>
 <script src="nav.js?v=1"></script>
 <script>
@@ -337,7 +338,11 @@ function renderStatus(st){
   const rb = $('#remindBtn'), rh = $('#remindHint');
   if(unpaid>0){
     rb.disabled = false;
-    rb.onclick = () => alert(NAV.t('ระบบเตือนอัตโนมัติให้แล้วค่ะ — คุณช่วยทักเพื่อนใน LINE กลุ่มได้อีกแรงค่ะ','Automatic reminders are already sent — a nudge to friends in the group LINE chat helps too.'));
+    rb.onclick = async () => {   // คัดลอกข้อความเตือนสำเร็จรูป + ลิงก์หน้านี้ ไว้วางใน LINE กลุ่ม
+      const msg = NAV.t('เพื่อน ๆ ที่ยังไม่ได้จ่ายค่าชุด กดจ่ายในลิงก์นี้ได้เลยนะคะ 💛 ','Friends who haven\'t paid for the dresses yet — here\'s the link 💛 ') + location.href;
+      try { await navigator.clipboard.writeText(msg); alert(NAV.t('คัดลอกข้อความเตือนแล้ว — วางใน LINE กลุ่มได้เลยค่ะ (ระบบก็เตือนอัตโนมัติให้อีกทาง)','Reminder message copied — paste it in the group LINE chat (automatic reminders also go out).')); }
+      catch(_e){ alert(NAV.t('ระบบเตือนอัตโนมัติให้แล้วค่ะ — คุณช่วยทักเพื่อนใน LINE กลุ่มได้อีกแรงค่ะ','Automatic reminders are already sent — a nudge to friends in the group LINE chat helps too.')); }
+    };
     rh.textContent = NAV.t('ยังเหลือ ','') + unpaid + NAV.t(' คนที่รอชำระ · ระบบเตือนอัตโนมัติให้อยู่แล้ว',' still pending · reminders go out automatically');
   } else {
     rb.disabled = true;

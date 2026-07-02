@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LLOOP · แผนเร่งเครื่องสู่กำไร ฿500k/เดือน</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --plane:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --sec:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#1baf7a; --neg:#e34948; --good:#006300;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --plane:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --sec:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#199e70; --neg:#e66767; --good:#0ca30c;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);font-family:'Prompt',system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.55}
+.wrap{max-width:1020px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:22px;font-weight:600;margin:0 0 4px}
+.sub{color:var(--sec);margin:0 0 20px;font-size:13.5px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.tile .l{color:var(--sec);font-size:12.5px;margin-bottom:2px}
+.tile .v{font-size:26px;font-weight:600;line-height:1.2}
+.tile .h{color:var(--muted);font-size:12px;margin-top:2px}
+.levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:6px 0 22px}
+.lv{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.lv b{display:block;font-size:13px;font-weight:600}
+.lv span{display:block;color:var(--muted);font-size:11.5px;margin-bottom:4px}
+.lv p{margin:0;color:var(--sec);font-size:12.5px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 18px 10px;margin-bottom:16px;position:relative}
+.card h2{font-size:15px;font-weight:600;margin:0 0 2px}
+.card .desc{color:var(--sec);font-size:12.5px;margin:0 0 10px}
+.legend{display:flex;gap:16px;align-items:center;margin:2px 0 6px;flex-wrap:wrap}
+.legend .it{display:flex;gap:6px;align-items:center;color:var(--sec);font-size:12.5px}
+.key-line{width:16px;height:2px;border-radius:1px}
+.key-rect{width:10px;height:10px;border-radius:3px}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:'Prompt',system-ui,sans-serif}
+.tick{fill:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.axis-t{fill:var(--muted);font-size:11px}
+.grid-l{stroke:var(--grid);stroke-width:1}
+.base-l{stroke:var(--baseline);stroke-width:1}
+.zero-l{stroke:var(--baseline);stroke-width:1}
+.ref-l{stroke:var(--sec);stroke-width:1;stroke-dasharray:4 3}
+.ref-t{fill:var(--sec);font-size:11.5px}
+.lbl{fill:var(--sec);font-size:12px}
+.lbl b, .lbl-strong{fill:var(--ink);font-weight:600}
+.anno-t{fill:var(--sec);font-size:11.5px}
+.anno-v{fill:var(--ink);font-size:12px;font-weight:600}
+.tt{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.10);padding:9px 12px;min-width:170px;display:none;z-index:5}
+.tt .m{font-size:12px;color:var(--muted);margin-bottom:5px}
+.tt .row{display:flex;align-items:center;gap:8px;margin:3px 0}
+.tt .row .k{width:14px;height:2.5px;border-radius:1px;flex:none}
+.tt .row .val{font-weight:600;font-variant-numeric:tabular-nums}
+.tt .row .nm{color:var(--sec);font-size:12px}
+details{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:16px}
+summary{cursor:pointer;font-weight:500}
+table{border-collapse:collapse;width:100%;margin-top:12px;font-size:12.5px}
+th{text-align:right;color:var(--sec);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--grid)}
+th:first-child,td:first-child{text-align:left}
+td{text-align:right;padding:5px 10px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+.note{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;color:var(--sec);font-size:12.5px}
+.note b{color:var(--ink)}
+.note ul{margin:6px 0 0;padding-left:18px}
+.note li{margin:3px 0}
+:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>แผนเร่งเครื่องสู่กำไรสุทธิ ฿500,000/เดือน</h1>
+  <p class="sub">ฉาก "เร่งเครื่อง" — ลูกค้าโต 20%/เดือน · จำลอง 18 เดือนด้วยสูตรเดียวกับหน้า forecast ของระบบ · ตั้งต้นลูกค้า 70 คน ชุดในคลัง 60 ตัว (ตัวเลขประมาณการ ไม่ใช่ยอดจริง)</p>
+
+  <div class="kpis">
+    <div class="tile"><div class="l">เงินทุนที่ต้องเตรียม</div><div class="v">฿631,000</div><div class="h">จุดเงินสดต่ำสุด เดือนที่ 10</div></div>
+    <div class="tile"><div class="l">กำไรสุทธิแตะ ฿500k</div><div class="v">เดือนที่ 18</div><div class="h">เริ่มมีกำไรตั้งแต่เดือนที่ 10</div></div>
+    <div class="tile"><div class="l">ซื้อชุดเข้ารวม</div><div class="v">1,666 ตัว</div><div class="h">ทุนสต็อกสะสม ~฿443,000</div></div>
+    <div class="tile"><div class="l">สต็อกทะลุ 800 ตัว</div><div class="v">เดือนที่ 14</div><div class="h">ต้องเช่าคลังเพิ่ม ~฿15k/เดือน + ติดตั้ง ฿80k</div></div>
+  </div>
+
+  <div class="levels">
+    <div class="lv"><span>เลเวล 1 · เดือน 1–6</span><b>สร้างฐานลูกค้า</b><p>อัดแอด ฿30k/เดือน หาลูกค้า 70→174 คน — ช่วงเผาเงินสดหนักสุด (ติดลบสะสม ~฿456k) ห้องสต็อก 800 ตัว + ห้องไลฟ์ยังพอสบาย</p></div>
+    <div class="lv"><span>เลเวล 2 · เดือน 7–12</span><b>ดันความถี่ 2→3</b><p>เปิด "วันเปลี่ยนตู้" + ปฏิทินงาน · กำไรพลิกบวกเดือนที่ 10 ซึ่งเป็นจุดเงินสดต่ำสุด −฿631k พอดี</p></div>
+    <div class="lv"><span>เลเวล 3 · เดือน 13–15</span><b>ขยายโครงสร้าง</b><p>สต็อกทะลุ 800 เดือนที่ 14 → เช่าคลังเพิ่ม (ห้องไลฟ์อยู่ที่เดิม) · แพ็กเสริมพรีเมียมดันกำไร/เช่า 174→220 · เปิดจุดรับ-ส่งเฟส 2</p></div>
+    <div class="lv"><span>เลเวล 4 · เดือน 16–18</span><b>เก็บเกี่ยว</b><p>เงินสดสะสมกลับเป็นบวกเดือนที่ 16 · referral ลดงบแอดเหลือ 8% · เดือนที่ 18 กำไรสุทธิ ฿535k จากยอดขาย ฿1.33M</p></div>
+  </div>
+
+  <div class="card" id="c1">
+    <h2>รายได้ กับ กำไรสุทธิ ต่อเดือน</h2>
+    <p class="desc">บาท/เดือน — กำไรพลิกบวกเดือนที่ 10 และไต่ถึง ฿535k ในเดือนที่ 18</p>
+    <div class="legend">
+      <span class="it"><span class="key-line" style="background:var(--s1)"></span>รายได้/เดือน</span>
+      <span class="it"><span class="key-line" style="background:var(--s2)"></span>กำไรสุทธิ/เดือน</span>
+    </div>
+    <div class="plot"></div><div class="tt"></div>
+  </div>
+
+  <div class="card" id="c2">
+    <h2>เงินสดสะสม (เงินทุนที่ต้องเตรียม)</h2>
+    <p class="desc">รวมผลกำไร/ขาดทุน + เงินซื้อชุด + ค่าติดตั้งคลัง — หลุมลึกสุด −฿631k คือเงินทุนที่ต้องมีก่อนเริ่ม</p>
+    <div class="plot"></div><div class="tt"></div>
+  </div>
+
+  <div class="card" id="c3">
+    <h2>ซื้อชุดเข้า และ ชุดสะสมในคลัง</h2>
+    <p class="desc">จำนวนตัว — เส้นประคือความจุห้องสต็อกปัจจุบัน 800 ตัว (มีห้องไลฟ์ติดกัน) พอทะลุต้องเช่าคลังเพิ่ม</p>
+    <div class="legend">
+      <span class="it"><span class="key-rect" style="background:var(--s1)"></span>ซื้อเข้า/เดือน (ตัว)</span>
+      <span class="it"><span class="key-line" style="background:var(--s2)"></span>ชุดสะสมในคลัง</span>
+    </div>
+    <div class="plot"></div><div class="tt"></div>
+  </div>
+
+  <details>
+    <summary>ตารางข้อมูลรายเดือน (ตัวเลขเต็มทุกค่า)</summary>
+    <table id="tbl">
+      <thead><tr><th>เดือน</th><th>ลูกค้า</th><th>การเช่า</th><th>รายได้</th><th>กำไรสุทธิ</th><th>ซื้อชุด (ตัว)</th><th>ชุดสะสม</th><th>เงินซื้อชุด</th><th>เงินสดสะสม</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </details>
+
+  <div class="note">
+    <b>สมมติฐานของฉากเร่งเครื่อง</b> (ทุกค่าอิงหน้า forecast ของระบบ ปรับได้เมื่อมีตัวเลขจริง):
+    <ul>
+      <li>รายได้ ฿286/การเช่า · util 2.7 รอบ/ชุด/เดือน · ค่าส่งร้านออก ฿40/ครั้ง · ทุนชุดเหมา ฿266/ตัว</li>
+      <li>ความถี่เช่า 2 → 3 ครั้ง/เดือน (ไต่ช่วงเดือน 7–12 จาก "วันเปลี่ยนตู้" + ปฏิทินงาน)</li>
+      <li>กำไรขั้นต้น/เช่า ฿174 → ฿220 (ไต่ช่วงเดือน 10–15 จากแพ็กเสริมพรีเมียม)</li>
+      <li>ทีมจับชุด ฿18k/คน ดูแล 190 คน → 250 คน ตั้งแต่เดือน 12 (จุดรับ-ส่งเฟส 2) + ทีมเสริม ฿18k + เงินเดือนเจ้าของ ฿30k + ค่าคงที่ ฿8k</li>
+      <li>งบแอด: ขั้นต่ำ ฿30k/เดือน หรือ 12% ของยอดขาย → ลดเหลือ 8% ช่วงเดือน 13–16 (referral ติด)</li>
+      <li>คลัง: ห้องปัจจุบันจุ 800 ตัว — ทะลุแล้วเช่าเพิ่ม ฿15k/เดือน + ติดตั้งครั้งเดียว ฿80k (ห้องไลฟ์คงอยู่ที่เดิม)</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const D = [{"m":1,"customers":70,"rentals":140,"rev":40040,"net":-85240,"buy":0,"owned":60,"capex":0,"cash":-85240},{"m":2,"customers":84,"rentals":168,"rev":48048,"net":-81488,"buy":3,"owned":63,"capex":798,"cash":-167526},{"m":3,"customers":101,"rentals":202,"rev":57658,"net":-76986,"buy":12,"owned":75,"capex":3192,"cash":-247704},{"m":4,"customers":121,"rentals":242,"rev":69189,"net":-71583,"buy":15,"owned":90,"capex":3990,"cash":-323276},{"m":5,"customers":145,"rentals":290,"rev":83027,"net":-65099,"buy":18,"owned":108,"capex":4788,"cash":-393164},{"m":6,"customers":174,"rentals":348,"rev":99632,"net":-57319,"buy":22,"owned":130,"capex":5852,"cash":-456335},{"m":7,"customers":209,"rentals":453,"rev":129522,"net":-61315,"buy":38,"owned":168,"capex":10108,"cash":-527758},{"m":8,"customers":251,"rentals":585,"rev":167382,"net":-43576,"buy":49,"owned":217,"capex":13034,"cash":-584368},{"m":9,"customers":301,"rentals":752,"rev":215206,"net":-21169,"buy":62,"owned":279,"capex":16492,"cash":-622029},{"m":10,"customers":361,"rentals":963,"rev":275463,"net":11392,"buy":78,"owned":357,"capex":20748,"cash":-631385},{"m":11,"customers":433,"rentals":1228,"rev":351216,"net":31240,"buy":98,"owned":455,"capex":26068,"cash":-626213},{"m":12,"customers":520,"rentals":1560,"rev":446251,"net":81420,"buy":123,"owned":578,"capex":32718,"cash":-577512},{"m":13,"customers":624,"rentals":1872,"rev":535501,"net":139414,"buy":116,"owned":694,"capex":30856,"cash":-468954},{"m":14,"customers":749,"rentals":2247,"rev":642601,"net":197948,"buy":139,"owned":833,"capex":36974,"cash":-387980},{"m":15,"customers":899,"rentals":2696,"rev":771121,"net":272920,"buy":166,"owned":999,"capex":44156,"cash":-159216},{"m":16,"customers":1078,"rentals":3235,"rev":925346,"net":347358,"buy":200,"owned":1199,"capex":53200,"cash":134942},{"m":17,"customers":1294,"rentals":3883,"rev":1110415,"net":431029,"buy":239,"owned":1438,"capex":63574,"cash":502398},{"m":18,"customers":1553,"rentals":4659,"rev":1332498,"net":535035,"buy":288,"owned":1726,"capex":76608,"cash":960825}];
+
+const NF = new Intl.NumberFormat('en-US');
+const fmtB = n => (n<0?'−฿':'฿') + NF.format(Math.abs(Math.round(n)));
+const fmtN = n => NF.format(Math.round(n));
+const fmtShort = n => {
+  const s = n<0?'−':''; const a = Math.abs(n);
+  if(a>=1e6) return s+'฿'+(Math.round(a/1e5)/10)+'M';
+  if(a>=1e3) return s+'฿'+Math.round(a/1e3)+'k';
+  return s+'฿'+a;
+};
+const NS = 'http://www.w3.org/2000/svg';
+function el(name, attrs, parent){
+  const e = document.createElementNS(NS, name);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  if(parent) parent.appendChild(e);
+  return e;
+}
+
+const W = 960, H = 330, M = {t:26, r:132, b:42, l:66};
+const PW = W - M.l - M.r, PH = H - M.t - M.b;
+const X = i => M.l + (i + 0.5) * PW / D.length;
+
+function makeChart(cardId, cfg){
+  const card = document.getElementById(cardId);
+  const holder = card.querySelector('.plot');
+  const tt = card.querySelector('.tt');
+  const svg = el('svg', {viewBox:`0 0 ${W} ${H}`, role:'img', 'aria-label':cfg.aria});
+  holder.appendChild(svg);
+  const Y = v => M.t + PH * (1 - (v - cfg.yMin) / (cfg.yMax - cfg.yMin));
+
+  // gridlines + y ticks
+  for(let v = cfg.yMin; v <= cfg.yMax + 1e-6; v += cfg.yStep){
+    const y = Y(v);
+    el('line', {x1:M.l, x2:W-M.r, y1:y, y2:y, class: v===0 ? 'zero-l' : 'grid-l'}, svg);
+    const t = el('text', {x:M.l-8, y:y+4, 'text-anchor':'end', class:'tick'}, svg);
+    t.textContent = cfg.fmtTick(v);
+  }
+  // x axis labels
+  D.forEach((d,i)=>{
+    const t = el('text', {x:X(i), y:H-M.b+18, 'text-anchor':'middle', class:'tick'}, svg);
+    t.textContent = d.m;
+  });
+  const xt = el('text', {x:M.l+PW/2, y:H-4, 'text-anchor':'middle', class:'axis-t'}, svg);
+  xt.textContent = 'เดือนที่';
+
+  // reference line (dashed threshold)
+  if(cfg.refY != null){
+    const y = Y(cfg.refY);
+    el('line', {x1:M.l, x2:W-M.r, y1:y, y2:y, class:'ref-l'}, svg);
+    const t = el('text', {x:M.l+4, y:y-6, class:'ref-t'}, svg);
+    t.textContent = cfg.refLabel;
+  }
+
+  // series
+  const lineSeries = cfg.series.filter(s=>s.type==='line');
+  const colSeries  = cfg.series.filter(s=>s.type==='col');
+  const bars = [];
+
+  colSeries.forEach(s=>{
+    D.forEach((d,i)=>{
+      const v = d[s.key]; if(v<=0){bars[i]=null;return;}
+      const bw = 20, x0 = X(i)-bw/2, y0 = Y(v), y1 = Y(0), r = Math.min(4, (y1-y0)/2);
+      const p = el('path', {d:`M${x0},${y1} L${x0},${y0+r} Q${x0},${y0} ${x0+r},${y0} L${x0+bw-r},${y0} Q${x0+bw},${y0} ${x0+bw},${y0+r} L${x0+bw},${y1} Z`,
+        fill:`var(${s.color})`}, svg);
+      bars[i] = p;
+    });
+  });
+
+  lineSeries.forEach(s=>{
+    const pts = D.map((d,i)=>[X(i), Y(d[s.key])]);
+    if(s.area === 'sign'){
+      // diverging wash: positive part blue, negative part red
+      const areaPath = 'M'+pts.map(p=>p.join(',')).join(' L ')+` L${pts[pts.length-1][0]},${Y(0)} L${pts[0][0]},${Y(0)} Z`;
+      const cpTop = el('clipPath', {id:cardId+'-cpt'}, svg);
+      el('rect', {x:0, y:0, width:W, height:Y(0)}, cpTop);
+      const cpBot = el('clipPath', {id:cardId+'-cpb'}, svg);
+      el('rect', {x:0, y:Y(0), width:W, height:H-Y(0)}, cpBot);
+      el('path', {d:areaPath, fill:`var(${s.color})`, opacity:.10, 'clip-path':`url(#${cardId}-cpt)`}, svg);
+      el('path', {d:areaPath, fill:'var(--neg)', opacity:.10, 'clip-path':`url(#${cardId}-cpb)`}, svg);
+    }
+    el('path', {d:'M'+pts.map(p=>p.join(',')).join(' L '), fill:'none', stroke:`var(${s.color})`,
+      'stroke-width':2, 'stroke-linejoin':'round', 'stroke-linecap':'round'}, svg);
+    // end marker + direct end label
+    const last = pts[pts.length-1];
+    el('circle', {cx:last[0], cy:last[1], r:4.5, fill:`var(${s.color})`, stroke:'var(--surface)', 'stroke-width':2}, svg);
+    const lv = el('text', {x:last[0]+10, y:last[1]-3, class:'anno-v'}, svg);
+    lv.textContent = cfg.fmtVal(D[D.length-1][s.key]);
+    const ln = el('text', {x:last[0]+10, y:last[1]+12, class:'anno-t'}, svg);
+    ln.textContent = s.name;
+  });
+
+  // annotations
+  (cfg.annos||[]).forEach(a=>{
+    const i = a.m-1, s = cfg.series.find(x=>x.key===a.key);
+    const x = X(i), y = Y(D[i][a.key]);
+    el('circle', {cx:x, cy:y, r:4.5, fill:`var(${s.color})`, stroke:'var(--surface)', 'stroke-width':2}, svg);
+    const t = el('text', {x:x+(a.dx||0), y:y+(a.dy||-12), 'text-anchor':a.anchor||'middle', class:'anno-t'}, svg);
+    t.textContent = a.text;
+  });
+
+  // hover layer: crosshair + tooltip (also keyboard-focusable)
+  const cross = el('line', {y1:M.t, y2:H-M.b, class:'base-l', opacity:0}, svg);
+  const dots = lineSeries.map(s => el('circle', {r:5, fill:`var(${s.color})`, stroke:'var(--surface)', 'stroke-width':2, opacity:0}, svg));
+  const hit = el('rect', {x:M.l, y:M.t, width:PW, height:PH, fill:'transparent', tabindex:0}, svg);
+  let idx = -1;
+  function show(i){
+    if (i === idx) return;   // เดือนเดิม — ไม่ต้องรื้อ tooltip ใหม่ทุก pointermove
+    idx = i;
+    const d = D[i];
+    cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i)); cross.setAttribute('opacity', 1);
+    lineSeries.forEach((s,k)=>{ dots[k].setAttribute('cx', X(i)); dots[k].setAttribute('cy', Y(d[s.key])); dots[k].setAttribute('opacity',1); });
+    bars.forEach((b,k)=>{ if(b) b.setAttribute('opacity', k===i?0.75:1); });
+    tt.replaceChildren();
+    const h = document.createElement('div'); h.className='m'; h.textContent = 'เดือนที่ ' + d.m; tt.appendChild(h);
+    cfg.series.forEach(s=>{
+      const r = document.createElement('div'); r.className='row';
+      const k = document.createElement('span'); k.className='k'; k.style.background = `var(${s.color})`;
+      const v = document.createElement('span'); v.className='val'; v.textContent = cfg.fmtVal(d[s.key]);
+      const n = document.createElement('span'); n.className='nm'; n.textContent = s.name;
+      r.append(k,v,n); tt.appendChild(r);
+    });
+    (cfg.extraRows||[]).forEach(ex=>{
+      const r = document.createElement('div'); r.className='row';
+      const k = document.createElement('span'); k.className='k'; k.style.background='var(--baseline)';
+      const v = document.createElement('span'); v.className='val'; v.textContent = ex.fmt(d[ex.key]);
+      const n = document.createElement('span'); n.className='nm'; n.textContent = ex.name;
+      r.append(k,v,n); tt.appendChild(r);
+    });
+    tt.style.display = 'block';
+    const cw = card.clientWidth, scale = cw / W;
+    let left = X(i)*scale + 14;
+    if(left + tt.offsetWidth > cw - 8) left = X(i)*scale - tt.offsetWidth - 14;
+    tt.style.left = left + 'px';
+    tt.style.top = (holder.offsetTop + 16) + 'px';
+  }
+  function hide(){
+    idx = -1; cross.setAttribute('opacity',0); dots.forEach(d=>d.setAttribute('opacity',0));
+    bars.forEach(b=>{ if(b) b.setAttribute('opacity',1); });
+    tt.style.display = 'none';
+  }
+  hit.addEventListener('pointermove', e=>{
+    const r = svg.getBoundingClientRect();
+    const mx = (e.clientX - r.left) * W / r.width;
+    const i = Math.max(0, Math.min(D.length-1, Math.round((mx - M.l) / (PW/D.length) - 0.5)));
+    show(i);
+  });
+  hit.addEventListener('pointerleave', hide);
+  hit.addEventListener('focus', ()=>show(idx<0? D.length-1 : idx));
+  hit.addEventListener('blur', hide);
+  hit.addEventListener('keydown', e=>{
+    if(e.key==='ArrowLeft'){ show(Math.max(0,(idx<0?D.length-1:idx)-1)); e.preventDefault(); }
+    if(e.key==='ArrowRight'){ show(Math.min(D.length-1,(idx<0?0:idx)+1)); e.preventDefault(); }
+    if(e.key==='Escape') hide();
+  });
+}
+
+// ---- chart 1: revenue vs net profit (฿/เดือน)
+makeChart('c1', {
+  aria:'กราฟเส้นรายได้และกำไรสุทธิต่อเดือน 18 เดือน',
+  yMin:-200000, yMax:1400000, yStep:200000,
+  fmtTick:fmtShort, fmtVal:fmtB,
+  series:[
+    {type:'line', key:'rev', name:'รายได้/เดือน', color:'--s1'},
+    {type:'line', key:'net', name:'กำไรสุทธิ', color:'--s2'},
+  ],
+  annos:[
+    {m:10, key:'net', text:'พลิกบวกเดือนที่ 10', dy:22},
+  ],
+});
+
+// ---- chart 2: cumulative cash (diverging around 0)
+makeChart('c2', {
+  aria:'กราฟเงินสดสะสมรายเดือน แสดงเงินทุนที่ต้องเตรียม',
+  yMin:-750000, yMax:1000000, yStep:250000,
+  fmtTick:fmtShort, fmtVal:fmtB,
+  series:[
+    {type:'line', key:'cash', name:'เงินสดสะสม', color:'--s1', area:'sign'},
+  ],
+  extraRows:[
+    {key:'capex', name:'เงินซื้อชุดเดือนนี้', fmt:fmtB},
+  ],
+  annos:[
+    {m:10, key:'cash', text:'ลึกสุด −฿631k (เดือน 10)', dy:24},
+    {m:16, key:'cash', text:'กลับเป็นบวกเดือนที่ 16', dy:-14, dx:-30},
+  ],
+});
+
+// ---- chart 3: purchases (cols) + cumulative inventory (line), unit = ตัว
+makeChart('c3', {
+  aria:'กราฟจำนวนชุดที่ซื้อเข้าต่อเดือนและชุดสะสมในคลัง เทียบความจุ 800 ตัว',
+  yMin:0, yMax:1800, yStep:300,
+  fmtTick:fmtN, fmtVal:n=>fmtN(n)+' ตัว',
+  refY:800, refLabel:'ความจุห้องสต็อกปัจจุบัน 800 ตัว',
+  series:[
+    {type:'col', key:'buy', name:'ซื้อเข้า/เดือน', color:'--s1'},
+    {type:'line', key:'owned', name:'ชุดสะสม', color:'--s2'},
+  ],
+  annos:[
+    {m:14, key:'owned', text:'ทะลุ 800 → เช่าคลังเพิ่ม', dy:-14, dx:-10},
+  ],
+});
+
+// ---- table view
+const tb = document.querySelector('#tbl tbody');
+D.forEach(d=>{
+  const tr = document.createElement('tr');
+  [d.m, fmtN(d.customers), fmtN(d.rentals), fmtB(d.rev), fmtB(d.net), fmtN(d.buy), fmtN(d.owned), fmtB(d.capex), fmtB(d.cash)]
+    .forEach(v=>{ const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+  tb.appendChild(tr);
+});
+</script>
+</body>
+</html>

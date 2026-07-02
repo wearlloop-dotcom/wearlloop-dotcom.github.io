@@ -60,7 +60,7 @@
   // === ตั้งค่า (publishable key ปลอดภัยที่จะฝัง) ===
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
-  const QR_BASE='https://wearlloop-dotcom.github.io/g.html?c='; // QR → หน้าเช่าชุด (g.html รับ ?c=<code>) · github.io ออนไลน์จริง · เปลี่ยนเป็น lloop.app เมื่อผูก DNS
+  const QR_BASE=(window.CONFIG&&CONFIG.GARMENT_URL)||'https://wearlloop-dotcom.github.io/g.html?c=';  // ฐาน URL กลางอยู่ที่ config.js (GARMENT_URL)
 
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // R-4: RPC ผ่าน gateway (LINE idToken + role)

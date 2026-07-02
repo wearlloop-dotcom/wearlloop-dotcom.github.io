@@ -10,7 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
-<script src="me-api.js"></script>
+<script src="me-api.js?v=56"></script>
 <script src="analytics.js"></script>
 <script src="nav.js?v=1"></script>
 <style>
@@ -747,7 +747,8 @@ $('wishForm').addEventListener('submit', async e => {
   showErr('');
 
   if (!selectedFile) { showErr(T('กรุณาเลือกรูปชุดที่ต้องการก่อน', 'Please choose a photo first')); return; }
-  if (!uid) { showErr(T('กรุณาเข้าสู่ระบบก่อน', 'Please sign in first')); return; }
+  // guest กดส่ง → พาไปล็อกอิน LINE ต่อเลย (แทน error ค้างที่ไปต่อไม่ได้)
+  if (!uid) { showErr(T('กำลังพาไปเข้าสู่ระบบ LINE…', 'Signing in with LINE…')); liff.login({ redirectUri: window.location.href }); return; }
 
   const btn = $('submitBtn');
   btn.disabled = true;
@@ -890,12 +891,25 @@ async function doVote(requestId) {
   btn.disabled = false;
 }
 
+// guest เห็นหน้าได้ก่อน — แบนเนอร์ชวนล็อกอินแทนการเด้งไป LINE ทันทีที่เปิดหน้า
+function showSignInBar() {
+  if (document.getElementById('signinBar')) return;
+  const d = document.createElement('div');
+  d.id = 'signinBar';
+  d.style.cssText = 'margin:12px 16px 0;padding:12px 14px;background:#fff;border:1px solid var(--line,#E7E5E1);border-radius:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:13px';
+  d.innerHTML = '<span>' + T('เข้าสู่ระบบเพื่อส่งคำขอ', 'Sign in to submit') + '</span>'
+    + '<button type="button" style="flex:0 0 auto;background:#06C755;color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;font-family:inherit" onclick="liff.login({redirectUri:location.href})">' + T('เข้าสู่ระบบ', 'Sign in') + '</button>';
+  const bar = document.querySelector('.lloop-topbar');
+  if (bar && bar.parentNode) bar.parentNode.insertBefore(d, bar.nextSibling); else document.body.prepend(d);
+}
+
 async function init() {
   if (!LIFF_ID) { showErr(T('ยังไม่ได้ตั้งค่า LIFF_ID', 'LIFF_ID is not configured')); return; }
   try {
     await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
     if (!liff.isLoggedIn()) {
-      liff.login({ redirectUri: window.location.href });
+      // guest ดูหน้าได้ก่อน ค่อยล็อกอินตอนกดส่ง (เดิมเด้งไป LINE ก่อนเห็นเนื้อหา — สาเหตุ "เด้งไปเด้งมา")
+      showSignInBar();
       return;
     }
     const profile = await liff.getProfile();

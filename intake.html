@@ -89,6 +89,19 @@
       <div class="field"><label>ไซส์ (size)</label><select id="f_size"><option value="">— ไม่ระบุ —</option><option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option><option value="FREE">FREE SIZE</option></select></div>
       <div class="field"><label>สภาพชุด (condition)</label><select id="f_condition"><option value="new">ใหม่มาก</option><option value="good">ดี</option><option value="fair">พอใช้</option><option value="poor">ต้องซ่อม</option></select></div>
     </div>
+    <details style="margin-bottom:13px">
+      <summary style="font-size:12px;color:var(--muted);cursor:pointer">ชุดมีตำหนิ? — แจ้งลูกค้าตรง ๆ + ลดราคาจากเรทปกติ (ออปชัน)</summary>
+      <div style="margin-top:10px">
+        <div class="field"><label>เรทปกติก่อนลด (บาท) — ใส่แล้วหน้าเว็บโชว์ราคาขีดฆ่า ส่วน"ค่าเช่า/ครั้ง"ด้านบนคือราคาที่ลดแล้ว</label><input id="f_regprice" type="number" placeholder="เช่น 320"></div>
+        <div class="field"><label>ตำหนิอยู่ตรงไหน (ลูกค้าเห็นข้อความนี้)</label><textarea id="f_defect" rows="2" placeholder="เช่น รอยเปื้อนจาง ๆ ที่ชายกระโปรงด้านหลัง มองแทบไม่เห็นตอนใส่"></textarea></div>
+        <div class="field"><label>รูปจุดตำหนิ (ลูกค้ากดดูได้)</label>
+          <button type="button" class="aibtn" style="margin-bottom:8px" onclick="defectShot()"> ถ่ายรูปตำหนิ (กล้อง)</button>
+          <div id="defectShots" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+          <textarea id="f_defectphotos" rows="2" placeholder="หรือวางลิงก์รูป คั่นด้วย , — https://... , https://..."></textarea>
+        </div>
+        <div class="note" style="margin-top:0">มีข้อความตำหนิหรือรูปอย่างน้อย 1 อย่าง = หน้าลูกค้าขึ้นป้าย "มีตำหนิเล็กน้อย" อัตโนมัติ</div>
+      </div>
+    </details>
     <div class="field"><label>โอกาสที่ใส่ได้ (เลือกได้หลายอัน)</label><div class="chips" id="occ"></div></div>
     <div class="row2">
       <div class="field"><label>สี (ชื่อ)</label><input id="f_colorname" placeholder="navy"></div>
@@ -126,12 +139,13 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
+<script src="qc-photo.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
   const FUNCTIONS=SUPABASE_URL.replace('.supabase.co','.functions.supabase.co');
-  const QR_BASE='https://wearlloop-dotcom.github.io/g.html?c=';  // หน้าเช่าชุดนี้ (g.html รับ ?c=<code> → เลือกวัน+จอง) · github.io ออนไลน์จริง (lloop.app ยังไม่ผูก DNS)
+  const QR_BASE=(window.CONFIG&&CONFIG.GARMENT_URL)||'https://wearlloop-dotcom.github.io/g.html?c=';  // ฐาน URL กลางอยู่ที่ config.js (GARMENT_URL)
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
@@ -157,7 +171,7 @@
     const photo=$('f_photo').value;
     if(!photo){ alert('วางลิงก์รูปก่อนค่ะ'); return; }
     try{
-      const r=await fetch(FUNCTIONS+'/intake-tagger',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer'+SUPABASE_KEY},body:JSON.stringify({image_url:photo,id_token:(window.opsIdToken?window.opsIdToken():'')})});
+      const r=await fetch(FUNCTIONS+'/intake-tagger',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+SUPABASE_KEY},body:JSON.stringify({image_url:photo,id_token:(window.opsIdToken?window.opsIdToken():'')})});
       if(!r.ok) throw new Error('not deployed');
       const t=await r.json();
       $('f_name').value=t.name||$('f_name').value; $('f_category').value=t.category||'dress';
@@ -167,6 +181,23 @@
       syncPreview();
     }catch(e){ alert('AI ช่วยกรอกยังไม่พร้อม — ต้องตั้ง Anthropic key + deploy ฟังก์ชัน intake-tagger ก่อน (พรุ่งนี้) ค่ะ\nตอนนี้กรอกมือไปก่อนได้เลย'); }
   }
+
+  // ถ่ายรูปตำหนิจากกล้อง → อัปโหลดผ่าน qc_photo_upload (phase 'defect') → เก็บ URL ไว้ส่งกับ intake
+  let defectShots=[];
+  async function defectShot(){
+    const r=await window.qcPhotoCapture({ phase:'defect', garment_code:($('f_code').value||null), note:'ตำหนิ (intake)' });
+    if(!r.ok){ if(r.error!=='ยกเลิก') alert('อัปโหลดรูปไม่สำเร็จ: '+r.error); return; }
+    const d=r.data||{};
+    const url=typeof d==='string'?d:(d.url||d.public_url||d.photo_url||'');
+    if(!url){ alert('อัปโหลดแล้วแต่ไม่ได้ URL กลับ — วางลิงก์รูปในช่องด้านล่างแทนนะคะ'); return; }
+    defectShots.push(url); renderDefectShots();
+  }
+  function renderDefectShots(){
+    $('defectShots').innerHTML=defectShots.map((u,i)=>
+      `<span style="position:relative;display:inline-block"><img src="${u}" style="height:54px;border-radius:4px;border:1px solid var(--line)">`+
+      `<button type="button" onclick="rmDefectShot(${i})" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;border:none;background:#A32D2D;color:#fff;font-size:11px;line-height:1;cursor:pointer">×</button></span>`).join('');
+  }
+  function rmDefectShot(i){ defectShots.splice(i,1); renderDefectShots(); }
 
   async function save(){
     const tips=$('f_tips').value.split(',').map(s=>s.trim()).filter(Boolean);
@@ -181,7 +212,12 @@
       fabric_composition:$('f_fabric').value, styling_tips:tips,
       photos:$('f_photo').value?[$('f_photo').value]:[],
       size:$('f_size').value||null,
-      condition:$('f_condition').value||null
+      condition:$('f_condition').value||null,
+      acquisition_id:window._acqId||null,   // มาจากหน้าจัดการรับซื้อ (?acq=) — ให้ DB ผูกชุดกับดีลและปิดสถานะเป็น stocked
+      // ตำหนิ (แจ้งโปร่งใส): เรทปกติก่อนลด + โน้ต + รูปจุดตำหนิ
+      regular_price:$('f_regprice').value||null,
+      defect_note:$('f_defect').value.trim()||null,
+      defect_photos:[...defectShots, ...$('f_defectphotos').value.split(',').map(s=>s.trim()).filter(Boolean)]
     };
     const { data, error } = await sb.rpc('intake_garment',{ p: payload });
     if(error){ alert('บันทึกไม่ได้:'+error.message); return; }
@@ -199,6 +235,24 @@
     const stTxt = $('f_publish').checked ? '<b>ready</b> ขึ้นร้านแล้ว' : '<b>needs_review</b> (รออนุมัติ)';
     ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> · ${stTxt}${binMsg}${nfcMsg} — <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
   }
+
+  // เปิดจากหน้าจัดการรับซื้อ (acquisitions.html?...) → เติมข้อมูลจาก offer ให้เลย ไม่ต้องคีย์ใหม่
+  (function(){
+    const Q=new URLSearchParams(location.search);
+    if(!Q.get('name')&&!Q.get('acq')) return;
+    window._acqId=Q.get('acq')||null;   // เก็บไว้ส่งกับ intake_garment ตอนบันทึก (ปิดลูปรับซื้อ→คลัง)
+    const setv=(id,v)=>{ const el=$(id); if(el&&v!=null&&v!=='') el.value=v; };
+    // <select>: ตั้งค่าเฉพาะเมื่อมี option ตรงจริง (ค่าที่ไม่ตรงจะทำ select ว่างเงียบ ๆ)
+    const setSel=(id,v,norm)=>{ const el=$(id); if(!el||v==null||v==='') return;
+      const vv=norm?norm(String(v).trim()):String(v).trim();
+      if([...el.options].some(o=>o.value===vv)) el.value=vv; };
+    setv('f_name',Q.get('name')); setv('f_brand',Q.get('brand')); setv('f_photo',Q.get('photo'));
+    setSel('f_size',Q.get('size'),s=>s.toUpperCase().replace(/^FREE.*$/,'FREE'));
+    setSel('f_condition',Q.get('condition'));
+    setv('f_cost',Q.get('cost'));
+    setv('f_colorname',Q.get('color')); setv('f_fabric',Q.get('fabric'));
+    if(Q.get('photo')&&typeof syncPreview==='function') syncPreview();
+  })();
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>
