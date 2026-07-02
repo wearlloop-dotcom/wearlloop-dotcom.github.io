@@ -1036,8 +1036,8 @@ function openDetail(id) {
     </div>
     ${(window.BDAY && window.BDAY.voucher && window.BDAY.voucher.active && !subCovers(g))
       ? `<button class="bdaybtn" onclick="bdayBook('${g.id}')">${lang==='th'
-          ? (g.price<=window.BDAY.voucher.value_cap?'ใช้สิทธิ์วันเกิด · เช่าฟรี':`ใช้สิทธิ์วันเกิด · จ่ายเพิ่ม ฿${g.price-window.BDAY.voucher.value_cap}`)
-          : (g.price<=window.BDAY.voucher.value_cap?'Use birthday gift · free':`Use birthday gift · pay ฿${g.price-window.BDAY.voucher.value_cap}`)}</button>`
+          ? (g.price<=window.BDAY.voucher.value_cap?'ใช้สิทธิ์วันเกิด · เช่าฟรี':`ใช้สิทธิ์วันเกิด · จ่ายเพิ่ม ${money(g.price-window.BDAY.voucher.value_cap)}`)
+          : (g.price<=window.BDAY.voucher.value_cap?'Use birthday gift · free':`Use birthday gift · pay ${money(g.price-window.BDAY.voucher.value_cap)}`)}</button>`
       : ''}
     ${subCovers(g)
       ? `<div class="creditline">${lang==='th'?`ใช้สิทธิ์สมาชิก ${CUSTOMER._sub.plan_name} · เหลือ ${CUSTOMER._sub.remaining} ชุดรอบนี้ · ส่งฟรีขาไป`:`Using ${CUSTOMER._sub.plan_name} · ${CUSTOMER._sub.remaining} left · free outbound`}</div>`
@@ -2093,7 +2093,7 @@ function openCart() {
         ${it.brand ? `<small>${it.brand}</small>` : ''}<span class="cnm">${it.name}</span>
         <em class="cstat"></em><em class="clink">${TH ? 'ดูรายละเอียด ›' : 'View details ›'}</em>
       </span>
-      <b>฿${it.price}</b>
+      <b>${money(staffPrice(it.price))}</b>
       <button class="cx" onclick="removeFromCart('${it.id}')" aria-label="${TH ? 'นำออก' : 'Remove'}">×</button>
     </div>`;
   }).join('');
@@ -2153,7 +2153,11 @@ async function revalidateCart() {
 function closeCart() { $('#cartOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 // กดชุดในตะกร้า → กลับไปดูรายละเอียดชุดเต็ม (ปิดตะกร้าก่อน แล้วเปิด detail)
 function cartOpenDetail(id) { closeCart(); openDetail(id); }
+let _cartBooking = false;
 async function bookCartNow() {
+  if (_cartBooking) return;   // กันกดซ้ำระหว่างรอ kycGate/bookCart — กันสร้างออเดอร์ซ้ำ
+  _cartBooking = true;
+  try {
   const TH = lang === 'th';
   const date = $('#cartDate') && $('#cartDate').value;
   if (!date) { toast(TH ? 'เลือกวันที่ก่อนนะคะ' : 'Pick a date'); return; }
@@ -2185,6 +2189,7 @@ async function bookCartNow() {
     if (btn) { btn.disabled = false; btn.textContent = TH ? 'จองทั้งหมด' : 'Book all'; }
     toast(TH ? 'จองไม่สำเร็จ ลองใหม่นะคะ' : 'Booking failed');
   }
+  } finally { _cartBooking = false; }
 }
 
 // ===== profile =====
@@ -2504,7 +2509,7 @@ function topMatches(n) {
 function gThumb(g) {
   const img = g.photo ? `<img src="${g.photo}" loading="lazy" alt="">`
     : `<span style="display:block;width:100%;height:100%;background:${g.bg || '#E7D9C3'}"></span>`;
-  const pr = g.price != null ? `฿${Number(g.price).toLocaleString()}` : '';
+  const pr = g.price != null ? money(staffPrice(g.price)) : '';   // ผ่าน money()+staffPrice ให้ตรงสกุลเงิน/ส่วนลดพนักงานเหมือนราคาหลัก
   return `<div class="gthumb" onclick="openDetail('${esc(g.id)}')"><div class="gth-img">${img}</div>`
     + `<div class="gth-nm">${esc(g.name || '')}</div><div class="gth-pr">${pr}</div></div>`;
 }
@@ -3326,7 +3331,7 @@ function orderCard(r, spareList) {
   const reRent =`<button class="obtn" onclick="reRentByCode('${(r.code||'').replace(/'/g,"")}')">${lang ==='th'?'เช่าอีก':'Rent again'}</button>`;
   // ออเดอร์ที่ยังรอชำระ — ปุ่มหลักคือกลับไปจ่าย/ส่งสลิป (กันลูกค้าค้างสถานะ hold)
   const payB = (!isSpare && r.status ==='hold')
-    ?`<button class="obtn" onclick="orderPay('${(r.code||'').replace(/'/g,"")}','${r.use_date}',${r.rent_days||1},'${(r.name||'').replace(/'/g,"")}')">${lang ==='th'?'ชำระเงิน / ส่งสลิป':'Pay / send slip'}</button>`:'';
+    ?`<button class="obtn" onclick="orderPay('${(r.code||'').replace(/'/g,"")}','${r.use_date}',${r.rent_days||1},'${(r.name||'').replace(/'/g,"")}','${r.rental_id||''}')">${lang ==='th'?'ชำระเงิน / ส่งสลิป':'Pay / send slip'}</button>`:'';
   const review = (!isSpare && r.status ==='returned')
     ?`<button class="obtn ghost" onclick="openReview('${r.rental_id}','${(r.name||'').replace(/'/g,"")}')">${lang ==='th'?'รีวิว':'Review'}</button>`:'';
   // ยืดหยุ่นกว่าคู่แข่ง: ลูกค้ายกเลิก/เลื่อน/ต่อเวลาเองได้ (ผ่าน me-rpc gateway) — เฉพาะชุดหลัก
@@ -3639,11 +3644,26 @@ function reRentByCode(code) {
 }
 
 // กลับไปจ่าย/ส่งสลิปสำหรับออเดอร์ที่ยังค้าง (hold) — เปิดแผงยืนยันเดิมพร้อม QR + ยอดที่ถูกต้อง
-async function orderPay(code, useDate, days, name) {
+async function orderPay(code, useDate, days, name, rentalId) {
   const g = GARMENTS.find(x => x.code === code) || { name: name || code, code, photo: null };
   const to = addDays(useDate, Math.max(0, (days || 1) - 1));
-  let total = null, pay = null;
-  try { const tq = await window.API.quote(code, CUSTOMER, useDate, to); if (tq && !tq.error) { const applied = Math.max(0, Math.min(Math.round(CUSTOMER.credit_balance || 0), Math.round((tq.rate || 0) + (tq.shipping || 0)))); total = Math.max(0, Math.round(tq.total - applied)); } } catch (e) { /**/ }
+  let total = null, pay = null, applied = 0;
+  try { const tq = await window.API.quote(code, CUSTOMER, useDate, to); if (tq && !tq.error) { applied = Math.max(0, Math.min(Math.round(CUSTOMER.credit_balance || 0), Math.round((tq.rate || 0) + (tq.shipping || 0)))); total = Math.max(0, Math.round(tq.total - applied)); } } catch (e) { /**/ }
+  // เครดิตในกระเป๋าครอบคลุมยอดเต็ม (เหลือจ่าย ฿0) → ตัดเครดิตจริง + ยืนยันเลย แทนแผง QR ฿0 ที่ทำต่อไม่ได้ (ออเดอร์ hold ค้างถาวร)
+  if (total === 0 && applied > 0 && rentalId) {
+    const pr = await window.API.payWithCredit(rentalId);
+    if (pr && pr.ok) {
+      const d = pr.data || {};
+      if (d.balance != null) CUSTOMER.credit_balance = d.balance;
+      if ($('#credit')) $('#credit').textContent = '฿' + Math.round(CUSTOMER.credit_balance || 0);
+      const depNote = (d.deposit_due > 0) ? (lang ==='th'?` · มัดจำ ฿${Math.round(d.deposit_due)} เก็บตอนรับชุด`:` · deposit ฿${Math.round(d.deposit_due)} at pickup`) : '';
+      toast((lang ==='th'?`จ่ายด้วยเครดิตสำเร็จ · ${g.name}`:`Paid with credit · ${g.name}`) + depNote);
+      closeOrders();
+      if (typeof openOrders === 'function') setTimeout(() => { try { openOrders(); } catch (e) { /**/ } }, 400);   // รีเฟรชรายการให้เห็นสถานะจ่ายแล้ว
+      return;
+    }
+    // ตัดเครดิตไม่สำเร็จ → ตกไปโชว์แผงจ่ายปกติ
+  }
   try { pay = await window.API.payInfo(); } catch (e) { /**/ }
   closeOrders();
   showPayConfirm({ g, date: useDate, total, pay, backups: [] });
