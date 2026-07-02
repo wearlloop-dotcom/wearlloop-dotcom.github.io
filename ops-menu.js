@@ -50,12 +50,28 @@
     ] },
   ];
   const ROLE_TH = { owner: 'เจ้าของ', manager: 'ผู้จัดการ', care: 'ดูแลของ', stock: 'สต๊อก', marketing: 'การตลาด',
-    hr_admin: 'หัวหน้าฝ่ายบุคคล', accounting: 'บัญชี', stylist: 'สไตลิสต์', sales: 'ขาย', admin: 'แอดมิน' };
+    hr_admin: 'หัวหน้าฝ่ายบุคคล', accounting: 'บัญชี', stylist: 'สไตลิสต์', sales: 'ขาย', admin: 'แอดมิน',
+    laundry: 'ซัก / ดูแลชุด', repair: 'ช่างซ่อม', shipping: 'จัดส่ง' };
+
+  // ── default: ตำแหน่งที่ไม่ได้ใส่ใน roles ของแต่ละเมนู เห็นหน้าอะไรบ้าง (owner ปรับได้ที่นี่จุดเดียว) ──
+  // นอกจากเมนูที่ตรงกับ role ตรง ๆ แล้ว role เหล่านี้จะเห็นหน้าตาม list ด้านล่างเพิ่มเติม
+  const ROLE_PAGES = {
+    laundry:    ['laundry.html','shipout.html','intake.html','putaway.html','repair.html','nfc.html','stock.html','garment.html'],
+    repair:     ['repair.html','laundry.html','nfc.html','garment.html','stock.html'],
+    shipping:   ['shipout.html','nfc.html'],
+    accounting: ['accounting.html','slips.html','analytics.html','purchasing.html'],
+    hr_admin:   ['hr.html'],
+    stylist:    ['stylist-bookings.html'],
+    sales:      ['marketing.html','requests.html','market.html','influencers.html','live.html','ugc.html','ops-looks.html','stylist-bookings.html'],
+    admin:      ['*'], // แอดมิน = เห็นทุกเมนู (เทียบเท่าผู้จัดการ)
+  };
 
   function canSee(item, role, isOwner) {
     if (isOwner) return true;                 // เจ้าของเห็นหมด
     if (item.roles === '*') return true;
-    return Array.isArray(item.roles) && item.roles.includes(role);
+    if (Array.isArray(item.roles) && item.roles.includes(role)) return true;
+    const pages = ROLE_PAGES[role];           // default ตามตำแหน่งใหม่
+    return !!(pages && (pages.indexOf('*') >= 0 || pages.indexOf(item.href) >= 0));
   }
   function visibleNav(role, isOwner) {
     return OPS_NAV.map((sec) => ({ section: sec.section, items: sec.items.filter((it) => canSee(it, role, isOwner)) }))
