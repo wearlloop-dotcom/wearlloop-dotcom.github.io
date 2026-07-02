@@ -1,0 +1,98 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;background:#fff}
+.tile{width:200px;height:200px;background:transparent;display:block}
+</style></head><body>
+<script>
+// ไอคอนลายเส้นทองเดี่ยว — สไตล์เดียวกับไอคอนปฏิทินบนการ์ด LLOOP เดิม
+const G=`fill="none" stroke="#C9A86A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"`;
+const GF='#C9A86A';
+
+const ICONS = {
+// ปฏิทิน+หัวใจ — จอง/เปลี่ยนแปลงการจอง (ตรงกับไอคอนเดิม)
+'booking': `<rect x="40" y="52" width="120" height="104" rx="10" ${G}/>
+  <line x1="40" y1="82" x2="160" y2="82" ${G}/>
+  <line x1="68" y1="38" x2="68" y2="62" ${G}/><line x1="132" y1="38" x2="132" y2="62" ${G}/>
+  <path d="M100 138 L88 126 Q82 118 88 112 Q94 107 100 113 Q106 107 112 112 Q118 118 112 126 Z" fill="${GF}"/>`,
+// รถส่งของ
+'shipped': `<rect x="24" y="70" width="90" height="60" rx="7" ${G}/>
+  <path d="M114 88 H148 L164 108 V130 H114" ${G}/>
+  <circle cx="52" cy="136" r="12" ${G}/><circle cx="138" cy="136" r="12" ${G}/>
+  <line x1="24" y1="90" x2="8" y2="90" ${G}/><line x1="20" y1="108" x2="6" y2="108" ${G}/>`,
+// กล่อง+ลูกศรวนกลับ — เตือนคืน/กรอกเลขพัสดุ
+'return': `<rect x="60" y="84" width="96" height="64" rx="5" ${G}/><line x1="108" y1="84" x2="108" y2="148" ${G}/>
+  <path d="M60 84 L46 66 M156 84 L170 66 M46 66 H102 M170 66 H114" ${G}/>
+  <path d="M40 138 Q18 122 26 96 Q32 78 52 72" ${G}/><path d="M40 58 L54 71 L42 86" ${G}/>`,
+// กล่อง+เช็ค — รับเลขพัสดุแล้ว
+'return-received': `<rect x="52" y="90" width="96" height="62" rx="5" ${G}/><line x1="100" y1="90" x2="100" y2="152" ${G}/>
+  <path d="M52 90 L38 72 M148 90 L162 72 M38 72 H94 M162 72 H106" ${G}/>
+  <circle cx="146" cy="56" r="22" ${G}/><path d="M136 56 L143 63 L156 49" ${G}/>`,
+// ใบเสร็จ+เช็ค — ชำระเงินสำเร็จ
+'payment-ok': `<path d="M56 32 H144 V156 L129 146 L114 156 L100 146 L86 156 L71 146 L56 156 Z" ${G}/>
+  <line x1="74" y1="58" x2="126" y2="58" ${G}/><line x1="74" y1="80" x2="126" y2="80" ${G}/>
+  <circle cx="100" cy="116" r="18" ${G}/><path d="M92 116 L98 122 L109 110" ${G}/>`,
+// ใบเสร็จ+ตกใจ — สลิปไม่ผ่าน
+'slip-x': `<path d="M56 32 H144 V156 L129 146 L114 156 L100 146 L86 156 L71 146 L56 156 Z" ${G}/>
+  <line x1="74" y1="58" x2="126" y2="58" ${G}/>
+  <line x1="100" y1="82" x2="100" y2="112" ${G}/><circle cx="100" cy="130" r="4.5" fill="${GF}"/>`,
+// นาฬิกาทราย — ใกล้หมดเวลาชำระ
+'pay-clock': `<path d="M64 32 H136 M64 168 H136 M72 32 Q72 84 100 100 Q128 84 128 32 M72 168 Q72 116 100 100 Q128 116 128 168" ${G}/>
+  <path d="M84 46 Q84 74 100 84 Q116 74 116 46 Z" fill="${GF}"/>`,
+// เดรส — ต้อนรับ/รับคืนสภาพผ่าน
+'dress': `<path d="M84 30 L80 52 M116 30 L120 52" ${G}/>
+  <path d="M80 52 Q100 62 120 52 L124 82 Q100 90 76 82 Z" ${G}/>
+  <path d="M76 82 L56 148 Q100 162 144 148 L124 82" ${G}/>`,
+// แว่นขยาย+ผ้า — ผลตรวจสภาพ
+'qc-fee': `<rect x="34" y="64" width="76" height="72" rx="8" ${G}/>
+  <path d="M46 88 Q60 78 74 88 T98 88 M46 112 Q60 102 74 112 T98 112" ${G}/>
+  <circle cx="126" cy="86" r="30" ${G}/><line x1="148" y1="108" x2="168" y2="128" stroke="#C9A86A" stroke-width="10" stroke-linecap="round"/>`,
+// แบงก์+ลูกศร — คืนเงิน
+'refund': `<rect x="52" y="72" width="112" height="64" rx="8" ${G}/><circle cx="108" cy="104" r="17" ${G}/>
+  <path d="M40 140 Q20 122 28 96 Q34 80 52 74" ${G}/><path d="M42 60 L54 73 L44 86" ${G}/>`,
+// นาฬิกาปลุก — เลยกำหนดคืน
+'overdue': `<circle cx="100" cy="108" r="52" ${G}/>
+  <line x1="100" y1="108" x2="100" y2="78" ${G}/><line x1="100" y1="108" x2="120" y2="118" ${G}/>
+  <path d="M66 66 Q52 52 64 44 Q74 38 80 50 M134 66 Q148 52 136 44 Q126 38 120 50" ${G}/>
+  <line x1="66" y1="152" x2="58" y2="162" ${G}/><line x1="134" y1="152" x2="142" y2="162" ${G}/>`,
+// กระดิ่ง — คิวว่าง
+'queue': `<path d="M100 44 Q134 44 136 88 Q137 116 150 128 H50 Q63 116 64 88 Q66 44 100 44" ${G}/>
+  <path d="M88 128 Q88 146 100 146 Q112 146 112 128" ${G}/><line x1="100" y1="44" x2="100" y2="32" ${G}/>`,
+// กระเป๋าเงิน+เหรียญ — เครดิต
+'credit': `<rect x="40" y="76" width="120" height="76" rx="12" ${G}/><path d="M40 94 Q40 68 66 68 H160" ${G}/>
+  <rect x="126" y="102" width="34" height="26" rx="7" ${G}/><circle cx="66" cy="46" r="14" ${G}/>`,
+// เค้ก — วันเกิด
+'birthday': `<rect x="44" y="118" width="112" height="40" rx="7" ${G}/><rect x="62" y="84" width="76" height="34" rx="7" ${G}/>
+  <path d="M62 98 Q72 108 81 98 Q90 108 100 98 Q110 108 119 98 Q128 108 138 98" ${G}/>
+  <line x1="100" y1="52" x2="100" y2="84" ${G}/><path d="M100 30 Q107 41 100 48 Q93 41 100 30" fill="${GF}"/>`,
+// พัดสวอตช์ — ผลวิเคราะห์สี
+'style': `<g transform="translate(100,140)">
+  <g transform="rotate(-38)"><rect x="-14" y="-92" width="28" height="74" rx="6" ${G}/></g>
+  <g transform="rotate(-13)"><rect x="-14" y="-98" width="28" height="80" rx="6" ${G}/></g>
+  <g transform="rotate(13)"><rect x="-14" y="-98" width="28" height="80" rx="6" ${G}/></g>
+  <g transform="rotate(38)"><rect x="-14" y="-92" width="28" height="74" rx="6" ${G}/></g>
+  <circle cx="0" cy="0" r="12" ${G}/></g>`,
+// ปฏิทิน+นาฬิกา — นัดสไตลิสต์
+'stylist': `<rect x="34" y="52" width="104" height="92" rx="10" ${G}/><line x1="34" y1="80" x2="138" y2="80" ${G}/>
+  <line x1="60" y1="38" x2="60" y2="62" ${G}/><line x1="112" y1="38" x2="112" y2="62" ${G}/>
+  <circle cx="138" cy="128" r="30" ${G}/><line x1="138" y1="128" x2="138" y2="112" ${G}/><line x1="138" y1="128" x2="150" y2="134" ${G}/>`,
+// ไม้แขวนคู่ — กลุ่ม/ชวนเพื่อน
+'group': `<g transform="translate(64,58)"><path d="M0 0 Q10 0 10 -9 Q10 -18 0 -18" ${G}/><path d="M0 0 L-38 20 L38 20 Z" ${G}/>
+  <path d="M-14 20 L-17 34 M14 20 L17 34 M-17 34 Q0 42 17 34 L26 88 Q0 98 -26 88 Z" ${G}/></g>
+  <g transform="translate(136,58)"><path d="M0 0 Q10 0 10 -9 Q10 -18 0 -18" ${G}/><path d="M0 0 L-38 20 L38 20 Z" ${G}/>
+  <path d="M-14 20 L-17 34 M14 20 L17 34 M-17 34 Q0 42 17 34 L26 88 Q0 98 -26 88 Z" ${G}/></g>`,
+// เข็ม+ด้าย+กระดุม — ซ่อม
+'repair': `<line x1="52" y1="140" x2="140" y2="52" ${G}/>
+  <ellipse cx="132" cy="60" rx="8" ry="13" transform="rotate(45 132 60)" ${G}/>
+  <path d="M138 66 Q178 84 156 118 Q140 142 104 132" ${G}/>
+  <circle cx="66" cy="86" r="22" ${G}/><circle cx="60" cy="80" r="2.6" fill="${GF}"/><circle cx="72" cy="80" r="2.6" fill="${GF}"/>
+  <circle cx="60" cy="92" r="2.6" fill="${GF}"/><circle cx="72" cy="92" r="2.6" fill="${GF}"/>`,
+// เอกสาร+ลายเซ็น — สัญญา
+'contract': `<path d="M52 32 H128 L148 52 V168 H52 Z" ${G}/><path d="M128 32 V52 H148" ${G}/>
+  <line x1="70" y1="76" x2="130" y2="76" ${G}/><line x1="70" y1="98" x2="130" y2="98" ${G}/><line x1="70" y1="120" x2="108" y2="120" ${G}/>
+  <path d="M70 146 Q82 136 92 146 Q102 154 114 144" ${G}/>`,
+};
+for (const [name, inner] of Object.entries(ICONS)) {
+  const d=document.createElement('div'); d.className='tile'; d.id='tile-'+name;
+  d.innerHTML=`<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+  document.body.appendChild(d);
+}
+</script></body></html>

@@ -866,18 +866,21 @@ function bindInvite(){
         if(window.liff && liff.isApiAvailable && liff.isApiAvailable('shareTargetPicker')){
           const gname=(curGroup() && curGroup().name) || NAV.t('กลุ่มของเรา','our group');
           // การ์ด flex สวย ๆ + ปุ่ม "เข้าร่วมกลุ่ม" ในตัว → เลือกกลุ่ม/เพื่อนใน LINE ส่งได้เลย
+          // ฟอร์แมตการ์ดมาตรฐาน LLOOP: ไอคอนทอง → โลโก้กลาง → เส้นคั่น → kicker ทอง → หัวข้อ → ปุ่มดำ
           liff.shareTargetPicker([{ type:'flex', altText:NAV.t('ชวนเข้ากลุ่ม '+gname+' บน LLOOP','Join '+gname+' on LLOOP'), contents:{
             type:'bubble',
-            hero:{ type:'image', url:'https://wearlloop-dotcom.github.io/line-flex/group.png', size:'full', aspectRatio:'2:1', aspectMode:'cover' },
-            body:{ type:'box', layout:'vertical', spacing:'sm', contents:[
-              { type:'text', text:NAV.t('ชวนเข้ากลุ่ม','Group invite'), size:'xs', color:'#C9A86A', weight:'bold' },
-              { type:'text', text:gname, weight:'bold', size:'xl', wrap:true, color:'#1A1A1A' },
-              { type:'text', text:NAV.t('จัดชุดเข้าตีม เช่าพร้อมกันออเดอร์เดียว','Dress in one theme, rent in one order'), size:'sm', color:'#7C7361', wrap:true }
+            body:{ type:'box', layout:'vertical', paddingAll:'20px', contents:[
+              { type:'image', url:'https://wearlloop-dotcom.github.io/line-flex/icon-group.png', size:'60px' },
+              { type:'text', text:'L L O O P', weight:'bold', size:'xl', align:'center', margin:'lg', color:'#1A1A1A' },
+              { type:'separator', margin:'xl' },
+              { type:'text', text:NAV.t('ชวนเข้ากลุ่ม','Group invite'), size:'xs', color:'#C9A86A', weight:'bold', margin:'xl' },
+              { type:'text', text:gname, weight:'bold', size:'xl', wrap:true, color:'#1A1A1A', margin:'sm' },
+              { type:'text', text:NAV.t('มาจัดชุดเข้าตีมเดียวกัน แล้วเช่าพร้อมกันในออเดอร์เดียวค่ะ','Dress in one theme and rent together in a single order'), size:'sm', color:'#1A1A1A', wrap:true, margin:'md' }
             ]},
-            footer:{ type:'box', layout:'vertical', spacing:'sm', contents:[
-              { type:'button', style:'primary', color:'#3B362C',
+            footer:{ type:'box', layout:'vertical', spacing:'sm', paddingAll:'20px', paddingTop:'0px', contents:[
+              { type:'button', style:'primary', color:'#1A1A1A',
                 action:{ type:'uri', label:NAV.t('เข้าร่วมกลุ่ม','Join the group'), uri: inviteUrl } },
-              { type:'button', style:'link', height:'sm', color:'#A75F3A',
+              { type:'button', style:'link', height:'sm', color:'#1A1A1A',
                 action:{ type:'uri', label:NAV.t('ดูชุดให้เช่าก่อน','Browse dresses first'), uri:'https://liff.line.me/'+((window.CONFIG&&window.CONFIG.LIFF_ID)||'') } } ]}
           }}]);
           return;
