@@ -8,6 +8,7 @@ window.CONFIG = {
   GA4_ID:'G-XXXXXXXXXX',           // TODO: แทนด้วย Measurement ID จาก GA4 > Admin > Data Streams
   N8N_BASE_URL:'',                 // TODO: ใส่ URL เมื่อ deploy n8n เช่น https://n8n.lloop.app
   GOOGLE_MAPS_KEY:'AIzaSyDOz7Ruts01gnasSpgqhDJcHosO-fXhm9w', // Maps key (wearlloop-maps-web) — ล็อก 3 Maps API + โดเมน github.io/lloop.app
+  GARMENT_URL:'https://wearlloop-dotcom.github.io/g.html?c=', // ฐาน URL "เช่าชุดนี้" สำหรับป้าย QR/NFC (shipout/labels/care-label/intake) — ผูก lloop.app เมื่อไหร่ เปลี่ยนที่นี่ที่เดียว
 
   // ===== วิดีโอ hero แบบ Dior (เปิดด้วย pain point ผู้หญิง → ทางออก LLOOP) =====
   // ใส่ลิงก์ไฟล์วิดีโอที่เรนเดอร์แล้ว (ดูพรอมป์ที่ brand/video-prompts.md — ชุด P1–P6 + คลิป #1 แชร์ตู้)

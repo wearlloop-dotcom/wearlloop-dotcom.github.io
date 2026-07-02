@@ -134,6 +134,24 @@ function fmtDate(s){ try { return new Date(s + 'T00:00:00').toLocaleDateString('
 function todayStr(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
 let _tt; function toast(m){ const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2600); }
 
+// ประวัติความสะอาดของชุดตัวนี้ (RPC พับลิก garment_hygiene_public — จาก supabase-p0-moats.sql)
+// ยังไม่ติดตั้ง RPC ก็เงียบไว้ บรรทัดพื้นฐานแสดงตามปกติ
+let _hygSb = null;   // client เดียวต่อหน้า — ไม่สร้างใหม่ทุกสแกน
+async function loadHygiene(){
+  try{
+    if(!G || !window.CONFIG || !window.supabase) return;
+    if(!_hygSb) _hygSb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    const { data } = await _hygSb.rpc('garment_hygiene_public', { p_code: G.code });
+    if(!data) return;
+    const dd = s => { try{ return new Date(s).toLocaleDateString('th-TH', { day:'numeric', month:'short' }); }catch(e){ return ''; } };
+    const bits = [];
+    if(data.last_cleaned_at) bits.push(NAV.t('ซักล่าสุด ','Last cleaned ') + dd(data.last_cleaned_at) + (data.last_method ? ' · ' + data.last_method : ''));
+    if(data.last_qc_pass) bits.push(NAV.t('ตรวจสภาพผ่าน ','QC passed ') + dd(data.last_qc_pass));
+    const el = $('#hygLine');
+    if(bits.length && el) el.textContent = el.textContent + ' · ' + bits.join(' · ');
+  }catch(_e){}
+}
+
 let CUSTOMER = null, G = null, PAY = null, BOOKED = [];
 let gDur = 3, lastQuote = null, booked = false;
 
@@ -207,6 +225,7 @@ function rangeBusy(from, to){
   try { PAY = await window.API.payInfo(); } catch (e) {}
   try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) { BOOKED = []; }
   renderItem();
+  loadHygiene();   // ประวัติความสะอาดของชุดตัวนี้ (สแกนป้ายแล้วเห็นเลย) — ไม่มี RPC ก็เงียบไว้
 })();
 
 function renderEdge(title, body){
@@ -233,6 +252,11 @@ function renderItem(){
     : `<div class="photo ph" style="background:${G.bg || '#EFEDE9'}">${(G.code || 'LLOOP')}</div>`;
   const worth = G.retail ? `<span class="worth">${NAV.t('มูลค่าชุด','Retail value')} <b>${baht(G.retail)}</b></span>` : '';
   const rented = (G.timesRented > 0) ? NAV.t(`เคยถูกเช่า ${G.timesRented} ครั้ง`,`Rented ${G.timesRented} times`) : NAV.t('ชุดพร้อมเช่า','Ready to rent');
+  // มีประวัติซักแล้วค่อยเคลมเรื่องซัก — ชุดใหม่ยังไม่มีรอบซัก ใช้คำที่จริงเสมอ (ตรวจสภาพก่อนส่ง)
+  const hygiene = (G.washCount > 0
+      ? NAV.t('ซักและตรวจสภาพก่อนส่งทุกครั้ง · ดูแลมาแล้ว ' + G.washCount + ' รอบ', 'Cleaned & inspected before every rental · ' + G.washCount + ' care cycles logged')
+      : NAV.t('ตรวจสภาพและเตรียมชุดก่อนส่งทุกครั้ง', 'Inspected & prepared before every rental'))
+    + (G.grade ? ' · ' + NAV.t('เกรดสภาพ ', 'Condition grade ') + G.grade : '');
   const cta = signedIn
     ? `<button class="btn" id="bookBtn" onclick="onBook()" disabled>${NAV.t('เลือกวันก่อนนะคะ','Pick a date first')}</button>`
     : `<button class="btn sage" onclick="window.LiffAuth.signIn()">${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อจอง','Sign in with LINE to book')}</button>
@@ -247,6 +271,7 @@ function renderItem(){
       ${worth}
     </div>
     <div class="trust">${rented} · ${NAV.t('มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป','Deposit refunded after inspection · free shipping on 3+ day rentals')}</div>
+    <div class="trust" id="hygLine">${hygiene}</div>
     ${defectBox}
 
     <div class="sec">

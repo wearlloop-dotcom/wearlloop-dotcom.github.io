@@ -216,6 +216,9 @@ function fitConfidence(c, g) {
   if (c.waist_in!= null && g.waist) {
     if (c.waist_in > g.waist[1] + slack) score -= (c.waist_in - g.waist[1] - slack) * 15;
   }
+  if (c.hip_in != null && g.hip) {   // สะโพก (g.hip = สะโพกกว้างสุดของชุด) — เก็บมานานแต่เพิ่งใช้
+    if (c.hip_in > g.hip + slack) score -= (c.hip_in - g.hip - slack) * 12;
+  }
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 // โน้ตฟิตจากลูกค้าจริง (โชว์เมื่อมีรีวิวพอ) — คืน {text,cls} หรือ null
@@ -273,6 +276,16 @@ function personalScore(g) {
   if (sp.brands && sp.brands.includes(g.brand)) s += 18; // แบรนด์ที่ชอบ (พาร์ทเนอร์วิเคราะห์)
   if (sp.categories && g.category && sp.categories.includes(g.category)) s += 18;
   if (sp.avoid_colors && g.colors.some(col => sp.avoid_colors.includes(col[1]))) s -= 20;
+  const pf = c.prefs || {};                    // สไตล์/สี/โอกาสที่ลูกค้ากรอกเองในโปรไฟล์
+  if (Array.isArray(pf.occasions) && pf.occasions.length && g.occasion_tags.some(t => pf.occasions.includes(t))) s += 10;
+  const colorName = ((g.colors[0] && g.colors[0][0]) || '').toLowerCase();
+  if (colorName && colorName !== 'สี' && colorName !== '—') {
+    // จับสองทาง ไม่สนตัวพิมพ์: "ส้ม" ในโปรไฟล์ต้องจับ "ส้มสด" ของชุดได้ และกลับกัน
+    const hit = txt => String(txt || '').toLowerCase().split(/[,\s·]+/).filter(Boolean)
+      .some(tok => tok.includes(colorName) || colorName.includes(tok));
+    if (hit(pf.avoid_colors)) s -= 15;      // สีที่บอกว่าเลี่ยง
+    else if (hit(pf.fav_colors)) s += 10;   // สีโปรด
+  }
   if (EVENT && g.occasion_tags.includes(EVENT.occasion)) s += 12; // ตรงกับงานในปฏิทิน
   // ML-lite: รสนิยมที่เรียนจากพฤติกรรมจริง (category/brand/season ที่ลูกค้าสนใจเอง)
   const tt = c._taste;
@@ -971,6 +984,7 @@ function openDetail(id) {
       ${defectBox(g)}
       ${sizeChips ? `<div class="sec">${lang==='th'?'เลือกไซส์':'Select size'}</div>${sizeChips}` : ''}
       <div id="ratingline" class="ratingline"></div>
+      <div id="sizedRev"></div>
       <div id="socialproof" class="socialproof"></div>
       ${fit!= null?`<div class="fitbox"><div class="pct">${fit}%</div>
         <div><div style="font-size:13px;font-weight:500;color:#04342C">${t('fitTitle')}</div>
@@ -1034,6 +1048,7 @@ function openDetail(id) {
   renderUGC(g.id);
   loadRating(g.id);  // เรตติ้ง/รีวิวของชุด (async inject)
   loadFit(g.code || g.id);  // สรุปฟิตจากลุคจริงในชุมชน (Lemon8: trust)
+  loadSizedReviews(g);  // รีวิวจากคนไซซ์/ส่วนสูงใกล้เคียง (moat: ข้อมูลที่ย้ายร้านไม่ได้)
   loadSocialProof(g.code || g.id);  // มีคนเช่า/ดู/หมายตา (social proof)
   loadRecommendWith(g.code || g.id);  // ใส่คู่กับชุดนี้บ่อย (collaborative)
   if (gUseDate) checkAvail(g.id);  // โชว์สถานะวันที่เลือกจากหน้าแรกทันที
@@ -1070,6 +1085,32 @@ async function loadRating(garmentId) {
   const avg = (Math.round(r.avg * 10) / 10).toFixed(1);
   const reviewWord = lang ==='th'?'รีวิว':(r.count > 1?'reviews':'review');
   el.innerHTML =`<span class="star">★</span> ${avg} <span class="rcount">(${r.count} ${reviewWord})</span>`;
+}
+
+// รีวิวจากคนไซซ์/ส่วนสูงใกล้เคียงลูกค้า — RPC garment_reviews_sized (supabase-p0-moats.sql)
+// ยังไม่ติดตั้ง RPC หรือไม่มีรีวิว → เงียบไว้ ไม่แสดงส่วนนี้
+async function loadSizedReviews(g) {
+  const _seq = window._detailSeq;
+  const el = $('#sizedRev'); if (!el || !g || !g.code) return;
+  try {
+    const cli = kycSb();   // client กลางที่ cache ไว้แล้ว — ห้าม createClient ใหม่ทุกครั้งที่เปิดชุด
+    if (!cli) return;
+    const c = CUSTOMER || {};
+    const { data } = await cli.rpc('garment_reviews_sized', { p_code: g.code, p_height: c.height_cm || null, p_size: c.size || null });
+    if (_seq !== window._detailSeq) return;  // สลับชุดไปแล้ว อย่าเขียนทับชีตชุดใหม่
+    const revs = (data && data.reviews) || [];
+    if (!revs.length) { el.innerHTML = ''; return; }
+    const near = revs.filter(r => r.near_you);
+    const list = (near.length ? near : revs).slice(0, 3);
+    const th = lang === 'th';
+    const chip = r => [r.reviewer_height_cm ? Math.round(r.reviewer_height_cm) + (th ? ' ซม.' : ' cm') : null, r.reviewer_size || null].filter(Boolean).join(' · ');
+    el.innerHTML = `<div style="font-size:12.5px;font-weight:600;margin-top:10px;color:#0F6E56">${near.length ? (th ? 'รีวิวจากคนตัวใกล้คุณ' : 'Reviews from people your size') : (th ? 'รีวิวล่าสุด' : 'Recent reviews')}</div>`
+      + list.map(r => `<div style="font-size:13px;margin:6px 0;color:#4A4742">
+          <span style="color:#C9A86A">★ ${esc(r.rating ?? '–')}</span>
+          ${chip(r) ? `<span style="background:#F4EFE6;border-radius:8px;padding:1px 8px;font-size:11.5px;margin-left:6px">${esc(chip(r))}</span>` : ''}
+          ${r.comment ? `<div style="color:#7C7771">${esc(String(r.comment).slice(0, 120))}</div>` : ''}
+        </div>`).join('');
+  } catch (_e) { /* ไม่มี RPC ก็ข้ามไป */ }
 }
 
 // สรุปฟิต/ไซส์ จาก "ลุคจริง" ในชุมชน (คนเคยใส่บอกสูง/ไซส์/ความพอดี) — ลดลังเล ลดคืนผิดไซส์
@@ -2344,6 +2385,7 @@ function openProfile(onboard) {
       </div>
       ${onboard ? '' : `<div class="field"><label>${t('pNotes')}</label><input id="pNotes" value="${c.notes ||''}"></div>`}
       <button class="savebtn" onclick="saveProfile()">${onboard ? (lang==='th'?'บันทึก & ไปต่อ':'Save & continue') : t('pSave')}</button>
+      ${onboard ? '' : `<a href="my-events.html" style="display:block;text-align:center;margin-top:10px;font-size:13.5px">${lang==='th'?'ปฏิทินงานของฉัน — ฝากวันงานไว้ ให้สไตลิสต์จัดลุคล่วงหน้า →':'My event calendar — save your dates, we style ahead →'}</a>`}
     </div>`;
   $('#pOverlay').classList.add('open');
   document.body.style.overflow ='hidden';
