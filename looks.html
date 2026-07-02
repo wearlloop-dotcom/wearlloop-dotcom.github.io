@@ -200,7 +200,8 @@
 <script>
 const $ = s => document.querySelector(s);
 const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
-const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+const safeHref=u=>{ u=String(u||''); return /^(https?:\/\/|\/)/i.test(u)?u:'#'; };
 const baht = n => '฿'+Number(n||0).toLocaleString('th-TH');
 const TIER_TH = { new:'', silver:'Silver', gold:'Gold', platinum:'Platinum' };
 let CUSTOMER=null, LIVE=false, FEED=[], TAB='all', OCC=null, TAG=null, STORY_I=-1;
@@ -280,7 +281,7 @@ function tplBadge(c){
   return `<span class="tplb">${t?esc(t):''}${(t&&n>1?' · ':'')}${n>1?n+' '+T('รูป','photos'):''}</span>`;
 }
 function fitStr(c){
-  const p=[]; if(c.wearer_height_cm) p.push(T('สูง ','Height ')+c.wearer_height_cm); if(c.wearer_size) p.push(T('ไซส์ ','Size ')+esc(c.wearer_size));
+  const p=[]; if(c.wearer_height_cm) p.push(T('สูง ','Height ')+esc(c.wearer_height_cm)); if(c.wearer_size) p.push(T('ไซส์ ','Size ')+esc(c.wearer_size));
   if(FIT_TH[c.fit_note]) p.push(FIT_TH[c.fit_note]); return p.join(' · ');
 }
 function cardHtml(c){
@@ -559,7 +560,7 @@ async function openProfile(handle){
     return `<div class="card"><div class="ph">${l.photo?`<img src="${esc(l.photo)}" loading="lazy">`:''}${l.featured?'<span class="feat">เด่น</span>':''}</div>
       <div class="cbody">${g.code?`<div class="gchip" style="border-top:none;padding-top:0;margin-top:0"><div class="gname"><b>${esc(g.name||g.code)}</b></div><a class="rentbtn" href="${u}">${T('เช่า','Rent')}</a></div>`:''}</div></div>`;
   }).join('') || `<p class="muted" style="grid-column:1/-1">${T('ยังไม่มีลุคที่เผยแพร่','No published looks yet')}</p>`;
-  const social = cr.social?`<a href="${esc(cr.social)}" target="_blank" class="shareln" style="margin-top:8px">${T('ดูโซเชียล →','View social →')}</a>`:'';
+  const social = cr.social?`<a href="${esc(safeHref(cr.social))}" target="_blank" class="shareln" style="margin-top:8px">${T('ดูโซเชียล →','View social →')}</a>`:'';
   const h = cr.handle||handle;
   const isMe = CUSTOMER && (String(cr.handle||'').toLowerCase()===String((CUSTOMER.handle||CUSTOMER.link_code||'')).toLowerCase());
   const following = FOLLOWING.has(String(h||'').toLowerCase());

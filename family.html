@@ -376,7 +376,7 @@ let MY_HIDE = false;   // ซ่อนรูปโปรไฟล์ของฉ
 // LIVE=true → ต่อ Supabase จริงผ่าน window.API; LIVE=false → ใช้ mock arrays ด้านบน (พรีวิว)
 let LIVE = false;
 const SEASONS = ['autumn','winter','spring','summer'];
-function escHtml(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function escHtml(s){ return String(s==null?'':s).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c])); }
 function toast(msg){ try{ alert(msg); }catch(_e){} }
 // unwrap { ok, data, error } จาก window.API; คืน data หรือโยน error แบบนุ่ม
 function unwrap(res){
@@ -430,7 +430,7 @@ function renderSwitch(){
   GROUPS.forEach(g=>{
     const b=document.createElement('button');
     b.className='gchip'+(g.id===active?' on':'');
-    b.innerHTML=`<span class="k">${g.kind==='friends'?NAV.t('เพื่อน','Friends'):g.kind==='couple'?NAV.t('คู่','Couple'):NAV.t('ครอบครัว','Family')}</span>${g.name}`;
+    b.innerHTML=`<span class="k">${g.kind==='friends'?NAV.t('เพื่อน','Friends'):g.kind==='couple'?NAV.t('คู่','Couple'):NAV.t('ครอบครัว','Family')}</span>${escHtml(g.name)}`;
     b.onclick=()=>{active=g.id;selRel=null;render();};
     el.appendChild(b);
   });
@@ -466,7 +466,7 @@ function memberCard(m){
   return `<div class="mcard" style="${m.pend?'opacity:.72':''}">
     ${m.role==='owner'?'<span class="badge">'+NAV.t('หัวหน้ากลุ่ม','Group lead')+'</span>':''}
     ${avaHtml(m.picture, m.id, m.name)}
-    <div><div class="mname">${m.name}</div><div class="mrel">${m.rel|| (m.role==='owner'?NAV.t('ตัวคุณเอง','You'):NAV.t('สมาชิก','Member'))}</div></div>
+    <div><div class="mname">${escHtml(m.name)}</div><div class="mrel">${escHtml(m.rel|| (m.role==='owner'?NAV.t('ตัวคุณเอง','You'):NAV.t('สมาชิก','Member')))}</div></div>
     <div class="tags">${tags.join('')}</div>
     ${m.id===ME.id?`<button class="picpriv" onclick="togglePicHide()">${MY_HIDE?NAV.t('· แสดงรูปฉัน','· Show my photo'):NAV.t('· ซ่อนรูปฉันจากกลุ่ม','· Hide my photo from the group')}</button>`:''}
   </div>`;
@@ -797,8 +797,8 @@ function renderInvites(){
     <div class="ib-h"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--ok);fill:none;stroke-width:1.7"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
       ${NAV.t('คำเชิญรอคุณตอบรับ','Invitations awaiting you')} (${INVITES.length})</div>
     ${INVITES.map(iv=>`<div class="invrow">
-      <div class="ir-t"><div class="ir-n">${iv.name}</div>
-        <div class="ir-f"><span class="ir-k">${iv.kind==='friends'?NAV.t('เพื่อน','Friends'):NAV.t('ครอบครัว','Family')}</span> · ${NAV.t(iv.from+' ชวนคุณเข้าร่วม',iv.from+' invited you to join')}</div></div>
+      <div class="ir-t"><div class="ir-n">${escHtml(iv.name)}</div>
+        <div class="ir-f"><span class="ir-k">${iv.kind==='friends'?NAV.t('เพื่อน','Friends'):NAV.t('ครอบครัว','Family')}</span> · ${escHtml(NAV.t(iv.from+' ชวนคุณเข้าร่วม',iv.from+' invited you to join'))}</div></div>
       <button class="mini yes" onclick="respondInvite('${iv.group_id}',true)">${NAV.t('ตอบรับ','Accept')}</button>
       <button class="mini no" onclick="respondInvite('${iv.group_id}',false)">${NAV.t('ปฏิเสธ','Decline')}</button>
     </div>`).join('')}
@@ -970,6 +970,23 @@ document.addEventListener('DOMContentLoaded',async ()=>{
     }
     try{ await reloadGroups(); }
     catch(e){ console.warn('reloadGroups failed:', e); LIVE=false; }
+  }
+
+  // M-d: ถ้าตั้งใจต่อของจริง (ไม่ใช่โหมดพรีวิว USE_MOCK) แต่ทำ LIVE ไม่สำเร็จ
+  // (ยังไม่ล็อกอิน / init ล้ม / โหลดกลุ่มล้ม) — อย่าโชว์ mock เป็นของจริง
+  // ล้างข้อมูลจำลองแล้วขอให้ผู้ใช้เข้าสู่ระบบเพื่อยืนยันข้อมูลจริง
+  const wantLive = !!(window.API && window.CONFIG && !window.CONFIG.USE_MOCK);
+  if(wantLive && !LIVE){
+    GROUPS = []; INVITES = []; active = null;
+    render();
+    const grpName=$('#grpName'), grpCap=$('#grpCap'), body=$('#memberBody');
+    if(grpName) grpName.textContent = NAV.t('กรุณาเข้าสู่ระบบ','Please sign in');
+    if(grpCap) grpCap.textContent = '';
+    if(body) body.innerHTML = `<div class="empty">
+      <h4>${NAV.t('กรุณาเข้าสู่ระบบเพื่อยืนยันข้อมูลกลุ่มของคุณ','Sign in to verify your groups')}</h4>
+      <p>${NAV.t('ยังไม่ได้เข้าสู่ระบบ จึงยังไม่แสดงข้อมูลกลุ่มจริง — ตัวเลขและรายชื่อด้านล่างไม่ใช่ข้อมูลของคุณ','You\'re not signed in yet, so real group data isn\'t shown — no numbers or names are your own until you sign in.')}</p>
+    </div>`;
+    return;
   }
 
   render();
