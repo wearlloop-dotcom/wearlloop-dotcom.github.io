@@ -330,7 +330,11 @@ function renderStatus(st){
   const rb = $('#remindBtn'), rh = $('#remindHint');
   if(unpaid>0){
     rb.disabled = false;
-    rb.onclick = () => alert(NAV.t('ระบบเตือนอัตโนมัติให้แล้วค่ะ — คุณช่วยทักเพื่อนใน LINE กลุ่มได้อีกแรงค่ะ','Automatic reminders are already sent — a nudge to friends in the group LINE chat helps too.'));
+    rb.onclick = async () => {   // คัดลอกข้อความเตือนสำเร็จรูป + ลิงก์หน้านี้ ไว้วางใน LINE กลุ่ม
+      const msg = NAV.t('เพื่อน ๆ ที่ยังไม่ได้จ่ายค่าชุด กดจ่ายในลิงก์นี้ได้เลยนะคะ 💛 ','Friends who haven\'t paid for the dresses yet — here\'s the link 💛 ') + location.href;
+      try { await navigator.clipboard.writeText(msg); alert(NAV.t('คัดลอกข้อความเตือนแล้ว — วางใน LINE กลุ่มได้เลยค่ะ (ระบบก็เตือนอัตโนมัติให้อีกทาง)','Reminder message copied — paste it in the group LINE chat (automatic reminders also go out).')); }
+      catch(_e){ alert(NAV.t('ระบบเตือนอัตโนมัติให้แล้วค่ะ — คุณช่วยทักเพื่อนใน LINE กลุ่มได้อีกแรงค่ะ','Automatic reminders are already sent — a nudge to friends in the group LINE chat helps too.')); }
+    };
     rh.textContent = NAV.t('ยังเหลือ ','') + unpaid + NAV.t(' คนที่รอชำระ · ระบบเตือนอัตโนมัติให้อยู่แล้ว',' still pending · reminders go out automatically');
   } else {
     rb.disabled = true;

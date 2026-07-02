@@ -162,8 +162,9 @@
   <div class="toast" id="toast"></div>
 
 <script>
-  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
-  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  // ใช้ค่าจาก config.js เป็นหลัก (กัน drift) — hardcode ไว้เป็น fallback เท่านั้น
+  const SUPABASE_URL=(window.CONFIG&&CONFIG.SUPABASE_URL)||'https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY=(window.CONFIG&&CONFIG.SUPABASE_ANON_KEY)||'sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // วิ่งผ่าน gateway (LINE login + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});
