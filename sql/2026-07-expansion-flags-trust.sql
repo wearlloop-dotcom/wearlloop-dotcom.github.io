@@ -74,15 +74,24 @@ declare
   v_kyc boolean;
 begin
   select
-    count(*) filter (where on_time and qc_ok and not disputed),
+    count(*) filter (where on_time and qc_ok),
     count(*) filter (where not on_time),
     count(*) filter (where not qc_ok),
-    count(*) filter (where disputed),
-    count(*),
-    count(*) filter (where disputed and ended_at > now() - interval '12 months'),
-    count(*) filter (where disputed and ended_at > now() - interval '6 months')
-  into v_perfect, v_late, v_damage, v_dispute, v_total, v_dispute_12m, v_dispute_6m
+    count(*)
+  into v_perfect, v_late, v_damage, v_total
   from trust_history(p_customer);
+
+  -- พิพาท: นับจากทะเบียนคดีจริง dispute_cases (ผูกคู่กรณีด้วย party_type/party_ref)
+  -- สมมุติฐาน: party_type = 'customer' และ party_ref เก็บ customer id เป็นข้อความ
+  -- ถ้ารูปแบบจริงต่างจากนี้ แก้เงื่อนไข where สองบรรทัดนี้จุดเดียว
+  select
+    count(*),
+    count(*) filter (where created_at > now() - interval '12 months'),
+    count(*) filter (where created_at > now() - interval '6 months')
+  into v_dispute, v_dispute_12m, v_dispute_6m
+  from dispute_cases d
+  where d.party_type = 'customer'
+    and d.party_ref  = p_customer::text;
 
   v_score := greatest(0, v_perfect*10 - v_late*15 - v_damage*20 - v_dispute*40);
   v_tier  := case
