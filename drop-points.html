@@ -190,6 +190,7 @@
 <script src="analytics.js?v=38"></script>
 <script src="nav.js?v=1"></script>
 <script src="liffAuth.js?v=38"></script>
+<script src="me-api.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
@@ -198,6 +199,15 @@ const esc = s => (s == null ? '' : String(s)).replace(/[<>&"]/g, c => ({'<':'&lt
 let sb = null;
 function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
 
+// เรียกผ่าน gateway me-rpc ก่อน (verify LINE idToken ฝั่ง server — ปลอม uid ไม่ได้)
+// gateway ยังไม่ allowlist ฟังก์ชัน → fallback ยิงตรงตาม convention เดิม (ขั้นตอนปิดถาวรดู db/README)
+async function gwRpc(name, args){
+  if (window.meRpc && UID) {
+    const r = await window.meRpc(name, args);
+    if (!r.error) return r;
+  }
+  return client().rpc(name, args);
+}
 let UID = null;              // LINE uid (null = ยังไม่ล็อกอิน — หน้ายังใช้ได้ครบ)
 let POINTS = [];             // จุดรับ-ส่งทั้งหมด
 let ZONE = null;             // { postal, province, district, districts:Set } จากรหัสไปรษณีย์
@@ -377,7 +387,7 @@ async function sendInterest(){
   btn.disabled = true;
   let count = null;
   try{
-    const { data, error } = await client().rpc('drop_point_interest', { p_uid: UID, p_postal: ZONE.postal });
+    const { data, error } = await gwRpc('drop_point_interest', { p_uid: UID, p_postal: ZONE.postal });
     if(error) throw error;                       // transport/RPC ยังไม่ deploy → คิวใน catch
     if(data && data.error){
       // ถึง server แล้วแต่ถูกปฏิเสธ — บอกตรง ๆ ไม่โชว์ success ปลอม ไม่เก็บ localStorage
@@ -497,7 +507,7 @@ $('expressForm').addEventListener('submit', async e => {
     p_size: $('exSize').value,
   };
   try{
-    const { data, error } = await client().rpc('express_request', payload);
+    const { data, error } = await gwRpc('express_request', payload);
     if(error) throw error;                       // transport/RPC ยังไม่ deploy → คิวไว้ใน catch
     if(data && data.error){
       // ถึง server แล้วแต่ถูกปฏิเสธ — บอกผู้ใช้ตรง ๆ ไม่เก็บคิว ไม่โชว์ success

@@ -133,6 +133,7 @@
 <script src="analytics.js?v=38"></script>
 <script src="nav.js?v=1"></script>
 <script src="liffAuth.js"></script>
+<script src="me-api.js"></script>
 <script src="data.js"></script>
 <script>
 // ===== Fit DNA — ฟีดแบ็กความพอดีหลังคืนชุด → โปรไฟล์แม่นขึ้นทุกครั้ง =====
@@ -150,6 +151,15 @@ const LS_DONE = 'lloop_fit_done';      // rental_id ที่ส่งแล้�
 function lsGet(k){ try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e){ return []; } }
 function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 
+// เรียกผ่าน gateway me-rpc ก่อน (verify LINE idToken ฝั่ง server — ปลอม uid ไม่ได้)
+// gateway ยังไม่ allowlist ฟังก์ชัน → fallback ยิงตรงตาม convention เดิม (ขั้นตอนปิดถาวรดู db/README)
+async function gwRpc(name, args){
+  if (window.meRpc && UID) {
+    const r = await window.meRpc(name, args);
+    if (!r.error) return r;
+  }
+  return client().rpc(name, args);
+}
 let UID = null;          // LINE userId (null = โหมดตัวอย่าง)
 let FEEDBACK = [];       // ฟีดแบ็กสะสมทั้งหมด (จาก RPC หรือ fallback)
 let PENDING = [];        // ชุดที่เพิ่งคืน รอบอกความพอดี
@@ -290,7 +300,7 @@ async function submitFit(i){
   // ยิง RPC จริงเฉพาะตอนล็อกอิน — โหมดตัวอย่างเก็บ local อย่างเดียว (ห้ามส่ง uid ปลอม)
   if(UID){
     try {
-      const { error } = await client().rpc('submit_fit_feedback', {
+      const { error } = await gwRpc('submit_fit_feedback', {
         p_uid: UID, p_rental: p.rental_id, p_garment: p.garment_code,
         p_bust: p.sel.bust, p_waist: p.sel.waist, p_hip: p.sel.hip, p_length: p.sel.length, p_note: note,
       });
@@ -366,7 +376,7 @@ async function loadProfile(){
     return;
   }
   try {
-    const { data, error } = await client().rpc('my_fit_profile', { p_uid: UID });
+    const { data, error } = await gwRpc('my_fit_profile', { p_uid: UID });
     if(error) throw error;
     if(!data || !Array.isArray(data.feedback)) throw new Error('no data');
     FEEDBACK = data.feedback;
@@ -378,7 +388,7 @@ async function loadProfile(){
 async function loadPending(){
   if(!UID){ PENDING = demoPending(); return; }     // โหมดตัวอย่าง — ไม่ยิง RPC
   try {
-    const { data, error } = await client().rpc('fit_feedback_pending', { p_uid: UID });
+    const { data, error } = await gwRpc('fit_feedback_pending', { p_uid: UID });
     if(error) throw error;
     if(!Array.isArray(data)) throw new Error('no data');
     PENDING = data;

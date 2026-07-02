@@ -140,6 +140,7 @@
 <script src="analytics.js?v=38"></script>
 <script src="nav.js?v=1"></script>
 <script src="liffAuth.js"></script>
+<script src="me-api.js"></script>
 <script src="data.js?v=38"></script>
 <script>
 // ===== ปฏิทินงานของฉัน — ลูกค้าบอกงานล่วงหน้า → สไตลิสต์เตรียมลุคเชิงรุก =====
@@ -183,7 +184,16 @@ let _toastT = null;
 function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(_toastT); _toastT = setTimeout(()=>t.classList.remove('show'), 3200); }
 
 // ---------- server + sync ----------
-async function rpc(name, args){ const { data, error } = await client().rpc(name, args); if(error) throw error; if(data && data.error) throw new Error(data.error); return data; }
+// เรียกผ่าน gateway me-rpc ก่อน (verify LINE idToken ฝั่ง server — ปลอม uid ไม่ได้)
+// gateway ยังไม่ allowlist ฟังก์ชัน → fallback ยิงตรงตาม convention เดิม (ขั้นตอนปิดถาวรดู db/README)
+async function gwRpc(name, args){
+  if (window.meRpc && uid) {
+    const r = await window.meRpc(name, args);
+    if (!r.error) return r;
+  }
+  return client().rpc(name, args);
+}
+async function rpc(name, args){ const { data, error } = await gwRpc(name, args); if(error) throw error; if(data && data.error) throw new Error(data.error); return data; }
 
 // ล็อกอิน + RPC ใช้ได้ → ดันของที่เคยบันทึกในเครื่องขึ้น server ครั้งเดียว แล้วเคลียร์เครื่อง
 async function syncLocalUp(serverRows){

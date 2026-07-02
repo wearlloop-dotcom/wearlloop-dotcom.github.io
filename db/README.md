@@ -31,6 +31,20 @@
   ชื่อทั้งสองเข้า function allowlist ของ ops-rpc ด้วย ไม่งั้นหน้า ops จะเรียกไม่ได้เลย
   (หลังแก้สิทธิ์แล้ว gateway นี้คือ **ทางเดียว** ที่เรียกได้)
 
+## ปิดช่อง IDOR ฝั่งลูกค้า (me-rpc allowlist) — 2 ขั้น
+
+หน้าลูกค้าทั้ง 4 เรียกผ่าน gateway `me-rpc` ก่อนเสมอเมื่อล็อกอิน (verify LINE idToken ฝั่ง server)
+และ fallback ยิงตรงเมื่อ gateway ยังไม่รู้จักฟังก์ชัน — ทำ 2 ขั้นนี้เมื่อพร้อม:
+
+1. **เพิ่มใน allowlist ของ edge function `me-rpc`** พร้อมให้ gateway override `p_uid` จาก idToken ที่ verify แล้ว
+   (เหมือนที่ทำกับ `p_customer`/`p_line_uid`):
+   `my_events` `upsert_event` `delete_event` · `fit_feedback_pending` `submit_fit_feedback` `my_fit_profile` ·
+   `closet_day_get` `closet_day_set` `closet_box_swap` `closet_box_confirm` `closet_box_skip` `closet_box_unskip` ·
+   `drop_point_interest` `express_request`
+2. **หลัง allowlist ใช้งานจริงแล้ว** ค่อย `revoke execute ... from anon, authenticated` กับฟังก์ชันด้านบน
+   → เส้นยิงตรง (ที่เชื่อ p_uid จาก client) ตายสนิท เหลือแต่เส้น gateway ที่ปลอม uid ไม่ได้
+   (`drop_points_list` เป็นข้อมูลสาธารณะ คง anon ไว้ได้)
+
 ## งานอัตโนมัติที่ต้องตั้งเพิ่ม (n8n หรือ pg_cron + LINE Messaging API)
 
 1. **T-14 ping** — ทุกเช้า: `select * from upcoming_customer_events(14)` ที่ `pinged_at is null`

@@ -125,6 +125,7 @@
 <script src="analytics.js?v=38"></script>
 <script src="nav.js?v=1"></script>
 <script src="liffAuth.js"></script>
+<script src="me-api.js"></script>
 <script src="data.js"></script>
 <script>
 'use strict';
@@ -144,6 +145,16 @@ const CUST = (window.MOCK && MOCK.CUSTOMER) || {};
 
 // ---------- state ----------
 let sb = null, UID = null;
+// เรียกผ่าน gateway me-rpc ก่อน (verify LINE idToken ฝั่ง server — ปลอม uid ไม่ได้)
+// gateway ยังไม่ allowlist ฟังก์ชัน → fallback ยิงตรงตาม convention เดิม (ขั้นตอนปิดถาวรดู db/README)
+async function gwRpc(name, args){
+  if (window.meRpc && UID) {
+    const r = await window.meRpc(name, args);
+    if (!r.error) return r;
+  }
+  return client().rpc(name, args);
+}
+
 let S = { day:null, box:[], status:'draft', swaps_used:0 };  // box = [{code,name,brand,tier,season,bg}]
 let RANKED = [];            // ผลจัดอันดับจาก MOCK (ใช้เลือก top 3 + ตัวสำรองตอนสลับ)
 let swapOpenFor = null;     // code ของการ์ดที่กำลังกางตัวเลือกสลับ
@@ -155,7 +166,7 @@ function ym(){ return new Date().toISOString().slice(0,7); }   // UTC — ให
 async function rpcTry(name, args){
   if(!UID) return null;                            // โหมดตัวอย่าง — ไม่ยิง RPC
   try{
-    const { data, error } = await client().rpc(name, args);
+    const { data, error } = await gwRpc(name, args);
     if(error) throw error;
     return data;
   }catch(e){
