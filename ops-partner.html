@@ -257,6 +257,8 @@
   if(window.opsRpc) sb.rpc=window.opsRpc;
   if(window.opsLogin) window.opsLogin().catch(()=>{});
   const $=id=>document.getElementById(id);
+  const esc = s => (s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+  const safeHref = u => { u=(u==null?'':String(u)); return (/^https?:\/\//i.test(u)||u.charAt(0)==='/'||u.charAt(0)==='#') ? u : '#'; };
   let code=null, baseSeason='';
   const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2200);};
   const num=id=>{const v=$(id).value;return v?Number(v):undefined;};
@@ -382,7 +384,7 @@
         added.push(url);
         const local=URL.createObjectURL(file);
         const div=document.createElement('div'); div.className='th';
-        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${(file.name||'').slice(0,18)}</div>`;
+        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${esc((file.name||'').slice(0,18))}</div>`;
         thumbs.appendChild(div);
       }catch(e){
         $('upnote').style.display='block';
@@ -431,8 +433,8 @@
     const clip='<svg viewBox="0 0 24 24"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.6 1.6 0 0 1-2.3-2.3l7.8-7.8"/></svg>';
     list(targetId).forEach(url=>{
       let name=url; try{ name=decodeURIComponent(url.split('/').pop().split('?')[0]).replace(/^docs\//,'').replace(/^\d+-\d+-/,''); }catch(e){}
-      const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener';
-      a.innerHTML=clip+'<span>'+(name||url).slice(0,40)+'</span>';
+      const a=document.createElement('a'); a.href=safeHref(url); a.target='_blank'; a.rel='noopener';
+      a.innerHTML=clip+'<span>'+esc((name||url).slice(0,40))+'</span>';
       box.appendChild(a);
     });
   }

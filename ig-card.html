@@ -145,6 +145,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   const $ = id => document.getElementById(id);
+  const esc = s => (s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+  const safeImg = u => { u=(u==null?'':String(u)); return (/^https?:\/\//i.test(u)||/^data:image\/(png|jpe?g|gif|webp|avif|svg\+xml);/i.test(u)) ? u : ''; };
   const v = id => $(id).value;
   const set = (id,val)=>{ const e=$(id); if(e!=null && val!=null) e.value=val; };
   const baht = n => '฿' + Number(n||0).toLocaleString('th-TH');
@@ -160,21 +162,21 @@
     const price=v('f-price'), d1=v('f-d1'), d3=v('f-d3'), d5=v('f-d5'), best=$('f-best').checked;
 
     const photoEl = photo
-      ? `<img class="c-photo" crossorigin="anonymous" src="${photo}" alt="">`
-      : `<div class="c-photo ph" style="background:${hex||'#C9A86A'}">${(v('f-meta').split('·').pop()||'LLOOP').trim()}</div>`;
+      ? `<img class="c-photo" crossorigin="anonymous" src="${esc(safeImg(photo))}" alt="">`
+      : `<div class="c-photo ph" style="background:${hex||'#C9A86A'}">${esc((v('f-meta').split('·').pop()||'LLOOP').trim())}</div>`;
 
     const specs = [];
-    if (colorName) specs.push(`<div class="c-spec"><span class="c-swatch" style="background:${hex}"></span>${colorName}</div>`);
+    if (colorName) specs.push(`<div class="c-spec"><span class="c-swatch" style="background:${hex}"></span>${esc(colorName)}</div>`);
     const sz = [bust&&`อก ${bust}`, waist&&`เอว ${waist}`, len&&`ยาว ${len} ซม.`].filter(Boolean).join(' · ');
-    if (sz) specs.push(`<div class="c-spec">${sz}</div>`);
+    if (sz) specs.push(`<div class="c-spec">${esc(sz)}</div>`);
 
     $('card').innerHTML = `
       ${photoEl}
       <div class="c-body">
         <div class="c-top"><div class="c-mark">LLOOP</div><div class="c-ring"></div></div>
-        <div class="c-name">${name}</div>
-        ${meta?`<div class="c-meta">${meta}</div>`:''}
-        ${forr?`<div class="c-for">เหมาะกับ ${forr}</div>`:''}
+        <div class="c-name">${esc(name)}</div>
+        ${meta?`<div class="c-meta">${esc(meta)}</div>`:''}
+        ${forr?`<div class="c-for">เหมาะกับ ${esc(forr)}</div>`:''}
         ${specs.length?`<div class="c-specs">${specs.join('')}</div>`:''}
         <div class="c-priceline"><span class="c-price">${baht(price)}</span><span class="c-per">/วัน เริ่มต้น</span></div>
         <div class="c-rates">
