@@ -199,7 +199,7 @@
     if(!r.ok||!out.ok){const e=new Error(out.error||('kyc '+r.status));e.code=out.error||('http_'+r.status);throw e;}
     return out;
   }
-  const ROLE_TH={admin:'แอดมิน',stylist:'สไตลิสต์',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง',sales:'ขาย',owner:'เจ้าของ'};
+  const ROLE_TH={owner:'เจ้าของ',manager:'ผู้จัดการ',hr_admin:'หัวหน้าบุคคล',care:'ดูแลชุด',stock:'สต๊อก',marketing:'การตลาด',accounting:'บัญชี',stylist:'สไตลิสต์',sales:'ขาย',admin:'แอดมิน',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง'};
   const ST_TH={applicant:'ผู้สมัคร',interview:'สัมภาษณ์',offer:'เสนองาน',hired:'จ้างแล้ว',probation:'ทดลองงาน',active:'ทำงาน',suspended:'พักงาน',resigned:'ลาออก',rejected:'ไม่ผ่าน'};
 
   // ---------- โหมดยืนยัน UID ----------

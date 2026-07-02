@@ -193,6 +193,8 @@ function setLang(l) {
   closeDetail(); closeProfile();
   applyStatic();
   renderEvent(); renderCatnav(); renderChips(); renderDiscover(); renderFilters(); renderGrid();
+  // ส่วนที่เคยค้างภาษาเดิมตอนสลับ TH/EN → re-render ให้ครบ
+  renderDatebar(); renderPersonalRail(); if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
   // เมนู drawer เปิดค้างอยู่ → rebuild ให้ label เปลี่ยนภาษาทันที (ปุ่ม TH/EN อยู่ในเมนูนี้)
   if ($('#menuOverlay')?.classList.contains('open')) openMenu();
   updateCurNote();
@@ -665,7 +667,7 @@ function gridCardHtml(g) {
           <div class="try">${lang ==='th'?'ลองดูเลย':'View'} ›</div>
           <div class="sizes">
             ${fit!= null?`<span>${t('fitGood')} ${fit}%</span>`:''}
-            <span>${occName(g.occasion_tags[0])}</span>
+            <span>${g.occasion_tags[0] ? occName(g.occasion_tags[0]) : ''}</span>
             <span>${money(staffPrice(g.price))}</span>
           </div>
         </div>
@@ -883,6 +885,7 @@ function setColorFromVenue(h) { fColors = [classifyHex(h)]; renderFilters(); ren
 function openDetail(id) {
   const g = GARMENTS.find(x => x.id === id);
   window._detailId = id;   // เก็บไว้ให้ setCur re-render ราคาเมื่อสลับสกุลเงิน
+  window._detailSeq = (window._detailSeq || 0) + 1;  // token กัน response ช้าของชุดก่อนหน้าเขียนทับชีตชุดปัจจุบัน
   _backupPicks = [];   // ล้างชุดสำรองที่เลือกไว้จากชุดก่อนหน้า
   fbTrack('ViewContent', { content_ids:[g.code || g.id], content_name: g.name, content_type:'product', value: g.price, currency:'THB' });
   window.track?.('view_item', g.code || g.id, { name: g.name, price: g.price, occasion: (g.occasion_tags||[])[0] || null });
@@ -1032,8 +1035,10 @@ function galTick(){ const g=document.getElementById('dgal'), c=document.getEleme
 
 // เรตติ้งเฉลี่ยของชุด — ดึงแยกแล้วฉีดเข้าหน้ารายละเอียด (ไม่เรียกต่อการ์ดเพื่อ performance)
 async function loadRating(garmentId) {
+  const _seq = window._detailSeq;
   let r = null;
   try { r = await window.API.garmentRating(garmentId); } catch (e) { /**/ }
+  if (_seq !== window._detailSeq) return;  // สลับชุดไปแล้ว อย่าเขียนทับชีตชุดใหม่
   const el = $('#ratingline'); if (!el) return;
   if (!r || !r.count) { el.innerHTML =''; return; }
   const avg = (Math.round(r.avg * 10) / 10).toFixed(1);
@@ -1043,8 +1048,10 @@ async function loadRating(garmentId) {
 
 // สรุปฟิต/ไซส์ จาก "ลุคจริง" ในชุมชน (คนเคยใส่บอกสูง/ไซส์/ความพอดี) — ลดลังเล ลดคืนผิดไซส์
 async function loadFit(code) {
+  const _seq = window._detailSeq;
   const el = $('#fitsummary'); if (!el) return;
   let f = null; try { f = await window.API.garmentFit?.(code); } catch (e) { /**/ }
+  if (_seq !== window._detailSeq) return;  // สลับชุดไปแล้ว อย่าเขียนทับชีตชุดใหม่
   if (!f || !f.n) { el.innerHTML = ''; return; }
   const th = lang === 'th';
   const fit = f.fit || {};
@@ -1068,10 +1075,12 @@ async function loadFit(code) {
 
 // Social proof: "มีคนเช่าไปแล้ว X ครั้ง · กำลังมาแรง · กำลังดูอยู่ N คน" — urgency + ความน่าเชื่อ
 async function loadSocialProof(code) {
+  const _seq = window._detailSeq;
   const el = $('#socialproof'); if (!el) return;
   const th = lang === 'th';
   let s = null, live = 0;
   try { [s, live] = await Promise.all([window.API.socialProof?.(code), window.API.liveViewers?.(code)]); } catch (e) { /**/ }
+  if (_seq !== window._detailSeq) return;  // สลับชุดไปแล้ว อย่าเขียนทับชีตชุดใหม่
   const chips = [];
   if (live >= 2) chips.push(`<span class="sp-chip live"><i class="lvdot"></i>${th ? `มีคนกำลังดู ${live} คน` : `${live} viewing now`}</span>`);
   if (s) {
@@ -1083,8 +1092,10 @@ async function loadSocialProof(code) {
 }
 // "ใส่คู่กับชุดนี้บ่อย" — collaborative recommendations (เช่า/ดูด้วยกันบ่อย)
 async function loadRecommendWith(code) {
+  const _seq = window._detailSeq;
   const el = $('#recoWith'); if (!el) return;
   let recs = []; try { recs = await window.API.recommendWith?.(code, 4) || []; } catch (e) { /**/ }
+  if (_seq !== window._detailSeq) return;  // สลับชุดไปแล้ว อย่าเขียนทับชีตชุดใหม่
   const items = recs.map(r => GARMENTS.find(g => (g.code || '') === r.code)).filter(Boolean);
   if (!items.length) { el.innerHTML = ''; return; }
   const th = lang === 'th';
@@ -1122,8 +1133,10 @@ async function renderPersonalRail() {
 
 // ปฏิทินว่าง/ไม่ว่างของชุด (2 เดือน) — แตะวันว่างเพื่อเลือก
 async function renderAvailCalendar(garmentId) {
+  const _seq = window._detailSeq;
   const box = $('#availcal'); if (!box) return;
   let ranges = []; try { ranges = await window.API.bookedRanges?.(garmentId) || []; } catch (e) { /**/ }
+  if (_seq !== window._detailSeq) return;  // สลับชุดไปแล้ว อย่าเขียนทับปฏิทินชีตชุดใหม่
   const ymd = dt => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
   const booked = new Set();
   ranges.forEach(r => { let d = new Date(r.from_date + 'T00:00:00'); const end = new Date(r.to_date + 'T00:00:00');
@@ -1528,7 +1541,13 @@ function pickBackup(code) {
   }
   document.querySelectorAll('#backupPicker .bp-chip').forEach(b => b.classList.toggle('on', _backupPicks.includes(b.dataset.code)));
 }
+let _reserving = false;
 async function reserve(id, useCredit) {
+  // กันกดซ้ำ/กดรัว — เส้นจองนี้สร้าง hold + หักเครดิตจริง (Dr2050/Cr4010) กดซ้ำ = จอง/จ่ายซ้ำ
+  if (_reserving) return;
+  const _bookBtn = $('#bookBtn');
+  _reserving = true; if (_bookBtn) _bookBtn.disabled = true;
+  try {
   const g = GARMENTS.find(x => x.id === id);
   const date = $('#useDate') && $('#useDate').value;
   if (!date) {
@@ -1551,7 +1570,18 @@ async function reserve(id, useCredit) {
   // กันจองชน — เช็กว่างตลอดช่วงเช่า (ไม่ใช่แค่วันแรก) ให้ตรงกับที่ server จองจริง
   let freeRange = true;
   try { freeRange = await window.API.availableRange(id, date, toDate); } catch (e) { console.warn(e); }
-  if (freeRange === false) { checkAvail(id); return; }
+  // ช่วงเช่า (default 3 วัน) มีบางวันไม่ว่าง แม้วันแรกจะว่าง — บอกให้ชัด อย่าเรียก checkAvail(id) ที่เช็กวันแรกซ้ำแล้วโชว์ 'ว่าง จองได้เลย' วนลูป dead-end
+  if (freeRange === false) {
+    const msg = $('#availMsg');
+    if (msg) {
+      msg.className = 'availmsg busy';
+      msg.textContent = lang ==='th'
+        ? `ช่วงเช่า ${fmtDate(date)}–${fmtDate(toDate)} มีบางวันไม่ว่าง ลองสั้นลงหรือเลื่อนวันนะคะ`
+        : `Some days in ${fmtDate(date)}–${fmtDate(toDate)} are booked — try a shorter or later range`;
+    }
+    toast(lang ==='th'?'ช่วงที่เลือกมีบางวันไม่ว่างค่ะ':'Some days in the selected range are unavailable');
+    return;
+  }
   const wantBackup = !!($('#wantBackup') && $('#wantBackup').checked);
   // ชุดสำรอง = ลูกค้าเลือกเอง (ส่งเฉพาะโค้ดที่เลือก) · ไม่เลือก = ไม่มีสำรอง
   if (wantBackup && !_backupPicks.length) {
@@ -1594,10 +1624,17 @@ async function reserve(id, useCredit) {
   try { pay = await window.API.payInfo(); } catch (e) { /**/ }
   closeDetail();
   showPayConfirm({ g, date, total, pay, backups });
+  } finally { _reserving = false; if (_bookBtn) _bookBtn.disabled = false; }
 }
 
 // จองด้วยสิทธิ์วันเกิด (ฟรีถึงเพดาน · เกินจ่ายส่วนต่าง · มัดจำตามปกติ)
+let _bdayBooking = false;
 async function bdayBook(id) {
+  // กันกดซ้ำ — voucher ใช้ครั้งเดียว กดรัวก่อน BDAY ถูกเคลียร์ = ยิง birthdayReserve ซ้ำ
+  if (_bdayBooking) return;
+  const _bdayBtn = document.querySelector('.bdaybtn');
+  _bdayBooking = true; if (_bdayBtn) _bdayBtn.disabled = true;
+  try {
   const g = GARMENTS.find(x => x.id === id);
   const date = $('#useDate') && $('#useDate').value;
   if (!date) {
@@ -1621,6 +1658,7 @@ async function bdayBook(id) {
   toast(lang === 'th'
     ? (Number(res.pay) > 0 ? `จองวันเกิดสำเร็จ จ่ายเพิ่ม ฿${res.pay} · สุขสันต์วันเกิดค่ะ` : 'จองวันเกิดสำเร็จ เช่าฟรี! สุขสันต์วันเกิดค่ะ')
     : (Number(res.pay) > 0 ? `Birthday booking done · pay ฿${res.pay}` : 'Birthday booking done · free! Happy birthday'));
+  } finally { _bdayBooking = false; if (_bdayBtn) _bdayBtn.disabled = false; }
 }
 
 // ===== ยืนยันตัวตน (KYC) =====
@@ -2585,13 +2623,18 @@ async function confirmStylistBooking() {
   loadPcBookZone();
 }
 function closeStylistPicker() { const el = document.getElementById('stpick'); if (el) el.remove(); }
+const _cancellingAppts = new Set();  // กันกดยกเลิกนัดซ้ำ → กันยิง cancel ซ้ำ + toast สับสน
 async function cancelMyAppointment(id) {
   const th = lang === 'th';
+  if (_cancellingAppts.has(id)) return;  // in-flight lock กันกดรัว/เน็ตช้า
   if (!confirm(th ? 'ยกเลิกนัดนี้? คุณจองเวลาใหม่กับสไตลิสต์คนไหนก็ได้' : 'Cancel this booking? You can rebook with any stylist.')) return;
+  _cancellingAppts.add(id);
+  try {
   const r = await window.API.pcCancelAppointment(id);
   if (!r.ok) { toast(th ? 'ยกเลิกไม่สำเร็จ' : 'Could not cancel'); return; }
   toast(th ? 'ยกเลิกแล้ว — เลือกเวลาใหม่ได้เลย' : 'Cancelled — pick a new time');
   loadPcBookZone();
+  } finally { _cancellingAppts.delete(id); }
 }
 
 // ===== ครอบครัว & กลุ่ม — ไปหน้าจัดการกลุ่ม + เช่าเข้าตีม =====
@@ -2956,6 +2999,7 @@ const COURIER_TRACK = {
   kex:'https://th.kerryexpress.com/th/track/?track=',
   jt:'https://www.jtexpress.co.th/index/query/gzquery.html?bills=',
   thaipost:'https://track.thailandpost.co.th/?trackNumber=',
+  ems:'https://track.thailandpost.co.th/?trackNumber=',
   ninja:'https://www.ninjavan.co/th-th/tracking?id=',
 };
 function trackUrl(courier, no) {
@@ -3193,8 +3237,12 @@ async function editOrderOccasion(rentalId) {
 }
 // ===== ยกเลิก / เลื่อน / ต่อเวลา (ลูกค้าทำเอง — ผ่าน gateway ที่เช็ค ownership) =====
 function _isYmd(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s); }
+const _cancellingRentals = new Set();  // กันกดยกเลิกซ้ำต่อ rental → กันคืนเงินซ้ำ
 async function orderCancel(rentalId) {
   if (!rentalId) return;
+  if (_cancellingRentals.has(rentalId)) return;  // in-flight lock กันกดรัว/เน็ตช้า
+  _cancellingRentals.add(rentalId);
+  try {
   let msg = lang ==='th'?'ยืนยันยกเลิกการเช่านี้ใช่ไหมคะ':'Cancel this rental?';
   try {
     const q = await window.API.quoteCancellation(rentalId, true);
@@ -3211,6 +3259,7 @@ async function orderCancel(rentalId) {
   if (!res || !res.ok) { toast(lang ==='th'?'ยกเลิกไม่สำเร็จ ลองใหม่อีกครั้งนะคะ':'Cancel failed'); return; }
   toast(lang ==='th'?'ยกเลิกเรียบร้อย คืนเงินให้ตามนโยบายแล้วค่ะ':'Cancelled — refund on its way');
   openOrders();
+  } finally { _cancellingRentals.delete(rentalId); }
 }
 // ===== ต่อเวลา — เลือกวันคืนใหม่จากปฏิทินว่าง (แทนการพิมพ์วันเอง) =====
 let _extend = null;  // { rentalId, name, dueAt, booked:Set, pick, charge }
@@ -3285,7 +3334,11 @@ async function pickExtendDate(ds) {
       _extend.pick = null; _renderExtend(); return;
     }
     if (q && !q.error) { _extend.charge = q.extra_charge || 0; _renderExtend(); }
-  } catch (e) { _extend.charge = 0; _renderExtend(); }
+  } catch (e) {
+    // quote ล้ม (เน็ตหลุด/timeout) — อย่าตั้ง charge=0 ที่สื่อว่า 'ฟรี' แล้วปล่อยให้กดยืนยันโดยไม่เห็นยอดจริง
+    _extend.charge = null; _extend.pick = null; _renderExtend();
+    toast(lang ==='th'?'คำนวณราคาไม่สำเร็จ ลองเลือกวันอีกครั้งนะคะ':'Could not calculate price — try again');
+  }
 }
 function closeExtend() { $('#reschedOverlay').classList.remove('open'); document.body.style.overflow =''; _extend = null; const s = $('#reschedSheet'); if (s) s.innerHTML = ''; }
 async function confirmExtend() {
@@ -3800,7 +3853,8 @@ async function boot() {
       setTimeout(() => toast(lang === 'th' ? `ของขวัญวันเกิด: เช่าฟรี 1 ชุด (ถึง ฿${window.BDAY.voucher.value_cap}) เลือกชุดได้เลย` : `Birthday gift: 1 free rental — pick a dress`), 1200);
   } catch (e) { window.BDAY = null; }
   // เดโม: ยังไม่ได้ล็อกอินผ่าน LINE (เปิดบน localhost) ใส่ตัวอย่างให้หน้าผลกระทบดูมีชีวิต
-  if (!CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
+  // เฉพาะตอนยังไม่ล็อกอินจริงเท่านั้น (dev/mock) — ห้ามยัดตัวเลขปลอมให้ลูกค้าจริงที่ my_impact คืน null
+  if (!loggedIn && !CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   // เครดิตใกล้หมดอายุ: โชว์ banner กระตุ้นให้กลับมาใช้
   // กันเหนียว: รีเซ็ตซ่อน+ล้างข้อความก่อนเสมอ แล้วโชว์เฉพาะเมื่อมีเครดิตจริง + ข้อความไม่ว่าง
   const _eb = $('#expiryBanner'), _em = $('#expiryMsg');
@@ -3880,6 +3934,8 @@ function routeDeepLink() {
       const wd = qs.get('date') || (ls && ls.get('date'));
       if (wd && /^\d{4}-\d{2}-\d{2}$/.test(wd)) gUseDate = wd;
       if (g) { setTimeout(() => openDetail(g.id), 80); return; }
+      // ลิงก์มาถึงชุดที่ไม่ ready/ถูกจองเต็ม/ถูกลบ (ไม่อยู่ใน GARMENTS) → แจ้งลูกค้าแทนตกหน้าแรกเงียบ ๆ
+      setTimeout(() => toast(lang === 'th' ? 'ชุดนี้ไม่ว่างตอนนี้ — ลองดูชุดคล้ายกันนะคะ' : 'This dress is unavailable right now — try similar ones'), 400);
     }
     // โค้ดชวนเพื่อนจากลิงก์ (?ref=CODE) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿50 ทั้งคู่ เมื่อเช่าครั้งแรก)
     if (ref) { try { localStorage.setItem('lloop_ref', ref.trim()); } catch (_e) {} applyPendingReferral(); }

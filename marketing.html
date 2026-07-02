@@ -375,7 +375,8 @@
     $('gGrid').innerHTML='<div class="grid-g">'+G_LIST.map((g,i)=>
       '<div class="gcard"><img class="ph" src="'+esc(g.photo||'')+'" alt=""><div class="gi">'+
       '<div class="gn">'+esc(g.name||'')+'</div><div class="gc">'+esc(g.code||'')+(g.color_name?' · '+esc(g.color_name):'')+'</div>'+
-      '<button class="btn clay sm" style="margin-top:auto" onclick="genGarmentPost('+i+')">ให้ AI เขียนโพสต์</button>'+
+      '<select id="gplat'+i+'" style="margin-top:auto"><option value="tiktok">TikTok</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option></select>'+
+      '<button class="btn clay sm" onclick="genGarmentPost('+i+')">ให้ AI เขียนโพสต์</button>'+
       '<div id="gout'+i+'"></div></div></div>').join('')+'</div>';
   }
   let GARMENT_RESULTS={};

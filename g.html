@@ -130,8 +130,19 @@ let gDur = 3, lastQuote = null, booked = false;
 function readCode(){
   const u = new URL(location.href);
   let c = u.searchParams.get('c') || u.searchParams.get('code') || '';
+  // เผื่อกลับจาก LINE login ผ่าน LIFF deep-link — รหัสถูกห่อไว้ใน liff.state (แบบ pay.html)
+  if (!c) {
+    const st = u.searchParams.get('liff.state');
+    if (st) { const inner = new URLSearchParams(st.replace(/^\?/,'')); c = inner.get('c') || inner.get('code') || ''; }
+  }
   if (!c) { const m = location.pathname.match(/\/g\/([^/?#]+)/); if (m) c = decodeURIComponent(m[1]); }
-  return (c || '').trim().toUpperCase();
+  c = (c || '').trim().toUpperCase();
+  // จำรหัสไว้ เผื่อ redirect กลับจาก LINE login แล้ว ?c หายไป (redirectUri เป็น baseUrl ตัด query)
+  try {
+    if (c) sessionStorage.setItem('gCode', c);
+    else c = (sessionStorage.getItem('gCode') || '').trim().toUpperCase();
+  } catch (_e) {}
+  return c;
 }
 
 // ช่วงที่ถูกจองทับกับ [from,to] ไหม (UX hint — ตัวจริง book_cart เป็นคนตัดสิน)
@@ -226,6 +237,11 @@ async function onPick(){
   }
   msg.className = 'availmsg free';
   msg.textContent = NAV.t('ว่างช่วงวันนี้ — จองได้เลย','Available on these dates — ready to book');
+  // ยังไม่ล็อกอิน: ไม่เรียก quote (meRpc จะ reauth เด้งออกไป LINE login กลางคัน ทั้งที่แค่ดูราคา) — ชวนล็อกอินก่อน
+  if (!(CUSTOMER && CUSTOMER.id)){
+    sum.innerHTML = `<div class="qdates">${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อดูสรุปยอดและจองค่ะ','Sign in with LINE to see the summary and book.')}</div>`;
+    return;
+  }
   let q = null;
   try { q = await window.API.quote(G.code, CUSTOMER, from, to); } catch (e) {}
   lastQuote = q;

@@ -2,7 +2,7 @@
 // ออกแบบเป็น "drop-in" ของ supabase rpc: คืน { data, error } เหมือนกัน
 // วิธี convert หน้า ops (เกือบ find-replace):
 //   1) โหลด: <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-//            <script src="../liff/config.js"></script><script src="ops-api.js"></script>
+//            <script src="config.js"></script><script src="ops-api.js"></script>
 //   2) หลังสร้าง sb ใส่:  sb.rpc = window.opsRpc;   // คำสั่ง sb.rpc(...) เดิมจะวิ่งผ่าน gateway เอง
 //   3) เรียก await window.opsLogin() ตอนเปิดหน้า (ให้ staff login ก่อน)
 (function () {

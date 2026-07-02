@@ -26,7 +26,7 @@
   .btn.sage{background:var(--sage)}.btn.clay{background:var(--clay)}.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
   .btn:disabled{opacity:.55}
   label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-  input{width:100%;font-family:var(--sans);font-size:16px;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff;text-transform:uppercase}
+  input{width:100%;font-family:var(--sans);font-size:16px;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}
   .big{text-align:center;padding:26px 14px;border:2px dashed var(--line);border-radius:14px;color:var(--muted);font-size:15px;line-height:1.6}
   .big.scan{border-color:var(--sage);color:var(--sage);background:#F2F7F1}
   .res{margin-top:14px}
@@ -78,7 +78,7 @@
 
     <!-- โหมดผูก tag -->
     <div class="card hide" id="pairCard">
-      <div class="field"><label>รหัสชุดที่จะผูก</label><input id="pairCode" placeholder="เช่น G1" autocapitalize="characters"></div>
+      <div class="field"><label>รหัสชุดที่จะผูก</label><input id="pairCode" placeholder="เช่น g1" autocapitalize="none"></div>
       <button class="btn clay" onclick="startScan('pair')" id="pairBtn">แตะ tag เปล่าเพื่อผูก + เขียนรหัส</button>
       <div class="res" id="pairRes"></div>
       <div class="muted">ผูกแล้ว: tag จะชี้กลับมาที่ระบบด้วยรหัสนี้ · แตะซ้ำได้ทุกเมื่อเพื่อเช็คชุด</div>
@@ -102,7 +102,7 @@
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
-  const CUSTOMER_SITE='https://lloop.app';          // หน้าลูกค้า: แตะ tag → เปิดหน้าชุด ?g=รหัส (รูป/สไตล์/เช่าชุดนี้)
+  const CUSTOMER_SITE='https://wearlloop-dotcom.github.io'; // หน้าลูกค้า: แตะ tag → เปิดหน้าชุด ?garment=รหัส (รูป/สไตล์/เช่าชุดนี้) · ใช้ github.io ที่ออนไลน์จริง (lloop.app ยังไม่ผูก DNS)
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // วิ่งผ่าน gateway (LINE login + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});
@@ -130,19 +130,24 @@
   }
   async function writeUrl(code){
     // เขียน URL หน้าลูกค้าลง tag → ลูกค้าแตะเฉย ๆ มือถือเด้งหน้าชุด (ไม่ใช่หลังบ้าน)
-    try{ const w=new NDEFReader(); await w.write({records:[{recordType:'url',data:CUSTOMER_SITE+'/?g='+encodeURIComponent(code)}]}); }catch(e){/* เขียนไม่ได้ไม่เป็นไร ผูกใน DB แล้ว */}
+    try{ const w=new NDEFReader(); await w.write({records:[{recordType:'url',data:CUSTOMER_SITE+'/?garment='+encodeURIComponent(code)}]}); }catch(e){/* เขียนไม่ได้ไม่เป็นไร ผูกใน DB แล้ว */}
   }
 
   async function startScan(mode){
     if(!NFC_OK){ toast('อุปกรณ์นี้แตะ NFC ในเว็บไม่ได้',true); return; }
     const zone=$('checkZone');
+    const pb=$('pairBtn');
     if(mode==='check'){ zone.classList.add('scan'); zone.textContent='ถือ tag ไว้ที่ด้านหลังมือถือ...'; }
+    else if(pb){ pb.disabled=true; }        // กันกดผูกซ้ำระหว่างรอแตะ/บันทึก
     try{
       const uid=await readUid();
       if(mode==='check') await doCheck(uid);
       else await doPair(uid);
     }catch(e){ toast(e.message||'ผิดพลาด',true); }
-    finally{ if(mode==='check'){ zone.classList.remove('scan'); zone.textContent='แตะปุ่มนี้ แล้วแตะ tag กับด้านหลังมือถือ'; } }
+    finally{
+      if(mode==='check'){ zone.classList.remove('scan'); zone.textContent='แตะปุ่มนี้ แล้วแตะ tag กับด้านหลังมือถือ'; }
+      else if(pb){ pb.disabled=false; }
+    }
   }
 
   // เช็คชุดจาก UID
@@ -169,24 +174,27 @@
         '<br>วิธีดูแล: '+esc(g.wash||'-')+
         '<br>เห็นล่าสุด: '+dt(g.last_seen_at)+(g.last_seen_action?' ('+esc(g.last_seen_action)+')':'')+'</div>'+
       '<div class="acts">'+
-        '<button class="btn sage" onclick="logScan(\''+esc(uid)+'\',\'checkin\')">เช็คอิน (กลับร้าน)</button>'+
-        '<button class="btn ghost" onclick="logScan(\''+esc(uid)+'\',\'checkout\')">เช็คเอาท์ (ออก)</button>'+
+        '<button class="btn sage" onclick="logScan(\''+esc(uid)+'\',\'checkin\',this)">เช็คอิน (กลับร้าน)</button>'+
+        '<button class="btn ghost" onclick="logScan(\''+esc(uid)+'\',\'checkout\',this)">เช็คเอาท์ (ออก)</button>'+
       '</div>'+
       '<a href="/garment.html?code='+esc(g.code)+'" style="display:block;text-align:center;margin-top:10px;font-size:14px;color:var(--muted)">ดูไทม์ไลน์ชุด ></a>'+
     '</div>';
   }
 
-  async function logScan(uid,action){
-    const {data,error}=await sb.rpc('tag_scan',{p_tag_uid:uid,p_action:action,p_source:'nfc',p_location:null});
-    if(error||!data){ toast('บันทึกไม่สำเร็จ',true); return; }
-    toast((action==='checkin'?'เช็คอิน':'เช็คเอาท์')+' '+(data.code||'')+' แล้ว');
-    // refresh last_seen
-    doCheck(uid);
+  async function logScan(uid,action,btn){
+    if(btn) btn.disabled=true;               // กันแตะรัวยิง tag_scan ซ้ำ
+    try{
+      const {data,error}=await sb.rpc('tag_scan',{p_tag_uid:uid,p_action:action,p_source:'nfc',p_location:null});
+      if(error||!data){ toast('บันทึกไม่สำเร็จ',true); return; }
+      toast((action==='checkin'?'เช็คอิน':'เช็คเอาท์')+' '+(data.code||'')+' แล้ว');
+      // refresh last_seen
+      doCheck(uid);
+    }finally{ if(btn) btn.disabled=false; }
   }
 
   // ผูก tag ใหม่
   async function doPair(uid){
-    const code=$('pairCode').value.trim().toUpperCase();
+    const code=$('pairCode').value.trim().toLowerCase();
     if(!code){ toast('ใส่รหัสชุดก่อน',true); return; }
     const {data,error}=await sb.rpc('tag_register',{p_tag_uid:uid,p_code:code,p_type:'nfc'});
     if(error){ toast('เชื่อมระบบไม่ได้',true); return; }

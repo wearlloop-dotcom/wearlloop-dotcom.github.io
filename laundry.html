@@ -117,7 +117,11 @@
   async function checkin(){
     const code=$('code').value.trim().toLowerCase(); if(!code){ toast('ใส่โค้ดก่อนค่ะ'); return; }
     const { data, error } = await sb.rpc('care_checkin',{ p_code: code });
-    if(error||!data||data.error){ $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">ไม่พบชุด ${code}</div>`; return; }
+    if(error){
+      if(error.message==='redirecting_to_login') return;   // opsLogin กำลังพาไป LINE login
+      $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">${error.message||('ไม่พบชุด '+code)}</div>`; return;
+    }
+    if(!data||data.error){ $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">ไม่พบชุด ${code}</div>`; return; }
     current=code; renderPanel(data); loadQueue();
   }
   // แตะ NFC ที่ป้ายชุด → หาโค้ดจากแท็ก → รับเข้าอัตโนมัติ (Android Chrome รองรับ Web NFC)

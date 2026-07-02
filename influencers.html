@@ -457,7 +457,7 @@
       <div id="d_msg" class="notice"></div>
       <div class="mr">
         <button class="btn ghost" onclick="closeOv()">ยกเลิก</button>
-        <button class="btn clay" onclick="saveDeal()">บันทึก</button>
+        <button class="btn clay" onclick="saveDeal(this)">บันทึก</button>
       </div>`);
     searchGarments('');
   }
@@ -497,7 +497,7 @@
     updateGCount();
   }
   function updateGCount(){ const c=$('g_count'); if(c)c.textContent='เลือกแล้ว '+pickedGarments.length+' ชุด'; }
-  async function saveDeal(){
+  async function saveDeal(btn){
     const v=id=>($(id)||{}).value;
     const num=x=>x===''||x==null?null:Number(x);
     if(!v('d_inf')){ $('d_msg').textContent='กรุณาเลือกอินฟลูเอนเซอร์'; $('d_msg').className='notice err'; return; }
@@ -510,9 +510,12 @@
     };
     if(v('d_id'))p.id=v('d_id');
     $('d_msg').textContent='กำลังบันทึก…'; $('d_msg').className='notice';
-    const {error}=await sb.rpc('collab_upsert',{p});
-    if(error){ $('d_msg').textContent='บันทึกไม่สำเร็จ: '+error.message; $('d_msg').className='notice err'; return; }
-    closeOv(); await loadDeals(); renderDealFilter(); renderDealList();
+    if(btn)btn.disabled=true;  // กันกดซ้ำระหว่างบันทึก (สร้างดีลใหม่ไม่มี id → กันซ้ำ)
+    try{
+      const {error}=await sb.rpc('collab_upsert',{p});
+      if(error){ $('d_msg').textContent='บันทึกไม่สำเร็จ: '+error.message; $('d_msg').className='notice err'; return; }
+      closeOv(); await loadDeals(); renderDealFilter(); renderDealList();
+    }finally{ if(btn)btn.disabled=false; }
   }
 
   /* ---------- loaders ---------- */

@@ -562,7 +562,7 @@
     const { data, error } = res || {};
     if(error || !data || data.is_partner!==true){
       const m=(error&&error.message)||'';
-      const needLogin = /LINE|เข้าสู่ระบบ|idToken|unauthorized|เซสชัน/i.test(m);
+      const needLogin = /LINE|เข้าสู่ระบบ|idToken|unauthorized|เซสชัน|redirecting_to_login|login/i.test(m);
       $('gate').style.display='block'; $('main').style.display='none';
       // ----- diagnostic (เปิดด้วย ?diag) — โชว์สาเหตุจริงบนจอ -----
       if(/[?&]diag/i.test(location.search)){
@@ -697,16 +697,17 @@
     try{
       const { data } = await window.meRpc('partner_portal_clients', {});
       const box=$('myclients'); const arr=Array.isArray(data)?data:[];
+      const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
       if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีลูกค้าที่บันทึก — ค้นหาด้วยรหัสด้านล่างเพื่อเริ่ม</div>'; return; }
       box.innerHTML='';
       arr.forEach(c=>{
         const row=document.createElement('div'); row.className='clientrow';
         const nm=c.name||'ลูกค้า';
         const av=c.picture
-          ? '<div class="av2" style="background-image:url(&quot;'+c.picture+'&quot;)"></div>'
-          : '<div class="av2">'+(nm.trim().charAt(0).toUpperCase()||'?')+'</div>';
-        row.innerHTML=av+'<div><div class="nm">'+nm+'</div><div class="cd">'+(c.code||'')+'</div></div>'+
-          '<div class="hl">'+(c.headline||'')+'</div>';
+          ? '<div class="av2" style="background-image:url(&quot;'+esc(c.picture)+'&quot;)"></div>'
+          : '<div class="av2">'+esc(nm.trim().charAt(0).toUpperCase()||'?')+'</div>';
+        row.innerHTML=av+'<div><div class="nm">'+esc(nm)+'</div><div class="cd">'+esc(c.code||'')+'</div></div>'+
+          '<div class="hl">'+esc(c.headline||'')+'</div>';
         row.onclick=()=>{ $('code').value=c.code; lookup(); window.scrollTo({top:0,behavior:'smooth'}); };
         box.appendChild(row);
       });
@@ -789,6 +790,7 @@
   }
   async function loadCalendar(){
     const box=$('calList');
+    const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
     try{
       const { data } = await window.meRpc('partner_calendar_self', {});
       const arr=Array.isArray(data)?data:[];
@@ -802,7 +804,7 @@
         groups[k].forEach(s=>{
           const row=document.createElement('div'); row.className='slot'+(s.status==='booked'?' booked':'');
           let right = s.status==='booked'
-            ? '<span class="st">จองแล้ว · '+(s.customer||'ลูกค้า')+'</span>'
+            ? '<span class="st">จองแล้ว · '+esc(s.customer||'ลูกค้า')+'</span>'
             : '<span class="st">ว่าง</span><button class="rm" onclick="removeSlot(\''+s.id+'\')">ลบ</button>';
           row.innerHTML='<span class="tm">'+fmtTime(s.starts_at)+'</span>'+right;
           g.appendChild(row);
@@ -834,6 +836,7 @@
   async function loadBookings(){
     loadEarnings();
     const box=$('bookList');
+    const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
     try{
       const { data } = await window.meRpc('partner_bookings_self', {});
       const arr=Array.isArray(data)?data:[];
@@ -842,8 +845,8 @@
       arr.forEach(b=>{
         const div=document.createElement('div'); div.className='bkrow'+(b.status==='done'?' is-done':'');
         const when=new Date(b.starts_at).toLocaleString('th-TH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-        let html='<div class="bt">'+(b.customer||'ลูกค้า')+'<span class="bcode">'+(b.code?('รหัส '+b.code):'')+'</span></div>'+
-          '<div class="bn">'+when+(b.customer_note?(' · “'+b.customer_note+'”'):'')+'</div>';
+        let html='<div class="bt">'+esc(b.customer||'ลูกค้า')+'<span class="bcode">'+(b.code?('รหัส '+esc(b.code)):'')+'</span></div>'+
+          '<div class="bn">'+when+(b.customer_note?(' · “'+esc(b.customer_note)+'”'):'')+'</div>';
         if(b.status==='confirmed'){
           html+='<div class="bact">'+
             (b.code?'<button onclick="goAnalyse(\''+b.code+'\')">กรอกผลวิเคราะห์</button>':'')+

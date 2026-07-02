@@ -32,7 +32,7 @@
       { href: 'requests.html',   label: 'คำขอชุดลูกค้า',  icon: '⌕', roles: ['marketing','manager'] },
     ] },
     { section: 'ธุรกิจ', items: [
-      { href: 'cockpit.html',    label: 'คอกพิตเจ้าของ', icon: '◉', roles: ['owner','manager'] },
+      { href: 'cockpit.html',    label: 'คอกพิตเจ้าของ', icon: '◉', roles: ['owner'] },
       { href: 'analytics.html',  label: 'วิเคราะห์',     icon: '▲', roles: ['manager','owner'] },
       { href: 'accounting.html', label: 'บัญชี',         icon: '฿', roles: ['owner','manager'] },
       { href: 'slips.html',      label: 'สลิปโอน',       icon: '⊞', roles: ['owner','manager'] },
@@ -49,7 +49,8 @@
       { href: 'settings.html',  label: 'ตั้งค่าฮับ',     icon: '⚙', roles: ['owner'] },
     ] },
   ];
-  const ROLE_TH = { owner: 'เจ้าของ', manager: 'ผู้จัดการ', care: 'ดูแลของ', stock: 'สต๊อก', marketing: 'การตลาด' };
+  const ROLE_TH = { owner: 'เจ้าของ', manager: 'ผู้จัดการ', care: 'ดูแลของ', stock: 'สต๊อก', marketing: 'การตลาด',
+    hr_admin: 'หัวหน้าฝ่ายบุคคล', accounting: 'บัญชี', stylist: 'สไตลิสต์', sales: 'ขาย', admin: 'แอดมิน' };
 
   function canSee(item, role, isOwner) {
     if (isOwner) return true;                 // เจ้าของเห็นหมด

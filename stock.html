@@ -62,13 +62,13 @@
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
   let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',3000);}
-  const ST_TH={available:'ว่าง',reserved:'จองแล้ว',out:'ออกไป',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',lost:'หาย',needs_review:'รอตรวจ'};
+  const ST_TH={available:'ว่าง',reserved:'จองแล้ว',out:'ออกไป',returned:'รับคืนแล้ว',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',lost:'หาย',needs_review:'รอตรวจ'};
 
   async function loadSummary(){
     const {data,error}=await sb.rpc('stock_summary');
     if(error){ $('summary').innerHTML='<div class="loading">โหลดไม่สำเร็จ</div>'; return; }
     const bs=data.by_status||{};
-    const order=['available','reserved','out','cleaning','repair','retired','lost','needs_review'];
+    const order=['available','reserved','out','returned','cleaning','repair','retired','lost','needs_review'];
     const keys=[...new Set([...order.filter(k=>bs[k]!=null),...Object.keys(bs)])];
     const cells=keys.map(k=>`<div class="b"><div class="n">${bs[k]}</div><div class="l">${esc(ST_TH[k]||k)}</div></div>`).join('');
     $('summary').innerHTML=`<div class="stat">${cells}</div>`+
