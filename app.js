@@ -241,6 +241,28 @@ function valueStrip(g) {
   if (!parts.length) return '';
   return `<div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0">${parts.join('')}</div>`;
 }
+// ชุดมีตำหนิ (แจ้งโปร่งใส) — มีโน้ตตำหนิ หรือรูปจุดตำหนิ
+function hasDefect(g) { return !!(g && (g.defectNote || (g.defectPhotos && g.defectPhotos.length))); }
+// % ที่ลดจากเรทปกติเพราะตำหนิ (ต้องมี priceRegular > price ถึงโชว์ขีดฆ่า)
+function defectOffPct(g) {
+  if (!hasDefect(g) || !g.priceRegular || g.priceRegular <= g.price) return null;
+  return Math.round((1 - g.price / g.priceRegular) * 100);
+}
+// กล่องตำหนิในหน้า detail — บอกตำหนิตรง ๆ + ราคาลดจากเรทปกติ + กดดูรูปว่าตำหนิตรงไหน
+function defectBox(g) {
+  if (!hasDefect(g)) return '';
+  const th = lang === 'th';
+  const off = defectOffPct(g);
+  const ph = (g.defectPhotos || []).map(u => `<img src="${u}" loading="lazy" alt="${th?'รูปจุดตำหนิ':'flaw photo'}" onclick="this.classList.toggle('zoom')">`).join('');
+  return `<div class="defectbox">
+    <div class="dfhead">
+      <span class="dftag">${th?'มีตำหนิเล็กน้อย':'Minor flaw'}</span>
+      ${off ? `<span class="dfoff">-${off}% <s>${money(g.priceRegular)}</s></span>` : ''}
+    </div>
+    ${g.defectNote ? `<div class="dfnote">${g.defectNote}</div>` : ''}
+    ${ph ? `<div class="dfphotos">${ph}</div>` : ''}
+  </div>`;
+}
 // คะแนน"แนะนำสำหรับคุณ"— รวม fit + โทนสี + สไตล์จากโปรไฟล์/พาร์ทเนอร์ (style_profile)
 function personalScore(g) {
   const c = CUSTOMER;
@@ -662,6 +684,7 @@ function gridCardHtml(g) {
           ${(fForYou && gPersonalRecs.includes(g.code))?`<span class="bdg pick">${lang==='th'?'แนะนำสำหรับคุณ':'For you'}</span>`:''}
           ${match?`<span class="bdg tone">${t('toneMatch')}</span>`:''}
           ${sv?`<span class="bdg" style="background:#27500A;color:#fff">${lang==='th'?'ประหยัด ':'save '}${sv}%</span>`:''}
+          ${hasDefect(g)?`<span class="bdg defect">${lang==='th'?'มีตำหนิ':'Flaw'}${defectOffPct(g)?` · -${defectOffPct(g)}%`:''}</span>`:''}
         </div>
         <div class="hoverbar">
           <div class="try">${lang ==='th'?'ลองดูเลย':'View'} ›</div>
@@ -675,7 +698,7 @@ function gridCardHtml(g) {
       <div class="pmeta">
         <div class="pbrand">${g.brand ||''}</div>
         <div class="pname">${g.name}</div>
-        <div class="pprice">${money(staffPrice(g.price))}${staffTag()} <span style="color:var(--muted);font-weight:400">/ ${t('perTime')}</span></div>
+        <div class="pprice">${defectOffPct(g)?`<s style="color:var(--muted);font-weight:400;margin-right:5px">${money(g.priceRegular)}</s>`:''}${money(staffPrice(g.price))}${staffTag()} <span style="color:var(--muted);font-weight:400">/ ${t('perTime')}</span></div>
         ${sizeLbl}
         <div class="pcolors">${dots}</div>
         ${fn?`<div class="fitnote ${fn.cls}">${fn.text}</div>`:''}
@@ -943,6 +966,7 @@ function openDetail(id) {
       <div class="cbrand">${g.brand ||''}</div>
       <div class="dname">${g.name}</div>
       <div class="dmeta">${g.tier} · ${t('rotating')}</div>
+      ${defectBox(g)}
       ${sizeChips ? `<div class="sec">${lang==='th'?'เลือกไซส์':'Select size'}</div>${sizeChips}` : ''}
       <div id="ratingline" class="ratingline"></div>
       <div id="socialproof" class="socialproof"></div>
@@ -990,7 +1014,7 @@ function openDetail(id) {
     </label>
     <div id="backupPicker" class="backuppick" hidden></div>
     <div class="cta">
-      <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}${subCapLabel(g)}</span>` : money(staffPrice(g.price))+staffTag()}</span>
+      <span class="price">${subCovers(g) ? `<span style="color:var(--sage)">${lang==='th'?'รวมในแพ็กเกจ':'Included in plan'}${subCapLabel(g)}</span>` : (defectOffPct(g)?`<s style="color:var(--muted);font-weight:400;font-size:14px;margin-right:5px">${money(g.priceRegular)}</s>`:'')+money(staffPrice(g.price))+staffTag()}</span>
       ${subCovers(g) ? '' : `<button class="cartbtn" onclick="addToCart('${g.id}')" title="${lang==='th'?'เพิ่มลงตะกร้า':'Add to cart'}">+ ${lang==='th'?'ตะกร้า':'Cart'}</button>`}
       <button id="bookBtn" onclick="reserve('${g.id}')">${t('reserveBtn')}</button>
     </div>
