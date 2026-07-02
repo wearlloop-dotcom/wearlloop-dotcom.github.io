@@ -32,6 +32,10 @@ create table if not exists public.customer_calendar (
 create index if not exists customer_calendar_uid_date_idx
   on public.customer_calendar (line_uid, date);
 
+-- กันแถวซ้ำจากการแตะรัว/ยิงซ้ำ (จองกลุ่มวันเดิม, gateway retry) — งานเดียวกัน = 1 แถว
+create unique index if not exists customer_calendar_uid_date_occ_uq
+  on public.customer_calendar (line_uid, date, occasion);
+
 -- ----------------------------------------------------------------------------
 -- ความปลอดภัย: เปิด RLS แต่ "ไม่สร้าง policy สาธารณะ" เลย
 -- → ตารางนี้อ่าน/เขียนตรงจาก client ไม่ได้ ทุกอย่างต้องผ่านฟังก์ชัน
@@ -90,6 +94,9 @@ begin
     -- งานใหม่
     insert into customer_calendar (line_uid, date, occasion, venue, dress_code)
     values (p_uid, p_date, p_occasion, nullif(trim(p_venue), ''), nullif(trim(p_dress_code), ''))
+    on conflict (line_uid, date, occasion) do update set
+      venue      = coalesce(excluded.venue, customer_calendar.venue),
+      dress_code = coalesce(excluded.dress_code, customer_calendar.dress_code)
     returning id into v_id;
   else
     -- แก้งานเดิม — ต้องเป็นเจ้าของ (line_uid ตรง) เท่านั้น

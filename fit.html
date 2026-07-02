@@ -157,6 +157,10 @@ async function gwRpc(name, args){
   if (window.meRpc && UID) {
     const r = await window.meRpc(name, args);
     if (!r.error) return r;
+    // fallback เฉพาะเคสที่ gateway ยังไม่ได้รันแน่ ๆ — 5xx/เน็ตหลุดอาจรันไปแล้ว ห้ามยิงซ้ำ (กัน insert เบิ้ล)
+    const m = r.error.message || '';
+    const notRun = m === 'redirecting_to_login' || m === 'คำสั่งนี้ไม่อนุญาต' || m === 'ยังไม่พบบัญชีลูกค้าของคุณ' || m === 'เซสชันหมดอายุ เข้าสู่ระบบใหม่';
+    if (!notRun) return r;
   }
   return client().rpc(name, args);
 }

@@ -181,6 +181,10 @@ async function gwRpc(name, args){
   if (window.meRpc && UID) {
     const r = await window.meRpc(name, args);
     if (!r.error) return r;
+    // fallback เฉพาะเคสที่ gateway ยังไม่ได้รันแน่ ๆ — 5xx/เน็ตหลุดอาจรันไปแล้ว ห้ามยิงซ้ำ (กัน insert เบิ้ล)
+    const m = r.error.message || '';
+    const notRun = m === 'redirecting_to_login' || m === 'คำสั่งนี้ไม่อนุญาต' || m === 'ยังไม่พบบัญชีลูกค้าของคุณ' || m === 'เซสชันหมดอายุ เข้าสู่ระบบใหม่';
+    if (!notRun) return r;
   }
   return client().rpc(name, args);
 }
@@ -211,6 +215,7 @@ function seasonLabel(key){
 
 // ---- demo data (โหมดตัวอย่าง — สร้างจาก MOCK.GARMENTS ให้ดูน่าเชื่อ) ----
 // ประหยัด = ค่าเช่ารวม ×5 (ราคาเต็ม ≈ ค่าเช่า ×6): ใช้ ฿6,280 → ประหยัด ฿31,400
+let IS_DEMO = true;   // true จนกว่าจะได้ข้อมูลจริงจาก RPC — ชิป "ตัวอย่าง" อิงตัวนี้ ไม่ใช่สถานะล็อกอิน
 function demoWrapped(){
   const G = (window.MOCK && MOCK.GARMENTS) || [];
   const g = i => G[i] || {};
@@ -363,7 +368,7 @@ async function loadWrapped(){
     const { data, error } = await gwRpc('my_wrapped', { p_uid: UID, p_year: YEAR });
     if(error) throw error;
     if(!data || typeof data.rentals !== 'number') throw new Error('no data');
-    W = data;
+    W = data; IS_DEMO = false;
   } catch(e){
     console.warn('my_wrapped fallback → demo:', e && e.message || e);
     W = demoWrapped();
@@ -384,13 +389,14 @@ async function boot(){
     if(p){ UID = p.userId; NAME = p.displayName; }
   } catch(e){ console.warn('LIFF skipped:', e); }
   $('loginSoft').classList.toggle('hidden', !!UID);
-  $('demoChip').classList.toggle('hidden', !!UID);
+  $('demoChip').classList.toggle('hidden', false);   // ตัวอย่างจนกว่าข้อมูลจริงจะมา (IS_DEMO)
   // วาดจากข้อมูลตัวอย่างก่อนทันที — network ช้าแค่ไหนหน้าก็ไม่ค้างว่าง
   W = demoWrapped();
   renderAll();
   if(io) io.observe($('statsCard'));
   else { statsAnimated = true; runCountUps(); }
   await loadWrapped();
+  $('demoChip').classList.toggle('hidden', !IS_DEMO);   // ได้ข้อมูลจริงแล้วค่อยถอดชิปตัวอย่าง
   renderAll();
 }
 boot();

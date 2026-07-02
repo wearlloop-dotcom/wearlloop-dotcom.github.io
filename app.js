@@ -1395,11 +1395,16 @@ function bookingOccChips(g, date) {
 }
 async function bookingOccasion(occ, date) {
   const box = document.getElementById('pcOcc');
+  if (box) box.querySelectorAll('button').forEach(b => { b.disabled = true; });   // กันแตะรัว = แถวซ้ำ
   const uid = CUSTOMER.line_uid || null;
+  if (window.CONFIG && CONFIG.USE_MOCK) {   // โหมดตัวอย่าง — การจองไม่จริง ห้ามลงปฏิทิน (โชว์ UI อย่างเดียว)
+    if (box) box.innerHTML = `<div style="font-size:13px;color:#0F6E56;font-weight:600">${lang === 'th' ? 'บันทึกลงปฏิทินแล้วค่ะ 💚 (ตัวอย่าง)' : 'Saved to your calendar 💚 (sample)'}</div>`;
+    return;
+  }
   let onServer = false;
   if (uid && window.meRpc) {
     // gateway verify idToken ให้ — ถ้ายังไม่ allowlist upsert_event จะได้ error → เก็บลงเครื่องแทน
-    try { const r = await window.meRpc('upsert_event', { p_uid: uid, p_id: null, p_date: date, p_occasion: occ, p_venue: null, p_dress_code: null }); onServer = !r.error && !(r.data && r.data.error); } catch (e) { /**/ }
+    try { const r = await window.meRpc('upsert_event', { p_uid: uid, p_id: null, p_date: date, p_occasion: occ, p_venue: null, p_dress_code: null }, { noReauth: true }); onServer = !r.error && !(r.data && r.data.error); } catch (e) { /**/ }
   }
   if (!onServer) {
     // โครงเดียวกับ my-events.html ('lloop_events_v1') — หน้า ปฏิทินงานของฉัน จะ sync ขึ้น server ให้เอง

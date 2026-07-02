@@ -29,16 +29,18 @@
   }
 
   // drop-in แทน client.rpc(fn,args) → คืน { data, error }
-  async function meRpc(fn, args) {
+  // opts.noReauth = งานเบื้องหลัง (เช่น บันทึกปฏิทินหลังจอง) — ห้ามเด้งออกจากหน้า ให้คืน error แทน
+  async function meRpc(fn, args, opts) {
+    const noReauth = !!(opts && opts.noReauth);
     try {
       await ensureInit();
       if (!liff.isLoggedIn()) {
         // ยังไม่ล็อกอิน → เด้งเข้า LINE เลย (ทั้งในแอปและบนเว็บ) กัน loop ด้วย reauth()
-        reauth();
+        if (!noReauth) reauth();
         return { data: null, error: { message: 'redirecting_to_login' } };
       }
       const idToken = liff.getIDToken();
-      if (!idToken) { reauth(); return { data: null, error: { message: 'redirecting_to_login' } }; }
+      if (!idToken) { if (!noReauth) reauth(); return { data: null, error: { message: 'redirecting_to_login' } }; }
       const r = await fetch(FUNCTIONS + '/me-rpc', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_token: idToken, fn, args: args || {} }),
@@ -46,7 +48,7 @@
       const out = await r.json().catch(() => ({}));
       if (!r.ok || out.error) {
         // โทเคนหมดอายุ → เด้งเข้า LINE login ให้เองอัตโนมัติ (แทน toast ที่กดยาก)
-        if (out.error === 'unauthorized' && reauth()) {
+        if (out.error === 'unauthorized' && !noReauth && reauth()) {
           return { data: null, error: { message: 'redirecting_to_login' } };
         }
         const map = { unauthorized: 'เซสชันหมดอายุ เข้าสู่ระบบใหม่', no_customer: 'ยังไม่พบบัญชีลูกค้าของคุณ',

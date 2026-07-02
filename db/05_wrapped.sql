@@ -65,14 +65,19 @@ begin
 
   -- ใช้ dynamic SQL เพื่อให้สร้างฟังก์ชันได้แม้ตาราง rentals/garments ยังไม่มีตอนรัน migration
   -- ⚠️ TODO: แก้ชื่อคอลัมน์ (rate / starts_at / returned_at) ให้ตรง schema จริงตอน deploy
-  execute $q$
-    select count(*),
-           count(distinct coalesce(r.starts_at, r.returned_at)::date),
-           coalesce(sum(coalesce(r.rate, 0)), 0)
-    from rentals r
-    where r.line_uid = $1
-      and extract(year from coalesce(r.starts_at, r.returned_at))::int = $2
-  $q$ into v_rentals, v_occas, v_spent using p_uid, v_year;
+  begin
+    execute $q$
+      select count(*),
+             count(distinct coalesce(r.starts_at, r.returned_at)::date),
+             coalesce(sum(coalesce(r.rate, 0)), 0)
+      from rentals r
+      where r.line_uid = $1
+        and extract(year from coalesce(r.starts_at, r.returned_at))::int = $2
+    $q$ into v_rentals, v_occas, v_spent using p_uid, v_year;
+  exception when undefined_column then
+    -- ชื่อคอลัมน์ยังไม่ตรง schema จริง — คืนศูนย์แทน error (ตามสัญญา "ห้าม error")
+    v_rentals := 0; v_occas := 0; v_spent := 0;
+  end;
 
   -- top-3 ลุคแห่งปี — join garments เพื่อเติมชื่อ/แบรนด์/สีบล็อก (ถ้ามีตาราง)
   if to_regclass('public.garments') is not null then
