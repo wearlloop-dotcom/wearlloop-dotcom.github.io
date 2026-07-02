@@ -213,6 +213,8 @@
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH');
+  // C-1: ยอมรับเฉพาะ data-URI รูปแบบเข้ม (กัน XSS แทรก " onerror= ใน src ของลายเซ็น)
+  const isSigDataUri=s=>typeof s==='string'&&/^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(s);
   function thDate(s){ if(!s) return '—'; const d=new Date(s+(s.length<=10?'T00:00:00':'')); if(isNaN(d)) return s;
     return d.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}); }
 
@@ -465,7 +467,7 @@
     // ฝ่ายพาร์ทเนอร์
     let pInner;
     if(signed){
-      const sig = (c.signature&&c.signature.startsWith('data:image'))
+      const sig = isSigDataUri(c.signature)
         ? `<img src="${c.signature}" alt="ลายเซ็น">`
         : `<span class="typed">${esc(c.signer_name||c.partner_name)}</span>`;
       const when=c.signed_at?new Date(c.signed_at).toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}):'';
@@ -482,7 +484,7 @@
     $('actionbar').classList.add('hide');
     $('done').classList.remove('hide');
     $('doneNo').textContent=c.contract_no||'';
-    if(c.signature && c.signature.startsWith('data:image')) $('doneSig').innerHTML=`<img src="${c.signature}" alt="ลายเซ็น">`;
+    if(isSigDataUri(c.signature)) $('doneSig').innerHTML=`<img src="${c.signature}" alt="ลายเซ็น">`;
     else if(c.signer_name) $('doneSig').innerHTML=`<div style="font-family:var(--display);font-size:24px;padding:10px 0">${esc(c.signer_name)}</div>`;
     const when=c.signed_at?new Date(c.signed_at).toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short'}):'';
     $('doneMeta').textContent=(c.signer_name?('ผู้ลงนาม '+c.signer_name+' · '):'')+(when?('ลงนามเมื่อ '+when):'');
@@ -570,7 +572,12 @@
     // HI-6: บังคับ login LINE ก่อนเปิดสัญญา — ตัวตนคนเซ็นต้องยืนยันได้ (ไม่ใช่แค่มีลิงก์)
     try{
       await liff.init({liffId:LIFF_ID, withLoginOnExternalBrowser:true});
-      if(!liff.isLoggedIn()){ liff.login({ redirectUri: location.href }); return; }  // ยังไม่ login → พาไป LINE แล้วกลับมา
+      if(!liff.isLoggedIn()){
+        if(sessionStorage.getItem('ctLoginTried')){ $('loading').classList.add('hide'); $('error').classList.remove('hide'); return; }  // กันลูป: เด้ง login ครั้งเดียว
+        sessionStorage.setItem('ctLoginTried','1');
+        liff.login({ redirectUri: location.href }); return;
+      }
+      sessionStorage.removeItem('ctLoginTried');
       const p=await liff.getProfile(); lineUid=p.userId; idToken=liff.getIDToken();
     }catch(e){ $('loading').classList.add('hide'); $('error').classList.remove('hide'); return; }
     // ส่ง idToken ที่ยืนยันได้ให้เซิร์ฟเวอร์ verify + เทียบ partner_line_uid (ห้ามเชื่อ line_uid ที่ client ส่ง)
