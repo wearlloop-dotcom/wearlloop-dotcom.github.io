@@ -903,7 +903,27 @@ async function onBook(){
   finally{ btn.disabled=false; btn.textContent=NAV.t('ยืนยันจองทั้งกลุ่ม','Confirm group booking'); }
 
   if(!res){ alert(NAV.t('จองไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Booking failed — please try again.')); return; }
+  if(!res.error) saveGroupCalendar(from);   // จองกลุ่มสำเร็จ → วันงานเข้าปฏิทินหัวหน้ากลุ่มอัตโนมัติ (T-14 สไตลิสต์ทักก่อนงาน)
   await renderResult(res, from, to);
+}
+
+// บันทึกวันงานกลุ่มลงปฏิทิน (โครงเดียวกับ bookingOccasion ใน app.js) — เงียบ ๆ ไม่ขวาง flow จอง
+// ผ่าน me-rpc เมื่อ gateway พร้อม · ไม่พร้อมเก็บ lloop_events_v1 ให้หน้า ปฏิทินงานของฉัน sync ขึ้นเอง
+async function saveGroupCalendar(date){
+  const occ = $('#t_occ').value || 'party';
+  const uid = (CUSTOMER && CUSTOMER.line_uid) || null;
+  let onServer = false;
+  if(uid && window.meRpc){
+    try{ const r = await window.meRpc('upsert_event', { p_uid: uid, p_id: null, p_date: date, p_occasion: occ, p_venue: null, p_dress_code: null }); onServer = !r.error && !(r.data && r.data.error); }catch(e){ /**/ }
+  }
+  if(!onServer){
+    try{
+      const a = JSON.parse(localStorage.getItem('lloop_events_v1') || '[]');
+      if(!a.some(e => e.date === date && e.occasion === occ)) a.push({ id:'loc_'+Date.now(), date, occasion:occ, venue:null, dress_code:null, status:'planned' });
+      localStorage.setItem('lloop_events_v1', JSON.stringify(a));
+    }catch(e){ /**/ }
+  }
+  window.track?.('occasion_tagged', occ, { date, via:'group-checkout' });
 }
 
 async function renderResult(res, from, to){

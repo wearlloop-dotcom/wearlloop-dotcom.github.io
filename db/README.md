@@ -52,9 +52,12 @@
    → สไตลิสต์จัดลุค → ส่ง LINE push → กด "ทักแล้ว" ใน `today.html` (หรือเรียก `mark_event_pinged`)
 2. **กล่อง LLOOP Day** — ทุกวัน: หาสมาชิกที่ `closet_day_prefs.day - 5 = วันนี้` → สร้าง/แจ้งกล่อง draft ทาง LINE
 3. **Fit DNA nudge** — หลังสถานะเช่าเป็น "คืนแล้ว" 1 วัน → ส่งลิงก์ `fit.html` ทาง LINE
-4. **Auto-confirm กล่อง LLOOP Day** — ทุกวัน: `update closet_boxes set status='confirmed'`
+4. **Fan-out ปฏิทินแขกทั้งกลุ่ม** — เมื่อ book_group_cart/split สำเร็จ: สร้างแถว `customer_calendar`
+   ให้สมาชิกทุกคนในกลุ่มที่มี line_uid (วันที่+occasion เดียวกับออเดอร์) — ฝั่งหน้าเว็บบันทึกให้เฉพาะ
+   หัวหน้ากลุ่มแล้ว (`saveGroupCalendar` ใน group-checkout.html) เพราะ frontend ไม่รู้ uid ของแขก
+5. **Auto-confirm กล่อง LLOOP Day** — ทุกวัน: `update closet_boxes set status='confirmed'`
    เฉพาะกล่อง `status='draft'` ที่วันเปลี่ยนตู้ของสมาชิก (จาก `closet_day_prefs.day`) เหลือ ≤ 5 วัน
    (คู่กับ LINE notification แจ้งลูกค้า) — ⚠️ ระหว่างที่ job นี้ยังไม่มี ข้อความบนหน้าเว็บตอนนี้
    บอกลูกค้าว่า "สไตลิสต์จะยืนยันทาง LINE ก่อนจัดส่ง" แทน auto-confirm
 
-`CONFIG.N8N_BASE_URL` ใน `config.js` เว้นไว้รองรับข้อ 1-4 แล้ว
+`CONFIG.N8N_BASE_URL` ใน `config.js` เว้นไว้รองรับข้อ 1-5 แล้ว

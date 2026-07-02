@@ -330,7 +330,13 @@ async function submitEvent(){
 }
 
 // ---------- render list ----------
-function occLabel(k){ return NAV.lang==='en' ? (OCC_EN[k] || OCCS[k] || k) : (OCCS[k] || k); }
+// งานจากการจองกลุ่มมี occasion นอกชุดหลัก 9 แบบ — แปลป้ายให้ครบ ไม่โชว์ key ดิบ
+const OCC_EXTRA = { family_portrait:['ถ่ายรูปครอบครัว','Family portrait'], songkran:['สงกรานต์','Songkran'] };
+function occLabel(k){
+  const ex = OCC_EXTRA[k];
+  if(NAV.lang==='en') return OCC_EN[k] || (ex && ex[1]) || OCCS[k] || k;
+  return OCCS[k] || (ex && ex[0]) || k;
+}
 function fmtDay(iso){ try{ return new Date(iso+'T00:00:00').getDate(); }catch(e){ return '–'; } }
 function fmtMon(iso){
   try{ return new Date(iso+'T00:00:00').toLocaleDateString(NAV.lang==='en' ? 'en-GB' : 'th-TH', { month:'short' }); }
