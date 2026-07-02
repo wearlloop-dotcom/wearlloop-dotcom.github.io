@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · วันเปลี่ยนตู้</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* โทนแบรนด์ LLOOP (craft sage + ทอง) — ตรงกับ forecast/home */
+  :root{ --bg:#FBFAF7; --card:#FFFFFF; --ink:#1A1A1A; --muted:#8C8B86; --line:#E7E5E1;
+    --teal:#6FB3A6; --sage-bg:#E4F0EC; --gold:#C9A86A; --ok:#0F6E56;
+    --sans:'Inter','Prompt',-apple-system,sans-serif; --disp:'Poppins','Prompt',sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px;margin-bottom:14px}
+  .card h2{font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .kicker{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;font-family:var(--disp)}
+  h1{font-family:var(--disp);font-weight:600;font-size:20px;color:var(--ink);margin-bottom:6px}
+  .lead{font-size:14px;color:var(--muted);margin-bottom:16px}
+  .hidden{display:none}
+
+  /* โหมดตัวอย่าง (ยังไม่ล็อกอิน) */
+  .demo{background:var(--sage-bg);border-color:var(--teal);display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:13px;color:var(--ok)}
+  .demo .linebtn{margin-left:auto;background:#06C755;color:#fff;border:none;border-radius:9px;padding:9px 14px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer}
+
+  /* day picker */
+  .daylabel{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .daygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}
+  .daygrid button{font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 0;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;cursor:pointer}
+  .daygrid button.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+  .chosen{font-size:13.5px;color:var(--ok);background:var(--sage-bg);border-radius:9px;padding:9px 12px}
+  .chosen.empty{color:var(--muted);background:transparent;border:1px dashed var(--line)}
+
+  /* กล่องเดือนนี้ */
+  .count{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .gcard{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:#fff}
+  .gph{width:74px;height:92px;border-radius:10px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:600;font-size:20px;color:rgba(26,26,26,.35)}
+  .gbody{flex:1;min-width:0}
+  .gbrand{font-size:11.5px;color:var(--muted);letter-spacing:.4px}
+  .gname{font-size:15px;font-weight:600;color:var(--ink);line-height:1.35;margin:1px 0 6px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  .chip{font-size:11px;font-weight:600;padding:2px 9px;border-radius:14px;letter-spacing:.3px}
+  .chip.tier{border:1px solid var(--gold);color:var(--gold);background:#fff}
+  .chip.tone{background:var(--sage-bg);color:var(--ok)}
+  .swapbtn{font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 12px;border:1px solid var(--teal);background:#fff;color:var(--ok);border-radius:16px;cursor:pointer}
+  .swapbtn:disabled{border-color:var(--line);color:var(--muted);cursor:default;opacity:.7}
+  .altwrap{border:1px dashed var(--teal);border-radius:12px;background:var(--sage-bg);padding:10px 12px;margin:-2px 0 12px}
+  .altwrap .alt-h{font-size:12px;color:var(--ok);font-weight:600;margin-bottom:8px}
+  .altrow{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px}
+  .altrow:last-child{margin-bottom:0}
+  .altrow .gph{width:44px;height:54px;font-size:14px;border-radius:8px}
+  .altrow .a-name{flex:1;min-width:0;font-size:13px;font-weight:600}
+  .altrow .a-name small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+  .pickbtn{font-family:var(--sans);font-size:12px;font-weight:600;padding:6px 12px;border:none;background:var(--teal);color:#fff;border-radius:8px;cursor:pointer;white-space:nowrap}
+  .swapnote{font-size:12px;color:var(--muted)}
+  .swapnote.max{color:var(--gold);font-weight:600}
+
+  /* action row */
+  .btnP{width:100%;background:var(--teal);color:#fff;border:none;padding:14px;font-family:var(--sans);font-size:15px;font-weight:600;border-radius:11px;cursor:pointer;margin-bottom:10px}
+  .btnP:active{opacity:.9}
+  .btnS{width:100%;background:#fff;color:var(--muted);border:1px solid var(--line);padding:12px;font-family:var(--sans);font-size:14px;font-weight:500;border-radius:11px;cursor:pointer}
+  .statecard{border-radius:12px;padding:16px;text-align:center;font-size:15px;font-weight:600}
+  .statecard.okc{background:var(--sage-bg);color:var(--ok)}
+  .statecard.skipc{background:#F5F0E8;color:#8A7355}
+  .statecard .sub{display:block;font-size:12.5px;font-weight:400;margin-top:4px}
+  .undobtn{margin-top:10px;background:#fff;border:1px solid var(--teal);color:var(--ok);font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 16px;border-radius:9px;cursor:pointer}
+
+  /* ทำไมถึงคุ้ม */
+  .why{list-style:none}
+  .why li{display:flex;gap:9px;font-size:13.5px;color:var(--ink);padding:7px 0;border-bottom:1px solid var(--line)}
+  .why li:last-child{border-bottom:none}
+  .why li::before{content:'✦';color:var(--gold);flex:0 0 auto}
+  .why a{color:var(--ok);font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
+
+<div class="wrap">
+
+  <!-- โหมดตัวอย่าง — ยังไม่ได้เข้าสู่ระบบ LINE -->
+  <div class="card demo hidden" id="demoCard">
+    <span data-i18n="Preview mode — sign in with LINE so we can save your real closet day">โหมดตัวอย่างค่ะ — เข้าสู่ระบบเพื่อบันทึกวันเปลี่ยนตู้ของคุณจริง ๆ นะคะ</span>
+    <button class="linebtn" onclick="LiffAuth.signIn()" data-i18n="Sign in with LINE">เข้าสู่ระบบด้วย LINE</button>
+  </div>
+
+  <!-- 1) hero + day picker -->
+  <div class="card">
+    <div class="kicker">LLOOP DAY</div>
+    <h1 data-i18n="Your closet-swap day">วันเปลี่ยนตู้ของคุณ</h1>
+    <p class="lead" data-i18n="Every month we curate a fresh box from your profile and deliver it to your door — picking up the previous box at the same time. Nothing to order, nothing to think about.">ทุกเดือน เราจัดกล่องชุดใหม่จากโปรไฟล์ของคุณ ส่งถึงบ้านพร้อมรับกล่องเดิมกลับ — ไม่ต้องสั่ง ไม่ต้องคิดค่ะ</p>
+    <div class="daylabel" data-i18n="Pick the day of the month that suits you (1–28)">เลือกวันที่สะดวกของทุกเดือนนะคะ (1–28)</div>
+    <div class="daygrid" id="dayGrid"></div>
+    <div class="chosen empty" id="dayChosen"></div>
+  </div>
+
+  <!-- 2) กล่องเดือนนี้ -->
+  <div class="card">
+    <h2 data-i18n="This month's box, curated for you">กล่องเดือนนี้ที่จัดให้</h2>
+    <div class="count" id="countLine"></div>
+    <div id="boxList"></div>
+    <div class="swapnote" id="swapNote"></div>
+  </div>
+
+  <!-- 3) action row / สถานะ -->
+  <div id="actionArea" style="margin-bottom:14px"></div>
+
+  <!-- 4) ทำไมถึงคุ้ม -->
+  <div class="card">
+    <h2 data-i18n="Why it's worth it">ทำไมถึงคุ้ม</h2>
+    <ul class="why">
+      <li data-i18n="One round trip covers drop-off and pick-up — members pay no shipping">ส่งไป-กลับเที่ยวเดียว สมาชิกไม่เสียค่าส่ง</li>
+      <li data-i18n="Pieces rotate on a schedule, so you always get them in their best condition">ชุดหมุนเวียนตามตาราง ได้ชุดสภาพดีที่สุด</li>
+      <li><span data-i18n="The more Fit DNA you share, the better each box gets ·">ยิ่งบอก Fit DNA กล่องยิ่งถูกใจ ·</span>&nbsp;<a href="fit.html" data-i18n="Update Fit DNA →">อัปเดต Fit DNA →</a></li>
+    </ul>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=38"></script>
+<script src="analytics.js?v=38"></script>
+<script src="nav.js?v=1"></script>
+<script src="liffAuth.js"></script>
+<script src="data.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => s==null ? '' : String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+// ---------- ค่าคงที่ ----------
+const TH_M = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const EN_M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const LSK = {                                     // localStorage (fallback ระหว่างรอ backend)
+  day:     'lloop_closetday_day',                 // วันเปลี่ยนตู้ที่เลือก (1–28)
+  box:     'lloop_closetday_box_',                // + 'YYYY-MM' → {items:[code], status, swaps_used}
+  history: 'lloop_closetday_history',             // โค้ดชุดที่เคยอยู่ในกล่องแล้ว (กันจัดซ้ำ)
+};
+const MAX_SWAPS = 2;
+const CUST = (window.MOCK && MOCK.CUSTOMER) || {};
+
+// ---------- state ----------
+let sb = null, UID = null;
+let S = { day:null, box:[], status:'draft', swaps_used:0 };  // box = [{code,name,brand,tier,season,bg}]
+let RANKED = [];            // ผลจัดอันดับจาก MOCK (ใช้เลือก top 3 + ตัวสำรองตอนสลับ)
+let swapOpenFor = null;     // code ของการ์ดที่กำลังกางตัวเลือกสลับ
+
+function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
+function ym(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+
+// RPC ทุกตัวยังไม่มีบน backend — ห่อ try/catch แล้ว fallback localStorage เสมอ
+async function rpcTry(name, args){
+  if(!UID) return null;                            // โหมดตัวอย่าง — ไม่ยิง RPC
+  try{
+    const { data, error } = await client().rpc(name, args);
+    if(error) throw error;
+    return data;
+  }catch(e){
+    console.warn('[closet-day] rpc ' + name + ' → fallback localStorage:', (e && e.message) || e);
+    return null;
+  }
+}
+
+// ---------- วันที่ ----------
+// รอบถัดไปของ "วันเปลี่ยนตู้": ถ้าวันนั้นผ่านไปแล้วเดือนนี้ → เดือนหน้า
+function nextOccurrence(day){
+  const now = new Date();
+  let y = now.getFullYear(), m = now.getMonth();
+  if(day < now.getDate()){ m++; if(m > 11){ m = 0; y++; } }
+  return new Date(y, m, day);
+}
+function fmtDate(d){ return NAV.t(d.getDate() + ' ' + TH_M[d.getMonth()], EN_M[d.getMonth()] + ' ' + d.getDate()); }
+// ยืนยันอัตโนมัติ 5 วันก่อนวันเปลี่ยนตู้ → เหลืออีกกี่วัน
+function daysUntilAutoConfirm(){
+  if(!S.day) return null;
+  const cutoff = nextOccurrence(S.day);
+  cutoff.setDate(cutoff.getDate() - 5);
+  cutoff.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.round((cutoff - today) / 864e5);
+}
+
+// ---------- คัดกล่อง (fallback: ให้คะแนน MOCK.GARMENTS ฝั่ง client) ----------
+function getHistory(){ try{ return JSON.parse(localStorage.getItem(LSK.history)) || []; }catch(e){ return []; } }
+function toItem(g){ return g ? { code:g.id, name:g.name, brand:g.brand, tier:g.tier, season:g.season, bg:g.bg } : null; }
+// คะแนน = ฟิตไซส์ (รอบอก +20, เอว +20) + เข้าโทนสีส่วนตัว (+25) − เคยอยู่ในกล่องแล้ว (−30) + ชุดใหม่ (+5)
+function scoreGarment(g, hist){
+  let s = 0;
+  if(CUST.bust_in  != null && g.bust  && CUST.bust_in  >= g.bust[0]  && CUST.bust_in  <= g.bust[1])  s += 20;
+  if(CUST.waist_in != null && g.waist && CUST.waist_in >= g.waist[0] && CUST.waist_in <= g.waist[1]) s += 20;
+  if(g.season === CUST.my_color_season) s += 25;
+  if(hist.includes(g.id)) s -= 30;
+  if(g.isNew) s += 5;
+  return s;
+}
+function curateRank(){
+  const hist = getHistory();
+  const list = (window.MOCK && MOCK.GARMENTS) || [];
+  RANKED = list
+    .map(g => ({ item: toItem(g), score: scoreGarment(g, hist) }))
+    .sort((a,b) => b.score - a.score)
+    .map(x => x.item);
+}
+// ตัวเลือกสลับ = 2 อันดับถัดไปที่ยังไม่อยู่ในกล่อง
+function alternatives(){
+  const codes = S.box.map(b => b.code);
+  return RANKED.filter(g => !codes.includes(g.code)).slice(0, 2);
+}
+
+// ---------- load / save ----------
+function saveBoxLocal(){
+  try{
+    localStorage.setItem(LSK.box + ym(), JSON.stringify({ items: S.box.map(b => b.code), status: S.status, swaps_used: S.swaps_used }));
+  }catch(e){}
+}
+function loadLocal(){
+  const raw = localStorage.getItem(LSK.day);
+  S.day = raw ? parseInt(raw, 10) : null;
+  if(!(S.day >= 1 && S.day <= 28)) S.day = null;
+  curateRank();
+  try{
+    const rec = JSON.parse(localStorage.getItem(LSK.box + ym()));
+    if(rec && Array.isArray(rec.items)){
+      S.status = rec.status || 'draft';
+      S.swaps_used = rec.swaps_used || 0;
+      S.box = rec.items.map(code => RANKED.find(g => g.code === code)).filter(Boolean);
+      if(S.box.length === 3) return;
+    }
+  }catch(e){}
+  // ยังไม่มีกล่องเดือนนี้ → คัด top 3 ให้เลย
+  S.box = RANKED.slice(0, 3);
+  S.status = 'draft';
+  S.swaps_used = 0;
+  saveBoxLocal();
+}
+async function loadState(){
+  loadLocal();                                     // ตั้งฐานจาก localStorage + MOCK ก่อนเสมอ
+  const data = await rpcTry('closet_day_get', { p_uid: UID });
+  if(data && !data.error){
+    if(data.day >= 1 && data.day <= 28) S.day = data.day;
+    if(Array.isArray(data.box) && data.box.length) S.box = data.box;
+    if(data.status) S.status = data.status;
+    if(data.swaps_used != null) S.swaps_used = data.swaps_used;
+    saveBoxLocal();                                // sync สำเนาไว้ใช้ offline
+    if(S.day) try{ localStorage.setItem(LSK.day, String(S.day)); }catch(e){}
+  }
+}
+
+// ---------- actions ----------
+async function setDay(d){
+  S.day = d;
+  try{ localStorage.setItem(LSK.day, String(d)); }catch(e){}
+  renderAll();
+  await rpcTry('closet_day_set', { p_uid: UID, p_day: d });
+}
+function openSwap(code){
+  if(S.status !== 'draft' || S.swaps_used >= MAX_SWAPS) return;
+  swapOpenFor = (swapOpenFor === code) ? null : code;
+  renderBox();
+}
+async function doSwap(outCode, inCode){
+  const inItem = RANKED.find(g => g.code === inCode);
+  const idx = S.box.findIndex(b => b.code === outCode);
+  if(!inItem || idx < 0 || S.swaps_used >= MAX_SWAPS) return;
+  S.box[idx] = inItem;
+  S.swaps_used++;
+  swapOpenFor = null;
+  saveBoxLocal();
+  renderAll();
+  await rpcTry('closet_box_swap', { p_uid: UID, p_out_code: outCode, p_in_code: inCode });
+}
+async function confirmBox(){
+  S.status = 'confirmed';
+  // จำชุดที่เคยอยู่ในกล่อง — เดือนหน้าจะได้ไม่จัดซ้ำ
+  const hist = getHistory();
+  S.box.forEach(b => { if(!hist.includes(b.code)) hist.push(b.code); });
+  try{ localStorage.setItem(LSK.history, JSON.stringify(hist)); }catch(e){}
+  saveBoxLocal();
+  renderAll();
+  await rpcTry('closet_box_confirm', { p_uid: UID });
+}
+async function skipBox(){
+  const ok = window.confirm(NAV.t(
+    'ข้ามได้สบายมากค่ะ สิทธิ์เช่าของรอบนี้ยังอยู่ครบ — ยืนยันข้ามกล่องเดือนนี้นะคะ?',
+    "Totally fine to skip — this cycle's rental credits stay untouched. Skip this month's box?"));
+  if(!ok) return;
+  S.status = 'skipped';
+  swapOpenFor = null;
+  saveBoxLocal();
+  renderAll();
+  await rpcTry('closet_box_skip', { p_uid: UID });
+}
+function undoSkip(){
+  // ยังไม่มี RPC สำหรับยกเลิกการข้าม — บันทึกฝั่ง client ไปก่อน (backend ค่อยเก็บจาก closet_day_get รอบถัดไป)
+  console.warn('[closet-day] undo skip — local only (no backend RPC yet)');
+  S.status = 'draft';
+  saveBoxLocal();
+  renderAll();
+}
+
+// ---------- render ----------
+function renderDay(){
+  let html = '';
+  for(let d = 1; d <= 28; d++){
+    html += '<button type="button" class="' + (S.day === d ? 'on' : '') + '" onclick="setDay(' + d + ')">' + d + '</button>';
+  }
+  $('dayGrid').innerHTML = html;
+  const box = $('dayChosen');
+  if(S.day){
+    const nd = nextOccurrence(S.day);
+    box.className = 'chosen';
+    box.textContent = NAV.t('กล่องถัดไปจะถึงวันที่ ' + fmtDate(nd) + ' นี้ค่ะ', 'Your next box arrives ' + fmtDate(nd) + '.');
+  }else{
+    box.className = 'chosen empty';
+    box.textContent = NAV.t('ยังไม่ได้เลือกวัน — แตะเลือกวันที่สะดวกด้านบนได้เลยนะคะ', "No day picked yet — tap a date above whenever you're ready.");
+  }
+}
+function renderBox(){
+  // countdown ยืนยันอัตโนมัติ
+  const n = daysUntilAutoConfirm();
+  const cl = $('countLine');
+  if(S.status !== 'draft' || n == null){
+    cl.textContent = '';
+  }else if(n > 0){
+    cl.textContent = NAV.t('ยืนยันอัตโนมัติในอีก ' + n + ' วัน — ไม่ต้องกดอะไรถ้าถูกใจแล้วค่ะ',
+                           'Auto-confirms in ' + n + ' day' + (n > 1 ? 's' : '') + " — nothing to do if you already love it.");
+  }else{
+    cl.textContent = NAV.t('กล่องนี้พร้อมยืนยันอัตโนมัติแล้วค่ะ — ไม่ต้องกดอะไรถ้าถูกใจแล้วนะคะ',
+                           "This box is ready to auto-confirm — nothing to do if you already love it.");
+  }
+
+  const swapsLeft = MAX_SWAPS - S.swaps_used;
+  const canSwap = S.status === 'draft' && swapsLeft > 0;
+  const alts = alternatives();
+
+  $('boxList').innerHTML = S.box.map(b => {
+    const tone = b.season === CUST.my_color_season
+      ? '<span class="chip tone">' + NAV.t('เข้าโทนสีคุณ', 'Matches your palette') + '</span>' : '';
+    const btn = '<button type="button" class="swapbtn" ' + (canSwap ? '' : 'disabled ')
+      + 'onclick="openSwap(\'' + esc(b.code) + '\')">' + NAV.t('สลับชิ้นนี้', 'Swap this piece') + '</button>';
+    let card = '<div class="gcard">'
+      + '<div class="gph" style="background:' + esc(b.bg || '#E7E2DA') + '">' + esc((b.name || '?').charAt(0)) + '</div>'
+      + '<div class="gbody">'
+      +   '<div class="gbrand">' + esc(b.brand) + '</div>'
+      +   '<div class="gname">' + esc(b.name) + '</div>'
+      +   '<div class="chips"><span class="chip tier">' + esc(b.tier) + '</span>' + tone + '</div>'
+      +   btn
+      + '</div></div>';
+    if(swapOpenFor === b.code && canSwap){
+      card += '<div class="altwrap"><div class="alt-h">' + NAV.t('เลือกชิ้นที่อยากได้แทนนะคะ', 'Pick the piece you’d rather have') + '</div>'
+        + (alts.length ? alts.map(a =>
+            '<div class="altrow">'
+          + '<div class="gph" style="background:' + esc(a.bg || '#E7E2DA') + '">' + esc((a.name || '?').charAt(0)) + '</div>'
+          + '<div class="a-name">' + esc(a.name) + '<small>' + esc(a.brand) + ' · ' + esc(a.tier) + '</small></div>'
+          + '<button type="button" class="pickbtn" onclick="doSwap(\'' + esc(b.code) + '\',\'' + esc(a.code) + '\')">' + NAV.t('เลือกชิ้นนี้แทน', 'Take this one') + '</button>'
+          + '</div>').join('')
+          : '<div style="font-size:12.5px;color:var(--muted)">' + NAV.t('ตอนนี้ยังไม่มีชิ้นสำรองค่ะ', 'No alternatives available right now.') + '</div>')
+        + '</div>';
+    }
+    return card;
+  }).join('');
+
+  const note = $('swapNote');
+  if(S.status !== 'draft'){
+    note.className = 'swapnote'; note.textContent = '';
+  }else if(swapsLeft <= 0){
+    note.className = 'swapnote max';
+    note.textContent = NAV.t('สลับได้ 2 ชิ้นต่อกล่องนะคะ', 'Up to 2 swaps per box.');
+  }else{
+    note.className = 'swapnote';
+    note.textContent = NAV.t('สลับได้อีก ' + swapsLeft + ' ชิ้น (สูงสุด 2 ชิ้นต่อกล่องค่ะ)', swapsLeft + ' swap' + (swapsLeft > 1 ? 's' : '') + ' left (max 2 per box).');
+  }
+}
+function renderActions(){
+  const area = $('actionArea');
+  if(S.status === 'confirmed'){
+    const when = S.day ? fmtDate(nextOccurrence(S.day)) : NAV.t('วันเปลี่ยนตู้ของคุณ', 'your closet day');
+    area.innerHTML = '<div class="statecard okc">' + NAV.t('เรียบร้อยค่ะ เจอกันวันที่ ' + when + ' นะคะ 💚', 'All set! See you on ' + when + ' 💚')
+      + '<span class="sub">' + NAV.t('เตรียมกล่องเดิมไว้ให้พร้อม เดี๋ยวเรารับกลับพร้อมกันเลยค่ะ', "Have the old box ready — we'll pick it up at the same time.") + '</span></div>';
+  }else if(S.status === 'skipped'){
+    area.innerHTML = '<div class="statecard skipc">' + NAV.t('ข้ามเดือนนี้แล้วค่ะ — พักได้เต็มที่ ไม่เสียสิทธิ์อะไรเลยนะคะ', 'This month is skipped — rest easy, you lose nothing.')
+      + '<br><button type="button" class="undobtn" onclick="undoSkip()">' + NAV.t('เปลี่ยนใจ กลับมารับกล่อง', 'Changed my mind — send the box') + '</button></div>';
+  }else{
+    area.innerHTML = '<button type="button" class="btnP" onclick="confirmBox()">' + NAV.t('ถูกใจ ส่งกล่องนี้เลย', 'Love it — send this box') + '</button>'
+      + '<button type="button" class="btnS" onclick="skipBox()">' + NAV.t('ข้ามเดือนนี้', 'Skip this month') + '</button>';
+  }
+}
+function renderAll(){ renderDay(); renderBox(); renderActions(); }
+
+// ---------- boot ----------
+async function boot(){
+  try{
+    const p = await LiffAuth.login();              // ใน LINE = auto · เว็บ = null จนกว่าจะกดปุ่ม
+    if(p) UID = p.userId;
+  }catch(e){ console.warn('LIFF login skipped:', e); }
+  $('demoCard').classList.toggle('hidden', !!UID);
+  await loadState();
+  renderAll();
+}
+boot();
+
+// สลับภาษา → re-render เนื้อหา dynamic ทั้งหมด
+window.addEventListener('lloop:lang', renderAll);
+</script>
+</body>
+</html>
