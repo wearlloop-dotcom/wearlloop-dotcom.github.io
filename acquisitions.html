@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · จัดการรับซื้อ (Closet Cash)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+  .tabs button{font:inherit;font-size:13px;padding:7px 14px;border-radius:99px;border:1px solid var(--line,#E3E0D8);background:#fff;cursor:pointer}
+  .tabs button.on{background:#1E1E1C;color:#fff;border-color:#1E1E1C}
+  .offer-row{display:flex;justify-content:space-between;gap:10px;padding:11px 4px;border-bottom:1px solid var(--line,#EFEDE7);cursor:pointer}
+  .offer-row:hover{background:#FAF9F5}
+  .offer-row .nm{font-weight:600}
+  .offer-row .meta{font-size:12.5px;color:var(--muted,#86857F)}
+  .st{font-size:12px;padding:2px 10px;border-radius:99px;white-space:nowrap;align-self:center}
+  .st.new{background:#FFF3D6}.st.priced{background:#E8F0FB}.st.accepted{background:#E3F2EC}.st.paid{background:#DCEFE4;font-weight:600}.st.rejected{background:#F3E9E7;color:#A32D2D}.st.stocked{background:#EEEDE9}
+  .photos{display:flex;gap:8px;overflow-x:auto;margin:8px 0}
+  .photos img{height:110px;border-radius:10px}
+  .kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:13.5px;margin:8px 0}
+  .kv .k{color:var(--muted,#86857F)}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .actions .btn{width:auto;padding:10px 16px;margin:0}
+  .price-row{display:flex;gap:8px;align-items:end;margin-top:10px}
+  .price-row input{max-width:140px}
+  .warnbox{border-left:3px solid #C99B3F;background:#FFF9EC;border-radius:10px;padding:12px 14px;font-size:13.5px;margin-bottom:14px}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h1>จัดการรับซื้อ</h1>
+    <div class="nav"><a href="/seller.html">ฟอร์มรับซื้อ</a><a href="/intake.html">รับเข้า</a><a href="/today.html">วันนี้</a></div>
+  </div>
+
+  <div class="wrap">
+    <section class="phead">
+      <div class="eyebrow">closet cash</div>
+      <h1>ข้อเสนอขายตู้เสื้อผ้า</h1>
+      <div class="sub">ตีราคา → ตกลงซื้อ → จ่ายเงิน → ส่งเข้าคลัง — จบในหน้าเดียว ทุกดีลมีร่องรอย</div>
+      <div class="kpis">
+        <div class="kpi"><div class="n" id="k_pending">—</div><div class="l">รอจัดการ</div></div>
+        <div class="kpi"><div class="n" id="k_accepted">—</div><div class="l">ตกลงแล้ว รอจ่าย</div></div>
+        <div class="kpi ok"><div class="n" id="k_paid">—</div><div class="l">จ่ายแล้ว รอเข้าคลัง</div></div>
+      </div>
+    </section>
+
+    <div class="warnbox" id="rpcWarn" style="display:none">
+      หน้านี้ต้องติดตั้ง RPC ชุดรับซื้อก่อน (seller_offers_list / seller_offer_get / seller_offer_price / seller_offer_decide / seller_offer_paid)
+      — รันไฟล์ <b>supabase-p0-moats.sql</b> ใน Supabase SQL Editor แล้วรีเฟรชหน้านี้ค่ะ
+    </div>
+
+    <div class="card">
+      <div class="tabs" id="tabs">
+        <button data-s="pending" class="on" onclick="setTab('pending')">รอจัดการ</button>
+        <button data-s="accepted" onclick="setTab('accepted')">ตกลงแล้ว</button>
+        <button data-s="paid" onclick="setTab('paid')">จ่ายแล้ว</button>
+        <button data-s="rejected" onclick="setTab('rejected')">ไม่รับ</button>
+        <button data-s="all" onclick="setTab('all')">ทั้งหมด</button>
+      </div>
+      <div id="list"><div class="muted">กำลังโหลด…</div></div>
+    </div>
+
+    <div class="card" id="detailCard" style="display:none">
+      <h2 id="dTitle">รายละเอียด</h2>
+      <div id="detail"></div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const baht=n=>n==null?'—':'฿'+Number(n).toLocaleString();
+  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':' ok');clearTimeout(T);T=setTimeout(()=>t.className='toast',2600);}
+  // RPC ยังไม่ติดตั้ง (ก่อนรัน supabase-p0-moats.sql) → โชว์แบนเนอร์แทนพัง
+  const missingRpc=e=>/function|not.*found|does not exist|404/i.test(e?.message||'');
+
+  const ST_TH={new:'ใหม่',priced:'ตีราคาแล้ว',accepted:'ตกลงซื้อ',paid:'จ่ายแล้ว',rejected:'ไม่รับ',stocked:'เข้าคลังแล้ว'};
+  const COND_MAP={'ใหม่ป้ายห้อย':'new','new':'new','ดีมาก':'good','ดี':'good','good':'good','พอใช้':'fair','fair':'fair','poor':'poor'};
+  let TAB='pending', CUR=null;
+
+  function setTab(s){ TAB=s; document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.s===s)); loadList(); }
+
+  async function loadList(){
+    const {data,error}=await sb.rpc('seller_offers_list',{p_status:TAB});
+    if(error){ if(missingRpc(error)){ $('rpcWarn').style.display='block'; $('list').innerHTML='<div class="muted">ยังเรียกข้อมูลไม่ได้ — ติดตั้ง RPC ก่อนค่ะ</div>'; return; }
+      $('list').innerHTML='<div class="muted" style="color:var(--clay)">ผิดพลาด: '+esc(error.message)+'</div>'; return; }
+    const rows=data?.offers||data||[];
+    $('k_pending').textContent=data?.kpi?.pending??'—';
+    $('k_accepted').textContent=data?.kpi?.accepted??'—';
+    $('k_paid').textContent=data?.kpi?.paid??'—';
+    if(!rows.length){ $('list').innerHTML='<div class="muted">ไม่มีรายการในแท็บนี้</div>'; return; }
+    $('list').innerHTML=rows.map(o=>{
+      const label=o.mode==='bulk'?('ขายเหมา '+(o.item_count||0)+' ตัว'):(o.name||'เสนอขาย');
+      const price=o.offered_price!=null?('เสนอซื้อ '+baht(o.offered_price)):(o.asking_price!=null?('ผู้ขายขอ '+baht(o.asking_price)):'');
+      return `<div class="offer-row" onclick="openOffer('${esc(o.id)}')">
+        <div><div class="nm">${esc(label)}</div>
+          <div class="meta">${esc(o.seller_name||'')}${o.seller_phone?' · '+esc(o.seller_phone):''}${price?' · '+price:''}</div></div>
+        <span class="st ${esc(o.status||'new')}">${esc(ST_TH[o.status]||o.status||'ใหม่')}</span>
+      </div>`;
+    }).join('');
+  }
+
+  async function openOffer(id){
+    const {data,error}=await sb.rpc('seller_offer_get',{p_id:id});
+    if(error){ toast(missingRpc(error)?'ติดตั้ง RPC ก่อนค่ะ':'เปิดไม่ได้: '+error.message,true); return; }
+    CUR=data; renderDetail(data);
+    $('detailCard').style.display='block'; $('detailCard').scrollIntoView({behavior:'smooth'});
+  }
+
+  function renderDetail(d){
+    const o=d.offer||d, s=d.seller||{};
+    $('dTitle').textContent=(o.mode==='bulk'?'ขายเหมา '+(o.item_count||0)+' ตัว':(o.name||'เสนอขาย'))+' · '+(ST_TH[o.status]||o.status||'');
+    const photos=(d.photos||o.photos||[]).map(u=>`<img src="${esc(u)}" referrerpolicy="no-referrer">`).join('');
+    const kv=[
+      ['ผู้ขาย',[s.name,s.phone].filter(Boolean).join(' · ')],
+      ['บัญชีโอน',[s.bank_name,s.bank_account].filter(Boolean).join(' ')||'—'],
+      ['แบรนด์',o.brand],['ไซซ์',o.size],['สภาพ',o.condition],['ตำหนิ',o.defects],
+      ['ราคาที่ผู้ขายขอ',o.asking_price!=null?baht(o.asking_price):'—'],
+      ['ใบรับซื้อ',o.voucher_no||'ยังไม่ออก'],['หมายเหตุ',o.note],
+    ].filter(([,v])=>v!=null&&v!=='').map(([k,v])=>`<div class="k">${k}</div><div>${esc(v)}</div>`).join('');
+    const canDecide=['new','priced'].includes(o.status||'new');
+    const canPay=o.status==='accepted';
+    const canStock=['paid','accepted'].includes(o.status);
+    $('detail').innerHTML=`
+      ${photos?`<div class="photos">${photos}</div>`:''}
+      <div class="kv">${kv}</div>
+      ${canDecide?`<div class="price-row">
+        <div><label>ราคาเสนอซื้อของเรา (บาท)</label><input id="dPrice" type="number" value="${o.offered_price??''}" placeholder="เช่น 800"></div>
+        <button class="btn ghost" style="width:auto;margin:0" onclick="savePrice()">บันทึกราคา</button>
+      </div>`:''}
+      <div class="actions">
+        ${canDecide?`<button class="btn sage" onclick="decide('accepted')">ตกลงซื้อ</button>
+                     <button class="btn ghost" onclick="decide('rejected')">ไม่รับซื้อ</button>`:''}
+        ${canPay?`<button class="btn sage" onclick="markPaid()">บันทึกจ่ายเงินแล้ว (ออกใบรับซื้อ)</button>`:''}
+        ${canStock?`<a class="btn" style="width:auto;text-decoration:none;display:inline-block" href="${intakeLink(o,d)}">ส่งเข้าคลัง → รับเข้า</a>`:''}
+      </div>
+      <div class="muted" style="margin-top:10px">ตกลงซื้อ = แจ้งผู้ขาย · จ่ายเงินแล้ว = ออกเลขใบรับซื้อผูก KYC/PDPA อัตโนมัติ · ส่งเข้าคลัง = เปิดหน้ารับเข้าพร้อมข้อมูลเติมให้แล้ว</div>`;
+  }
+
+  function intakeLink(o,d){
+    const photo=(d.photos||o.photos||[])[0]||'';
+    const q=new URLSearchParams({acq:o.id||'',name:o.name||'',brand:o.brand||'',size:o.size||'',
+      condition:COND_MAP[o.condition]||'',cost:(o.offered_price??o.asking_price)??'',color:o.color_name||'',fabric:o.fabric||'',photo});
+    return 'intake.html?'+q.toString();
+  }
+
+  async function savePrice(){
+    const v=Number($('dPrice').value); if(!v){ toast('ใส่ราคาก่อนค่ะ',true); return; }
+    const o=CUR.offer||CUR;
+    const {error}=await sb.rpc('seller_offer_price',{p_id:o.id,p_offered:v});
+    if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }
+    toast('บันทึกราคาเสนอซื้อแล้ว'); openOffer(o.id); loadList();
+  }
+  async function decide(decision){
+    const o=CUR.offer||CUR;
+    if(decision==='accepted' && o.offered_price==null && !$('dPrice')?.value){ toast('ตีราคาเสนอซื้อก่อนตกลงค่ะ',true); return; }
+    const note=decision==='rejected'?(prompt('เหตุผล (แจ้งผู้ขาย — เว้นว่างได้)','')||null):null;
+    const {error}=await sb.rpc('seller_offer_decide',{p_id:o.id,p_decision:decision,p_note:note});
+    if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }
+    toast(decision==='accepted'?'ตกลงซื้อแล้ว — นัดจ่ายเงิน/รับของต่อได้เลย':'บันทึกไม่รับซื้อแล้ว');
+    openOffer(o.id); loadList();
+  }
+  async function markPaid(){
+    const o=CUR.offer||CUR;
+    const ref=prompt('อ้างอิงการโอน (เลขสลิป/เวลาโอน — เว้นว่างได้)','')||null;
+    const {data,error}=await sb.rpc('seller_offer_paid',{p_id:o.id,p_ref:ref});
+    if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }
+    toast('บันทึกจ่ายแล้ว · ใบรับซื้อ '+(data?.voucher_no||'ออกแล้ว'));
+    openOffer(o.id); loadList();
+  }
+
+  // เปิดจาก today.html?id=<x> → เปิดรายการนั้นเลย
+  loadList().then(()=>{ const id=new URLSearchParams(location.search).get('id'); if(id) openOffer(id); });
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
+</body>
+</html>

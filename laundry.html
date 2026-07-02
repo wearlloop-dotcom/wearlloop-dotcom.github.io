@@ -113,6 +113,15 @@
   const $=id=>document.getElementById(id);
   let current=null;
   function toast(m){ const t=$('toast'); t.textContent=m; t.className='toast show'; setTimeout(()=>t.className='toast',1900); }
+  function handlerName(){                 // ชื่อผู้ตรวจ/ซัก — ลงไทม์ไลน์ชุด (ถามครั้งเดียว จำในเครื่อง)
+    let h=localStorage.getItem('lloop_handler');
+    if(!h && !sessionStorage.getItem('handlerAsked')){
+      sessionStorage.setItem('handlerAsked','1');
+      h=(prompt('ชื่อผู้ตรวจ/ซัก (บันทึกลงไทม์ไลน์ชุด — ใส่ครั้งเดียวจำให้ตลอด)','')||'').trim();
+      if(h) localStorage.setItem('lloop_handler',h);
+    }
+    return h||null;
+  }
 
   async function checkin(){
     const code=$('code').value.trim().toLowerCase(); if(!code){ toast('ใส่โค้ดก่อนค่ะ'); return; }
@@ -142,6 +151,14 @@
         <div class="sub">โค้ด ${current} · ซักมาแล้ว ${d.wash_count} ครั้ง</div>
         <div class="hint"> วิธีซัก: <b>${d.wash}</b></div>
         <div style="font-weight:600;margin:6px 0">2) ตรวจสภาพ — ของกลับมาเป็นยังไง?</div>
+        <div class="hint" style="margin:4px 0 8px">วิธีที่ซัก/ฆ่าเชื้อรอบนี้ (ลงไทม์ไลน์ชุด):
+          <select id="washMethod" style="font:inherit;padding:4px 8px;border-radius:8px">
+            <option value="ซักมือ + ตากแดด">ซักมือ + ตากแดด</option>
+            <option value="ซักเครื่องถนอมผ้า + อบ">ซักเครื่องถนอมผ้า + อบ</option>
+            <option value="ซักแห้ง (dry clean)">ซักแห้ง (dry clean)</option>
+            <option value="รีดไอน้ำฆ่าเชื้อ">รีดไอน้ำฆ่าเชื้อ</option>
+            <option value="ส่งร้านซักพาร์ทเนอร์">ส่งร้านซักพาร์ทเนอร์</option>
+          </select></div>
         <div style="margin:4px 0 8px"><button class="btn" style="background:var(--soft);padding:9px 13px;font-size:14px" onclick="qcShot()">ถ่ายรูปสภาพ (ตอนรับคืน) <span id="qcShotN" style="color:var(--muted)"></span></button></div>
         <div class="big">
           <button class="good" onclick="qc('good',true,0)"> ดี ครบ</button>
@@ -151,6 +168,7 @@
           <button class="wash" onclick="washDone()"> ซักเสร็จแล้ว ปล่อยเช่าต่อ</button>
         </div>
       </div>`;
+    const wm=localStorage.getItem('lloop_wash_method'); if(wm&&$('washMethod')) $('washMethod').value=wm;
   }
   let qcShotCount=0;
   async function qcShot(){
@@ -160,7 +178,7 @@
     else if(r.error!=='ยกเลิก'){ toast('รูปไม่สำเร็จ: '+r.error); }
   }
   async function qc(cond, complete, fee, notes){
-    const { data, error } = await sb.rpc('care_qc',{ p_code: current, p_condition: cond, p_complete: complete, p_fee: fee||0, p_notes: notes||null, p_handler: null });
+    const { data, error } = await sb.rpc('care_qc',{ p_code: current, p_condition: cond, p_complete: complete, p_fee: fee||0, p_notes: notes||null, p_handler: handlerName() });
     if(error){ toast('ผิดพลาด:'+error.message); return; }
     toast(data==='to_repair'?'บันทึก: เข้าคิวซ่อม':'บันทึกสภาพแล้ว ซักต่อได้');
     loadQueue();
@@ -168,7 +186,8 @@
   function qcDamage(){ const fee=prompt('ค่าเสียหายเท่าไร? (บาท)','300'); if(fee===null) return; const why=prompt('เสียหายตรงไหน?','ซิปขาด')||''; qc('damage',true,Number(fee)||0,why); }
   function qcMissing(){ const why=prompt('ขาดชิ้นอะไร?','เข็มขัด')||''; const fee=prompt('คิดค่าของขาดเท่าไร? (0=ไม่คิด)','0'); qc('missing',false,Number(fee)||0,why); }
   async function washDone(){
-    const { data, error } = await sb.rpc('care_wash_done',{ p_code: current, p_method:null, p_handler:null });
+    const m=$('washMethod')?$('washMethod').value:null; if(m) localStorage.setItem('lloop_wash_method',m);
+    const { data, error } = await sb.rpc('care_wash_done',{ p_code: current, p_method:m, p_handler:handlerName() });
     if(error){ toast('ผิดพลาด:'+error.message); return; }
     if(!data||data.error){ toast(data&&data.msg ? data.msg : 'ผิดพลาด'); loadQueue(); return; }  // เช่น ยังไม่ได้ตรวจสภาพ (QC) / ของไม่ครบชิ้น
     toast(`${current} ซักเสร็จ ปล่อยเช่าต่อได้`); $('panel').innerHTML=''; $('code').value=''; current=null; loadQueue();

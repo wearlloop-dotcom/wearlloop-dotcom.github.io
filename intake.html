@@ -199,6 +199,17 @@
     const stTxt = $('f_publish').checked ? '<b>ready</b> ขึ้นร้านแล้ว' : '<b>needs_review</b> (รออนุมัติ)';
     ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> · ${stTxt}${binMsg}${nfcMsg} — <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
   }
+
+  // เปิดจากหน้าจัดการรับซื้อ (acquisitions.html?...) → เติมข้อมูลจาก offer ให้เลย ไม่ต้องคีย์ใหม่
+  (function(){
+    const Q=new URLSearchParams(location.search);
+    if(!Q.get('name')&&!Q.get('acq')) return;
+    const setv=(id,v)=>{ const el=$(id); if(el&&v!=null&&v!=='') el.value=v; };
+    setv('f_name',Q.get('name')); setv('f_brand',Q.get('brand')); setv('f_photo',Q.get('photo'));
+    setv('f_size',Q.get('size')); setv('f_condition',Q.get('condition')); setv('f_cost',Q.get('cost'));
+    setv('f_colorname',Q.get('color')); setv('f_fabric',Q.get('fabric'));
+    if(Q.get('photo')&&typeof syncPreview==='function') syncPreview();
+  })();
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>

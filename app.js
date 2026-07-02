@@ -249,6 +249,13 @@ function personalScore(g) {
   if (sp.brands && sp.brands.includes(g.brand)) s += 18; // แบรนด์ที่ชอบ (พาร์ทเนอร์วิเคราะห์)
   if (sp.categories && g.category && sp.categories.includes(g.category)) s += 18;
   if (sp.avoid_colors && g.colors.some(col => sp.avoid_colors.includes(col[1]))) s -= 20;
+  const pf = c.prefs || {};                    // สไตล์/สี/โอกาสที่ลูกค้ากรอกเองในโปรไฟล์
+  if (Array.isArray(pf.occasions) && pf.occasions.length && g.occasion_tags.some(t => pf.occasions.includes(t))) s += 10;
+  const colorName = (g.colors[0] && g.colors[0][0]) || '';
+  if (colorName && colorName !== 'สี' && colorName !== '—') {
+    if ((pf.avoid_colors || '').includes(colorName)) s -= 15;      // สีที่บอกว่าเลี่ยง (จับจากชื่อสี)
+    else if ((pf.fav_colors || '').includes(colorName)) s += 10;   // สีโปรด
+  }
   if (EVENT && g.occasion_tags.includes(EVENT.occasion)) s += 12; // ตรงกับงานในปฏิทิน
   // ML-lite: รสนิยมที่เรียนจากพฤติกรรมจริง (category/brand/season ที่ลูกค้าสนใจเอง)
   const tt = c._taste;
@@ -2180,6 +2187,7 @@ function openProfile(onboard) {
       </div>
       ${onboard ? '' : `<div class="field"><label>${t('pNotes')}</label><input id="pNotes" value="${c.notes ||''}"></div>`}
       <button class="savebtn" onclick="saveProfile()">${onboard ? (lang==='th'?'บันทึก & ไปต่อ':'Save & continue') : t('pSave')}</button>
+      ${onboard ? '' : `<a href="my-events.html" style="display:block;text-align:center;margin-top:10px;font-size:13.5px">${lang==='th'?'ปฏิทินงานของฉัน — ฝากวันงานไว้ ให้สไตลิสต์จัดลุคล่วงหน้า →':'My event calendar — save your dates, we style ahead →'}</a>`}
     </div>`;
   $('#pOverlay').classList.add('open');
   document.body.style.overflow ='hidden';
