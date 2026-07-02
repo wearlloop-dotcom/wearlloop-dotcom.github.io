@@ -770,6 +770,23 @@
   .ocard .ost.done{background:#EAF1EC;color:#2E4A3A}
   .ocard .ost.cancel{background:#F3E2DC;color:#9A4A2E}
   .ocard .ost.spare{background:#EFE7DD;color:#8A7A5E}
+  /* แถบขั้นตอนออเดอร์: ชำระเงิน → ยืนยัน → ถึงมือคุณ → คืนแล้ว */
+  .ocard .osteps{display:flex;margin:12px 0 4px}
+  .ocard .ostep{flex:1;text-align:center;font-size:9.5px;color:#B9B4AA;position:relative;padding-top:13px}
+  .ocard .ostep i{position:absolute;top:0;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:#E3DED4}
+  .ocard .ostep::before{content:'';position:absolute;top:3.5px;left:-50%;width:100%;height:1.5px;background:#E3DED4}
+  .ocard .ostep:first-child::before{display:none}
+  .ocard .ostep.done i,.ocard .ostep.done::before{background:#9DBFB4}
+  .ocard .ostep.done{color:#7FA093}
+  .ocard .ostep.now i{background:#0F6E56;box-shadow:0 0 0 3px #E4F0EC}
+  .ocard .ostep.now::before{background:#9DBFB4}
+  .ocard .ostep.now{color:#0F6E56;font-weight:600}
+  /* ป้ายเตือนกำหนดคืน + กล่องวิธีคืนชุด */
+  .ocard .odue-soon{font-size:10px;font-weight:600;color:#8A6A1E;background:#F6EAD2;border-radius:10px;padding:2px 8px;margin-left:6px}
+  .ocard .odue-late{font-size:10px;font-weight:600;color:#9B1C1C;background:#F9E2E2;border-radius:10px;padding:2px 8px;margin-left:6px}
+  .ocard .oreturn{background:#F4F8F6;border:1px solid #D8E6E0;border-radius:12px;padding:12px 14px;margin-top:10px;font-size:12.5px;line-height:1.55;color:#2E4A3A}
+  .ocard .oreturn b{display:block;margin-bottom:3px}
+  .ocard .oreturn-btn{display:block;text-align:center;margin-top:9px;background:#0F6E56;color:#fff;border-radius:10px;padding:9px;font-weight:600;text-decoration:none;font-size:12.5px}
   .ocard-spare{background:#FCFAF4;border-style:dashed}
   .ocard .ospares{margin-top:12px;padding:11px 12px;background:#FAF5EA;border:1px dashed #E2D6BF;border-radius:6px}
   .ocard .ospares-h{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#A39472;margin-bottom:8px}
@@ -1414,6 +1431,6 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=79"></script>
+<script src="app.js?v=80"></script>
 </body>
 </html>

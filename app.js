@@ -3192,6 +3192,31 @@ function orderCard(r, spareList) {
     ? `<span class="oocc-val">${esc(r.occasion)}</span><button class="oocc-edit" onclick="editOrderOccasion('${r.rental_id}')">${th ? 'แก้ไข' : 'Edit'}</button>`
     : `<button class="oocc-add" onclick="editOrderOccasion('${r.rental_id}')">${th ? '+ บันทึกว่าใส่ไปงานอะไร' : '+ Add the occasion'}</button>`;
   const occLine = isSpare ? '' : `<div class="orow oocc"><span>${th ? 'งาน' : 'Occasion'}</span><span class="oocc-wrap">${occInner}</span></div>`;
+  // แถบขั้นตอน — มองปุ๊บรู้ว่าออเดอร์อยู่ตรงไหน ต่อไปต้องทำอะไร (แก้ความงง "จองแล้วยังไงต่อ")
+  const stepIdx = { hold: 0, reserved: 1, out: 2, returned: 3 }[r.status];
+  const steps = (!isSpare && stepIdx != null) ? (() => {
+    const names = th ? ['ชำระเงิน','ยืนยันแล้ว','ถึงมือคุณ','คืนแล้ว'] : ['Payment','Confirmed','With you','Returned'];
+    return `<div class="osteps">${names.map((n, i) =>
+      `<span class="ostep${i < stepIdx ? ' done' : ''}${i === stepIdx ? ' now' : ''}"><i></i>${n}</span>`).join('')}</div>`;
+  })() : '';
+  // ใกล้กำหนดคืน/เลยกำหนด — ป้ายเตือนบนแถวกำหนดคืน (เฉพาะชุดที่อยู่กับลูกค้า)
+  let dueBadge = '';
+  if (!isSpare && r.status === 'out' && r.due_at) {
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    const dleft = Math.round((new Date(String(r.due_at).slice(0, 10) + 'T00:00:00') - t0) / 86400000);
+    if (dleft < 0) dueBadge = `<span class="odue-late">${th ? `เลยกำหนด ${-dleft} วัน` : `${-dleft}d overdue`}</span>`;
+    else if (dleft === 0) dueBadge = `<span class="odue-soon">${th ? 'คืนวันนี้' : 'Due today'}</span>`;
+    else if (dleft === 1) dueBadge = `<span class="odue-soon">${th ? 'คืนพรุ่งนี้' : 'Due tomorrow'}</span>`;
+    else if (dleft <= 3) dueBadge = `<span class="odue-soon">${th ? `อีก ${dleft} วัน` : `in ${dleft} days`}</span>`;
+  }
+  // วิธีคืนชุด — โชว์เฉพาะตอนชุดอยู่กับลูกค้า (เดิม journey จบห้วน ๆ ไม่รู้ต้องคืนยังไง)
+  const returnBox = (!isSpare && r.status === 'out') ? `
+    <div class="oreturn">
+      <b>${th ? 'วิธีคืนชุด' : 'How to return'}</b>
+      ${th ? 'แพ็กชุดใส่บรรจุภัณฑ์เดิม แล้วทักแชต LINE เพื่อรับที่อยู่ส่งคืนหรือนัดรับ — คืนตรงเวลา มัดจำคืนไวหลังตรวจชุดค่ะ'
+           : 'Pack the piece in its original packaging and message us on LINE for the return address or pickup — deposit refunded after inspection.'}
+      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" class="oreturn-btn">${th ? 'ทักแชต LINE เรื่องคืนชุด' : 'Message us on LINE'}</a>
+    </div>` : '';
   return`<div class="ocard${isSpare?' ocard-spare':''}">
     <div class="otop">
       <span class="othumb" style="${orderThumb(r)}"></span>
@@ -3201,12 +3226,14 @@ function orderCard(r, spareList) {
         ${famBadge}
       </div>
     </div>
+    ${steps}
     ${durLine}
     <div class="orow"><span>${lang ==='th'?'วันที่ใช้':'Use date'}</span>${r.use_date? fmtDate(r.use_date):'—'}</div>
-    <div class="orow"><span>${lang ==='th'?'กำหนดคืน':'Due back'}</span>${r.due_at? fmtDate(r.due_at):'—'}</div>
+    <div class="orow"><span>${lang ==='th'?'กำหนดคืน':'Due back'}</span>${r.due_at? fmtDate(r.due_at):'—'}${dueBadge}</div>
     ${occLine}
     ${priceLine}
     ${ship}
+    ${returnBox}
     ${sparesBox}
     ${actions}
   </div>`;
