@@ -48,8 +48,27 @@
     }
   }
 
+  // เรียก edge function acct (บัญชี/สลิป/จัดซื้อ/คดี/แฟ้มหลักฐาน) — ที่เดียว ใช้ร่วมทุกหน้า
+  // คืน json ที่ parse แล้ว · โยน Error('unauth') เมื่อ 401/403 · โยนข้อความจาก body เมื่อ !ok หรือมี error
+  // (หน้าเรียกใช้: const api = window.opsAcct; แล้ว catch จัดการ UI ของตัวเองตามเดิม)
+  async function opsAcct(action, extra) {
+    if (!(await opsLogin())) throw new Error('redirecting');
+    const idToken = liff.getIDToken();
+    if (!idToken) throw new Error('unauth');
+    const r = await fetch(FUNCTIONS + '/acct', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + idToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ action: action }, extra || {})),
+    });
+    if (r.status === 401 || r.status === 403) throw new Error('unauth');
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || j.error) throw new Error(j.error || ('acct ' + r.status));
+    return j;
+  }
+
   // ออดิท: id_token ของ staff สำหรับ gate edge functions ที่เรียก AI (marketing-ai/intake-tagger/repair-advise)
   window.opsIdToken = function () { try { return (window.liff && liff.getIDToken && liff.getIDToken()) || ''; } catch (e) { return ''; } };
   window.opsLogin = opsLogin;
   window.opsRpc = opsRpc;
+  window.opsAcct = opsAcct;
 })();
