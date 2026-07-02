@@ -870,14 +870,14 @@ function bindInvite(){
             type:'bubble',
             hero:{ type:'image', url:'https://wearlloop-dotcom.github.io/line-flex/group.png', size:'full', aspectRatio:'2:1', aspectMode:'cover' },
             body:{ type:'box', layout:'vertical', spacing:'sm', contents:[
-              { type:'text', text:NAV.t('ชวนเข้ากลุ่ม','Group invite'), size:'xs', color:'#6FB3A6', weight:'bold' },
+              { type:'text', text:NAV.t('ชวนเข้ากลุ่ม','Group invite'), size:'xs', color:'#C9A86A', weight:'bold' },
               { type:'text', text:gname, weight:'bold', size:'xl', wrap:true, color:'#1A1A1A' },
-              { type:'text', text:NAV.t('จัดชุดเข้าตีม เช่าพร้อมกันออเดอร์เดียว','Dress in one theme, rent in one order'), size:'sm', color:'#8C8B86', wrap:true }
+              { type:'text', text:NAV.t('จัดชุดเข้าตีม เช่าพร้อมกันออเดอร์เดียว','Dress in one theme, rent in one order'), size:'sm', color:'#7C7361', wrap:true }
             ]},
             footer:{ type:'box', layout:'vertical', spacing:'sm', contents:[
-              { type:'button', style:'primary', color:'#6FB3A6',
+              { type:'button', style:'primary', color:'#3B362C',
                 action:{ type:'uri', label:NAV.t('เข้าร่วมกลุ่ม','Join the group'), uri: inviteUrl } },
-              { type:'button', style:'link', height:'sm',
+              { type:'button', style:'link', height:'sm', color:'#A75F3A',
                 action:{ type:'uri', label:NAV.t('ดูชุดให้เช่าก่อน','Browse dresses first'), uri:'https://liff.line.me/'+((window.CONFIG&&window.CONFIG.LIFF_ID)||'') } } ]}
           }}]);
           return;

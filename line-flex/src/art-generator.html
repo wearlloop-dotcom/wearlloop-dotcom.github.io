@@ -1,9 +1,12 @@
-<!doctype html><html><head><meta charset="utf-8"><style>
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
 body{margin:0;background:#fff}
-.tile{width:800px;height:400px;background:#FBFAF8;display:block}
+.tile{width:800px;height:400px;background:#FBF7EE;display:block}
 </style></head><body>
 <script>
-const INK='#1A1A1A', SAGE='#6FB3A6', SAGEBG='#E4F0EC', GOLD='#C9A86A', CLAY='#A75F3A', MUT='#8C8B86';
+// พาเลตต์ LLOOP จริง (จาก index.html/g.html): น้ำตาลเข้ม + clay + ทราย + ครีม + ทอง
+const INK='#3B362C', SAGE='#A75F3A', SAGEBG='#F0E7D4', GOLD='#C9A86A', CLAY='#A75F3A', MUT='#8A7A5E', NAVY='#2B5070';
 const S=`fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"`;
 const SG=`fill="none" stroke="${SAGE}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"`;
 const GD=`fill="none" stroke="${GOLD}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"`;
@@ -24,7 +27,7 @@ const receipt=(x,y,w=180,h=210)=>`<g transform="translate(${x},${y})">
   <path d="M0 0 H${w} V${h-16} L${w-w/6} ${h} L${w-w/3} ${h-16} L${w/2} ${h} L${w/3} ${h-16} L${w/6} ${h} L0 ${h-16} Z" fill="#fff" ${S.replace('fill="none" ','')}/>
   <line x1="28" y1="44" x2="${w-28}" y2="44" ${S}/><line x1="28" y1="80" x2="${w-28}" y2="80" ${S}/>
   <line x1="28" y1="116" x2="${w-60}" y2="116" ${S}/></g>`;
-const check=(x,y,r=42)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${SAGE}"/>
+const check=(x,y,r=42)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${INK}"/>
   <path d="M${x-r*0.45} ${y} L${x-r*0.1} ${y+r*0.35} L${x+r*0.5} ${y-r*0.3}" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>`;
 const alert=(x,y,r=42,c=CLAY)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>
   <line x1="${x}" y1="${y-r*0.45}" x2="${x}" y2="${y+r*0.1}" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
@@ -34,7 +37,7 @@ const box=(x,y,w=200,h=120)=>`<g transform="translate(${x},${y})">
   <rect x="${-w/2}" y="0" width="${w}" height="${h}" rx="6" fill="#fff" ${S.replace('fill="none" ','')}/>
   <line x1="0" y1="0" x2="0" y2="${h}" ${S}/>
   <path d="M${-w/2} 0 L${-w/2-34} -34 M${w/2} 0 L${w/2+34} -34 M${-w/2-34} -34 L${-6} -34 M${w/2+34} -34 L${6} -34" ${S}/>
-  <rect x="-22" y="${h*0.42}" width="44" height="26" rx="4" fill="${SAGEBG}" stroke="${SAGE}" stroke-width="4"/></g>`;
+  <rect x="-22" y="${h*0.42}" width="44" height="26" rx="4" fill="${SAGEBG}" stroke="${GOLD}" stroke-width="4"/></g>`;
 
 const ART = {
 // 1 ต้อนรับ/KYC ผ่าน — เดรสบนไม้แขวน + เช็ค
@@ -66,7 +69,7 @@ shipped: blob(430,210)+`<g transform="translate(300,150)">
   <path d="M180 34 H244 L272 72 V110 H180" fill="#fff" ${S}/>
   <line x1="196" y1="34" x2="196" y2="72" ${S}/><line x1="196" y1="72" x2="244" y2="72" ${S}/>
   <circle cx="52" cy="118" r="22" fill="${SAGEBG}" ${S}/><circle cx="224" cy="118" r="22" fill="${SAGEBG}" ${S}/>
-  <rect x="30" y="26" width="86" height="52" rx="6" fill="${SAGEBG}" stroke="${SAGE}" stroke-width="4"/></g>
+  <rect x="30" y="26" width="86" height="52" rx="6" fill="${SAGEBG}" stroke="${GOLD}" stroke-width="4"/></g>
   <line x1="176" y1="196" x2="252" y2="196" ${SG}/><line x1="150" y1="230" x2="238" y2="230" ${SG}/><line x1="188" y1="264" x2="248" y2="264" ${SG}/>`,
 // 7 เตือนคืน/กรอกเลขพัสดุ — กล่อง + ลูกศรวนกลับ
 'return': blob()+box(430,168)+`<path d="M300 262 Q210 250 216 172 Q222 112 296 108" ${SG}/>
@@ -103,7 +106,7 @@ queue: blob()+`<g transform="translate(400,196)">
 // 14 เครดิต — กระเป๋าเงิน + เหรียญ
 credit: blob()+`<rect x="300" y="160" width="200" height="130" rx="16" fill="#fff" ${S.replace('fill="none" ','')}/>
   <path d="M300 190 Q300 150 340 150 H480" ${S}/>
-  <rect x="448" y="204" width="70" height="44" rx="12" fill="${SAGEBG}" stroke="${SAGE}" stroke-width="4"/><circle cx="478" cy="226" r="7" fill="${SAGE}"/>
+  <rect x="448" y="204" width="70" height="44" rx="12" fill="${SAGEBG}" stroke="${GOLD}" stroke-width="4"/><circle cx="478" cy="226" r="7" fill="${SAGE}"/>
   <circle cx="356" cy="118" r="26" fill="${GOLD}"/><circle cx="404" cy="100" r="16" fill="${SAGEBG}" stroke="${GOLD}" stroke-width="4"/>`,
 // 15 วันเกิด — เค้ก + เทียน
 birthday: blob()+`<g transform="translate(400,180)">
@@ -117,8 +120,8 @@ birthday: blob()+`<g transform="translate(400,180)">
 style: blob()+`<g transform="translate(400,286)">
   <g transform="rotate(-42)"><rect x="-30" y="-186" width="60" height="150" rx="10" fill="${CLAY}"/></g>
   <g transform="rotate(-14)"><rect x="-30" y="-196" width="60" height="160" rx="10" fill="${GOLD}"/></g>
-  <g transform="rotate(14)"><rect x="-30" y="-196" width="60" height="160" rx="10" fill="${SAGE}"/></g>
-  <g transform="rotate(42)"><rect x="-30" y="-186" width="60" height="150" rx="10" fill="#fff" stroke="${SAGE}" stroke-width="4"/></g>
+  <g transform="rotate(14)"><rect x="-30" y="-196" width="60" height="160" rx="10" fill="${NAVY}"/></g>
+  <g transform="rotate(42)"><rect x="-30" y="-186" width="60" height="150" rx="10" fill="#fff" stroke="#A39472" stroke-width="4"/></g>
   <circle cx="0" cy="0" r="24" fill="#fff" ${S}/></g>`+spark(258,140,11)+spark(556,150,9,SAGE),
 // 17 นัดสไตลิสต์ — ปฏิทิน + นาฬิกา
 stylist: blob()+`<rect x="272" y="108" width="230" height="196" rx="14" fill="#fff" ${S.replace('fill="none" ','')}/>
@@ -148,9 +151,11 @@ contract: blob()+`<path d="M300 96 H460 L500 136 V304 H300 Z" fill="#fff" ${S}/>
   <path d="M330 278 Q352 262 368 278 Q384 292 404 276" ${SG}/>
   <g transform="translate(474,250) rotate(45)"><rect x="-9" y="-64" width="18" height="86" rx="6" fill="${GOLD}"/><path d="M-9 22 L0 44 L9 22 Z" fill="${INK}"/></g>`,
 };
+// โลโก้ LLOOP มุมบนซ้าย — Poppins เว้นช่องไฟตาม .logo ของเว็บ (letter-spacing .18em)
+const wordmark=`<text x="36" y="58" font-family="'Poppins',sans-serif" font-size="21" font-weight="700" letter-spacing="7" fill="${INK}">LLOOP</text>`;
 for (const [name, inner] of Object.entries(ART)) {
   const d=document.createElement('div'); d.className='tile'; d.id='tile-'+name;
-  d.innerHTML=`<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="400" fill="#FBFAF8"/>${inner}</svg>`;
+  d.innerHTML=`<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="400" fill="#FBF7EE"/>${inner}${wordmark}</svg>`;
   document.body.appendChild(d);
 }
 </script></body></html>

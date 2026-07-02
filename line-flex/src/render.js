@@ -7,6 +7,8 @@ const fs = require('fs');
   const browser = await chromium.launch();
   const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 900, height: 500 } });
   await page.goto('file://' + path.join(__dirname, 'art.html'));
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(800);
   const tiles = await page.$$('.tile');
   for (const t of tiles) {
     const id = await t.getAttribute('id');

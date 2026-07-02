@@ -10,10 +10,10 @@
 ## หลักการดีไซน์ (ทุกใบ)
 
 - **ภาพนำเสมอ** — ใบที่ผูกกับชุดใช้**รูปชุดจริงจากเว็บ** (`{{PHOTO_URL}}` — รูปเดียวกับการ์ดหน้าร้าน) · ใบสถานะระบบใช้ **line art** โทนแบรนด์ที่โฮสต์ในเว็บ: `https://wearlloop-dotcom.github.io/line-flex/<ชื่อ>.png` (มี 20 ภาพในโฟลเดอร์ `line-flex/`)
-- **ตัวอักษรน้อย**: kicker 2–4 คำ (สี sage) → บรรทัดหลักตัวใหญ่ 1 บรรทัด → ข้อมูลย่อ 1 บรรทัด จบ
+- **ตัวอักษรน้อย**: kicker 2–4 คำ (สีทอง — ตามป้าย label ของเว็บ) → บรรทัดหลักตัวใหญ่ 1 บรรทัด → ข้อมูลย่อ 1 บรรทัด จบ
 - **ไม่มี emoji** ทุกใบ
-- **ปุ่ม**: หลัก 1 ปุ่ม (primary `#6FB3A6`) + รองไม่เกิน 2 (link) — ทุกลิงก์เป็น LIFF permanent link `https://liff.line.me/{{LIFF_ID}}/...` (LIFF_ID: `2010486714-1g6lDuHo`) · `{{OA_CHAT_URL}}` = แชท LINE OA
-- โทนสี: sage `#6FB3A6` · ink `#1A1A1A` · muted `#8C8B86` · เตือน `#A75F3A` (clay ตามเว็บ)
+- **ปุ่ม**: หลัก 1 ปุ่ม (primary `#3B362C` — สีเดียวกับปุ่ม "จอง" ของเว็บ) + รองไม่เกิน 2 (link สี clay) — ทุกลิงก์เป็น LIFF permanent link `https://liff.line.me/{{LIFF_ID}}/...` (LIFF_ID: `2010486714-1g6lDuHo`) · `{{OA_CHAT_URL}}` = แชท LINE OA
+- โทนสีตาม UI จริงของเว็บ: ปุ่ม/เส้นหลัก `#3B362C` · kicker ทอง `#C9A86A` · เตือน/ปุ่มรอง clay `#A75F3A` · ตัวรอง `#7C7361` · พื้นภาพครีม `#FBF7EE` · line art มีโลโก้ LLOOP เว้นช่องไฟมุมบนทุกภาพ
 
 โครง hero ที่ใช้ซ้ำ:
 - line art → `{ "type":"image", "url":"https://wearlloop-dotcom.github.io/line-flex/<ชื่อ>.png", "size":"full", "aspectRatio":"2:1", "aspectMode":"cover" }`
@@ -30,18 +30,18 @@ altText: `รับคำจองแล้ว · {{GARMENT_NAME}}`
   "type": "bubble",
   "hero": { "type": "image", "url": "{{PHOTO_URL}}", "size": "full", "aspectRatio": "4:3", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "รับคำจองแล้ว", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "รับคำจองแล้ว", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "รับ {{START_DATE}} · คืน {{END_DATE}}", "size": "sm", "color": "#8C8B86" },
+    { "type": "text", "text": "รับ {{START_DATE}} · คืน {{END_DATE}}", "size": "sm", "color": "#7C7361" },
     { "type": "box", "layout": "baseline", "margin": "md", "contents": [
       { "type": "text", "text": "ชำระภายใน {{PAY_DEADLINE}}", "size": "xs", "color": "#A75F3A", "flex": 0 },
       { "type": "text", "text": "฿{{AMOUNT}}", "size": "lg", "weight": "bold", "align": "end" }
     ]}
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ชำระเงิน", "uri": "https://liff.line.me/{{LIFF_ID}}/pay.html?order={{ORDER_ID}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "ออเดอร์ของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me" } }
   ]}
 }
@@ -56,12 +56,12 @@ altText: `ชำระเงินสำเร็จ · ออเดอร์ {{
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/payment-ok.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "ชำระเงินสำเร็จ", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "ชำระเงินสำเร็จ", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "฿{{AMOUNT}}", "weight": "bold", "size": "xxl" },
-    { "type": "text", "text": "ออเดอร์ {{ORDER_CODE}} · {{PAID_AT}}", "size": "sm", "color": "#8C8B86" }
+    { "type": "text", "text": "ออเดอร์ {{ORDER_CODE}} · {{PAID_AT}}", "size": "sm", "color": "#7C7361" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ดูออเดอร์ของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me" } }
   ]}
 }
@@ -78,12 +78,12 @@ altText: `สลิปยังไม่ผ่าน · ออเดอร์ {{
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
     { "type": "text", "text": "สลิปยังไม่ผ่าน", "size": "xs", "color": "#A75F3A", "weight": "bold" },
     { "type": "text", "text": "{{REASON}}", "weight": "bold", "size": "lg", "wrap": true },
-    { "type": "text", "text": "ถือคิวให้ถึง {{HOLD_UNTIL}}", "size": "sm", "color": "#8C8B86" }
+    { "type": "text", "text": "ถือคิวให้ถึง {{HOLD_UNTIL}}", "size": "sm", "color": "#7C7361" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ส่งสลิปใหม่", "uri": "https://liff.line.me/{{LIFF_ID}}/pay.html?order={{ORDER_ID}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "คุยกับแอดมิน", "uri": "{{OA_CHAT_URL}}" } }
   ]}
 }
@@ -98,14 +98,14 @@ altText: `จัดส่งแล้ว · {{TRACKING_NO}}`
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/shipped.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "จัดส่งแล้ว", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "จัดส่งแล้ว", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "{{CARRIER}} · {{TRACKING_NO}} · ถึงราว {{ETA_DATE}}", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "{{CARRIER}} · {{TRACKING_NO}} · ถึงราว {{ETA_DATE}}", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ติดตามพัสดุ", "uri": "{{TRACKING_URL}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "วิธีคืนชุด", "uri": "https://liff.line.me/{{LIFF_ID}}/rental-terms.html#return" } }
   ]}
 }
@@ -122,12 +122,12 @@ altText: `พรุ่งนี้กำหนดคืน · {{GARMENT_NAME}}`
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
     { "type": "text", "text": "พรุ่งนี้กำหนดคืน", "size": "xs", "color": "#A75F3A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "ใช้ถุง + ใบปะหน้าในกล่อง แล้วกรอกเลขพัสดุ", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "ใช้ถุง + ใบปะหน้าในกล่อง แล้วกรอกเลขพัสดุ", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "กรอกเลขพัสดุส่งคืน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&return={{RENTAL_ID}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "ต่อวันเช่า", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&extend={{RENTAL_ID}}" } }
   ]}
 }
@@ -142,12 +142,12 @@ altText: `รับเลขพัสดุแล้ว · {{RETURN_TRACKING_NO}
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/return-received.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "รับเลขพัสดุแล้ว", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "รับเลขพัสดุแล้ว", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{RETURN_COURIER}} · {{RETURN_TRACKING_NO}}", "weight": "bold", "size": "lg", "wrap": true },
-    { "type": "text", "text": "ถึงร้านแล้วแจ้งผลตรวจ + คืนมัดจำทาง LINE", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "ถึงร้านแล้วแจ้งผลตรวจ + คืนมัดจำทาง LINE", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ติดตามพัสดุขากลับ", "uri": "{{RETURN_TRACKING_URL}}" } }
   ]}
 }
@@ -162,14 +162,14 @@ altText: `รับชุดคืนแล้ว สภาพผ่าน`
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/qc-pass.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "รับคืนแล้ว · สภาพผ่าน", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "รับคืนแล้ว · สภาพผ่าน", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "มัดจำ ฿{{DEPOSIT}} คืนภายใน {{REFUND_DAYS}} วัน", "weight": "bold", "size": "lg", "wrap": true },
-    { "type": "text", "text": "รีวิวสั้น ๆ ช่วยเพื่อนเลือกไซส์ได้มาก", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "รีวิวสั้น ๆ ช่วยเพื่อนเลือกไซส์ได้มาก", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "เขียนรีวิว รับเครดิต", "uri": "https://liff.line.me/{{LIFF_ID}}/review.html?rental={{RENTAL_ID}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "หาชุดงานถัดไป", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html" } }
   ]}
 }
@@ -187,14 +187,14 @@ altText: `ผลตรวจสภาพ · ค่าดูแลเพิ่ม
     { "type": "text", "text": "ผลตรวจสภาพชุด", "size": "xs", "color": "#A75F3A", "weight": "bold" },
     { "type": "text", "text": "{{ISSUE_SUMMARY}}", "weight": "bold", "size": "lg", "wrap": true },
     { "type": "box", "layout": "baseline", "margin": "md", "contents": [
-      { "type": "text", "text": "หักจากมัดจำ ฿{{DEPOSIT}}", "size": "xs", "color": "#8C8B86", "flex": 0 },
+      { "type": "text", "text": "หักจากมัดจำ ฿{{DEPOSIT}}", "size": "xs", "color": "#7C7361", "flex": 0 },
       { "type": "text", "text": "฿{{FEE}}", "size": "lg", "weight": "bold", "align": "end", "color": "#A75F3A" }
     ]}
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ดูรูปหลักฐาน", "uri": "{{EVIDENCE_URL}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "คุยกับแอดมิน", "uri": "{{OA_CHAT_URL}}" } }
   ]}
 }
@@ -209,13 +209,13 @@ altText: `ชุดที่คุณขอไว้มาแล้ว · {{GARM
   "type": "bubble",
   "hero": { "type": "image", "url": "{{PHOTO_URL}}", "size": "full", "aspectRatio": "3:4", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "ชุดที่คุณขอไว้ มาแล้ว", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "ชุดที่คุณขอไว้ มาแล้ว", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "{{BRAND}} · ไซส์ {{SIZE}} · ฿{{PRICE}}", "size": "sm", "color": "#8C8B86" },
+    { "type": "text", "text": "{{BRAND}} · ไซส์ {{SIZE}} · ฿{{PRICE}}", "size": "sm", "color": "#7C7361" },
     { "type": "text", "text": "ถือคิวให้คุณก่อนใคร {{HOLD_HOURS}} ชม.", "size": "xs", "color": "#A75F3A", "margin": "md" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "จองเลย", "uri": "https://liff.line.me/{{LIFF_ID}}/g.html?code={{GARMENT_CODE}}" } }
   ]}
 }
@@ -230,14 +230,14 @@ altText: `วันที่คุณรอ ว่างแล้ว · {{GARMEN
   "type": "bubble",
   "hero": { "type": "image", "url": "{{PHOTO_URL}}", "size": "full", "aspectRatio": "4:3", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "คิวของคุณมาถึงแล้ว", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "คิวของคุณมาถึงแล้ว", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "วันที่ {{DATE}} ว่างแล้ว · เลือกก่อนใคร {{HOLD_HOURS}} ชม.", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "วันที่ {{DATE}} ว่างแล้ว · เลือกก่อนใคร {{HOLD_HOURS}} ชม.", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "จองวันนี้เลย", "uri": "https://liff.line.me/{{LIFF_ID}}/g.html?code={{GARMENT_CODE}}&date={{DATE}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "ออกจากคิว", "uri": "https://liff.line.me/{{LIFF_ID}}/wishlist.html?leave={{QUEUE_ID}}" } }
   ]}
 }
@@ -252,13 +252,13 @@ altText: `ลุคของคุณขึ้นฟีดแล้ว`
   "type": "bubble",
   "hero": { "type": "image", "url": "{{LOOK_PHOTO_URL}}", "size": "full", "aspectRatio": "3:4", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "อนุมัติแล้ว", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "อนุมัติแล้ว", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "ลุคของคุณขึ้นฟีดแล้ว", "weight": "bold", "size": "lg", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ดูในฟีด", "uri": "https://liff.line.me/{{LIFF_ID}}/looks.html?look={{LOOK_ID}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "แชร์ให้เพื่อน", "uri": "https://liff.line.me/{{LIFF_ID}}/looks.html?look={{LOOK_ID}}&share=1" } }
   ]}
 }
@@ -273,14 +273,14 @@ altText: `ผลประเมินซ่อม · {{GARMENT_NAME}}`
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/repair.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "ผลประเมินซ่อม", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "ผลประเมินซ่อม", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "lg", "wrap": true },
-    { "type": "text", "text": "{{ASSESSMENT}} · ฿{{COST}} · {{DAYS}} วัน", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "{{ASSESSMENT}} · ฿{{COST}} · {{DAYS}} วัน", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ยืนยันให้ซ่อม", "uri": "https://liff.line.me/{{LIFF_ID}}/repair.html?job={{JOB_ID}}&approve=1" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "คุยกับแอดมินก่อน", "uri": "{{OA_CHAT_URL}}" } }
   ]}
 }
@@ -295,14 +295,14 @@ altText: `กลุ่ม {{GROUP_NAME}} รอคุณอยู่ · ฿{{AMO
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/group.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "กลุ่ม {{GROUP_NAME}} รอคุณอยู่", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "กลุ่ม {{GROUP_NAME}} รอคุณอยู่", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "฿{{AMOUNT}}", "weight": "bold", "size": "xxl" },
-    { "type": "text", "text": "จ่ายแล้ว {{PAID_COUNT}}/{{TOTAL_COUNT}} คน · ครบภายใน {{DEADLINE}}", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "จ่ายแล้ว {{PAID_COUNT}}/{{TOTAL_COUNT}} คน · ครบภายใน {{DEADLINE}}", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "จ่ายส่วนของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/pay.html?group={{GROUP_ORDER_ID}}&member={{MEMBER_ID}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "สถานะกลุ่ม", "uri": "https://liff.line.me/{{LIFF_ID}}/event.html?order={{GROUP_ORDER_ID}}" } }
   ]}
 }
@@ -317,12 +317,12 @@ altText: `สำเนาสัญญา {{CONTRACT_NO}}`
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/contract.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "ลงนามเรียบร้อย", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "ลงนามเรียบร้อย", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "สัญญา {{CONTRACT_NO}}", "weight": "bold", "size": "lg", "wrap": true },
-    { "type": "text", "text": "{{SIGNED_AT}}", "size": "sm", "color": "#8C8B86" }
+    { "type": "text", "text": "{{SIGNED_AT}}", "size": "sm", "color": "#7C7361" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "เปิดดูสัญญา", "uri": "https://liff.line.me/{{LIFF_ID}}/contract.html?token={{CONTRACT_TOKEN}}" } }
   ]}
 }
@@ -337,14 +337,14 @@ altText: `ยืนยันตัวตนผ่านแล้ว เช่า
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/welcome.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "ยืนยันตัวตนผ่านแล้ว", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "ยืนยันตัวตนผ่านแล้ว", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "ยินดีต้อนรับ {{FIRST_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "เช่าได้ทุกชุดในร้านทันที", "size": "sm", "color": "#8C8B86" }
+    { "type": "text", "text": "เช่าได้ทุกชุดในร้านทันที", "size": "sm", "color": "#7C7361" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "เริ่มเลือกชุด", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "ควิซสไตล์ 2 นาที", "uri": "https://liff.line.me/{{LIFF_ID}}/quiz.html" } }
   ]}
 }
@@ -361,10 +361,10 @@ altText: `อีก {{HOURS_LEFT}} ชม. คิวจะหลุด · {{GARM
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
     { "type": "text", "text": "อีก {{HOURS_LEFT}} ชม. คิวจะหลุด", "size": "xs", "color": "#A75F3A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "ยอด ฿{{AMOUNT}} · ถึง {{HOLD_UNTIL}}", "size": "sm", "color": "#8C8B86" }
+    { "type": "text", "text": "ยอด ฿{{AMOUNT}} · ถึง {{HOLD_UNTIL}}", "size": "sm", "color": "#7C7361" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ชำระเงินตอนนี้", "uri": "https://liff.line.me/{{LIFF_ID}}/pay.html?order={{ORDER_ID}}" } }
   ]}
 }
@@ -379,12 +379,12 @@ altText: `{{CHANGE_TITLE}}สำเร็จ · {{GARMENT_NAME}}` (`{{CHANGE_TIT
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/booking.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "{{CHANGE_TITLE}}สำเร็จ", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "{{CHANGE_TITLE}}สำเร็จ", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "lg", "wrap": true },
-    { "type": "text", "text": "{{CHANGE_DETAIL}}", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "{{CHANGE_DETAIL}}", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ดูออเดอร์ของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me" } }
   ]}
 }
@@ -402,12 +402,12 @@ altText: `สลับชุดสำรองให้แล้ว · {{SPARE_N
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
     { "type": "text", "text": "สลับเป็นชุดสำรองให้แล้ว", "size": "xs", "color": "#A75F3A", "weight": "bold" },
     { "type": "text", "text": "{{SPARE_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "ไม่มีค่าใช้จ่ายเพิ่ม · ส่งตามกำหนดเดิม", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "ไม่มีค่าใช้จ่ายเพิ่ม · ส่งตามกำหนดเดิม", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ดูชุดที่จะได้รับ", "uri": "https://liff.line.me/{{LIFF_ID}}/g.html?code={{SPARE_CODE}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "คุยกับแอดมิน", "uri": "{{OA_CHAT_URL}}" } }
   ]}
 }
@@ -425,15 +425,15 @@ altText: `เลยกำหนดคืน {{DAYS_LATE}} วัน · {{GARMENT
     { "type": "text", "text": "เลยกำหนดคืน {{DAYS_LATE}} วัน", "size": "xs", "color": "#A75F3A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
     { "type": "box", "layout": "baseline", "margin": "md", "contents": [
-      { "type": "text", "text": "ค่าปรับ ฿{{LATE_FEE_PER_DAY}}/วัน", "size": "xs", "color": "#8C8B86", "flex": 0 },
+      { "type": "text", "text": "ค่าปรับ ฿{{LATE_FEE_PER_DAY}}/วัน", "size": "xs", "color": "#7C7361", "flex": 0 },
       { "type": "text", "text": "฿{{LATE_FEE_TOTAL}}", "size": "lg", "weight": "bold", "align": "end", "color": "#A75F3A" }
     ]},
-    { "type": "text", "text": "กรอกเลขพัสดุแล้วค่าปรับหยุดนับทันที", "size": "xs", "color": "#8C8B86", "wrap": true, "margin": "md" }
+    { "type": "text", "text": "กรอกเลขพัสดุแล้วค่าปรับหยุดนับทันที", "size": "xs", "color": "#7C7361", "wrap": true, "margin": "md" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "กรอกเลขพัสดุส่งคืน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&return={{RENTAL_ID}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "คุยกับแอดมิน", "uri": "{{OA_CHAT_URL}}" } }
   ]}
 }
@@ -448,12 +448,12 @@ altText: `คืนเงิน ฿{{AMOUNT}} เรียบร้อย`
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/refund.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "คืนเงินเรียบร้อย", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "คืนเงินเรียบร้อย", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "฿{{AMOUNT}}", "weight": "bold", "size": "xxl" },
-    { "type": "text", "text": "{{REFUND_KIND}} · {{METHOD}} · {{REFUNDED_AT}}", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "{{REFUND_KIND}} · {{METHOD}} · {{REFUNDED_AT}}", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ดูชุดใหม่เข้าร้าน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?sort=new" } }
   ]}
 }
@@ -468,13 +468,13 @@ altText: `เข้าใหม่ ตรงสไตล์คุณ · {{GARMEN
   "type": "bubble",
   "hero": { "type": "image", "url": "{{PHOTO_URL}}", "size": "full", "aspectRatio": "3:4", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "เข้าใหม่ · ตรงสไตล์คุณ", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "เข้าใหม่ · ตรงสไตล์คุณ", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "{{BRAND}} · ไซส์ {{SIZE}} · ฿{{PRICE}}", "size": "sm", "color": "#8C8B86" },
-    { "type": "text", "text": "{{MATCH_REASON}}", "size": "xs", "color": "#8C8B86", "wrap": true, "margin": "md" }
+    { "type": "text", "text": "{{BRAND}} · ไซส์ {{SIZE}} · ฿{{PRICE}}", "size": "sm", "color": "#7C7361" },
+    { "type": "text", "text": "{{MATCH_REASON}}", "size": "xs", "color": "#7C7361", "wrap": true, "margin": "md" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ดูชุดนี้", "uri": "https://liff.line.me/{{LIFF_ID}}/g.html?code={{GARMENT_CODE}}" } }
   ]}
 }
@@ -491,10 +491,10 @@ altText: `เครดิต ฿{{AMOUNT}} หมดอายุ {{EXPIRE_DATE}}
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
     { "type": "text", "text": "เครดิตใกล้หมดอายุ", "size": "xs", "color": "#A75F3A", "weight": "bold" },
     { "type": "text", "text": "฿{{AMOUNT}}", "weight": "bold", "size": "xxl" },
-    { "type": "text", "text": "ใช้ได้ถึง {{EXPIRE_DATE}}", "size": "sm", "color": "#8C8B86" }
+    { "type": "text", "text": "ใช้ได้ถึง {{EXPIRE_DATE}}", "size": "sm", "color": "#7C7361" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ใช้เครดิตเลือกชุด", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html" } }
   ]}
 }
@@ -509,12 +509,12 @@ altText: `เดือนเกิดนี้ เช่าฟรี 1 ชุด
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/birthday.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "สุขสันต์วันเกิด", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "สุขสันต์วันเกิด", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "เช่าฟรี 1 ชุด เดือนเกิดนี้", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "ถึง ฿{{BUDGET}} · ใช้สิทธิ์ได้ถึง {{VALID_UNTIL}}", "size": "sm", "color": "#8C8B86" }
+    { "type": "text", "text": "ถึง ฿{{BUDGET}} · ใช้สิทธิ์ได้ถึง {{VALID_UNTIL}}", "size": "sm", "color": "#7C7361" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ใช้สิทธิ์วันเกิด", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?birthday=1" } }
   ]}
 }
@@ -529,14 +529,14 @@ altText: `รับเครดิตชวนเพื่อน ฿{{AMOUNT}}`
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/credit.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "เครดิตชวนเพื่อนเข้าแล้ว", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "เครดิตชวนเพื่อนเข้าแล้ว", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "+฿{{AMOUNT}}", "weight": "bold", "size": "xxl" },
-    { "type": "text", "text": "{{FRIEND_NAME}} เช่าครั้งแรกสำเร็จ", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "{{FRIEND_NAME}} เช่าครั้งแรกสำเร็จ", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ใช้เครดิตเลือกชุด", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "ชวนเพื่อนต่อ", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&referral=1" } }
   ]}
 }
@@ -551,13 +551,13 @@ altText: `ผลวิเคราะห์สีของคุณเสร็�
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/style.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "ผลวิเคราะห์เสร็จแล้ว", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "ผลวิเคราะห์เสร็จแล้ว", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "คุณคือโทน {{SEASON}}", "weight": "bold", "size": "xl", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ดูผลวิเคราะห์", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?style=result" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "ชุดตรงโทนของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?season={{SEASON_KEY}}" } }
   ]}
 }
@@ -572,14 +572,14 @@ altText: `{{KIND}}นัดสไตลิสต์ · {{APPT_DATE}} {{APPT_TIME
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/stylist.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "{{KIND}}นัดสไตลิสต์", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "{{KIND}}นัดสไตลิสต์", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{STYLIST_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "{{APPT_DATE}} · {{APPT_TIME}} · {{MODE}}", "size": "sm", "color": "#8C8B86", "wrap": true }
+    { "type": "text", "text": "{{APPT_DATE}} · {{APPT_TIME}} · {{MODE}}", "size": "sm", "color": "#7C7361", "wrap": true }
   ]},
   "footer": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "ดูนัดของฉัน", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&appt={{APPT_ID}}" } },
-    { "type": "button", "style": "link", "height": "sm",
+    { "type": "button", "style": "link", "height": "sm", "color": "#A75F3A",
       "action": { "type": "uri", "label": "เลื่อน / ยกเลิกนัด", "uri": "https://liff.line.me/{{LIFF_ID}}/index.html?tab=me&appt={{APPT_ID}}&manage=1" } }
   ]}
 }
@@ -594,12 +594,12 @@ altText: `{{FRIEND_NAME}} เข้ากลุ่ม {{GROUP_NAME}} แล้�
   "type": "bubble",
   "hero": { "type": "image", "url": "https://wearlloop-dotcom.github.io/line-flex/group.png", "size": "full", "aspectRatio": "2:1", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "สมาชิกใหม่เข้ากลุ่ม", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "สมาชิกใหม่เข้ากลุ่ม", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{FRIEND_NAME}} ตอบรับแล้ว", "weight": "bold", "size": "lg", "wrap": true },
-    { "type": "text", "text": "กลุ่ม {{GROUP_NAME}} · {{MEMBER_COUNT}} คน", "size": "sm", "color": "#8C8B86" }
+    { "type": "text", "text": "กลุ่ม {{GROUP_NAME}} · {{MEMBER_COUNT}} คน", "size": "sm", "color": "#7C7361" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "จัดธีมกลุ่ม", "uri": "https://liff.line.me/{{LIFF_ID}}/family.html?group={{GROUP_ID}}" } }
   ]}
 }
@@ -614,12 +614,12 @@ altText: `ชุดในตะกร้ายังรออยู่ · {{GARM
   "type": "bubble",
   "hero": { "type": "image", "url": "{{PHOTO_URL}}", "size": "full", "aspectRatio": "3:4", "aspectMode": "cover" },
   "body": { "type": "box", "layout": "vertical", "spacing": "sm", "contents": [
-    { "type": "text", "text": "ยังเก็บไว้ให้อยู่", "size": "xs", "color": "#6FB3A6", "weight": "bold" },
+    { "type": "text", "text": "ยังเก็บไว้ให้อยู่", "size": "xs", "color": "#C9A86A", "weight": "bold" },
     { "type": "text", "text": "{{GARMENT_NAME}}", "weight": "bold", "size": "xl", "wrap": true },
-    { "type": "text", "text": "วันที่ {{DATE_RANGE}} ยังว่าง", "size": "sm", "color": "#8C8B86" }
+    { "type": "text", "text": "วันที่ {{DATE_RANGE}} ยังว่าง", "size": "sm", "color": "#7C7361" }
   ]},
   "footer": { "type": "box", "layout": "vertical", "contents": [
-    { "type": "button", "style": "primary", "color": "#6FB3A6",
+    { "type": "button", "style": "primary", "color": "#3B362C",
       "action": { "type": "uri", "label": "จองต่อให้จบ", "uri": "https://liff.line.me/{{LIFF_ID}}/g.html?code={{GARMENT_CODE}}&resume=1" } }
   ]}
 }
