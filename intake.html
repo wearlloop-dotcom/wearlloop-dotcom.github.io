@@ -234,6 +234,9 @@
     const ok=$('ok'); ok.style.display='block';
     const stTxt = $('f_publish').checked ? '<b>ready</b> ขึ้นร้านแล้ว' : '<b>needs_review</b> (รออนุมัติ)';
     ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> · ${stTxt}${binMsg}${nfcMsg} — <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
+    // รีเซ็ตช่องตำหนิ/ราคาลด/รูปตำหนิ ต่อชุด — กันข้อมูลตำหนิของชุดก่อนติดไปชุดถัดไปที่กรอกในหน้าเดิม
+    defectShots=[]; renderDefectShots();
+    ['f_regprice','f_defect','f_defectphotos'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
   }
 
   // เปิดจากหน้าจัดการรับซื้อ (acquisitions.html?...) → เติมข้อมูลจาก offer ให้เลย ไม่ต้องคีย์ใหม่

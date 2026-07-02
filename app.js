@@ -256,13 +256,13 @@ function defectBox(g) {
   if (!hasDefect(g)) return '';
   const th = lang === 'th';
   const off = defectOffPct(g);
-  const ph = (g.defectPhotos || []).map(u => `<img src="${u}" loading="lazy" alt="${th?'รูปจุดตำหนิ':'flaw photo'}" onclick="this.classList.toggle('zoom')">`).join('');
+  const ph = (g.defectPhotos || []).map(u => `<img src="${esc(u)}" loading="lazy" alt="${th?'รูปจุดตำหนิ':'flaw photo'}" onclick="this.classList.toggle('zoom')">`).join('');
   return `<div class="defectbox">
     <div class="dfhead">
       <span class="dftag">${th?'มีตำหนิเล็กน้อย':'Minor flaw'}</span>
       ${off ? `<span class="dfoff">-${off}% <s>${money(g.priceRegular)}</s></span>` : ''}
     </div>
-    ${g.defectNote ? `<div class="dfnote">${g.defectNote}</div>` : ''}
+    ${g.defectNote ? `<div class="dfnote">${esc(g.defectNote)}</div>` : ''}
     ${ph ? `<div class="dfphotos">${ph}</div>` : ''}
   </div>`;
 }
