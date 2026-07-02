@@ -280,7 +280,7 @@
     if(!lastId){ toast('สร้างสัญญาก่อนค่ะ'); return; }
     const { data, error } = await sb.rpc('contract_make_customer',{ p:{
       contract_id:lastId, name:v('partner_name'), phone:v('partner_phone'),
-      social_url:v('partner_email')||'' , line_uid:v('partner_line_uid') } });
+      email:v('partner_email')||'', social_url:'' , line_uid:v('partner_line_uid') } });
     if(error){ toast('สร้างลูกค้าไม่สำเร็จ: '+error.message); return; }
     $('custCode').textContent=data.link_code;
     $('custOut').style.display='block';
@@ -316,11 +316,19 @@
         <td style="white-space:nowrap">
           <a class="mini" href="${url}" target="_blank">เปิด</a>
           <button class="mini" onclick="cp('${url}')">คัดลอก</button>
+          ${c.status!=='signed'&&c.status!=='void'?`<button class="mini" onclick="sr('${c.id}')">ส่ง LINE</button>`:''}
           ${c.status!=='signed'&&c.status!=='void'?`<button class="mini" onclick="ed('${c.id}')">แก้</button>`:''}
         </td></tr>`;
     }).join('');
   }
   function cp(u){ navigator.clipboard.writeText(u).then(()=>toast('คัดลอกลิงก์แล้ว')); }
+  async function sr(id){
+    const { data, error } = await sb.rpc('contract_send',{ p_id:id });
+    if(error){ toast('ส่งไม่สำเร็จ: '+error.message); return; }
+    if(data && data.error){ toast('ส่งไม่ได้: '+data.error); return; }
+    toast('ทำเครื่องหมายส่งแล้ว — ถ้ามี LINE userID ระบบจะ push ให้พาร์ทเนอร์');
+    load();
+  }
 
   async function ed(id){
     const c=(await sb.rpc('contract_list',{p_status:null})).data.find(x=>x.id===id);

@@ -271,11 +271,11 @@
     if(!confirm('ประกาศไลฟ์นี้ไปทุกช่องที่เลือกเลยไหม? (LINE จะ broadcast หา follower ทุกคน)')) return;
     btn.disabled=true; btn.innerHTML='<span class="spin"></span>กำลังกระจาย...';
     try{
-      const res=await fetch(BROADCAST_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({live_id:id})});
+      const res=await fetch(BROADCAST_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({live_id:id,id_token:(window.opsIdToken?window.opsIdToken():'')})});
       const j=await res.json().catch(()=>null);
       if(!res.ok||!j||j.error){ toast('กระจายไม่สำเร็จ: '+((j&&j.error)||('HTTP '+res.status)),true); }
       else toast('ประกาศไลฟ์แล้ว');
-    }catch(e){ toast('เชื่อมต่อไม่สำเร็จ: '+e.message,true); }
+    }catch(e){ toast('ไม่ทราบผล — อาจกระจายไปแล้ว อย่ากดซ้ำจนกว่าจะตรวจสอบ ('+e.message+')',true); }
     btn.disabled=false; loadList();
   }
   async function setStatus(id,status){

@@ -195,7 +195,7 @@
       <div class="kv"><b>ที่อยู่:</b> ${esc(c.party_address)}</div>
       <div class="kv"><b>เรื่อง:</b> ${esc(c.title)}</div>
       <div class="kv"><b>รายละเอียด:</b> ${esc(c.description)}</div>
-      <div class="kv"><b>มูลค่าเรียกร้อง:</b> ${baht(c.damage_amount)} · <b style="min-width:auto">สถานะ:</b> <span class="badge">${esc(STATUS[c.status]||c.status)}</span></div>
+      <div class="kv"><b>มูลค่าเรียกร้อง:</b> ${baht(c.damage_amount)} · <b style="min-width:auto">สถานะ:</b> <span class="badge ${['police','court'].includes(c.status)?'red':''}">${esc(STATUS[c.status]||c.status)}</span></div>
       <div class="kv"><b>ส่งหนังสือเมื่อ:</b> ${dt(c.demand_sent_at)} · <b style="min-width:auto">แจ้งความ:</b> ${esc(c.police_report_no)} · <b style="min-width:auto">คดีศาล:</b> ${esc(c.court_case_no)}</div>
 
       <div class="toolbar" style="margin-top:12px">
@@ -230,7 +230,8 @@
     return Object.entries(grp).map(([k,arr])=>{
       const col=(label,list)=>`<div style="flex:1"><div class="muted" style="font-size:12px;margin-bottom:3px">${label}</div>`+
         (list.length?'<div class="imgs">'+list.map(p=>`<div><img src="${p.url||''}"><div class="muted" style="font-size:11px">${esc(p.note)} · ${dt(p.created_at)}</div></div>`).join('')+'</div>':'<div class="muted">— ไม่มี —</div>')+'</div>';
-      return `<div style="margin-bottom:10px"><div style="font-weight:700;font-size:12.5px">${k}</div><div style="display:flex;gap:14px">${col('ก่อนส่ง',arr.filter(p=>p.phase==='before'))}${col('ตอนรับคืน',arr.filter(p=>p.phase==='after'))}</div></div>`;
+      const other=arr.filter(p=>p.phase!=='before'&&p.phase!=='after'); // กัน phase อื่น/ว่าง หายเงียบ ๆ
+      return `<div style="margin-bottom:10px"><div style="font-weight:700;font-size:12.5px">${k}</div><div style="display:flex;gap:14px">${col('ก่อนส่ง',arr.filter(p=>p.phase==='before'))}${col('ตอนรับคืน',arr.filter(p=>p.phase==='after'))}${other.length?col('อื่น ๆ',other):''}</div></div>`;
     }).join('');
   }
   function tbl(arr,cols){return !arr||!arr.length?'<div class="muted">— ไม่มี —</div>':`<table><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr>${arr.map(o=>`<tr>${cols.map(c=>`<td>${c[1](o)}</td>`).join('')}</tr>`).join('')}</table>`;}
@@ -261,7 +262,10 @@
     catch(e){ alert(e.message); }
   }
   async function markDemandSent(){
-    try{ await api('dispute_event',{event:{case_id:CUR.id,kind:'demand_sent',detail:'ส่งหนังสือทวงถาม'}}); openDetail(CUR.id); loadList(); }
+    try{ await api('dispute_event',{event:{case_id:CUR.id,kind:'demand_sent',detail:'ส่งหนังสือทวงถาม'}});
+      // เลื่อนสถานะเป็น notice_sent ให้ตรงกับป้ายปุ่ม (เฉพาะตอนยังเป็น 'เปิด' เพื่อไม่ให้ถอยหลังคดีที่ก้าวหน้ากว่า)
+      if(CUR.status==='open') await api('dispute_update',{update:{id:CUR.id,status:'notice_sent',police_report_no:CUR.police_report_no||'',court_case_no:CUR.court_case_no||''}});
+      openDetail(CUR.id); loadList(); }
     catch(e){ alert(e.message); }
   }
   async function saveUpdate(){

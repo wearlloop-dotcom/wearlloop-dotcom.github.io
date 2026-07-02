@@ -270,7 +270,9 @@
   }
   async function lookup(){
     const c=$('code').value.trim().toUpperCase(); if(!c){toast('ใส่รหัสก่อนค่ะ');return;}
-    const { data } = await sb.rpc('partner_lookup',{ p_code: c });
+    const { data, error } = await sb.rpc('partner_lookup',{ p_code: c });
+    // ops-rpc ตอบ no_access/unauthorized/owner_only → data เป็น null แต่มี error.message → โชว์สาเหตุจริง (ไม่ใช่ 'ไม่พบรหัส')
+    if(error){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent=error.message; $('form').className=''; return; }
     if(!data||!data.found){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='ไม่พบรหัส '+c; $('form').className=''; return; }
     code=c; $('found').className='found show'; $('found').style.color='';
     $('found').textContent='พบลูกค้า: '+data.name+(data.has_profile?' (มีผลเดิม — บันทึกทับได้)':''); $('form').className='on';

@@ -158,8 +158,8 @@ function renderEvent(){
     a.addEventListener('click', async (e) => {
       e.preventDefault();
       const code = a.dataset.code;
-      if (CUSTOMER) { try { await window.API.wedSharePick(CUSTOMER, SUMMARY.code, code, 'reserved'); } catch (err) {} }
-      // ไปหน้าจองชุดตัวนี้ (g.html อ่าน ?code=)
+      if (CUSTOMER) { try { await window.API.wedSharePick(CUSTOMER, SUMMARY.code, code, 'eyeing'); } catch (err) {} }
+      // ไปหน้าจองชุดตัวนี้ (g.html อ่าน ?code=) — ส่ง 'eyeing' (กำลังดู) ไม่ล็อกชุด; ให้ backend อัปเป็น 'reserved' เมื่อจองสำเร็จจริง
       location.href = 'g.html?code=' + encodeURIComponent(code);
     });
   });

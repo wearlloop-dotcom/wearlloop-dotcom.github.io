@@ -18,7 +18,7 @@
   .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:18px}
   .card h2{font-family:var(--display);font-size:20px;margin-bottom:2px}
   .card .sub{font-size:12px;color:var(--stone);margin-bottom:12px}
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
   .kpi{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:14px}
   .kpi .n{font-family:var(--display);font-size:26px;font-weight:700}
   .kpi .l{font-size:11px;color:var(--stone);letter-spacing:.5px;margin-top:2px}
@@ -53,6 +53,7 @@
     <div class="kpi"><div class="n" id="k_confirmed">–</div><div class="l">รอทำ</div></div>
     <div class="kpi"><div class="n" id="k_done">–</div><div class="l">เสร็จแล้ว</div></div>
     <div class="kpi"><div class="n" id="k_cancelled">–</div><div class="l">ยกเลิก</div></div>
+    <div class="kpi"><div class="n" id="k_no_show">–</div><div class="l">ไม่มา</div></div>
   </div>
 
   <div class="card">
@@ -69,6 +70,7 @@
       <button data-s="confirmed" onclick="setFilter('confirmed',this)">รอทำ</button>
       <button data-s="done" onclick="setFilter('done',this)">เสร็จแล้ว</button>
       <button data-s="cancelled" onclick="setFilter('cancelled',this)">ยกเลิก</button>
+      <button data-s="no_show" onclick="setFilter('no_show',this)">ไม่มา</button>
     </div>
     <div class="list" id="list" style="margin-top:12px"><div class="empty">กำลังโหลด…</div></div>
   </div>
@@ -136,6 +138,7 @@
     $('k_confirmed').textContent=by('confirmed');
     $('k_done').textContent=by('done');
     $('k_cancelled').textContent=by('cancelled');
+    $('k_no_show').textContent=by('no_show');
   }
   function setFilter(s,btn){ curFilter=s; document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on',b===btn)); render(); }
   function render(){
