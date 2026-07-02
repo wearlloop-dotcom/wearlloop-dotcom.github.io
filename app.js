@@ -1365,6 +1365,13 @@ function showPayConfirm({ g, date, total, pay, backups }) {
         <div style="font-weight:400;font-size:12px;margin-top:3px">${TH ? 'ระบบตรวจสลิปและยืนยันออเดอร์ให้อัตโนมัติ' : 'We verify the slip and confirm your order automatically'}</div>
       </div>` : `
       <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center">${TH ? 'จองไว้ให้แล้ว · ทีมงานจะส่งวิธีชำระเงินให้ในแชต LINE นี้ค่ะ' : 'Reserved — we’ll send payment details in this LINE chat'}</div>`}
+      <div id="pcOcc" style="margin-top:14px;border:1px solid var(--line,#E7E5E1);border-radius:12px;padding:12px 14px">
+        <div style="font-size:13px;font-weight:600">${TH ? 'ใส่ไปงานอะไรคะ? แตะเดียวพอ' : 'What’s the occasion? Just one tap'}</div>
+        <div style="font-size:12px;color:var(--muted,#8C8B86);margin-top:2px">${TH ? 'สไตลิสต์จะจำวันงานไว้ เตรียมลุคให้ก่อนถึงวันจริง' : 'Your stylist remembers the date and preps looks ahead'}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px">
+          ${bookingOccChips(g, date)}
+        </div>
+      </div>
       <button onclick="closePayConfirm();openOrders()" style="width:100%;margin-top:16px;border:1px solid var(--ink,#1A1A1A);background:#fff;border-radius:12px;padding:11px;font-weight:600;cursor:pointer">${TH ? 'ดูออเดอร์ของฉัน' : 'View my order'}</button>
       <button onclick="closePayConfirm()" style="width:100%;margin-top:8px;border:none;background:none;color:var(--muted,#8C8B86);padding:8px;cursor:pointer">${TH ? 'ปิด' : 'Close'}</button>
     </div>`;
@@ -1374,6 +1381,37 @@ function showPayConfirm({ g, date, total, pay, backups }) {
     const el = ov.querySelector('#pcfqr');
     if (el) try { window.promptpayBrandedQR(el, pay.pay_promptpay_id, total, pay.pay_promptpay_type); } catch (e) { /**/ }
   }
+}
+
+// ===== เก็บ occasion ตอนจอง — ปฏิทินงานโตเองโดยไม่ต้องขอให้ลูกค้ากรอกฟอร์ม =====
+// แตะเดียวบันทึกงาน (วันที่ = วันรับชุด) · ห้ามเดา occasion เอง — ลูกค้ายืนยันเท่านั้น
+function bookingOccChips(g, date) {
+  const occs = OCCASIONS && Object.keys(OCCASIONS).length ? OCCASIONS : (window.MOCK && MOCK.OCCASIONS) || {};
+  const tags = (g && g.occasion_tags) || [];
+  const keys = Object.keys(occs).sort((a, b) => (tags.includes(b) ? 1 : 0) - (tags.includes(a) ? 1 : 0));
+  const chip = 'border:1px solid var(--line,#E7E5E1);background:#fff;border-radius:16px;padding:6px 12px;font-size:12.5px;cursor:pointer';
+  return keys.map(k => `<button type="button" style="${chip}" onclick="bookingOccasion('${k}','${date}')">${occs[k]}</button>`).join('')
+    + `<button type="button" style="${chip};color:var(--muted,#8C8B86);border-style:dashed" onclick="document.getElementById('pcOcc').remove()">${lang === 'th' ? 'ข้าม' : 'Skip'}</button>`;
+}
+async function bookingOccasion(occ, date) {
+  const box = document.getElementById('pcOcc');
+  const uid = CUSTOMER.line_uid || null;
+  let onServer = false;
+  if (uid && window.meRpc) {
+    // gateway verify idToken ให้ — ถ้ายังไม่ allowlist upsert_event จะได้ error → เก็บลงเครื่องแทน
+    try { const r = await window.meRpc('upsert_event', { p_uid: uid, p_id: null, p_date: date, p_occasion: occ, p_venue: null, p_dress_code: null }); onServer = !r.error && !(r.data && r.data.error); } catch (e) { /**/ }
+  }
+  if (!onServer) {
+    // โครงเดียวกับ my-events.html ('lloop_events_v1') — หน้า ปฏิทินงานของฉัน จะ sync ขึ้น server ให้เอง
+    try {
+      const a = JSON.parse(localStorage.getItem('lloop_events_v1') || '[]');
+      if (!a.some(e => e.date === date && e.occasion === occ)) a.push({ id: 'loc_' + Date.now(), date, occasion: occ, venue: null, dress_code: null, status: 'planned' });
+      localStorage.setItem('lloop_events_v1', JSON.stringify(a));
+    } catch (e) { /**/ }
+  }
+  window.track?.('occasion_tagged', occ, { date, via: 'booking' });
+  if (box) box.innerHTML = `<div style="font-size:13px;color:#0F6E56;font-weight:600">${lang === 'th' ? 'บันทึกลงปฏิทินแล้วค่ะ 💚' : 'Saved to your calendar 💚'}</div>
+    <div style="font-size:12px;color:var(--muted,#8C8B86);margin-top:2px">${lang === 'th' ? 'สไตลิสต์จะเตรียมลุคให้ก่อนถึงวันงาน · ' : 'Your stylist will prep looks before the day · '}<a href="my-events.html" style="color:inherit">${lang === 'th' ? 'ดูปฏิทินของฉัน' : 'My calendar'}</a></div>`;
 }
 
 // ===== ชุดสำรอง — ลูกค้าเลือกเอง =====
