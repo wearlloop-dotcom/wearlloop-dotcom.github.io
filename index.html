@@ -900,6 +900,7 @@
   .lookrow .lv{flex:1;display:flex;flex-wrap:wrap;gap:5px}
   .lookrow .lv i{font-style:normal;font-size:13px;background:#fff;border:1px solid #EADFCB;border-radius:20px;padding:4px 11px;color:#4A4438}
   .looknote{font-size:11px;color:#A39472;margin-top:10px;font-style:italic;line-height:1.5}
+  .lookteaser{background:#FBF7EE;border:1px solid #EADFCB;border-radius:6px;padding:12px 14px;font-size:12.5px;line-height:1.55;color:#7A6A45;margin-bottom:4px}
   .pform{padding:18px}.pform h3{font-family:var(--display);font-size:22px;font-weight:600;margin-bottom:2px}.pform .hint{font-size:12px;color:var(--muted);margin-bottom:16px}
   .field{margin-bottom:14px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:16px;background:#fff}
   .field textarea{resize:none;line-height:1.5}.field .subhint{font-size:11px;color:var(--muted);margin-top:4px}
@@ -1085,11 +1086,17 @@
   <button class="enterbtn" id="introEnter" onclick="enterApp()">เปิดคอลเลกชัน</button>
 </div>
 <script>
-  /* intro โชว์แค่ครั้งแรกของ session — กลับหน้าหลักจากหน้าอื่นเข้าคอลเลกชันเลย ไม่คั่นซ้ำ
+  /* intro โชว์แค่ครั้งแรกที่เข้าเท่านั้น — เข้าแล้วกดหน้าไหน/กลับหน้าหลักก็ไม่คั่นซ้ำอีก
+     ใช้ localStorage (ไม่ใช่ sessionStorage) เพราะใน in-app browser ของ LINE sessionStorage
+     มักถูกล้างเมื่อเปิด webview ใหม่/สลับหน้า ทำให้ intro เด้งซ้ำทุกครั้ง
      ทำแบบ synchronous ตรงนี้ (ก่อน intro paint) กัน flash */
   try {
-    if (sessionStorage.getItem('lloop_entered') === '1') document.getElementById('intro').style.display = 'none';
-    else setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 3000);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — ไม่ต้องบังคับกดปุ่ม
+    if (localStorage.getItem('lloop_entered') === '1') document.getElementById('intro').style.display = 'none';
+    else {
+      // ครั้งแรกที่แสดง intro → มาร์กว่า "เห็นแล้ว" ทันที กันกรณี LINE รีโหลด webview กลางอนิเมชัน (ก่อนถึง enterApp) แล้ว intro เด้งซ้ำ
+      try { localStorage.setItem('lloop_entered', '1'); } catch (e2) {}
+      setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 3000);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — ไม่ต้องบังคับกดปุ่ม
+    }
   } catch (e) {}
 </script>
 
@@ -1385,7 +1392,7 @@
             var res = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
               input: q, sessionToken: token,
               includedRegionCodes: ['th'],            // โฟกัสสถานที่ในไทยก่อน (ตปท. ค่อยปลดทีหลัง)
-              language: (window.lang === 'en' ? 'en' : 'th'), region: 'th',
+              language: (localStorage.getItem('lloop_lang') === 'en' ? 'en' : 'th'), region: 'th',
             });
             var sugg = (res && res.suggestions) || [];
             if (!sugg.length){ clearBox(); return; }

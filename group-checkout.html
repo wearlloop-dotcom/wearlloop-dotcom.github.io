@@ -727,11 +727,11 @@ function renderAssign(){
   mems.forEach(m=>{
     const id = m.customer_id;
     const sub = `${m.relation || ''}${m.relation?' · ':''}${AGE_TH[m.age_band]||m.age_band||''}`;
-    html += `<div class="look" id="look-${esc(id)}">
+    html += `<div class="look ${SEL[id]?'has':''}" id="look-${esc(id)}">
       <div class="lhead">
         ${avaHtml(m.picture, id, m.name)}
         <div><div class="lname">${esc(m.name)}</div><div class="lrel">${esc(sub)}</div></div>
-        <div class="lpick" id="lpick-${esc(id)}"></div>
+        <div class="lpick" id="lpick-${esc(id)}">${SEL[id]?NAV.t('เลือกแล้ว','Selected'):''}</div>
       </div>`;
     const picks = m.picks || [];
     if(m.needs_sourcing || picks.length===0){
@@ -739,7 +739,7 @@ function renderAssign(){
         ${NAV.t('ยังไม่มีชุด'+(AGE_TH[m.age_band]||'')+'ที่ว่างในวันนี้ — ทีมจะช่วย ','No '+(AGE_TH[m.age_band]||'')+' outfit free on this date — the team can ')}<b>${NAV.t('จัดหาเพิ่ม','source more')}</b>${NAV.t('ให้เข้าตีมเดียวกัน (ไม่รวมในออเดอร์นี้)',' to match the same theme (not included in this order)')}</div>`;
     } else {
       html += `<div class="picks">${picks.map(p=>`
-        <div class="pick" data-w="${esc(id)}" data-code="${esc(p.code)}" onclick="pickOne('${esc(id)}','${esc(p.code)}')">
+        <div class="pick ${SEL[id]===p.code?'sel':''}" data-w="${esc(id)}" data-code="${esc(p.code)}" onclick="pickOne('${esc(id)}','${esc(p.code)}')">
           <div class="swatch" style="background:${esc(p.color_hex||'#E7E2DA')}">
             ${p.on_theme?'<span class="ontheme">'+NAV.t('เข้าตีม','On theme')+'</span>':'<span></span>'}
             ${p.fit!=null?`<span class="fitpill">${NAV.t('พอดี ','Fit ')}${p.fit}%</span>`:'<span></span>'}
@@ -749,12 +749,12 @@ function renderAssign(){
       // วิธีส่งของชุดนี้ (โผล่เมื่อเลือกชุดแล้ว)
       const sp = SHIP[id] || {};
       if(PAYMODE==='split'){
-        html += `<div class="shipctl" id="ship-${esc(id)}">
+        html += `<div class="shipctl ${SEL[id]?'show':''}" id="ship-${esc(id)}">
           <div class="selfnote"><svg viewBox="0 0 24 24"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
             ${NAV.t('ส่งไปที่อยู่ของ ','Ships to ')}<b>${esc(m.name)}</b>${NAV.t('','\'s address')} · ${esc(m.name)} ${NAV.t('จ่ายเอง','pays')}</div>
         </div>`;
       } else {
-        html += `<div class="shipctl" id="ship-${esc(id)}">
+        html += `<div class="shipctl ${SEL[id]?'show':''}" id="ship-${esc(id)}">
           <div class="shiprow">
             <div class="shipopt ${sp.separate?'':'on'}" id="shopt0-${esc(id)}" onclick="setShip('${esc(id)}',false)">
               <span class="dot"></span><span><b>${NAV.t('ส่งรวมกล่องหลัก','In the main box')}</b><span>${NAV.t('ไปพร้อมชุดอื่น ประหยัดค่าส่ง','Ships with the others · saves on delivery')}</span></span></div>
@@ -961,7 +961,7 @@ async function renderResult(res, from, to){
       <div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
         ${NAV.t('เรากันชุดให้ทุกคน 30 นาที — เพื่อนแต่ละคนเปิด LINE ของตัวเองเพื่อโอนและแนบสลิปยืนยันส่วนของตนค่ะ','We hold everyone\'s outfits for 30 minutes — each friend opens their own LINE to transfer and attach a slip to confirm their share.')}</div>
       <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
-        <a class="btn" href="event.html?event=${esc(res.event_group||'')}">${NAV.t('ดูสถานะการจ่าย','View payment status')}</a>
+        ${res.event_group?`<a class="btn" href="event.html?event=${esc(res.event_group)}">${NAV.t('ดูสถานะการจ่าย','View payment status')}</a>`:''}
         <a class="btn ghost" href="family.html">${NAV.t('กลับหน้ากลุ่ม','Back to group')}</a></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }

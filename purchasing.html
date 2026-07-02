@@ -28,6 +28,7 @@
   .pill{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--hair)}
   .pill.ordered{color:var(--navy);border-color:#C5D2DE}.pill.received{color:var(--ok);border-color:#BFE0D4;background:#EAF4EF}
   .pill.low{color:var(--danger);border-color:#E6C9C9;background:#F8EEEE}
+  .pill.draft{color:var(--stone);border-color:var(--hair);background:var(--canvas)}
   label{display:block;font-size:12px;color:var(--stone);margin:8px 0 4px;font-weight:500}
   input,select{width:100%;border:1px solid var(--hair);border-radius:2px;padding:9px 10px;font-size:14px;font-family:var(--sans);background:var(--canvas)}
   .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
@@ -76,14 +77,14 @@
 <div id="toast" class="toast"></div>
 
 <script>
-  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const baht=n=>'฿'+Number(n||0).toLocaleString('th-TH');
   const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  async function authHeader(){ if(!(await window.opsLogin())) throw new Error('redirecting'); return 'Bearer '+liff.getIDToken(); }
-  async function api(action,extra){const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action},extra||{}))});
-    if(r.status===401||r.status===403){toast('ไม่มีสิทธิ์เข้าระบบจัดซื้อ (เฉพาะเจ้าของ/ผู้จัดการ)');throw new Error('unauth');}return r.json();}
+  const api=(action,extra)=>window.opsAcct(action,extra).catch(e=>{
+    if(e.message==='unauth'){toast('ไม่มีสิทธิ์เข้าระบบจัดซื้อ (เฉพาะเจ้าของ/ผู้จัดการ)');throw e;}
+    if(e.message==='redirecting')throw e;
+    return {ok:false,error:e.message};});
   function logout(){ try{ liff.logout(); }catch(e){} $('app').classList.add('hide');$('gate').classList.remove('hide');}
 
   let tab='restock', SUPPLIERS=[], SUPPLIES=[];
@@ -236,7 +237,7 @@
     drawItems();
   }
   function drawItems(){
-    const supOpts=SUPPLIES.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+    const supOpts=SUPPLIES.map(s=>`<option value="${esc(s.name)}"></option>`).join('');
     $('poItems').innerHTML=ITEMS.map((it,i)=>`<div class="itemrow">
       <div><input list="suplist" placeholder="ชื่อรายการ" value="${esc(it.description||'')}" oninput="ITEMS[${i}].description=this.value"></div>
       <div><input type="number" placeholder="จำนวน" value="${it.qty||''}" oninput="ITEMS[${i}].qty=Number(this.value);calcT()"></div>

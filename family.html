@@ -441,8 +441,9 @@ function renderSwitch(){
 }
 
 async function createGroupFlow(){
-  const name = (prompt(NAV.t('ตั้งชื่อกลุ่มใหม่','Name your new group'),NAV.t('กลุ่มใหม่','New group'))||'').trim();
-  if(name===null) return;
+  const raw = prompt(NAV.t('ตั้งชื่อกลุ่มใหม่','Name your new group'),NAV.t('กลุ่มใหม่','New group'));
+  if(raw===null) return;   // ผู้ใช้กด Cancel → ไม่สร้างกลุ่ม (เช็คก่อน trim ที่แปลง null เป็น '')
+  const name = raw.trim();
   if(LIVE){
     try{
       const res = unwrap(await window.API.createGroup(ME, name||NAV.t('กลุ่มใหม่','New group'), 'family'));
@@ -843,6 +844,11 @@ window.openInvite=async ()=>{
     $('#invLinkUrl').textContent=NAV.t('กำลังสร้างลิงก์…','Creating link…');
     try{
       const data=unwrap(await window.API.groupJoinToken(g.id, ME));
+      if(data && data.error){   // backend คืน error ระดับข้อมูล (เช่น not_owner) → อย่าประกอบ URL token ว่าง
+        $('#invLinkUrl').textContent=NAV.t('สร้างลิงก์ไม่สำเร็จ','Couldn\'t create link');
+        inviteUrl='';
+        return;
+      }
       const token=(data && data.token) || '';
       inviteUrl = buildJoinUrl(token);
       $('#invLinkUrl').textContent = inviteUrl;
@@ -958,18 +964,33 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   }catch(e){ LIVE=false; console.warn('family LIVE bootstrap failed, fallback mock:', e); }
 
   if(LIVE){
-    // จัดการลิงก์เชิญขาเข้า ?join=<token> ก่อน แล้วค่อยโหลดกลุ่ม
-    const token=readJoinToken();
+    // จัดการลิงก์เชิญขาเข้า ?join=<token> (หรือที่เก็บไว้ตอนยังไม่ล็อกอิน) ก่อน แล้วค่อยโหลดกลุ่ม
+    let token=readJoinToken();
+    if(!token){ try{ token=sessionStorage.getItem('lloop_pending_join')||null; }catch(_e){} }
     if(token){
+      try{ sessionStorage.removeItem('lloop_pending_join'); }catch(_e){}
       try{
         const r=unwrap(await window.API.joinGroup(token, ME));
         cleanJoinFromUrl();
-        if(r && r.group_id) active=r.group_id;
-        if(r && r.group_name) setTimeout(()=>alert(NAV.t('เข้าร่วม “'+r.group_name+'” แล้ว','You\'ve joined “'+r.group_name+'”')),60);
+        if(r && r.error){   // error ระดับข้อมูล (เช่น expired) — gateway ไม่ throw ต้องเช็คเอง
+          toast(NAV.t('เข้าร่วมกลุ่มไม่สำเร็จ: ','Couldn\'t join the group: ')+friendlyErr(r.error));
+        } else {
+          if(r && r.group_id) active=r.group_id;
+          if(r && r.group_name) setTimeout(()=>alert(NAV.t('เข้าร่วม “'+r.group_name+'” แล้ว','You\'ve joined “'+r.group_name+'”')),60);
+        }
       }catch(e){ cleanJoinFromUrl(); toast(NAV.t('เข้าร่วมกลุ่มไม่สำเร็จ: ','Couldn\'t join the group: ')+friendlyErr(e.message||e)); }
     }
     try{ await reloadGroups(); }
     catch(e){ console.warn('reloadGroups failed:', e); LIVE=false; }
+  } else {
+    // มีลิงก์เชิญแต่ยังไม่ล็อกอิน (เปิดนอกแอป LINE) → เก็บ token ไว้ แล้วชวนเข้าสู่ระบบเพื่อรับคำเชิญ แทนการทิ้งเงียบ
+    const token=readJoinToken();
+    if(token && window.LiffAuth && LiffAuth.signIn){
+      try{ sessionStorage.setItem('lloop_pending_join', token); }catch(_e){}
+      if(confirm(NAV.t('เข้าสู่ระบบด้วย LINE เพื่อรับคำเชิญเข้ากลุ่ม?','Sign in with LINE to accept this group invite?'))){
+        LiffAuth.signIn(); return;   // redirect ไป LINE login แล้วกลับมา process token ต่อ
+      }
+    }
   }
 
   render();

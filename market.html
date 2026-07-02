@@ -121,7 +121,7 @@
   async function scan(){
     $('scanBtn').disabled=true; $('scanBtn').textContent='กำลังสแกน… (อาจใช้เวลาสักครู่)';
     try{
-      const res=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:'{}'});
+      const res=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({id_token:(window.opsIdToken?window.opsIdToken():'')})});
       const j=await res.json().catch(()=>null);
       if(j&&j.skipped==='no_key'){ $('scanNote').innerHTML='<div class="notice">ยังไม่ได้ตั้ง ANTHROPIC key — AI สแกนจะทำงานเมื่อใส่ key แล้ว (ตอนนี้เพิ่มชุดเอง + watchlist ใช้ได้ปกติ)</div>'; }
       else if(!res.ok||!j||j.ok===false){ toast('สแกนไม่สำเร็จ: '+((j&&j.error)||('HTTP '+res.status)),true); }

@@ -4,11 +4,13 @@ window.LiffAuth = (function () {
   let _initP = null;
   function ensureInit() {
     if (!window.liff || !CONFIG.LIFF_ID) return Promise.reject(new Error('LIFF SDK/ID missing'));
-    if (!_initP) _initP = liff.init({ liffId: CONFIG.LIFF_ID });
+    if (!_initP) _initP = liff.init({ liffId: CONFIG.LIFF_ID, withLoginOnExternalBrowser: true });  // ให้ re-auth บนเบราว์เซอร์ปกติ (นอกแอป LINE) กลับเข้าได้ ไม่ค้าง unauthenticated
     return _initP;
   }
-  // redirectUri = URL ปัจจุบันพร้อม query — กลับจาก LINE แล้วไม่หลุดหน้า/ไม่ทิ้ง ?code= ?garment= ที่เปิดอยู่
-  function baseUrl() { return location.origin + location.pathname + location.search; }
+  // base URL (ไม่มี query) — ใช้เป็น redirectUri ให้ตรง LIFF endpoint + กลับมาสะอาด
+  function baseUrl() { return location.origin + location.pathname; }
+  // redirect URL ที่ "คง query เดิม" — กัน deep-link param (?order/?event/?join/?garment) หายหลัง LINE login
+  function redirectUrl() { return baseUrl() + location.search; }
 
   async function login() {
     try {
@@ -20,7 +22,7 @@ window.LiffAuth = (function () {
       // ยังไม่ล็อกอิน: auto-redirect เฉพาะในแอป LINE (กัน redirect loop บนเว็บ) — เว็บกดปุ่มเอง
       if (liff.isInClient() && !sessionStorage.getItem('liffLoginTried')) {
         sessionStorage.setItem('liffLoginTried', '1');
-        liff.login({ redirectUri: baseUrl() });
+        liff.login({ redirectUri: redirectUrl() });
       }
       return null;
     } catch (e) {
@@ -39,7 +41,7 @@ window.LiffAuth = (function () {
       // ผู้ใช้กดปุ่ม login = ต้องการเข้าสู่ระบบ → เด้งไป LINE login "เสมอ"
       // ถ้ามี session ค้างอยู่แล้วแต่โปรไฟล์ไม่ขึ้น (scope/โทเคนมีปัญหา) → logout ให้สดก่อน
       if (liff.isLoggedIn()) { try { liff.logout(); } catch (_e) {} }
-      liff.login({ redirectUri: baseUrl() }); // redirect ไป LINE login แล้วกลับมาหน้าเดิม
+      liff.login({ redirectUri: redirectUrl() }); // redirect ไป LINE login แล้วกลับมาหน้าเดิม (คง query เดิม)
     } catch (e) {
       console.error('signIn failed:', e);
       alert('เข้าสู่ระบบไม่สำเร็จ: ' + (e && e.message ? e.message : e)); // โชว์เหตุจริงเพื่อ debug
