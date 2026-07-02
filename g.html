@@ -123,6 +123,23 @@ function fmtDate(s){ try { return new Date(s + 'T00:00:00').toLocaleDateString('
 function todayStr(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
 let _tt; function toast(m){ const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2600); }
 
+// ประวัติความสะอาดของชุดตัวนี้ (RPC พับลิก garment_hygiene_public — จาก supabase-p0-moats.sql)
+// ยังไม่ติดตั้ง RPC ก็เงียบไว้ บรรทัดพื้นฐานแสดงตามปกติ
+async function loadHygiene(){
+  try{
+    if(!G || !window.CONFIG || !window.supabase) return;
+    const c = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    const { data } = await c.rpc('garment_hygiene_public', { p_code: G.code });
+    if(!data) return;
+    const dd = s => { try{ return new Date(s).toLocaleDateString('th-TH', { day:'numeric', month:'short' }); }catch(e){ return ''; } };
+    const bits = [];
+    if(data.last_cleaned_at) bits.push(NAV.t('ซักล่าสุด ','Last cleaned ') + dd(data.last_cleaned_at) + (data.last_method ? ' · ' + data.last_method : ''));
+    if(data.last_qc_pass) bits.push(NAV.t('ตรวจสภาพผ่าน ','QC passed ') + dd(data.last_qc_pass));
+    const el = $('#hygLine');
+    if(bits.length && el) el.textContent = el.textContent + ' · ' + bits.join(' · ');
+  }catch(_e){}
+}
+
 let CUSTOMER = null, G = null, PAY = null, BOOKED = [];
 let gDur = 3, lastQuote = null, booked = false;
 
@@ -157,6 +174,7 @@ function rangeBusy(from, to){
   try { PAY = await window.API.payInfo(); } catch (e) {}
   try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) { BOOKED = []; }
   renderItem();
+  loadHygiene();   // ประวัติความสะอาดของชุดตัวนี้ (สแกนป้ายแล้วเห็นเลย) — ไม่มี RPC ก็เงียบไว้
 })();
 
 function renderEdge(title, body){
@@ -191,7 +209,7 @@ function renderItem(){
       ${worth}
     </div>
     <div class="trust">${rented} · ${NAV.t('มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป','Deposit refunded after inspection · free shipping on 3+ day rentals')}</div>
-    <div class="trust">${hygiene}</div>
+    <div class="trust" id="hygLine">${hygiene}</div>
 
     <div class="sec">
       <div class="sectitle">${NAV.t('เลือกวันที่จะใช้','Choose your date')}</div>
