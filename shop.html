@@ -134,6 +134,8 @@
   document.getElementById('ctaLine').href = LINE;
 
   const grid = document.getElementById('grid');
+  const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+  const safeImg=u=>{ u=String(u||''); return (/^https:\/\//i.test(u)||/^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(u))?u:''; };
   function baht(n){ return '฿' + Math.round(Number(n)||0).toLocaleString('th-TH'); }
 
   const rotw = document.getElementById('rotw');
@@ -160,13 +162,14 @@
     const price = g.rate_1d ?? g.rental_price ?? 0;
     const out = !(g.status === 'available');
     const img = photo
-      ? `<img src="${photo}" alt="${g.name||g.code||''}" loading="lazy">`
-      : `<div class="ph">${g.name || g.code || NAV.t('ชุด','Outfit')}</div>`;
+      ? `<img src="${safeImg(photo)}" alt="${esc(g.name||g.code||'')}" loading="lazy">`
+      : `<div class="ph">${esc(g.name || g.code || NAV.t('ชุด','Outfit'))}</div>`;
     // การ์ดพาเข้าหน้าชุดในร้านจริง (?garment= เปิดชีตรายละเอียดทันที) — เดิมทุกใบพาเข้าแชต LINE
     const href = g.code ? `index.html?garment=${encodeURIComponent(g.code)}` : LINE;
     return `<a class="pcard" href="${href}">
+
       <div class="pphoto">${img}${out?`<span class="pout">${NAV.t('มีคิวจอง','Booked')}</span>`:''}</div>
-      <div class="pname">${g.name || g.code || ''}</div>
+      <div class="pname">${esc(g.name || g.code || '')}</div>
       <div class="pprice">${baht(price)} <small>${NAV.t('/ วัน','/ day')}</small></div>
     </a>`;
   }

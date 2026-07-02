@@ -572,6 +572,9 @@
     return _sbClient ? _sbClient.storage : null;
   }});
   const $=id=>document.getElementById(id);
+  const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+  const safeHref=u=>{ u=String(u||''); return /^(https?:\/\/|\/)/i.test(u)?u:'#'; };
+  const safeImg=u=>{ u=String(u||''); return (/^https:\/\//i.test(u)||/^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(u))?u:''; };
   let code=null, baseSeason='';
   const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2200);};
   const num=id=>{const v=$(id).value;return v?Number(v):undefined;};
@@ -613,7 +616,7 @@
     }
     $('gate').style.display='none'; $('main').style.display='flex';
     const who=data.org||data.name||'พาร์ทเนอร์';
-    $('hello').innerHTML='ลงชื่อเข้าใช้ในนาม <b>'+who+'</b>';
+    $('hello').innerHTML='ลงชื่อเข้าใช้ในนาม <b>'+esc(who)+'</b>';
     loadClients();
   }
 
@@ -728,8 +731,9 @@
       arr.forEach(c=>{
         const row=document.createElement('div'); row.className='clientrow';
         const nm=c.name||'ลูกค้า';
-        const av=c.picture
-          ? '<div class="av2" style="background-image:url(&quot;'+encodeURI(String(c.picture)).replace(/"/g,'%22')+'&quot;)"></div>'
+        const pic=safeImg(c.picture);
+        const av=pic
+          ? '<div class="av2" style="background-image:url(&quot;'+esc(pic)+'&quot;)"></div>'
           : '<div class="av2">'+esc(nm.trim().charAt(0).toUpperCase()||'?')+'</div>';
         row.innerHTML=av+'<div><div class="nm">'+esc(nm)+'</div><div class="cd">'+esc(c.code||'')+'</div></div>'+
           '<div class="hl">'+esc(c.headline||'')+'</div>';
@@ -874,9 +878,9 @@
           '<div class="bn">'+when+(b.customer_note?(' · “'+esc(b.customer_note)+'”'):'')+'</div>';
         if(b.status==='confirmed'){
           html+='<div class="bact">'+
-            (b.code?'<button onclick="goAnalyse(\''+b.code+'\')">กรอกผลวิเคราะห์</button>':'')+
-            '<button class="done" onclick="bookingAction(\''+b.id+'\',\'done\')">เสร็จงาน</button>'+
-            '<button onclick="bookingAction(\''+b.id+'\',\'cancel\')">ยกเลิก</button></div>';
+            (b.code?'<button onclick="goAnalyse(\''+esc(b.code)+'\')">กรอกผลวิเคราะห์</button>':'')+
+            '<button class="done" onclick="bookingAction(\''+esc(b.id)+'\',\'done\')">เสร็จงาน</button>'+
+            '<button onclick="bookingAction(\''+esc(b.id)+'\',\'cancel\')">ยกเลิก</button></div>';
         }else{
           const STLABEL={done:'เสร็จงานแล้ว',cancelled:'ยกเลิก',canceled:'ยกเลิก',no_show:'ไม่มา'};
           html+='<div class="bn">'+esc(STLABEL[b.status]||'เสร็จงานแล้ว')+'</div>';
@@ -967,7 +971,7 @@
       if(data && data.found && Array.isArray(data.visits)) visits=data.visits;
     }catch(e){ return; }
     if(!visits.length) return;  // ลูกค้าใหม่ — ยังไม่มีประวัติ
-    const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
     const rows=visits.map((v,i)=>{
       const m=v.measured||{}, mm=[];
       if(m.bust_in)mm.push('อก '+m.bust_in); if(m.waist_in)mm.push('เอว '+m.waist_in);
@@ -1166,7 +1170,7 @@
         added.push(url);
         const local=URL.createObjectURL(file);
         const div=document.createElement('div'); div.className='th';
-        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${(file.name||'').slice(0,18)}</div>`;
+        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${esc((file.name||'').slice(0,18))}</div>`;
         thumbs.appendChild(div);
       }catch(e){
         $('upnote').style.display='block';
@@ -1215,8 +1219,8 @@
     const clip='<svg viewBox="0 0 24 24"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.6 1.6 0 0 1-2.3-2.3l7.8-7.8"/></svg>';
     list(targetId).forEach(url=>{
       let name=url; try{ name=decodeURIComponent(url.split('/').pop().split('?')[0]).replace(/^docs\//,'').replace(/^\d+-\d+-/,''); }catch(e){}
-      const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener';
-      a.innerHTML=clip+'<span>'+(name||url).slice(0,40)+'</span>';
+      const a=document.createElement('a'); a.href=safeHref(url); a.target='_blank'; a.rel='noopener';
+      a.innerHTML=clip+'<span>'+esc((name||url).slice(0,40))+'</span>';
       box.appendChild(a);
     });
   }

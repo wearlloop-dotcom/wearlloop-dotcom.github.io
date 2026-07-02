@@ -259,8 +259,10 @@ async function load(isRefresh){
       const r = await window.API.groupEventStatus(EVENT_GROUP, CUSTOMER);
       if(r && r.error){ st = { error:(r.error.message||String(r.error)) }; }
       else st = (r && r.data) || { error:'not_found' };
+    } else if (window.CONFIG && window.CONFIG.USE_MOCK) {
+      st = JSON.parse(JSON.stringify(MOCK_STATUS));   // พรีวิวดีไซน์เท่านั้น
     } else {
-      st = JSON.parse(JSON.stringify(MOCK_STATUS));
+      st = { error:'signin_required' };               // M-d: โปรดักชัน+ยังไม่ล็อกอิน → อย่าโชว์ mock เป็นสถานะจริง
     }
   }catch(e){ st = { error:'network' }; }
   finally{ if(isRefresh){ btn.disabled=false; btn.textContent=NAV.t('รีเฟรช','Refresh'); } }
@@ -281,6 +283,12 @@ function renderStatus(st){
   if(st.error==='denied'){
     edgeState(NAV.t('ดูได้เฉพาะสมาชิกกลุ่ม','Group members only'),
       NAV.t('หน้านี้สำหรับหัวหน้ากลุ่มและสมาชิกในตีมเท่านั้น — ขอให้คนที่จัดตีมเปิดลิงก์นี้ให้ หรือชวนคุณเข้ากลุ่มก่อนค่ะ','This page is for the group lead and theme members only — ask whoever set up the theme to open this link for you, or to invite you into the group first.'),
+      NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
+    return;
+  }
+  if(st.error==='signin_required'){
+    edgeState(NAV.t('เข้าสู่ระบบเพื่อดูสถานะจริง','Sign in to see live status'),
+      NAV.t('เปิดหน้านี้ผ่าน LINE เพื่อดึงสถานะการจ่ายจริงของทีม — ตัวเลขจะยังไม่ถูกต้องจนกว่าจะเข้าสู่ระบบค่ะ','Open this page via LINE to pull your team\'s real payment status — the numbers are not valid until you sign in.'),
       NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
     return;
   }

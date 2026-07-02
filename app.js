@@ -2179,6 +2179,11 @@ async function bookCartNow() {
   const data = res && res.data;
   if (res && !res.error && data && !data.error) {
     const unavail = (data.unavailable || []);
+    if (unavail.length >= codes.length) {   // ทุกชุดไม่ว่าง = ไม่มีอะไรถูกจอง เก็บตะกร้าไว้ให้เลือกวันใหม่
+      if (btn) { btn.disabled = false; btn.textContent = TH ? 'จองทั้งหมด' : 'Book all'; }
+      toast(TH ? 'ชุดในตะกร้าไม่ว่างวันนั้น ลองวันอื่นนะคะ' : 'These pieces are booked on that date — try another');
+      return;
+    }
     gCart = []; saveCart();
     renderCartBtn(); closeCart();
     toast(unavail.length
