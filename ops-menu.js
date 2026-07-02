@@ -35,7 +35,7 @@
     { section: 'ธุรกิจ', items: [
       { href: 'cockpit.html',    label: 'คอกพิตเจ้าของ', icon: '◉', roles: ['owner'] },
       { href: 'analytics.html',  label: 'วิเคราะห์',     icon: '▲', roles: ['manager','owner'] },
-      { href: 'forecast.html',   label: 'ประมาณการ',     icon: '◔', roles: ['owner'] },
+      { href: 'forecast.html',   label: 'ประมาณการ',     icon: '≈', roles: ['owner'] },
       { href: 'accounting.html', label: 'บัญชี',         icon: '฿', roles: ['owner','manager'] },
       { href: 'slips.html',      label: 'สลิปโอน',       icon: '⊞', roles: ['owner','manager'] },
       { href: 'purchasing.html', label: 'จัดซื้อ',       icon: '⛬', roles: ['owner','manager'] },
