@@ -169,7 +169,7 @@ let pickedOcc = null;
 let dressTouched = false;     // ผู้ใช้เลือกเดรสโค้ดเองแล้ว → ไม่ auto-suggest ทับ
 
 function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
-function esc(s){ if(s==null) return ''; return String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function esc(s){ if(s==null) return ''; return String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c])); }
 function todayStr(){ const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function addDays(iso, n){ const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function daysUntil(iso){ return Math.round((new Date(iso+'T00:00:00') - new Date(todayStr()+'T00:00:00')) / 86400000); }
@@ -183,14 +183,18 @@ let _toastT = null;
 function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(_toastT); _toastT = setTimeout(()=>t.classList.remove('show'), 3200); }
 
 // ---------- server + sync ----------
-async function rpc(name, args){ const { data, error } = await client().rpc(name, args); if(error) throw error; return data; }
+async function rpc(name, args){ const { data, error } = await client().rpc(name, args); if(error) throw error; if(data && data.error) throw new Error(data.error); return data; }
 
 // ล็อกอิน + RPC ใช้ได้ → ดันของที่เคยบันทึกในเครื่องขึ้น server ครั้งเดียว แล้วเคลียร์เครื่อง
-async function syncLocalUp(){
+async function syncLocalUp(serverRows){
   const loc = localGet();
   if(!loc.length) return;
+  // กันซ้ำ: ถ้า (วันที่, ประเภทงาน, สถานที่) ตรงกับที่มีบน server อยู่แล้ว — ข้ามไม่ push ซ้ำ
+  const dupKey = ev => [ev.date, ev.occasion, ev.venue || ''].join('|');
+  const onServer = new Set((Array.isArray(serverRows) ? serverRows : []).map(dupKey));
   const failed = [];
   for(const ev of loc){
+    if(onServer.has(dupKey(ev))) continue;
     try{
       await rpc('upsert_event', { p_uid: uid, p_id: null, p_date: ev.date, p_occasion: ev.occasion, p_venue: ev.venue || null, p_dress_code: ev.dress_code || null });
     }catch(e){ console.warn('sync local event failed', e); failed.push(ev); }
@@ -205,7 +209,7 @@ async function loadEvents(){
       let rows = await rpc('my_events', { p_uid: uid });
       serverOK = true;
       if(localGet().length){
-        await syncLocalUp();
+        await syncLocalUp(rows);
         try{ rows = await rpc('my_events', { p_uid: uid }); }catch(e){ /* ใช้รอบแรก */ }
       }
       events = Array.isArray(rows) ? rows : [];
@@ -236,26 +240,31 @@ async function removeEvent(id){
   if(String(id).indexOf('loc_') === 0){
     localSet(localGet().filter(e => e.id !== id));
   } else {
+    // ลบบน server ไม่สำเร็จ → คงแถวไว้ ไม่หลอกว่าลบแล้ว
     try{ await rpc('delete_event', { p_uid: uid, p_id: id }); }
-    catch(e){ console.warn('delete_event RPC ยังไม่พร้อม', e); }
+    catch(e){ console.warn('delete_event ล้มเหลว', e); toast(T('ลบไม่สำเร็จ ลองใหม่นะคะ','Couldn’t delete — please try again')); return; }
   }
   events = events.filter(e => e.id !== id);
   render();
   toast(T('ลบงานแล้วค่ะ','Event deleted'));
 }
 
-// ---------- ควิซฝากงานไว้ → import ----------
+// ---------- ควิซฝากงานไว้ → prefill ฟอร์ม (ไม่บันทึกอัตโนมัติ — ให้ผู้ใช้เลือกวันที่เอง) ----------
 async function importPending(){
   let raw = null;
   try{ raw = localStorage.getItem(PENDING_KEY); }catch(e){}
   if(!raw) return;
-  try{ localStorage.removeItem(PENDING_KEY); }catch(e){}
   try{
     const p = JSON.parse(raw);
     if(p && p.occasion && OCCS[p.occasion]){
-      const date = (p.date && /^\d{4}-\d{2}-\d{2}$/.test(p.date) && p.date >= todayStr()) ? p.date : addDays(todayStr(), 14);
-      await persistEvent({ date, occasion: p.occasion, venue: p.note || '', dress_code: '' });
-      toast(T('เพิ่มงานจากควิซให้แล้วค่ะ','Added your event from the quiz'));
+      pickedOcc = p.occasion;      // เลือกชิปประเภทงานให้
+      renderChips();
+      $('fDate').value = '';       // วันที่ให้ผู้ใช้เลือกเอง
+      $('fVenue').value = '';
+      const formCard = $('fDate').closest('.card');
+      if(formCard && formCard.scrollIntoView) formCard.scrollIntoView({ behavior:'smooth' });
+      toast(T('เลือกวันที่งานให้หน่อยนะคะ แล้วเราจะเตรียมลุคให้ค่ะ','Pick the event date and we’ll prep your looks'));
+      try{ localStorage.removeItem(PENDING_KEY); }catch(e){}  // ลบ key หลัง prefill สำเร็จเท่านั้น
     }
   }catch(e){ console.warn('pending event import failed', e); }
 }
@@ -325,11 +334,12 @@ function cdText(days){
 
 function rowHTML(e, isPast){
   const days = daysUntil(e.date);
-  const status = isPast ? '' : (days > 14
-    ? `<div class="stat prep">${T('สไตลิสต์กำลังเตรียมลุคให้ค่ะ','Your stylist is preparing a look for you')}</div>`
-    : `<div class="stat ready">${T('ลุคของคุณพร้อมแล้ว — สไตลิสต์จะทักไปทาง LINE นะคะ','Your look is ready — your stylist will message you on LINE')}</div>`);
+  // "ลุคพร้อมแล้ว" ต่อเมื่อสไตลิสต์ ping จริง (status='pinged') และล็อกอินอยู่ — ไม่เดาจากวันที่อย่างเดียว
+  const status = isPast ? '' : ((e.status === 'pinged' && uid)
+    ? `<div class="stat ready">${T('ลุคของคุณพร้อมแล้ว — สไตลิสต์จะทักไปทาง LINE นะคะ','Your look is ready — your stylist will message you on LINE')}</div>`
+    : `<div class="stat prep">${T('สไตลิสต์กำลังเตรียมลุคให้ค่ะ','Your stylist is preparing a look for you')}</div>`);
   const seeBtn = (!isPast && days <= 14)
-    ? `<a class="seebtn" href="index.html#shop?occasion=${encodeURIComponent(e.occasion)}">${T('ดูชุดที่แนะนำ','See suggested pieces')}</a>` : '';
+    ? `<a class="seebtn" href="shop.html?occasion=${encodeURIComponent(e.occasion)}">${T('ดูชุดที่แนะนำ','See suggested pieces')}</a>` : '';
   return `<div class="ev${isPast?' past':''}">
     <div class="dt"><b>${fmtDay(e.date)}</b><span>${esc(fmtMon(e.date))}</span></div>
     <div class="info">
