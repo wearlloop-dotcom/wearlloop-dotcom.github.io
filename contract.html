@@ -208,7 +208,7 @@
 
   const $=id=>document.getElementById(id);
   const token=new URLSearchParams(location.search).get('token');
-  let C=null, lineUid=null;
+  let C=null, lineUid=null, idToken=null;
 
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -537,11 +537,11 @@
     if($('signBtn').disabled) return;
     $('signBtn').disabled=true; $('signBtn').textContent='กำลังบันทึก…';
     const sig = hasInk ? pad.toDataURL('image/png') : $('signerName').value.trim();
-    const { data, error } = await sb.rpc('contract_sign',{ p_token:token, p:{
+    const { data, error } = await sb.rpc('contract_sign',{ p_token:token, p_id_token:idToken, p:{
       signer_name:$('signerName').value.trim(),
       signer_id_card:$('signerId').value.trim(),
-      signature:sig, consent:true,
-      body_snapshot:snapshot(C), line_uid:lineUid
+      signature:sig, consent:$('consent').checked,
+      body_snapshot:snapshot(C)
     }});
     if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); $('signBtn').disabled=false; $('signBtn').textContent='ยอมรับและลงนาม'; return; }
     if(data!=='ok'){
@@ -567,9 +567,15 @@
   // ---------- boot ----------
   async function boot(){
     if(!token){ $('loading').classList.add('hide'); $('error').classList.remove('hide'); return; }
-    // LIFF (ไม่บังคับ — เปิดในเบราว์เซอร์ปกติก็ได้)
-    try{ await liff.init({liffId:LIFF_ID}); if(liff.isLoggedIn()){ const p=await liff.getProfile(); lineUid=p.userId; } }catch(e){ /* เบราว์เซอร์ปกติ */ }
-    const { data, error } = await sb.rpc('contract_get',{ p_token:token, p_line_uid:lineUid });
+    // HI-6: บังคับ login LINE ก่อนเปิดสัญญา — ตัวตนคนเซ็นต้องยืนยันได้ (ไม่ใช่แค่มีลิงก์)
+    try{
+      await liff.init({liffId:LIFF_ID, withLoginOnExternalBrowser:true});
+      if(!liff.isLoggedIn()){ liff.login({ redirectUri: location.href }); return; }  // ยังไม่ login → พาไป LINE แล้วกลับมา
+      const p=await liff.getProfile(); lineUid=p.userId; idToken=liff.getIDToken();
+    }catch(e){ $('loading').classList.add('hide'); $('error').classList.remove('hide'); return; }
+    // ส่ง idToken ที่ยืนยันได้ให้เซิร์ฟเวอร์ verify + เทียบ partner_line_uid (ห้ามเชื่อ line_uid ที่ client ส่ง)
+    // ⚠️ ต้อง deploy คู่กับสเปกเซิร์ฟเวอร์: contract_get/contract_sign ต้อง verify p_id_token แล้ว inject line_uid เอง
+    const { data, error } = await sb.rpc('contract_get',{ p_token:token, p_id_token:idToken });
     if(error || !data || data.error){ $('loading').classList.add('hide'); $('error').classList.remove('hide'); return; }
     render(data);
   }
