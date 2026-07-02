@@ -129,7 +129,7 @@ let gDur = 3, lastQuote = null, booked = false;
 // อ่านรหัสชุดจาก ?c= หรือ ?code= (เผื่อ path /g/<code> ที่ rewrite มา)
 function readCode(){
   const u = new URL(location.href);
-  let c = u.searchParams.get('c') || u.searchParams.get('code') || '';
+  let c = u.searchParams.get('c') || u.searchParams.get('code') || u.searchParams.get('g') || '';
   if (!c) { const m = location.pathname.match(/\/g\/([^/?#]+)/); if (m) c = decodeURIComponent(m[1]); }
   return (c || '').trim().toUpperCase();
 }
