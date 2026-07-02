@@ -145,7 +145,7 @@
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
   const FUNCTIONS=SUPABASE_URL.replace('.supabase.co','.functions.supabase.co');
-  const QR_BASE='https://wearlloop-dotcom.github.io/g.html?c=';  // หน้าเช่าชุดนี้ (g.html รับ ?c=<code> → เลือกวัน+จอง) · github.io ออนไลน์จริง (lloop.app ยังไม่ผูก DNS)
+  const QR_BASE=(window.CONFIG&&CONFIG.GARMENT_URL)||'https://wearlloop-dotcom.github.io/g.html?c=';  // ฐาน URL กลางอยู่ที่ config.js (GARMENT_URL)
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
@@ -213,6 +213,7 @@
       photos:$('f_photo').value?[$('f_photo').value]:[],
       size:$('f_size').value||null,
       condition:$('f_condition').value||null,
+      acquisition_id:window._acqId||null,   // มาจากหน้าจัดการรับซื้อ (?acq=) — ให้ DB ผูกชุดกับดีลและปิดสถานะเป็น stocked
       // ตำหนิ (แจ้งโปร่งใส): เรทปกติก่อนลด + โน้ต + รูปจุดตำหนิ
       regular_price:$('f_regprice').value||null,
       defect_note:$('f_defect').value.trim()||null,
@@ -237,6 +238,24 @@
     defectShots=[]; renderDefectShots();
     ['f_regprice','f_defect','f_defectphotos'].forEach(id=>{ const el=$(id); if(el) el.value=''; });
   }
+
+  // เปิดจากหน้าจัดการรับซื้อ (acquisitions.html?...) → เติมข้อมูลจาก offer ให้เลย ไม่ต้องคีย์ใหม่
+  (function(){
+    const Q=new URLSearchParams(location.search);
+    if(!Q.get('name')&&!Q.get('acq')) return;
+    window._acqId=Q.get('acq')||null;   // เก็บไว้ส่งกับ intake_garment ตอนบันทึก (ปิดลูปรับซื้อ→คลัง)
+    const setv=(id,v)=>{ const el=$(id); if(el&&v!=null&&v!=='') el.value=v; };
+    // <select>: ตั้งค่าเฉพาะเมื่อมี option ตรงจริง (ค่าที่ไม่ตรงจะทำ select ว่างเงียบ ๆ)
+    const setSel=(id,v,norm)=>{ const el=$(id); if(!el||v==null||v==='') return;
+      const vv=norm?norm(String(v).trim()):String(v).trim();
+      if([...el.options].some(o=>o.value===vv)) el.value=vv; };
+    setv('f_name',Q.get('name')); setv('f_brand',Q.get('brand')); setv('f_photo',Q.get('photo'));
+    setSel('f_size',Q.get('size'),s=>s.toUpperCase().replace(/^FREE.*$/,'FREE'));
+    setSel('f_condition',Q.get('condition'));
+    setv('f_cost',Q.get('cost'));
+    setv('f_colorname',Q.get('color')); setv('f_fabric',Q.get('fabric'));
+    if(Q.get('photo')&&typeof syncPreview==='function') syncPreview();
+  })();
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>
