@@ -490,11 +490,6 @@
   </div>
 </div>
 
-<!-- Reward banner -->
-<div class="reward-banner">
-  <div class="rb-text" data-i18n="Share a photo of you wearing it — credit back every time">แชร์รูปที่ใส่จริง รับเครดิตคืนทุกครั้ง</div>
-  <div class="rb-credit">+10 CREDIT</div>
-</div>
 
 <div class="wrap">
 
@@ -504,7 +499,7 @@
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <h2 data-i18n="Thank you for your review">ขอบคุณสำหรับรีวิว</h2>
-    <p id="successSub" data-i18n="Your feedback helps us do better">ความเห็นของคุณช่วยให้เราพัฒนาบริการได้ดีขึ้น</p>
+    <p id="successSub"></p>
   </div>
 
   <!-- FORM STATE -->
@@ -590,8 +585,7 @@
               <circle cx="12" cy="13" r="4"/>
             </svg>
           </div>
-          <div class="up-text" data-i18n="Tap to take or choose a photo">แตะเพื่อถ่ายหรือเลือกรูป</div>
-          <div class="up-sub" data-i18n="Add a photo for +10 credit (optional)">แนบรูป +10 เครดิต (ไม่บังคับ)</div>
+          <div class="up-text" data-i18n="Tap to take or choose a photo · optional">แตะเพื่อถ่ายหรือเลือกรูป · ไม่บังคับ</div>
         </div>
         <img id="imgPreview" alt="preview">
       </div>
@@ -837,7 +831,7 @@ $('submitBtn').addEventListener('click', async () => {
 
   $('successSub').textContent = photoUrl
     ? T('+10 เครดิตเข้ากระเป๋าแล้ว ขอบคุณที่แชร์รูป', '+10 credit added to your wallet — thank you for sharing')
-    : T('ขอบคุณที่บอกเรา ความเห็นของคุณมีค่ามากค่ะ', 'Thank you — your feedback means a lot');
+    : T('ขอบคุณที่บอกเราค่ะ', 'Thank you for telling us');
 
   setTimeout(() => {
     $('formState').style.display = 'none';

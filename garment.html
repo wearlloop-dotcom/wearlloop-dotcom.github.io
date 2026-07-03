@@ -52,13 +52,13 @@
   <section class="phead">
     <div class="eyebrow">garment lifecycle</div>
     <h1>ทุกชุดมีเรื่องราว</h1>
-    <div class="sub">สแกนโค้ดชุด แล้วย้อนดูทุกรอบการดูแล สภาพ รูปถ่าย และการเดินทาง — เพราะชุดที่อยู่ใน loop ได้นาน คือชุดที่เราใส่ใจทุกครั้ง</div>
+    <div class="sub">ย้อนดูทุกรอบการดูแล สภาพ และรูปแต่ละรอบ</div>
   </section>
   <div class="scan">
     <input id="code" placeholder="ใส่/สแกนโค้ดชุด เช่น g1" autocomplete="off">
     <button class="btn" onclick="load()">ดู</button>
   </div>
-  <div id="out"><div class="empty">สแกน QR บนชุด หรือใส่โค้ด เพื่อดูประวัติแต่ละรอบ + รูป</div></div>
+  <div id="out"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -110,7 +110,7 @@
         </div>
       </div>
       <div class="card">
-        <h2>รอบการดูแล (สภาพ + รูปแต่ละรอบ)</h2>
+        <h2>รอบการดูแล</h2>
         ${cycles?`<div class="tl">${cycles}</div>`:'<div class="empty">ยังไม่มีรอบการดูแล</div>'}
       </div>
       <div class="card">

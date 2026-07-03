@@ -130,15 +130,9 @@
       </div>
     </div>
 
-    <!-- (c) HOW it works + the action -->
+    <!-- (c) the action -->
     <div class="sec">
-      <div class="seclabel" data-i18n="Simple steps">ขั้นตอนง่าย ๆ</div>
-      <div class="steps">
-        <div class="step"><span class="num">1</span><span class="st" data-i18n="Tap &lt;b&gt;Join group&lt;/b&gt;">แตะปุ่ม <b>เข้าร่วมกลุ่ม</b></span></div>
-        <div class="step" id="stepLogin"><span class="num">2</span><span class="st" data-i18n="Verify with &lt;b&gt;LINE&lt;/b&gt; (just once)">ยืนยันตัวตนด้วย <b>LINE</b> (ครั้งเดียว)</span></div>
-        <div class="step"><span class="num">3</span><span class="st" data-i18n="&lt;b&gt;Pick outfits&lt;/b&gt; with your friends">เลือกชุดกับ<b>เพื่อน</b>ได้เลย</span></div>
-      </div>
-      <div class="actions" style="margin-top:18px">
+      <div class="actions">
         <button class="btn sage" id="joinBtn" data-i18n="Join group">เข้าร่วมกลุ่ม</button>
         <div class="btnnote" id="joinNote"></div>
         <a class="linkbtn" href="index.html" data-i18n="Maybe later">ไว้ก่อน</a>
@@ -253,10 +247,10 @@ function renderWelcome(p){
   }
   if(inviter){
     $('#welInvite').innerHTML='<b>'+escHtml(inviter)+'</b> '+NAV.t('ชวนคุณเข้ากลุ่ม','invited you to a group');
-    $('#welSub').innerHTML=NAV.t('ตอบรับคำเชิญได้เลยค่ะ','Accept the invitation below');
+    $('#welSub').innerHTML='';
   } else {
     $('#welInvite').textContent=NAV.t('คุณถูกชวนเข้ากลุ่มนี้','You\'ve been invited to this group');
-    $('#welSub').innerHTML=NAV.t('ตอบรับคำเชิญได้เลยค่ะ','Accept the invitation below');
+    $('#welSub').innerHTML='';
   }
 
   // --- (b) group card ---

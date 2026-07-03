@@ -162,7 +162,7 @@
   <div class="hero">
     <div class="eyebrow">community</div>
     <h1 class="htitle">The Loop Looks</h1>
-    <p class="hsub" data-i18n="Real looks from the loop — rent them in a tap · share your look, earn credit">ลุคจริงจากคนใน loop — กดเช่าตามได้เลย · แชร์ลุคของคุณ รับเครดิต</p>
+    <p class="hsub" data-i18n="Real looks from the loop — rent them in a tap">ลุคจริงจากคนใน loop — กดเช่าตามได้เลย</p>
   </div>
   <div class="hubs" id="hubs"></div>
   <div class="tabs" id="tabs">
@@ -325,7 +325,7 @@ function renderFeed(){
     $('#feed').innerHTML = `<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div>
       <h4>${T('ยังไม่มีลุคในชุมชน','No looks yet')}</h4>
-      <p>${T('เป็นคนแรกที่แชร์ลุค — เช่า ถ่ายรูป แล้วแชร์ ได้เครดิตเข้ากระเป๋า','Be the first to share — rent, snap a photo, and earn credit to your wallet')}</p></div>`;
+      <p>${T('เช่า ถ่ายรูป แล้วแชร์ รับเครดิต','Rent, snap, share — earn credit')}</p></div>`;
     if(TAG) $('#feed').innerHTML = clr + $('#feed').innerHTML;
     return;
   }

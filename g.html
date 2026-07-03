@@ -259,8 +259,7 @@ function renderItem(){
     + (G.grade ? ' · ' + NAV.t('เกรดสภาพ ', 'Condition grade ') + G.grade : '');
   const cta = signedIn
     ? `<button class="btn" id="bookBtn" onclick="onBook()" disabled>${NAV.t('เลือกวันก่อนนะคะ','Pick a date first')}</button>`
-    : `<button class="btn sage" onclick="window.LiffAuth.signIn()">${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อจอง','Sign in with LINE to book')}</button>
-       <div class="signhint">${NAV.t('เข้าระบบด้วย LINE ครั้งเดียว แล้วเลือกวันจองได้เลย','Sign in once with LINE, then pick your dates.')}</div>`;
+    : `<button class="btn sage" onclick="window.LiffAuth.signIn()">${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อจอง','Sign in with LINE to book')}</button>`;
   $('#root').innerHTML = `
     ${photo}
     <div class="eyebrow">${NAV.t('เช่าชุดนี้','Rent this piece')}</div>
@@ -276,7 +275,7 @@ function renderItem(){
 
     <div class="sec">
       <div class="sectitle">${NAV.t('เลือกวันที่จะใช้','Choose your date')}</div>
-      <div class="seccap">${NAV.t('วันแรกคือวันรับ/วันใช้งาน — เราเช็กให้ทันทีว่าว่างไหม','The first day is your pickup/wear day — we check availability instantly.')}</div>
+      <div class="seccap">${NAV.t('วันแรกคือวันรับ/วันใช้งาน','The first day is your pickup/wear day')}</div>
       <label class="fl">${NAV.t('วันที่ใช้งาน','Wear date')}</label>
       <input type="date" id="useDate" min="${todayStr()}" onchange="onPick()">
       <label class="fl">${NAV.t('เช่ากี่วัน','How many days')}</label>

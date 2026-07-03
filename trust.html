@@ -96,8 +96,8 @@
   <div id="loading" class="state">กำลังเปิดสมุดพก…</div>
 
   <div id="off" class="state" style="display:none">
-    สมุดพกความเชื่อใจกำลังจะเปิดเร็ว ๆ นี้<br>
-    ทุกการเช่า-คืนของคุณถูกบันทึกไว้แล้ว — วันที่เปิด คะแนนสะสมย้อนหลังจะแสดงทันทีค่ะ
+    <b>สมุดพกความเชื่อใจ กำลังจะเปิดเร็ว ๆ นี้</b><br>
+    ทุกการเช่า-คืนถูกบันทึกไว้ให้แล้วค่ะ
   </div>
 
   <div id="err" class="state" style="display:none"></div>
@@ -124,19 +124,21 @@
       <div class="stat"><div class="n" id="stDamage">0</div><div class="l">สภาพไม่ผ่าน</div></div>
     </div>
 
-    <div class="rules">
-      <div class="h">คะแนนคิดยังไง</div>
+    <details class="rules">
+      <summary class="h" style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">คะแนนคิดยังไง <span style="font-weight:400;font-size:11px">▸ แตะดูเกณฑ์</span></summary>
+      <div style="margin-top:6px">
       คืนตรงเวลา + สภาพเรียบร้อย <b>+10</b> · คืนช้า <b>−15</b> · สภาพไม่ผ่าน <b>−20</b> · มีเคสพิพาท <b>−40</b><br>
       ระดับ: <b>Bronze</b> เริ่มสะสม · <b>Silver</b> 50 คะแนน · <b>Gold</b> 120 คะแนน (ไม่มีเคสใน 12 เดือน)<br>
-      สิทธิ์ไม่วางมัดจำ: ยืนยันตัวตนแล้ว + คืนสมบูรณ์ครบตามเกณฑ์ + ไม่มีเคสใน 6 เดือน
-    </div>
+      ไม่วางมัดจำ: ยืนยันตัวตน + คืนครบตามเกณฑ์ + ไม่มีเคสใน 6 เดือน
+      </div>
+    </details>
   </div>
 </div>
 
 <script>
 const $ = (s) => document.querySelector(s);
 const TIERS = {
-  NEW:    { th: 'เพื่อนใหม่ — เช่าครั้งแรกเมื่อไหร่ เริ่มสะสมทันที', tone: '#8C8B86', tint: '#F5F4F2' },
+  NEW:    { th: 'เพื่อนใหม่ — เริ่มสะสมได้เลย', tone: '#8C8B86', tint: '#F5F4F2' },
   BRONZE: { th: 'บรอนซ์ — กำลังสะสมความเชื่อใจ',                    tone: '#B08D57', tint: '#F6EFE4' },
   SILVER: { th: 'ซิลเวอร์ — ลูกค้าประวัติดี',                        tone: '#78828C', tint: '#EEF1F4' },
   GOLD:   { th: 'โกลด์ — ระดับสูงสุดของความเชื่อใจ',                 tone: '#C9A86A', tint: '#F9F2E3' },
@@ -154,7 +156,7 @@ function paint(d) {
   const ben = $('#benefit');
   if (d.waive_deposit) {
     ben.classList.add('on');
-    ben.textContent = 'เช่าโดยไม่ต้องวางมัดจำแล้วค่ะ — ขอบคุณที่ดูแลชุดเสมอมา';
+    ben.textContent = 'เช่าได้เลยไม่ต้องวางมัดจำค่ะ';
   } else {
     ben.textContent = d.next_step || 'เริ่มเช่าเพื่อสะสมคะแนนความเชื่อใจ';
   }
