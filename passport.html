@@ -60,6 +60,7 @@
   .value b { color: var(--ink); font-weight: 600; }
   .value .rent { color: var(--sage-deep); font-weight: 600; }
   .care { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+  .care .ck { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; margin-right: 7px; }
 
   /* story — คำโปรยตัวเอียง โชว์เฉพาะที่มี */
   .tale { font-family: 'Prompt', serif; font-style: italic; font-size: 15px; line-height: 1.7;
@@ -204,7 +205,7 @@ function paint(d) {
     $('#value').innerHTML = 'มูลค่าจริง <b>฿' + Number(g.retail).toLocaleString() + '</b>'
       + (g.rent ? ' · เช่า <span class="rent">฿' + Number(g.rent).toLocaleString() + '</span>' : '');
   }
-  if (g.care) { $('#care').style.display = ''; $('#care').textContent = '🧺 ' + g.care; }
+  if (g.care) { $('#care').style.display = ''; $('#care').innerHTML = '<span class="ck">การดูแล</span>' + esc(g.care); }
 
   if (g.story) { $('#tale').style.display = ''; $('#tale').textContent = g.story; }
 
