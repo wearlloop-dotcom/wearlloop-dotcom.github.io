@@ -240,7 +240,7 @@ function valueStrip(g) {
   const sv = savingsPct(g);
   const parts = [];
   if (sv) parts.push(`<span style="background:#EAF3DE;color:#27500A;padding:4px 10px;border-radius:6px;font-size:12px">${th?'มูลค่าชุด':'Worth'} ${money(g.retail)} · ${th?'เช่าประหยัด':'save'} ${sv}%</span>`);
-  if (g.grade) parts.push(`<span style="background:#E1F5EE;color:#085041;padding:4px 10px;border-radius:6px;font-size:12px">${th?'ผ่าน QC เกรด':'QC grade'} ${g.grade} · ${th?'ดูแลอย่างดี':'well kept'}</span>`);
+  if (g.grade) parts.push(`<span style="background:#E1F5EE;color:#085041;padding:4px 10px;border-radius:6px;font-size:12px">${th?'ผ่าน QC เกรด':'QC grade'} ${g.grade}</span>`);
   if (!parts.length) return '';
   return `<div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0">${parts.join('')}</div>`;
 }
@@ -653,7 +653,7 @@ function renderGrid() {
     (!fNewOnly || g.isNew) &&
     priceOk(g) &&
     matchQuery(g));
-  if (fWishOnly && !list.length) { $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา — แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
+  if (fWishOnly && !list.length) { $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา — แตะหัวใจเพื่อเก็บ':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
   if (fForYou) {
     // ดันชุดที่ "คนเหมือนคุณเช่า" (collaborative จาก behavior data) ขึ้นบนสุด แล้วตามด้วย personalScore
     const recIdx = g => { const i = gPersonalRecs.indexOf(g.code); return i < 0 ? 999 : i; };
@@ -991,11 +991,11 @@ function openDetail(id) {
         <div style="font-size:11px;color:var(--ok)">${t('fitFromPre')} ${g.stretch!=='none'? t('stretchHelp') : t('noStretchHelp')}</div></div></div>`:''}
       ${tips?`<div class="sec">${t('secWear')}</div><div class="tips">${tips}</div>`:''}
       <div class="sec">${lang ==='th'?'ครบลุค — ทรงผม & เครื่องประดับ':'Complete the look'}</div>
-      <div class="lookteaser">${lang ==='th'?'จองชุดนี้แล้ว รับ “ครบลุค” ให้เลย — LLOOP Atelier จะจัดทรงผม & เครื่องประดับที่เข้ากับชุด แล้วส่งเข้าแชต LINE ให้หลังชำระเงิน':'Book this dress and LLOOP Atelier styles your complete look — hair & accessories, sent to your LINE chat after payment'}</div>
+      <div class="lookteaser">${lang ==='th'?'จองแล้วรับ “ครบลุค” — ทรงผม & เครื่องประดับเข้าชุด ส่งใน LINE หลังชำระเงิน':'Includes a full look — hair & accessories, sent in LINE after payment'}</div>
       <div id="ugcWrap" style="display:none"><div class="sec">${lang ==='th'?'รูปจริงจากลูกค้า':'Real customer photos'}</div><div id="ugcbox" class="ugcbox"></div></div>
       <div class="sec secrow">${t('secSize')}<span class="munit">${['in','cm'].map(u=>`<button data-u="${u}" class="${gMUnit===u?'on':''}" onclick="setMUnit('${u}')">${u==='in'?(lang==='th'?'นิ้ว':'inch'):(lang==='th'?'ซม.':'cm')}</button>`).join('')}</span></div>
       <div class="measure" id="measureBox">${measureCells(g)}</div>
-      ${chart ? `<div class="sec">${lang==='th'?'ตารางไซส์':'Size chart'}</div><div class="dsizechart"><img src="${chart}" alt="size chart" loading="lazy">${ourSizesLabel ? `<div class="dscnote">${lang==='th'?`ตารางอ้างอิงจากแบรนด์ — <b>ไซส์ที่เรามีให้เช่า: ${ourSizesLabel}</b>`:`Brand reference — <b>we rent: ${ourSizesLabel}</b>`}</div>` : ''}</div>` : ''}
+      ${chart ? `<div class="sec">${lang==='th'?'ตารางไซส์':'Size chart'}</div><div class="dsizechart"><img src="${chart}" alt="size chart" loading="lazy">${ourSizesLabel ? `<div class="dscnote">${lang==='th'?`<b>ไซส์ที่มีให้เช่า: ${ourSizesLabel}</b>`:`<b>We rent: ${ourSizesLabel}</b>`}</div>` : ''}</div>` : ''}
       <div id="fitsummary"></div>
       <div class="sec">${t('secFabric')}</div>
       <div class="fabric">${fabricTags}</div>
@@ -1024,8 +1024,8 @@ function openDetail(id) {
       <span class="bo-txt">
         <span class="bo-title">${lang==='th'?'เลือกชุดสำรองเผื่อไว้เอง':'Choose your own spare'}</span>
         <span class="bo-why">${lang==='th'
-          ? 'เผื่อชุดหลักมีเหตุไม่พร้อมจริง ๆ เช่น ผู้เช่าก่อนหน้าทำชุดเสียหาย เลือกชุดที่อยากให้สลับให้เองได้เลย — ไม่มีค่าใช้จ่ายเพิ่ม'
-          : 'If your main piece truly can’t make it (e.g. a prior renter damaged it), pick the spares you’d want us to swap in — no extra charge.'}</span>
+          ? 'ถ้าชุดหลักไม่พร้อม เราสลับตัวที่คุณเลือกให้ทันที — ฟรี'
+          : 'If your main piece can’t make it, we swap in your pick — free.'}</span>
       </span>
     </label>
     <div id="backupPicker" class="backuppick" hidden></div>
@@ -1229,7 +1229,7 @@ async function renderAvailCalendar(garmentId) {
     html += `<div class="calmonth"><div class="calhd">${monthName}</div><div class="calgrid">${cells}</div></div>`;
   }
   html += `<div class="callegend"><span><i class="lfree"></i>${lang === 'th' ? 'ว่าง' : 'free'}</span><span><i class="lbk"></i>${lang === 'th' ? 'ไม่ว่าง' : 'booked'}</span></div>`;
-  html += `<div class="calnote">${lang === 'th' ? 'วันไม่ว่างรวมเวลาส่ง+ซัก+รีดของชุดด้วย เพื่อให้คุณได้ชุดสะอาดตรงวัน' : 'Booked days include shipping + cleaning time so your piece arrives fresh on time'}</div>`;
+  html += `<div class="calnote">${lang === 'th' ? 'วันไม่ว่างรวมเวลาส่ง + ซักรีดแล้ว' : 'Includes shipping + cleaning time'}</div>`;
   box.innerHTML = html;
 }
 function pickCalDate(garmentId, ds) {
@@ -1433,7 +1433,7 @@ async function renderQuote(id, date) {
       : pay.pay_promptpay_qr ? `<div style="text-align:center;margin:10px 0">
         <img src="${pay.pay_promptpay_qr}" alt="PromptPay QR" style="display:block;margin:0 auto;width:200px;max-width:70%;border:1px solid var(--line,#E7E5E1);border-radius:6px">
         <div style="font-size:13px;margin-top:6px">${TH ? 'สแกนแล้วโอน' : 'Scan & pay'} <b>${baht(netTotal)}</b></div></div>` : ''}
-      <div style="font-size:12px;color:var(--muted,#8C8B86);margin-top:6px">${pay.pay_note || (TH ? 'โอนแล้วแนบสลิปในแชตนี้ ระบบตรวจให้อัตโนมัติค่ะ' : 'Transfer then send slip in chat — we verify it automatically')}</div>
+      <div style="font-size:12px;color:var(--muted,#8C8B86);margin-top:6px">${pay.pay_note || (TH ? 'โอนแล้วแนบสลิปในแชตนี้ค่ะ' : 'Transfer then send slip in chat — we verify it automatically')}</div>
     </div>`;
   const kyc = q.kyc_required ? `<div class="kycnote">
       <div class="kt">${TH ? 'ยืนยันตัวตน ลดมัดจำได้' : 'Verify to lower your deposit'}</div>
@@ -1459,10 +1459,10 @@ async function renderQuote(id, date) {
     ${row(TH ? 'ค่าส่ง' : 'Shipping', q.shipping > 0 ? baht(q.shipping) : (TH ? 'ส่งฟรี' : 'Free'))}
     ${creditApplied > 0 ? row(TH ? 'ใช้เครดิตในกระเป๋า' : 'Wallet credit', '−' + baht(creditApplied)) : ''}
     ${row(TH ? 'รวมโอน' : 'Total', netTotal > 0 ? baht(netTotal) : (TH ? 'ใช้เครดิตครบ' : 'Fully covered'), true)}
-    ${q.deposit > 0 ? `<div class="qdates" style="color:var(--muted,#8C8B86)">${TH ? `ยอดนี้รวมมัดจำ ฿${q.deposit} แล้ว · มัดจำคืนเข้ากระเป๋า LLOOP หลังเราตรวจชุด` : `Total includes a ฿${q.deposit} deposit · returned to your LLOOP wallet after we inspect the dress`}</div>` : ''}
+    ${q.deposit > 0 ? `<div class="qdates" style="color:var(--muted,#8C8B86)">${TH ? `รวมมัดจำ ฿${q.deposit} — คืนเข้ากระเป๋า LLOOP หลังตรวจชุด` : `Includes ฿${q.deposit} deposit — returned to your wallet after inspection`}</div>` : ''}
     <div class="qdates qspan">${TH ? 'วันรับชุด (นับเป็นวันแรก)' : 'Day 1 (you receive it)'}: <b>${fmtDate(q.use_date)}</b> · ${TH ? `เช่า ${q.days} วัน` : `${q.days} days`}</div>
     <div class="qdates">${TH ? 'กำหนดคืน' : 'Return by'} <b>${fmtDate(q.return_date)}${q.return_by ? (TH ? ` ก่อน ${q.return_by} น.` : ` by ${q.return_by}`) : ''}</b> ${TH ? `(วันที่ ${q.days} ของการเช่า)` : `(day ${q.days})`}</div>
-    <div class="qdates">${TH ? 'เราจัดส่งให้ของถึงมือคุณตรงวันรับ · คืนตรงเวลาช่วยให้ชุดพร้อมคิวถัดไปทัน' : 'We ship so it arrives on your Day 1 · on-time return keeps the next booking on track'}</div>
+    <div class="qdates">${TH ? 'ส่งถึงมือคุณตรงวันรับ' : 'Arrives on your Day 1'}</div>
     ${kyc}
     ${creditBtn}
     ${payBlock}`;
@@ -1500,7 +1500,7 @@ function showPayConfirm({ g, date, total, pay, backups }) {
       </div>
       <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center;font-weight:600">
         ${TH ? 'โอนแล้วส่งสลิปในแชต LINE' : 'After paying, send the slip on LINE'}
-        <div style="font-weight:400;font-size:12px;margin-top:3px">${TH ? 'ตรวจสลิปและยืนยันให้อัตโนมัติ' : 'Verified and confirmed automatically'}</div>
+        
       </div>
       <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;background:#06C755;color:#fff;border-radius:12px;padding:11px;font-weight:600;text-decoration:none">${TH ? 'ส่งสลิปใน LINE' : 'Send slip on LINE'}</a>` : `
       <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center">${TH ? 'จองไว้ให้แล้ว · ทีมงานจะส่งวิธีชำระเงินให้ในแชต LINE นี้ค่ะ' : 'Reserved — we’ll send payment details in this LINE chat'}</div>`}
@@ -1635,7 +1635,7 @@ async function aiRankBackups() {
     const ranked = Array.isArray(resp.ranked) ? resp.ranked : [];
     if (resp.error === 'no_quota') {
       // โควต้า LLOOP Atelier หมด → ใช้การเรียงอัตโนมัติเดิมต่อได้ ไม่เสียอะไร
-      toast(lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว — เช่าชุดเพื่อรับเพิ่ม 3 ครั้ง (ตอนนี้ใช้การเรียงอัตโนมัติให้แล้ว)':'LLOOP Atelier quota used up — rent an outfit for +3 (showing the auto-sorted order)');
+      toast(lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว — เช่าชุดเพื่อรับเพิ่ม 3 ครั้ง':'LLOOP Atelier quota used up — rent an outfit for +3');
       if (btn) { btn.disabled = true; btn.textContent = lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว':'LLOOP Atelier quota used up'; }
     } else if (ranked.length) {
       _bpWhy = {};
@@ -1827,13 +1827,13 @@ function openKyc(id) {
     <div class="ksheet">
       <button class="close" onclick="closeKyc()">×</button>
       <div class="khd">${TH ? 'ยืนยันตัวตน' : 'Verify identity'}</div>
-      <div class="ksub">${TH ? 'เพื่อความปลอดภัยของทั้งสองฝ่าย ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว รอบหน้าไม่ต้องทำอีก' : 'One-time verification for new customers'}</div>
+      <div class="ksub">${TH ? 'ลูกค้าใหม่ยืนยันครั้งเดียว รอบหน้าไม่ต้องทำอีก' : 'One-time verification for new customers'}</div>
       <label class="klabel">${TH ? 'บัตรประชาชน (ถ่ายชัดเจน)' : 'ID card photo'}</label>
       <input type="file" id="kycId" accept="image/*">
       <label class="klabel">${TH ? 'ลิงก์ IG หรือ Facebook (สาธารณะ)' : 'IG / Facebook link (public)'}</label>
       <input type="url" id="kycSocial" placeholder="https://instagram.com/..." class="kinput">
       <button class="ksubmit" onclick="submitKycForm('${id || ''}')">${TH ? 'ส่งยืนยันตัวตน' : 'Submit'}</button>
-      <div class="knote">${TH ? 'หรือไม่ต้องยืนยันก็ได้ — เพียงวางมัดจำเพิ่มตามที่แจ้งในสรุปยอด' : 'Or skip and keep the higher deposit shown in the summary'}</div>
+      <div class="knote">${TH ? 'หรือวางมัดจำเพิ่มแทนการยืนยันก็ได้' : 'Or skip and keep the higher deposit shown in the summary'}</div>
     </div>`;
   $('#kycOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
 }
@@ -2381,7 +2381,7 @@ function openProfile(onboard) {
         <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
         ${onboard ? '' : `<div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>`}
       </div>
-      <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label>
+      <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว)' : 'Delivery address (once — auto-fills labels)'}</label>
         <textarea id="pAddrDetail" rows="2" autocomplete="shipping street-address" inputmode="text" placeholder="${lang === 'th' ? 'บ้านเลขที่ / หมู่บ้าน-คอนโด / ซอย / ถนน' : 'House no. / building / soi / road'}">${c.address || ''}</textarea>
         <div class="subhint">${lang === 'th' ? 'พิมพ์รหัสไปรษณีย์ 5 หลัก แล้วเลือกตำบล — อำเภอ/จังหวัดเติมให้อัตโนมัติ' : 'Type the 5-digit postal code, pick a subdistrict — district & province auto-fill'}</div>
       </div>
@@ -2911,7 +2911,7 @@ async function openTaste(){
   if (n < 5) {
     body = `<div class="taste-empty">${en
       ? 'We\'re still learning your taste. Browse a few more looks and we\'ll show what you love here.'
-      : 'เรากำลังเรียนรู้สไตล์ของคุณอยู่ — ลองดูชุดเพิ่มอีกสักนิด แล้วเราจะสรุป “สิ่งที่คุณชอบ” ให้ตรงใจ'}</div>`;
+      : 'ดูชุดเพิ่มอีกนิด เดี๋ยวเราสรุปสไตล์ที่คุณชอบให้ค่ะ'}</div>`;
   } else {
     body = block(en?'Occasions':'โอกาสที่ชอบ', tt.occasions, occName)
          + block(en?'Brands':'แบรนด์ที่ชอบ', tt.brands, k=>k)
@@ -2931,7 +2931,7 @@ async function openTaste(){
     <div class="taste-body">${body}${recentHtml}</div>
     <div class="taste-foot">${en
       ? 'Private to you — used only to sort looks you\'ll love first.'
-      : 'เป็นข้อมูลส่วนตัวของคุณ — ใช้เพื่อจัดชุดที่น่าจะถูกใจขึ้นก่อนเท่านั้น'}</div>`;
+      : 'ข้อมูลส่วนตัว — ใช้จัดชุดให้ตรงใจเท่านั้น'}</div>`;
   $('#tasteOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -3153,7 +3153,7 @@ async function closeSubPay(refresh) {
     CUSTOMER._sub = await window.API.mySubscription?.(CUSTOMER) || { active: false };
     let plans = []; try { plans = await window.API.subPlans?.() || []; } catch (e) { /**/ }
     renderMembership(CUSTOMER._sub, plans);
-    toast(lang === 'en' ? 'We will open your membership once the slip is verified' : 'เมื่อสลิปผ่าน ระบบจะเปิดสิทธิ์ให้อัตโนมัติค่ะ');
+    toast(lang === 'en' ? 'Payment received — thank you' : 'โอนเรียบร้อยแล้วค่ะ');
   } catch (e) { /**/ }
 }
 async function subActionClick(action) {
@@ -3223,7 +3223,7 @@ function renderOrders(rentals) {
   _myRentals = rentals || [];
   const body = $('#ordersBody'); if (!body) return;
   if (!rentals.length) {
-    body.innerHTML =`<div class="oempty">${lang ==='th'?'ยังไม่มีออเดอร์ — เลือกชุดที่ถูกใจแล้วเริ่มลุคแรกของคุณได้เลย':'No rentals yet — pick a look you love to begin'}</div>`;
+    body.innerHTML =`<div class="oempty">${lang ==='th'?'ยังไม่มีออเดอร์ — เลือกชุดที่ถูกใจได้เลย':'No rentals yet — pick a look you love to begin'}</div>`;
     return;
   }
   // จับกลุ่ม: ชุดสำรองไปซ้อนใต้ชุดหลักของมัน (ไม่โผล่เป็นออเดอร์แยกให้งง)
@@ -3357,7 +3357,7 @@ function orderCard(r, spareList) {
       <div class="ospares-body" id="${spId}" hidden>
         ${spareList.map(s => `<div class="ospare"><span class="othumb sm" style="${orderThumb(s)}"></span><span class="osp-name">${s.name||'—'}</span></div>`).join('')}
         <div class="ospares-why">${lang==='th'
-          ? 'ถ้าชุดหลักมีเหตุไม่พร้อมจริง ๆ (เช่น ผู้เช่าก่อนหน้าทำเสียหาย) เราสลับตัวสำรองให้ทันที ไม่มีค่าใช้จ่ายเพิ่ม'
+          ? 'ถ้าชุดหลักไม่พร้อม เราสลับตัวสำรองให้ทันที — ฟรี'
           : 'If your main piece can’t make it (e.g. damaged by a prior renter), we swap in a spare right away at no extra cost.'}</div>
       </div>
     </div>` : '';
@@ -3616,7 +3616,7 @@ function _renderResched() {
     <div class="rsd-hint">${th?'เลือกวันรับใหม่จากวันที่ว่าง — ระบบเลื่อนวันคืนให้อัตโนมัติ':'Pick a new start date from the free days — return date moves automatically'}</div>
     <div class="rsd-cal">${cal}</div>
     <div class="callegend"><span><i class="lfree"></i>${th?'ว่าง':'free'}</span><span><i class="lbk"></i>${th?'ไม่ว่าง':'booked'}</span></div>
-    <div class="calnote">${th?'วันไม่ว่างรวมเวลาส่ง+ซัก+รีดของชุดด้วย เพื่อให้คุณได้ชุดสะอาดตรงวัน':'Booked days include shipping + cleaning time'}</div>
+    <div class="calnote">${th?'วันไม่ว่างรวมเวลาส่ง + ซักรีดแล้ว':'Includes shipping + cleaning time'}</div>
     ${summary}
     <button class="rvsubmit" id="rsdGo" ${S.pick?'':'disabled'} onclick="confirmResched()">${th?'ยืนยันเลื่อนวัน':'Confirm reschedule'}</button>`;
 }
@@ -3694,7 +3694,7 @@ function openReview(rentalId, name) {
     <textarea id="rvComment" class="rvtext" rows="3" placeholder="${lang ==='th'?'ชอบตรงไหน ใส่ไปงานอะไร…':'What you loved, where you wore it…'}"></textarea>
     <div class="rvphotos">
       <div class="rvvtitle">${lang ==='th'?'แนบรูปที่ใส่จริง รับเครดิต +฿15':'Add a photo wearing it — earn ฿15'}</div>
-      <div class="rvvhint">${lang ==='th'?'รูปจริงของคุณจะไปโชว์ในหน้าชุด ช่วยให้เพื่อน ๆ ตัดสินใจง่ายขึ้น':'Your real photo appears on the dress page to help others'}</div>
+      <div class="rvvhint">${lang ==='th'?'รูปของคุณจะโชว์ในหน้าชุด':'Your real photo appears on the dress page to help others'}</div>
       <input type="file" accept="image/*" multiple onchange="reviewPhotoUpload(this)">
       <div class="rvthumbs" id="rvThumbs"></div>
     </div>
@@ -3740,8 +3740,8 @@ async function submitReview() {
     const photos = _reviewPhotos.length ? _reviewPhotos : null;
     try { await window.API.addReview(_reviewRental, _reviewRating, _reviewFit, comment, photos); } catch (e) { console.warn(e); }
     toast(photos
-      ? (lang ==='th'?'ขอบคุณที่แชร์รูปจริงนะคะ! +฿15 — ทุกครั้งที่ชุดได้ใส่ซ้ำ คือช่วยกันรักษ์โลกค่ะ':'Thank you for sharing! +฿15 — you keep our loop strong')
-      : (lang ==='th'?'ขอบคุณสำหรับรีวิวนะคะ ทุกความเห็นช่วยให้เพื่อน ๆ เลือกชุดที่ใช่ได้ง่ายขึ้นค่ะ':'Thank you — you make our community stronger'));
+      ? (lang ==='th'?'ขอบคุณที่แชร์รูปค่ะ +฿15':'Thank you for sharing! +฿15 — you keep our loop strong')
+      : (lang ==='th'?'ขอบคุณสำหรับรีวิวค่ะ':'Thank you — you make our community stronger'));
   }
 }
 function animateCounts(root) {
