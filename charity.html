@@ -53,6 +53,14 @@
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:9;max-width:90%;text-align:center}
   .toast.show{opacity:1}
   .link{background:none;border:none;color:var(--warm);font-size:13px;text-decoration:underline;cursor:pointer;font-family:var(--sans);padding:0}
+  .taxbox{background:#F4F8F6;border:1px solid #D8E6E0;border-radius:10px;padding:12px 14px;margin-top:14px}
+  .taxstat{border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+  .taxstat b{display:block;font-family:var(--display);font-size:20px;font-weight:700;color:var(--ink);line-height:1}
+  .taxstat span{font-size:11px;color:var(--muted);display:block;margin-top:6px;line-height:1.3}
+  .taxstat.hl{background:#EAF4EF;border-color:#CFE6DB}.taxstat.hl b{color:var(--ok)}
+  .taxhint{background:#EAF4EF;border:1px solid #CFE6DB;border-radius:9px;padding:9px 12px;font-size:12.5px;color:#0F5A46;margin:8px 0;line-height:1.5}
+  .taxhint.no{background:#FBF3E2;border-color:#ECDDBD;color:#6b5a2e}
+  .pill.tax{background:#EAF4EF;color:var(--ok)}.pill.tax2{background:#0F6E56;color:#fff}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
 </head>
@@ -77,20 +85,34 @@
     <div class="fnote" id="fNote">กำลังโหลด…</div>
   </div>
 
+  <!-- สรุปสิทธิภาษี -->
+  <div class="card">
+    <h2>สิทธิลดหย่อนภาษีบริษัท</h2>
+    <div class="sub">นับเฉพาะการโอนที่ปลายทางหักภาษีได้ + มีหลักฐาน · เพดานจริง (2%/10% ของกำไรสุทธิ) คิดตอนยื่นภาษี</div>
+    <div class="g2">
+      <div class="taxstat"><b id="tBase">฿0</b><span>ยอดบริจาคที่หักได้ (ปีนี้)</span></div>
+      <div class="taxstat hl"><b id="tWeighted">฿0</b><span>หักได้เสมือน × เท่า (ปีนี้)</span></div>
+    </div>
+    <div class="fnote" id="tNote" style="text-align:left"></div>
+  </div>
+
   <!-- บันทึกการโอนจริง -->
   <div class="card">
     <h2>บันทึกการโอนจริง</h2>
     <div class="sub">หลังประสานมูลนิธิ + โอนเงินแล้ว → ลงบันทึกที่นี่เพื่อตัดยอดคงค้างและอัปเดตตัวเลข "โอนจริง" ที่ลูกค้าเห็น</div>
     <label>มูลนิธิ / โครงการ *</label>
-    <select id="dPartner"><option value="">— เลือกมูลนิธิ —</option></select>
+    <select id="dPartner" onchange="taxHint()"><option value="">— เลือกมูลนิธิ —</option></select>
+    <div class="taxhint" id="dTaxHint" style="display:none"></div>
     <div class="g2">
-      <div><label>ยอดที่โอน (฿) *</label><input id="dAmount" type="number" inputmode="decimal" placeholder="เช่น 5000"></div>
+      <div><label>ยอดที่โอน (฿) *</label><input id="dAmount" type="number" inputmode="decimal" placeholder="เช่น 5000" oninput="taxHint()"></div>
       <div><label>จำนวนน้องที่ช่วย</label><input id="dKids" type="number" inputmode="numeric" placeholder="เช่น 12"></div>
     </div>
     <div class="g2">
       <div><label>วันที่โอน</label><input id="dDate" type="date"></div>
       <div><label>เลขอ้างอิง / ใบเสร็จ</label><input id="dRef" placeholder="เลขที่โอน/ใบอนุโมทนา"></div>
     </div>
+    <label>เลขอ้างอิง e-Donation (ถ้าบริจาคผ่านระบบสรรพากร)</label>
+    <input id="dEdon" placeholder="เลข e-Donation — จำเป็นสำหรับสิทธิหัก 2 เท่าหลายโครงการ">
     <label>หลักฐาน (สลิป / ใบเสร็จ / ภาพส่งมอบ)</label>
     <input type="file" id="dProofUp" accept="image/*" multiple onchange="uploadProof(this)">
     <div class="thumbs" id="dProofThumbs"></div>
@@ -126,6 +148,24 @@
       </div>
       <label>ที่อยู่</label><input id="pAddress" placeholder="ที่อยู่จัดส่ง/ติดต่อ">
       <label>โน้ต</label><textarea id="pNote" placeholder="ข้อมูลเพิ่มเติม"></textarea>
+      <div class="taxbox">
+        <label style="display:flex;align-items:center;gap:8px;margin:0 0 4px"><input id="pTaxDed" type="checkbox" style="width:auto" onchange="toggleTaxFields()"> <b>บริจาคแล้วหักภาษีบริษัทได้</b> (ปลายทางต้องเป็นองค์กรรับรอง)</label>
+        <div class="sub" style="margin:0 0 8px">เลือกให้ตรงประเภท — ระบบจะคำนวณ "ยอดหักได้เสมือน" ให้ (เพดานจริงคิดตอนยื่นภาษี)</div>
+        <fieldset id="pTaxFields" style="border:none;padding:0;opacity:.4;pointer-events:none">
+          <div class="g2">
+            <div><label>สิทธิหัก</label><select id="pTaxMult" onchange="syncTaxCat()">
+              <option value="1">1 เท่า — การกุศลทั่วไป</option>
+              <option value="2">2 เท่า — การศึกษา/รพ.รัฐ/กีฬา</option></select></div>
+            <div><label>ประเภท</label><select id="pTaxCat">
+              <option value="general">การกุศลทั่วไป</option>
+              <option value="hospital">สถานพยาบาลของรัฐ</option>
+              <option value="education">สถานศึกษา</option>
+              <option value="sports">การกีฬา</option>
+              <option value="other">อื่น ๆ</option></select></div>
+          </div>
+          <label>เลขที่ประกาศ / เลขประจำตัวผู้รับบริจาค</label><input id="pTaxRef" placeholder="เลขลำดับในประกาศ / เลขผู้รับบริจาค e-Donation">
+        </fieldset>
+      </div>
       <label style="display:flex;align-items:center;gap:8px;margin-top:12px"><input id="pActive" type="checkbox" checked style="width:auto"> ใช้งานอยู่ (แสดงเป็นตัวเลือกและชื่อสาธารณะ)</label>
       <div class="g2" style="margin-top:14px">
         <button class="btn ghost" onclick="cancelPartner()">ยกเลิก</button>
@@ -186,12 +226,25 @@
       ? ('โอนแล้ว '+Math.round(disb/pledged*100)+'% ของคำมั่นสะสม' + (fund.last_donated_on?(' · โอนล่าสุด '+thDate(fund.last_donated_on)):''))
       : 'ยังไม่มีค่าเช่าที่จบ — กองบุญเริ่มสะสมเมื่อมีการเช่าคืนแล้ว';
 
+    const tax = data.tax || {};
+    $('tBase').textContent = baht(tax.deductible_base_ytd);
+    $('tWeighted').textContent = baht(tax.deductible_weighted_ytd);
+    const bonus = Number(tax.deductible_weighted_ytd||0) - Number(tax.deductible_base_ytd||0);
+    $('tNote').textContent = Number(tax.deductible_base_ytd||0) > 0
+      ? ('ปี '+(tax.year||'')+' บริจาคที่หักได้ '+baht(tax.deductible_base_ytd)+' → ใช้สิทธิหักเสมือน '+baht(tax.deductible_weighted_ytd)+(bonus>0?(' (ได้เพิ่มจากสิทธิหลายเท่า '+baht(bonus)+')'):''))
+      : 'ยังไม่มีการโอนที่หักภาษีได้ปีนี้ — ตั้งค่ามูลนิธิให้ "หักภาษีได้" แล้วบันทึกการโอนพร้อมใบเสร็จ/e-Donation';
+
     PARTNERS = data.partners || [];
     DISB = data.disbursements || [];
     renderPartners();
     renderPartnerOptions();
     renderDisb();
     renderPosts(data.posts || []);
+  }
+  // ป้ายสิทธิภาษีของ partner
+  function taxPill(p){
+    if(!p || !p.tax_deductible) return '<span class="pill off">หักภาษีไม่ได้</span>';
+    return Number(p.tax_multiplier)>=2 ? '<span class="pill tax2">หัก 2 เท่า</span>' : '<span class="pill tax">หักได้ 1 เท่า</span>';
   }
 
   function renderPartnerOptions(){
@@ -204,8 +257,8 @@
     const box=$('partnerList');
     if(!PARTNERS.length){ box.innerHTML='<div class="empty">ยังไม่มีมูลนิธิ — เพิ่มได้ด้านล่าง</div>'; return; }
     box.innerHTML=PARTNERS.map(p=>`<div class="row"><div class="rmain">
-        <div class="rt">${esc(p.name)}${p.active?'':'<span class="pill off">ปิด</span>'}${p.org_type?'<span class="pill">'+esc(p.org_type)+'</span>':''}</div>
-        <div class="rs">${[p.contact_name,p.phone].filter(Boolean).map(esc).join(' · ')||'—'}${p.note?'<br>'+esc(p.note):''}</div>
+        <div class="rt">${esc(p.name)}${p.active?'':'<span class="pill off">ปิด</span>'}${taxPill(p)}${p.org_type?'<span class="pill">'+esc(p.org_type)+'</span>':''}</div>
+        <div class="rs">${[p.contact_name,p.phone].filter(Boolean).map(esc).join(' · ')||'—'}${p.tax_ref?' · เลขรับรอง '+esc(p.tax_ref):''}${p.note?'<br>'+esc(p.note):''}</div>
       </div><button class="link" onclick='editPartner(${JSON.stringify(p.id)})'>แก้ไข</button></div>`).join('');
   }
   function renderDisb(){
@@ -213,9 +266,12 @@
     if(!DISB.length){ box.innerHTML='<div class="empty">ยังไม่มีการโอน</div>'; return; }
     box.innerHTML=DISB.map(d=>{
       const proof=(d.proof_photos||[]).map(safeImg).filter(Boolean).map(u=>`<img src="${esc(u)}" onclick="window.open('${esc(u)}','_blank')">`).join('');
+      const mult=Number(d.tax_multiplier||0);
+      const taxTag = mult>=2 ? '<span class="pill tax2">หัก 2 เท่า</span>' : mult>0 ? '<span class="pill tax">หักได้</span>' : '';
+      const ded = mult>0 ? ' · หักเสมือน '+baht(d.deductible_thb) : '';
       return `<div class="row"><div class="rmain">
-        <div class="rt">${esc(d.partner_name||'—')}${d.kids_helped?'<span class="pill">น้อง '+esc(d.kids_helped)+' คน</span>':''}</div>
-        <div class="rs">${thDate(d.donated_on)}${d.reference?' · อ้างอิง '+esc(d.reference):''}${d.recorded_by?' · โดย '+esc(d.recorded_by):''}${d.note?'<br>'+esc(d.note):''}</div>
+        <div class="rt">${esc(d.partner_name||'—')}${taxTag}${d.kids_helped?'<span class="pill">น้อง '+esc(d.kids_helped)+' คน</span>':''}</div>
+        <div class="rs">${thDate(d.donated_on)}${d.reference?' · อ้างอิง '+esc(d.reference):''}${d.edonation_ref?' · e-Donation '+esc(d.edonation_ref):''}${ded}${d.recorded_by?' · โดย '+esc(d.recorded_by):''}${d.note?'<br>'+esc(d.note):''}</div>
         ${proof?'<div class="thumbs">'+proof+'</div>':''}
       </div><div class="ramt">${baht(d.amount_thb)}</div></div>`;
     }).join('');
@@ -229,6 +285,19 @@
     }).join('');
   }
 
+  // ── hint: ยอดหักได้เสมือน ตามมูลนิธิที่เลือก ──
+  function taxHint(){
+    const p = PARTNERS.find(x=>x.id===$('dPartner').value);
+    const box=$('dTaxHint');
+    if(!p){ box.style.display='none'; return; }
+    box.style.display='block';
+    if(!p.tax_deductible){ box.className='taxhint no'; box.textContent='มูลนิธินี้ตั้งไว้ว่า "หักภาษีไม่ได้" — โอนได้แต่จะไม่นับเป็นสิทธิลดหย่อน'; return; }
+    const mult=Number(p.tax_multiplier)||1;
+    const amt=Number($('dAmount').value)||0;
+    box.className='taxhint';
+    box.textContent='หักภาษีได้ '+mult+' เท่า'+(amt>0?(' → ยอดนี้หักได้เสมือน '+baht(amt*mult)):'')+(mult>=2?' · อย่าลืมเลข e-Donation':'');
+  }
+
   // ── บันทึกการโอน ──
   async function saveDisburse(){
     const partner_id=$('dPartner').value;
@@ -240,6 +309,7 @@
       kids_helped:$('dKids').value||'0',
       donated_on:$('dDate').value||null,
       reference:$('dRef').value||null,
+      edonation_ref:$('dEdon').value||null,
       proof_photos:list('dProof'),
       note:$('dNote').value||null,
       recorded_by:(ME && (ME.name||ME.nickname))||null
@@ -248,16 +318,30 @@
     if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
     if(data && data.error){ toast('ผิดพลาด: '+data.error); return; }
     toast('บันทึกการโอนแล้ว — ยอด "โอนจริง" อัปเดตให้ลูกค้าแล้ว');
-    ['dAmount','dKids','dRef','dProof','dNote'].forEach(id=>$(id).value=''); $('dProofThumbs').innerHTML='';
+    ['dAmount','dKids','dRef','dEdon','dProof','dNote'].forEach(id=>$(id).value=''); $('dProofThumbs').innerHTML=''; $('dTaxHint').style.display='none';
     load();
   }
 
   // ── มูลนิธิ ──
+  function toggleTaxFields(){
+    const on=$('pTaxDed').checked;
+    $('pTaxFields').style.opacity = on?'1':'.4';
+    $('pTaxFields').style.pointerEvents = on?'auto':'none';
+  }
+  function syncTaxCat(){ // เลือก 2 เท่า แล้วประเภทยังเป็น general → เดาเป็นรพ.รัฐให้
+    if($('pTaxMult').value==='2' && $('pTaxCat').value==='general') $('pTaxCat').value='hospital';
+    if($('pTaxMult').value==='1') $('pTaxCat').value='general';
+  }
   function editPartner(id){
     const p = id ? PARTNERS.find(x=>x.id===id) : null;
     $('pId').value=p?p.id:''; $('pName').value=p?p.name:''; $('pType').value=p&&p.org_type||'';
     $('pContact').value=p&&p.contact_name||''; $('pPhone').value=p&&p.phone||'';
     $('pAddress').value=p&&p.address||''; $('pNote').value=p&&p.note||'';
+    $('pTaxDed').checked = p ? !!p.tax_deductible : false;
+    $('pTaxMult').value = p && Number(p.tax_multiplier)>=2 ? '2' : '1';
+    $('pTaxCat').value = p&&p.tax_category || 'general';
+    $('pTaxRef').value = p&&p.tax_ref || '';
+    toggleTaxFields();
     $('pActive').checked = p ? !!p.active : true;
     $('pForm').style.display='block'; $('pForm').scrollIntoView({behavior:'smooth',block:'center'});
   }
@@ -267,7 +351,9 @@
     if(!name){ toast('ใส่ชื่อมูลนิธิค่ะ'); return; }
     const p_data={ id:$('pId').value||null, name, org_type:$('pType').value||null,
       contact_name:$('pContact').value||null, phone:$('pPhone').value||null,
-      address:$('pAddress').value||null, note:$('pNote').value||null, active:$('pActive').checked };
+      address:$('pAddress').value||null, note:$('pNote').value||null, active:$('pActive').checked,
+      tax_deductible:$('pTaxDed').checked, tax_multiplier:$('pTaxMult').value,
+      tax_category:$('pTaxCat').value||null, tax_ref:$('pTaxRef').value||null };
     const { data, error } = await sb.rpc('charity_partner_upsert', { p_data });
     if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
     if(data && data.error){ toast('ผิดพลาด: '+data.error); return; }
