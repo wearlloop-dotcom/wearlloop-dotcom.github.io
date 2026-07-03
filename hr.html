@@ -441,8 +441,13 @@
     const {data:calc}=await sb.rpc('hr_payroll_calc',{p_employee:curEmp.id,p_period:curKpiPeriod});
     const {data:slips}=await sb.rpc('hr_payslip_list',{p_period:null,p_employee:curEmp.id});
     const ST={draft:'ร่าง',finalized:'ปิดงวดแล้ว',paid:'จ่ายแล้ว'};
-    const rows=(slips||[]).map(s=>`<tr><td><b>${s.period}</b></td><td>฿${Number(s.net).toLocaleString()}</td><td>${ST[s.status]||s.status}</td>
-      <td style="white-space:nowrap">${s.status==='draft'?`<button class="mini" onclick="payStatus('${s.id}','finalized')">ปิดงวด</button>`:s.status==='finalized'?`<button class="mini" onclick="payStatus('${s.id}','paid')">จ่ายแล้ว</button>`:'✓'}</td></tr>`).join('');
+    const rows=(slips||[]).map(s=>{
+      const posted=!!(s.journal_id||s.posted_at);
+      const statusBtn=s.status==='draft'?`<button class="mini" onclick="payStatus('${s.id}','finalized')">ปิดงวด</button>`:s.status==='finalized'?`<button class="mini" onclick="payStatus('${s.id}','paid')">จ่ายแล้ว</button>`:'✓';
+      const postCtl=posted?`<span class="hint" style="color:var(--stone)">ลงบัญชีแล้ว</span>`:((s.status==='finalized'||s.status==='paid')?`<button class="mini" onclick="postSlip('${s.id}',this)">ลงบัญชี</button>`:'');
+      return `<tr><td><b>${s.period}</b></td><td>฿${Number(s.net).toLocaleString()}</td><td>${ST[s.status]||s.status}</td>
+      <td style="white-space:nowrap">${statusBtn}${postCtl?' '+postCtl:''}</td></tr>`;
+    }).join('');
     b.innerHTML=`
       <div class="hint">งวด <input id="payPeriod" value="${curKpiPeriod}" style="max-width:140px;display:inline-block"> <button class="btn ghost sm" onclick="loadPay()">คำนวณใหม่</button></div>
       <div style="margin-top:10px">${calc&&!calc.error?`
@@ -480,6 +485,21 @@
   async function payStatus(id,st){
     const {data}=await sb.rpc('hr_payslip_status',{p_id:id,p_status:st});
     if(data&&data.ok){toast(st==='paid'?'ทำเครื่องหมายจ่ายแล้ว + แจ้งพนักงาน':'ปิดงวด + แจ้งพนักงานแล้ว');loadPay();}else toast('ไม่สำเร็จ');
+  }
+  async function postSlip(id,btn){
+    if(btn)btn.disabled=true;
+    const {data,error}=await sb.rpc('hr_payslip_post',{p_id:id});
+    if(btn)btn.disabled=false;
+    const err=error||(data&&data.error?{message:data.error}:null);
+    if(err){
+      const m=err.message||'';
+      if(m==='already_posted')toast('ลงบัญชีไปแล้ว');
+      else if(m==='zero_amount')toast('ยอดเป็นศูนย์ ลงบัญชีไม่ได้');
+      else if(m.indexOf('เจ้าของ')>=0)toast(m);
+      else toast('ลงบัญชีไม่สำเร็จ: '+m);
+      return;
+    }
+    toast('ลงบัญชีเงินเดือนแล้ว');loadPay();
   }
   // ---------- ใบเตือน ----------
   async function loadWarn(){
