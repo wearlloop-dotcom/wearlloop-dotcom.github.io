@@ -127,6 +127,19 @@
     </div>
   </div>
 
+  <div class="card" id="eventsCard" style="display:none">
+    <h2>ปฏิทินงานลูกค้า (สไตลิสต์ทักก่อนงาน)</h2>
+    <div class="desc">เปิด = ลูกค้าบันทึก “วันงาน” (งานแต่ง/รับปริญญา/ปาร์ตี้…) ในแอปได้ → ระบบเตือน + คัดชุดให้ล่วงหน้าก่อนถึงงาน (cron วิ่งอยู่แล้ว) · ปิด = ลูกค้ายังไม่เห็นเมนูนี้</div>
+    <div class="feat">
+      <div class="info">
+        <div class="name">เปิดปฏิทินงานให้ลูกค้า</div>
+        <div class="note">ลูกค้าใส่วันงานเอง → 7 วันก่อนงานระบบทักพร้อมชุดที่ว่าง+เข้ากับงาน (เพิ่มโอกาสเช่าซ้ำ)</div>
+        <div class="need">พร้อมแล้ว: RPC ปฏิทิน + cron แจ้งเตือน + หน้า my-events.html — เปิดได้เลย</div>
+      </div>
+      <label class="sw" data-key="events_calendar_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+  </div>
+
   <div class="card" id="premiumCard" style="display:none">
     <h2>ระบบคุ้มครองชุดออกงาน (ชุดแพง)</h2>
     <div class="desc">เตือนเจ้าของให้ทำขั้นตอนคุ้มครองทุกครั้งที่ชุดแพงถูกจอง<span class="inf" title="ขั้นตอนคุ้มครอง เช่น วิดีโอก่อนแพค/ตอนแกะของ · ควรมีหน้าเก็บวิดีโอ มัดจำ pre-auth และประกันความเสียหายก่อนเปิดใช้จริง · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก">i</span></div>
@@ -256,6 +269,7 @@ async function load(){
   $('#panel').style.display = '';
   $('#stylistCard').style.display = '';
   $('#partnerCard').style.display = '';
+  $('#eventsCard').style.display = '';
   $('#premiumCard').style.display = '';
   $('#financeCard').style.display = '';
   $('#expansionCard').style.display = '';
