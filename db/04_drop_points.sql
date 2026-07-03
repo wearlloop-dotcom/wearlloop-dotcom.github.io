@@ -1,4 +1,11 @@
 -- ============================================================================
+-- ⛔ DEPRECATED — ใช้ backend จริงแทน (ดู db/INTEGRATION.md).
+--    ไฟล์นี้เก็บไว้อ้างอิงเท่านั้น ห้าม deploy.
+--    ระบบจริงมี pickup_points + pickup_list/pickup_get/pickup_points_active,
+--    suggest_express/express_cutoff_status/express_dispatch_date และตาราง
+--    pickup_interest — adapter เขียนความสนใจ pickup_interest_add อยู่ที่ db/06_adapters.sql
+--    (ห้ามสร้าง drop_points / drop_point_interest / express_requests)
+-- ============================================================================
 -- 04_drop_points.sql — จุดรับ-ส่งใกล้บ้าน + ชุดฉุกเฉิน (หน้า drop-points.html)
 -- ----------------------------------------------------------------------------
 -- แนวคิด: ใช้ร้านซักพาร์ทเนอร์/คาเฟ่/ล็อกเกอร์เป็น "จุดรับ-ส่ง" ให้ลูกค้า

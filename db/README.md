@@ -1,50 +1,60 @@
 # LLOOP — SQL migrations ชุด "ขาดเราไม่ได้" (Life-cycle features)
 
-สคริปต์ฝั่ง Supabase สำหรับฟีเจอร์ชุดใหม่ 4 ตัว ที่หน้าเว็บเรียกผ่าน RPC
-(หน้าเว็บทุกหน้า **ทำงานได้ก่อน deploy SQL** — จะ fallback เป็น localStorage/ข้อมูลตัวอย่างอัตโนมัติ
-พอรัน SQL แล้วข้อมูลจะเริ่มลงฐานจริงทันทีโดยไม่ต้องแก้หน้าเว็บ)
+> ➡️ **อ่าน [`INTEGRATION.md`](./INTEGRATION.md) ก่อน** — เป็น map ที่ตัดสินใจแล้วว่า "ต่อของเดิม"
+> (เลิกใช้ตารางซ้ำ ให้เรียกตาราง/RPC จริงบน Supabase ผ่าน gateway `me-rpc`).
+> ผลคือ **01/02/04 = DEPRECATED**, **03/05 = ปรับให้ตรง schema จริงแล้ว**, และเพิ่ม
+> **06_adapters.sql** เป็น RPC บาง ๆ บนตารางจริง.
+
+สคริปต์ฝั่ง Supabase — หน้าเว็บเรียกผ่าน RPC (fallback เป็น localStorage/ข้อมูลตัวอย่าง
+อัตโนมัติก่อน deploy). ทุกฟังก์ชันฝั่งลูกค้ารับ `p_customer uuid` ที่ `me-rpc` เติมให้จาก
+LINE idToken ที่ verify แล้ว (server-trusted — ไม่เชื่อ uid จาก client).
 
 ## ลำดับการรัน (Supabase Dashboard → SQL Editor)
 
-| ลำดับ | ไฟล์ | ฟีเจอร์ | หน้าที่ใช้ |
-|---|---|---|---|
-| 1 | `01_customer_events.sql` | ปฏิทินงานลูกค้า + คิวสไตลิสต์ T-14 | `my-events.html`, `today.html` |
-| 2 | `02_fit_dna.sql` | Fit DNA — feedback ความพอดีหลังคืนชุด | `fit.html` |
-| 3 | `03_closet_day.sql` | LLOOP Day — วันเปลี่ยนตู้/กล่องประจำเดือน | `closet-day.html` |
-| 4 | `04_drop_points.sql` | จุดรับ-ส่งใกล้บ้าน + ชุดฉุกเฉิน | `drop-points.html` |
-| 5 | `05_wrapped.sql` | Loop Wrapped — สรุปปีของลูกค้า + การ์ดแชร์ IG | `wrapped.html` |
+| ลำดับ | ไฟล์ | สถานะ | ฟีเจอร์ | หน้าที่ใช้ |
+|---|---|---|---|---|
+| — | `01_customer_events.sql` | ⛔ DEPRECATED | ใช้ตาราง customer_events จริง + RPC ใน 06 แทน | `my-events.html`, `today.html` |
+| — | `02_fit_dna.sql` | ⛔ DEPRECATED | ใช้ submit_review/recompute_garment_fit จริงแทน | `fit.html` |
+| 1 | `03_closet_day.sql` | ✅ ADAPTED | LLOOP Day — key ด้วย customer_id, จัดกล่องจาก garments จริง | `closet-day.html` |
+| — | `04_drop_points.sql` | ⛔ DEPRECATED | ใช้ pickup_points/pickup_* + pickup_interest จริงแทน | `drop-points.html` |
+| 2 | `05_wrapped.sql` | ✅ ADAPTED | Loop Wrapped — อ่าน rentals/garments/customers จริง | `wrapped.html` |
+| 3 | `06_adapters.sql` | ✅ NEW | RPC ที่ระบบยังไม่มี: mark_event_notified · upcoming_customer_events (ops) · pickup_interest_add | `today.html`, `drop-points.html`, n8n |
+
+> **Deploy เฉพาะ 03 → 05 → 06 เท่านั้น** — 01/02/04 ห้าม deploy (เก็บไว้อ้างอิง).
 
 ## สิ่งที่ต้องปรับก่อนใช้จริง
 
-- ฟังก์ชันที่ join กับตารางเช่า/ตารางชุด (`fit_feedback_pending`, การจัดกล่องใน `closet_day_get`)
-  เขียนไว้กับโครงตารางแบบกลาง ๆ — **ต้องแก้ชื่อตาราง/คอลัมน์ให้ตรง schema จริง** (มีคอมเมนต์ `-- TODO` กำกับในไฟล์)
-- ⚠️ `closet_day_get` และ `closet_box_swap` อ้าง `public.garments` **ตรง ๆ** — ถ้ายังไม่มีตารางนี้
-  (หรือชื่อจริงเป็นอย่างอื่น) ฟังก์ชัน **จะ error ทันที ไม่ใช่ fallback** — ต้องสร้าง/เปลี่ยนชื่อให้ตรง
-  schema จริงก่อนเปิดใช้ LLOOP Day เท่านั้น
-- `04_drop_points.sql` มี seed จุดรับ-ส่งตัวอย่าง 3 จุด (กทม.) — แก้เป็นจุดพาร์ทเนอร์จริงก่อนเปิดใช้
-- ทุกตารางเปิด RLS และไม่มี public policy — เข้าถึงผ่านฟังก์ชัน SECURITY DEFINER เท่านั้น (ตาม convention เดิมของระบบ)
+- 03/05/06 อ้าง schema จริงแล้ว (customer_id + คอลัมน์จริงของ rentals/garments/customers/
+  customer_events/pickup_interest) — **deploy ได้** โดยไม่ต้องแก้ชื่อคอลัมน์อีก
+- `03_closet_day.sql`: ตาราง `closet_day_prefs`/`closet_boxes` เป็น **ของใหม่แต่ integrate แล้ว**
+  (ระบบยังไม่มี ritual กล่องรายเดือน) — ฟังก์ชันจัดกล่องอ่าน `garments` จริง (`status='available'`)
+  ให้คะแนนเทียบ `customers.bust_in/waist_in/my_color_season`
+- `05_wrapped.sql`: ยังคง `to_regclass` guard — ถ้าตาราง rentals/garments หายจะคืน json ค่าศูนย์
+  (ไม่ error). ประหยัดเทียบซื้อคิดจาก `garments.retail_value` จริง (เลิกใช้สูตร ×6)
+- ทุกตารางใหม่เปิด RLS และไม่มี public policy — เข้าถึงผ่านฟังก์ชัน SECURITY DEFINER เท่านั้น
 
 ## ต้องเพิ่มใน ops-rpc allowlist
 
-- `upcoming_customer_events` และ `mark_event_pinged` ถูก **revoke จาก anon/authenticated แล้ว**
-  (เห็นข้อมูลลูกค้าทุกคน + เปลี่ยนสถานะ pinged ได้ — เป็นฟังก์ชันฝั่ง ops เท่านั้น)
-- `today.html` เรียกสองฟังก์ชันนี้ผ่าน **ops-rpc edge function** (service role) — ดังนั้นต้องเพิ่ม
-  ชื่อทั้งสองเข้า function allowlist ของ ops-rpc ด้วย ไม่งั้นหน้า ops จะเรียกไม่ได้เลย
-  (หลังแก้สิทธิ์แล้ว gateway นี้คือ **ทางเดียว** ที่เรียกได้)
+- `upcoming_customer_events` และ `mark_event_notified` (ใน `06_adapters.sql`) ถูก **revoke จาก
+  anon/authenticated แล้ว** (เห็น/แก้ข้อมูลลูกค้าทุกคน — ฝั่ง ops เท่านั้น, grant ให้ `service_role`)
+- `today.html` เรียกสองฟังก์ชันนี้ผ่าน **ops-rpc edge function** (service role) — ต้องเพิ่มชื่อทั้งสอง
+  เข้า function allowlist ของ ops-rpc ด้วย ไม่งั้นหน้า ops จะเรียกไม่ได้เลย
+  (หมายเหตุ: ทั้งสองอ้างตาราง `customer_events` จริง — **แทนที่** เวอร์ชันเดิมใน 01 ที่ deprecated)
 
 ## ปิดช่อง IDOR ฝั่งลูกค้า (me-rpc allowlist) — 2 ขั้น
 
-หน้าลูกค้าทั้ง 4 เรียกผ่าน gateway `me-rpc` ก่อนเสมอเมื่อล็อกอิน (verify LINE idToken ฝั่ง server)
-และ fallback ยิงตรงเมื่อ gateway ยังไม่รู้จักฟังก์ชัน — ทำ 2 ขั้นนี้เมื่อพร้อม:
+หน้าลูกค้าเรียกผ่าน gateway `me-rpc` ก่อนเสมอเมื่อล็อกอิน (verify LINE idToken ฝั่ง server แล้ว
+เติม `p_customer uuid` ให้เอง) — ทำ 2 ขั้นนี้เมื่อพร้อม:
 
-1. **เพิ่มใน allowlist ของ edge function `me-rpc`** พร้อมให้ gateway override `p_uid` จาก idToken ที่ verify แล้ว
-   (เหมือนที่ทำกับ `p_customer`/`p_line_uid`):
-   `my_events` `upsert_event` `delete_event` · `fit_feedback_pending` `submit_fit_feedback` `my_fit_profile` ·
-   `closet_day_get` `closet_day_set` `closet_box_swap` `closet_box_confirm` `closet_box_skip` `closet_box_unskip` ·
-   `drop_point_interest` `express_request` · `my_wrapped`
+1. **เพิ่มใน allowlist ของ edge function `me-rpc`** (gateway เติม `p_customer` จาก idToken ที่ verify แล้ว)
+   — ฟังก์ชันฝั่งลูกค้าบนตารางจริงทั้งหมด:
+   `pickup_interest_add`  *(06_adapters.sql)* · `my_wrapped`  *(05)* ·
+   *(add_customer_event · my_events · remove_customer_event มีอยู่แล้วบน Supabase — อยู่ใน allowlist แล้ว)* ·
+   `closet_day_get` `closet_day_set` `closet_box_swap` `closet_box_confirm` `closet_box_skip`
+   `closet_box_unskip`  *(03_closet_day.sql)* ·  `my_wrapped`  *(05_wrapped.sql)*
 2. **หลัง allowlist ใช้งานจริงแล้ว** ค่อย `revoke execute ... from anon, authenticated` กับฟังก์ชันด้านบน
-   → เส้นยิงตรง (ที่เชื่อ p_uid จาก client) ตายสนิท เหลือแต่เส้น gateway ที่ปลอม uid ไม่ได้
-   (`drop_points_list` เป็นข้อมูลสาธารณะ คง anon ไว้ได้)
+   → เส้นยิงตรง (ที่เชื่อ uid จาก client) ตายสนิท เหลือแต่เส้น gateway ที่ปลอม uuid ไม่ได้
+   (`mark_event_notified` / `upcoming_customer_events` = ops-rpc allowlist เท่านั้น ไม่อยู่ใน me-rpc)
 
 ## งานอัตโนมัติที่ต้องตั้งเพิ่ม (n8n หรือ pg_cron + LINE Messaging API)
 

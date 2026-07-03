@@ -1,4 +1,10 @@
 -- ============================================================================
+-- ⛔ DEPRECATED — ใช้ backend จริงแทน (ดู db/INTEGRATION.md).
+--    ไฟล์นี้เก็บไว้อ้างอิงเท่านั้น ห้าม deploy.
+--    ตารางจริงคือ customer_events (ไม่ใช่ customer_calendar) — adapter RPC อยู่ที่
+--    db/06_adapters.sql (add_customer_event · my_events · mark_event_notified ·
+--    upcoming_customer_events บนตาราง customer_events จริง)
+-- ============================================================================
 -- LLOOP · 01_customer_events.sql
 -- ปฏิทินงานของลูกค้า (feature "ปฏิทินงานของฉัน" — my-events.html)
 -- ลูกค้าบอกว่ามีงานอะไรล่วงหน้า → สไตลิสต์เตรียมลุคเชิงรุก แล้วทักไปทาง LINE

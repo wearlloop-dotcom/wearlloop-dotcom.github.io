@@ -365,7 +365,7 @@ async function downloadShareCard(){
 async function loadWrapped(){
   if(!UID){ W = demoWrapped(); return; }            // โหมดตัวอย่าง — ไม่ยิง RPC (ห้ามส่ง uid ปลอม)
   try {
-    const { data, error } = await gwRpc('my_wrapped', { p_uid: UID, p_year: YEAR });
+    const { data, error } = await gwRpc('my_wrapped', { p_year: YEAR });
     if(error) throw error;
     if(!data || typeof data.rentals !== 'number') throw new Error('no data');
     W = data; IS_DEMO = false;

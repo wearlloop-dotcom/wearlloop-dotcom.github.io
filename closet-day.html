@@ -288,7 +288,7 @@ function loadLocal(){
 }
 async function loadState(){
   loadLocal();                                     // ตั้งฐานจาก localStorage + MOCK ก่อนเสมอ
-  const data = await rpcTry('closet_day_get', { p_uid: UID });
+  const data = await rpcTry('closet_day_get', {});
   if(data && !data.error){
     if(data.day >= 1 && data.day <= 28) S.day = data.day;
     if(Array.isArray(data.box) && data.box.length) S.box = data.box;
@@ -304,7 +304,7 @@ async function setDay(d){
   S.day = d;
   try{ localStorage.setItem(LSK.day, String(d)); }catch(e){}
   renderAll();
-  await rpcWrite('closet_day_set', { p_uid: UID, p_day: d });
+  await rpcWrite('closet_day_set', { p_day: d });
 }
 function openSwap(code){
   if(S.status !== 'draft' || S.swaps_used >= MAX_SWAPS) return;
@@ -320,7 +320,7 @@ async function doSwap(outCode, inCode){
   swapOpenFor = null;
   saveBoxLocal();
   renderAll();
-  await rpcWrite('closet_box_swap', { p_uid: UID, p_out_code: outCode, p_in_code: inCode });
+  await rpcWrite('closet_box_swap', { p_out_code: outCode, p_in_code: inCode });
 }
 async function confirmBox(){
   S.status = 'confirmed';
@@ -330,7 +330,7 @@ async function confirmBox(){
   try{ localStorage.setItem(LSK.history, JSON.stringify(hist)); }catch(e){}
   saveBoxLocal();
   renderAll();
-  await rpcWrite('closet_box_confirm', { p_uid: UID });
+  await rpcWrite('closet_box_confirm', {});
 }
 async function skipBox(){
   const ok = window.confirm(NAV.t(
@@ -341,14 +341,14 @@ async function skipBox(){
   swapOpenFor = null;
   saveBoxLocal();
   renderAll();
-  await rpcWrite('closet_box_skip', { p_uid: UID });
+  await rpcWrite('closet_box_skip', {});
 }
 async function undoSkip(){
   S.status = 'draft';
   saveBoxLocal();
   renderAll();
   // ล็อกอินอยู่ → บอก server ให้เลิกข้ามด้วย (ไม่ล็อกอิน rpcWrite จะไม่ยิงเอง — local อย่างเดียวตามเดิม)
-  await rpcWrite('closet_box_unskip', { p_uid: UID });
+  await rpcWrite('closet_box_unskip', {});
 }
 
 // ---------- render ----------

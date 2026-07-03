@@ -1,4 +1,9 @@
 -- ============================================================
+-- ⛔ DEPRECATED — ใช้ backend จริงแทน (ดู db/INTEGRATION.md).
+--    ไฟล์นี้เก็บไว้อ้างอิงเท่านั้น ห้าม deploy.
+--    ระบบจริงเก็บ fit ผ่านรีวิว: submit_review / submit_video_review →
+--    recompute_garment_fit → garments.fit_avg/fit_n/fit_label (ห้ามสร้าง fit_feedback)
+-- ============================================================
 -- 02_fit_dna.sql — Fit DNA: ฟีดแบ็กความพอดีหลังคืนชุด
 -- ฝั่งหน้าเว็บ: fit.html เรียก 3 RPC นี้ผ่าน anon key
 --   1) fit_feedback_pending(p_uid)  → ชุดที่เพิ่งคืน ยังไม่ได้บอกความพอดี
