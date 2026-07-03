@@ -30,7 +30,7 @@
     sessionStorage.setItem('meReauthTried', '1');
     try { if (liff.isLoggedIn()) liff.logout(); } catch (_e) {} // ล้างโทเคนเก่าที่หมดอายุก่อน
     // คง query เดิม (?order/?event/?join/?garment) หลัง LINE login เหมือน LiffAuth.redirectUrl() — กัน deep-link หายตอน re-auth
-    try { liff.login({ redirectUri: baseUrl() + location.search }); } catch (_e) {}
+    try { liff.login({ redirectUri: baseUrl() }); } catch (_e) {}  // baseUrl() มี location.search อยู่แล้ว — อย่าต่อซ้ำ (deep-link param เพี้ยน)
     return true;
   }
 

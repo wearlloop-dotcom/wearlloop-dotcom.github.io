@@ -236,15 +236,18 @@ function renderEdge(title, body){
   </div>`;
 }
 
+// หน้านี้เป็นสาธารณะ (สแกน QR ดูได้ไม่ต้อง login) — ต้อง escape ข้อมูลตำหนิที่ ops กรอกก่อนใส่ DOM กัน stored XSS
+function escH(s){return (s==null?'':String(s)).replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));}
+
 function renderItem(){
   const signedIn = !!(CUSTOMER && CUSTOMER.id);
   // ตำหนิ (แจ้งโปร่งใส): ป้าย + ราคาขีดฆ่าจากเรทปกติ + รูปจุดตำหนิ (กดดูใกล้ ๆ ได้)
   const hasDefect = !!(G.defectNote || (G.defectPhotos && G.defectPhotos.length));
   const defOff = (hasDefect && G.priceRegular > G.price) ? Math.round((1 - G.price / G.priceRegular) * 100) : null;
-  const defPh = (G.defectPhotos || []).map(u => `<img src="${u}" loading="lazy" alt="${NAV.t('รูปจุดตำหนิ','flaw photo')}" referrerpolicy="no-referrer" onclick="this.classList.toggle('zoom')">`).join('');
+  const defPh = (G.defectPhotos || []).filter(u => /^https?:\/\//i.test(u)).map(u => `<img src="${escH(u)}" loading="lazy" alt="${NAV.t('รูปจุดตำหนิ','flaw photo')}" referrerpolicy="no-referrer" onclick="this.classList.toggle('zoom')">`).join('');
   const defectBox = hasDefect ? `<div class="defectbox">
       <span class="dftag">${NAV.t('มีตำหนิเล็กน้อย','Minor flaw')}</span>${defOff ? `<span class="dfoff">-${defOff}%</span>` : ''}
-      ${G.defectNote ? `<div class="dfnote">${G.defectNote}</div>` : ''}
+      ${G.defectNote ? `<div class="dfnote">${escH(G.defectNote)}</div>` : ''}
       ${defPh ? `<div class="dfphotos">${defPh}</div>` : ''}
     </div>` : '';
   const photo = G.photo
