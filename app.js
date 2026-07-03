@@ -958,7 +958,8 @@ function openDetail(id) {
       <div id="ugcWrap" style="display:none"><div class="sec">${lang ==='th'?'รูปจริงจากลูกค้า':'Real customer photos'}</div><div id="ugcbox" class="ugcbox"></div></div>
       <div class="sec secrow">${t('secSize')}<span class="munit">${['in','cm'].map(u=>`<button data-u="${u}" class="${gMUnit===u?'on':''}" onclick="setMUnit('${u}')">${u==='in'?(lang==='th'?'นิ้ว':'inch'):(lang==='th'?'ซม.':'cm')}</button>`).join('')}</span></div>
       <div class="measure" id="measureBox">${measureCells(g)}</div>
-      ${chart ? `<div class="sec">${lang==='th'?'ตารางไซส์':'Size chart'}</div><div class="dsizechart"><img src="${chart}" alt="size chart" loading="lazy">${ourSizesLabel ? `<div class="dscnote">${lang==='th'?`ตารางอ้างอิงจากแบรนด์ — <b>ไซส์ที่เรามีให้เช่า: ${ourSizesLabel}</b>`:`Brand reference — <b>we rent: ${ourSizesLabel}</b>`}</div>` : ''}</div>` : ''}
+      ${fitMatch(g)}
+      ${ourSizesLabel ? `<div class="dscnote">${lang==='th'?`ไซส์ที่เรามีให้เช่า: <b>${ourSizesLabel}</b>`:`We rent: <b>${ourSizesLabel}</b>`}</div>` : ''}
       <div id="fitsummary"></div>
       <div class="sec">${t('secFabric')}</div>
       <div class="fabric">${fabricTags}</div>
@@ -1025,7 +1026,66 @@ function measureCells(g){
   return [[t('bust'),rng(g.bust)],[t('waist'),rng(g.waist)],[t('hip'),one(g.hip)],[t('length'),len]]
     .map(m=>`<div class="mcell"><span>${m[0]}</span>${m[1]}</div>`).join('');
 }
-function setMUnit(u){ gMUnit=u; const box=document.getElementById('measureBox'); const g=GARMENTS.find(x=>x.id===window._curDetailId); if(box&&g) box.innerHTML=measureCells(g); document.querySelectorAll('.munit button').forEach(b=>b.classList.toggle('on', b.dataset.u===u)); }
+function setMUnit(u){ gMUnit=u; const box=document.getElementById('measureBox'); const g=GARMENTS.find(x=>x.id===window._curDetailId); if(box&&g){ box.innerHTML=measureCells(g); const fb=document.getElementById('fitmatchBox'); if(fb) fb.outerHTML=fitMatch(g); } document.querySelectorAll('.munit button').forEach(b=>b.classList.toggle('on', b.dataset.u===u)); }
+
+// เทียบสัดส่วนลูกค้า ↔ ช่วงที่ชุดรับได้จริง (ข้อมูลหลังบ้าน) → ตอบ "พอดีตัวคุณไหม" + ผูกกับไซส์ที่เลือก
+function fitMatch(g){
+  const th = lang==='th';
+  const hasGmt = !!(g.bust || g.waist || g.hip);
+  if (!hasGmt) return '';   // ชุดยังไม่มีสัดส่วนละเอียด — เงียบไว้ (measureBox โชว์ "—/free" อยู่แล้ว)
+  const c = CUSTOMER || {};
+  const hasBody = c.bust_in!=null || c.waist_in!=null || c.hip_in!=null;
+  const u = gMUnit;
+  const cv = v => v==null ? null : (u==='cm'? Math.round(v*2.54) : v);
+  const uni = u==='cm'? t('cm') : '"';
+  if (!hasBody) {
+    return `<div id="fitmatchBox" style="background:#FBF8F2;border:1px solid #E7E5E1;border-radius:12px;padding:12px 13px;margin-top:10px">
+      <div style="font-size:13px;font-weight:600;color:#04342C;margin-bottom:6px">${th?'พอดีตัวคุณไหม?':'Will it fit you?'}</div>
+      <div style="font-size:12.5px;color:#6b6a65;margin-bottom:9px">${th?'ใส่สัดส่วนของคุณ (อก/เอว/สะโพก) แล้วเราเช็คกับช่วงที่ชุดนี้รับได้ให้ทันที':'Add your measurements and we’ll check them against this dress instantly'}</div>
+      <button onclick="closeDetail();openProfile()" style="border:0;background:#04342C;color:#fff;border-radius:9px;padding:8px 14px;font-size:12.5px;cursor:pointer">${th?'ใส่สัดส่วนของฉัน':'Add my measurements'}</button>
+    </div>`;
+  }
+  const slack = g.stretch==='stretchy'?2:g.stretch==='slight'?1:0;
+  const row = (label, cval, range, isCeil) => {
+    if (cval==null || !range) return '';
+    const lo = range[0], hi = range[1];
+    let st;
+    if (isCeil) { st = (cval > hi + slack) ? 'tight' : 'fit'; }
+    else if (cval > hi + slack) st = 'tight';
+    else if (cval < lo - 1.5) st = 'loose';
+    else st = 'fit';
+    const ic  = st==='fit'?'✓':st==='tight'?'⚠':'◇';
+    const col = st==='fit'?'#0F6E56':st==='tight'?'#B4232A':'#8a6d1f';
+    const word= st==='fit'?(th?'พอดี':'fits'):st==='tight'?(th?'อาจคับ':'snug'):(th?'อาจหลวม':'loose');
+    const rng = isCeil ? `≤ ${cv(hi)}${uni}` : `${cv(lo)}–${cv(hi)}${uni}`;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:4px 0;border-top:1px solid #d7e7e0">
+      <span style="color:#5b5a55;min-width:38px">${label}</span>
+      <span style="color:#04342C;flex:1;text-align:center"><b>${cv(cval)}${uni}</b> <span style="color:#8a897f">· ${th?'ชุด':'dress'} ${rng}</span></span>
+      <span style="color:${col};font-weight:600;min-width:58px;text-align:right">${ic} ${word}</span></div>`;
+  };
+  const rows = [
+    row(t('bust'),  c.bust_in,  g.bust, false),
+    row(t('waist'), c.waist_in, g.waist, false),
+    row(t('hip'),   c.hip_in,   g.hip? [g.hip,g.hip] : null, true),
+  ].join('');
+  const score = fitConfidence(c, g);
+  const sizeNote = (g.size && String(g.size).toUpperCase()!=='FREE')
+    ? `<span style="font-size:11.5px;color:#0F6E56;background:#fff;border:1px solid #cfe6da;border-radius:7px;padding:3px 8px">${th?'ไซส์':'Size'} <b>${esc(g.size)}</b></span>` : '';
+  let verdict='', vcol='#0F6E56';
+  if (score!=null){
+    if (score>=85){ verdict=th?'พอดีตัวคุณ':'Great fit for you'; vcol='#0F6E56'; }
+    else if (score>=65){ verdict=th?'ใส่ได้ อาจต้องเผื่อจุดที่ ⚠':'Should work — mind the ⚠'; vcol='#8a6d1f'; }
+    else { verdict=th?'อาจไม่พอดี — ดูจุดที่ ⚠':'May not fit — see ⚠'; vcol='#B4232A'; }
+  }
+  return `<div id="fitmatchBox" style="background:#E4F0EC;border:1px solid #cfe6df;border-radius:12px;padding:12px 13px;margin-top:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:13px;font-weight:600;color:#04342C">${th?'พอดีตัวคุณไหม?':'Will it fit you?'}</div>${sizeNote}
+    </div>
+    ${verdict?`<div style="font-size:13px;font-weight:600;color:${vcol};margin-bottom:2px">${verdict}${score!=null?` · ${score}%`:''}</div>`:''}
+    ${rows}
+    <div style="font-size:11px;color:#8a897f;margin-top:8px">${th?'อ้างอิงสัดส่วนที่คุณบันทึกไว้ · แก้ได้ในโปรไฟล์':'From your saved measurements · edit in profile'}</div>
+  </div>`;
+}
 function closeDetail() { $('#overlay').classList.remove('open'); document.body.style.overflow =''; }
 // เลือกสี → ไฮไลต์ + เปลี่ยนรูปหลักเป็นสีนั้น
 function setGColor(i){ const c=(window._cvars||[])[i]; if(!c) return;
