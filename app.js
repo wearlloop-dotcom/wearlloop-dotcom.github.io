@@ -2269,6 +2269,7 @@ function openMenu() {
       ${item(I.foryou, en ? 'For you' : 'แนะนำเฉพาะคุณ', 'if(!fForYou)toggleForYou()')}
       ${signedIn ? item(I.foryou, en ? 'What you love' : 'สิ่งที่คุณชอบ', 'openTaste()') : ''}
       ${item(I.stylist, en ? 'What to wear? — card game' : 'งานนี้ใส่อะไรดี — เพื่อนสาวช่วยเลือก', "location.href='quiz.html'")}
+      ${window._eventsOn ? item(I.stylist, en ? 'My events — get styled early' : 'วันงานของฉัน — เตรียมชุดล่วงหน้า', "location.href='my-events.html'") : ''}
       ${item(I.stylist, en ? 'LLOOP Atelier by venue' : 'LLOOP Atelier ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
       ${item(I.findwish, en ? 'Wish for a piece — tell us' : 'อยากได้ชุดไหน บอกเราได้', "location.href='wishlist.html'")}
@@ -4132,6 +4133,8 @@ async function boot() {
     gPersonalRecs = (await window.API.recommendPersonal?.(8) || []).map(r => r.code).filter(Boolean);
     CUSTOMER._taste = await window.API.myTaste?.();  // รสนิยมที่เรียนจากพฤติกรรม → ใช้ใน personalScore
     gRecentViewed = await window.API.myRecentlyViewed?.(12) || [];  // "ดูล่าสุด" (Shopee-style)
+    // ปฏิทินงานลูกค้า (dark-launch): เปิดสวิตช์ที่ settings ค่อยโชว์เมนู "วันงานของฉัน"
+    try { const _ev = await window.meRpc?.('my_events', {}); window._eventsOn = !!(_ev && _ev.data && _ev.data.enabled); } catch (_e) { window._eventsOn = false; }
   } catch (e) { /**/ } }
   loadCart(); renderCartBtn();   // กู้ตะกร้าที่ค้างไว้ (กัน refresh แล้วของหาย)
   renderEvent(); renderCatnav(); renderChips(); renderDiscover(); renderFilters(); renderDatebar(); renderGrid();
