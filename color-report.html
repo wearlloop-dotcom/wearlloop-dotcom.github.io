@@ -240,6 +240,8 @@
 <footer><b>LLOOP</b> · My Style Passport — สรุปจากผลวิเคราะห์เฉพาะบุคคล<br>พาเลตต์/เมคอัพอ้างอิง Classis Personal Color · ไซส์และการจัดสไตล์โดย LLOOP</footer>
 <div class="toast" id="toast">คัดลอกแล้ว</div>
 
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
 <script>
 /* =========================================================================
    PROFILE — โครงเดียวกับที่ partner.html บันทึก (partner_portal_save)
@@ -407,6 +409,33 @@ function flatlay(pieces){
 
 /* ========================= RENDER ========================= */
 const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+// ===== โหลดข้อมูลลูกค้าจริงจาก Supabase (my_style_summary ผ่าน me-rpc) =====
+// เปิดในแอป LINE ที่ล็อกอินแล้ว → เห็นข้อมูลตัวเอง · เปิดนอก LINE/ยังไม่ล็อกอิน → ใช้ตัวอย่าง (ไม่บังคับล็อกอิน)
+async function loadReal(){
+  try{
+    var C=window.CONFIG||{};
+    if(C.USE_MOCK||!C.SUPABASE_URL||!C.LIFF_ID||!window.liff) return;
+    try{ await liff.init({liffId:C.LIFF_ID}); }catch(e){ return; }
+    if(!liff.isLoggedIn()) return;
+    var idt=liff.getIDToken(); if(!idt) return;
+    var r=await fetch(C.SUPABASE_URL+'/functions/v1/me-rpc',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id_token:idt,fn:'my_style_summary',args:{}})});
+    var out=await r.json().catch(function(){return{};});
+    if(!r.ok||out.error||!out.data) return;
+    var d=out.data, g=d.guide||{}, mr=d.measured_ref||{};
+    try{ var pf=await liff.getProfile(); if(pf&&pf.displayName){PROFILE.name=pf.displayName;PROFILE.initial=(pf.displayName.trim()[0]||'C').toUpperCase();} }catch(e){}
+    if(d.season_type&&LIBRARY.seasons[d.season_type]) PROFILE.color.type_12=d.season_type;
+    if(g.body_type&&LIBRARY.bodies[g.body_type]) PROFILE.body.type=g.body_type;
+    if(Array.isArray(g.metals)&&g.metals.length) PROFILE.color.metals=g.metals;
+    if(mr.by) PROFILE.analyst=mr.by;
+    var mm=PROFILE.measurements;
+    ['bust_in','waist_in','hip_in','shoulder_in','height_cm','weight_kg','dress_size','shoe_size','ring_size'].forEach(function(k){ if(mr[k]!=null&&mr[k]!=='') mm[k]=mr[k]; });
+    if(Array.isArray(d.stylist_looks)&&d.stylist_looks.length) PROFILE.looks=d.stylist_looks;
+  }catch(e){ /* เงียบ → ใช้ตัวอย่าง */ }
+}
+
+function renderAll(){
 const S=LIBRARY.seasons[PROFILE.color.type_12]||LIBRARY.seasons["Warm Autumn"];
 const B=LIBRARY.bodies[PROFILE.body.type]||LIBRARY.bodies["นาฬิกาทราย"];
 const F=LIBRARY.faces[PROFILE.face.shape]||LIBRARY.faces["รูปไข่"];
@@ -523,6 +552,7 @@ S.avoid.forEach(a=>$("#d_avoid").appendChild(el("span","achip",`<i style="backgr
 S.neutrals.forEach(n=>{const d=el("div","n",`<i style="background:${n.c}"></i><b>${n.n}</b><small>${n.c}</small>`);d.onclick=()=>copy(n.c);$("#d_neu").appendChild(d);});
 $("#hxt").onclick=()=>$("#swwrap").classList.toggle("show");
 $("#swwrap").addEventListener("click",e=>{const s=e.target.closest(".sw");if(s)copy(s.dataset.c);});
+}  /* /renderAll */
 
 // copy + toast
 let tt;
@@ -531,6 +561,9 @@ function copy(text){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(done);}
   else{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();done();}
 }
+
+// โหลดข้อมูลจริงก่อน (ถ้ามี) แล้วค่อยเรนเดอร์ — ล้มเหลว/ไม่มี = เรนเดอร์ตัวอย่าง
+loadReal().then(renderAll).catch(renderAll);
 </script>
 </body>
 </html>
