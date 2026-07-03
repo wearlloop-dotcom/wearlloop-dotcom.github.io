@@ -5,6 +5,9 @@ let STAFF_PCT = 0;
 const staffPrice = (p) => STAFF_PCT > 0 ? Math.round(Number(p || 0) * (1 - STAFF_PCT / 100)) : Number(p || 0);
 const staffTag = () => STAFF_PCT > 0 ? `<span style="display:inline-block;font-size:11px;font-weight:600;color:#0F6E56;background:#E4F0EC;border:1px solid #cfe6da;border-radius:20px;padding:1px 8px;margin-left:6px">${lang==='th'?'พนักงาน':'Staff'} −${STAFF_PCT}%</span>` : '';
 let fOccasion = null, fColors = [], fBrand ='', fMood = null, fToneOnly = false, fForYou = false, fWishOnly = false;
+let fFabric = [];  // filter ลาย/เนื้อผ้า (lace/floral/satin…) จาก g.tags
+const FABRIC_LABELS = { lace:['ลูกไม้','Lace'], floral:['ลายดอก','Floral'], print:['ลายพิมพ์','Print'], solid:['สีพื้น','Solid'], embroidered:['ปัก','Embroidered'], sequin:['เลื่อม','Sequin'], glitter:['กลิตเตอร์','Glitter'], ruffle:['ระบาย','Ruffle'], pleated:['อัดพลีท','Pleated'], satin:['ซาติน','Satin'], chiffon:['ชีฟอง','Chiffon'], tulle:['ตาข่าย','Tulle'], velvet:['กำมะหยี่','Velvet'], knit:['ไหมพรม','Knit'], sheer:['ซีทรู','Sheer'], cutout:['เว้าโชว์','Cutout'], bow:['โบว์','Bow'], feather:['ขนนก','Feather'] };
+function fabricLabel(k){ const m=FABRIC_LABELS[k]; return m ? (lang==='th'?m[0]:m[1]) : k; }
 let gPersonalRecs = [];  // โค้ดชุดแนะนำเฉพาะบุคคล (collaborative) — เรียงตามความเกี่ยวข้อง
 let gQuery = '';  // คำค้นหา catalog (ชื่อ/แบรนด์/โอกาส/สี)
 let _searchTimer = null;
@@ -414,7 +417,15 @@ function renderQuickFilters(){
     `<button class="qf ${fNewOnly?'on':''}" onclick="setNewOnly()">${TH?'มาใหม่':'New'}</button>`+
     `<button class="qf ${fPrice?'on':''}" onclick="cyclePrice()">${TH?'งบ':'Budget'} · ${priceLabel}</button>`+
     `<button class="qf ${availOn?'on':''}" onclick="quickAvail()">${TH?'ว่างวันฉัน':'Free on date'}${gUseDate?' · '+fmtDate(gUseDate):''}</button>`;
+  // ลาย/เนื้อผ้า — โชว์เฉพาะ tag ที่มีจริงในสต็อก
+  const FABRIC_ORDER=['lace','floral','print','solid','satin','chiffon','tulle','velvet','knit','embroidered','sequin','glitter','ruffle','pleated','sheer','cutout','bow','feather'];
+  const present=FABRIC_ORDER.filter(k=>GARMENTS.some(g=>Array.isArray(g.tags)&&g.tags.includes(k)));
+  if(present.length){
+    el.innerHTML += `<span style="width:1px;align-self:center;height:16px;background:var(--line,#E7E5E1);margin:0 4px"></span>`
+      + present.map(k=>`<button class="qf ${fFabric.includes(k)?'on':''}" onclick="setFabric('${k}')">${fabricLabel(k)}</button>`).join('');
+  }
 }
+function setFabric(k){ const i=fFabric.indexOf(k); if(i<0) fFabric.push(k); else fFabric.splice(i,1); renderQuickFilters(); renderGrid(); }
 function setNewOnly(){ fNewOnly=!fNewOnly; renderQuickFilters(); renderGrid(); }
 function cyclePrice(){ const o=[null,'lo','mid','hi']; fPrice=o[(o.indexOf(fPrice)+1)%o.length]; renderQuickFilters(); renderGrid(); }
 function quickAvail(){
@@ -614,6 +625,7 @@ function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
     (!fColors.length || [...familiesOf(g)].some(fam => fColors.includes(fam))) &&
+    (!fFabric.length || (Array.isArray(g.tags) && g.tags.some(tg => fFabric.includes(tg)))) &&
     (!fBrand || gbrand(g).toLowerCase() === String(fBrand).toLowerCase()) &&
     (!fMood || garmentGroup(g) === fMood) &&
     (!fToneOnly || g.season === CUSTOMER.my_color_season) &&
@@ -655,8 +667,10 @@ function gridCardHtml(g) {
   const sv = savingsPct(g);
   const dots = g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
   const ph = gPhoto(g);
+  const ph2 = (Array.isArray(g.photos) && g.photos[1] && g.photos[1] !== ph) ? g.photos[1] : '';  // รูปที่ 2 = โชว์ตอน hover (เห็นอีกมุม)
   return`<div class="pcard ${gUseDate && !av ? 'busy' : ''}" onclick="openDetail('${g.id}')">
       <div class="pphoto" style="${ph?`background-image:url('${ph}');background-size:cover;background-position:center`:`background:${g.bg}`}">
+        ${ph2?`<div class="pphoto2" style="background-image:url('${ph2}')"></div>`:''}
         ${ph?'':`<span class="ph">${g.name}</span>`}
         <button class="wish ${gWish.has(g.id)?'on':''}" onclick="toggleWish('${g.id}',event)" aria-label="wishlist">♥</button>
         <div class="badges">
@@ -956,13 +970,15 @@ function openDetail(id) {
       <div class="sec">${lang ==='th'?'ครบลุค — ทรงผม & เครื่องประดับ':'Complete the look'}</div>
       <div id="lookbox" class="lookbox"><button class="lookbtn" onclick="loadLook('${g.code || g.id}','${(g.occasion_tags||[])[0]||''}')">${lang ==='th'?'ดูทรงผม & เครื่องประดับที่เข้ากับชุดนี้':'See hair & accessories for this look'}</button></div>
       <div id="ugcWrap" style="display:none"><div class="sec">${lang ==='th'?'รูปจริงจากลูกค้า':'Real customer photos'}</div><div id="ugcbox" class="ugcbox"></div></div>
-      <div class="sec secrow">${t('secSize')}<span class="munit">${['in','cm'].map(u=>`<button data-u="${u}" class="${gMUnit===u?'on':''}" onclick="setMUnit('${u}')">${u==='in'?(lang==='th'?'นิ้ว':'inch'):(lang==='th'?'ซม.':'cm')}</button>`).join('')}</span></div>
+      ${(g.bust||g.waist||g.hip||g.length)
+        ? `<div class="sec secrow">${t('secSize')}<span class="munit">${['in','cm'].map(u=>`<button data-u="${u}" class="${gMUnit===u?'on':''}" onclick="setMUnit('${u}')">${u==='in'?(lang==='th'?'นิ้ว':'inch'):(lang==='th'?'ซม.':'cm')}</button>`).join('')}</span></div>
       <div class="measure" id="measureBox">${measureCells(g)}</div>
-      ${fitMatch(g)}
+      ${fitMatch(g)}`
+        : (ourSizesLabel ? `<div class="sec">${lang==='th'?'ไซส์':'Size'}</div>` : '')}
       ${ourSizesLabel ? `<div class="dscnote">${lang==='th'?`ไซส์ที่เรามีให้เช่า: <b>${ourSizesLabel}</b>`:`We rent: <b>${ourSizesLabel}</b>`}</div>` : ''}
       <div id="fitsummary"></div>
-      <div class="sec">${t('secFabric')}</div>
-      <div class="fabric">${fabricTags}</div>
+      ${g.fabric ? `<div class="sec">${t('secFabric')}</div>
+      <div class="fabric">${fabricTags}</div>` : ''}
       ${colorSel}
       <div id="recoWith" class="recowith"></div>
       <div class="sec">${lang ==='th'?'ปฏิทินว่าง':'Availability'}</div>

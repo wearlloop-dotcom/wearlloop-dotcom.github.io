@@ -320,6 +320,8 @@
   .searchbar{display:flex;align-items:center;gap:8px;border:1px solid var(--line,#e3ddd2);border-radius:8px;padding:8px 12px;margin-bottom:10px;background:#fff}
   .searchbar .sicon{width:16px;height:16px;stroke:var(--muted,#999);fill:none;stroke-width:2;flex-shrink:0}
   .searchbar input{border:none;outline:none;flex:1;font-size:14px;background:transparent;color:var(--ink)}
+  .pphoto2{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .4s ease;z-index:1}
+  @media(hover:hover){.pcard:hover .pphoto2{opacity:1}}
   .hoverbar{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);transform:translateY(101%);transition:transform .28s ease;z-index:2}
   .pcard:hover .hoverbar{transform:translateY(0)}
   .hoverbar .try{display:flex;align-items:center;justify-content:center;gap:7px;height:40px;font-size:13px;font-weight:500;border-bottom:1px solid var(--line)}

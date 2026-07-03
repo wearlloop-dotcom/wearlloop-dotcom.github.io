@@ -52,6 +52,7 @@ window.API = (function () {
       fitAvg: r.fit_avg!= null? Number(r.fit_avg) : null, fitN: r.fit_n || 0, fitLabel: r.fit_label || null,
       colors: r.color_hex? [[r.color_name ||'สี', r.color_hex]] : [['—','#E7E2DA']],
       season: r.color_season, occasion_tags: r.occasion_tags || [],
+      tags: Array.isArray(r.tags) ? r.tags : [],   // ลาย/เนื้อผ้า (lace/floral/satin…) ไว้ค้นหา
       bg: r.color_hex ||'#E7E2DA', isNew: false,
     };
   }
