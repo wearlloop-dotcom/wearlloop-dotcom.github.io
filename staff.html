@@ -58,10 +58,14 @@
   .howbtn.on{background:var(--sageDeep);color:#fff}
   .howpanel{max-width:560px;margin:10px auto 0;padding:0 14px}
   .guide-h{font-family:var(--display);font-size:18px;margin-bottom:6px}
-  .guide-item{padding:11px 0;border-bottom:1px solid var(--hair)}
+  .guide-item{border-bottom:1px solid var(--hair)}
   .guide-item:last-child{border-bottom:none}
-  .guide-item b{display:block;font-size:14px;margin-bottom:3px}
-  .guide-item p{font-size:13px;color:var(--stone);line-height:1.65}
+  .guide-item summary{padding:11px 0;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .guide-item summary::-webkit-details-marker{display:none}
+  .guide-item summary::after{content:'▸';color:var(--stone);font-size:11px;flex:none}
+  .guide-item[open] summary::after{content:'▾'}
+  .guide-item b{font-size:14px}
+  .guide-item p{font-size:13px;color:var(--stone);line-height:1.65;padding-bottom:11px}
 </style>
 </head>
 <body>
@@ -106,14 +110,14 @@
       todayWorked:'วันนี้ทำงานไปแล้ว %s', notYet:'วันนี้ยังไม่ได้ลงเวลา', clockIn:'เข้างาน / ลงเวลา',
       mustLine:'ต้องเปิดผ่าน LINE', mustLineSub:'กรุณาเปิดพอร์ทัลนี้จากแอป LINE OA หลังบ้านค่ะ', cantWork:'ยังเข้าทำงานไม่ได้', copyUid:'คัดลอก UID',
       guide:[
-        {t:'เข้างาน / ออกงาน', s:'กดปุ่ม "เข้างาน / ลงเวลา" เมื่อเริ่มงาน และกด "ออกงาน" เมื่อเลิกงาน ระบบจะนับชั่วโมงทำงานให้อัตโนมัติ'},
-        {t:'KPI — คะแนนการทำงาน', s:'ดูคะแนนการทำงานของคุณในแต่ละงวด เทียบกับเป้าหมาย'},
-        {t:'ประกาศ', s:'อ่านประกาศจากบริษัท เรื่องที่ขึ้นว่า "ยังไม่รับทราบ" ให้กดปุ่ม "กดรับทราบ"'},
-        {t:'ตารางเวร', s:'ดูวันและเวลาเข้างานล่วงหน้า 14 วัน วันหยุดจะขึ้นว่า "หยุด"'},
-        {t:'ลางาน', s:'กด "+ ขอลา" เลือกประเภท (ป่วย/กิจ/พักร้อน) และวันที่ แล้วรอฝ่ายบุคคลอนุมัติ'},
-        {t:'เบิกเงิน', s:'ขอเบิกค่าใช้จ่ายที่มีใบเสร็จ หรือเบิกเงินเดือนล่วงหน้า รอเจ้าของอนุมัติ'},
-        {t:'งาน', s:'ดูงานที่ได้รับมอบหมาย เมื่อทำเสร็จให้กดปุ่ม "เสร็จ"'},
-        {t:'เงินเดือน · เอกสาร · สัญญา · ยืนยันตัวตน', s:'ดูสลิปเงินเดือน อัปโหลดเอกสาร ลงนามสัญญาจ้าง และยืนยันตัวตน (KYC) ได้ในแท็บเหล่านี้'},
+        {t:'เข้างาน / ออกงาน', s:'กด "เข้างาน" เมื่อเริ่ม · กด "ออกงาน" เมื่อเลิก ระบบนับชั่วโมงให้เอง'},
+        {t:'KPI — คะแนนการทำงาน', s:'ดูคะแนนแต่ละงวดเทียบกับเป้าหมาย'},
+        {t:'ประกาศ', s:'เรื่องที่ขึ้น "ยังไม่รับทราบ" ให้กด "กดรับทราบ"'},
+        {t:'ตารางเวร', s:'ดูเวรล่วงหน้า 14 วัน วันหยุดขึ้นว่า "หยุด"'},
+        {t:'ลางาน', s:'กด "+ ขอลา" เลือกประเภทและวันที่ แล้วรอฝ่ายบุคคลอนุมัติ'},
+        {t:'เบิกเงิน', s:'เบิกค่าใช้จ่าย (แนบใบเสร็จ) หรือเบิกเงินเดือนล่วงหน้า รอเจ้าของอนุมัติ'},
+        {t:'งาน', s:'ทำงานที่ได้รับมอบหมายเสร็จแล้วกด "เสร็จ"'},
+        {t:'เงินเดือน · เอกสาร · สัญญา · ยืนยันตัวตน', s:'ดูสลิป อัปโหลดเอกสาร ลงนามสัญญา และทำ KYC ในแท็บเหล่านี้'},
       ] },
     en:{ langName:'English', barSub:'STAFF · Team', howBtn:'How to work', howClose:'Close guide', guideTitle:'Work guide',
       t_kpi:'KPI', t_ann:'Announcements', t_sched:'Schedule', t_leave:'Leave', t_claim:'Claims', t_task:'Tasks', t_pay:'Payroll', t_doc:'Documents', t_contract:'Contract', t_kyc:'ID verify',
@@ -122,14 +126,14 @@
       todayWorked:'Worked %s today', notYet:'Not clocked in yet', clockIn:'Clock in',
       mustLine:'Open via LINE', mustLineSub:'Please open this portal from the LINE OA app.', cantWork:'Cannot work yet', copyUid:'Copy UID',
       guide:[
-        {t:'Clock in / Clock out', s:'Tap "Clock in" when you start and "Clock out" when you finish. Your hours are counted automatically.'},
-        {t:'KPI — your score', s:'See your performance score for each period against the target.'},
-        {t:'Announcements', s:'Read company announcements. For items marked "not acknowledged", tap "Acknowledge".'},
-        {t:'Schedule', s:'See your shifts for the next 14 days. Days off show as "Off".'},
-        {t:'Leave', s:'Tap "+ Request leave", choose the type (sick/personal/vacation) and dates, then wait for HR approval.'},
-        {t:'Claims', s:'Claim expenses with a receipt, or request a salary advance. Wait for the owner to approve.'},
-        {t:'Tasks', s:'See your assigned tasks. Tap "Done" when you finish one.'},
-        {t:'Payroll · Documents · Contract · ID verify', s:'View payslips, upload documents, sign your contract, and verify your identity (KYC) in these tabs.'},
+        {t:'Clock in / Clock out', s:'Tap "Clock in" when you start · "Clock out" when you finish. Hours are counted automatically.'},
+        {t:'KPI — your score', s:'See your score each period vs the target.'},
+        {t:'Announcements', s:'Tap "Acknowledge" on items marked "not acknowledged".'},
+        {t:'Schedule', s:'See shifts 14 days ahead. Days off show "Off".'},
+        {t:'Leave', s:'Tap "+ Request leave", pick type and dates, wait for HR approval.'},
+        {t:'Claims', s:'Claim expenses (attach receipt) or request a salary advance. Owner approves.'},
+        {t:'Tasks', s:'Tap "Done" when you finish an assigned task.'},
+        {t:'Payroll · Documents · Contract · ID verify', s:'Payslips, documents, contract signing, and KYC live in these tabs.'},
       ] },
     my:{ langName:'မြန်မာ', barSub:'STAFF · အဖွဲ့သား', howBtn:'အလုပ်လုပ်နည်း', howClose:'လမ်းညွှန် ပိတ်ရန်', guideTitle:'အလုပ်လုပ်နည်း လမ်းညွှန်',
       t_kpi:'KPI', t_ann:'ကြေညာချက်', t_sched:'အလုပ်ဇယား', t_leave:'ခွင့်ယူ', t_claim:'ငွေတောင်းခံ', t_task:'အလုပ်', t_pay:'လစာ', t_doc:'စာရွက်စာတမ်း', t_contract:'စာချုပ်', t_kyc:'အထောက်အထား',
@@ -177,7 +181,7 @@
     const bs=$('barSub'); if(bs) bs.textContent=t('barSub');
     const hb=$('howBtn'); if(hb) hb.textContent=howOpen?t('howClose'):t('howBtn');
   }
-  function renderHow(){const g=t('guide')||[];$('howPanel').innerHTML=`<div class="card"><div class="guide-h">${t('guideTitle')}</div>${g.map(it=>`<div class="guide-item"><b>${it.t}</b><p>${it.s}</p></div>`).join('')}</div>`;}
+  function renderHow(){const g=t('guide')||[];$('howPanel').innerHTML=`<div class="card"><div class="guide-h">${t('guideTitle')}</div>${g.map(it=>`<details class="guide-item"><summary><b>${it.t}</b></summary><p>${it.s}</p></details>`).join('')}</div>`;}
   function toggleHow(){howOpen=!howOpen;const p=$('howPanel'),b=$('howBtn');if(howOpen){p.classList.remove('hide');renderHow();b.classList.add('on');}else{p.classList.add('hide');b.classList.remove('on');}b.textContent=howOpen?t('howClose'):t('howBtn');}
   function setLang(l){if(!STAFF_I18N[l])return;LANG=l;localStorage.setItem('staffLang',l);applyStatic();if(howOpen)renderHow();if(activeRender)activeRender();
     // sync แถบ topbar ร่วม เฉพาะ th/en (my/lo ไม่มีปุ่มบน topbar — คงค่าเดิมไว้)

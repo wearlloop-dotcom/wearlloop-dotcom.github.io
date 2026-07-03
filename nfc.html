@@ -230,7 +230,7 @@
   // ตรวจรองรับ NFC
   if(!NFC_OK){
     $('noNfc').classList.remove('hide');
-    $('noNfc').innerHTML='อุปกรณ์/เบราว์เซอร์นี้ยังแตะ NFC ในเว็บไม่ได้ — ใช้ <b>มือถือ Android + Chrome</b> (iPhone แตะอ่าน tag ที่เขียน URL แล้วได้ แต่หน้านี้ใช้เขียน/ผูกบน Android). โครงระบบพร้อมแล้ว พอเปิดบนเครื่องที่รองรับก็ใช้ได้ทันที';
+    $('noNfc').innerHTML='อุปกรณ์นี้แตะ NFC ไม่ได้ — เปิดหน้านี้ด้วย <b>มือถือ Android + Chrome</b> ค่ะ';
     $('checkZone').textContent='อุปกรณ์นี้ไม่รองรับการแตะ NFC';
     $('checkZone').style.cursor='default';
   }

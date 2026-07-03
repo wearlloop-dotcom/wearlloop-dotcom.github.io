@@ -157,7 +157,7 @@
   <div class="hero">
     <div class="eyebrow">together</div>
     <h1 class="htitle" data-i18n="Family &amp; groups">ครอบครัว &amp; กลุ่ม</h1>
-    <p class="hsub" data-i18n="Keep the people you love in one circle — mum, your kids, grandma, or your friends — and let our stylist dress everyone in one theme, rented together in a single order.">ผูกคนที่รักไว้ในกลุ่มเดียว — คุณแม่ คุณลูก คุณยาย หรือแก๊งเพื่อน แล้วให้สไตลิสต์ของเราจัดชุดเข้าตีมเดียวกัน เช่าพร้อมกันในออเดอร์เดียว</p>
+    <p class="hsub" data-i18n="Keep family or friends in one circle — our stylist dresses the whole group in one theme.">รวมครอบครัวหรือแก๊งเพื่อนไว้กลุ่มเดียว — สไตลิสต์จัดชุดเข้าตีมให้ทั้งกลุ่ม</p>
   </div>
 
   <!-- คำเชิญรอตอบรับ -->
@@ -509,7 +509,7 @@ function renderMembers(){
     body.innerHTML=`<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
       <h4>${NAV.t('ยังไม่มีสมาชิกในกลุ่มนี้','No members in this group yet')}</h4>
-      <p>${NAV.t('เริ่มจากเพิ่มคนในครอบครัว — คุณลูก คุณยาย หรือชวนเพื่อนที่มีแอคเคานต์ LLOOP อยู่แล้ว แล้วเราจะช่วยจัดชุดเข้าตีมให้','Start by adding family — your child or grandma — or invite a friend who already has an LLOOP account, and we\'ll style everyone in one theme.')}</p>
+      <p>${NAV.t('เพิ่มสมาชิกคนแรกได้เลยค่ะ','Add your first member below.')}</p>
       <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
         <button class="btn sage" onclick="openForm()">${NAV.t('+ เพิ่มสมาชิก (เด็ก/ผู้สูงวัย)','+ Add member (child/senior)')}</button>
         <button class="btn ghost" onclick="openInvite()">${NAV.t('ชวนเพื่อนด้วยลิงก์/รหัส','Invite a friend by link or code')}</button>
@@ -825,7 +825,7 @@ window.respondInvite=async (gid,ok)=>{
     GROUPS.push(ng); active=gid;
   }
   render();
-  if(ok) setTimeout(()=>alert(NAV.t('เข้าร่วม “'+iv.name+'” แล้ว · ของจริงเรียก group_respond(accept) แล้วแจ้งเตือนหัวหน้ากลุ่ม','You\'ve joined “'+iv.name+'” · in production this calls group_respond(accept) and notifies the group lead')),50);
+  if(ok) setTimeout(()=>alert(NAV.t('เข้าร่วม “'+iv.name+'” แล้ว — แจ้งหัวหน้ากลุ่มให้แล้วค่ะ','You\'ve joined “'+iv.name+'” — the group lead has been notified.')),50);
 };
 
 // ===== ชวนเพื่อน =====
@@ -912,7 +912,7 @@ function bindInvite(){
         role:'member',age:'adult',gen:'female',managed:false,season:'autumn',pend:true});
       $('#invForm').classList.remove('show'); $('#i_code').value=''; $('#i_rel').value='';
       render();
-      setTimeout(()=>alert(NAV.t('ส่งคำเชิญแล้ว · ของจริงเรียก group_invite → เพื่อนได้แจ้งเตือนให้กดรับ (ตอนนี้ขึ้นป้าย “รอตอบรับ”)','Invite sent · in production this calls group_invite → your friend is notified to accept (now shown as “Pending”)')),50);
+      setTimeout(()=>alert(NAV.t('ส่งคำเชิญแล้ว · เพื่อนได้แจ้งเตือนให้กดรับ (ขึ้นป้าย “รอตอบรับ”)','Invite sent · your friend is notified to accept (shown as “Pending”)')),50);
     }
   };
 }

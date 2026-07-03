@@ -496,8 +496,8 @@ async function boot(){
   // กลุ่มไม่มีสมาชิกอื่น
   const active = (GROUP.members||[]).filter(m => (m.status||'active')==='active');
   if(active.length<2){
-    edgeState(NAV.t('กลุ่มนี้ยังมีสมาชิกไม่พอ','Not enough members in this group'),
-      NAV.t('การจองทั้งกลุ่มต้องมีสมาชิกอย่างน้อย 2 คน — กลับไปเพิ่มคนในครอบครัวหรือชวนเพื่อนเข้ากลุ่มก่อนได้เลยค่ะ','Group booking needs at least 2 members — go back to add family members or invite friends into the group first.'),
+    edgeState(NAV.t('ต้องมีสมาชิกอย่างน้อย 2 คน','Needs at least 2 members'),
+      NAV.t('เพิ่มคนในครอบครัว หรือชวนเพื่อนเข้ากลุ่มก่อนค่ะ','Add family members or invite friends into the group first.'),
       NAV.t('ไปเพิ่มสมาชิก','Add members'),'family.html');
     return;
   }
@@ -918,8 +918,12 @@ async function renderResult(res, from, to){
   if(res.error==='kyc_required'){
     box.innerHTML = `<div class="kycbox">
       <h4>${NAV.t('ยืนยันตัวตนก่อนจองนะคะ','Verify your identity before booking')}</h4>
-      <p>${NAV.t('การจองทั้งกลุ่มจะบิลรวมที่หัวหน้ากลุ่ม (ผู้จ่าย) — ระบบขอให้ผู้จ่ายยืนยันตัวตน (บัตรประชาชน + โซเชียลสาธารณะ) ครั้งเดียวเพื่อความปลอดภัยก่อนค่ะ','Group bookings bill the group lead (the payer) — for safety, the payer verifies their identity once (ID card + public social) before booking.')}</p>
-      <a class="btn" href="index.html">${NAV.t('ไปยืนยันตัวตน','Go to verify')}</a></div>`;
+      <p>${NAV.t('ผู้จ่ายของกลุ่มยืนยันตัวตนครั้งเดียว แล้วจองได้เลยค่ะ','The group payer verifies their identity once, then you can book.')}</p>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <a class="btn" href="index.html">${NAV.t('ไปยืนยันตัวตน','Go to verify')}</a>
+        <a href="#" style="font-size:12px;color:inherit" onclick="this.style.display='none';this.nextElementSibling.style.display='block';return false">${NAV.t('ทำไมต้องยืนยัน?','Why verify?')}</a>
+        <span style="display:none;font-size:12px;flex-basis:100%">${NAV.t('บิลของกลุ่มรวมที่ผู้จ่าย ระบบจึงขอยืนยันตัวตน (บัตรประชาชน + โซเชียลสาธารณะ) เพื่อความปลอดภัยค่ะ','Group bills go to the payer, so we ask them to verify (ID card + public social) once for safety.')}</span>
+      </div></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
   if(res.error==='no_payer'){
@@ -959,7 +963,7 @@ async function renderResult(res, from, to){
       <div style="margin-top:12px">${rows}</div>
       <div class="totbox"><div class="trow hl"><span>${NAV.t('ยอดรวมทั้งกลุ่ม','Group total')}</span><span>${baht(res.grand_total)}</span></div></div>
       <div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        ${NAV.t('เรากันชุดให้ทุกคน 30 นาที — เพื่อนแต่ละคนเปิด LINE ของตัวเองเพื่อโอนและแนบสลิปยืนยันส่วนของตนค่ะ','We hold everyone\'s outfits for 30 minutes — each friend opens their own LINE to transfer and attach a slip to confirm their share.')}</div>
+        ${NAV.t('กันชุดไว้ 30 นาที — แต่ละคนโอน + แนบสลิปใน LINE ของตัวเองค่ะ','Outfits held for 30 minutes — each person transfers + attaches a slip in their own LINE.')}</div>
       <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
         ${res.event_group?`<a class="btn" href="event.html?event=${esc(res.event_group)}">${NAV.t('ดูสถานะการจ่าย','View payment status')}</a>`:''}
         <a class="btn ghost" href="family.html">${NAV.t('กลับหน้ากลุ่ม','Back to group')}</a></div>`;
@@ -1025,7 +1029,7 @@ async function renderResult(res, from, to){
       <div class="trow hl"><span>${NAV.t('รวมโอน','Total to transfer')}</span><span>${baht(res.total)}</span></div>
     </div>
     <div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      ${NAV.t('เรากันชุดให้แล้ว 30 นาที — โอนและแนบสลิปภายในเวลานี้เพื่อยืนยันการจองค่ะ','We\'re holding your outfits for 30 minutes — transfer and attach your slip within this time to confirm.')}</div>
+      ${NAV.t('กันชุดไว้ 30 นาที — โอน + แนบสลิปภายในเวลานี้ค่ะ','Outfits held for 30 minutes — transfer + attach your slip within this time.')}</div>
     ${payBlock}
     <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
       <a class="btn ghost" href="family.html">${NAV.t('กลับหน้ากลุ่ม','Back to group')}</a>

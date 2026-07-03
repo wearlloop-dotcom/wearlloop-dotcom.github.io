@@ -177,7 +177,7 @@ async function boot(){
   // ไม่มี order id ใน URL → empty state
   if(!ORDER){
     edgeState(NAV.t('ยังไม่มีบิลให้แสดง','No bill to show yet'),
-      NAV.t('เปิดหน้านี้จากปุ่ม “จ่ายส่วนของฉัน” ในข้อความ LINE ที่เพื่อนส่งให้ เพื่อดูบิลและโอนค่าเช่าของคุณค่ะ','Open this page from the “Pay my share” button in the LINE message your friend sent you, to see your bill and transfer your rental fee.'));
+      NAV.t('เปิดจากปุ่ม “จ่ายส่วนของฉัน” ใน LINE ที่เพื่อนส่งให้นะคะ','Open this page from the “Pay my share” button in your friend\'s LINE message.'));
     return;
   }
 
@@ -201,10 +201,10 @@ async function boot(){
       const code = res && res.error;
       if(code==='denied'){
         edgeState(NAV.t('นี่ไม่ใช่บิลของคุณ','This isn’t your bill'),
-          NAV.t('บิลนี้เป็นของสมาชิกคนอื่นในกลุ่ม — เปิดลิงก์ที่ส่งมาให้คุณโดยตรงเพื่อดูส่วนของตัวเองนะคะ','This bill belongs to another group member — open the link sent directly to you to see your own share.'));
+          NAV.t('เปิดลิงก์ที่ส่งถึงคุณโดยตรงนะคะ','Open the link sent directly to you.'));
       } else if(code==='not_found'){
         edgeState(NAV.t('ไม่พบบิลนี้','Bill not found'),
-          NAV.t('บิลนี้อาจหมดเวลากันชุด (hold) หรือถูกยกเลิกไปแล้ว — ลองจองใหม่กับเพื่อนอีกครั้งนะคะ','This bill may have passed its hold time or been cancelled — try booking again with your friends.'));
+          NAV.t('บิลอาจหมดเวลาหรือถูกยกเลิกแล้ว — ลองจองใหม่นะคะ','The bill may have expired or been cancelled — try booking again.'));
       } else {
         edgeState(NAV.t('เปิดบิลไม่สำเร็จ','Couldn’t open the bill'),
           NAV.t('เกิดข้อผิดพลาด','Something went wrong') + (code?(' ('+code+')'):'') + NAV.t(' — ลองเปิดลิงก์ใหม่อีกครั้งนะคะ',' — please open the link again.'));
@@ -215,7 +215,7 @@ async function boot(){
   } else if(window.CONFIG && !window.CONFIG.USE_MOCK){
     // โปรดักชัน (USE_MOCK=false) แต่ init/ล็อกอินไม่สำเร็จ → ห้ามตกไปโชว์บิล mock (มี QR จ่ายเงินจริง)
     edgeState(NAV.t('เปิดบิลไม่สำเร็จ','Couldn’t open the bill'),
-      NAV.t('เข้าสู่ระบบ LINE ไม่สำเร็จ — กรุณาเปิดลิงก์นี้ใหม่จากแชต LINE ที่เพื่อนส่งให้อีกครั้งนะคะ','Couldn’t sign in with LINE — please reopen this link from the LINE chat your friend sent you.'));
+      NAV.t('เข้าสู่ระบบ LINE ไม่สำเร็จ — เปิดลิงก์ใหม่จากแชต LINE อีกครั้งนะคะ','Couldn’t sign in with LINE — reopen the link from your LINE chat.'));
     return;
   } else {
     // โหมดพรีวิว / mock (เฉพาะเมื่อ USE_MOCK=true เท่านั้น)

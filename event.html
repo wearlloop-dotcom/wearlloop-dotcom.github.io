@@ -138,10 +138,10 @@
     <!-- gentle footer note -->
     <div class="selfnote">
       <svg viewBox="0 0 24 24"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
-      <div data-i18n="Everyone pays their own share and reminders go out automatically — a nudge in the group's LINE chat helps too.">แต่ละคนจ่ายส่วนของตัวเอง ระบบเตือนให้อัตโนมัติ — คุณช่วยทักเตือนใน LINE กลุ่มได้อีกแรงค่ะ</div>
+      <div data-i18n="Everyone pays their own share.">แต่ละคนจ่ายส่วนของตัวเองค่ะ</div>
     </div>
     <div class="remindrow">
-      <button class="btn ghost sm" id="remindBtn" disabled title="ระบบส่งคำเตือนให้เพื่อนที่ยังไม่จ่ายโดยอัตโนมัติอยู่แล้ว" data-i18n="Remind friends who haven't paid">เตือนเพื่อนที่ยังไม่จ่าย</button>
+      <button class="btn ghost sm" id="remindBtn" disabled data-i18n="Remind friends who haven't paid">เตือนเพื่อนที่ยังไม่จ่าย</button>
       <span class="hint" id="remindHint" data-i18n="Reminders already go out automatically">ระบบส่งคำเตือนอัตโนมัติให้อยู่แล้ว</span>
     </div>
   </div>
@@ -149,7 +149,7 @@
   <!-- edge / empty state -->
   <div class="sec hide" id="edgeSec"><div id="edgeBody"></div></div>
 
-  <div class="demo" id="demoNote" data-i18n="LLOOP payment-status page · production connects to Supabase via &lt;b&gt;api.js&lt;/b&gt; (group_event_status returns the whole event's payment state)">หน้าสถานะการจ่าย LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>api.js</b> (group_event_status คืนสถานะจ่ายของทั้งอีเวนต์)</div>
+  <div class="demo" id="demoNote"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -234,7 +234,7 @@ async function boot(){
   }catch(e){ /* ตกไป mock */ }
 
   if(!LIVE){
-    $('#demoNote').innerHTML = NAV.t('โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อดึงสถานะจาก Supabase','Preview mode (mock) · open via real LINE to pull live status from Supabase');
+    $('#demoNote').innerHTML = NAV.t('โหมดพรีวิว · เปิดผ่าน LINE เพื่อดูสถานะจริง','Preview mode · open via LINE to see live status');
   }
 
   await load(false);
