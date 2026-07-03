@@ -56,6 +56,7 @@
   .spec .k { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
   .spec .v { font-size: 14px; font-weight: 600; margin-top: 3px; display: flex; align-items: center; gap: 6px; justify-content: center; }
   .spec .dot { width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--line); flex: 0 0 auto; }
+  .spec .fab { width: 20px; height: 20px; border-radius: 5px; object-fit: cover; border: 1px solid var(--line); flex: 0 0 auto; }
   .value { margin-top: 14px; font-size: 13.5px; color: var(--muted); }
   .value b { color: var(--ink); font-weight: 600; }
   .value .rent { color: var(--sage-deep); font-weight: 600; }
@@ -195,7 +196,8 @@ function paint(d) {
   // แถบสเปค — โชว์เฉพาะช่องที่มีข้อมูล (ว่าง=ข้าม ไม่รก)
   const specs = [];
   if (g.size)   specs.push('<div class="it"><div class="k">ไซส์</div><div class="v">' + esc(g.size) + '</div></div>');
-  if (g.fabric) specs.push('<div class="it"><div class="k">เนื้อผ้า</div><div class="v">' + esc(g.fabric) + '</div></div>');
+  if (g.fabric) specs.push('<div class="it"><div class="k">เนื้อผ้า</div><div class="v">' +
+      (g.fabric_photo ? '<img class="fab" src="' + esc(g.fabric_photo) + '" alt="">' : '') + esc(g.fabric) + '</div></div>');
   if (g.color)  specs.push('<div class="it"><div class="k">สี</div><div class="v">' +
       (g.color_hex ? '<span class="dot" style="background:' + esc(g.color_hex) + '"></span>' : '') + esc(g.color) + '</div></div>');
   $('#spec').innerHTML = specs.join('');
