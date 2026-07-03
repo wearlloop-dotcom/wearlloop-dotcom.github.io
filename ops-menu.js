@@ -88,6 +88,7 @@
     { section: 'เจ้าของ', items: [
       { href: 'hr.html',        label: 'บุคคล (HR)',    icon: 'person', roles: ['owner'] },
       { href: 'ops-partner.html', label: 'พาร์ทเนอร์',    icon: 'partner', roles: ['owner'] },
+      { href: 'charity.html',   label: 'กองบุญ / charity', icon: 'heart', roles: ['owner'] },
       { href: 'stylist-bookings.html', label: 'คิวสไตลิสต์', icon: 'calendar', roles: ['owner','manager'] },
       { href: 'disputes.html',  label: 'ทะเบียนคดี',     icon: 'scale', roles: ['owner','manager'] },
       { href: 'case-file.html', label: 'แฟ้มหลักฐาน',    icon: 'folder', roles: ['owner','manager'] },
