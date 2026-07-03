@@ -127,7 +127,7 @@
   <div class="card express" id="expressCard">
     <h2 data-i18n="Emergency dress">ชุดฉุกเฉิน</h2>
     <div id="expressFormWrap">
-      <p class="lead" data-i18n="Event tomorrow but no dress yet? Order before 15:00 and pick up at a point near you within 3 hours.">มีงานพรุ่งนี้ แต่ยังไม่มีชุด? สั่งก่อน 15:00 รับที่จุดใกล้บ้านภายใน 3 ชั่วโมงค่ะ</p>
+      <p class="lead" id="exLead" data-i18n="Event tomorrow but no dress yet? Order before the daily cutoff and your stylist picks it for you.">มีงานพรุ่งนี้ แต่ยังไม่มีชุด? สั่งก่อนรอบตัดของวัน สไตลิสต์จะจัดชุดให้เลยค่ะ</p>
       <form id="expressForm" novalidate>
         <div class="f2">
           <div class="f">
@@ -199,18 +199,16 @@ const esc = s => (s == null ? '' : String(s)).replace(/[<>&"]/g, c => ({'<':'&lt
 let sb = null;
 function client(){ if(!window.supabase) throw new Error('supabase sdk not loaded'); if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
 
-// เรียกผ่าน gateway me-rpc ก่อน (verify LINE idToken ฝั่ง server — ปลอม uid ไม่ได้)
-// gateway ยังไม่ allowlist ฟังก์ชัน → fallback ยิงตรงตาม convention เดิม (ขั้นตอนปิดถาวรดู db/README)
-async function gwRpc(name, args){
-  if (window.meRpc && UID) {
-    const r = await window.meRpc(name, args);
-    if (!r.error) return r;
-    // fallback เฉพาะเคสที่ gateway ยังไม่ได้รันแน่ ๆ — 5xx/เน็ตหลุดอาจรันไปแล้ว ห้ามยิงซ้ำ (กัน insert เบิ้ล)
-    const m = r.error.message || '';
-    const notRun = m === 'redirecting_to_login' || m === 'คำสั่งนี้ไม่อนุญาต' || m === 'ยังไม่พบบัญชีลูกค้าของคุณ' || m === 'เซสชันหมดอายุ เข้าสู่ระบบใหม่';
-    if (!notRun) return r;
-  }
-  return client().rpc(name, args);
+// public read → ยิงตรงผ่าน anon client (จุดรับ-ส่ง/รอบตัดของชุดฉุกเฉินเป็นข้อมูลสาธารณะ)
+// customer write (pickup_interest_add / suggest_express) → ผ่าน window.meRpc เท่านั้น
+//   gateway เติม p_customer จาก idToken ที่ verify แล้ว — ปลอม uid ไม่ได้ (db/INTEGRATION.md)
+
+// error จาก meRpc ที่ถือว่ายัง "ไม่ได้คำตอบจาก business logic" (เน็ต/เกตเวย์ 5xx) → คิว local ได้
+function isTransportFail(msg){
+  if(!msg) return true;
+  if(msg === 'me-rpc failed') return true;
+  if(/^me-rpc\s+(0|5\d\d)\b/.test(msg)) return true;
+  return /failed to fetch|networkerror|network|timeout|load failed/i.test(msg);
 }
 let UID = null;              // LINE uid (null = ยังไม่ล็อกอิน — หน้ายังใช้ได้ครบ)
 let POINTS = [];             // จุดรับ-ส่งทั้งหมด
@@ -235,31 +233,52 @@ function toast(msg){
   toast._t = setTimeout(() => { el.style.opacity = '0'; }, 3500);
 }
 
-// ===== demo data — ใช้เมื่อ backend RPC ยังไม่พร้อม (มาร์กเป็น "เร็ว ๆ นี้" แบบเนียน ๆ) =====
+// ===== ตัวอย่าง — ใช้เฉพาะเมื่อ RPC error/คืนค่าว่าง (มาร์กชัดเจนว่า "ตัวอย่าง") =====
 const DEMO_POINTS = [
   { id:'demo-ladprao', name:'ร้านซักพาร์ทเนอร์ ลาดพร้าว', type:'laundry',
-    address:'ปากซอยลาดพร้าว 23 (ใกล้ MRT ลาดพร้าว)', district:'จตุจักร', postal:'10900',
+    address:'ปากซอยลาดพร้าว 23 (ใกล้ MRT ลาดพร้าว)', district:'จตุจักร', province:'กรุงเทพมหานคร', postcode:'10900',
     lat:13.8160, lng:100.5610, hours:'09:00–20:00 ทุกวัน', services:['return','pickup','express'], demo:true },
   { id:'demo-ari', name:'คาเฟ่พาร์ทเนอร์ อารีย์', type:'cafe',
-    address:'ซอยอารีย์ 1 (เดิน 3 นาทีจาก BTS อารีย์)', district:'พญาไท', postal:'10400',
+    address:'ซอยอารีย์ 1 (เดิน 3 นาทีจาก BTS อารีย์)', district:'พญาไท', province:'กรุงเทพมหานคร', postcode:'10400',
     lat:13.7795, lng:100.5447, hours:'08:00–19:00 ทุกวัน', services:['return','pickup'], demo:true },
   { id:'demo-suk49', name:'ร้านซักพาร์ทเนอร์ สุขุมวิท 49', type:'laundry',
-    address:'สุขุมวิท 49 (ใกล้ BTS ทองหล่อ)', district:'วัฒนา', postal:'10110',
+    address:'สุขุมวิท 49 (ใกล้ BTS ทองหล่อ)', district:'วัฒนา', province:'กรุงเทพมหานคร', postcode:'10110',
     lat:13.7330, lng:100.5735, hours:'09:00–20:00 ทุกวัน', services:['return','pickup','express'], demo:true },
 ];
 
 const TYPE_LABEL = { laundry:['ร้านซัก','Laundry'], cafe:['คาเฟ่','Café'], locker:['ล็อกเกอร์','Locker'] };
 const SVC_LABEL  = { return:['คืนชุด','Return'], pickup:['รับชุด','Pick up'], express:['ชุดฉุกเฉิน','Emergency dress'] };
 
-// ===== โหลดจุดรับ-ส่ง (RPC → fallback demo) =====
+// map แถวจาก RPC จริง → รูปแบบที่การ์ดใช้ (รองรับทั้ง pickup_points_active และ pickup_list)
+// pickup_points_active คืน: id,name,province,district,address,hours,services,lat,lng
+// pickup_list คืน: id,code,name,host_type,host_name,province,district,services,active
+function mapPoint(r){
+  return {
+    id: r.id,
+    name: r.name || r.host_name || '',
+    type: r.host_type || r.type || null,      // host_type มีเฉพาะ pickup_list (active ไม่ส่งมา)
+    address: r.address || '',
+    district: r.district || '',
+    province: r.province || '',
+    postcode: r.postcode || r.postal || '',   // RPC ปัจจุบันยังไม่ส่ง postcode → กรองด้วย district แทน
+    lat: r.lat != null ? r.lat : null,
+    lng: r.lng != null ? r.lng : null,
+    hours: r.hours || '',
+    services: Array.isArray(r.services) ? r.services : [],
+  };
+}
+
+// ===== โหลดจุดรับ-ส่งจาก RPC จริง (public) → fallback "ตัวอย่าง" เมื่อ error/ว่าง =====
 async function loadPoints(){
   try{
-    const { data, error } = await client().rpc('drop_points_list');
+    // จุดรับ-ส่งเป็นข้อมูลสาธารณะ → ยิงตรงผ่าน anon client ไม่ต้องล็อกอิน
+    // ใช้ pickup_points_active (มี address/hours/lat/lng ให้การ์ด) แทน pickup_list ที่ไม่มีฟิลด์เหล่านี้
+    const { data, error } = await client().rpc('pickup_points_active');
     if(error) throw error;
-    if(Array.isArray(data) && data.length) POINTS = data;
-    else POINTS = DEMO_POINTS;
+    const rows = Array.isArray(data) ? data : [];
+    POINTS = rows.length ? rows.map(mapPoint) : DEMO_POINTS;
   }catch(e){
-    console.warn('drop_points_list not ready — using demo points:', e && e.message ? e.message : e);
+    console.warn('pickup_points_active not ready — using sample points:', e && e.message ? e.message : e);
     POINTS = DEMO_POINTS;
   }
   renderPoints();
@@ -267,28 +286,34 @@ async function loadPoints(){
 }
 
 function dpCard(p, matched){
-  const tl = TYPE_LABEL[p.type] || [esc(p.type), esc(p.type)];
+  const tl = p.type ? (TYPE_LABEL[p.type] || [esc(p.type), esc(p.type)]) : null;
+  const typeChip = tl ? `<span class="chip type">${T(tl[0], tl[1])}</span>` : '';
   const svcs = (p.services || []).map(s => {
     const l = SVC_LABEL[s]; return l ? `<span class="chip svc">${T(l[0], l[1])}</span>` : '';
   }).join('');
-  const soon = p.demo ? `<span class="chip soon">${T('เร็ว ๆ นี้','Coming soon')}</span>` : '';
+  const demo = p.demo ? `<span class="chip soon">${T('ตัวอย่าง','Sample')}</span>` : '';
   const map = (p.lat != null && p.lng != null)
     ? `<a class="maplink" target="_blank" rel="noopener" href="https://maps.google.com/?q=${encodeURIComponent(p.lat + ',' + p.lng)}">
          <svg viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
          ${T('เปิดแผนที่','Open map')}</a>`
     : '';
+  const loc = [
+    p.district ? esc(p.district) : '',
+    (p.province && p.province !== p.district) ? esc(shortProv(p.province)) : '',
+  ].filter(Boolean).join(' · ');
   return `<div class="dp${matched ? ' match' : ''}">
-    <div class="row1"><div class="nm">${esc(p.name)}</div><span class="chip type">${T(tl[0], tl[1])}</span></div>
-    <div class="adr">${esc(p.address || '')}${p.district ? ' · ' + esc(p.district) : ''}</div>
+    <div class="row1"><div class="nm">${esc(p.name)}</div>${typeChip}</div>
+    <div class="adr">${esc(p.address || '')}${loc ? (p.address ? ' · ' : '') + loc : ''}</div>
     ${p.hours ? `<div class="hrs">${T('เวลาเปิด','Hours')} ${esc(p.hours)}</div>` : ''}
-    <div class="chips">${svcs}${soon}</div>
+    <div class="chips">${svcs}${demo}</div>
     ${map}
   </div>`;
 }
 
 function inZone(p){
   if(!ZONE) return false;
-  if(p.postal && String(p.postal) === ZONE.postal) return true;
+  const pc = p.postcode || p.postal;                       // RPC ยังไม่ส่ง postcode → มักกรองด้วย district
+  if(pc && String(pc) === ZONE.postal) return true;
   if(p.district && ZONE.districts.has(String(p.district).trim())) return true;
   return false;
 }
@@ -387,34 +412,54 @@ function interestOkText(count){
 
 async function sendInterest(){
   if(!ZONE) return;
+  // ต้องล็อกอินก่อน — pickup_interest_add ผูกกับ customer_id ที่ gateway เติมจาก idToken
+  if(!UID){
+    toast(T('ขอเข้าสู่ระบบด้วย LINE ก่อนนะคะ เราจะได้แจ้งเมื่อเปิดโซนนี้ 💚',
+            'Please sign in with LINE so we can tell you when this zone opens 💚'));
+    LiffAuth.signIn();
+    return;
+  }
   const btn = $('interestBtn');
   btn.disabled = true;
+  const ok = $('interestOk');
+  const failMsg = () => {
+    btn.disabled = false;
+    ok.style.display = 'block';
+    ok.textContent = T('ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Request failed — please try again');
+  };
+  const area = [ZONE.district, ZONE.postal].filter(Boolean).join(' ') || ZONE.postal;
   let count = null;
-  try{
-    const { data, error } = await gwRpc('drop_point_interest', { p_uid: UID, p_postal: ZONE.postal });
-    if(error) throw error;                       // transport/RPC ยังไม่ deploy → คิวใน catch
-    if(data && data.error){
-      // ถึง server แล้วแต่ถูกปฏิเสธ — บอกตรง ๆ ไม่โชว์ success ปลอม ไม่เก็บ localStorage
-      btn.disabled = false;
-      const ok = $('interestOk');
-      ok.style.display = 'block';
-      ok.textContent = T('ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Request failed — please try again');
+  // customer write → ผ่าน gateway เท่านั้น (เติม p_customer เอง) — ไม่ fallback ยิงตรง
+  const r = window.meRpc
+    ? await window.meRpc('pickup_interest_add', { p_area: area, p_lat: null, p_lng: null })
+    : { data: null, error: { message: 'me-rpc failed' } };
+  if(r.error){
+    const m = r.error.message || '';
+    if(m === 'redirecting_to_login'){ btn.disabled = false; return; }   // กำลังเด้งเข้า LINE
+    if(isTransportFail(m)){
+      // เน็ต/เกตเวย์ 5xx → ไม่รู้ว่ารันหรือยัง แต่ไม่ทิ้งความสนใจ → คิวในเครื่อง
+      console.warn('pickup_interest_add transport fail — saving locally:', m);
+      try{
+        const k = 'lloop_dp_interest';
+        const arr = JSON.parse(localStorage.getItem(k) || '[]');
+        arr.push({ area, postal: ZONE.postal, at: new Date().toISOString() });
+        localStorage.setItem(k, JSON.stringify(arr));
+      }catch(_e){}
+    }else{
+      // server ปฏิเสธชัดเจน (เช่น RPC ยังไม่เปิดใช้) — บอกตรง ๆ ไม่ success ปลอม ไม่เก็บ local
+      failMsg();
       return;
     }
-    if(data && data.count != null) count = data.count;
-  }catch(e){
-    console.warn('drop_point_interest not ready — saving locally:', e && e.message ? e.message : e);
-    try{
-      const k = 'lloop_dp_interest';
-      const arr = JSON.parse(localStorage.getItem(k) || '[]');
-      arr.push({ postal: ZONE.postal, at: new Date().toISOString() });
-      localStorage.setItem(k, JSON.stringify(arr));
-    }catch(_e){}
+  }else if(r.data && r.data.error){
+    // ถึง server แล้วแต่ RPC คืน {error} — ไม่โชว์ success ปลอม
+    failMsg();
+    return;
+  }else if(r.data && r.data.count != null){
+    count = r.data.count;
   }
   INTEREST_SENT.set(ZONE.postal, count);         // กันส่งซ้ำเมื่อ onPostalInput รันใหม่
   btn.disabled = false;
   btn.style.display = 'none';
-  const ok = $('interestOk');
   ok.style.display = 'block';
   ok.textContent = interestOkText(count);
 }
@@ -482,15 +527,40 @@ function applyExpressOkCopy(){
                     "Got it 💚 Add LLOOP on LINE and message 'express' to confirm right away");
 }
 
+// ===== รอบตัด/รอบส่งชุดฉุกเฉินจริง (public) — แทนคอปี "15:00 / 3 ชม." ที่ฮาร์ดโค้ด =====
+let CUTOFF = null;   // { cutoff, dispatch_date, past_cutoff } จาก express_cutoff_status()
+
+async function loadCutoff(){
+  try{
+    const { data, error } = await client().rpc('express_cutoff_status');   // public
+    if(error) throw error;
+    if(data && data.cutoff){ CUTOFF = data; renderExpressLead(); }
+  }catch(e){
+    console.warn('express_cutoff_status not ready — keeping default copy:', e && e.message ? e.message : e);
+  }
+}
+
+function renderExpressLead(){
+  if(!CUTOFF) return;                            // ยังไม่โหลด → คงคอปีตั้งต้น (data-i18n)
+  const el = $('exLead');
+  if(!el) return;
+  el.removeAttribute('data-i18n');               // จากนี้สลับภาษาผ่าน renderExpressLead เอง
+  const c = CUTOFF.cutoff, d = CUTOFF.dispatch_date || '';
+  el.textContent = CUTOFF.past_cutoff
+    ? T(`วันนี้เลยรอบ ${c} น. แล้วค่ะ — สั่งตอนนี้ สไตลิสต์จะจัดชุดให้รอบส่ง ${d} นะคะ`,
+        `Past today's ${c} cutoff — order now and your stylist will have it ready for ${d}`)
+    : T(`มีงานแต่ยังไม่มีชุด? สั่งก่อน ${c} น. วันนี้ สไตลิสต์จัดชุดให้ทันรอบส่ง ${d} ค่ะ`,
+        `Event coming but no dress yet? Order before ${c} today and your stylist has it ready for ${d}`);
+}
+
 $('expressForm').addEventListener('submit', async e => {
   e.preventDefault();
   showExMsg('');
   const date = $('exDate').value;
   if(!date){ showExMsg(T('เลือกวันที่ต้องใส่ก่อนนะคะ','Please pick the date you need it')); return; }
   if(date < todayStr()){ showExMsg(T('เลือกวันตั้งแต่วันนี้เป็นต้นไปนะคะ','Please pick today or a later date')); return; }
-  if(!$('exPoint').value){ showExMsg(T('เลือกจุดรับที่สะดวกก่อนนะคะ','Please pick a pickup point')); return; }
 
-  // ต้องล็อกอิน LINE ก่อนส่ง — จะได้ทักกลับไปยืนยันได้
+  // ต้องล็อกอิน LINE ก่อนส่ง — สไตลิสต์จะได้ทัก LINE ไปยืนยันชุด
   if(!UID){
     const p = await LiffAuth.login();
     if(p && p.userId){ UID = p.userId; }
@@ -506,41 +576,47 @@ $('expressForm').addEventListener('submit', async e => {
   btn.disabled = true;
   btn.textContent = T('กำลังส่ง…','Sending…');
   const resetBtn = () => { btn.disabled = false; btn.textContent = T('สั่งชุดฉุกเฉินเลยค่ะ','Order an emergency dress'); };
-  const payload = {
-    p_uid: UID,
-    p_date: date,
-    p_occasion: $('exOccasion').value,
-    p_point: $('exPoint').value,
-    p_size: $('exSize').value,
-  };
-  try{
-    const { data, error } = await gwRpc('express_request', payload);
-    if(error) throw error;                       // transport/RPC ยังไม่ deploy → คิวไว้ใน catch
-    if(data && data.error){
-      // ถึง server แล้วแต่ถูกปฏิเสธ — บอกผู้ใช้ตรง ๆ ไม่เก็บคิว ไม่โชว์ success
+
+  // suggest_express: gateway เติม p_customer จาก idToken → คิวชุดฉุกเฉินให้สไตลิสต์ + ทัก LINE
+  // (คืน text: 'queued' = สำเร็จ, 'no_garments' = ไม่มีชุดว่างวันนั้น)
+  const r = window.meRpc
+    ? await window.meRpc('suggest_express', { p_use_date: date, p_limit: 3 })
+    : { data: null, error: { message: 'me-rpc failed' } };
+
+  if(r.error){
+    const m = r.error.message || '';
+    if(m === 'redirecting_to_login'){ stashExpress(date); return; }   // กำลังเด้งเข้า LINE
+    if(isTransportFail(m)){
+      // เน็ต/เกตเวย์ล่ม → คิวในเครื่อง (ทีมงานตามเก็บ) — คอปีต้องไม่สัญญา 30 นาที
+      console.warn('suggest_express transport fail — queueing locally:', m);
+      try{
+        const k = 'lloop_express_queue';
+        const q = JSON.parse(localStorage.getItem(k) || '[]');
+        q.push({ p_use_date: date, occasion: $('exOccasion').value, point: $('exPoint').value, size: $('exSize').value, at: new Date().toISOString() });
+        localStorage.setItem(k, JSON.stringify(q));
+      }catch(_e){}
+      EX_QUEUED = true;                          // คิวในเครื่อง → copy ต้องไม่สัญญาว่าจะทักกลับ
+    }else{
+      // server ปฏิเสธชัดเจน — บอกตรง ๆ ไม่โชว์ success ปลอม
       resetBtn();
-      if(data.error === 'point_not_found'){
-        showExMsg(T('จุดรับนี้เพิ่งปิดไปค่ะ เลือกจุดอื่นนะคะ','This pickup point just closed — please pick another one'));
-      }else if(data.error === 'login_required'){
-        showExMsg(T('ขอล็อกอิน LINE ก่อนนะคะ จะได้ทักไปยืนยันชุดได้ 💚','Please sign in with LINE first so we can confirm your dress 💚'));
-        stashExpress(date);
-        LiffAuth.signIn();
-      }else{
-        showExMsg(T('ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Request failed — please try again'));
-      }
+      showExMsg(T('ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Request failed — please try again'));
       return;
     }
-    EX_QUEUED = false;                           // สำเร็จจริงจาก server → สัญญา 30 นาทีได้
-  }catch(err){
-    // backend ยังไม่พร้อม/เน็ตหลุด → เก็บคิวไว้ในเครื่องก่อน (ทีมงานตามเก็บทีหลัง)
-    console.warn('express_request not ready — queueing locally:', err && err.message ? err.message : err);
-    try{
-      const k = 'lloop_express_queue';
-      const q = JSON.parse(localStorage.getItem(k) || '[]');
-      q.push({ ...payload, at: new Date().toISOString() });
-      localStorage.setItem(k, JSON.stringify(q));
-    }catch(_e){}
-    EX_QUEUED = true;                            // คิวในเครื่อง → copy ต้องไม่สัญญาว่าจะทักกลับ
+  }else{
+    const d = r.data;
+    if(d === 'no_garments'){
+      // ถึง server แล้ว แต่ไม่มีชุดฉุกเฉินว่างในวันนั้น — บอกตรง ๆ ไม่โชว์ success
+      resetBtn();
+      showExMsg(T('ช่วงวันที่เลือกยังไม่มีชุดฉุกเฉินว่างค่ะ ลองเปลี่ยนวัน หรือทัก LINE ให้ทีมช่วยหาให้นะคะ',
+                  'No express pieces open for that date — try another day or message us on LINE'));
+      return;
+    }
+    if(d === 'no_uid' || (d && d.error)){
+      resetBtn();
+      showExMsg(T('ส่งคำขอไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Request failed — please try again'));
+      return;
+    }
+    EX_QUEUED = false;                           // 'queued' — สไตลิสต์คิวชุดไปทาง LINE แล้ว
   }
   resetBtn();
   applyExpressOkCopy();
@@ -559,6 +635,7 @@ async function boot(){
   $('exDate').min = todayStr();
   $('postal').addEventListener('input', onPostalInput);
   loadPoints();                                  // จุดรับ-ส่งเป็นข้อมูลสาธารณะ — ไม่ต้องรอล็อกอิน
+  loadCutoff();                                  // รอบตัด/รอบส่งชุดฉุกเฉิน (public) — แทนคอปี 15:00/3 ชม.
   try{
     const p = await LiffAuth.login();            // เงียบ ๆ — ไม่ล็อกอินหน้าก็ยังใช้ได้ครบ
     if(p && p.userId){ UID = p.userId; restoreExpressStash(); }
@@ -570,6 +647,7 @@ boot();
 window.addEventListener('lloop:lang', function(){
   renderPoints();
   fillPointSelect();
+  renderExpressLead();
   applyExpressOkCopy();
   if(ZONE) onPostalInput();
 });
