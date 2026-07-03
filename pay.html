@@ -207,7 +207,7 @@ async function boot(){
           NAV.t('บิลอาจหมดเวลาหรือถูกยกเลิกแล้ว — ลองจองใหม่นะคะ','The bill may have expired or been cancelled — try booking again.'));
       } else {
         edgeState(NAV.t('เปิดบิลไม่สำเร็จ','Couldn’t open the bill'),
-          NAV.t('เกิดข้อผิดพลาด','Something went wrong') + (code?(' ('+code+')'):'') + NAV.t(' — ลองเปิดลิงก์ใหม่อีกครั้งนะคะ',' — please open the link again.'));
+          NAV.t('ลองเปิดลิงก์ใหม่อีกครั้งนะคะ','Please open the link again.') + (code?(' ('+code+')'):''));
       }
       return;
     }
@@ -264,8 +264,7 @@ function billHtml(s){
       ${NAV.t('เรากันชุดให้ 30 นาที — โอนก่อนหมดเวลานะคะ','We’re holding your pieces for 30 minutes — please transfer before time runs out.')}</div>` : '';
 
   return `<div class="sec">
-    <div class="sechead"><div><div class="sectitle">${NAV.t('บิลของคุณ · จองตีมกับเพื่อน','Your bill · group theme booking')}</div>
-      <div class="seccap">${NAV.t('ชุดที่คุณรับผิดชอบในออเดอร์กลุ่มนี้','The pieces you’re covering in this group order')}</div></div></div>
+    <div class="sechead"><div><div class="seccap">${NAV.t('ชุดที่คุณรับผิดชอบ','Your pieces')}</div></div></div>
     <div style="margin-top:10px">${itemHtml}</div>
     <div class="totbox">
       <div class="trow"><span class="muted">${NAV.t('ค่าเช่ารวม','Rental total')}</span><span>${baht(s.rate_sum)}</span></div>

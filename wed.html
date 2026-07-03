@@ -84,7 +84,7 @@ function renderCreate(){
   $app.innerHTML = `
     <div class="hero"><div class="eyebrow">The Loop · งานแต่ง</div>
       <h1>ชวนเพื่อนเช่าชุดเข้างานเดียวกัน</h1>
-      <div class="sub">สร้างลิงก์งาน แชร์ให้เพื่อนแขก — ทุกคนเห็นชุดที่ว่างวันงาน และไม่ใส่ชนกัน</div></div>
+      <div class="sub">แชร์ให้เพื่อนแขก เห็นชุดว่างวันงาน ไม่ใส่ชนกัน</div></div>
     <div class="form">
       <label>ชื่องาน</label>
       <input id="wt" placeholder="เช่น งานแต่งมิ้น & โต้ง">
@@ -93,7 +93,7 @@ function renderCreate(){
       <button class="share" id="mk" style="margin-top:16px">สร้างลิงก์งาน</button>
       <div id="mkOut"></div>
     </div>
-    <div class="note">ชวนเพื่อนใหม่มาเช่า ได้เครดิต <b>฿50</b> ทั้งคู่เมื่อเพื่อนเช่าครั้งแรก · เพื่อนเห็นว่าใครเลือกชุดไหนแล้ว จะได้ไม่ซ้ำกันในงาน</div>`;
+    <div class="note">ชวนเพื่อนเช่าครั้งแรก รับเครดิต <b>฿50</b> ทั้งคู่</div>`;
   document.getElementById('mk').addEventListener('click', async () => {
     const title = document.getElementById('wt').value.trim();
     const date = document.getElementById('wd').value;
@@ -111,7 +111,7 @@ function renderCreate(){
 function doShare(link, title){
   const text = (title ? title + ' — ' : '') + 'มาเช่าชุดเข้างานด้วยกัน เลือกชุดที่นี่: ' + link;
   if (navigator.share) { navigator.share({ title: title || 'งานแต่ง', text, url: link }).catch(() => {}); }
-  else { navigator.clipboard && navigator.clipboard.writeText(link); alert('คัดลอกลิงก์แล้ว — เอาไปแชร์ในกลุ่มได้เลย'); }
+  else { navigator.clipboard && navigator.clipboard.writeText(link); alert('คัดลอกลิงก์แล้ว'); }
 }
 
 function renderEvent(){
@@ -150,9 +150,9 @@ function renderEvent(){
       </div>
     </div>
     <button class="share" id="sh">ชวนเพื่อนคนอื่นในงาน</button>
-    <div class="note">เลือกชุดที่ <b>ว่างวันงาน</b> ด้านล่าง — ตัวที่เพื่อนจองแล้วจะขึ้นป้าย เพื่อไม่ให้ใส่ซ้ำกัน · ชวนเพื่อนใหม่รับเครดิต <b>฿50</b> ทั้งคู่</div>
+    <div class="note">ชุดที่เพื่อนจองแล้วจะขึ้นป้าย · ชวนเพื่อนใหม่รับ <b>฿50</b> ทั้งคู่</div>
     <div class="seclabel">ชุดที่ว่างวันงาน</div>
-    <div class="grid">${cards || '<div class="center">ยังไม่มีชุดว่างในวันนี้ — ทีมจะช่วยจัดหาเพิ่ม</div>'}</div>`;
+    <div class="grid">${cards || '<div class="center">ยังไม่มีชุดว่างวันนี้ — เดี๋ยวทีมช่วยหาให้ค่ะ</div>'}</div>`;
 
   document.getElementById('sh').addEventListener('click', () => doShare(link, SUMMARY.title));
   $app.querySelectorAll('a.pick[data-code]').forEach(a => {

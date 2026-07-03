@@ -157,7 +157,7 @@
   <div class="hero">
     <div class="eyebrow">together</div>
     <h1 class="htitle" data-i18n="Family &amp; groups">ครอบครัว &amp; กลุ่ม</h1>
-    <p class="hsub" data-i18n="Keep family or friends in one circle — our stylist dresses the whole group in one theme.">รวมครอบครัวหรือแก๊งเพื่อนไว้กลุ่มเดียว — สไตลิสต์จัดชุดเข้าตีมให้ทั้งกลุ่ม</p>
+    <p class="hsub" data-i18n="Our stylist dresses the whole group in one theme.">สไตลิสต์จัดชุดเข้าตีมให้ทั้งกลุ่ม</p>
   </div>
 
   <!-- คำเชิญรอตอบรับ -->
@@ -183,7 +183,7 @@
     <!-- แพ็กเพื่อนเจ้าสาว -->
     <div class="form show" id="bridesmaidCard" style="display:none;margin-top:14px">
       <div style="font-weight:600;margin-bottom:4px" data-i18n="Bridesmaid package">แพ็กเพื่อนเจ้าสาว</div>
-      <div class="seccap" style="margin-bottom:10px" data-i18n="Rent in one theme together — the more of you, the more you save. One order, billed to one payer.">เช่าเข้าตีมพร้อมกัน ยิ่งหลายคนยิ่งลด · ส่งรวมออเดอร์เดียว บิลที่ผู้จ่ายคนเดียว</div>
+      <div class="seccap" style="margin-bottom:10px" data-i18n="The more of you, the more you save · one order, one bill.">ยิ่งหลายคนยิ่งลด · ส่งรวมบิลเดียว</div>
       <div id="bmLadder" style="font-size:13px;line-height:1.9"></div>
       <div id="bmPerk" class="seccap" style="margin-top:8px"></div>
       <button class="btn sage" id="bmCta" style="margin-top:10px;font-size:13px;padding:9px 16px" data-i18n="Style the whole group in theme">จัดชุดเข้าตีมให้ทั้งกลุ่ม</button>
@@ -192,7 +192,6 @@
     <!-- ชวนเพื่อน -->
     <div class="form" id="invForm">
       <div style="font-weight:600;margin-bottom:4px" data-i18n="Invite a friend to the group">ชวนเพื่อนเข้ากลุ่ม</div>
-      <div class="seccap" style="margin-bottom:12px" data-i18n="The easy way: share a link on LINE and your friend can tap to join.">วิธีง่ายสุด: แชร์ลิงก์ทาง LINE ให้เพื่อนแตะเข้าร่วมได้เลย</div>
       <div class="invlink" id="invLink">
         <span class="lk" id="invLinkUrl">lloop.app/join/…</span>
         <button class="btn sage" id="copyLink" data-i18n="Share on LINE" style="padding:8px 14px;font-size:12px">แชร์ทาง LINE</button>
@@ -238,7 +237,7 @@
   <div class="sec" id="themeSec">
     <div class="sechead">
       <div><div class="sectitle" data-i18n="Dress the whole group in one theme">จัดชุดเข้าตีมทั้งกลุ่ม</div>
-      <div class="seccap" data-i18n="Our stylist picks the on-theme, best-fitting piece that's actually free on the day — for everyone.">สไตลิสต์เลือก “ตัวที่เข้าตีม + พอดีตัวที่สุด ที่ว่างจริงในวันนั้น” ให้ทุกคน</div></div>
+      <div class="seccap" data-i18n="On-theme, well-fitting, and actually free on the day.">เลือกตัวที่เข้าตีม พอดีตัว และว่างจริงในวันนั้น</div></div>
     </div>
     <div class="toolbar">
       <div class="fld" style="max-width:200px"><label data-i18n="Occasion">งาน / โอกาส</label>
@@ -492,7 +491,7 @@ function renderMembers(){
     $('#memberBody').innerHTML=`<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
       <h4>${NAV.t('ยังไม่มีกลุ่มของคุณ','You don\'t have a group yet')}</h4>
-      <p>${NAV.t('เริ่มจากสร้างกลุ่มครอบครัวหรือแก๊งเพื่อน แล้วเพิ่มสมาชิก — เราจะช่วยจัดชุดเข้าตีมให้','Start by creating a family or friends group and adding members — we\'ll style everyone in one theme.')}</p>
+      <p>${NAV.t('สร้างกลุ่มแล้วจัดชุดเข้าตีมได้เลย','Create a group and style everyone in one theme.')}</p>
       <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
         <button class="btn sage" onclick="createGroupFlow()">${NAV.t('+ สร้างกลุ่มใหม่','+ New group')}</button>
       </div></div>`;
@@ -509,8 +508,7 @@ function renderMembers(){
     body.innerHTML=`<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
       <h4>${NAV.t('ยังไม่มีสมาชิกในกลุ่มนี้','No members in this group yet')}</h4>
-      <p>${NAV.t('เพิ่มสมาชิกคนแรกได้เลยค่ะ','Add your first member below.')}</p>
-      <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
+      <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:12px">
         <button class="btn sage" onclick="openForm()">${NAV.t('+ เพิ่มสมาชิก (เด็ก/ผู้สูงวัย)','+ Add member (child/senior)')}</button>
         <button class="btn ghost" onclick="openInvite()">${NAV.t('ชวนเพื่อนด้วยลิงก์/รหัส','Invite a friend by link or code')}</button>
       </div></div>`;
@@ -532,11 +530,10 @@ function fillBridesmaid(count){
   const card=$('#bridesmaidCard'); if(!card) return;
   card.style.display='';
   const active=bmDiscPct(count);
-  $('#bmLadder').innerHTML = `<div style="font-weight:700;color:#2f6f4f">${NAV.t('เช่าเป็นกลุ่มลดทุกชุด — 2 คนลด 5% · 3 คนลด 10% · 4 คนขึ้นไปลด 15%','Group discount on every dress — 2 people 5% · 3 people 10% · 4+ people 15%')}</div>`
-    + (active>0
-        ? `<div style="margin-top:4px" class="seccap">${NAV.t(`กลุ่มคุณ ${count} คน ได้ส่วนลด ${active}% แล้ว`,`Your group of ${count} gets ${active}% off`)}</div>`
-        : `<div style="margin-top:4px" class="seccap">${NAV.t('เพิ่มอีกอย่างน้อย 2 คน เริ่มได้ส่วนลด','Add at least 2 people to start the discount')}</div>`);
-  $('#bmPerk').innerHTML = NAV.t('ครบ 4 คน เจ้าสาวได้ผ้าคลุม/แอคเซสซอรีฟรี 1 ชิ้น · ชวนเพื่อนใหม่รับเครดิต ฿50','At 4 people the bride gets a free accessory · invite a new friend for ฿50 credit');
+  const chip=(label,pct)=>`<span style="display:inline-block;border-radius:20px;padding:3px 12px;font-size:12.5px;font-weight:700;${active===pct?'background:#2f6f4f;color:#fff':'background:#E4F0EC;color:#2f6f4f'}">${label}</span>`;
+  $('#bmLadder').innerHTML = `<div style="display:flex;gap:7px;flex-wrap:wrap">${chip(NAV.t('2 คน −5%','2 people −5%'),5)}${chip(NAV.t('3 คน −10%','3 people −10%'),10)}${chip(NAV.t('4+ คน −15%','4+ people −15%'),15)}</div>`
+    + (active>0 ? `<div style="margin-top:6px" class="seccap">${NAV.t(`ได้ส่วนลด ${active}% แล้ว`,`You get ${active}% off`)}</div>` : '');
+  $('#bmPerk').innerHTML = NAV.t('ครบ 4 คน เจ้าสาวรับแอคเซสซอรีฟรี 1 ชิ้น','At 4 people the bride gets a free accessory');
 }
 document.getElementById('bmCta')?.addEventListener('click', ()=>{ document.getElementById('themeSec')?.scrollIntoView({behavior:'smooth',block:'start'}); });
 
@@ -689,7 +686,7 @@ async function renderTheme(show){
   const box=$('#themeResult'); if(!show){box.innerHTML='';return;}
   const g=curGroup(), occ=$('#t_occ').value;
   if(!g || others(g).length===0){
-    box.innerHTML=`<div class="empty" style="padding:24px"><h4>${NAV.t('ยังจัดตีมไม่ได้','Can\'t set a theme yet')}</h4><p>${NAV.t('ต้องมีสมาชิกอย่างน้อย 1 คนก่อน ถึงจะให้สไตลิสต์จัดชุดเข้าตีมให้ทั้งกลุ่มได้','You need at least one member before our stylist can dress the whole group in one theme.')}</p></div>`;
+    box.innerHTML=`<div class="empty" style="padding:24px"><h4>${NAV.t('ยังจัดตีมไม่ได้','Can\'t set a theme yet')}</h4><p>${NAV.t('เพิ่มสมาชิกอย่างน้อย 1 คนก่อนนะคะ','Add at least one member first.')}</p></div>`;
     return;
   }
   const modeInfo=resolveThemeMode();
