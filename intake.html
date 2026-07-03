@@ -59,6 +59,14 @@
   <div class="card">
     <h2>ข้อมูลชุด</h2>
     <button class="aibtn" onclick="aiFill()"> AI ช่วยกรอกจากรูป</button>
+    <div class="field" style="margin-top:4px">
+      <label>ลิงก์ร้านค้า (Lazada / Shopee) — ดูดข้อมูลอัตโนมัติ</label>
+      <div style="display:flex;gap:8px">
+        <input id="f_ref" placeholder="วางลิงก์ Lazada / Shopee (ผู้ขายแนบมา)" style="flex:1">
+        <button class="aibtn" style="margin:0;white-space:nowrap" onclick="importFromLink()">ดูดข้อมูล</button>
+      </div>
+      <div class="note" id="refNote" style="display:none"></div>
+    </div>
     <div class="field"><label>ลิงก์รูป (วาง URL รูปชุด)</label><input id="f_photo" oninput="syncPreview()" placeholder="https://..."></div>
     <div class="row2">
       <div class="field"><label>โค้ด (เว้นว่าง = สร้างอัตโนมัติ)</label><input id="f_code" oninput="syncPreview()" placeholder="เช่น g7"></div>
@@ -182,6 +190,31 @@
     }catch(e){ alert('AI ช่วยกรอกยังไม่พร้อม — ต้องตั้ง Anthropic key + deploy ฟังก์ชัน intake-tagger ก่อน (พรุ่งนี้) ค่ะ\nตอนนี้กรอกมือไปก่อนได้เลย'); }
   }
 
+  // ดูดข้อมูลชุดจากลิงก์ร้านค้า (Lazada/Shopee) → เติมฟอร์มให้ ทีมแค่ตรวจ/แก้ (ลดงานคีย์มือ)
+  async function importFromLink(){
+    const url=($('f_ref').value||'').trim();
+    const note=$('refNote'); note.style.display='block';
+    if(!url){ note.textContent='วางลิงก์ Lazada/Shopee ก่อนค่ะ'; return; }
+    note.textContent='กำลังดูดข้อมูลจากลิงก์…';
+    try{
+      const r=await fetch(FUNCTIONS+'/market-import',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+SUPABASE_KEY},body:JSON.stringify({url,id_token:(window.opsIdToken?window.opsIdToken():'')})});
+      const t=await r.json();
+      if(!t.ok){ note.textContent=t.note||'ดูดข้อมูลไม่สำเร็จ — กรอกมือได้เลยค่ะ'; return; }
+      if(t.name&&!$('f_name').value) $('f_name').value=t.name;
+      if(t.brand&&!$('f_brand').value) $('f_brand').value=t.brand;
+      if(t.category) $('f_category').value=t.category;
+      if(t.color_name&&!$('f_colorname').value) $('f_colorname').value=t.color_name;
+      if(t.color_hex&&/^#?[0-9a-fA-F]{6}$/.test(t.color_hex)) $('f_colorhex').value=t.color_hex.startsWith('#')?t.color_hex:('#'+t.color_hex);
+      if(t.fabric_guess&&!$('f_fabric').value) $('f_fabric').value=t.fabric_guess;
+      if((t.image_urls||[]).length && !$('f_photo').value) $('f_photo').value=t.image_urls[0];
+      (t.occasion_tags||[]).forEach(k=>{const el=document.querySelector(`.chip[data-k="${k}"]`); if(el&&!sel.has(k)){sel.add(k);el.classList.add('on')}});
+      syncPreview();
+      const parts=[]; if(t.retail_price) parts.push('ราคาขายปลีกอ้างอิง ~'+Number(t.retail_price).toLocaleString()+' บาท (ใช้ตั้งเรทเช่า/ทุน)');
+      parts.push('ตรวจ/แก้ได้เลยค่ะ'+(t.confidence!=null?(' · ความมั่นใจ '+Math.round(t.confidence*100)+'%'):''));
+      note.textContent='✓ ดูดจาก '+(t.source||'ลิงก์')+' แล้ว — '+parts.join(' · ');
+    }catch(e){ note.textContent='market-import ยังไม่ deploy — กรอกมือไปก่อนได้ค่ะ'; }
+  }
+
   // ถ่ายรูปตำหนิจากกล้อง → อัปโหลดผ่าน qc_photo_upload (phase 'defect') → เก็บ URL ไว้ส่งกับ intake
   let defectShots=[];
   async function defectShot(){
@@ -242,6 +275,7 @@
   // เปิดจากหน้าจัดการรับซื้อ (acquisitions.html?...) → เติมข้อมูลจาก offer ให้เลย ไม่ต้องคีย์ใหม่
   (function(){
     const Q=new URLSearchParams(location.search);
+    const refEl=$('f_ref'), refv=Q.get('ref'); if(refEl&&refv) refEl.value=refv;   // ลิงก์ร้านค้าจากดีลรับซื้อ — พร้อมกด "ดูดข้อมูล"
     if(!Q.get('name')&&!Q.get('acq')) return;
     window._acqId=Q.get('acq')||null;   // เก็บไว้ส่งกับ intake_garment ตอนบันทึก (ปิดลูปรับซื้อ→คลัง)
     const setv=(id,v)=>{ const el=$(id); if(el&&v!=null&&v!=='') el.value=v; };
