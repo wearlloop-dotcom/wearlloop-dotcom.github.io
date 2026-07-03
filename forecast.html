@@ -75,10 +75,6 @@
     <div class="ic">LLOOP</div>
     <h2 data-i18n="Owners only">หน้านี้สำหรับเจ้าของเท่านั้น</h2>
     <p id="lockmsg">กำลังตรวจสอบสิทธิ์…</p>
-    <div id="uidbox" class="hidden">
-      <input id="uidin" placeholder="วาง LINE UID เจ้าของ (ขึ้นต้น U…)" data-i18n-ph="Paste the owner LINE UID (starts with U…)">
-      <button onclick="unlock()" data-i18n="Unlock">ปลดล็อก</button>
-    </div>
   </div>
 
   <div id="main" class="hidden">
@@ -172,7 +168,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<script src="config.js?v=38"></script>
+<script src="config.js?v=61"></script>
+<script src="ops-api.js?v=61"></script>
 <script src="analytics.js?v=38"></script>
 <script src="nav.js?v=1"></script>
 <script>
@@ -183,9 +180,8 @@ let sb = null, OWNER_UID = null, ACT = null;
 function client(){ if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
 function num(id){ return Number(document.getElementById(id).value) || 0; }
 
-// หมายเหตุ: หน้านี้ยังเรียก RPC ตรง (ตรวจสิทธิ์ด้วย p_uid ฝั่งเซิร์ฟเวอร์) — จะย้ายเข้า gateway ops-rpc ได้
-// ต่อเมื่อ backend เพิ่ม forecast_actuals / plan_economics / update_plan_price เข้า allowlist
-// และหน้าเลิกใช้ LIFF ลูกค้า (สอง LIFF init พร้อมกันบน liff object เดียวไม่ได้)
+// HI-5: ทุก RPC วิ่งผ่าน gateway ops-rpc (ops-api.js verify LINE idToken + role เจ้าของฝั่งเซิร์ฟเวอร์)
+//   — ไม่รับ/เชื่อ p_uid จาก client อีกต่อไป · ใช้ OPS_LIFF_ID ตัวเดียว (ไม่ init LIFF ลูกค้าซ้ำ)
 
 // ---------- core math ----------
 let gTargetType = 'rev';   // 'rev' = เป้ายอดขาย · 'net' = เป้ากำไรสุทธิ
@@ -294,7 +290,7 @@ function renderPlan(){
 let _planEcon = null;
 async function loadPlanMargin(){
   const el = document.getElementById('planMargin'); if(!el) return;
-  if(!_planEcon){ try { const { data } = await client().rpc('plan_economics'); _planEcon = data || []; } catch(e){ _planEcon = []; } }
+  if(!_planEcon){ try { const { data } = await window.opsRpc('plan_economics', {}); _planEcon = data || []; } catch(e){ _planEcon = []; } }
   const plans = _planEcon;
   if(!plans.length){ el.textContent = NAV.t('ยังไม่มีแพ็กเกจ','No packs yet'); return; }
   const ship = num('i_ship');
@@ -341,7 +337,7 @@ async function savePlanPrice(){
   const rentals = Number(document.getElementById('ppRentals').value) || null;
   if(!code || price <= 0){ msg.style.color='#B4543A'; msg.textContent=NAV.t('ใส่ราคาให้ถูกต้องก่อนนะคะ','Please enter a valid price first'); return; }
   msg.style.color='var(--color-text-secondary)'; msg.style.color='#7C8694'; msg.textContent=NAV.t('กำลังบันทึก…','Saving…');
-  const { data, error } = await client().rpc('update_plan_price', { p_uid: OWNER_UID, p_code: code, p_price: price, p_rentals: rentals });
+  const { data, error } = await window.opsRpc('update_plan_price', { p_code: code, p_price: price, p_rentals: rentals });
   if(error || !data || data.error){ msg.style.color='#B4543A'; msg.textContent=NAV.t('บันทึกไม่สำเร็จ','Save failed') + (data&&data.error?(' ('+data.error+')'):''); return; }
   _planEcon = null;                                  // refetch ราคาใหม่
   await loadPlanMargin();
@@ -408,8 +404,8 @@ function bindInputs(){
   document.querySelectorAll('#planMode input').forEach(el=> el.addEventListener('input', ()=>{ renderPlan(); if(ACT) renderGap(); }));
   document.getElementById('r_target').addEventListener('input', renderGap);
 }
-async function loadActuals(uid){
-  const { data, error } = await client().rpc('forecast_actuals', { p_uid: uid });
+async function loadActuals(){
+  const { data, error } = await window.opsRpc('forecast_actuals', {});
   if(error || !data) return null;
   return data;
 }
@@ -419,32 +415,16 @@ function showMain(){
   renderPlan(); bindInputs(); refreshRealChips(); loadPlanMargin();
   if(ACT) renderReal();
 }
-function showLock(msg, askUid){
+function showLock(msg){
   document.getElementById('lockmsg').textContent = msg;
-  document.getElementById('uidbox').classList.toggle('hidden', !askUid);
-}
-async function tryUid(uid){
-  if(!uid) return false;
-  const data = await loadActuals(uid);
-  if(data && data.owner){ OWNER_UID = uid; ACT = data; localStorage.setItem('lloop_owner_uid', uid); return true; }
-  return false;
-}
-async function unlock(){
-  const uid = (document.getElementById('uidin').value||'').trim();
-  showLock(NAV.t('กำลังตรวจสอบ…','Checking…'), false);
-  if(await tryUid(uid)) showMain();
-  else showLock(NAV.t('UID นี้ไม่ใช่เจ้าของ ลองใหม่อีกครั้ง','That UID isn’t an owner — try again'), true);
 }
 async function boot(){
-  let uid = null;
-  try{
-    await liff.init({ liffId: CONFIG.LIFF_ID });
-    if(liff.isLoggedIn()){ const p = await liff.getProfile(); uid = p.userId; }
-    else if(liff.isInClient()){ liff.login(); return; }
-  }catch(e){ /* นอก LINE */ }
-  if(!uid) uid = localStorage.getItem('lloop_owner_uid');
-  if(uid && await tryUid(uid)){ showMain(); return; }
-  showLock(NAV.t('เปิดผ่าน LINE ด้วยบัญชีเจ้าของ หรือใส่ UID เจ้าของด้านล่าง','Open via LINE with an owner account, or paste the owner UID below'), true);
+  // gate ผ่าน gateway ops-rpc — ops-api.js จัดการ LINE login (OPS_LIFF_ID) + verify owner ฝั่งเซิร์ฟเวอร์
+  //   owner → forecast_actuals คืนข้อมูล · ไม่ใช่ owner → opsRpc คืน error (owner_only) = data null
+  showLock(NAV.t('กำลังตรวจสอบสิทธิ์เจ้าของ…','Verifying owner access…'));
+  const data = await loadActuals();
+  if(data){ ACT = data; showMain(); return; }
+  showLock(NAV.t('หน้านี้สำหรับเจ้าของเท่านั้น — เปิดผ่าน LINE ด้วยบัญชีเจ้าของ','Owners only — open via LINE with an owner account'));
 }
 boot();
 
@@ -456,7 +436,7 @@ window.addEventListener('lloop:lang', function(){
   } else {
     // lock screen still showing — refresh the status line
     const lm = document.getElementById('lockmsg');
-    if (lm) showLock(NAV.t('เปิดผ่าน LINE ด้วยบัญชีเจ้าของ หรือใส่ UID เจ้าของด้านล่าง','Open via LINE with an owner account, or paste the owner UID below'), !document.getElementById('uidbox').classList.contains('hidden'));
+    if (lm) showLock(NAV.t('หน้านี้สำหรับเจ้าของเท่านั้น — เปิดผ่าน LINE ด้วยบัญชีเจ้าของ','Owners only — open via LINE with an owner account'));
   }
 });
 </script>
