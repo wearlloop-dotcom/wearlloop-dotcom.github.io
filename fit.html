@@ -136,8 +136,13 @@
 <script src="me-api.js"></script>
 <script src="data.js"></script>
 <script>
-// ===== Fit DNA — ฟีดแบ็กความพอดีหลังคืนชุด → โปรไฟล์แม่นขึ้นทุกครั้ง =====
-// backend RPC ยังไม่มีจริง → ทุก rpc() ห่อ try/catch แล้ว fallback localStorage ('lloop_fit_*') + MOCK
+// ===== Fit DNA — สรุปโปรไฟล์ความพอดี + ชวนรีวิวชุดที่เพิ่งคืน (บน backend จริง) =====
+// เก็บ fit ผ่าน "รีวิว" จริง: submit_review(...) → recompute_garment_fit → garments.fit_avg/fit_n/fit_label
+//   · รายการชุดที่คืนแล้ว: my_rentals(p_customer)  (ผ่าน gateway me-rpc, inject p_customer จาก idToken)
+//   · แคตตาล็อกชุด (แบรนด์/fit_label): อ่าน anon จากตาราง garments (data ready สาธารณะ)
+// สเกล p_fit_score = จำนวนเต็ม −2..+2 (ตรงกับ review.html):  −2/−1 คับ-เล็กกว่า · 0 พอดี · +1/+2 หลวม-ใหญ่กว่า
+//   (recompute_garment_fit: avg ≤ −0.6 → 'small' · ≥ +0.6 → 'large' · อื่น ๆ → 'true')
+// ไม่มี fake success: โหมดล็อกอินจะขึ้น "ขอบคุณ" เฉพาะเมื่อ submit_review สำเร็จจริงเท่านั้น
 const $ = id => document.getElementById(id);
 const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
 function esc(s){ if(s==null) return ''; return String(s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
@@ -145,75 +150,64 @@ function esc(s){ if(s==null) return ''; return String(s).replace(/[<>&"]/g, c =>
 let sb = null;
 function client(){ if(!window.supabase) throw new Error('supabase sdk not loaded'); if(!sb) sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY); return sb; }
 
-// ---- localStorage store (fallback เมื่อ backend ยังไม่มี) ----
-const LS_FB   = 'lloop_fit_feedback';  // ฟีดแบ็กที่ผู้ใช้เคยส่ง (cache ฝั่งเครื่อง)
-const LS_DONE = 'lloop_fit_done';      // rental_id ที่ส่งแล้ว — ซ่อนการ์ด pending
+// ---- localStorage: cache รีวิวที่ "ส่งสำเร็จแล้ว" ฝั่งเครื่อง (backend ไม่มี RPC อ่านรีวิวของตัวเอง) ----
+const LS_FB   = 'lloop_fit_feedback';  // รีวิวความพอดีที่ส่งสำเร็จ (นับความแม่น + สรุปแบรนด์)
+const LS_DONE = 'lloop_fit_done';      // rental_id ที่รีวิวแล้ว — ซ่อนการ์ด pending
 function lsGet(k){ try { return JSON.parse(localStorage.getItem(k)) || []; } catch(e){ return []; } }
 function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 
-// เรียกผ่าน gateway me-rpc ก่อน (verify LINE idToken ฝั่ง server — ปลอม uid ไม่ได้)
-// gateway ยังไม่ allowlist ฟังก์ชัน → fallback ยิงตรงตาม convention เดิม (ขั้นตอนปิดถาวรดู db/README)
-async function gwRpc(name, args){
-  if (window.meRpc && UID) {
-    const r = await window.meRpc(name, args);
-    if (!r.error) return r;
-    // fallback เฉพาะเคสที่ gateway ยังไม่ได้รันแน่ ๆ — 5xx/เน็ตหลุดอาจรันไปแล้ว ห้ามยิงซ้ำ (กัน insert เบิ้ล)
-    const m = r.error.message || '';
-    const notRun = m === 'redirecting_to_login' || m === 'คำสั่งนี้ไม่อนุญาต' || m === 'ยังไม่พบบัญชีลูกค้าของคุณ' || m === 'เซสชันหมดอายุ เข้าสู่ระบบใหม่';
-    if (!notRun) return r;
-  }
-  return client().rpc(name, args);
-}
-let UID = null;          // LINE userId (null = โหมดตัวอย่าง)
-let FEEDBACK = [];       // ฟีดแบ็กสะสมทั้งหมด (จาก RPC หรือ fallback)
-let PENDING = [];        // ชุดที่เพิ่งคืน รอบอกความพอดี
-let lastAcc = null;      // ค่าความแม่นก่อนหน้า (ใช้แอนิเมตตอนส่งฟีดแบ็ก)
+let UID = null;          // LINE userId (null = โหมดตัวอย่าง) — gateway override p_uid จริงอีกชั้น
+let CUSTOMER = null;     // { id } ลูกค้าจริง (ใช้เรียก my_rentals)
+let FEEDBACK = [];       // รีวิวความพอดีที่ส่งแล้ว (แต่ละ entry มี fit_score −2..+2 + brand)
+let PENDING = [];        // ชุดที่คืนแล้ว (status='returned') รอรีวิวความพอดี
+let GMAP = {};           // garment_id → { brand, fabric, stretch, fit_label } (จาก garments / MOCK)
+let lastAcc = null;      // ค่าความแม่นก่อนหน้า (ใช้แอนิเมตตอนส่งรีวิว)
 
-const AREAS = [
-  { key:'bust',   th:'อก',      en:'Bust',   opts:[['tight','คับ','Tight'],['fit','พอดี','Fits'],['loose','หลวม','Loose']] },
-  { key:'waist',  th:'เอว',     en:'Waist',  opts:[['tight','คับ','Tight'],['fit','พอดี','Fits'],['loose','หลวม','Loose']] },
-  { key:'hip',    th:'สะโพก',   en:'Hip',    opts:[['tight','คับ','Tight'],['fit','พอดี','Fits'],['loose','หลวม','Loose']] },
-  { key:'length', th:'ความยาว', en:'Length', opts:[['short','สั้นไป','Too short'],['fit','พอดี','Just right'],['long','ยาวไป','Too long']] },
+// สเกลความพอดี −2..+2 (ตรงกับปุ่มใน review.html) → ป้ายไทย/อังกฤษสั้น ๆ
+const FIT_OPTS = [
+  { v:-2, th:'เล็กมาก', en:'Way small' },
+  { v:-1, th:'คับไป',   en:'Tight' },
+  { v: 0, th:'พอดี',    en:'True' },
+  { v: 1, th:'หลวมไป',  en:'Loose' },
+  { v: 2, th:'ใหญ่มาก', en:'Way large' },
 ];
-const AREA_TH = { bust:'อก', waist:'เอว', hip:'สะโพก', length:'ความยาว' };
-const AREA_EN = { bust:'Bust', waist:'Waist', hip:'Hip', length:'Length' };
 
 // ---- demo data (โชว์ตอนยังไม่ล็อกอิน — โปรไฟล์ดู "มีชีวิต" ทันที) ----
+function demoGarment(i){ const G = (window.MOCK && MOCK.GARMENTS) || []; return G[i] || {}; }
 function demoFeedback(){
-  const G = (window.MOCK && MOCK.GARMENTS) || [];
-  const g = i => G[i] || {};
-  return [
-    { rental_id:'demo-p1', garment_code:g(1).id, garment_name:g(1).name, brand:g(1).brand, fabric:g(1).fabric, bust:'fit', waist:'tight', hip:'fit', length:'fit', note:'', created_at:'2026-05-02' },
-    { rental_id:'demo-p2', garment_code:g(3).id, garment_name:g(3).name, brand:g(3).brand, fabric:g(3).fabric, bust:'fit', waist:'fit', hip:'fit', length:'fit', note:'', created_at:'2026-05-20' },
-    { rental_id:'demo-p3', garment_code:g(0).id, garment_name:g(0).name, brand:g(0).brand, fabric:g(0).fabric, bust:'fit', waist:'fit', hip:'fit', length:'fit', note:'', created_at:'2026-06-08' },
-    { rental_id:'demo-p4', garment_code:g(1).id, garment_name:g(1).name, brand:g(1).brand, fabric:g(1).fabric, bust:'fit', waist:'tight', hip:'fit', length:'fit', note:'เอวแน่นนิดนึงค่ะ', created_at:'2026-06-21' },
-  ];
+  const rec = (i, fit, note, date) => { const g = demoGarment(i); return {
+    rental_id:'demo-p'+i+'-'+date, garment_id:g.id, code:g.id, name:g.name,
+    brand:g.brand, fabric:g.fabric, fit_score:fit, note:note||null, created_at:date }; };
+  return [ rec(1,-1,'',
+    '2026-05-02'), rec(3,0,'','2026-05-20'), rec(0,0,'','2026-06-08'), rec(1,-1,'เอวแน่นนิดนึงค่ะ','2026-06-21') ];
 }
 function demoPending(){
   const G = (window.MOCK && MOCK.GARMENTS) || [];
   return [0,1].filter(i => G[i]).map((i,n) => ({
-    rental_id:'demo-r'+(n+1), garment_code:G[i].id, garment_name:G[i].name,
-    brand:G[i].brand, fabric:G[i].fabric, returned_at:'2026-06-28',
+    rental_id:'demo-r'+(n+1), garment_id:G[i].id, code:G[i].id, name:G[i].name,
+    brand:G[i].brand, fabric:G[i].fabric, status:'returned',
   }));
 }
+function demoGmap(){
+  const m = {}; ((window.MOCK && MOCK.GARMENTS) || []).forEach(g => {
+    m[g.id] = { brand:g.brand, fabric:g.fabric, stretch:g.stretch || 'none', fit_label:null }; });
+  return m;
+}
 
-// ---- สูตรความแม่น: เริ่ม 60% · +4 ต่อฟีดแบ็ก 1 ครั้ง · โบนัส +5 ต่อชุดที่พอดีทุกจุด · เพดาน 98% ----
-function isPerfect(f){ return f.bust==='fit' && f.waist==='fit' && f.hip==='fit' && f.length==='fit'; }
+// ---- สูตรความแม่น (คงรูปเดิม): เริ่ม 60% · +4 ต่อรีวิว 1 ครั้ง · โบนัส +5 ต่อชุดที่ "พอดีเป๊ะ" · เพดาน 98% ----
+function isPerfect(f){ return f.fit_score === 0; }                    // พอดีเป๊ะ = fit_score 0 (true to size)
 function accuracy(list){
   const perfect = list.filter(isPerfect).length;
   return Math.min(98, 60 + list.length*4 + perfect*5);
 }
-
-// จุดที่ต้องเผื่อ — ตอบ "คับ" ซ้ำ ≥2 ครั้งในจุดเดียวกัน
-function adjustAreas(list){
-  const out = [];
-  ['bust','waist','hip'].forEach(k => {
-    const tight = list.filter(f => f[k]==='tight').length;
-    if(tight >= 2) out.push(T(AREA_TH[k]+': เผื่อ +1 นิ้ว', AREA_EN[k]+': allow +1 in'));
-  });
-  const short_ = list.filter(f => f.length==='short').length;
-  if(short_ >= 2) out.push(T('ความยาว: เลือกรุ่นยาวขึ้น','Length: go longer'));
-  return out;
+// แนวโน้มไซซ์ของลูกค้า จากค่าเฉลี่ย fit_score (สเกลเดียวกับ recompute_garment_fit)
+function sizeTendency(list){
+  const s = list.map(f => f.fit_score).filter(v => typeof v === 'number');
+  if(!s.length) return T('ยังไม่พอ — บอกเราเพิ่มนะคะ','Need a bit more');
+  const avg = s.reduce((a,b)=>a+b,0) / s.length;
+  if(avg <= -0.6) return T('ชุดมักคับ → เผื่อ +1 ไซซ์','Runs tight → size up 1');
+  if(avg >=  0.6) return T('ชุดมักหลวม → ลด 1 ไซซ์','Runs loose → size down 1');
+  return T('ส่วนใหญ่พอดีเป๊ะ 💚','Mostly true to size 💚');
 }
 
 // ---- render: hero + สถิติ ----
@@ -247,51 +241,49 @@ function renderHero(animate){
   lastAcc = acc;
 
   const brands = [...new Set(FEEDBACK.map(f => f.brand).filter(Boolean))];
-  const adj = adjustAreas(FEEDBACK);
   $('statChips').innerHTML =
     chip(T('จำนวนครั้งที่บอกเรา','Times you told us'), FEEDBACK.length + T(' ครั้ง',''))
   + chip(T('แบรนด์ที่เรียนรู้แล้ว','Brands learned'), brands.length + T(' แบรนด์',''), brands.slice(0,3).join(' · '))
-  + chip(T('จุดที่ต้องเผื่อ','Where to allow room'), adj.length ? adj[0] : T('ยังไม่พบ — ดีมากค่ะ','None yet — great!'), adj.slice(1).join(' · '));
+  + chip(T('แนวโน้มไซซ์ของคุณ','Your size tendency'), sizeTendency(FEEDBACK));
 }
 function chip(l, v, sub){
   return `<div class="chip"><div class="l">${esc(l)}</div><div class="v">${esc(v)}${sub ? ` <small>${esc(sub)}</small>` : ''}</div></div>`;
 }
 
-// ---- render: การ์ด pending + ฟอร์ม 20 วินาที ----
+// ---- render: การ์ด pending + คอนโทรลความพอดี 20 วินาที ----
 function renderPending(){
   const box = $('pendingList');
   const done = lsGet(LS_DONE);
   const items = PENDING.filter(p => !done.includes(p.rental_id));
   if(!items.length){
-    box.innerHTML = `<div class="empty">${T('ตอนนี้ไม่มีชุดที่รอฟีดแบ็กค่ะ ไว้เช่าครั้งหน้ามาบอกเราอีกนะคะ 💚','No pieces waiting for feedback right now — tell us again after your next rental 💚')}</div>`;
+    box.innerHTML = `<div class="empty">${T('ตอนนี้ไม่มีชุดที่รอรีวิวค่ะ ไว้คืนชุดครั้งหน้ามาบอกเราอีกนะคะ 💚','No pieces waiting for a fit rating right now — tell us again after your next return 💚')}</div>`;
     return;
   }
   box.innerHTML = items.map((p, i) => {
-    p.sel = p.sel || { bust:'fit', waist:'fit', hip:'fit', length:'fit' }; // ค่าเริ่ม "พอดี" — ปรับเฉพาะจุดที่ไม่พอดี = เร็ว
-    const rows = AREAS.map(a => `
-      <div class="arearow">
-        <div class="al">${T(a.th, a.en)}</div>
-        <div class="seg">${a.opts.map(([v, th, en]) =>
-          `<button type="button" class="${p.sel[a.key]===v?'on':''}" onclick="pick(${i},'${a.key}','${v}')">${T(th, en)}</button>`).join('')}
-        </div>
-      </div>`).join('');
+    if(typeof p.fit !== 'number') p.fit = 0;   // ค่าเริ่ม "พอดี" — แตะเฉพาะเมื่อไม่พอดี = เร็ว
+    const meta = GMAP[p.garment_id] || {};
+    const brand = p.brand || meta.brand || '';
+    const fabric = p.fabric || meta.fabric || '';
+    const seg = FIT_OPTS.map(o =>
+      `<button type="button" class="${p.fit===o.v?'on':''}" onclick="pick(${i},${o.v})">${T(o.th, o.en)}</button>`).join('');
     return `<div class="pend" id="pend_${i}">
-      <div class="gname">${esc(p.garment_name || p.garment_code || T('ชุดที่เช่าล่าสุด','Your latest rental'))}</div>
-      <div class="gmeta">${esc(p.brand || '')}${p.fabric ? ' · ' + esc(p.fabric) : ''}</div>
-      ${rows}
+      <div class="gname">${esc(p.name || p.code || T('ชุดที่เช่าล่าสุด','Your latest rental'))}</div>
+      <div class="gmeta">${esc(brand)}${fabric ? ' · ' + esc(fabric) : ''}</div>
+      <div class="arearow">
+        <div class="al">${T('ความพอดีโดยรวม','Overall fit')}<small>${T('เทียบไซซ์ที่คาด','vs. expected size')}</small></div>
+        <div class="seg">${seg}</div>
+      </div>
       <input class="note" id="note_${i}" maxlength="140" placeholder="${T('อยากบอกอะไรเพิ่มมั้ยคะ (ไม่บังคับ)','Anything else? (optional)')}" value="${esc(p.noteVal || '')}" oninput="PENDING_ITEMS[${i}].noteVal = this.value">
       <button class="send" onclick="submitFit(${i})">${T('ส่งให้สไตลิสต์เลยค่ะ','Send to my stylist')}</button>
     </div>`;
   }).join('');
   window.PENDING_ITEMS = items; // อ้างอิงจาก onclick (index ตรงกับที่ render)
 }
-function pick(i, area, val){
+function pick(i, val){
   const p = window.PENDING_ITEMS[i]; if(!p) return;
-  p.sel[area] = val;
+  p.fit = val;
   const card = $('pend_' + i); if(!card) return;
-  const rowIdx = AREAS.findIndex(a => a.key === area);
-  const row = card.querySelectorAll('.arearow')[rowIdx];
-  row.querySelectorAll('button').forEach((b, bi) => b.classList.toggle('on', AREAS[rowIdx].opts[bi][0] === val));
+  card.querySelectorAll('.seg button').forEach((b, bi) => b.classList.toggle('on', FIT_OPTS[bi].v === val));
 }
 
 async function submitFit(i){
@@ -301,29 +293,46 @@ async function submitFit(i){
   btn.disabled = true; btn.textContent = T('กำลังส่ง…','Sending…');
   const note = (p.noteVal || '').trim() || null;
 
-  // ยิง RPC จริงเฉพาะตอนล็อกอิน — โหมดตัวอย่างเก็บ local อย่างเดียว (ห้ามส่ง uid ปลอม)
+  // โหมดล็อกอิน: ยิง submit_review จริงผ่าน gateway (เหมือน review.html เป๊ะ) — ไม่มี fake success
+  //   gateway verify idToken → override p_uid + เช็ค ownership ของ rental ก่อน insert
   if(UID){
-    try {
-      const { error } = await gwRpc('submit_fit_feedback', {
-        p_uid: UID, p_rental: p.rental_id, p_garment: p.garment_code,
-        p_bust: p.sel.bust, p_waist: p.sel.waist, p_hip: p.sel.hip, p_length: p.sel.length, p_note: note,
-      });
-      if(error) throw error;
-    } catch(e){ console.warn('submit_fit_feedback fallback → localStorage:', e && e.message || e); }
+    const { error } = await window.meRpc('submit_review', {
+      p_rental_id:     p.rental_id,
+      p_garment_id:    p.garment_id,
+      p_uid:           UID,
+      p_score:         null,            // หน้านี้โฟกัสความพอดี — ไม่บังคับให้ดาว (คะแนนชุดทำที่ review.html)
+      p_fit_score:     p.fit,           // −2..+2
+      p_occasion_tags: [],
+      p_feel_tags:     [],
+      p_feel_note:     note,
+      p_photo_url:     null,
+    });
+    if(error){
+      // ล้มเหลวจริง → ไม่ขึ้นขอบคุณ ไม่นับความแม่น (กันหลอกตา) ให้กดใหม่ได้
+      btn.disabled = false; btn.textContent = T('ส่งให้สไตลิสต์เลยค่ะ','Send to my stylist');
+      let card2 = $('pend_' + i);
+      let old = card2.querySelector('.senderr'); if(old) old.remove();
+      const err = document.createElement('div');
+      err.className = 'senderr'; err.style.cssText = 'color:#B91C1C;font-size:12.5px;margin-top:8px;text-align:center';
+      err.textContent = (error.message === 'redirecting_to_login')
+        ? T('กำลังพาไปเข้าสู่ระบบ…','Redirecting to sign in…')
+        : T('ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะคะ','Could not send — please try again');
+      btn.insertAdjacentElement('afterend', err);
+      return;
+    }
   }
 
-  // เก็บ local เสมอ (cache) — โปรไฟล์แม่นขึ้นทันทีแม้ backend ยังไม่มา
+  // สำเร็จ (หรือโหมดตัวอย่าง) → cache รีวิวไว้ฝั่งเครื่อง แล้วอัปเดตความแม่น/สรุป
   const entry = {
-    rental_id: p.rental_id, garment_code: p.garment_code, garment_name: p.garment_name,
-    brand: p.brand || null, fabric: p.fabric || null,
-    bust: p.sel.bust, waist: p.sel.waist, hip: p.sel.hip, length: p.sel.length,
-    note, created_at: new Date().toISOString(),
+    rental_id: p.rental_id, garment_id: p.garment_id, code: p.code, name: p.name,
+    brand: p.brand || (GMAP[p.garment_id] || {}).brand || null,
+    fabric: p.fabric || (GMAP[p.garment_id] || {}).fabric || null,
+    fit_score: p.fit, note, created_at: new Date().toISOString(),
   };
   lsSet(LS_FB, lsGet(LS_FB).concat([entry]));
   lsSet(LS_DONE, lsGet(LS_DONE).concat([p.rental_id]));
   FEEDBACK.push(entry);
 
-  // thank-you state + ตัวเลขความแม่นวิ่งขึ้น
   card.innerHTML = `<div class="thanks">
     <div class="tk"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
     <p>${T('ขอบคุณค่ะ โปรไฟล์คุณแม่นขึ้นอีกขั้นแล้ว ✨','Thank you — your profile just got smarter ✨')}</p>
@@ -332,7 +341,12 @@ async function submitFit(i){
   renderInsights();
 }
 
-// ---- render: สิ่งที่สไตลิสต์เรียนรู้ (กติกาง่าย ๆ ฝั่ง client) ----
+// ---- render: สิ่งที่สไตลิสต์เรียนรู้ (จาก fit_score ของลูกค้า + fit_label ของชุมชน) ----
+function fitWord(avg){
+  if(avg <= -0.6) return 'small';
+  if(avg >=  0.6) return 'large';
+  return 'true';
+}
 function renderInsights(){
   const box = $('insightList');
   if(!FEEDBACK.length){
@@ -341,31 +355,42 @@ function renderInsights(){
   }
   const rows = [];
 
-  // ต่อแบรนด์: มี "คับ" ≥1 จุดไหน → แนะนำเผื่อ · มี "หลวม" ≥1 → เลือกเล็กลงได้
+  // ต่อแบรนด์: เฉลี่ย fit_score ที่ลูกค้าบอก → แบรนด์นี้ "เล็ก/ใหญ่/พอดี" สำหรับคุณ
   const byBrand = {};
   FEEDBACK.forEach(f => { if(f.brand){ (byBrand[f.brand] = byBrand[f.brand] || []).push(f); } });
   Object.keys(byBrand).forEach(brand => {
     const list = byBrand[brand];
-    ['bust','waist','hip'].forEach(k => {
-      const tight = list.filter(f => f[k]==='tight').length;
-      const loose = list.filter(f => f[k]==='loose').length;
-      if(tight >= 1) rows.push({ ic:'📏',
-        tt: T(`แบรนด์ ${brand} — ${AREA_TH[k]}เล็กกว่าป้าย`, `${brand} — ${AREA_EN[k].toLowerCase()} runs small`),
-        dd: T('แนะนำเผื่อ 1 ไซซ์นะคะ','We suggest sizing up 1') });
-      else if(loose >= 1) rows.push({ ic:'📐',
-        tt: T(`แบรนด์ ${brand} — ${AREA_TH[k]}ใหญ่กว่าป้าย`, `${brand} — ${AREA_EN[k].toLowerCase()} runs big`),
-        dd: T('เลือกเล็กลงได้เลยค่ะ','You can size down') });
-    });
-    const short_ = list.filter(f => f.length==='short').length;
-    const long_  = list.filter(f => f.length==='long').length;
-    if(short_ >= 1) rows.push({ ic:'✂️', tt: T(`แบรนด์ ${brand} — ทรงสั้นกว่าที่คิด`, `${brand} — runs shorter than expected`), dd: T('เลือกรุ่นยาวขึ้นให้นะคะ','We\'ll pick longer cuts for you') });
-    else if(long_ >= 1) rows.push({ ic:'✂️', tt: T(`แบรนด์ ${brand} — ทรงยาวกว่าที่คิด`, `${brand} — runs longer than expected`), dd: T('เลือกรุ่นสั้นลง หรือเผื่อเก็บชายให้ค่ะ','We\'ll go shorter or hem it for you') });
+    const avg = list.reduce((a,f)=>a + (f.fit_score||0), 0) / list.length;
+    const w = fitWord(avg);
+    if(w === 'small') rows.push({ ic:'📏',
+      tt: T(`แบรนด์ ${brand} — มักคับกว่าป้าย`, `${brand} — tends to run small`),
+      dd: T('แนะนำเผื่อขึ้น 1 ไซซ์นะคะ','We suggest sizing up 1') });
+    else if(w === 'large') rows.push({ ic:'📐',
+      tt: T(`แบรนด์ ${brand} — มักหลวมกว่าป้าย`, `${brand} — tends to run large`),
+      dd: T('เลือกเล็กลง 1 ไซซ์ได้เลยค่ะ','You can size down 1') });
+    else rows.push({ ic:'💚',
+      tt: T(`แบรนด์ ${brand} — พอดีตัวคุณ`, `${brand} — true to size on you`),
+      dd: T('สไตลิสต์จะเลือกไซซ์เดิมให้ต่อไป','We\'ll keep the same size for you') });
+
+    // เสียงจากชุมชน: garments.fit_label ของชุดที่คุณเคยรีวิวในแบรนด์นี้ (ถ้าตรงข้ามกับของคุณ = เตือน)
+    const labels = list.map(f => (GMAP[f.garment_id] || {}).fit_label).filter(Boolean);
+    if(labels.includes('small') && w !== 'small') rows.push({ ic:'👥',
+      tt: T(`ชุมชนบอก ${brand} บางตัวคับ`, `Community says some ${brand} pieces run small`),
+      dd: T('เราจะเช็กไซซ์ให้ก่อนส่งนะคะ','We\'ll double-check the size before shipping') });
+    else if(labels.includes('large') && w !== 'large') rows.push({ ic:'👥',
+      tt: T(`ชุมชนบอก ${brand} บางตัวหลวม`, `Community says some ${brand} pieces run large`),
+      dd: T('เราจะเลือกตัวที่เข้ารูปให้ค่ะ','We\'ll pick a more fitted cut') });
   });
 
   // ต่อเนื้อผ้า: ผ้ายืด (สแปนเด็กซ์/ยืด) ที่ตอบพอดีทุกครั้ง → ใส่พอดีตัวได้เลย
-  const stretchy = FEEDBACK.filter(f => f.fabric && /ยืด|สแปนเด็กซ์|spandex/i.test(f.fabric));
-  if(stretchy.length && stretchy.every(f => f.bust!=='tight' && f.waist!=='tight' && f.hip!=='tight')){
-    rows.push({ ic:'🧵', tt: T('ผ้ายืด — ใส่พอดีตัวได้เลย','Stretch fabrics — true to size on you'), dd: T('ทุกครั้งที่ใส่ผ้ายืด คุณบอกว่าพอดีค่ะ','Every stretch piece so far fit you well') });
+  const stretchy = FEEDBACK.filter(f => {
+    const meta = GMAP[f.garment_id] || {};
+    const fab = f.fabric || meta.fabric || '';
+    const st = meta.stretch || '';
+    return /ยืด|สแปนเด็กซ์|spandex/i.test(fab) || (st && st !== 'none');
+  });
+  if(stretchy.length && stretchy.every(f => (f.fit_score||0) >= 0)){
+    rows.push({ ic:'🧵', tt: T('ผ้ายืด — ใส่พอดีตัวได้เลย','Stretch fabrics — true to size on you'), dd: T('ทุกครั้งที่ใส่ผ้ายืด คุณบอกว่าไม่คับค่ะ','No stretch piece has felt tight on you') });
   }
 
   box.innerHTML = rows.length
@@ -373,33 +398,45 @@ function renderInsights(){
     : `<div class="ins"><div class="dot">💚</div><div><div class="tt">${T('ทุกชุดที่ผ่านมาพอดีตัวคุณหมดเลยค่ะ','Everything so far has fit you perfectly')}</div><div class="dd">${T('สไตลิสต์จะเลือกไซซ์เดิมให้ต่อไปนะคะ','Your stylist will keep picking the same sizes')}</div></div></div>`;
 }
 
-// ---- โหลดข้อมูล (RPC จริง → fallback localStorage + MOCK) ----
-async function loadProfile(){
-  if(!UID){                                        // โหมดตัวอย่าง — ไม่ยิง RPC (ห้ามส่ง uid ปลอม)
-    FEEDBACK = demoFeedback().concat(lsGet(LS_FB));
-    return;
-  }
+// ---- แคตตาล็อกชุด: อ่าน anon เพื่อได้แบรนด์/fit_label ของชุดที่เกี่ยวข้อง (SDK guard) ----
+async function loadGarments(ids){
+  if(!ids.length) return;
   try {
-    const { data, error } = await gwRpc('my_fit_profile', { p_uid: UID });
-    if(error) throw error;
-    if(!data || !Array.isArray(data.feedback)) throw new Error('no data');
-    FEEDBACK = data.feedback;
-  } catch(e){
-    console.warn('my_fit_profile fallback → localStorage:', e && e.message || e);
-    FEEDBACK = lsGet(LS_FB);
-  }
+    const { data } = await client()
+      .from('garments')
+      .select('id,brand,fabric_composition,stretch,fit_label')
+      .in('id', ids);
+    (data || []).forEach(g => { GMAP[g.id] = {
+      brand:g.brand, fabric:g.fabric_composition, stretch:g.stretch || 'none', fit_label:g.fit_label }; });
+  } catch(e){ console.warn('garments read skipped:', e && e.message || e); }
 }
-async function loadPending(){
-  if(!UID){ PENDING = demoPending(); return; }     // โหมดตัวอย่าง — ไม่ยิง RPC
+
+// ---- โหลดข้อมูลจริง: my_rentals (ผ่าน gateway) → แยกชุดที่คืนแล้วรอรีวิว + เติมแบรนด์ ----
+async function loadReal(){
+  // FEEDBACK (รีวิวที่ส่งไปแล้ว) = cache ฝั่งเครื่อง — backend ไม่มี RPC อ่านรีวิวของตัวเอง
+  FEEDBACK = lsGet(LS_FB);
+
+  // หา customer id ของตัวเองผ่าน gateway (verify idToken) แล้วดึงออเดอร์
+  let rentals = [];
   try {
-    const { data, error } = await gwRpc('fit_feedback_pending', { p_uid: UID });
-    if(error) throw error;
-    if(!Array.isArray(data)) throw new Error('no data');
-    PENDING = data;
-  } catch(e){
-    console.warn('fit_feedback_pending fallback → MOCK:', e && e.message || e);
-    PENDING = demoPending();
-  }
+    const prof = await window.meRpc('me_profile', {});
+    CUSTOMER = (prof && prof.data) || null;
+    if(CUSTOMER && CUSTOMER.id){
+      const r = await window.meRpc('my_rentals', { p_customer: CUSTOMER.id });
+      rentals = Array.isArray(r.data) ? r.data : [];
+    }
+  } catch(e){ console.warn('my_rentals skipped:', e && e.message || e); }
+
+  // ชุดที่ "คืนแล้ว" (status='returned') = รอรีวิวความพอดี · ตัดตัวที่รีวิวไปแล้ว (cache)
+  const done = lsGet(LS_DONE);
+  PENDING = rentals
+    .filter(r => r.status === 'returned' && r.garment_id && !done.includes(r.rental_id))
+    .map(r => ({ rental_id:r.rental_id, garment_id:r.garment_id, code:r.code, name:r.name, brand:null, fabric:null, status:r.status }));
+
+  // เติมแบรนด์/fit_label ให้ทั้ง pending และรีวิวที่ cache ไว้
+  const ids = [...new Set(PENDING.map(p => p.garment_id).concat(FEEDBACK.map(f => f.garment_id)).filter(Boolean))];
+  await loadGarments(ids);
+  FEEDBACK.forEach(f => { const m = GMAP[f.garment_id]; if(m){ f.brand = f.brand || m.brand; f.fabric = f.fabric || m.fabric; } });
 }
 
 // ---- boot: LIFF login แบบนุ่ม ๆ — ไม่ล็อกอินก็ใช้หน้าได้ (demo data) ----
@@ -409,14 +446,26 @@ async function boot(){
     if(p) UID = p.userId;
   } catch(e){ console.warn('LIFF skipped:', e); }
   $('loginSoft').classList.toggle('hidden', !!UID);
-  // วาดจากข้อมูลเครื่อง/ตัวอย่างก่อนทันที — network ช้าแค่ไหนหน้าก็ไม่ค้างว่าง
-  FEEDBACK = UID ? lsGet(LS_FB) : demoFeedback().concat(lsGet(LS_FB));
-  PENDING = UID ? [] : demoPending();
+
+  // วาดจากข้อมูลตัวอย่าง/เครื่องก่อนทันที — network ช้าแค่ไหนหน้าก็ไม่ค้างว่าง (render-first)
+  if(UID){
+    GMAP = {};
+    FEEDBACK = lsGet(LS_FB);
+    PENDING = [];
+  } else {
+    GMAP = demoGmap();
+    FEEDBACK = demoFeedback().concat(lsGet(LS_FB));
+    PENDING = demoPending();
+  }
   renderHero(false); renderPending(); renderInsights();
-  await Promise.all([loadProfile(), loadPending()]);
-  renderHero(false);
-  renderPending();
-  renderInsights();
+
+  // แล้วค่อยดึงของจริง (เฉพาะตอนล็อกอิน) → วาดทับ
+  if(UID){
+    await loadReal();
+    renderHero(false);
+    renderPending();
+    renderInsights();
+  }
 }
 boot();
 
