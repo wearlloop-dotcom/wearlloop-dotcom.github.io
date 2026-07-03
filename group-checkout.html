@@ -209,7 +209,7 @@
   <div class="hero">
     <div class="eyebrow">group booking</div>
     <h1 class="htitle" data-i18n="Book the whole group">จองชุดทั้งกลุ่ม</h1>
-    <p class="hsub" data-i18n="Pick on-theme outfits for everyone, booked in one order.">เลือกชุดเข้าตีมให้ทุกคน จองในออเดอร์เดียว</p>
+    <p class="hsub" data-i18n="Pick on-theme outfits for everyone in the group and book together in one order — one box, one bill to the group lead.">เลือกชุดเข้าตีมให้ทุกคนในกลุ่ม แล้วจองพร้อมกันในออเดอร์เดียว — ส่งกล่องเดียว บิลรวมที่หัวหน้ากลุ่ม</p>
   </div>
 
   <!-- step indicator -->
@@ -243,9 +243,9 @@
     <div class="themesrc">
       <div class="tslabel" data-i18n="Theme colour">โทนสีของตีม</div>
       <div class="tsmodes">
-        <button class="tsmode" id="tsm-auto" onclick="setThemeSrc('auto')"><b data-i18n="Let us choose">ให้ระบบเลือกให้</b><span data-i18n="From personal colours">จาก personal color</span></button>
-        <button class="tsmode" id="tsm-season" onclick="setThemeSrc('season')"><b data-i18n="Choose the tone">เลือกโทนเอง</b></button>
-        <button class="tsmode" id="tsm-venue" onclick="setThemeSrc('venue')"><b data-i18n="By venue">ตามสถานที่</b></button>
+        <button class="tsmode" id="tsm-auto" onclick="setThemeSrc('auto')"><b data-i18n="Let us choose">ให้ระบบเลือกให้</b><span data-i18n="Picked from the group's personal colours">คัดจาก personal color ของกลุ่ม</span></button>
+        <button class="tsmode" id="tsm-season" onclick="setThemeSrc('season')"><b data-i18n="Choose the tone">เลือกโทนเอง</b><span data-i18n="Pick the season that suits the group">เลือกฤดูที่ใช่ของกลุ่ม</span></button>
+        <button class="tsmode" id="tsm-venue" onclick="setThemeSrc('venue')"><b data-i18n="By venue">ตามสถานที่</b><span data-i18n="LLOOP Atelier suggests colours from the setting">LLOOP Atelier แนะนำสีจากบรรยากาศงาน</span></button>
       </div>
       <div class="tsdetail" id="tsDetail"></div>
     </div>
@@ -255,7 +255,7 @@
   <div class="sec hide" id="assignSec">
     <div class="sechead">
       <div><div class="sectitle" data-i18n="Choose an outfit for each person">เลือกชุดให้แต่ละคน</div>
-      <div class="seccap" data-i18n="Tap to pick one outfit per person">แตะเลือก 1 ชุดต่อคน</div></div>
+      <div class="seccap" data-i18n="Tap to pick one outfit per person — the stylist curates the on-theme, best-fitting piece that's actually free that day.">แตะเลือก 1 ชุดต่อคน — สไตลิสต์คัด “ตัวที่เข้าตีม + พอดีตัว ที่ว่างจริงในวันนั้น” มาให้</div></div>
     </div>
     <div id="assignBody"></div>
   </div>
@@ -277,10 +277,10 @@
 <script src="config.js?v=38"></script>
 <script src="data.js?v=38"></script>
 <script src="liffAuth.js?v=38"></script>
-<script src="me-api.js?v=61"></script>
+<script src="me-api.js?v=54"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=38"></script>
-<script src="api.js?v=61"></script>
+<script src="api.js?v=54"></script>
 <script src="nav.js?v=1"></script>
 <script>
 // ============================================================
@@ -496,8 +496,8 @@ async function boot(){
   // กลุ่มไม่มีสมาชิกอื่น
   const active = (GROUP.members||[]).filter(m => (m.status||'active')==='active');
   if(active.length<2){
-    edgeState(NAV.t('ต้องมีสมาชิกอย่างน้อย 2 คน','Needs at least 2 members'),
-      NAV.t('เพิ่มคนในครอบครัว หรือชวนเพื่อนเข้ากลุ่มก่อนค่ะ','Add family members or invite friends into the group first.'),
+    edgeState(NAV.t('กลุ่มนี้ยังมีสมาชิกไม่พอ','Not enough members in this group'),
+      NAV.t('การจองทั้งกลุ่มต้องมีสมาชิกอย่างน้อย 2 คน — กลับไปเพิ่มคนในครอบครัวหรือชวนเพื่อนเข้ากลุ่มก่อนได้เลยค่ะ','Group booking needs at least 2 members — go back to add family members or invite friends into the group first.'),
       NAV.t('ไปเพิ่มสมาชิก','Add members'),'family.html');
     return;
   }
@@ -579,6 +579,7 @@ function renderThemeSrc(){
     d.innerHTML = `<div class="venuefld">
       <input id="ts_venue" type="text" placeholder="${NAV.t('เช่น ริมทะเล, งานวัด, โรงแรมหรู','e.g. seaside, temple fair, luxury hotel')}" value="${esc(THEMESRC.venue||'')}" oninput="venueInput()" autocomplete="off">
       <div class="venuehint">${NAV.t('พิมพ์แล้วเลือกสถานที่จริงจาก Google','Type and pick a real place from Google')}</div>
+      <div class="venuehint">${NAV.t('LLOOP Atelier จะแนะนำพาเลตสีจากบรรยากาศของสถานที่ แล้วจัดชุดให้เข้ากับพาเลตนั้น','LLOOP Atelier suggests a colour palette from the setting, then styles outfits to match it')}</div>
       <div class="venuehint" id="aiqHint"></div>
     </div>`;
     refreshAIQ();
@@ -719,18 +720,18 @@ function renderAssign(){
 
   let html = `<div class="paymode">
       <button class="pm ${PAYMODE==='host'?'on':''}" onclick="setPayMode('host')"><b>${NAV.t('หัวหน้ากลุ่มจ่ายรวม','Group lead pays all')}</b><span>${NAV.t('บิลเดียว ส่งรวม/แยกได้','One bill · ship together or separately')}</span></button>
-      <button class="pm ${PAYMODE==='split'?'on':''}" onclick="setPayMode('split')"><b>${NAV.t('ต่างคนต่างจ่าย','Everyone pays their own')}</b></button>
+      <button class="pm ${PAYMODE==='split'?'on':''}" onclick="setPayMode('split')"><b>${NAV.t('ต่างคนต่างจ่าย','Everyone pays their own')}</b><span>${NAV.t('เพื่อนจ่ายเอง · ส่งที่ตัวเอง','Friends pay themselves · ship to each')}</span></button>
     </div>
     ${themeChip(season)}
     ${(THEME&&THEME.photo_tip)?`<div class="phototip"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M9 6l1.5-2h3L15 6"/></svg><span>${NAV.t('ถ่ายรูปสวยที่นี่ · ','Great photo spot · ')}${esc(THEME.photo_tip)}</span></div>`:''}`;
   mems.forEach(m=>{
     const id = m.customer_id;
     const sub = `${m.relation || ''}${m.relation?' · ':''}${AGE_TH[m.age_band]||m.age_band||''}`;
-    html += `<div class="look ${SEL[id]?'has':''}" id="look-${esc(id)}">
+    html += `<div class="look" id="look-${esc(id)}">
       <div class="lhead">
         ${avaHtml(m.picture, id, m.name)}
         <div><div class="lname">${esc(m.name)}</div><div class="lrel">${esc(sub)}</div></div>
-        <div class="lpick" id="lpick-${esc(id)}">${SEL[id]?NAV.t('เลือกแล้ว','Selected'):''}</div>
+        <div class="lpick" id="lpick-${esc(id)}"></div>
       </div>`;
     const picks = m.picks || [];
     if(m.needs_sourcing || picks.length===0){
@@ -738,7 +739,7 @@ function renderAssign(){
         ${NAV.t('ยังไม่มีชุด'+(AGE_TH[m.age_band]||'')+'ที่ว่างในวันนี้ — ทีมจะช่วย ','No '+(AGE_TH[m.age_band]||'')+' outfit free on this date — the team can ')}<b>${NAV.t('จัดหาเพิ่ม','source more')}</b>${NAV.t('ให้เข้าตีมเดียวกัน (ไม่รวมในออเดอร์นี้)',' to match the same theme (not included in this order)')}</div>`;
     } else {
       html += `<div class="picks">${picks.map(p=>`
-        <div class="pick ${SEL[id]===p.code?'sel':''}" data-w="${esc(id)}" data-code="${esc(p.code)}" onclick="pickOne('${esc(id)}','${esc(p.code)}')">
+        <div class="pick" data-w="${esc(id)}" data-code="${esc(p.code)}" onclick="pickOne('${esc(id)}','${esc(p.code)}')">
           <div class="swatch" style="background:${esc(p.color_hex||'#E7E2DA')}">
             ${p.on_theme?'<span class="ontheme">'+NAV.t('เข้าตีม','On theme')+'</span>':'<span></span>'}
             ${p.fit!=null?`<span class="fitpill">${NAV.t('พอดี ','Fit ')}${p.fit}%</span>`:'<span></span>'}
@@ -748,12 +749,12 @@ function renderAssign(){
       // วิธีส่งของชุดนี้ (โผล่เมื่อเลือกชุดแล้ว)
       const sp = SHIP[id] || {};
       if(PAYMODE==='split'){
-        html += `<div class="shipctl ${SEL[id]?'show':''}" id="ship-${esc(id)}">
+        html += `<div class="shipctl" id="ship-${esc(id)}">
           <div class="selfnote"><svg viewBox="0 0 24 24"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
             ${NAV.t('ส่งไปที่อยู่ของ ','Ships to ')}<b>${esc(m.name)}</b>${NAV.t('','\'s address')} · ${esc(m.name)} ${NAV.t('จ่ายเอง','pays')}</div>
         </div>`;
       } else {
-        html += `<div class="shipctl ${SEL[id]?'show':''}" id="ship-${esc(id)}">
+        html += `<div class="shipctl" id="ship-${esc(id)}">
           <div class="shiprow">
             <div class="shipopt ${sp.separate?'':'on'}" id="shopt0-${esc(id)}" onclick="setShip('${esc(id)}',false)">
               <span class="dot"></span><span><b>${NAV.t('ส่งรวมกล่องหลัก','In the main box')}</b><span>${NAV.t('ไปพร้อมชุดอื่น ประหยัดค่าส่ง','Ships with the others · saves on delivery')}</span></span></div>
@@ -917,12 +918,8 @@ async function renderResult(res, from, to){
   if(res.error==='kyc_required'){
     box.innerHTML = `<div class="kycbox">
       <h4>${NAV.t('ยืนยันตัวตนก่อนจองนะคะ','Verify your identity before booking')}</h4>
-      <p>${NAV.t('ผู้จ่ายของกลุ่มยืนยันตัวตนครั้งเดียว แล้วจองได้เลยค่ะ','The group payer verifies their identity once, then you can book.')}</p>
-      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
-        <a class="btn" href="index.html">${NAV.t('ไปยืนยันตัวตน','Go to verify')}</a>
-        <a href="#" style="font-size:12px;color:inherit" onclick="this.style.display='none';this.nextElementSibling.style.display='block';return false">${NAV.t('ทำไมต้องยืนยัน?','Why verify?')}</a>
-        <span style="display:none;font-size:12px;flex-basis:100%">${NAV.t('บิลของกลุ่มรวมที่ผู้จ่าย ระบบจึงขอยืนยันตัวตน (บัตรประชาชน + โซเชียลสาธารณะ) เพื่อความปลอดภัยค่ะ','Group bills go to the payer, so we ask them to verify (ID card + public social) once for safety.')}</span>
-      </div></div>`;
+      <p>${NAV.t('การจองทั้งกลุ่มจะบิลรวมที่หัวหน้ากลุ่ม (ผู้จ่าย) — ระบบขอให้ผู้จ่ายยืนยันตัวตน (บัตรประชาชน + โซเชียลสาธารณะ) ครั้งเดียวเพื่อความปลอดภัยก่อนค่ะ','Group bookings bill the group lead (the payer) — for safety, the payer verifies their identity once (ID card + public social) before booking.')}</p>
+      <a class="btn" href="index.html">${NAV.t('ไปยืนยันตัวตน','Go to verify')}</a></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
   if(res.error==='no_payer'){
@@ -958,13 +955,13 @@ async function renderResult(res, from, to){
     }).join('');
     box.innerHTML = `
       <div class="sechead"><div><div class="sectitle">${NAV.t('จองตีมสำเร็จ · ต่างคนต่างจ่าย','Theme booked · everyone pays their own')}</div>
-        <div class="seccap">${NAV.t('บิลส่งเข้า LINE แต่ละคนแล้ว','Bills sent to each person\'s LINE')}${res.discount_pct>0?` · ${NAV.t('ส่วนลดกลุ่ม ','Group discount ')}${res.discount_pct}%`:''}</div></div></div>
+        <div class="seccap">${NAV.t('เพื่อนแต่ละคนจ่ายส่วนของตัวเอง + ส่งไปที่อยู่ตัวเอง · บิลส่งเข้า LINE ของแต่ละคนแล้ว','Each friend pays their share and ships to their own address · bills sent to each person\'s LINE')}${res.discount_pct>0?` · ${NAV.t('ทั้งกลุ่มได้ส่วนลดแพคเกจ ','Group package discount ')}${res.discount_pct}%`:''}</div></div></div>
       <div style="margin-top:12px">${rows}</div>
       <div class="totbox"><div class="trow hl"><span>${NAV.t('ยอดรวมทั้งกลุ่ม','Group total')}</span><span>${baht(res.grand_total)}</span></div></div>
       <div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        ${NAV.t('กันชุดไว้ 30 นาที — แต่ละคนโอน + แนบสลิปใน LINE ของตัวเองค่ะ','Outfits held for 30 minutes — each person transfers + attaches a slip in their own LINE.')}</div>
+        ${NAV.t('เรากันชุดให้ทุกคน 30 นาที — เพื่อนแต่ละคนเปิด LINE ของตัวเองเพื่อโอนและแนบสลิปยืนยันส่วนของตนค่ะ','We hold everyone\'s outfits for 30 minutes — each friend opens their own LINE to transfer and attach a slip to confirm their share.')}</div>
       <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
-        ${res.event_group?`<a class="btn" href="event.html?event=${esc(res.event_group)}">${NAV.t('ดูสถานะการจ่าย','View payment status')}</a>`:''}
+        <a class="btn" href="event.html?event=${esc(res.event_group||'')}">${NAV.t('ดูสถานะการจ่าย','View payment status')}</a>
         <a class="btn ghost" href="family.html">${NAV.t('กลับหน้ากลุ่ม','Back to group')}</a></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
@@ -1028,7 +1025,7 @@ async function renderResult(res, from, to){
       <div class="trow hl"><span>${NAV.t('รวมโอน','Total to transfer')}</span><span>${baht(res.total)}</span></div>
     </div>
     <div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      ${NAV.t('กันชุดไว้ 30 นาที — โอน + แนบสลิปภายในเวลานี้ค่ะ','Outfits held for 30 minutes — transfer + attach your slip within this time.')}</div>
+      ${NAV.t('เรากันชุดให้แล้ว 30 นาที — โอนและแนบสลิปภายในเวลานี้เพื่อยืนยันการจองค่ะ','We\'re holding your outfits for 30 minutes — transfer and attach your slip within this time to confirm.')}</div>
     ${payBlock}
     <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
       <a class="btn ghost" href="family.html">${NAV.t('กลับหน้ากลุ่ม','Back to group')}</a>

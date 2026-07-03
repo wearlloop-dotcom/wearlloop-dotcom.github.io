@@ -11,17 +11,12 @@
   async function ensureInit() {
     if (_inited) return;
     if (!window.liff || !LIFF_ID) throw new Error('ยังไม่ได้ตั้งค่า LINE Login');
-    // ใช้ init promise ตัวเดียวกับ LiffAuth ถ้ามี — กัน liff.init() วิ่งซ้ำสองที่บนหน้าเดียว ที่ทำ SDK throw (ปุ่มเงียบ/RPC ค้าง)
-    if (window.LiffAuth && typeof window.LiffAuth.ensureInit === 'function') {
-      await window.LiffAuth.ensureInit();
-    } else {
-      await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
-    }
+    await liff.init({ liffId: LIFF_ID });
     _inited = true;
   }
 
-  // redirectUri = URL ปัจจุบันพร้อม query — กลับจาก LINE แล้วไม่หลุดหน้าเดิม (deep-link ?garment= ?code= ยังอยู่)
-  function baseUrl() { return location.origin + location.pathname + location.search; }
+  // base URL (ไม่มี query) — redirectUri ให้ตรง LIFF endpoint + กลับมาสะอาด
+  function baseUrl() { return location.origin + location.pathname; }
 
   // เด้งเข้า LINE login เอง พร้อมกัน redirect loop: ลองได้ครั้งเดียวต่อ session
   // ถ้ากลับมาแล้วยัง unauthorized อีก (login ไม่ติด/ยกเลิก) → ไม่เด้งซ้ำ ปล่อยให้โชว์ error แทน
@@ -29,8 +24,7 @@
     if (sessionStorage.getItem('meReauthTried')) return false; // เคยลองแล้วรอบนี้ → กัน loop
     sessionStorage.setItem('meReauthTried', '1');
     try { if (liff.isLoggedIn()) liff.logout(); } catch (_e) {} // ล้างโทเคนเก่าที่หมดอายุก่อน
-    // คง query เดิม (?order/?event/?join/?garment) หลัง LINE login เหมือน LiffAuth.redirectUrl() — กัน deep-link หายตอน re-auth
-    try { liff.login({ redirectUri: baseUrl() + location.search }); } catch (_e) {}
+    try { liff.login({ redirectUri: baseUrl() }); } catch (_e) {}
     return true;
   }
 

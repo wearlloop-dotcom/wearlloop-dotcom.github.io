@@ -103,10 +103,10 @@
   <section>
     <div class="sh" data-i18n="Shop by occasion">เลือกตามงาน</div>
     <div class="cols">
-      <a class="col" href="index.html?occasion=wedding_guest" style="background:#F0D9CE;color:#7A4A33;text-decoration:none" data-i18n="Weddings">งานแต่ง</a>
-      <a class="col" href="index.html?occasion=graduation" style="background:#F2E2C0;color:#7A5A1E;text-decoration:none" data-i18n="Graduation">รับปริญญา</a>
-      <a class="col" href="index.html?occasion=party" style="background:#D8ECE4;color:#1E5347;text-decoration:none" data-i18n="Evening parties">ปาร์ตี้ค่ำคืน</a>
-      <a class="col" href="index.html?occasion=merit" style="background:#E0DCEF;color:#463A6E;text-decoration:none" data-i18n="Daytime events">ออกงานกลางวัน</a>
+      <div class="col" style="background:#F0D9CE;color:#7A4A33" data-i18n="Weddings">งานแต่ง</div>
+      <div class="col" style="background:#F2E2C0;color:#7A5A1E" data-i18n="Graduation">รับปริญญา</div>
+      <div class="col" style="background:#D8ECE4;color:#1E5347" data-i18n="Evening parties">ปาร์ตี้ค่ำคืน</div>
+      <div class="col" style="background:#E0DCEF;color:#463A6E" data-i18n="Daytime events">ออกงานกลางวัน</div>
     </div>
   </section>
 
@@ -121,7 +121,7 @@
     <div class="step"><div class="n">3</div><div class="t" data-i18n="Receive · return · done">รับชุด · คืน · จบ</div></div>
   </section>
 
-  <footer data-i18n="LLOOP · circular fashion house">LLOOP · circular fashion house</footer>
+  <footer data-i18n="LLOOP · rent with a stylist · full deposit back every time">LLOOP · เช่าชุดพร้อมสไตลิสต์ · มัดจำคืนเต็มทุกครั้ง</footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -134,8 +134,6 @@
   document.getElementById('ctaLine').href = LINE;
 
   const grid = document.getElementById('grid');
-  const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
-  const safeImg=u=>{ u=String(u||''); return (/^https:\/\//i.test(u)||/^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(u))?u:''; };
   function baht(n){ return '฿' + Math.round(Number(n)||0).toLocaleString('th-TH'); }
 
   const rotw = document.getElementById('rotw');
@@ -162,14 +160,11 @@
     const price = g.rate_1d ?? g.rental_price ?? 0;
     const out = !(g.status === 'available');
     const img = photo
-      ? `<img src="${safeImg(photo)}" alt="${esc(g.name||g.code||'')}" loading="lazy">`
-      : `<div class="ph">${esc(g.name || g.code || NAV.t('ชุด','Outfit'))}</div>`;
-    // การ์ดพาเข้าหน้าชุดในร้านจริง (?garment= เปิดชีตรายละเอียดทันที) — เดิมทุกใบพาเข้าแชต LINE
-    const href = g.code ? `index.html?garment=${encodeURIComponent(g.code)}` : LINE;
-    return `<a class="pcard" href="${href}">
-
+      ? `<img src="${photo}" alt="${g.name||g.code||''}" loading="lazy">`
+      : `<div class="ph">${g.name || g.code || NAV.t('ชุด','Outfit')}</div>`;
+    return `<a class="pcard" href="${LINE}">
       <div class="pphoto">${img}${out?`<span class="pout">${NAV.t('มีคิวจอง','Booked')}</span>`:''}</div>
-      <div class="pname">${esc(g.name || g.code || '')}</div>
+      <div class="pname">${g.name || g.code || ''}</div>
       <div class="pprice">${baht(price)} <small>${NAV.t('/ วัน','/ day')}</small></div>
     </a>`;
   }

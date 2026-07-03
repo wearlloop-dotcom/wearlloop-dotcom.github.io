@@ -316,7 +316,6 @@
   .bdg.new{background:var(--ink);color:#fff}
   .bdg.tone{background:var(--sage);color:#0c3a33}
   .bdg.pick{background:#C0892B;color:#fff}
-  .bdg.defect{background:#8A5A00;color:#fff}
   .gridend{text-align:center;color:var(--muted,#999);font-size:12px;padding:18px 0 4px;letter-spacing:.3px}
   .searchbar{display:flex;align-items:center;gap:8px;border:1px solid var(--line,#e3ddd2);border-radius:8px;padding:8px 12px;margin-bottom:10px;background:#fff}
   .searchbar .sicon{width:16px;height:16px;stroke:var(--muted,#999);fill:none;stroke-width:2;flex-shrink:0}
@@ -615,17 +614,6 @@
   .gphotos img{height:200px;object-fit:cover;cursor:zoom-in;flex:0 0 auto;border:7px solid #fff;box-shadow:0 2px 10px rgba(80,64,38,.14);border-radius:1px}
   .gphotos img.zoom{height:auto;width:100%}
   .gcap{font-size:14px;margin-top:11px;line-height:1.55;color:#4A4438;font-style:italic}
-  /* กล่องตำหนิ (แจ้งโปร่งใส) ในหน้ารายละเอียดชุด */
-  .defectbox{margin:12px 0;padding:12px 14px;background:#FBF3E4;border:1px solid #E8D5AC;border-radius:8px}
-  .defectbox .dfhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .defectbox .dftag{font-size:11px;letter-spacing:.5px;font-weight:600;background:#8A5A00;color:#fff;padding:4px 10px;border-radius:30px}
-  .defectbox .dfoff{font-size:12.5px;color:#8A5A00;font-weight:500}
-  .defectbox .dfoff s{color:#A39472;font-weight:400}
-  .defectbox .dfnote{font-size:13px;color:#5E4A22;line-height:1.55;margin-top:8px}
-  .defectbox .dfphotos{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-top:10px}
-  .defectbox .dfphotos::-webkit-scrollbar{display:none}
-  .defectbox .dfphotos img{height:110px;border-radius:6px;object-fit:cover;flex:0 0 auto;cursor:zoom-in;border:3px solid #fff;box-shadow:0 1px 6px rgba(80,64,38,.14)}
-  .defectbox .dfphotos img.zoom{height:auto;width:100%;cursor:zoom-out}
   .gdate{font-size:11px;color:#A39472;margin-top:4px;letter-spacing:.5px}
   .gempty{text-align:center;color:#A39472;font-size:13px;padding:30px 0}
   .termsoverlay{position:fixed;inset:0;background:rgba(12,11,8,.55);z-index:120;display:none;align-items:center;justify-content:center;padding:18px}
@@ -770,23 +758,6 @@
   .ocard .ost.done{background:#EAF1EC;color:#2E4A3A}
   .ocard .ost.cancel{background:#F3E2DC;color:#9A4A2E}
   .ocard .ost.spare{background:#EFE7DD;color:#8A7A5E}
-  /* แถบขั้นตอนออเดอร์: ชำระเงิน → ยืนยัน → ถึงมือคุณ → คืนแล้ว */
-  .ocard .osteps{display:flex;margin:12px 0 4px}
-  .ocard .ostep{flex:1;text-align:center;font-size:9.5px;color:#B9B4AA;position:relative;padding-top:13px}
-  .ocard .ostep i{position:absolute;top:0;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:#E3DED4}
-  .ocard .ostep::before{content:'';position:absolute;top:3.5px;left:-50%;width:100%;height:1.5px;background:#E3DED4}
-  .ocard .ostep:first-child::before{display:none}
-  .ocard .ostep.done i,.ocard .ostep.done::before{background:#9DBFB4}
-  .ocard .ostep.done{color:#7FA093}
-  .ocard .ostep.now i{background:#0F6E56;box-shadow:0 0 0 3px #E4F0EC}
-  .ocard .ostep.now::before{background:#9DBFB4}
-  .ocard .ostep.now{color:#0F6E56;font-weight:600}
-  /* ป้ายเตือนกำหนดคืน + กล่องวิธีคืนชุด */
-  .ocard .odue-soon{font-size:10px;font-weight:600;color:#8A6A1E;background:#F6EAD2;border-radius:10px;padding:2px 8px;margin-left:6px}
-  .ocard .odue-late{font-size:10px;font-weight:600;color:#9B1C1C;background:#F9E2E2;border-radius:10px;padding:2px 8px;margin-left:6px}
-  .ocard .oreturn{background:#F4F8F6;border:1px solid #D8E6E0;border-radius:12px;padding:12px 14px;margin-top:10px;font-size:12.5px;line-height:1.55;color:#2E4A3A}
-  .ocard .oreturn b{display:block;margin-bottom:3px}
-  .ocard .oreturn-btn{display:block;text-align:center;margin-top:9px;background:#0F6E56;color:#fff;border-radius:10px;padding:9px;font-weight:600;text-decoration:none;font-size:12.5px}
   .ocard-spare{background:#FCFAF4;border-style:dashed}
   .ocard .ospares{margin-top:12px;padding:11px 12px;background:#FAF5EA;border:1px dashed #E2D6BF;border-radius:6px}
   .ocard .ospares-h{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#A39472;margin-bottom:8px}
@@ -900,7 +871,6 @@
   .lookrow .lv{flex:1;display:flex;flex-wrap:wrap;gap:5px}
   .lookrow .lv i{font-style:normal;font-size:13px;background:#fff;border:1px solid #EADFCB;border-radius:20px;padding:4px 11px;color:#4A4438}
   .looknote{font-size:11px;color:#A39472;margin-top:10px;font-style:italic;line-height:1.5}
-  .lookteaser{background:#FBF7EE;border:1px solid #EADFCB;border-radius:6px;padding:12px 14px;font-size:12.5px;line-height:1.55;color:#7A6A45;margin-bottom:4px}
   .pform{padding:18px}.pform h3{font-family:var(--display);font-size:22px;font-weight:600;margin-bottom:2px}.pform .hint{font-size:12px;color:var(--muted);margin-bottom:16px}
   .field{margin-bottom:14px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:16px;background:#fff}
   .field textarea{resize:none;line-height:1.5}.field .subhint{font-size:11px;color:var(--muted);margin-top:4px}
@@ -1086,17 +1056,11 @@
   <button class="enterbtn" id="introEnter" onclick="enterApp()">เปิดคอลเลกชัน</button>
 </div>
 <script>
-  /* intro โชว์แค่ครั้งแรกที่เข้าเท่านั้น — เข้าแล้วกดหน้าไหน/กลับหน้าหลักก็ไม่คั่นซ้ำอีก
-     ใช้ localStorage (ไม่ใช่ sessionStorage) เพราะใน in-app browser ของ LINE sessionStorage
-     มักถูกล้างเมื่อเปิด webview ใหม่/สลับหน้า ทำให้ intro เด้งซ้ำทุกครั้ง
+  /* intro โชว์แค่ครั้งแรกของ session — กลับหน้าหลักจากหน้าอื่นเข้าคอลเลกชันเลย ไม่คั่นซ้ำ
      ทำแบบ synchronous ตรงนี้ (ก่อน intro paint) กัน flash */
   try {
-    if (localStorage.getItem('lloop_entered') === '1') document.getElementById('intro').style.display = 'none';
-    else {
-      // ครั้งแรกที่แสดง intro → มาร์กว่า "เห็นแล้ว" ทันที กันกรณี LINE รีโหลด webview กลางอนิเมชัน (ก่อนถึง enterApp) แล้ว intro เด้งซ้ำ
-      try { localStorage.setItem('lloop_entered', '1'); } catch (e2) {}
-      setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 3000);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — ไม่ต้องบังคับกดปุ่ม
-    }
+    if (sessionStorage.getItem('lloop_entered') === '1') document.getElementById('intro').style.display = 'none';
+    else setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 3000);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — ไม่ต้องบังคับกดปุ่ม
   } catch (e) {}
 </script>
 
@@ -1151,7 +1115,7 @@
     <div class="hero-ring" aria-hidden="true"></div>
     <div class="hk" id="heroKicker">new season · 2026</div>
     <h2 id="heroTitle">LLOOP</h2>
-    <p id="heroSub">เช่า · ใส่ · คืน — สวยได้โดยไม่ต้องซื้อ</p>
+    <p id="heroSub">เช่า · ใส่ · คืน — สวยได้ทุกครั้ง โดยไม่ต้องซื้อเพิ่ม</p>
     <button class="hbtn" id="heroCta" onclick="scrollToGrid()">ดูคอลเลกชัน</button>
   </div>
   <div class="hero-ctrl" id="heroCtrl" hidden>
@@ -1207,7 +1171,7 @@
 <section class="ed-mani">
   <div class="ek">why we loop</div>
   <p class="lead" id="maniLead">“เสื้อผ้าสวยหนึ่งตัว ไม่ควรถูกใส่แค่ครั้งเดียว แล้วหลับใหลอยู่ในตู้ตลอดไป”</p>
-  <p class="body" id="maniBody">ชุดหนึ่งตัว เปล่งประกายได้หลายค่ำคืน หลายเจ้าของ</p>
+  <p class="body" id="maniBody">เราเชื่อว่าความสวยควรได้ไปต่อ — ชุดหนึ่งตัวเปล่งประกายได้หลายค่ำคืน หลายเจ้าของ โดยโลกไม่ต้องแบกแฟชั่นที่ถูกทิ้งเพิ่มอีกชิ้น</p>
 </section>
 
 <section class="ed-how">
@@ -1225,7 +1189,7 @@
   <div class="ek">the craft</div>
   <div class="num">1 : 7</div>
   <p class="cap" id="craftCap">ชุดหนึ่งตัว หมุนเข้า loop เฉลี่ย 7 ครั้ง</p>
-  <p class="body" id="craftBody">ทุกตัวซักและตรวจเนื้อผ้าด้วยมือก่อนถึงคุณ</p>
+  <p class="body" id="craftBody">ทุกตัวซักและตรวจเนื้อผ้าด้วยมือก่อนถึงคุณ — เราหลงใหลในสัมผัสของผ้าและเรื่องราวที่มันสะสมในแต่ละค่ำคืน</p>
 </section>
 
 <section class="ed-teaser">
@@ -1234,7 +1198,7 @@
     <div class="ed-tx">
       <div class="ek">coming into the loop · soon</div>
       <h3>The Midnight Edit</h3>
-      <p id="teaserBody">ชุดราตรีลิมิเต็ด เปิดให้คนใน loop จองก่อนใคร</p>
+      <p id="teaserBody">คอลเลกชันชุดราตรีลิมิเต็ด กำลังจะเข้าสู่ loop — เปิดให้คนใน loop จองก่อนใคร</p>
       <button id="teaserBtn" onclick="this.textContent=t('teaserBtnDone');this.disabled=true;this.style.opacity=.7">ลงชื่อรอเป็นคนแรก</button>
     </div>
   </div>
@@ -1243,7 +1207,7 @@
 <section class="ed-foot">
   <div class="r" aria-hidden="true"></div>
   <div class="ft">join the loop</div>
-  <div class="fs">แชร์ลุคสวย ช่วยรักษ์โลก</div>
+  <div class="fs">share the look, save the planet · แชร์ลุคสวย ช่วยรักษ์โลก</div>
 </section>
 
 <div class="menuov" id="menuOverlay" onclick="if(event.target===this)closeMenu()">
@@ -1278,13 +1242,12 @@
   <div class="lgbox">
     <div class="lgmark">LLOOP</div>
     <div class="lgtitle" id="lgTitle">ยินดีต้อนรับ</div>
-    <div class="lgsub" id="lgSub">จองชุดและใช้ LLOOP Atelier</div>
+    <div class="lgsub" id="lgSub">เข้าสู่ระบบด้วย LINE เพื่อเริ่มเลือกชุดและใช้บริการ LLOOP Atelier</div>
     <button class="lgbtn" onclick="LiffAuth.signIn()">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.13c0 4.02 3.56 7.39 8.37 8.03.33.07.77.22.88.5.1.26.07.66.03.92l-.14.86c-.04.26-.2 1.02.9.56 1.1-.46 5.93-3.49 8.09-5.98C21.6 13.36 22 11.8 22 10.13 22 5.64 17.52 2 12 2z"/></svg>
       <span id="lgBtnLabel">เข้าสู่ระบบด้วย LINE</span>
     </button>
     <div class="lgnote" id="lgNote">การเข้าสู่ระบบถือว่ายอมรับข้อตกลงการใช้บริการและนโยบายข้อมูลส่วนบุคคล</div>
-    <button id="lgBrowse" onclick="closeLoginGate()" style="margin-top:14px;background:none;border:none;color:#8C8B86;font-size:13px;text-decoration:underline;cursor:pointer;font-family:inherit">ขอดูชุดก่อน</button>
   </div>
 </div>
 <div class="inbox-mask" id="inboxMask" onclick="if(event.target===this)closeInbox()">
@@ -1311,13 +1274,13 @@
 <script src="analytics.js?v=45"></script>
 <script src="pixel.js?v=45"></script>
 <script src="i18n.js?v=52"></script>
-<script src="data.js?v=46"></script>
+<script src="data.js?v=45"></script>
 <script src="brands.js?v=5"></script>
 <script src="liffAuth.js?v=55"></script>
-<script src="me-api.js?v=61"></script>
+<script src="me-api.js?v=54"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=45"></script>
-<script src="api.js?v=61"></script>
+<script src="api.js?v=59"></script>
 <script>
   /* Spotlight — ดึงชุดที่เช่าน้อยสุดมาโชว์รูปใหญ่ + สลับสไลด์อัตโนมัติ (visual layer) */
   window.renderSpotlight = function(garments){
@@ -1359,7 +1322,7 @@
   /* Google Places autocomplete (Places API New) สำหรับช่อง "จะไปที่ไหน"
      ใช้ AutocompleteSuggestion + วาด dropdown เอง (widget เก่าใช้กับโปรเจกต์ใหม่ไม่ได้แล้ว มี.ค.2025)
      เก็บสถานที่ที่เลือกไว้ใน window.SELECTED_PLACE · ไม่มี key/โหลดไม่ได้ = พิมพ์ชื่อเองได้ตามเดิม
-     สำคัญ: ต้องเปิด "Places API (New)" ใน Google Cloud · ดู docs/google-maps-setup.md */
+     ⚠ ต้องเปิด "Places API (New)" ใน Google Cloud · ดู docs/google-maps-setup.md */
   window.SELECTED_PLACE = null;
   function priceLevelToNum(p){
     var m = { PRICE_LEVEL_FREE:0, PRICE_LEVEL_INEXPENSIVE:1, PRICE_LEVEL_MODERATE:2, PRICE_LEVEL_EXPENSIVE:3, PRICE_LEVEL_VERY_EXPENSIVE:4,
@@ -1392,7 +1355,7 @@
             var res = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
               input: q, sessionToken: token,
               includedRegionCodes: ['th'],            // โฟกัสสถานที่ในไทยก่อน (ตปท. ค่อยปลดทีหลัง)
-              language: (localStorage.getItem('lloop_lang') === 'en' ? 'en' : 'th'), region: 'th',
+              language: (window.lang === 'en' ? 'en' : 'th'), region: 'th',
             });
             var sugg = (res && res.suggestions) || [];
             if (!sugg.length){ clearBox(); return; }
@@ -1438,6 +1401,6 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=82"></script>
+<script src="app.js?v=77"></script>
 </body>
 </html>

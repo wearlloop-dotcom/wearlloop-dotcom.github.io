@@ -106,7 +106,7 @@
   <div class="hero">
     <div class="eyebrow">split pay</div>
     <h1 class="htitle" data-i18n="Payment status · Book a theme together">สถานะการจ่าย · จองตีมกับเพื่อน</h1>
-    <p class="hsub" data-i18n="Who's paid, who's pending — the whole group at a glance.">ใครจ่ายแล้ว ใครยังค้าง — ดูครบทั้งกลุ่ม</p>
+    <p class="hsub" data-i18n="As the group lead, see who in the theme has paid and who's still pending — with each person's amount and the group total.">ในฐานะหัวหน้ากลุ่ม ดูได้ว่าเพื่อนในตีมคนไหนจ่ายแล้ว คนไหนยังรอชำระ พร้อมยอดของแต่ละคนและยอดรวมทั้งกลุ่ม</p>
     <div class="palette" id="themePill" style="display:none"><span class="pdot"></span><span id="themeName" data-i18n="Shared theme">ตีมร่วม</span></div>
   </div>
 
@@ -130,12 +130,18 @@
   <!-- roster -->
   <div class="sec hide" id="rosterSec">
     <div class="sechead">
-      <div><div class="sectitle" data-i18n="People in the theme">รายชื่อในตีม</div></div>
+      <div><div class="sectitle" data-i18n="People in the theme">รายชื่อในตีม</div>
+      <div class="seccap" data-i18n="Still-pending members appear at the top">คนที่ยังค้างชำระอยู่บนสุด</div></div>
     </div>
     <div id="rosterBody"></div>
 
+    <!-- gentle footer note -->
+    <div class="selfnote">
+      <svg viewBox="0 0 24 24"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+      <div data-i18n="Everyone pays their own share and reminders go out automatically — a nudge in the group's LINE chat helps too.">แต่ละคนจ่ายส่วนของตัวเอง ระบบเตือนให้อัตโนมัติ — คุณช่วยทักเตือนใน LINE กลุ่มได้อีกแรงค่ะ</div>
+    </div>
     <div class="remindrow">
-      <button class="btn ghost sm" id="remindBtn" disabled data-i18n="Remind friends who haven't paid">เตือนเพื่อนที่ยังไม่จ่าย</button>
+      <button class="btn ghost sm" id="remindBtn" disabled title="ระบบส่งคำเตือนให้เพื่อนที่ยังไม่จ่ายโดยอัตโนมัติอยู่แล้ว" data-i18n="Remind friends who haven't paid">เตือนเพื่อนที่ยังไม่จ่าย</button>
       <span class="hint" id="remindHint" data-i18n="Reminders already go out automatically">ระบบส่งคำเตือนอัตโนมัติให้อยู่แล้ว</span>
     </div>
   </div>
@@ -143,16 +149,15 @@
   <!-- edge / empty state -->
   <div class="sec hide" id="edgeSec"><div id="edgeBody"></div></div>
 
-  <div class="demo" id="demoNote"></div>
+  <div class="demo" id="demoNote" data-i18n="LLOOP payment-status page · production connects to Supabase via &lt;b&gt;liff/api.js&lt;/b&gt; (group_event_status returns the whole event's payment state)">หน้าสถานะการจ่าย LLOOP · ของจริงต่อกับ Supabase ผ่าน <b>liff/api.js</b> (group_event_status คืนสถานะจ่ายของทั้งอีเวนต์)</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=38"></script>
-<script src="data.js?v=38"></script>
 <script src="liffAuth.js?v=38"></script>
-<script src="me-api.js?v=61"></script>
-<script src="api.js?v=61"></script>
+<script src="me-api.js?v=54"></script>
+<script src="api.js?v=54"></script>
 <script src="nav.js?v=1"></script>
 <script>
 // ============================================================
@@ -213,7 +218,7 @@ async function boot(){
   // ไม่มี event id ใน URL → empty/edge
   if(!EVENT_GROUP){
     edgeState(NAV.t('ยังไม่ได้เลือกอีเวนต์','No event selected yet'),
-      NAV.t('เปิดจากลิงก์ “จองตีมกับเพื่อน” ที่ส่งให้หัวหน้ากลุ่มนะคะ','Open this page from the "Book a theme together" link sent to the group lead.'),
+      NAV.t('เปิดหน้านี้จากลิงก์ “จองตีมกับเพื่อน” ที่ส่งให้หัวหน้ากลุ่ม เพื่อดูสถานะการจ่ายของทุกคนในตีมค่ะ','Open this page from the "Book a theme together" link sent to the group lead to see everyone\'s payment status.'),
       NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
     return;
   }
@@ -228,7 +233,7 @@ async function boot(){
   }catch(e){ /* ตกไป mock */ }
 
   if(!LIVE){
-    $('#demoNote').innerHTML = NAV.t('โหมดพรีวิว · เปิดผ่าน LINE เพื่อดูสถานะจริง','Preview mode · open via LINE to see live status');
+    $('#demoNote').innerHTML = NAV.t('โหมดพรีวิว (mock) · เข้าผ่าน LINE จริงเพื่อดึงสถานะจาก Supabase','Preview mode (mock) · open via real LINE to pull live status from Supabase');
   }
 
   await load(false);
@@ -253,10 +258,8 @@ async function load(isRefresh){
       const r = await window.API.groupEventStatus(EVENT_GROUP, CUSTOMER);
       if(r && r.error){ st = { error:(r.error.message||String(r.error)) }; }
       else st = (r && r.data) || { error:'not_found' };
-    } else if (window.CONFIG && window.CONFIG.USE_MOCK) {
-      st = JSON.parse(JSON.stringify(MOCK_STATUS));   // พรีวิวดีไซน์เท่านั้น
     } else {
-      st = { error:'signin_required' };               // M-d: โปรดักชัน+ยังไม่ล็อกอิน → อย่าโชว์ mock เป็นสถานะจริง
+      st = JSON.parse(JSON.stringify(MOCK_STATUS));
     }
   }catch(e){ st = { error:'network' }; }
   finally{ if(isRefresh){ btn.disabled=false; btn.textContent=NAV.t('รีเฟรช','Refresh'); } }
@@ -276,13 +279,7 @@ function renderStatus(st){
   // ---- errors ----
   if(st.error==='denied'){
     edgeState(NAV.t('ดูได้เฉพาะสมาชิกกลุ่ม','Group members only'),
-      NAV.t('สำหรับสมาชิกในตีมเท่านั้น — ขอให้คนจัดตีมชวนคุณเข้ากลุ่มก่อนนะคะ','For theme members only — ask whoever set up the theme to invite you first.'),
-      NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
-    return;
-  }
-  if(st.error==='signin_required'){
-    edgeState(NAV.t('เข้าสู่ระบบเพื่อดูสถานะจริง','Sign in to see live status'),
-      NAV.t('เปิดหน้านี้ผ่าน LINE เพื่อดึงสถานะการจ่ายจริงของทีม — ตัวเลขจะยังไม่ถูกต้องจนกว่าจะเข้าสู่ระบบค่ะ','Open this page via LINE to pull your team\'s real payment status — the numbers are not valid until you sign in.'),
+      NAV.t('หน้านี้สำหรับหัวหน้ากลุ่มและสมาชิกในตีมเท่านั้น — ขอให้คนที่จัดตีมเปิดลิงก์นี้ให้ หรือชวนคุณเข้ากลุ่มก่อนค่ะ','This page is for the group lead and theme members only — ask whoever set up the theme to open this link for you, or to invite you into the group first.'),
       NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
     return;
   }
@@ -302,7 +299,7 @@ function renderStatus(st){
   // ไม่มีสมาชิกเลย
   if(members.length===0){
     edgeState(NAV.t('ยังไม่มีคนในตีมนี้','No one in this theme yet'),
-      NAV.t('ยังไม่มีใครจองชุด — จองแล้วสถานะจะขึ้นที่นี่ค่ะ','No bookings yet — statuses will show here once friends book.'),
+      NAV.t('อีเวนต์นี้ยังไม่มีใครจองชุด — เมื่อเพื่อนเริ่มจองในตีม รายชื่อและสถานะการจ่ายจะปรากฏที่นี่ค่ะ','No one has booked an outfit for this event yet — once friends start booking in the theme, their names and payment status will show here.'),
       NAV.t('ไปหน้าครอบครัว & กลุ่ม','Go to Family & groups'),'family.html');
     return;
   }
@@ -332,12 +329,8 @@ function renderStatus(st){
   const rb = $('#remindBtn'), rh = $('#remindHint');
   if(unpaid>0){
     rb.disabled = false;
-    rb.onclick = async () => {   // คัดลอกข้อความเตือนสำเร็จรูป + ลิงก์หน้านี้ ไว้วางใน LINE กลุ่ม
-      const msg = NAV.t('เพื่อน ๆ ที่ยังไม่ได้จ่ายค่าชุด กดจ่ายในลิงก์นี้ได้เลยนะคะ ','Friends who haven\'t paid for the dresses yet — here\'s the link ') + location.href;
-      try { await navigator.clipboard.writeText(msg); alert(NAV.t('คัดลอกข้อความเตือนแล้ว — วางใน LINE กลุ่มได้เลยค่ะ (ระบบก็เตือนอัตโนมัติให้อีกทาง)','Reminder message copied — paste it in the group LINE chat (automatic reminders also go out).')); }
-      catch(_e){ alert(NAV.t('ระบบเตือนอัตโนมัติให้แล้วค่ะ — คุณช่วยทักเพื่อนใน LINE กลุ่มได้อีกแรงค่ะ','Automatic reminders are already sent — a nudge to friends in the group LINE chat helps too.')); }
-    };
-    rh.textContent = NAV.t('ระบบเตือนอัตโนมัติให้อยู่แล้ว','Reminders go out automatically');
+    rb.onclick = () => alert(NAV.t('ระบบเตือนอัตโนมัติให้แล้วค่ะ — คุณช่วยทักเพื่อนใน LINE กลุ่มได้อีกแรงค่ะ','Automatic reminders are already sent — a nudge to friends in the group LINE chat helps too.'));
+    rh.textContent = NAV.t('ยังเหลือ ','') + unpaid + NAV.t(' คนที่รอชำระ · ระบบเตือนอัตโนมัติให้อยู่แล้ว',' still pending · reminders go out automatically');
   } else {
     rb.disabled = true;
     rh.textContent = NAV.t('ทุกคนจ่ายครบแล้ว ไม่ต้องเตือนเพิ่ม','Everyone has paid — no more reminders needed');

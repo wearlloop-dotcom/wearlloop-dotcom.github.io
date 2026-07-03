@@ -490,6 +490,11 @@
   </div>
 </div>
 
+<!-- Reward banner -->
+<div class="reward-banner">
+  <div class="rb-text" data-i18n="Share a photo of you wearing it — credit back every time">แชร์รูปที่ใส่จริง รับเครดิตคืนทุกครั้ง</div>
+  <div class="rb-credit">+10 CREDIT</div>
+</div>
 
 <div class="wrap">
 
@@ -499,7 +504,7 @@
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <h2 data-i18n="Thank you for your review">ขอบคุณสำหรับรีวิว</h2>
-    <p id="successSub"></p>
+    <p id="successSub" data-i18n="Your feedback helps us do better">ความเห็นของคุณช่วยให้เราพัฒนาบริการได้ดีขึ้น</p>
   </div>
 
   <!-- FORM STATE -->
@@ -585,7 +590,8 @@
               <circle cx="12" cy="13" r="4"/>
             </svg>
           </div>
-          <div class="up-text" data-i18n="Tap to take or choose a photo · optional">แตะเพื่อถ่ายหรือเลือกรูป · ไม่บังคับ</div>
+          <div class="up-text" data-i18n="Tap to take or choose a photo">แตะเพื่อถ่ายหรือเลือกรูป</div>
+          <div class="up-sub" data-i18n="Add a photo for +10 credit (optional)">แนบรูป +10 เครดิต (ไม่บังคับ)</div>
         </div>
         <img id="imgPreview" alt="preview">
       </div>
@@ -614,11 +620,9 @@ const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const RENTAL_ID   = params.get('rental_id')   || null;
 const GARMENT_ID  = params.get('garment_id')  || null;
-// URLSearchParams.get() ถอดรหัส URL ให้แล้วหนึ่งชั้น — ห้าม decodeURIComponent ซ้ำ
-// (ค่าที่มี '%' เช่น 'ผ้าไหม 100%' จะโยน URIError ทำให้สคริปต์ทั้งหน้าตาย)
-const GARMENT_NAME = params.get('garment_name') || '';
-const SIZE        = params.get('size') || '';
-const DATE_RANGE  = params.get('date_range') || '';
+const GARMENT_NAME = decodeURIComponent(params.get('garment_name') || '');
+const SIZE        = decodeURIComponent(params.get('size') || '');
+const DATE_RANGE  = decodeURIComponent(params.get('date_range') || '');
 
 let uid = null;
 let selectedFile = null;
@@ -768,8 +772,7 @@ async function loadProfile() {
 $('submitBtn').addEventListener('click', async () => {
   showErr('');
 
-  // guest กดส่ง → พาไปล็อกอิน LINE ต่อเลย (แทน error ค้างที่ไปต่อไม่ได้)
-  if (!uid) { showErr(T('กำลังพาไปเข้าสู่ระบบ LINE…', 'Signing in with LINE…')); liff.login({ redirectUri: window.location.href }); return; }
+  if (!uid) { showErr(T('กรุณาเข้าสู่ระบบก่อน', 'Please sign in first')); return; }
   if (!score) { showErr(T('กรุณาให้คะแนนชุดก่อน', 'Please rate the piece first')); return; }
 
   const btn = $('submitBtn');
@@ -810,8 +813,7 @@ $('submitBtn').addEventListener('click', async () => {
       }}),
     });
     const j = await r.json();
-    // me-rpc คืน contract {data, error} (ตาม me-api.js) — สำเร็จเมื่อ HTTP ok และไม่มี error
-    if (r.ok && !j.error) data = j.data; else error = { message: (j.error && j.error.message) || j.message || j.error || T('ส่งรีวิวไม่สำเร็จ', 'Could not submit review') };
+    if (j.ok) data = j.data; else error = { message: j.message || j.error || T('ส่งรีวิวไม่สำเร็จ', 'Could not submit review') };
   } catch (_e) { error = { message: 'network' }; }
 
   btn.disabled = false;
@@ -831,7 +833,7 @@ $('submitBtn').addEventListener('click', async () => {
 
   $('successSub').textContent = photoUrl
     ? T('+10 เครดิตเข้ากระเป๋าแล้ว ขอบคุณที่แชร์รูป', '+10 credit added to your wallet — thank you for sharing')
-    : T('ขอบคุณที่บอกเราค่ะ', 'Thank you for telling us');
+    : T('ขอบคุณที่บอกเรา ความเห็นของคุณมีค่ามากค่ะ', 'Thank you — your feedback means a lot');
 
   setTimeout(() => {
     $('formState').style.display = 'none';
@@ -840,18 +842,6 @@ $('submitBtn').addEventListener('click', async () => {
   }, 1200);
 });
 
-// guest เห็นหน้ารีวิวได้ก่อน — แบนเนอร์ชวนล็อกอินแทนการเด้งไป LINE ทันทีที่เปิดหน้า
-function showSignInBar() {
-  if (document.getElementById('signinBar')) return;
-  const d = document.createElement('div');
-  d.id = 'signinBar';
-  d.style.cssText = 'margin:12px 16px 0;padding:12px 14px;background:#fff;border:1px solid var(--line,#E7E5E1);border-radius:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:13px';
-  d.innerHTML = '<span>' + T('เข้าสู่ระบบเพื่อรีวิวและรับเครดิต', 'Sign in to review') + '</span>'
-    + '<button type="button" style="flex:0 0 auto;background:#06C755;color:#fff;border:0;border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer;font-family:inherit" onclick="liff.login({redirectUri:location.href})">' + T('เข้าสู่ระบบ', 'Sign in') + '</button>';
-  const bar = document.querySelector('.lloop-topbar');
-  if (bar && bar.parentNode) bar.parentNode.insertBefore(d, bar.nextSibling); else document.body.prepend(d);
-}
-
 // --- Init ---
 async function init() {
   populateGarmentBar();
@@ -859,11 +849,9 @@ async function init() {
   try {
     await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
     if (!liff.isLoggedIn()) {
-      // guest ดูหน้าได้ก่อน ค่อยล็อกอินตอนกดส่งรีวิว (เดิมเด้งไป LINE ก่อนเห็นเนื้อหา)
-      showSignInBar();
+      liff.login({ redirectUri: window.location.href });
       return;
     }
-    sessionStorage.removeItem('reviewLoginTried'); // login สำเร็จ → เคลียร์ guard
     const profile = await liff.getProfile();
     uid = profile.userId;
 

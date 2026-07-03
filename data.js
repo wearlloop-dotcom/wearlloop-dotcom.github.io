@@ -70,10 +70,7 @@ window.MOCK = {
       colors:[['mustard','#D6A02E'],['terracotta','#C77B4E']],
       season:'autumn', occasion_tags:['cafe','festival','merit'], bg:'#E7D6B8', isNew:false,
       styling_tips:['ใส่บราปกติ','ผ้าฝ้ายใส่สบาย ระบายอากาศ','รองเท้าแตะ/สนีกเกอร์'],
-      tips_en:['A regular bra is fine','Breathable, comfy cotton','Sandals or sneakers'],
-      // ตัวอย่างชุดมีตำหนิ (แจ้งโปร่งใส): ราคาลดจากเรทปกติ + รูปจุดตำหนิ (placeholder สำหรับ mock)
-      priceRegular:220, defectNote:'รอยเปื้อนจางที่ชายกระโปรงด้านหลัง มองแทบไม่เห็นตอนใส่',
-      defectPhotos:['https://picsum.photos/seed/lloop-defect1/600/800','https://picsum.photos/seed/lloop-defect2/600/800'] },
+      tips_en:['A regular bra is fine','Breathable, comfy cotton','Sandals or sneakers'] },
     { id:'g6', name:'Azure halter gown', brand:'Azur', tier:'Premium', price:580,
       fabric:'ซาตินไหมเทียม', fabric_en:'Faux-silk satin', stretch:'none', lining:true, sheer:false, weight:'หนา ทิ้งตัว',
       bust:[32,35], waist:[25,29], hip:null, length:140,

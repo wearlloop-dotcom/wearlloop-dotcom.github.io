@@ -36,11 +36,8 @@ window.API = (function () {
   function mapGarment(r) {
     return {
       id: r.id, code: r.code, name: r.name || r.code, brand: r.brand, tier: r.tier, price: r.rental_price, category: r.category,
-      retail: r.replacement_value != null ? Number(r.replacement_value) : null,  // มูลค่าชุด (โชว์ความคุ้ม)
+      retail: r.retail_value != null ? Number(r.retail_value) : (r.replacement_value != null ? Number(r.replacement_value) : null),  // มูลค่าชุด/ราคาเต็ม (โชว์ความคุ้ม) — อ่าน retail_value ก่อน
       grade: r.condition_grade || null, washCount: r.wash_count ?? null,         // ความสะอาด/ดูแล
-      defectNote: r.defect_note || null,                                          // ตำหนิ (แจ้งลูกค้าตรง ๆ)
-      defectPhotos: Array.isArray(r.defect_photos) ? r.defect_photos : [],        // รูปจุดตำหนิ (กดดูได้)
-      priceRegular: r.regular_price != null ? Number(r.regular_price) : null,     // เรทปกติก่อนลดเพราะตำหนิ (โชว์ขีดฆ่า)
       timesRented: r.times_rented ?? 0,
       photo: (Array.isArray(r.photos) && r.photos[0]) || r.photo || null,
       photos: Array.isArray(r.photos) ? r.photos : [],
@@ -69,14 +66,8 @@ window.API = (function () {
     const c = client();
 
     // 2) upsert ลูกค้าจาก UID + log touchpoint (remarketing audience)
-    // window.MOCK มาจาก data.js เท่านั้น — บางหน้า (event/join/looks/pay) โหลด api.js โดยไม่มี data.js
-    // → guard กัน TypeError ที่ทำให้ init พังแล้วตกไปโหมด mock ถาวรทั้งที่ live
-    const MOCK = window.MOCK || {};
-    let customer = MOCK.CUSTOMER || {};
+    let customer = window.MOCK.CUSTOMER;
     if (lineUid) {
-      // ล็อกอินแล้ว → ตั้งโปรไฟล์ตั้งต้นจาก LINE (ไม่ใช้ MOCK.CUSTOMER)
-      // กันข้อมูล mock ('คุณมายา' เครดิต ฿160) รั่วมาแสดงเป็นของจริงเมื่อ me_profile ล้มเหลว
-      customer = { display_name: profile.displayName, picture_url: profile.pictureUrl, credit_balance: 0, profile_load_failed: true };
       await c.from('customers').upsert(
         { line_uid: lineUid, display_name: profile.displayName, picture_url: profile.pictureUrl },
         { onConflict:'line_uid'});
@@ -117,7 +108,7 @@ window.API = (function () {
       try { const { data: sp } = await window.meRpc('staff_discount_pct', { p_customer: customer.id });
             staff_pct = Number(sp) || 0; } catch (_e) {}
     }
-    return { OCCASIONS: MOCK.OCCASIONS || {}, CUSTOMER: customer, EVENT: event, GARMENTS: garments, lineUid, staff_pct };
+    return { OCCASIONS: window.MOCK.OCCASIONS, CUSTOMER: customer, EVENT: event, GARMENTS: garments, lineUid, staff_pct };
   }
 
   async function reserve(garmentId, customer) {

@@ -157,7 +157,7 @@
   <div class="hero">
     <div class="eyebrow">together</div>
     <h1 class="htitle" data-i18n="Family &amp; groups">ครอบครัว &amp; กลุ่ม</h1>
-    <p class="hsub" data-i18n="Our stylist dresses the whole group in one theme.">สไตลิสต์จัดชุดเข้าตีมให้ทั้งกลุ่ม</p>
+    <p class="hsub" data-i18n="Keep the people you love in one circle — mum, your kids, grandma, or your friends — and let our stylist dress everyone in one theme, rented together in a single order.">ผูกคนที่รักไว้ในกลุ่มเดียว — คุณแม่ คุณลูก คุณยาย หรือแก๊งเพื่อน แล้วให้สไตลิสต์ของเราจัดชุดเข้าตีมเดียวกัน เช่าพร้อมกันในออเดอร์เดียว</p>
   </div>
 
   <!-- คำเชิญรอตอบรับ -->
@@ -183,7 +183,7 @@
     <!-- แพ็กเพื่อนเจ้าสาว -->
     <div class="form show" id="bridesmaidCard" style="display:none;margin-top:14px">
       <div style="font-weight:600;margin-bottom:4px" data-i18n="Bridesmaid package">แพ็กเพื่อนเจ้าสาว</div>
-      <div class="seccap" style="margin-bottom:10px" data-i18n="The more of you, the more you save · one order, one bill.">ยิ่งหลายคนยิ่งลด · ส่งรวมบิลเดียว</div>
+      <div class="seccap" style="margin-bottom:10px" data-i18n="Rent in one theme together — the more of you, the more you save. One order, billed to one payer.">เช่าเข้าตีมพร้อมกัน ยิ่งหลายคนยิ่งลด · ส่งรวมออเดอร์เดียว บิลที่ผู้จ่ายคนเดียว</div>
       <div id="bmLadder" style="font-size:13px;line-height:1.9"></div>
       <div id="bmPerk" class="seccap" style="margin-top:8px"></div>
       <button class="btn sage" id="bmCta" style="margin-top:10px;font-size:13px;padding:9px 16px" data-i18n="Style the whole group in theme">จัดชุดเข้าตีมให้ทั้งกลุ่ม</button>
@@ -192,6 +192,7 @@
     <!-- ชวนเพื่อน -->
     <div class="form" id="invForm">
       <div style="font-weight:600;margin-bottom:4px" data-i18n="Invite a friend to the group">ชวนเพื่อนเข้ากลุ่ม</div>
+      <div class="seccap" style="margin-bottom:12px" data-i18n="The easy way: share a link on LINE and your friend can tap to join.">วิธีง่ายสุด: แชร์ลิงก์ทาง LINE ให้เพื่อนแตะเข้าร่วมได้เลย</div>
       <div class="invlink" id="invLink">
         <span class="lk" id="invLinkUrl">lloop.app/join/…</span>
         <button class="btn sage" id="copyLink" data-i18n="Share on LINE" style="padding:8px 14px;font-size:12px">แชร์ทาง LINE</button>
@@ -237,7 +238,7 @@
   <div class="sec" id="themeSec">
     <div class="sechead">
       <div><div class="sectitle" data-i18n="Dress the whole group in one theme">จัดชุดเข้าตีมทั้งกลุ่ม</div>
-      <div class="seccap" data-i18n="On-theme, well-fitting, and actually free on the day.">เลือกตัวที่เข้าตีม พอดีตัว และว่างจริงในวันนั้น</div></div>
+      <div class="seccap" data-i18n="Our stylist picks the on-theme, best-fitting piece that's actually free on the day — for everyone.">สไตลิสต์เลือก “ตัวที่เข้าตีม + พอดีตัวที่สุด ที่ว่างจริงในวันนั้น” ให้ทุกคน</div></div>
     </div>
     <div class="toolbar">
       <div class="fld" style="max-width:200px"><label data-i18n="Occasion">งาน / โอกาส</label>
@@ -269,8 +270,8 @@
 <script src="config.js?v=38"></script>
 <script src="data.js?v=38"></script>
 <script src="liffAuth.js?v=38"></script>
-<script src="me-api.js?v=61"></script>
-<script src="api.js?v=61"></script>
+<script src="me-api.js?v=54"></script>
+<script src="api.js?v=54"></script>
 <script src="nav.js?v=1"></script>
 <script>
 // ===== MOCK DATA (แทน Supabase ระหว่างพรีวิว) =====
@@ -375,7 +376,7 @@ let MY_HIDE = false;   // ซ่อนรูปโปรไฟล์ของฉ
 // LIVE=true → ต่อ Supabase จริงผ่าน window.API; LIVE=false → ใช้ mock arrays ด้านบน (พรีวิว)
 let LIVE = false;
 const SEASONS = ['autumn','winter','spring','summer'];
-function escHtml(s){ return String(s==null?'':s).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c])); }
+function escHtml(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
 function toast(msg){ try{ alert(msg); }catch(_e){} }
 // unwrap { ok, data, error } จาก window.API; คืน data หรือโยน error แบบนุ่ม
 function unwrap(res){
@@ -429,7 +430,7 @@ function renderSwitch(){
   GROUPS.forEach(g=>{
     const b=document.createElement('button');
     b.className='gchip'+(g.id===active?' on':'');
-    b.innerHTML=`<span class="k">${g.kind==='friends'?NAV.t('เพื่อน','Friends'):g.kind==='couple'?NAV.t('คู่','Couple'):NAV.t('ครอบครัว','Family')}</span>${escHtml(g.name)}`;
+    b.innerHTML=`<span class="k">${g.kind==='friends'?NAV.t('เพื่อน','Friends'):g.kind==='couple'?NAV.t('คู่','Couple'):NAV.t('ครอบครัว','Family')}</span>${g.name}`;
     b.onclick=()=>{active=g.id;selRel=null;render();};
     el.appendChild(b);
   });
@@ -440,9 +441,8 @@ function renderSwitch(){
 }
 
 async function createGroupFlow(){
-  const raw = prompt(NAV.t('ตั้งชื่อกลุ่มใหม่','Name your new group'),NAV.t('กลุ่มใหม่','New group'));
-  if(raw===null) return;   // ผู้ใช้กด Cancel → ไม่สร้างกลุ่ม (เช็คก่อน trim ที่แปลง null เป็น '')
-  const name = raw.trim();
+  const name = (prompt(NAV.t('ตั้งชื่อกลุ่มใหม่','Name your new group'),NAV.t('กลุ่มใหม่','New group'))||'').trim();
+  if(name===null) return;
   if(LIVE){
     try{
       const res = unwrap(await window.API.createGroup(ME, name||NAV.t('กลุ่มใหม่','New group'), 'family'));
@@ -466,7 +466,7 @@ function memberCard(m){
   return `<div class="mcard" style="${m.pend?'opacity:.72':''}">
     ${m.role==='owner'?'<span class="badge">'+NAV.t('หัวหน้ากลุ่ม','Group lead')+'</span>':''}
     ${avaHtml(m.picture, m.id, m.name)}
-    <div><div class="mname">${escHtml(m.name)}</div><div class="mrel">${escHtml(m.rel|| (m.role==='owner'?NAV.t('ตัวคุณเอง','You'):NAV.t('สมาชิก','Member')))}</div></div>
+    <div><div class="mname">${m.name}</div><div class="mrel">${m.rel|| (m.role==='owner'?NAV.t('ตัวคุณเอง','You'):NAV.t('สมาชิก','Member'))}</div></div>
     <div class="tags">${tags.join('')}</div>
     ${m.id===ME.id?`<button class="picpriv" onclick="togglePicHide()">${MY_HIDE?NAV.t('· แสดงรูปฉัน','· Show my photo'):NAV.t('· ซ่อนรูปฉันจากกลุ่ม','· Hide my photo from the group')}</button>`:''}
   </div>`;
@@ -491,7 +491,7 @@ function renderMembers(){
     $('#memberBody').innerHTML=`<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
       <h4>${NAV.t('ยังไม่มีกลุ่มของคุณ','You don\'t have a group yet')}</h4>
-      <p>${NAV.t('สร้างกลุ่มแล้วจัดชุดเข้าตีมได้เลย','Create a group and style everyone in one theme.')}</p>
+      <p>${NAV.t('เริ่มจากสร้างกลุ่มครอบครัวหรือแก๊งเพื่อน แล้วเพิ่มสมาชิก — เราจะช่วยจัดชุดเข้าตีมให้','Start by creating a family or friends group and adding members — we\'ll style everyone in one theme.')}</p>
       <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
         <button class="btn sage" onclick="createGroupFlow()">${NAV.t('+ สร้างกลุ่มใหม่','+ New group')}</button>
       </div></div>`;
@@ -508,7 +508,8 @@ function renderMembers(){
     body.innerHTML=`<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
       <h4>${NAV.t('ยังไม่มีสมาชิกในกลุ่มนี้','No members in this group yet')}</h4>
-      <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:12px">
+      <p>${NAV.t('เริ่มจากเพิ่มคนในครอบครัว — คุณลูก คุณยาย หรือชวนเพื่อนที่มีแอคเคานต์ LLOOP อยู่แล้ว แล้วเราจะช่วยจัดชุดเข้าตีมให้','Start by adding family — your child or grandma — or invite a friend who already has an LLOOP account, and we\'ll style everyone in one theme.')}</p>
+      <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
         <button class="btn sage" onclick="openForm()">${NAV.t('+ เพิ่มสมาชิก (เด็ก/ผู้สูงวัย)','+ Add member (child/senior)')}</button>
         <button class="btn ghost" onclick="openInvite()">${NAV.t('ชวนเพื่อนด้วยลิงก์/รหัส','Invite a friend by link or code')}</button>
       </div></div>`;
@@ -525,15 +526,16 @@ window.pickRel=r=>{selRel=r;renderRelQuick();};
 window.openForm=()=>{ $('#form').classList.add('show'); renderRelQuick(); $('#form').scrollIntoView({behavior:'smooth',block:'center'}); };
 
 // ===== แพ็กเพื่อนเจ้าสาว — ส่วนลดกลุ่มตามจำนวนคน (ตรงกับ group_discount_tiers ในระบบ) =====
-function bmDiscPct(n){ return n>=4?15:n>=3?10:n>=2?5:0; }   // ตรงกับขั้นบันไดตอนจ่ายจริง (group-checkout / DB group_discount_pct)
+function bmDiscPct(n){ return n>=2?5:0; }
 function fillBridesmaid(count){
   const card=$('#bridesmaidCard'); if(!card) return;
   card.style.display='';
   const active=bmDiscPct(count);
-  const chip=(label,pct)=>`<span style="display:inline-block;border-radius:20px;padding:3px 12px;font-size:12.5px;font-weight:700;${active===pct?'background:#2f6f4f;color:#fff':'background:#E4F0EC;color:#2f6f4f'}">${label}</span>`;
-  $('#bmLadder').innerHTML = `<div style="display:flex;gap:7px;flex-wrap:wrap">${chip(NAV.t('2 คน −5%','2 people −5%'),5)}${chip(NAV.t('3 คน −10%','3 people −10%'),10)}${chip(NAV.t('4+ คน −15%','4+ people −15%'),15)}</div>`
-    + (active>0 ? `<div style="margin-top:6px" class="seccap">${NAV.t(`ได้ส่วนลด ${active}% แล้ว`,`You get ${active}% off`)}</div>` : '');
-  $('#bmPerk').innerHTML = NAV.t('ครบ 4 คน เจ้าสาวรับแอคเซสซอรีฟรี 1 ชิ้น','At 4 people the bride gets a free accessory');
+  $('#bmLadder').innerHTML = `<div style="font-weight:700;color:#2f6f4f">${NAV.t('เช่าตั้งแต่ 2 คนขึ้นไป — ลด 5% ทุกชุด','Rent as 2+ people — 5% off every dress')}</div>`
+    + (active>0
+        ? `<div style="margin-top:4px" class="seccap">${NAV.t(`กลุ่มคุณ ${count} คน ได้ส่วนลด 5% แล้ว`,`Your group of ${count} gets 5% off`)}</div>`
+        : `<div style="margin-top:4px" class="seccap">${NAV.t('เพิ่มอีกอย่างน้อย 2 คน เริ่มได้ส่วนลด','Add at least 2 people to start the discount')}</div>`);
+  $('#bmPerk').innerHTML = NAV.t('ครบ 4 คน เจ้าสาวได้ผ้าคลุม/แอคเซสซอรีฟรี 1 ชิ้น · ชวนเพื่อนใหม่รับเครดิต ฿50','At 4 people the bride gets a free accessory · invite a new friend for ฿50 credit');
 }
 document.getElementById('bmCta')?.addEventListener('click', ()=>{ document.getElementById('themeSec')?.scrollIntoView({behavior:'smooth',block:'start'}); });
 
@@ -686,7 +688,7 @@ async function renderTheme(show){
   const box=$('#themeResult'); if(!show){box.innerHTML='';return;}
   const g=curGroup(), occ=$('#t_occ').value;
   if(!g || others(g).length===0){
-    box.innerHTML=`<div class="empty" style="padding:24px"><h4>${NAV.t('ยังจัดตีมไม่ได้','Can\'t set a theme yet')}</h4><p>${NAV.t('เพิ่มสมาชิกอย่างน้อย 1 คนก่อนนะคะ','Add at least one member first.')}</p></div>`;
+    box.innerHTML=`<div class="empty" style="padding:24px"><h4>${NAV.t('ยังจัดตีมไม่ได้','Can\'t set a theme yet')}</h4><p>${NAV.t('ต้องมีสมาชิกอย่างน้อย 1 คนก่อน ถึงจะให้สไตลิสต์จัดชุดเข้าตีมให้ทั้งกลุ่มได้','You need at least one member before our stylist can dress the whole group in one theme.')}</p></div>`;
     return;
   }
   const modeInfo=resolveThemeMode();
@@ -795,8 +797,8 @@ function renderInvites(){
     <div class="ib-h"><svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--ok);fill:none;stroke-width:1.7"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
       ${NAV.t('คำเชิญรอคุณตอบรับ','Invitations awaiting you')} (${INVITES.length})</div>
     ${INVITES.map(iv=>`<div class="invrow">
-      <div class="ir-t"><div class="ir-n">${escHtml(iv.name)}</div>
-        <div class="ir-f"><span class="ir-k">${iv.kind==='friends'?NAV.t('เพื่อน','Friends'):NAV.t('ครอบครัว','Family')}</span> · ${escHtml(NAV.t(iv.from+' ชวนคุณเข้าร่วม',iv.from+' invited you to join'))}</div></div>
+      <div class="ir-t"><div class="ir-n">${iv.name}</div>
+        <div class="ir-f"><span class="ir-k">${iv.kind==='friends'?NAV.t('เพื่อน','Friends'):NAV.t('ครอบครัว','Family')}</span> · ${NAV.t(iv.from+' ชวนคุณเข้าร่วม',iv.from+' invited you to join')}</div></div>
       <button class="mini yes" onclick="respondInvite('${iv.group_id}',true)">${NAV.t('ตอบรับ','Accept')}</button>
       <button class="mini no" onclick="respondInvite('${iv.group_id}',false)">${NAV.t('ปฏิเสธ','Decline')}</button>
     </div>`).join('')}
@@ -822,7 +824,7 @@ window.respondInvite=async (gid,ok)=>{
     GROUPS.push(ng); active=gid;
   }
   render();
-  if(ok) setTimeout(()=>alert(NAV.t('เข้าร่วม “'+iv.name+'” แล้ว — แจ้งหัวหน้ากลุ่มให้แล้วค่ะ','You\'ve joined “'+iv.name+'” — the group lead has been notified.')),50);
+  if(ok) setTimeout(()=>alert(NAV.t('เข้าร่วม “'+iv.name+'” แล้ว · ของจริงเรียก group_respond(accept) แล้วแจ้งเตือนหัวหน้ากลุ่ม','You\'ve joined “'+iv.name+'” · in production this calls group_respond(accept) and notifies the group lead')),50);
 };
 
 // ===== ชวนเพื่อน =====
@@ -841,11 +843,6 @@ window.openInvite=async ()=>{
     $('#invLinkUrl').textContent=NAV.t('กำลังสร้างลิงก์…','Creating link…');
     try{
       const data=unwrap(await window.API.groupJoinToken(g.id, ME));
-      if(data && data.error){   // backend คืน error ระดับข้อมูล (เช่น not_owner) → อย่าประกอบ URL token ว่าง
-        $('#invLinkUrl').textContent=NAV.t('สร้างลิงก์ไม่สำเร็จ','Couldn\'t create link');
-        inviteUrl='';
-        return;
-      }
       const token=(data && data.token) || '';
       inviteUrl = buildJoinUrl(token);
       $('#invLinkUrl').textContent = inviteUrl;
@@ -909,7 +906,7 @@ function bindInvite(){
         role:'member',age:'adult',gen:'female',managed:false,season:'autumn',pend:true});
       $('#invForm').classList.remove('show'); $('#i_code').value=''; $('#i_rel').value='';
       render();
-      setTimeout(()=>alert(NAV.t('ส่งคำเชิญแล้ว · เพื่อนได้แจ้งเตือนให้กดรับ (ขึ้นป้าย “รอตอบรับ”)','Invite sent · your friend is notified to accept (shown as “Pending”)')),50);
+      setTimeout(()=>alert(NAV.t('ส่งคำเชิญแล้ว · ของจริงเรียก group_invite → เพื่อนได้แจ้งเตือนให้กดรับ (ตอนนี้ขึ้นป้าย “รอตอบรับ”)','Invite sent · in production this calls group_invite → your friend is notified to accept (now shown as “Pending”)')),50);
     }
   };
 }
@@ -961,50 +958,18 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   }catch(e){ LIVE=false; console.warn('family LIVE bootstrap failed, fallback mock:', e); }
 
   if(LIVE){
-    // จัดการลิงก์เชิญขาเข้า ?join=<token> (หรือที่เก็บไว้ตอนยังไม่ล็อกอิน) ก่อน แล้วค่อยโหลดกลุ่ม
-    let token=readJoinToken();
-    if(!token){ try{ token=sessionStorage.getItem('lloop_pending_join')||null; }catch(_e){} }
+    // จัดการลิงก์เชิญขาเข้า ?join=<token> ก่อน แล้วค่อยโหลดกลุ่ม
+    const token=readJoinToken();
     if(token){
-      try{ sessionStorage.removeItem('lloop_pending_join'); }catch(_e){}
       try{
         const r=unwrap(await window.API.joinGroup(token, ME));
         cleanJoinFromUrl();
-        if(r && r.error){   // error ระดับข้อมูล (เช่น expired) — gateway ไม่ throw ต้องเช็คเอง
-          toast(NAV.t('เข้าร่วมกลุ่มไม่สำเร็จ: ','Couldn\'t join the group: ')+friendlyErr(r.error));
-        } else {
-          if(r && r.group_id) active=r.group_id;
-          if(r && r.group_name) setTimeout(()=>alert(NAV.t('เข้าร่วม “'+r.group_name+'” แล้ว','You\'ve joined “'+r.group_name+'”')),60);
-        }
+        if(r && r.group_id) active=r.group_id;
+        if(r && r.group_name) setTimeout(()=>alert(NAV.t('เข้าร่วม “'+r.group_name+'” แล้ว','You\'ve joined “'+r.group_name+'”')),60);
       }catch(e){ cleanJoinFromUrl(); toast(NAV.t('เข้าร่วมกลุ่มไม่สำเร็จ: ','Couldn\'t join the group: ')+friendlyErr(e.message||e)); }
     }
     try{ await reloadGroups(); }
     catch(e){ console.warn('reloadGroups failed:', e); LIVE=false; }
-  } else {
-    // มีลิงก์เชิญแต่ยังไม่ล็อกอิน (เปิดนอกแอป LINE) → เก็บ token ไว้ แล้วชวนเข้าสู่ระบบเพื่อรับคำเชิญ แทนการทิ้งเงียบ
-    const token=readJoinToken();
-    if(token && window.LiffAuth && LiffAuth.signIn){
-      try{ sessionStorage.setItem('lloop_pending_join', token); }catch(_e){}
-      if(confirm(NAV.t('เข้าสู่ระบบด้วย LINE เพื่อรับคำเชิญเข้ากลุ่ม?','Sign in with LINE to accept this group invite?'))){
-        LiffAuth.signIn(); return;   // redirect ไป LINE login แล้วกลับมา process token ต่อ
-      }
-    }
-  }
-
-  // M-d: ถ้าตั้งใจต่อของจริง (ไม่ใช่โหมดพรีวิว USE_MOCK) แต่ทำ LIVE ไม่สำเร็จ
-  // (ยังไม่ล็อกอิน / init ล้ม / โหลดกลุ่มล้ม) — อย่าโชว์ mock เป็นของจริง
-  // ล้างข้อมูลจำลองแล้วขอให้ผู้ใช้เข้าสู่ระบบเพื่อยืนยันข้อมูลจริง
-  const wantLive = !!(window.API && window.CONFIG && !window.CONFIG.USE_MOCK);
-  if(wantLive && !LIVE){
-    GROUPS = []; INVITES = []; active = null;
-    render();
-    const grpName=$('#grpName'), grpCap=$('#grpCap'), body=$('#memberBody');
-    if(grpName) grpName.textContent = NAV.t('กรุณาเข้าสู่ระบบ','Please sign in');
-    if(grpCap) grpCap.textContent = '';
-    if(body) body.innerHTML = `<div class="empty">
-      <h4>${NAV.t('กรุณาเข้าสู่ระบบเพื่อยืนยันข้อมูลกลุ่มของคุณ','Sign in to verify your groups')}</h4>
-      <p>${NAV.t('ยังไม่ได้เข้าสู่ระบบ จึงยังไม่แสดงข้อมูลกลุ่มจริง — ตัวเลขและรายชื่อด้านล่างไม่ใช่ข้อมูลของคุณ','You\'re not signed in yet, so real group data isn\'t shown — no numbers or names are your own until you sign in.')}</p>
-    </div>`;
-    return;
   }
 
   render();

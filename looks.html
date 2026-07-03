@@ -162,7 +162,7 @@
   <div class="hero">
     <div class="eyebrow">community</div>
     <h1 class="htitle">The Loop Looks</h1>
-    <p class="hsub" data-i18n="Real looks from the loop — rent them in a tap">ลุคจริงจากคนใน loop — กดเช่าตามได้เลย</p>
+    <p class="hsub" data-i18n="Real looks from the loop — rent them in a tap · share your look, earn credit">ลุคจริงจากคนใน loop — กดเช่าตามได้เลย · แชร์ลุคของคุณ รับเครดิต</p>
   </div>
   <div class="hubs" id="hubs"></div>
   <div class="tabs" id="tabs">
@@ -194,14 +194,13 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=49"></script>
 <script src="liffAuth.js?v=49"></script>
-<script src="me-api.js?v=61"></script>
-<script src="api.js?v=61"></script>
+<script src="me-api.js?v=54"></script>
+<script src="api.js?v=54"></script>
 <script src="nav.js?v=1"></script>
 <script>
 const $ = s => document.querySelector(s);
 const T = (th, en) => (window.NAV ? window.NAV.t(th, en) : th);
-const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
-const safeHref=u=>{ u=String(u||''); return /^(https?:\/\/|\/)/i.test(u)?u:'#'; };
+const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 const baht = n => '฿'+Number(n||0).toLocaleString('th-TH');
 const TIER_TH = { new:'', silver:'Silver', gold:'Gold', platinum:'Platinum' };
 let CUSTOMER=null, LIVE=false, FEED=[], TAB='all', OCC=null, TAG=null, STORY_I=-1;
@@ -281,7 +280,7 @@ function tplBadge(c){
   return `<span class="tplb">${t?esc(t):''}${(t&&n>1?' · ':'')}${n>1?n+' '+T('รูป','photos'):''}</span>`;
 }
 function fitStr(c){
-  const p=[]; if(c.wearer_height_cm) p.push(T('สูง ','Height ')+esc(c.wearer_height_cm)); if(c.wearer_size) p.push(T('ไซส์ ','Size ')+esc(c.wearer_size));
+  const p=[]; if(c.wearer_height_cm) p.push(T('สูง ','Height ')+c.wearer_height_cm); if(c.wearer_size) p.push(T('ไซส์ ','Size ')+esc(c.wearer_size));
   if(FIT_TH[c.fit_note]) p.push(FIT_TH[c.fit_note]); return p.join(' · ');
 }
 function cardHtml(c){
@@ -325,7 +324,7 @@ function renderFeed(){
     $('#feed').innerHTML = `<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div>
       <h4>${T('ยังไม่มีลุคในชุมชน','No looks yet')}</h4>
-      <p>${T('เช่า ถ่ายรูป แล้วแชร์ รับเครดิต','Rent, snap, share — earn credit')}</p></div>`;
+      <p>${T('เป็นคนแรกที่แชร์ลุค — เช่า ถ่ายรูป แล้วแชร์ ได้เครดิตเข้ากระเป๋า','Be the first to share — rent, snap a photo, and earn credit to your wallet')}</p></div>`;
     if(TAG) $('#feed').innerHTML = clr + $('#feed').innerHTML;
     return;
   }
@@ -560,7 +559,7 @@ async function openProfile(handle){
     return `<div class="card"><div class="ph">${l.photo?`<img src="${esc(l.photo)}" loading="lazy">`:''}${l.featured?'<span class="feat">เด่น</span>':''}</div>
       <div class="cbody">${g.code?`<div class="gchip" style="border-top:none;padding-top:0;margin-top:0"><div class="gname"><b>${esc(g.name||g.code)}</b></div><a class="rentbtn" href="${u}">${T('เช่า','Rent')}</a></div>`:''}</div></div>`;
   }).join('') || `<p class="muted" style="grid-column:1/-1">${T('ยังไม่มีลุคที่เผยแพร่','No published looks yet')}</p>`;
-  const social = cr.social?`<a href="${esc(safeHref(cr.social))}" target="_blank" class="shareln" style="margin-top:8px">${T('ดูโซเชียล →','View social →')}</a>`:'';
+  const social = cr.social?`<a href="${esc(cr.social)}" target="_blank" class="shareln" style="margin-top:8px">${T('ดูโซเชียล →','View social →')}</a>`:'';
   const h = cr.handle||handle;
   const isMe = CUSTOMER && (String(cr.handle||'').toLowerCase()===String((CUSTOMER.handle||CUSTOMER.link_code||'')).toLowerCase());
   const following = FOLLOWING.has(String(h||'').toLowerCase());
@@ -634,7 +633,7 @@ async function openShare(){
     <div class="shhd"><div class="shtitle">${T('แชร์ลุคของคุณ','Share your look')}</div><button class="x" onclick="closeOv('#ovShare')">×</button></div>
     <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 13px;margin-top:8px">
       <div style="font-size:12.5px;font-weight:600">${T('ลิงก์ชวนเช่าของคุณ','Your referral link')}</div>
-      <div class="muted" style="margin:2px 0 9px">${T('ใครเช่าผ่านลิงก์นี้ คุณได้เครดิต '+esc(String(REF_PCT))+'% ของค่าเช่า','Anyone who rents through this link earns you '+esc(String(REF_PCT))+'% of the rental in credit')}</div>
+      <div class="muted" style="margin:2px 0 9px">${T('แชร์ลิงก์นี้ที่ไหนก็ได้ (IG/โพสต์) — ใครเช่าผ่านลิงก์ คุณได้ส่วนแบ่งเครดิต '+esc(String(REF_PCT))+'% ของค่าเช่า','Share this link anywhere (IG/posts) — when someone rents through it you earn '+esc(String(REF_PCT))+'% of the rental in credit')}</div>
       <div style="display:flex;gap:8px">
         <button class="btn ghost" style="font-size:13px;padding:10px;flex:1" onclick="copyRef()">${T('คัดลอกลิงก์ชวนเช่า','Copy referral link')}</button>
         <button class="btn ghost" style="font-size:13px;padding:10px;flex:1" onclick="closeOv('#ovShare');openEarnings()">${T('รายได้ของฉัน','My earnings')}</button>
@@ -665,7 +664,7 @@ async function openShare(){
       <option value="true">${T('พอดีตัว','True to size')}</option><option value="large">${T('เผื่อ/ใหญ่นิดหน่อย','Roomy / slightly big')}</option><option value="small">${T('ฟิต/เล็กนิดหน่อย','Fitted / slightly small')}</option></select>
     <label class="lbl" style="display:flex;align-items:flex-start;gap:9px;font-weight:500;margin-top:14px">
       <input type="checkbox" id="shCross" style="width:auto;margin-top:3px">
-      <span>${T('ให้ LLOOP รีโพสต์ลุคนี้ใน IG/เพจได้ (เปิดสาธารณะ)','LLOOP may repost this look on IG/page (made public)')}</span>
+      <span>${T('ยินยอมให้ LLOOP นำลุคนี้ไปรีโพสต์ในไอจี/เพจของแบรนด์ เพื่อช่วยให้มีคนเห็น (เปิดเผยสู่สาธารณะ)','I allow LLOOP to repost this look on the brand IG/page for more reach (made public)')}</span>
     </label>
     <button class="btn" id="shSubmit" style="margin-top:16px">${T('แชร์ลุค','Share look')}</button>`;
   $('#shSubmit').onclick = submitShare;
