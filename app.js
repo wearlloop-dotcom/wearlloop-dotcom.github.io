@@ -1500,7 +1500,7 @@ function showPayConfirm({ g, date, total, pay, backups }) {
       </div>
       <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center;font-weight:600">
         ${TH ? 'โอนแล้วส่งสลิปในแชต LINE' : 'After paying, send the slip on LINE'}
-        <div style="font-weight:400;font-size:12px;margin-top:3px">${TH ? 'ตรวจสลิปและยืนยันให้อัตโนมัติ' : 'Verified and confirmed automatically'}</div>
+        
       </div>
       <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;background:#06C755;color:#fff;border-radius:12px;padding:11px;font-weight:600;text-decoration:none">${TH ? 'ส่งสลิปใน LINE' : 'Send slip on LINE'}</a>` : `
       <div style="background:#FBF6E9;border:1px solid #EBDFC0;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:13px;color:#7A5C00;text-align:center">${TH ? 'จองไว้ให้แล้ว · ทีมงานจะส่งวิธีชำระเงินให้ในแชต LINE นี้ค่ะ' : 'Reserved — we’ll send payment details in this LINE chat'}</div>`}
@@ -1635,7 +1635,7 @@ async function aiRankBackups() {
     const ranked = Array.isArray(resp.ranked) ? resp.ranked : [];
     if (resp.error === 'no_quota') {
       // โควต้า LLOOP Atelier หมด → ใช้การเรียงอัตโนมัติเดิมต่อได้ ไม่เสียอะไร
-      toast(lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว — เช่าชุดเพื่อรับเพิ่ม 3 ครั้ง (ตอนนี้ใช้การเรียงอัตโนมัติให้แล้ว)':'LLOOP Atelier quota used up — rent an outfit for +3 (showing the auto-sorted order)');
+      toast(lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว — เช่าชุดเพื่อรับเพิ่ม 3 ครั้ง':'LLOOP Atelier quota used up — rent an outfit for +3');
       if (btn) { btn.disabled = true; btn.textContent = lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว':'LLOOP Atelier quota used up'; }
     } else if (ranked.length) {
       _bpWhy = {};
@@ -3153,7 +3153,7 @@ async function closeSubPay(refresh) {
     CUSTOMER._sub = await window.API.mySubscription?.(CUSTOMER) || { active: false };
     let plans = []; try { plans = await window.API.subPlans?.() || []; } catch (e) { /**/ }
     renderMembership(CUSTOMER._sub, plans);
-    toast(lang === 'en' ? 'We will open your membership once the slip is verified' : 'เมื่อสลิปผ่าน ระบบจะเปิดสิทธิ์ให้อัตโนมัติค่ะ');
+    toast(lang === 'en' ? 'Payment received — thank you' : 'โอนเรียบร้อยแล้วค่ะ');
   } catch (e) { /**/ }
 }
 async function subActionClick(action) {
