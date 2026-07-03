@@ -129,7 +129,8 @@
       ['แบรนด์',o.brand],['ไซซ์',o.size],['สภาพ',o.condition],['ตำหนิ',o.defects],
       ['ราคาที่ผู้ขายขอ',o.asking_price!=null?baht(o.asking_price):'—'],
       ['ใบรับซื้อ',o.voucher_no||'ยังไม่ออก'],['หมายเหตุ',o.note],
-    ].filter(([,v])=>v!=null&&v!=='').map(([k,v])=>`<div class="k">${k}</div><div>${esc(v)}</div>`).join('');
+    ].filter(([,v])=>v!=null&&v!=='').map(([k,v])=>`<div class="k">${k}</div><div>${esc(v)}</div>`).join('')
+    + (o.market_ref?`<div class="k">ลิงก์อ้างอิง (Lazada/Shopee)</div><div><a href="${esc(o.market_ref)}" target="_blank" rel="noopener" style="color:var(--sage,#6FB3A6);word-break:break-all">${esc(o.market_ref)}</a></div>`:'');
     const canDecide=['new','priced'].includes(o.status||'new');
     const canPay=o.status==='accepted';
     const canStock=['paid','accepted'].includes(o.status);
@@ -152,7 +153,8 @@
   function intakeLink(o,d){
     const photo=(d.photos||o.photos||[])[0]||'';
     const q=new URLSearchParams({acq:o.id||'',name:o.name||'',brand:o.brand||'',size:o.size||'',
-      condition:COND_MAP[o.condition]||'',cost:o.offered_price??'',color:o.color_name||'',fabric:o.fabric||'',photo});
+      condition:COND_MAP[o.condition]||'',cost:o.offered_price??'',color:o.color_name||'',fabric:o.fabric||'',photo,
+      ref:o.market_ref||''});
       // cost = ราคาที่เราตกลงซื้อเท่านั้น — ห้าม fallback ไป asking_price (ราคาขอของผู้ขาย) เดี๋ยวทุนเพี้ยน
     return 'intake.html?'+q.toString();
   }
