@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>สัญญาซื้อขายชุดมือสอง — LLOOP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FBFAF7;
+    --cream2: #F5F4F2;
+    --line: #E7E5E1;
+    --ink: #1A1A1A;
+    --muted: #8C8B86;
+    --sage: #6FB3A6;
+    --sage-light: #E4F0EC;
+    --warm: #C9A86A;
+    --warn-bg: #FDF6EC;
+    --warn-border: #C9A86A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', 'Prompt', -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Hero band ---- */
+  .page-hero {
+    background: var(--cream2);
+    border-bottom: 1px solid var(--line);
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+
+  .page-hero .label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .page-hero h1 {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .page-hero .effective {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ---- Content layout ---- */
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ---- Sections ---- */
+  .section { margin-bottom: 52px; }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-num {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--sage);
+    flex-shrink: 0;
+  }
+
+  .section h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+
+  .section p {
+    margin-bottom: 12px;
+    color: var(--ink);
+    font-weight: 300;
+  }
+  .section p:last-child { margin-bottom: 0; }
+
+  /* ---- Sub-section ---- */
+  .sub-section { margin: 24px 0; }
+
+  .sub-section h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-left: 12px;
+    border-left: 2px solid var(--sage);
+  }
+
+  /* ---- Info table ---- */
+  .info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+
+  .info-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--cream2);
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .info-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  .info-table tr:last-child td { border-bottom: none; }
+  .info-table tr:hover td { background: #fff; }
+
+  .amt { font-weight: 600; color: var(--ink); }
+
+  /* ---- List ---- */
+  .styled-list { list-style: none; margin: 14px 0; padding: 0; }
+
+  .styled-list li {
+    padding: 8px 0 8px 20px;
+    position: relative;
+    font-weight: 300;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .styled-list li:first-child { border-top: 1px solid var(--line); }
+  .styled-list li::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 17px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--sage);
+  }
+
+  /* ---- Timeline list ---- */
+  .timeline { list-style: none; margin: 16px 0; padding: 0; }
+  .timeline li {
+    display: flex;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  .timeline li:first-child { border-top: 1px solid var(--line); }
+  .timeline-day {
+    flex-shrink: 0;
+    width: 60px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--sage);
+    text-transform: uppercase;
+    padding-top: 1px;
+  }
+
+  /* ---- Callout box ---- */
+  .callout {
+    background: var(--sage-light);
+    border-left: 3px solid var(--sage);
+    padding: 16px 20px;
+    border-radius: 2px;
+    margin: 20px 0;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  .callout strong { font-weight: 600; color: var(--ink); }
+
+  /* ---- Warning callout ---- */
+  .callout-warn {
+    background: var(--warn-bg);
+    border-left: 3px solid var(--warn-border);
+    padding: 16px 20px;
+    border-radius: 2px;
+    margin: 20px 0;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  .callout-warn strong { font-weight: 600; color: var(--ink); }
+
+  /* ---- Checkbox accept ---- */
+  .accept-box {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px;
+    margin-top: 32px;
+  }
+  .accept-box .accept-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 14px;
+  }
+  .checkbox-row:last-of-type { margin-bottom: 0; }
+  .checkbox-row input[type="checkbox"] { display: none; }
+  .custom-check {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, background 0.2s;
+    margin-top: 1px;
+  }
+  .custom-check svg { display: none; }
+  .custom-check.checked { background: var(--sage); border-color: var(--sage); }
+  .custom-check.checked svg { display: block; }
+  .checkbox-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .accept-note {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+    padding-left: 36px;
+  }
+
+  /* ---- Divider ---- */
+  .part-divider {
+    text-align: center;
+    margin: 56px 0 52px;
+    position: relative;
+  }
+  .part-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--line);
+  }
+  .part-divider span {
+    position: relative;
+    background: var(--cream);
+    padding: 0 16px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---- Footer ---- */
+  footer {
+    background: var(--cream2);
+    border-top: 1px solid var(--line);
+    text-align: center;
+    padding: 28px 24px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 480px) {
+    .page-hero h1 { font-size: 21px; }
+    .info-table { font-size: 12px; }
+  }
+</style>
+<script>window.CONFIG=window.CONFIG||{};</script>
+<script src="analytics.js"></script>
+</head>
+<body>
+
+<header class="lloop-topbar" data-back="seller.html" data-back-th="ขายชุด (Closet Cash)" data-back-en="Sell to us"></header>
+
+<!-- Hero -->
+<div class="page-hero">
+  <div class="label" data-i18n="Legal · Purchase Agreement">Legal · สัญญาซื้อขาย</div>
+  <h1 data-i18n="LLOOP Pre-Loved Purchase Agreement">สัญญาซื้อขายชุดมือสอง LLOOP</h1>
+  <p class="effective" data-i18n="Effective when you submit an offer to sell through LLOOP">มีผลเมื่อคุณกดเสนอขายชุดผ่านระบบ LLOOP</p>
+</div>
+
+<!-- Main content -->
+<div class="wrap">
+
+  <!-- Intro callout -->
+  <div class="callout" data-i18n="In this agreement <strong>&quot;the Buyer&quot; means LLOOP</strong> and <strong>&quot;the Seller&quot; means you</strong>, the person offering pre-loved garments for sale. It takes effect when you submit an offer to sell and accept these terms — LLOOP buys used garments outright to resell or rent, so the terms are written to protect the Buyer against undisclosed defects and misrepresentation.">
+    ในสัญญานี้ <strong>"ผู้ซื้อ" หมายถึง LLOOP</strong> และ <strong>"ผู้ขาย" หมายถึงคุณ</strong> ผู้เสนอขายชุดมือสอง
+    สัญญามีผลเมื่อคุณกดเสนอขายและยอมรับข้อตกลงนี้ — เนื่องจาก LLOOP รับซื้อชุดขาดเพื่อนำไปขายต่อหรือปล่อยเช่า
+    ข้อตกลงนี้จึงเขียนขึ้นเพื่อ<strong>คุ้มครองฝ่ายผู้ซื้อ</strong>จากการปกปิดตำหนิและการให้ข้อมูลเป็นเท็จเป็นสำคัญ
+  </div>
+
+  <!-- ====== Section 1 ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 data-i18n="General Information">ข้อมูลทั่วไป</h2>
+    </div>
+
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th data-i18n="Item">รายการ</th>
+          <th data-i18n="Detail">รายละเอียด</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-i18n="Agreement name">ชื่อสัญญา</td>
+          <td data-i18n="LLOOP Pre-Loved Purchase Agreement">สัญญาซื้อขายชุดมือสอง LLOOP</td>
+        </tr>
+        <tr>
+          <td data-i18n="Buyer">ผู้ซื้อ</td>
+          <td data-i18n="LLOOP — pre-loved garment buyer, operated by a sole proprietor in Thailand (operator's name disclosed upon request by email)">LLOOP — ผู้รับซื้อชุดมือสอง ดำเนินการในนามบุคคลธรรมดา ในประเทศไทย (เปิดเผยชื่อผู้ประกอบการเมื่อร้องขอทางอีเมล)</td>
+        </tr>
+        <tr>
+          <td data-i18n="Seller">ผู้ขาย</td>
+          <td data-i18n="The person submitting garments for sale, per the name / phone / bank / ID details provided in the offer form">ผู้เสนอขายชุด ตามชื่อ / เบอร์โทร / บัญชี / เลขบัตร ที่กรอกไว้ในฟอร์มเสนอขาย</td>
+        </tr>
+        <tr>
+          <td data-i18n="Type of sale">ลักษณะการซื้อขาย</td>
+          <td data-i18n="Outright sale — full transfer of ownership to the Buyer. Not consignment, not a pledge, and not returnable at the Seller's will.">ขายขาด — โอนกรรมสิทธิ์ให้ผู้ซื้อเต็มจำนวน มิใช่การฝากขาย มิใช่การจำนำ และผู้ขายเรียกคืนเองไม่ได้</td>
+        </tr>
+        <tr>
+          <td data-i18n="Language">ภาษา</td>
+          <td data-i18n="Thai and English. The Thai text prevails in case of conflict.">ภาษาไทยและภาษาอังกฤษ ฉบับภาษาไทยมีผลบังคับก่อนในกรณีที่ขัดกัน</td>
+        </tr>
+        <tr>
+          <td data-i18n="Governing law">กฎหมายที่ใช้บังคับ</td>
+          <td data-i18n="Laws of Thailand">กฎหมายไทย</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ====== Section 2 — Seller warranties ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 data-i18n="Seller's Warranties">คำรับรองของผู้ขาย</h2>
+    </div>
+
+    <p data-i18n="By offering an item for sale, the Seller warrants each of the following. These warranties are a material basis on which the Buyer agrees to buy and pay.">เมื่อเสนอขายชุด ผู้ขายรับรองว่าข้อความต่อไปนี้เป็นจริงทุกข้อ คำรับรองเหล่านี้เป็นสาระสำคัญที่ผู้ซื้อใช้ตัดสินใจรับซื้อและชำระเงิน</p>
+
+    <ul class="styled-list">
+      <li data-i18n="<strong>Ownership:</strong> the Seller is the true and sole owner of the item and has full legal right to sell it."><strong>กรรมสิทธิ์:</strong> ผู้ขายเป็นเจ้าของกรรมสิทธิ์ที่แท้จริงแต่เพียงผู้เดียว และมีสิทธิตามกฎหมายเต็มที่ในการขายชุดนี้</li>
+      <li data-i18n="<strong>Clean title:</strong> the item is not stolen, not obtained unlawfully, not pledged, mortgaged, seized, or held as evidence, and is free of any claim or encumbrance by a third party."><strong>ปลอดภาระผูกพัน:</strong> ชุดไม่ได้มาจากการลักทรัพย์หรือได้มาโดยมิชอบ ไม่ติดจำนำ จำนอง อายัด หรือเป็นของกลางในคดี และปราศจากสิทธิเรียกร้องหรือภาระผูกพันของบุคคลภายนอก</li>
+      <li data-i18n="<strong>Authenticity:</strong> if a brand is stated, the item is a genuine product of that brand — not a counterfeit, replica, or trademark-infringing copy."><strong>ของแท้:</strong> หากระบุแบรนด์ ชุดเป็นสินค้าแท้ของแบรนด์นั้นจริง — ไม่ใช่ของปลอม ของเลียนแบบ หรือของที่ละเมิดเครื่องหมายการค้า</li>
+      <li data-i18n="<strong>Truthful disclosure:</strong> all information given (brand, size, fabric, condition, and defects) is true, accurate, and complete, with no material defect concealed."><strong>ข้อมูลตรงจริง:</strong> ข้อมูลที่ให้ไว้ทั้งหมด (แบรนด์ ไซส์ เนื้อผ้า สภาพ และตำหนิ) เป็นความจริง ถูกต้อง และครบถ้วน โดยไม่ปกปิดตำหนิอันเป็นสาระสำคัญ</li>
+      <li data-i18n="<strong>Hygiene:</strong> the item has been cleaned and carries no contagious contamination, pest, or biohazard."><strong>สุขอนามัย:</strong> ชุดผ่านการทำความสะอาดแล้ว ไม่มีการปนเปื้อนของเชื้อโรคติดต่อ แมลง หรือสิ่งที่เป็นอันตรายทางชีวภาพ</li>
+    </ul>
+
+    <div class="callout" data-i18n="These warranties survive payment and delivery. If any turns out to be untrue, the Buyer keeps the rights set out in Sections 5 and 6 even after the price has been paid.">
+      คำรับรองเหล่านี้ยังคงมีผลแม้ชำระเงินและส่งมอบแล้ว หากข้อใดปรากฏว่าไม่เป็นความจริง ผู้ซื้อยังคงใช้สิทธิตามข้อ 5 และข้อ 6 ได้แม้จะจ่ายเงินไปแล้ว
+    </div>
+  </div>
+
+  <!-- ====== Section 3 — Condition & disclosure ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 data-i18n="Condition &amp; Disclosure of Defects">สภาพชุดและการเปิดเผยตำหนิ</h2>
+    </div>
+
+    <p data-i18n="The Buyer prices an item based entirely on the condition and defects the Seller declares and the photos provided. Honest, complete disclosure is the Seller's responsibility.">ผู้ซื้อประเมินราคาจากสภาพและตำหนิที่ผู้ขายแจ้ง รวมถึงรูปถ่ายที่ส่งมาเท่านั้น การเปิดเผยข้อมูลอย่างตรงไปตรงมาและครบถ้วนเป็นความรับผิดชอบของผู้ขาย</p>
+
+    <div class="sub-section">
+      <h3 data-i18n="Defects that must be declared">ตำหนิที่ต้องแจ้ง</h3>
+      <ul class="styled-list">
+        <li data-i18n="Stains, discoloration, fading, or yellowing — whether or not washable.">คราบเปื้อน สีตก สีซีด หรือเหลือง — ไม่ว่าจะซักออกได้หรือไม่</li>
+        <li data-i18n="Tears, holes, snags, worn fabric, or thinning.">รอยขาด รู รอยสะดุด เนื้อผ้าสึก หรือบางลง</li>
+        <li data-i18n="Broken / stuck zips, missing buttons, failed seams, damaged linings.">ซิปพัง/ฝืด กระดุมหาย ตะเข็บหลุด ซับในชำรุด</li>
+        <li data-i18n="Alterations, resizing, or prior repairs.">การดัดแปลง แก้ไซส์ หรือการซ่อมแซมมาก่อน</li>
+        <li data-i18n="Odors (smoke, damp, perfume), or a size that runs off-label.">กลิ่น (บุหรี่ อับชื้น น้ำหอม) หรือไซส์ที่ไม่ตรงป้าย</li>
+      </ul>
+    </div>
+
+    <div class="callout" data-i18n="&quot;I didn't notice it&quot; is not an exemption for a defect that a reasonable owner should have seen. Photograph and describe anything you're unsure about — full disclosure protects both sides and speeds up assessment.">
+      "ไม่ได้สังเกต" ไม่ถือเป็นข้อยกเว้นสำหรับตำหนิที่เจ้าของทั่วไปควรมองเห็นได้ หากไม่แน่ใจจุดใด ให้ถ่ายรูปและบอกไว้ — การแจ้งครบช่วยคุ้มครองทั้งสองฝ่ายและทำให้ประเมินได้เร็วขึ้น
+    </div>
+
+    <div class="sub-section">
+      <h3 data-i18n="Item details &amp; market reference link">รายละเอียดชุดและลิงก์อ้างอิงราคาตลาด</h3>
+      <p data-i18n="For each item the Seller provides its details (name, brand, size, fabric, condition, defects) and photos, and — where available — a <strong>reference link from Lazada or Shopee</strong> for the same or a comparable item.">สำหรับชุดแต่ละตัว ผู้ขายให้รายละเอียด (ชื่อ แบรนด์ ไซส์ เนื้อผ้า สภาพ ตำหนิ) พร้อมรูปถ่าย และหากมี ให้แนบ<strong>ลิงก์อ้างอิงจาก Lazada หรือ Shopee</strong> ของชุดรุ่นเดียวกันหรือใกล้เคียง</p>
+      <ul class="styled-list">
+        <li data-i18n="The reference link helps establish the fair market / retail price the Buyer's offer is based on.">ลิงก์อ้างอิงช่วยกำหนดราคาตลาด/ราคาขายปลีกที่เป็นธรรม ซึ่งผู้ซื้อใช้เป็นฐานในการเสนอราคา</li>
+        <li data-i18n="It also supports the authenticity warranty under Section 2 — a genuine-brand item should be traceable to a legitimate listing.">อีกทั้งช่วยสนับสนุนคำรับรองเรื่องของแท้ตามข้อ 2 — สินค้าแบรนด์แท้ควรอ้างอิงถึงรายการขายที่ถูกต้องได้</li>
+        <li data-i18n="The Seller warrants that any link provided genuinely corresponds to the item offered and is not used to inflate the price of a lesser or counterfeit item.">ผู้ขายรับรองว่าลิงก์ที่ให้มาตรงกับชุดที่เสนอขายจริง และไม่ได้ใช้เพื่อปั่นราคาชุดที่ด้อยกว่าหรือของปลอม</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ====== Section 4 — Price, payment, transfer of title ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 data-i18n="Price, Payment &amp; Transfer of Title">ราคา การชำระเงิน และการโอนกรรมสิทธิ์</h2>
+    </div>
+
+    <ul class="styled-list">
+      <li data-i18n="<strong>The Buyer is not obliged to buy.</strong> An asking price is only an offer; the Buyer may accept, propose a lower price, or decline any item without giving a reason."><strong>ผู้ซื้อไม่มีหน้าที่ต้องรับซื้อ</strong> ราคาที่ผู้ขายเสนอเป็นเพียงคำเสนอ ผู้ซื้อจะรับซื้อ เสนอราคาต่ำกว่า หรือปฏิเสธรายการใดก็ได้โดยไม่ต้องให้เหตุผล</li>
+      <li data-i18n="<strong>Agreed price only.</strong> The purchase price is the amount the Buyer confirms in writing (via LINE / the app), not the Seller's asking price."><strong>ยึดราคาที่ตกลง</strong> ราคาซื้อขายคือจำนวนที่ผู้ซื้อยืนยันเป็นลายลักษณ์อักษร (ผ่าน LINE / แอป) มิใช่ราคาที่ผู้ขายขอ</li>
+      <li data-i18n="<strong>Purchase voucher.</strong> On payment the Buyer issues a purchase voucher linked to the Seller's KYC and PDPA consent, for accounting and tax purposes."><strong>ใบรับซื้อ</strong> เมื่อจ่ายเงิน ผู้ซื้อจะออกใบรับซื้อผูกกับข้อมูล KYC และความยินยอม PDPA ของผู้ขาย เพื่อใช้ทางบัญชีและภาษี</li>
+      <li data-i18n="<strong>Title transfers on full payment.</strong> Ownership passes to the Buyer once the agreed amount is paid in full. The sale is final — the Seller may not later reclaim the item or demand its return."><strong>โอนกรรมสิทธิ์เมื่อชำระครบ</strong> กรรมสิทธิ์ตกเป็นของผู้ซื้อเมื่อชำระครบตามที่ตกลง การซื้อขายเป็นอันเด็ดขาด ผู้ขายจะเรียกชุดคืนหรือขอคืนภายหลังไม่ได้</li>
+      <li data-i18n="<strong>Free to use.</strong> After transfer the Buyer may clean, repair, alter, photograph, rebrand, resell, rent out, or dispose of the item as it sees fit."><strong>ใช้ได้อย่างอิสระ</strong> หลังโอนกรรมสิทธิ์ ผู้ซื้อมีสิทธิทำความสะอาด ซ่อม ดัดแปลง ถ่ายรูป เปลี่ยนป้าย ขายต่อ ปล่อยเช่า หรือจำหน่ายจ่ายโอนชุดได้ตามที่เห็นสมควร</li>
+    </ul>
+  </div>
+
+  <!-- ====== Section 5 — Inspection, rejection, re-pricing ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 data-i18n="Inspection, Re-Pricing &amp; Rejection">การตรวจรับ การปรับราคา และการปฏิเสธ</h2>
+    </div>
+
+    <p data-i18n="Where the Buyer prices from photos before physically receiving the item, the agreed price is provisional until inspection. The Buyer inspects within 3 business days of receiving the item.">กรณีผู้ซื้อประเมินราคาจากรูปก่อนได้รับชุดจริง ราคาที่ตกลงถือเป็นราคาชั่วคราวจนกว่าจะตรวจรับ ผู้ซื้อจะตรวจสภาพภายใน 3 วันทำการนับแต่วันได้รับชุด</p>
+
+    <div class="callout-warn" data-i18n="If, on inspection, the item's condition is materially worse than declared — undisclosed defects, wrong size, not authentic, or not the item in the photos — the Buyer may, at its sole choice:">
+      หากตรวจแล้วพบว่าสภาพชุดแย่กว่าที่แจ้งอย่างมีนัยสำคัญ — มีตำหนิที่ไม่ได้แจ้ง ไซส์ไม่ตรง ไม่ใช่ของแท้ หรือไม่ใช่ชุดในรูป — ผู้ซื้อมีสิทธิเลือกอย่างใดอย่างหนึ่งดังนี้
+    </div>
+
+    <ul class="styled-list">
+      <li data-i18n="<strong>Re-price:</strong> offer a revised lower price reflecting the true condition, which the Seller may accept or decline."><strong>ปรับราคา:</strong> เสนอราคาใหม่ที่ลดลงตามสภาพจริง ซึ่งผู้ขายจะรับหรือไม่รับก็ได้</li>
+      <li data-i18n="<strong>Reject &amp; return:</strong> cancel the purchase of that item and return it. Return shipping is at the Seller's expense; if already paid, the Seller refunds the amount received within 7 days."><strong>ปฏิเสธและส่งคืน:</strong> ยกเลิกการรับซื้อรายการนั้นและส่งคืน โดยค่าส่งคืนเป็นภาระของผู้ขาย หากจ่ายไปแล้ว ผู้ขายคืนเงินที่ได้รับภายใน 7 วัน</li>
+      <li data-i18n="<strong>Deduct:</strong> for a multi-item lot, deduct the value of the affected items from the total and pay only for the accepted ones."><strong>หักออก:</strong> กรณีขายเหมาหลายตัว ให้หักมูลค่ารายการที่มีปัญหาออกจากยอดรวม แล้วจ่ายเฉพาะรายการที่รับ</li>
+    </ul>
+
+    <div class="sub-section">
+      <h3 data-i18n="Unclaimed returns">ชุดที่ไม่มารับคืน</h3>
+      <p data-i18n="If an item is rejected and the Seller does not arrange collection or pay return shipping within 30 days of notice, the Buyer may donate or dispose of it without further liability.">หากรายการถูกปฏิเสธ และผู้ขายไม่มารับคืนหรือไม่ชำระค่าส่งคืนภายใน 30 วันนับแต่วันแจ้ง ผู้ซื้อมีสิทธินำไปบริจาคหรือจำหน่ายจ่ายโอนได้โดยไม่ต้องรับผิดใด ๆ อีก</p>
+    </div>
+  </div>
+
+  <!-- ====== Section 6 — Misrepresentation & fraud ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 data-i18n="Misrepresentation &amp; Fraudulent Sale">การให้ข้อมูลเท็จและการหลอกขาย</h2>
+    </div>
+
+    <p data-i18n="This section applies where the Seller acts in bad faith — as opposed to an honest mistake about condition, which is handled under Section 5.">ข้อนี้ใช้กับกรณีที่ผู้ขายกระทำโดยไม่สุจริต ซึ่งต่างจากความเข้าใจผิดเรื่องสภาพโดยสุจริตที่จัดการตามข้อ 5</p>
+
+    <div class="sub-section">
+      <h3 data-i18n="Examples of bad-faith conduct">ตัวอย่างการกระทำโดยไม่สุจริต</h3>
+      <ul class="styled-list">
+        <li data-i18n="Selling a counterfeit / replica as a genuine branded item.">ขายของปลอมหรือของเลียนแบบโดยอ้างว่าเป็นของแท้</li>
+        <li data-i18n="Selling an item the Seller does not own, or that is stolen / pledged / seized.">ขายชุดที่ผู้ขายไม่ได้เป็นเจ้าของ หรือเป็นของที่ถูกลัก/ติดจำนำ/ถูกอายัด</li>
+        <li data-i18n="Deliberately hiding a major defect, or swapping in a worse item than the one photographed.">จงใจปกปิดตำหนิสำคัญ หรือสลับส่งชุดที่แย่กว่าชุดที่ถ่ายรูปไว้</li>
+        <li data-i18n="Providing false identity, bank, or contact details.">ให้ข้อมูลตัวตน บัญชี หรือช่องทางติดต่อที่เป็นเท็จ</li>
+      </ul>
+    </div>
+
+    <div class="callout-warn" data-i18n="Where bad faith is found, the sale of the affected item is <strong>void</strong>. The Seller must <strong>refund the full amount received</strong> and is liable to the Buyer for:">
+      เมื่อพบการกระทำโดยไม่สุจริต การซื้อขายรายการนั้นตกเป็น<strong>โมฆะ</strong> ผู้ขายต้อง<strong>คืนเงินที่ได้รับทั้งหมด</strong> และต้องรับผิดต่อผู้ซื้อในส่วนต่อไปนี้
+    </div>
+
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th data-i18n="Item">รายการ</th>
+          <th data-i18n="Seller's liability">ความรับผิดของผู้ขาย</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-i18n="<strong>A) Refund</strong>"><strong>ก) คืนเงิน</strong></td>
+          <td data-i18n="The full purchase amount already paid, returned within 7 days of demand.">เงินค่าซื้อที่จ่ายไปแล้วทั้งหมด คืนภายใน 7 วันนับแต่วันทวงถาม</td>
+        </tr>
+        <tr>
+          <td data-i18n="<strong>B) Downstream losses</strong>"><strong>ข) ความเสียหายต่อเนื่อง</strong></td>
+          <td data-i18n="If the Buyer already cleaned, repaired, listed, resold, or rented out the item, the Seller covers those costs and any refund / compensation the Buyer must give its own customers.">หากผู้ซื้อได้ทำความสะอาด ซ่อม ลงขาย ขายต่อ หรือปล่อยเช่าไปแล้ว ผู้ขายรับผิดชอบค่าใช้จ่ายเหล่านั้น รวมถึงเงินคืน/ค่าชดเชยที่ผู้ซื้อต้องจ่ายให้ลูกค้าของตน</td>
+        </tr>
+        <tr>
+          <td data-i18n="<strong>C) Third-party claims</strong>"><strong>ค) ข้อเรียกร้องจากบุคคลภายนอก</strong></td>
+          <td data-i18n="The Seller indemnifies the Buyer against any claim by a brand owner, the true owner, or any third party arising from the item (e.g. a trademark or eviction claim).">ผู้ขายชดใช้ผู้ซื้อจากข้อเรียกร้องใด ๆ ของเจ้าของแบรนด์ เจ้าของที่แท้จริง หรือบุคคลภายนอกอันเกิดจากชุดนั้น (เช่น การละเมิดเครื่องหมายการค้า หรือการรอนสิทธิ)</td>
+        </tr>
+        <tr>
+          <td data-i18n="<strong>D) Costs &amp; interest</strong>"><strong>ง) ค่าใช้จ่ายและดอกเบี้ย</strong></td>
+          <td data-i18n="Reasonable collection, legal, and administrative costs, plus default interest at 5% per annum (current statutory rate) from the demand date.">ค่าติดตามทวงถาม ค่าดำเนินการทางกฎหมาย และค่าบริหารจัดการตามจริงที่สมเหตุสมผล พร้อมดอกเบี้ยผิดนัด 5% ต่อปี (อัตราตามกฎหมายปัจจุบัน) นับแต่วันทวงถาม</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-warn" data-i18n="Selling counterfeit or stolen goods, or deceiving the Buyer to obtain payment, may also be a <strong>criminal offence</strong> (fraud, dealing in stolen property, trademark infringement). The Buyer reserves the right to file a police report and pursue civil and criminal action, and to retain the KYC and evidence on file for that purpose.">
+      การขายของปลอม ของโจร หรือหลอกลวงเพื่อให้ได้เงินค่าซื้อ อาจเป็น<strong>ความผิดอาญา</strong>ด้วย (ฉ้อโกง รับของโจร ละเมิดเครื่องหมายการค้า) ผู้ซื้อสงวนสิทธิ์แจ้งความและดำเนินคดีทั้งทางแพ่งและอาญา รวมถึงเก็บรักษาข้อมูล KYC และหลักฐานไว้เพื่อการนี้
+    </div>
+  </div>
+
+  <!-- ====== Section 7 — Escalation timeline ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2 data-i18n="If the Seller Won't Refund">กรณีผู้ขายไม่ยอมคืนเงิน</h2>
+    </div>
+
+    <p data-i18n="Where a refund is due under Section 5 or 6 and the Seller does not pay, the Buyer follows this timeline. The Buyer always gives the Seller a chance to respond first.">กรณีต้องคืนเงินตามข้อ 5 หรือข้อ 6 แล้วผู้ขายไม่ชำระ ผู้ซื้อจะดำเนินการตาม timeline ดังนี้ โดยจะให้โอกาสผู้ขายชี้แจงก่อนเสมอ</p>
+
+    <ul class="timeline">
+      <li>
+        <span class="timeline-day" data-i18n="Day 1">วัน 1</span>
+        <div data-i18n="Notice via LINE / phone with the assessment and evidence, and a request to refund or take the item back.">แจ้งผ่าน LINE / โทร พร้อมผลการตรวจและหลักฐาน และขอให้คืนเงินหรือรับชุดคืน</div>
+      </li>
+      <li>
+        <span class="timeline-day" data-i18n="Day 7">วัน 7</span>
+        <div data-i18n="Second reminder. The Seller may dispute with supporting evidence within this window.">แจ้งเตือนครั้งที่สอง ผู้ขายสามารถโต้แย้งพร้อมหลักฐานได้ภายในช่วงเวลานี้</div>
+      </li>
+      <li>
+        <span class="timeline-day" data-i18n="Day 14">วัน 14</span>
+        <div data-i18n="Formal demand letter by registered post to the address on file.">ส่งหนังสือทวงถามอย่างเป็นทางการทางไปรษณีย์ลงทะเบียน ตามที่อยู่ที่ให้ไว้</div>
+      </li>
+      <li>
+        <span class="timeline-day" data-i18n="Day 15+">วัน 15+</span>
+        <div data-i18n="<strong>Civil claim and, where applicable, a police report</strong> for fraud / stolen goods, seeking the refund and all damages under Section 6."><strong>ดำเนินคดีแพ่ง และแจ้งความ</strong>ในความผิดฉ้อโกง/ของโจร (หากเข้าข่าย) เพื่อเรียกเงินคืนและค่าเสียหายทั้งหมดตามข้อ 6</div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ====== Section 8 — Personal data ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2 data-i18n="Personal Data (PDPA)">ข้อมูลส่วนบุคคล (PDPA)</h2>
+    </div>
+    <p data-i18n="The Seller consents to LLOOP collecting and using the personal data provided (name, ID number, address, bank account) to issue a purchase voucher, comply with tax and accounting law, and — where a warranty proves false — as evidence in a dispute. Data is handled under the Personal Data Protection Act B.E. 2562 (2019) and LLOOP's Privacy Policy.">ผู้ขายยินยอมให้ LLOOP เก็บและใช้ข้อมูลส่วนบุคคลที่ให้ไว้ (ชื่อ เลขบัตรประชาชน ที่อยู่ บัญชีธนาคาร) เพื่อออกใบรับซื้อ ปฏิบัติตามกฎหมายภาษีและบัญชี และ — กรณีคำรับรองเป็นเท็จ — ใช้เป็นหลักฐานในการดำเนินคดี ทั้งนี้เป็นไปตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 และนโยบายความเป็นส่วนตัวของ LLOOP</p>
+  </div>
+
+  <!-- ====== Section 9 — Legal references ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2 data-i18n="Legal References">ข้อกฎหมายที่อ้างอิง</h2>
+    </div>
+
+    <table class="info-table">
+      <thead>
+        <tr>
+          <th data-i18n="Law">กฎหมาย</th>
+          <th data-i18n="Section">มาตรา</th>
+          <th data-i18n="Subject">เรื่อง</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-i18n="Civil and Commercial Code">ประมวลกฎหมายแพ่งและพาณิชย์ (ป.พ.พ.)</td>
+          <td data-i18n="Section 453">มาตรา 453</td>
+          <td data-i18n="Sale — transfer of ownership against a price">ซื้อขาย — โอนกรรมสิทธิ์แลกกับราคา</td>
+        </tr>
+        <tr>
+          <td data-i18n="Civil and Commercial Code">ประมวลกฎหมายแพ่งและพาณิชย์ (ป.พ.พ.)</td>
+          <td data-i18n="Section 472">มาตรา 472</td>
+          <td data-i18n="Seller's liability for defects in the goods">ความรับผิดของผู้ขายเพื่อชำรุดบกพร่อง</td>
+        </tr>
+        <tr>
+          <td data-i18n="Civil and Commercial Code">ประมวลกฎหมายแพ่งและพาณิชย์ (ป.พ.พ.)</td>
+          <td data-i18n="Section 475">มาตรา 475</td>
+          <td data-i18n="Seller's liability for eviction / third-party right">ความรับผิดของผู้ขายในการรอนสิทธิ</td>
+        </tr>
+        <tr>
+          <td data-i18n="Civil and Commercial Code">ประมวลกฎหมายแพ่งและพาณิชย์ (ป.พ.พ.)</td>
+          <td data-i18n="Sections 7 &amp; 224">มาตรา 7 &amp; 224</td>
+          <td data-i18n="Default interest 5% per annum (current rate)">ดอกเบี้ยผิดนัด 5% ต่อปี (อัตราปัจจุบัน)</td>
+        </tr>
+        <tr>
+          <td data-i18n="Criminal Code">ประมวลกฎหมายอาญา (ป.อ.)</td>
+          <td data-i18n="Section 341">มาตรา 341</td>
+          <td data-i18n="Fraud">ฉ้อโกง</td>
+        </tr>
+        <tr>
+          <td data-i18n="Criminal Code">ประมวลกฎหมายอาญา (ป.อ.)</td>
+          <td data-i18n="Section 357">มาตรา 357</td>
+          <td data-i18n="Receiving / dealing in stolen property">รับของโจร</td>
+        </tr>
+        <tr>
+          <td data-i18n="Trademark Act">พ.ร.บ. เครื่องหมายการค้า</td>
+          <td data-i18n="B.E. 2534 (1991)">พ.ศ. 2534</td>
+          <td data-i18n="Counterfeit / infringing goods">สินค้าปลอม / ละเมิดเครื่องหมายการค้า</td>
+        </tr>
+        <tr>
+          <td data-i18n="Personal Data Protection Act">พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล</td>
+          <td data-i18n="B.E. 2562 (2019)">พ.ศ. 2562</td>
+          <td data-i18n="Handling of the Seller's personal data">การจัดการข้อมูลส่วนบุคคลของผู้ขาย</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ====== Section 10 — Jurisdiction ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2 data-i18n="Jurisdiction &amp; Legal Costs">เขตอำนาจศาลและค่าดำเนินคดี</h2>
+    </div>
+
+    <p data-i18n="Any dispute arising from this agreement shall be subject to the jurisdiction of the <strong>Bangkok South Civil Court</strong> or the court having jurisdiction over LLOOP's place of business at the time of the dispute.">ข้อพิพาทใด ๆ ที่เกิดจากสัญญานี้ให้อยู่ในเขตอำนาจของ<strong>ศาลแพ่งกรุงเทพใต้</strong> หรือศาลที่มีเขตอำนาจเหนือที่ตั้งธุรกิจ LLOOP ณ ขณะนั้น</p>
+
+    <div class="callout-warn" data-i18n="If the Seller breaches this agreement (e.g. gives false warranties, sells counterfeit or stolen goods, or fails to refund) and LLOOP must exercise its legal rights, <strong>the Seller agrees to bear LLOOP's reasonable attorney fees, court fees, demand-letter costs, and all actual reasonable litigation expenses</strong>, in addition to the amounts under Section 6.">
+      กรณีผู้ขายผิดสัญญา (เช่น ให้คำรับรองเท็จ ขายของปลอมหรือของโจร หรือไม่คืนเงิน) จน LLOOP ต้องใช้สิทธิทางกฎหมาย <strong>ผู้ขายตกลงรับผิดชอบค่าทนายความฝ่าย LLOOP ค่าธรรมเนียมศาล ค่าหนังสือทวงถาม และค่าใช้จ่ายในการดำเนินคดีทั้งหมดตามจริงที่สมเหตุสมผล</strong> เพิ่มเติมจากยอดในข้อ 6
+    </div>
+
+    <div class="sub-section">
+      <h3 data-i18n="General Provisions">ข้อกำหนดทั่วไป</h3>
+      <ul class="styled-list">
+        <li data-i18n="<strong>Severability:</strong> if any clause is unenforceable, the remaining clauses stay in full effect."><strong>ความเป็นโมฆะบางส่วน:</strong> หากข้อใดใช้บังคับไม่ได้ ข้ออื่นยังคงมีผลสมบูรณ์</li>
+        <li data-i18n="<strong>Consumer rights:</strong> nothing in this agreement excludes rights protected by law that cannot be waived."><strong>สิทธิผู้บริโภค:</strong> ไม่มีข้อใดในสัญญานี้ตัดสิทธิที่กฎหมายคุ้มครองและยกเว้นมิได้</li>
+        <li data-i18n="<strong>Notices:</strong> notices via LINE, email, or registered post to the details the Seller provided are deemed validly given."><strong>การบอกกล่าว:</strong> การแจ้งทาง LINE อีเมล หรือไปรษณีย์ลงทะเบียน ตามข้อมูลที่ผู้ขายให้ไว้ ถือว่าชอบแล้ว</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ====== Section 11 — Acceptance ====== -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2 data-i18n="Confirmation &amp; Acceptance">การยืนยันและยอมรับสัญญา</h2>
+    </div>
+
+    <p data-i18n="Submitting an offer to sell in the LLOOP system constitutes the Seller's full acknowledgement, understanding, and acceptance of all terms in this document, with the same legal force as a handwritten signature.">การกดเสนอขายในระบบ LLOOP ถือว่าผู้ขายได้อ่าน เข้าใจ และยอมรับข้อตกลงทุกข้อในเอกสารนี้โดยสมบูรณ์ และมีผลผูกพันตามกฎหมายเทียบเท่าการลงลายมือชื่อ</p>
+
+    <div class="accept-box">
+      <div class="accept-title" data-i18n="Acknowledgement">ยืนยันการยอมรับ</div>
+
+      <label class="checkbox-row" onclick="toggleCheck('chk1')">
+        <div class="custom-check" id="chk1">
+          <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5 5L5 8.5L11.5 1.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="checkbox-text" data-i18n="I warrant that I own these items, that all information I gave is true and complete, and that they are genuine and free of any third-party claim.">
+          ข้าพเจ้ารับรองว่าเป็นเจ้าของชุดเหล่านี้ ข้อมูลที่ให้ไว้เป็นความจริงและครบถ้วน และชุดเป็นของแท้ ปราศจากสิทธิเรียกร้องของบุคคลภายนอก
+        </div>
+      </label>
+
+      <label class="checkbox-row" onclick="toggleCheck('chk2')">
+        <div class="custom-check" id="chk2">
+          <svg width="13" height="10" viewBox="0 0 13 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5 5L5 8.5L11.5 1.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="checkbox-text" data-i18n="I have read and agree to all terms of the LLOOP Pre-Loved Purchase Agreement, including the Buyer's rights to re-price, reject, and seek a refund and damages for misrepresentation.">
+          ข้าพเจ้าได้อ่านและยอมรับข้อตกลงสัญญาซื้อขายชุดมือสอง LLOOP ทุกข้อ รวมถึงสิทธิของผู้ซื้อในการปรับราคา ปฏิเสธ และเรียกเงินคืนพร้อมค่าเสียหายกรณีให้ข้อมูลเท็จ
+        </div>
+      </label>
+
+      <div class="accept-note" data-i18n="This confirmation is legally binding and may be used as evidence in any dispute proceedings.">
+        การยืนยันนี้มีผลผูกพันตามกฎหมาย และใช้เป็นหลักฐานในการดำเนินคดีหากเกิดข้อพิพาท
+      </div>
+    </div>
+  </div>
+
+  <div class="part-divider">
+    <span data-i18n="Contact LLOOP">ติดต่อ LLOOP</span>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2 data-i18n="Contact">ติดต่อเรา</h2>
+    </div>
+    <p data-i18n="For any questions about this agreement, please contact us before offering an item for sale.">หากมีข้อสงสัยเกี่ยวกับสัญญานี้ กรุณาติดต่อก่อนเสนอขายชุด</p>
+
+    <div style="background:#fff;border:1px solid var(--line);border-radius:4px;padding:24px;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;" data-i18n="Buyer">ผู้ซื้อ</div>
+      <p style="font-weight:500;margin-bottom:2px;">LLOOP</p>
+      <p style="font-size:13px;color:var(--muted);font-weight:300;margin-bottom:8px;" data-i18n="Operated by a sole proprietor · name disclosed upon request">ดำเนินการในนามบุคคลธรรมดา · เปิดเผยชื่อผู้ประกอบการเมื่อร้องขอ</p>
+      <p style="font-size:14px;font-weight:300;margin-bottom:4px;"><span data-i18n="Email">อีเมล</span>: <a href="mailto:wearlloop@gmail.com" style="color:var(--sage);text-decoration:none;font-weight:500;">wearlloop@gmail.com</a></p>
+      <p style="font-size:14px;font-weight:300;">LINE OA: <a href="https://line.me/R/ti/p/@lloop" style="color:var(--sage);text-decoration:none;font-weight:500;">@lloop</a></p>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px;font-weight:300;" data-i18n="We respond within 1 business day.">ตอบกลับภายใน 1 วันทำการ</p>
+    </div>
+  </div>
+
+</div><!-- end .wrap -->
+
+<footer>
+  <span data-i18n="LLOOP &nbsp;&middot;&nbsp; Pre-Loved Purchase Agreement (version secondhand-2026a) &nbsp;&middot;&nbsp; Updated July 2026">LLOOP &nbsp;&middot;&nbsp; สัญญาซื้อขายชุดมือสอง (เวอร์ชัน secondhand-2026a) &nbsp;&middot;&nbsp; อัปเดต กรกฎาคม 2569</span><br>
+  <span style="margin-top:4px;display:inline-block;"><a href="privacy.html" style="color:var(--sage);text-decoration:none;" data-i18n="Privacy Policy">นโยบายความเป็นส่วนตัว (Privacy)</a> &nbsp;&middot;&nbsp; wearlloop@gmail.com</span>
+</footer>
+
+<script>
+  function toggleCheck(id) {
+    document.getElementById(id).classList.toggle('checked');
+  }
+</script>
+<script src="nav.js?v=1"></script>
+
+</body>
+</html>

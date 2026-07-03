@@ -116,6 +116,9 @@
     <label>ตำหนิ/จุดบกพร่อง (ถ้ามี — บอกตรง ๆ ช่วยให้ประเมินไวขึ้น)</label>
     <textarea id="gdefects" placeholder="เช่น คราบเล็กน้อยที่ชาย ซิปฝืด กระดุมหาย ฯลฯ (ไม่มีก็เว้นว่าง)" style="min-height:54px;resize:vertical"></textarea>
     <label>ราคาที่อยากได้ (บาท)</label><input id="gprice" type="number" inputmode="numeric">
+    <label>ลิงก์อ้างอิงราคา — Lazada / Shopee (ชุดเดียวกันหรือใกล้เคียง)</label>
+    <input id="gref" type="url" inputmode="url" placeholder="วางลิงก์ Lazada / Shopee ของชุดรุ่นเดียวกัน">
+    <div class="upnote" style="display:block;margin-top:8px">แนบลิงก์ร้านค้าที่ขายชุดรุ่นเดียวกัน (Lazada/Shopee) ช่วยให้ทีมยืนยันราคาตลาด + ความเป็นของแท้ และประเมินให้ไวขึ้นค่ะ</div>
   </div>
 
   <!-- ขายเหมา -->
@@ -125,6 +128,8 @@
     <label>จำนวนตัวที่อยากขายเหมา</label><input id="bcount" type="number" inputmode="numeric" placeholder="เช่น 12">
     <label>มีอะไรบ้าง (เล่าคร่าว ๆ)</label><textarea id="bnote" placeholder="เช่น เดรส 5 ตัว เสื้อ 4 กระโปรง 3 ส่วนใหญ่ไซส์ M สภาพดี" style="min-height:70px;resize:vertical"></textarea>
     <label>ราคาที่อยากได้ทั้งเหมา (บาท — เว้นว่างให้เราประเมิน)</label><input id="bprice" type="number" inputmode="numeric">
+    <label>ลิงก์อ้างอิงราคา — Lazada / Shopee (ถ้ามีชุดเด่น ๆ ในล็อต)</label>
+    <input id="bref" type="url" inputmode="url" placeholder="วางลิงก์ Lazada / Shopee (ถ้ามี)">
   </div>
 
   <div class="card">
@@ -137,6 +142,7 @@
     <label>หรือวางลิงก์รูป (คั่นด้วย ,)</label>
     <textarea id="gphotos" placeholder="https://...jpg" style="min-height:60px;resize:vertical"></textarea>
     <div style="margin-top:14px"><button class="btn" onclick="submit()">ส่งให้ทีมประเมิน</button></div>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6">การกดส่งถือว่ายอมรับ <a href="secondhand-terms.html" target="_blank" rel="noopener" style="color:var(--forest);font-weight:600">สัญญาซื้อขายชุดมือสอง</a> — ผู้ขายรับรองว่าเป็นเจ้าของ ของแท้ และแจ้งตำหนิครบถ้วน</p>
   </div>
 
   <div class="done" id="done"></div>
@@ -224,14 +230,14 @@
       const occ=[...$('occ').querySelectorAll('input:checked')].map(i=>i.value);
       p={ ...base, name:$('gname').value, brand:$('gbrand').value, category:$('gcat').value, size:$('gsize').value,
         color_name:$('gcolor').value, fabric:$('gfabric').value, condition:$('gcond').value, defects:$('gdefects').value,
-        asking_price:Number($('gprice').value)||0, occasion_tags:occ };
+        asking_price:Number($('gprice').value)||0, occasion_tags:occ, market_ref:($('gref')?$('gref').value.trim():'') };
     } else {
       const n=Number($('bcount').value)||0;
       if(!n){ toast('ใส่จำนวนตัวก่อนค่ะ'); return; }
       if(!photos.length){ toast('ขายเหมารบกวนแนบรูปทุกตัวด้วยค่ะ (อย่างน้อย 1 รูป)'); return; }
       if(photos.length < n && !confirm(`คุณใส่ ${n} ตัว แต่แนบรูป ${photos.length} รูป — แนบรูปให้ครบทุกตัวจะประเมินไวกว่า ส่งเลยไหมคะ?`)) return;
       p={ ...base, item_count:n, lot_note:$('bnote').value,
-        asking_price: $('bprice').value?Number($('bprice').value):null };
+        asking_price: $('bprice').value?Number($('bprice').value):null, market_ref:($('bref')?$('bref').value.trim():'') };
     }
     if($('sidcard') && $('sidcard').value && !($('sconsent')&&$('sconsent').checked)){ toast('กรุณายินยอมการเก็บข้อมูลส่วนบุคคล (PDPA) ก่อนค่ะ'); return; }
     const { error } = await sb.rpc('seller_submit',{ p });
