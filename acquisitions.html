@@ -130,7 +130,8 @@
       ['ราคาที่ผู้ขายขอ',o.asking_price!=null?baht(o.asking_price):'—'],
       ['ใบรับซื้อ',o.voucher_no||'ยังไม่ออก'],['หมายเหตุ',o.note],
     ].filter(([,v])=>v!=null&&v!=='').map(([k,v])=>`<div class="k">${k}</div><div>${esc(v)}</div>`).join('')
-    + (o.market_ref?`<div class="k">ลิงก์อ้างอิง (Lazada/Shopee)</div><div><a href="${esc(o.market_ref)}" target="_blank" rel="noopener" style="color:var(--sage,#6FB3A6);word-break:break-all">${esc(o.market_ref)}</a></div>`:'');
+    // ลิงก์อ้างอิงมาจากผู้ขาย (untrusted) — เรนเดอร์เป็นลิงก์เฉพาะ http(s) เท่านั้น กัน javascript:/data: (XSS)
+    + (o.market_ref?`<div class="k">ลิงก์อ้างอิง (Lazada/Shopee)</div><div>${/^https?:\/\//i.test(o.market_ref)?`<a href="${esc(o.market_ref)}" target="_blank" rel="noopener nofollow" style="color:var(--sage,#6FB3A6);word-break:break-all">${esc(o.market_ref)}</a>`:esc(o.market_ref)}</div>`:'');
     const canDecide=['new','priced'].includes(o.status||'new');
     const canPay=o.status==='accepted';
     const canStock=['paid','accepted'].includes(o.status);
