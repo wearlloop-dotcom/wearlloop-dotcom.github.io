@@ -1403,8 +1403,9 @@ async function bookingOccasion(occ, date) {
   }
   let onServer = false;
   if (uid && window.meRpc) {
-    // gateway verify idToken ให้ — ถ้ายังไม่ allowlist upsert_event จะได้ error → เก็บลงเครื่องแทน
-    try { const r = await window.meRpc('upsert_event', { p_uid: uid, p_id: null, p_date: date, p_occasion: occ, p_venue: null, p_dress_code: null }, { noReauth: true }); onServer = !r.error && !(r.data && r.data.error); } catch (e) { /**/ }
+    // เขียนลง customer_events จริงผ่าน add_customer_event (gateway เติม p_customer จาก idToken)
+    // วันงาน = วันรับชุด · ยังไม่รู้ชื่องาน/เดรสโค้ด → note/dress_code = null · ยังไม่ allowlist ก็ error → เก็บลงเครื่องแทน
+    try { const r = await window.meRpc('add_customer_event', { p: { event_date: date, occasion: occ, dress_code: null, note: null } }, { noReauth: true }); onServer = !r.error && !!(r.data && r.data.ok); } catch (e) { /**/ }
   }
   if (!onServer) {
     // โครงเดียวกับ my-events.html ('lloop_events_v1') — หน้า ปฏิทินงานของฉัน จะ sync ขึ้น server ให้เอง

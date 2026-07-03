@@ -915,7 +915,8 @@ async function saveGroupCalendar(date){
   const uid = (CUSTOMER && CUSTOMER.line_uid) || null;
   let onServer = false;
   if(uid && window.meRpc){
-    try{ const r = await window.meRpc('upsert_event', { p_uid: uid, p_id: null, p_date: date, p_occasion: occ, p_venue: null, p_dress_code: null }, { noReauth: true }); onServer = !r.error && !(r.data && r.data.error); }catch(e){ /**/ }
+    // เขียนลง customer_events จริงผ่าน add_customer_event (gateway เติม p_customer) · note/dress_code = null
+    try{ const r = await window.meRpc('add_customer_event', { p: { event_date: date, occasion: occ, dress_code: null, note: null } }, { noReauth: true }); onServer = !r.error && !!(r.data && r.data.ok); }catch(e){ /**/ }
   }
   if(!onServer){
     try{

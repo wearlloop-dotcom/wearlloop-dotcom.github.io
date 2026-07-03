@@ -144,8 +144,13 @@
 <script src="data.js?v=38"></script>
 <script>
 // ===== ปฏิทินงานของฉัน — ลูกค้าบอกงานล่วงหน้า → สไตลิสต์เตรียมลุคเชิงรุก =====
-// Backend RPC (my_events / upsert_event / delete_event) อาจยังไม่ deploy —
-// ทุก call ห่อ try/catch แล้ว fallback ลง localStorage ('lloop_events_v1') ให้หน้าใช้ได้เต็มรูปแบบทันที
+// Backend จริงบนตาราง customer_events (ไม่ใช่ตารางซ้ำ):
+//   อ่าน  my_events(p_customer)                → [{id,event_date,occasion,dress_code,note}] (เฉพาะงานในอนาคต)
+//   เพิ่ม  add_customer_event(p_customer, p jsonb {event_date,occasion,dress_code,note})  source='self'
+//   ลบ    remove_customer_event(p_customer, p_id)
+// เรียกผ่าน me-rpc — gateway เติม p_customer จาก LINE idToken (กัน IDOR)
+// สถานะ notified อ่านตรงจาก customer_events (RLS ev_read = SELECT public) เพราะ my_events ไม่ได้ส่งมาให้
+// ทุก call ห่อ error แล้ว fallback ลง localStorage ('lloop_events_v1') ให้หน้าใช้ได้เต็มเมื่อยังไม่ล็อกอิน/ยังไม่เปิด gateway
 const $ = id => document.getElementById(id);
 const T = (th, en) => (window.NAV ? NAV.t(th, en) : th);
 const LS_KEY = 'lloop_events_v1';           // prefix 'lloop_events_' ตามข้อตกลง
@@ -163,6 +168,13 @@ const OCC_EN = {
   merit:'Merit', festival:'Festival', trip:'Trip',
 };
 const VENUES = (window.MOCK && MOCK.VENUES) || [];
+
+// เดรสโค้ด: ป้าย UI ไทย → enum จริง (casual/smart_casual/cocktail/formal) · ตีมสี/ไม่ระบุ = null
+const DRESS_ENUM = { 'ค็อกเทล':'cocktail', 'ทางการ':'formal', 'สมาร์ทแคชชวล':'smart_casual', 'ลำลอง':'casual', 'ตีมสี':null, '':null };
+function mapDress(v){ return Object.prototype.hasOwnProperty.call(DRESS_ENUM, v) ? DRESS_ENUM[v] : null; }
+// enum → ป้ายแสดงผล (server เก็บ enum · local เก็บป้ายไทยเดิม — โชว์ตามที่มี)
+const DRESS_LABEL = { cocktail:['ค็อกเทล','Cocktail'], formal:['ทางการ','Formal'], smart_casual:['สมาร์ทแคชชวล','Smart casual'], casual:['ลำลอง','Casual'] };
+function dressLabel(v){ const d = DRESS_LABEL[v]; return d ? (NAV.lang==='en' ? d[1] : d[0]) : v; }
 
 let sb = null, uid = null, serverOK = false;
 let events = [];              // [{id,date,occasion,venue,dress_code,status}]
@@ -183,35 +195,51 @@ function localSet(a){ try{ localStorage.setItem(LS_KEY, JSON.stringify(a)); }cat
 let _toastT = null;
 function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(_toastT); _toastT = setTimeout(()=>t.classList.remove('show'), 3200); }
 
-// ---------- server + sync ----------
-// เรียกผ่าน gateway me-rpc ก่อน (verify LINE idToken ฝั่ง server — ปลอม uid ไม่ได้)
-// gateway ยังไม่ allowlist ฟังก์ชัน → fallback ยิงตรงตาม convention เดิม (ขั้นตอนปิดถาวรดู db/README)
-async function gwRpc(name, args){
-  if (window.meRpc && uid) {
-    const r = await window.meRpc(name, args);
-    if (!r.error) return r;
-    // fallback เฉพาะเคสที่ gateway ยังไม่ได้รันแน่ ๆ — 5xx/เน็ตหลุดอาจรันไปแล้ว ห้ามยิงซ้ำ (กัน insert เบิ้ล)
-    const m = r.error.message || '';
-    const notRun = m === 'redirecting_to_login' || m === 'คำสั่งนี้ไม่อนุญาต' || m === 'ยังไม่พบบัญชีลูกค้าของคุณ' || m === 'เซสชันหมดอายุ เข้าสู่ระบบใหม่';
-    if (!notRun) return r;
-  }
-  return client().rpc(name, args);
+// ---------- server (customer_events ผ่าน me-rpc) ----------
+// meRpc คืน { data, error } · gateway เติม p_customer จาก LINE idToken ที่ verify แล้ว (ปลอม uid ไม่ได้)
+// โทเคนหมดอายุ → meRpc เด้งเข้า LINE login ให้เอง (มี guard กัน loop) แล้วคืน error ให้ fallback local
+async function meCall(fn, args){
+  if(!(window.meRpc && uid)) return { data:null, error:{ message:'no_session' } };
+  return await window.meRpc(fn, args);
 }
-async function rpc(name, args){ const { data, error } = await gwRpc(name, args); if(error) throw error; if(data && data.error) throw new Error(data.error); return data; }
+
+// map แถวจาก server (my_events: id,event_date,occasion,dress_code,note) → รูปแบบภายในหน้า
+function mapServerRow(r){
+  return { id:r.id, date:r.event_date, occasion:r.occasion,
+           dress_code:r.dress_code || '', venue:r.note || '',
+           notified:!!r.notified, suggestions:Number(r.suggestions)||0, _server:true };
+}
+// map แถว local (เก็บป้ายไทยเดิม) — notified มาจาก status เดิมถ้ามี
+function mapLocalRow(r){
+  return { id:r.id, date:r.date, occasion:r.occasion, dress_code:r.dress_code || '',
+           venue:r.venue || '', notified:!!r.notified || r.status==='pinged', suggestions:0 };
+}
+
+// my_events ไม่ส่ง notified มา → เติมให้แถว server โดยอ่านตรงผ่าน RLS ev_read (SELECT public)
+async function enrichNotified(){
+  try{
+    const ids = events.filter(e => e._server).map(e => e.id);
+    if(!ids.length) return;
+    const { data } = await client().from('customer_events').select('id,notified').in('id', ids);
+    if(Array.isArray(data)){
+      const m = {}; data.forEach(x => { m[x.id] = !!x.notified; });
+      events.forEach(e => { if(e.id in m) e.notified = m[e.id]; });
+    }
+  }catch(e){ /* best-effort — อ่านไม่ได้ก็ถือว่ายังไม่ ready */ }
+}
 
 // ล็อกอิน + RPC ใช้ได้ → ดันของที่เคยบันทึกในเครื่องขึ้น server ครั้งเดียว แล้วเคลียร์เครื่อง
 async function syncLocalUp(serverRows){
   const loc = localGet();
   if(!loc.length) return;
-  // กันซ้ำ: ถ้า (วันที่, ประเภทงาน, สถานที่) ตรงกับที่มีบน server อยู่แล้ว — ข้ามไม่ push ซ้ำ
-  const dupKey = ev => [ev.date, ev.occasion, ev.venue || ''].join('|');
-  const onServer = new Set((Array.isArray(serverRows) ? serverRows : []).map(dupKey));
+  // กันซ้ำ: ถ้า (วันที่, ประเภทงาน, note) ตรงกับที่มีบน server อยู่แล้ว — ข้ามไม่ push ซ้ำ
+  const dupKey = (d,o,v) => [d, o, v || ''].join('|');
+  const onServer = new Set((Array.isArray(serverRows) ? serverRows : []).map(r => dupKey(r.event_date, r.occasion, r.note)));
   const failed = [];
   for(const ev of loc){
-    if(onServer.has(dupKey(ev))) continue;
-    try{
-      await rpc('upsert_event', { p_uid: uid, p_id: null, p_date: ev.date, p_occasion: ev.occasion, p_venue: ev.venue || null, p_dress_code: ev.dress_code || null });
-    }catch(e){ console.warn('sync local event failed', e); failed.push(ev); }
+    if(onServer.has(dupKey(ev.date, ev.occasion, ev.venue))) continue;
+    const r = await meCall('add_customer_event', { p: { event_date: ev.date, occasion: ev.occasion, dress_code: mapDress(ev.dress_code), note: ev.venue || null } });
+    if(r.error || !(r.data && r.data.ok)){ console.warn('sync local event failed', r.error || r.data); failed.push(ev); }
   }
   if(failed.length) localSet(failed);
   else localStorage.removeItem(LS_KEY);
@@ -219,34 +247,35 @@ async function syncLocalUp(serverRows){
 
 async function loadEvents(){
   if(uid){
-    try{
-      let rows = await rpc('my_events', { p_uid: uid });
+    const r = await meCall('my_events', {});
+    if(!r.error && Array.isArray(r.data)){
       serverOK = true;
+      let rows = r.data;
       if(localGet().length){
         await syncLocalUp(rows);
-        try{ rows = await rpc('my_events', { p_uid: uid }); }catch(e){ /* ใช้รอบแรก */ }
+        const r2 = await meCall('my_events', {});
+        if(!r2.error && Array.isArray(r2.data)) rows = r2.data;   // ใช้รอบแรกถ้าโหลดซ้ำไม่ได้
       }
-      events = Array.isArray(rows) ? rows : [];
+      events = rows.map(mapServerRow);
+      await enrichNotified();
       return;
-    }catch(e){ console.warn('my_events RPC ยังไม่พร้อม — ใช้ข้อมูลในเครื่อง', e); serverOK = false; }
+    }
+    console.warn('my_events ยังไม่พร้อม — ใช้ข้อมูลในเครื่อง', r.error); serverOK = false;
   }
-  events = localGet();
+  events = localGet().map(mapLocalRow);
 }
 
 // บันทึกงาน (server ก่อน — ล้มเมื่อไหร่ค่อยลงเครื่อง)
 async function persistEvent(ev){
   if(uid){
-    try{
-      await rpc('upsert_event', { p_uid: uid, p_id: null, p_date: ev.date, p_occasion: ev.occasion, p_venue: ev.venue || null, p_dress_code: ev.dress_code || null });
-      serverOK = true;
-      await loadEvents();
-      return;
-    }catch(e){ console.warn('upsert_event RPC ยังไม่พร้อม — บันทึกลงเครื่อง', e); serverOK = false; }
+    const r = await meCall('add_customer_event', { p: { event_date: ev.date, occasion: ev.occasion, dress_code: mapDress(ev.dress_code), note: ev.venue || null } });
+    if(!r.error && r.data && r.data.ok){ serverOK = true; await loadEvents(); return; }
+    console.warn('add_customer_event ยังไม่พร้อม/ไม่สำเร็จ — บันทึกลงเครื่อง', r.error || r.data); serverOK = false;
   }
-  const row = { id: 'loc_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), status: 'planned',
+  const row = { id: 'loc_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6), status: 'planned', notified: false,
                 date: ev.date, occasion: ev.occasion, venue: ev.venue || '', dress_code: ev.dress_code || '' };
   const loc = localGet(); loc.push(row); localSet(loc);
-  if(!events.some(x => x.id === row.id)) events.push(row);
+  if(!events.some(x => x.id === row.id)) events.push(mapLocalRow(row));
 }
 
 async function removeEvent(id){
@@ -254,9 +283,9 @@ async function removeEvent(id){
   if(String(id).indexOf('loc_') === 0){
     localSet(localGet().filter(e => e.id !== id));
   } else {
-    // ลบบน server ไม่สำเร็จ → คงแถวไว้ ไม่หลอกว่าลบแล้ว
-    try{ await rpc('delete_event', { p_uid: uid, p_id: id }); }
-    catch(e){ console.warn('delete_event ล้มเหลว', e); toast(T('ลบไม่สำเร็จ ลองใหม่นะคะ','Couldn’t delete — please try again')); return; }
+    // ลบบน server ผ่าน RPC จริง remove_customer_event — ไม่สำเร็จ คงแถวไว้ ไม่หลอกว่าลบแล้ว
+    const r = await meCall('remove_customer_event', { p_id: id });
+    if(r.error || !(r.data && r.data.ok)){ console.warn('remove_customer_event ล้มเหลว', r.error || r.data); toast(T('ลบไม่สำเร็จ ลองใหม่นะคะ','Couldn’t delete — please try again')); return; }
   }
   events = events.filter(e => e.id !== id);
   render();
@@ -354,8 +383,11 @@ function cdText(days){
 
 function rowHTML(e, isPast){
   const days = daysUntil(e.date);
-  // "ลุคพร้อมแล้ว" ต่อเมื่อสไตลิสต์ ping จริง (status='pinged') และล็อกอินอยู่ — ไม่เดาจากวันที่อย่างเดียว
-  const status = isPast ? '' : ((e.status === 'pinged' && uid)
+  // สไตลิสต์เตรียมลุคไว้กี่ชุด (event_suggestions) — โชว์เมื่อมีข้อมูลเท่านั้น
+  const prep = (!isPast && e.suggestions > 0)
+    ? `<div class="stat ready">${T('สไตลิสต์เตรียมลุคให้ '+e.suggestions+' ชุด','Your stylist prepared '+e.suggestions+' looks')}</div>` : '';
+  // "ลุคพร้อมแล้ว" เมื่อ notified = true (สไตลิสต์ทักแล้ว) และล็อกอินอยู่ — ไม่เดาจากวันที่
+  const status = isPast ? '' : ((e.notified && uid)
     ? `<div class="stat ready">${T('ลุคของคุณพร้อมแล้ว — สไตลิสต์จะทักไปทาง LINE นะคะ','Your look is ready — your stylist will message you on LINE')}</div>`
     : `<div class="stat prep">${T('สไตลิสต์กำลังเตรียมลุคให้ค่ะ','Your stylist is preparing a look for you')}</div>`);
   const seeBtn = (!isPast && days <= 14)
@@ -365,7 +397,8 @@ function rowHTML(e, isPast){
     <div class="info">
       <div class="l1"><b>${esc(occLabel(e.occasion))}</b>${isPast ? '' : `<span class="cd">${cdText(days)}</span>`}</div>
       ${e.venue ? `<div class="venue">${esc(e.venue)}</div>` : ''}
-      ${e.dress_code ? `<div class="dcchip">${esc(e.dress_code)}</div>` : ''}
+      ${e.dress_code ? `<div class="dcchip">${esc(dressLabel(e.dress_code))}</div>` : ''}
+      ${prep}
       ${status}
       <div class="acts">${seeBtn}<button class="delbtn" onclick="removeEvent('${esc(e.id)}')">${T('ลบ','Delete')}</button></div>
     </div>
