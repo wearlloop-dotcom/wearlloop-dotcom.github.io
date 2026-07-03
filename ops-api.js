@@ -12,13 +12,31 @@
   const LIFF_ID = CONF.OPS_LIFF_ID || '2010486714-lDr0nzy0';
   let _ready = false, _initP = null;
 
+  // LIFF ยังจำ session แต่ id token หมดอายุ (~1 ชม.) → logout แล้วพาไป LINE login ใหม่อัตโนมัติ
+  // ลอง "ครั้งเดียว" ต่อรอบ (ธง opsReloginTried ล้างเมื่อ RPC สำเร็จ) — กันวนลูปถ้า login กลับมาแล้วยังใช้ไม่ได้
+  function forceRelogin() {
+    if (sessionStorage.getItem('opsReloginTried')) return false;
+    sessionStorage.setItem('opsReloginTried', '1');
+    _ready = false;
+    sessionStorage.removeItem('opsLoginTried');
+    try { liff.logout(); } catch (_e) {}
+    liff.login({ redirectUri: window.location.href });
+    return true;
+  }
+
   async function opsLogin() {
     if (_ready) return true;
     if (!window.liff || !LIFF_ID) throw new Error('ยังไม่ได้ตั้งค่า LINE Login (LIFF_ID)');
     // withLoginOnExternalBrowser: ให้ login ทำงานบนเบราว์เซอร์นอกแอป LINE (ไม่งั้น isLoggedIn=false หลัง redirect → วน)
     if (!_initP) _initP = liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
     await _initP;
-    if (liff.isLoggedIn()) { _ready = true; sessionStorage.removeItem('opsLoginTried'); return true; }
+    if (liff.isLoggedIn()) {
+      // เช็คอายุ token ตั้งแต่เปิดหน้า — หมดอายุ/ใกล้หมด (< 1 นาที) ให้เด้งไป login ใหม่เลย ไม่รอ server ปฏิเสธ
+      const tok = (liff.getDecodedIDToken && liff.getDecodedIDToken()) || null;
+      const stale = !tok || (tok.exp && tok.exp * 1000 < Date.now() + 60000);
+      if (stale && forceRelogin()) return false;
+      _ready = true; sessionStorage.removeItem('opsLoginTried'); return true;
+    }
     // ยังไม่ login → redirect "ครั้งเดียว" (กัน loop: ถ้ากลับมาแล้วยังไม่ login = หยุด)
     if (sessionStorage.getItem('opsLoginTried')) return false;
     sessionStorage.setItem('opsLoginTried', '1');
@@ -38,10 +56,13 @@
       });
       const out = await r.json().catch(() => ({}));
       if (!r.ok || out.error) {
+        // server บอก token ใช้ไม่ได้ → พาไป LINE login ใหม่อัตโนมัติ (ครั้งเดียว) แทนการโชว์ข้อความค้าง
+        if (out.error === 'unauthorized' && forceRelogin()) return { data: null, error: { message: 'redirecting_to_login' } };
         const map = { unauthorized: 'เซสชันหมดอายุ เข้าสู่ระบบใหม่', no_access: 'ไม่มีสิทธิ์ใช้งานหลังบ้าน',
           owner_only: 'คำสั่งนี้สำหรับเจ้าของเท่านั้น', fn_not_allowed: 'คำสั่งนี้ไม่อนุญาต' };
         return { data: null, error: { message: map[out.error] || out.message || ('ops-rpc ' + r.status) } };
       }
+      sessionStorage.removeItem('opsReloginTried'); // token ผ่าน server แล้ว → เปิดสิทธิ์ relogin รอบหน้า (เมื่อหมดอายุอีก)
       return { data: out.data, error: null };
     } catch (e) {
       return { data: null, error: { message: (e && e.message) || 'ops-rpc failed' } };
@@ -60,9 +81,13 @@
       headers: { 'Authorization': 'Bearer ' + idToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(Object.assign({ action: action }, extra || {})),
     });
-    if (r.status === 401 || r.status === 403) throw new Error('unauth');
+    if (r.status === 401 || r.status === 403) {
+      if (r.status === 401 && forceRelogin()) throw new Error('redirecting'); // token หมดอายุ → พาไป login ใหม่
+      throw new Error('unauth');
+    }
     const j = await r.json().catch(() => ({}));
     if (!r.ok || j.error) throw new Error(j.error || ('acct ' + r.status));
+    sessionStorage.removeItem('opsReloginTried');
     return j;
   }
 
