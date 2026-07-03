@@ -251,3 +251,19 @@ end $function$;
 
 -- ops_today: ซ่อนดีลที่ paid/rejected/stocked จากคิว "งานวันนี้" (กันของ stocked โผล่ซ้ำ)
 -- (แพตช์ acq filter: status not in ('paid','rejected','stocked') — เดิมไม่มี 'stocked')
+
+
+-- ============================================================================
+-- §5 ปฏิทินงาน → จัดลุคก่อนงาน (APPLIED 2026-07-03)
+-- พบว่าระบบมี cron `event-suggestions` (cron_event_suggestions, ทุกวัน 01:00) อยู่แล้ว:
+--   หา customer_events ที่ยังไม่แจ้ง + ใกล้ถึง → เรียก edge fn /event-suggest (AI เลือก 3 ชุด)
+--   → insert notification_queue (kind 'event_suggest') → send-line ส่ง LINE → set notified=true
+-- เดิมไม่ทำงานเพราะลูกค้าเพิ่มงานเองไม่ได้ — my-events.html + add_customer_event (§3) เปิดทางเข้าให้แล้ว
+-- ปรับ horizon 7 → 14 วัน ให้ตรงวิชัน "อีก 2 สัปดาห์" + เพิ่ม guard c.line_uid is not null:
+--
+--   create or replace function public.cron_event_suggestions() ... 
+--     where not e.notified
+--       and e.event_date between current_date and current_date + 14   -- เดิม +7
+--       and c.line_uid is not null;
+--
+-- (โค้ดเต็มอยู่ในฟังก์ชันจริงบน Supabase — ส่วนที่เหลือของ body คงเดิมทุกบรรทัด)
