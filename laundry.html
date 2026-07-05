@@ -49,20 +49,6 @@
   .scanrow{display:flex;gap:10px;margin-top:10px}
   .scanrow .btn{flex:1;background:var(--soft);border:1px solid var(--line);color:var(--ink)}
   .muted2{color:var(--muted);font-size:13px;margin-top:8px}
-  /* จอมือถือเล็ก (floor staff) — กันล้น + แตะง่าย */
-  @media (max-width:480px){
-    .bar{padding:12px 14px}
-    .bar h1{font-size:17px}
-    .wrap{padding:0 10px;gap:12px;margin-top:12px}
-    .card{padding:14px}
-    .scan{flex-wrap:wrap}
-    .scan input{font-size:18px;padding:12px 14px;min-width:0}
-    .scan .btn{padding:12px 16px}
-    .scanrow{flex-wrap:wrap}
-    .big button{padding:16px 8px;font-size:16px}
-    .qrow{flex-wrap:wrap;gap:8px}
-    .qrow .tag{margin-left:auto}
-  }
 </style>
 </head>
 <body>
@@ -74,7 +60,7 @@
   <section class="phead">
     <div class="eyebrow">wash · quality check</div>
     <h1>ส่งต่อความสะอาดที่มั่นใจ</h1>
-    <div class="sub">ตรวจสภาพ ซัก และบันทึกวิธีซักของแต่ละชุด</div>
+    <div class="sub">ตรวจสภาพ ซัก และคืนความสวยให้ทุกชุด ก่อนส่งต่อสู่ลูกค้าคนถัดไป</div>
   </section>
   <div class="card">
     <h2>1) ชุดกลับถึงร้าน — สแกน หรือใส่โค้ด</h2>
@@ -103,7 +89,7 @@
 <script src="ops-api.js"></script>
 <script src="qc-photo.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="scan.js?v=1"></script>
+<script src="scan.js"></script>
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
@@ -113,24 +99,11 @@
   const $=id=>document.getElementById(id);
   let current=null;
   function toast(m){ const t=$('toast'); t.textContent=m; t.className='toast show'; setTimeout(()=>t.className='toast',1900); }
-  function handlerName(){                 // ชื่อผู้ตรวจ/ซัก — ลงไทม์ไลน์ชุด (ถามครั้งเดียว จำในเครื่อง)
-    let h=localStorage.getItem('lloop_handler');
-    if(!h && !sessionStorage.getItem('handlerAsked')){
-      sessionStorage.setItem('handlerAsked','1');
-      h=(prompt('ชื่อผู้ตรวจ/ซัก (บันทึกลงไทม์ไลน์ชุด — ใส่ครั้งเดียวจำให้ตลอด)','')||'').trim();
-      if(h) localStorage.setItem('lloop_handler',h);
-    }
-    return h||null;
-  }
 
   async function checkin(){
     const code=$('code').value.trim().toLowerCase(); if(!code){ toast('ใส่โค้ดก่อนค่ะ'); return; }
     const { data, error } = await sb.rpc('care_checkin',{ p_code: code });
-    if(error){
-      if(error.message==='redirecting_to_login') return;   // opsLogin กำลังพาไป LINE login
-      $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">${error.message||('ไม่พบชุด '+code)}</div>`; return;
-    }
-    if(!data||data.error){ $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">ไม่พบชุด ${code}</div>`; return; }
+    if(error||!data||data.error){ $('panel').innerHTML=`<div class="hint" style="color:var(--danger)">ไม่พบชุด ${code}</div>`; return; }
     current=code; renderPanel(data); loadQueue();
   }
   // แตะ NFC ที่ป้ายชุด → หาโค้ดจากแท็ก → รับเข้าอัตโนมัติ (Android Chrome รองรับ Web NFC)
@@ -155,14 +128,6 @@
         <div class="sub">โค้ด ${current} · ซักมาแล้ว ${d.wash_count} ครั้ง</div>
         <div class="hint"> วิธีซัก: <b>${d.wash}</b></div>
         <div style="font-weight:600;margin:6px 0">2) ตรวจสภาพ — ของกลับมาเป็นยังไง?</div>
-        <div class="hint" style="margin:4px 0 8px">วิธีที่ซัก/ฆ่าเชื้อรอบนี้ (ลงไทม์ไลน์ชุด):
-          <select id="washMethod" style="font:inherit;padding:4px 8px;border-radius:8px">
-            <option value="ซักมือ + ตากแดด">ซักมือ + ตากแดด</option>
-            <option value="ซักเครื่องถนอมผ้า + อบ">ซักเครื่องถนอมผ้า + อบ</option>
-            <option value="ซักแห้ง (dry clean)">ซักแห้ง (dry clean)</option>
-            <option value="รีดไอน้ำฆ่าเชื้อ">รีดไอน้ำฆ่าเชื้อ</option>
-            <option value="ส่งร้านซักพาร์ทเนอร์">ส่งร้านซักพาร์ทเนอร์</option>
-          </select></div>
         <div style="margin:4px 0 8px"><button class="btn" style="background:var(--soft);padding:9px 13px;font-size:14px" onclick="qcShot()">ถ่ายรูปสภาพ (ตอนรับคืน) <span id="qcShotN" style="color:var(--muted)"></span></button></div>
         <div class="big">
           <button class="good" onclick="qc('good',true,0)"> ดี ครบ</button>
@@ -172,7 +137,6 @@
           <button class="wash" onclick="washDone()"> ซักเสร็จแล้ว ปล่อยเช่าต่อ</button>
         </div>
       </div>`;
-    const wm=localStorage.getItem('lloop_wash_method'); if(wm&&$('washMethod')) $('washMethod').value=wm;
   }
   let qcShotCount=0;
   async function qcShot(){
@@ -182,7 +146,7 @@
     else if(r.error!=='ยกเลิก'){ toast('รูปไม่สำเร็จ: '+r.error); }
   }
   async function qc(cond, complete, fee, notes){
-    const { data, error } = await sb.rpc('care_qc',{ p_code: current, p_condition: cond, p_complete: complete, p_fee: fee||0, p_notes: notes||null, p_handler: handlerName() });
+    const { data, error } = await sb.rpc('care_qc',{ p_code: current, p_condition: cond, p_complete: complete, p_fee: fee||0, p_notes: notes||null, p_handler: null });
     if(error){ toast('ผิดพลาด:'+error.message); return; }
     toast(data==='to_repair'?'บันทึก: เข้าคิวซ่อม':'บันทึกสภาพแล้ว ซักต่อได้');
     loadQueue();
@@ -190,8 +154,7 @@
   function qcDamage(){ const fee=prompt('ค่าเสียหายเท่าไร? (บาท)','300'); if(fee===null) return; const why=prompt('เสียหายตรงไหน?','ซิปขาด')||''; qc('damage',true,Number(fee)||0,why); }
   function qcMissing(){ const why=prompt('ขาดชิ้นอะไร?','เข็มขัด')||''; const fee=prompt('คิดค่าของขาดเท่าไร? (0=ไม่คิด)','0'); qc('missing',false,Number(fee)||0,why); }
   async function washDone(){
-    const m=$('washMethod')?$('washMethod').value:null; if(m) localStorage.setItem('lloop_wash_method',m);
-    const { data, error } = await sb.rpc('care_wash_done',{ p_code: current, p_method:m, p_handler:handlerName() });
+    const { data, error } = await sb.rpc('care_wash_done',{ p_code: current, p_method:null, p_handler:null });
     if(error){ toast('ผิดพลาด:'+error.message); return; }
     if(!data||data.error){ toast(data&&data.msg ? data.msg : 'ผิดพลาด'); loadQueue(); return; }  // เช่น ยังไม่ได้ตรวจสภาพ (QC) / ของไม่ครบชิ้น
     toast(`${current} ซักเสร็จ ปล่อยเช่าต่อได้`); $('panel').innerHTML=''; $('code').value=''; current=null; loadQueue();
@@ -209,9 +172,7 @@
           ${j.days>=2?`<div class="late"> ค้าง ${j.days} วัน</div>`:''}</div>
         <div style="text-align:right">
           <div class="tag ${s[1]}">${s[0]}</div>
-          <div>${j.stage==='repair'
-            ? `<a class="btn" href="/repair.html" style="background:var(--soft);margin-top:6px;padding:8px 12px;font-size:14px;display:inline-block;text-decoration:none;color:var(--ink)">ไปหน้าซ่อม ›</a>`
-            : `<button class="btn" style="background:var(--soft);margin-top:6px;padding:8px 12px;font-size:14px" onclick="pick('${j.code}')">เปิด</button>`}</div>
+          <div><button class="btn" style="background:var(--soft);margin-top:6px;padding:8px 12px;font-size:14px" onclick="pick('${j.code}')">เปิด</button></div>
         </div>
       </div>`; }).join('');
   }

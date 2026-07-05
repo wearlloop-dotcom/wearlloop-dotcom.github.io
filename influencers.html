@@ -114,7 +114,7 @@
   <section class="phead">
     <div class="eyebrow">influencer collab</div>
     <h1>เสียงที่ช่วยชุดได้หมุนต่อ</h1>
-    <div class="sub">ทะเบียนอินฟลูเอนเซอร์และดีลความร่วมมือ ตั้งแต่ทาบทามจนถึงโพสต์</div>
+    <div class="sub">ทะเบียนอินฟลูเอนเซอร์และดีลความร่วมมือ ตั้งแต่ทาบทามจนถึงโพสต์ — ทุกคนที่ช่วยเล่าเรื่องชุดเช่าให้เดินทางไปไกลขึ้น</div>
   </section>
   <div class="toolrow">
     <div class="when" id="when"></div>
@@ -183,7 +183,7 @@
   async function callAI(payload){
     const r=await fetch(AI_URL,{method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},
-      body:JSON.stringify(Object.assign({},payload,{id_token:(window.opsIdToken?window.opsIdToken():'')}))});
+      body:JSON.stringify(payload)});
     let j=null; try{j=await r.json();}catch(e){}
     if(!r.ok||!j||j.error) throw new Error((j&&j.error)||('HTTP '+r.status));
     return j;
@@ -457,7 +457,7 @@
       <div id="d_msg" class="notice"></div>
       <div class="mr">
         <button class="btn ghost" onclick="closeOv()">ยกเลิก</button>
-        <button class="btn clay" onclick="saveDeal(this)">บันทึก</button>
+        <button class="btn clay" onclick="saveDeal()">บันทึก</button>
       </div>`);
     searchGarments('');
   }
@@ -497,7 +497,7 @@
     updateGCount();
   }
   function updateGCount(){ const c=$('g_count'); if(c)c.textContent='เลือกแล้ว '+pickedGarments.length+' ชุด'; }
-  async function saveDeal(btn){
+  async function saveDeal(){
     const v=id=>($(id)||{}).value;
     const num=x=>x===''||x==null?null:Number(x);
     if(!v('d_inf')){ $('d_msg').textContent='กรุณาเลือกอินฟลูเอนเซอร์'; $('d_msg').className='notice err'; return; }
@@ -510,12 +510,9 @@
     };
     if(v('d_id'))p.id=v('d_id');
     $('d_msg').textContent='กำลังบันทึก…'; $('d_msg').className='notice';
-    if(btn)btn.disabled=true;  // กันกดซ้ำระหว่างบันทึก (สร้างดีลใหม่ไม่มี id → กันซ้ำ)
-    try{
-      const {error}=await sb.rpc('collab_upsert',{p});
-      if(error){ $('d_msg').textContent='บันทึกไม่สำเร็จ: '+error.message; $('d_msg').className='notice err'; return; }
-      closeOv(); await loadDeals(); renderDealFilter(); renderDealList();
-    }finally{ if(btn)btn.disabled=false; }
+    const {error}=await sb.rpc('collab_upsert',{p});
+    if(error){ $('d_msg').textContent='บันทึกไม่สำเร็จ: '+error.message; $('d_msg').className='notice err'; return; }
+    closeOv(); await loadDeals(); renderDealFilter(); renderDealList();
   }
 
   /* ---------- loaders ---------- */

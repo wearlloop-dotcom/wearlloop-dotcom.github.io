@@ -56,7 +56,7 @@
   <section class="phead">
     <div class="eyebrow">stylist partner</div>
     <h1>บันทึกตัวตนของลูกค้าทุกคน</h1>
-    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์</div>
+    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดใน loop ใช่กับเขาที่สุด</div>
   </section>
   <div class="card">
     <h2>ค้นหาลูกค้า — รหัสจากแอป LLOOP</h2>
@@ -257,9 +257,6 @@
   if(window.opsRpc) sb.rpc=window.opsRpc;
   if(window.opsLogin) window.opsLogin().catch(()=>{});
   const $=id=>document.getElementById(id);
-  const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
-  const safeHref=u=>{ u=String(u||''); return /^(https?:\/\/|\/)/i.test(u)?u:'#'; };
-  const safeImg=u=>{ u=String(u||''); return (/^https:\/\//i.test(u)||/^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(u))?u:''; };
   let code=null, baseSeason='';
   const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2200);};
   const num=id=>{const v=$(id).value;return v?Number(v):undefined;};
@@ -273,9 +270,7 @@
   }
   async function lookup(){
     const c=$('code').value.trim().toUpperCase(); if(!c){toast('ใส่รหัสก่อนค่ะ');return;}
-    const { data, error } = await sb.rpc('partner_lookup',{ p_code: c });
-    // ops-rpc ตอบ no_access/unauthorized/owner_only → data เป็น null แต่มี error.message → โชว์สาเหตุจริง (ไม่ใช่ 'ไม่พบรหัส')
-    if(error){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent=error.message; $('form').className=''; return; }
+    const { data } = await sb.rpc('partner_lookup',{ p_code: c });
     if(!data||!data.found){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='ไม่พบรหัส '+c; $('form').className=''; return; }
     code=c; $('found').className='found show'; $('found').style.color='';
     $('found').textContent='พบลูกค้า: '+data.name+(data.has_profile?' (มีผลเดิม — บันทึกทับได้)':''); $('form').className='on';
@@ -385,7 +380,7 @@
         added.push(url);
         const local=URL.createObjectURL(file);
         const div=document.createElement('div'); div.className='th';
-        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${esc((file.name||'').slice(0,18))}</div>`;
+        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${(file.name||'').slice(0,18)}</div>`;
         thumbs.appendChild(div);
       }catch(e){
         $('upnote').style.display='block';
@@ -434,8 +429,8 @@
     const clip='<svg viewBox="0 0 24 24"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.6 1.6 0 0 1-2.3-2.3l7.8-7.8"/></svg>';
     list(targetId).forEach(url=>{
       let name=url; try{ name=decodeURIComponent(url.split('/').pop().split('?')[0]).replace(/^docs\//,'').replace(/^\d+-\d+-/,''); }catch(e){}
-      const a=document.createElement('a'); a.href=safeHref(url); a.target='_blank'; a.rel='noopener';
-      a.innerHTML=clip+'<span>'+esc((name||url).slice(0,40))+'</span>';
+      const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener';
+      a.innerHTML=clip+'<span>'+(name||url).slice(0,40)+'</span>';
       box.appendChild(a);
     });
   }
@@ -446,7 +441,7 @@
     'พอร์ทัลสไตลิสต์':'Stylist portal',
     'พาร์ทเนอร์ LLOOP · ข้อมูลภายใน':'LLOOP partner · internal',
     'บันทึกตัวตนของลูกค้าทุกคน':"Record every client's profile",
-    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis.',
+    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดใน loop ใช่กับเขาที่สุด':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis — so every rotating piece suits them best.',
     'ค้นหาลูกค้า — รหัสจากแอป LLOOP':'Find client — code from the LLOOP app',
     'ค้นหา':'Search',
     'ข้อมูลการให้บริการ':'Service details',

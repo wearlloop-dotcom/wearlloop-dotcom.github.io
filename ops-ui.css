@@ -4,8 +4,7 @@
    และอ่านสบายตา (ลดความแน่นของข้อมูล)
    ── สี/ฟอนต์ อ้างอิงเว็บจริง wearlloop (liff/index.html) ──
      โกลด์ #C9A86A · ดินเผา #A75F3A · เสจ #6FB3A6 · เขียวป่า #0C3A33–#2E4A3A
-     กระดาษครีมอุ่น · ฟอนต์ Poppins (display) + Prompt/Inter (body)  ห้ามใช้ navy/serif
-     ไอคอน: line art SVG เท่านั้น (stroke 1.6, currentColor — ดู OPS_ICONS ใน ops-menu.js) ห้ามใช้อิโมจิทุกกรณี
+     กระดาษครีมอุ่น · ฟอนต์ Poppins (display) + Prompt/Inter (body)  ❗ไม่ใช้ navy/serif
    ใช้: <link rel="stylesheet" href="ops-ui.css"> (ชื่อคลาสเดิมทั้งหมด ใช้ได้ทันที)
    ฟอนต์ที่ควรโหลดคู่กัน: Poppins:600;700 · Inter:400;500;600 · Prompt:400;500;600;700
    =========================================================================== */

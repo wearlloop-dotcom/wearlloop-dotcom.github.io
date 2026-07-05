@@ -160,7 +160,7 @@
     <div class="sub">ดูภาพรวมธุรกิจในที่เดียว — รายได้ การส่งต่อของชุด และสัญญาณที่ต้องรีบลงมือ</div>
     <div class="kpis">
       <div class="kpi" id="hero_spend"><div class="n">—</div><div class="l">ยอดใช้จ่าย 30 วัน</div></div>
-      <div class="kpi" id="hero_rev"><div class="n">—</div><div class="l">รายได้จากโฆษณา 30 วัน</div></div>
+      <div class="kpi" id="hero_rev"><div class="n">—</div><div class="l">รายได้ 30 วัน</div></div>
       <div class="kpi" id="hero_roas"><div class="n">—</div><div class="l">ROAS 30 วัน</div></div>
     </div>
   </section>
@@ -339,7 +339,7 @@
     const roas=data.roas_30d;
     $('strip').innerHTML =
       pill('ยอดใช้จ่าย 30 วัน', money(data.spend_30d)) +
-      pill('รายได้จากโฆษณา 30 วัน', money(data.revenue_30d)) +
+      pill('รายได้ 30 วัน', money(data.revenue_30d)) +
       pill('ROAS 30 วัน', roasTxt(roas));
     // hero KPIs
     $('hero_spend').querySelector('.n').textContent=money(data.spend_30d);
@@ -409,7 +409,7 @@
       const res=await fetch(SUPABASE_URL+'/functions/v1/marketing-ai',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},
-        body:JSON.stringify({task:'insights', summary:lastSummary, by_platform:lastSummary.by_platform||[],id_token:(window.opsIdToken?window.opsIdToken():'')})
+        body:JSON.stringify({task:'insights', summary:lastSummary, by_platform:lastSummary.by_platform||[]})
       });
       let data=null;
       try{ data=await res.json(); }catch(e){ data=null; }
@@ -487,7 +487,7 @@
     $('syncNote').textContent='กำลังดึงข้อมูลจาก Meta…';
     try{
       const res=await fetch(SUPABASE_URL+'/functions/v1/analytics-fetch',{
-        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY}, body:JSON.stringify({id_token:(window.opsIdToken?window.opsIdToken():'')})
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY}, body:'{}'
       });
       const j=await res.json();
       if(j.ok){ $('syncNote').textContent='ซิงค์สำเร็จ: '+Object.entries(j.results||{}).map(([k,v])=>k+' '+v).join(' · '); loadRows(); loadStrip(); loadSummary(); }

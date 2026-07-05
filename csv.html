@@ -36,7 +36,7 @@
   <section class="phead">
     <div class="eyebrow">bulk data · csv</div>
     <h1>ชุดทั้งคลังในไฟล์เดียว</h1>
-    <div class="sub">ส่งออกทั้งคลังไปแก้ในชีต แล้วนำกลับเข้าระบบทีละเยอะ</div>
+    <div class="sub">ส่งออกทั้งคลังไปแก้ในชีต แล้วนำกลับเข้าระบบทีละเยอะ — ดูแลข้อมูลทุกชุดให้ครบถ้วนพร้อมหมุนเวียนต่อ</div>
   </section>
   <div class="card">
     <h2> Export — ดึงชุดทั้งหมดออกเป็น CSV</h2>
@@ -66,7 +66,7 @@
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;
   if(window.opsLogin) window.opsLogin().catch(()=>{});
-  const COLS=['code','name','brand','tier','size','condition','rental_price','acquisition_cost','rate_1d','rate_3d','rate_5d','category','dress_code','occasion_tags','color_name','color_hex','color_season','bust_min_in','bust_max_in','waist_min_in','waist_max_in','length_cm','stretch','fabric_composition','has_lining','is_sheer','fabric_weight','styling_tips','photos'];
+  const COLS=['code','name','brand','tier','rental_price','category','dress_code','occasion_tags','color_name','color_hex','color_season','bust_min_in','bust_max_in','waist_min_in','waist_max_in','length_cm','stretch','fabric_composition','has_lining','is_sheer','fabric_weight','styling_tips','photos'];
   const MULTI=['occasion_tags','styling_tips','photos'];
   const $=id=>document.getElementById(id);
   function log(msg,cls){ const l=$('log'); l.className='log show'; l.textContent += msg+'\n'; if(cls)l.style.color=cls; }
@@ -78,7 +78,7 @@
     const rows = data.map(g=>{ const o={}; COLS.forEach(c=> o[c]= MULTI.includes(c)? (g[c]||[]).join(';') : (g[c]??'')); return o; });
     dl('lloop_garments.csv', Papa.unparse({fields:COLS, data:rows}));
   }
-  function downloadTemplate(){ dl('lloop_template.csv', Papa.unparse({fields:COLS, data:[{code:'',name:'ตัวอย่างเดรส',brand:'LLOOP',tier:'Standard',size:'M',condition:'good',rental_price:'320',acquisition_cost:'450',rate_1d:'',rate_3d:'',rate_5d:'',category:'dress',dress_code:'smart_casual',occasion_tags:'cafe;work',color_name:'navy',color_hex:'#15233F',color_season:'winter',bust_min_in:'32',bust_max_in:'36',waist_min_in:'26',waist_max_in:'30',length_cm:'92',stretch:'slight',fabric_composition:'ซาตินโพลี 95%',has_lining:'true',is_sheer:'false',fabric_weight:'ทิ้งตัว',styling_tips:'ใส่บราเกาะอก;ซ่อนสายในได้',photos:''}]})); }
+  function downloadTemplate(){ dl('lloop_template.csv', Papa.unparse({fields:COLS, data:[{code:'',name:'ตัวอย่างเดรส',brand:'LLOOP',tier:'Standard',rental_price:'320',category:'dress',dress_code:'smart_casual',occasion_tags:'cafe;work',color_name:'navy',color_hex:'#15233F',color_season:'winter',bust_min_in:'32',bust_max_in:'36',waist_min_in:'26',waist_max_in:'30',length_cm:'92',stretch:'slight',fabric_composition:'ซาตินโพลี 95%',has_lining:'true',is_sheer:'false',fabric_weight:'ทิ้งตัว',styling_tips:'ใส่บราเกาะอก;ซ่อนสายในได้',photos:''}]})); }
 
   function importCSV(){
     const f=$('file').files[0]; if(!f){ alert('เลือกไฟล์ CSV ก่อนค่ะ'); return; }
@@ -89,8 +89,6 @@
       for(const r of res.data){
         const p={...r};
         MULTI.forEach(c=> p[c]= (r[c]||'').split(';').map(s=>s.trim()).filter(Boolean));
-        // enum ที่เว้นว่างต้องเป็น null (ไม่ใช่ '') ให้ตรงกับ intake.html — กัน error invalid enum ตอน import
-        ['size','condition'].forEach(k=>{ if(p[k]==='') p[k]=null; });
         const { data, error } = await sb.rpc('intake_garment',{ p });
         if(error){ fail++; log(`✗ ${r.code||r.name||'(แถว)'} : ${error.message}`,'#A32D2D'); }
         else { ok++; log(`✓ ${data} · ${r.name||''}`); }
