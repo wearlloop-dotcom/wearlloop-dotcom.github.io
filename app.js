@@ -386,8 +386,9 @@ function classifyName(name){ const n=String(name||'').toLowerCase();
   if(/\bred\b|ruby|scarlet|crimson|wine|burgundy/.test(n)) return 'red';
   return 'cream'; }
 function familiesOf(g){ const fams=new Set();
-  // ใช้สีจริงที่เราสต็อก (color_hex/color_name) เท่านั้น — เลิกใช้ color_variants ของร้านต้นทาง
-  // (เราสต็อกสีเดียว/ชุด; color_variants เก่ามีหลายสีปน ทำให้กรองสีผิด เช่นเลือกดำแล้วขึ้นชุดขาว)
+  // 1) ถ้า operator ตั้งกลุ่มสีเอง (หลังบ้าน) → ใช้เลย แม่นสุด
+  if(g.colorFamily){ fams.add(g.colorFamily); return fams; }
+  // 2) ไม่งั้นเดาจากสีจริงที่สต็อก (color_hex/color_name) — เลิกใช้ color_variants ของร้านต้นทาง
   (g.colors||[]).forEach(c=>{ const hex=c[1]; if(hex&&hex!==PLACEHOLDER_HEX) fams.add(classifyHex(hex)); else if(c[0]&&c[0]!=='—') fams.add(classifyName(c[0])); });
   if(!fams.size) fams.add('cream'); return fams; }
 
