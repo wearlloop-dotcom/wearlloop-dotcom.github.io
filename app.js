@@ -386,9 +386,9 @@ function classifyName(name){ const n=String(name||'').toLowerCase();
   if(/\bred\b|ruby|scarlet|crimson|wine|burgundy/.test(n)) return 'red';
   return 'cream'; }
 function familiesOf(g){ const fams=new Set();
-  const cv=(g.sourceMeta&&g.sourceMeta.color_variants)||null;
-  if(cv&&cv.length){ cv.forEach(c=>fams.add(classifyName(c.name))); }
-  else { (g.colors||[]).forEach(c=>{ const hex=c[1]; if(hex&&hex!==PLACEHOLDER_HEX) fams.add(classifyHex(hex)); else if(c[0]&&c[0]!=='—') fams.add(classifyName(c[0])); }); }
+  // ใช้สีจริงที่เราสต็อก (color_hex/color_name) เท่านั้น — เลิกใช้ color_variants ของร้านต้นทาง
+  // (เราสต็อกสีเดียว/ชุด; color_variants เก่ามีหลายสีปน ทำให้กรองสีผิด เช่นเลือกดำแล้วขึ้นชุดขาว)
+  (g.colors||[]).forEach(c=>{ const hex=c[1]; if(hex&&hex!==PLACEHOLDER_HEX) fams.add(classifyHex(hex)); else if(c[0]&&c[0]!=='—') fams.add(classifyName(c[0])); });
   if(!fams.size) fams.add('cream'); return fams; }
 
 function renderFilters() {
@@ -976,6 +976,7 @@ function openDetail(id) {
       ${fitMatch(g)}`
         : (ourSizesLabel ? `<div class="sec">${lang==='th'?'ไซส์':'Size'}</div>` : '')}
       ${ourSizesLabel ? `<div class="dscnote">${lang==='th'?`ไซส์ที่เรามีให้เช่า: <b>${ourSizesLabel}</b>`:`We rent: <b>${ourSizesLabel}</b>`}</div>` : ''}
+      ${chart ? `<div class="sec">${lang==='th'?'ตารางไซส์ (อ้างอิงจากแบรนด์)':'Size chart (brand reference)'}</div><div class="dsizechart"><img src="${chart}" alt="size chart" loading="lazy"></div>` : ''}
       <div id="fitsummary"></div>
       ${g.fabric ? `<div class="sec">${t('secFabric')}</div>
       <div class="fabric">${fabricTags}</div>` : ''}
