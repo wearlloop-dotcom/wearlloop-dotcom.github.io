@@ -41,7 +41,6 @@
 </style>
 </head>
 <body>
-<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="wrap" id="app"><div class="center">กำลังโหลด…</div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -49,8 +48,8 @@
 <script src="config.js?v=51"></script>
 <script src="data.js?v=51"></script>
 <script src="liffAuth.js?v=51"></script>
-<script src="me-api.js?v=61"></script>
-<script src="api.js?v=61"></script>
+<script src="me-api.js?v=54"></script>
+<script src="api.js?v=55"></script>
 <script src="nav.js?v=1"></script>
 <script>
 const $app = document.getElementById('app');
@@ -84,7 +83,7 @@ function renderCreate(){
   $app.innerHTML = `
     <div class="hero"><div class="eyebrow">The Loop · งานแต่ง</div>
       <h1>ชวนเพื่อนเช่าชุดเข้างานเดียวกัน</h1>
-      <div class="sub">แชร์ให้เพื่อนแขก เห็นชุดว่างวันงาน ไม่ใส่ชนกัน</div></div>
+      <div class="sub">สร้างลิงก์งาน แชร์ให้เพื่อนแขก — ทุกคนเห็นชุดที่ว่างวันงาน และไม่ใส่ชนกัน</div></div>
     <div class="form">
       <label>ชื่องาน</label>
       <input id="wt" placeholder="เช่น งานแต่งมิ้น & โต้ง">
@@ -93,7 +92,7 @@ function renderCreate(){
       <button class="share" id="mk" style="margin-top:16px">สร้างลิงก์งาน</button>
       <div id="mkOut"></div>
     </div>
-    <div class="note">ชวนเพื่อนเช่าครั้งแรก รับเครดิต <b>฿50</b> ทั้งคู่</div>`;
+    <div class="note">ชวนเพื่อนใหม่มาเช่า ได้เครดิต <b>฿50</b> ทั้งคู่เมื่อเพื่อนเช่าครั้งแรก · เพื่อนเห็นว่าใครเลือกชุดไหนแล้ว จะได้ไม่ซ้ำกันในงาน</div>`;
   document.getElementById('mk').addEventListener('click', async () => {
     const title = document.getElementById('wt').value.trim();
     const date = document.getElementById('wd').value;
@@ -111,7 +110,7 @@ function renderCreate(){
 function doShare(link, title){
   const text = (title ? title + ' — ' : '') + 'มาเช่าชุดเข้างานด้วยกัน เลือกชุดที่นี่: ' + link;
   if (navigator.share) { navigator.share({ title: title || 'งานแต่ง', text, url: link }).catch(() => {}); }
-  else { navigator.clipboard && navigator.clipboard.writeText(link); alert('คัดลอกลิงก์แล้ว'); }
+  else { navigator.clipboard && navigator.clipboard.writeText(link); alert('คัดลอกลิงก์แล้ว — เอาไปแชร์ในกลุ่มได้เลย'); }
 }
 
 function renderEvent(){
@@ -150,17 +149,17 @@ function renderEvent(){
       </div>
     </div>
     <button class="share" id="sh">ชวนเพื่อนคนอื่นในงาน</button>
-    <div class="note">ชุดที่เพื่อนจองแล้วจะขึ้นป้าย · ชวนเพื่อนใหม่รับ <b>฿50</b> ทั้งคู่</div>
+    <div class="note">เลือกชุดที่ <b>ว่างวันงาน</b> ด้านล่าง — ตัวที่เพื่อนจองแล้วจะขึ้นป้าย เพื่อไม่ให้ใส่ซ้ำกัน · ชวนเพื่อนใหม่รับเครดิต <b>฿50</b> ทั้งคู่</div>
     <div class="seclabel">ชุดที่ว่างวันงาน</div>
-    <div class="grid">${cards || '<div class="center">ยังไม่มีชุดว่างวันนี้ — เดี๋ยวทีมช่วยหาให้ค่ะ</div>'}</div>`;
+    <div class="grid">${cards || '<div class="center">ยังไม่มีชุดว่างในวันนี้ — ทีมจะช่วยจัดหาเพิ่ม</div>'}</div>`;
 
   document.getElementById('sh').addEventListener('click', () => doShare(link, SUMMARY.title));
   $app.querySelectorAll('a.pick[data-code]').forEach(a => {
     a.addEventListener('click', async (e) => {
       e.preventDefault();
       const code = a.dataset.code;
-      if (CUSTOMER) { try { await window.API.wedSharePick(CUSTOMER, SUMMARY.code, code, 'eyeing'); } catch (err) {} }
-      // ไปหน้าจองชุดตัวนี้ (g.html อ่าน ?code=) — ส่ง 'eyeing' (กำลังดู) ไม่ล็อกชุด; ให้ backend อัปเป็น 'reserved' เมื่อจองสำเร็จจริง
+      if (CUSTOMER) { try { await window.API.wedSharePick(CUSTOMER, SUMMARY.code, code, 'reserved'); } catch (err) {} }
+      // ไปหน้าจองชุดตัวนี้ (g.html อ่าน ?code=)
       location.href = 'g.html?code=' + encodeURIComponent(code);
     });
   });

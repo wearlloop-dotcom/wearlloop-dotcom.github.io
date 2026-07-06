@@ -11,7 +11,7 @@
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="scan.js?v=1"></script>
+<script src="scan.js"></script>
 <link rel="stylesheet" href="ops-ui.css">
 <style>input{font-size:18px}</style>
 </head>
@@ -26,7 +26,7 @@
     <section class="phead">
       <div class="eyebrow">put-away · locate</div>
       <h1>ทุกชุดมีบ้านของมัน</h1>
-      <div class="sub">สแกนเก็บเข้าช่อง แล้วตามหาได้ใน 1 วินาทีตอนแพ็กส่ง</div>
+      <div class="sub">สแกนเก็บเข้าช่อง แล้วตามหาได้ใน 1 วินาทีตอนแพ็กส่ง — ไม่ต้องเดินหา ไม่ต้องเดา</div>
       <div class="kpis">
         <div class="kpi"><div class="n" id="k_bins">—</div><div class="l">ช่องเก็บ</div></div>
         <div class="kpi ok"><div class="n" id="k_onshelf">—</div><div class="l">ชุดอยู่บนชั้น</div></div>
@@ -92,7 +92,7 @@
   const up=s=>(s||'').trim();
   let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':' ok');clearTimeout(T);T=setTimeout(()=>t.className='toast',2800);}
   function fl(el){ if(!el)return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
-  const ST={available:'ว่าง',reserved:'จองแล้ว',out:'อยู่กับลูกค้า',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',returned:'รับคืนแล้ว',lost:'หาย',needs_review:'รอตรวจ'};
+  const ST={available:'ว่าง',reserved:'จองแล้ว',out:'อยู่กับลูกค้า',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',returned:'รับคืนแล้ว'};
   const dt=s=>s?new Date(s).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
 
   async function doPutAway(){

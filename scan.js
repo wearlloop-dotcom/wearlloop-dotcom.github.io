@@ -7,12 +7,8 @@
     if (!txt) return '';
     txt = String(txt).trim();
     if (txt.includes('/g/')) return txt.split('/g/').pop().split(/[/?#]/)[0];   // .../g/g1
-    if (/^https?:/i.test(txt)) {
-      // g.html?c=<code> (รูปแบบจริงของ care-label/intake/nfc) หรือ ?code= / ?garment= / ?g=
-      try { const u = new URL(txt); const q = u.searchParams.get('c') || u.searchParams.get('code') || u.searchParams.get('garment') || u.searchParams.get('g'); if (q) return q; } catch (_) {}
-      return txt.split('/').filter(Boolean).pop();      // เผื่อ url อื่น
-    }
     if (txt.includes('garment=')) return decodeURIComponent(txt.split('garment=').pop().split('&')[0]);
+    if (/^https?:/i.test(txt)) return txt.split('/').filter(Boolean).pop();      // เผื่อ url อื่น
     return txt;                                                                   // รหัสตรง ๆ
   }
   function ensureOverlay() {

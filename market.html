@@ -9,7 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
-<script src="ops-api.js?v=61"></script>
+<script src="ops-api.js"></script>
 <style>
   :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--ok:#0F6E56;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -65,7 +65,7 @@
     <section class="phead">
       <div class="eyebrow">market radar</div>
       <h1>ฟังเสียงตลาด ก่อนใคร</h1>
-      <div class="sub">ให้ AI ส่องเทรนด์และชุดใหม่ทั่วตลาด แล้วเลือกตุนเฉพาะที่ใช่ โดยไม่ตุนเกินจำเป็น</div>
+      <div class="sub">ให้ AI ส่องเทรนด์และชุดใหม่ทั่วตลาด แล้วเลือกตุนเฉพาะที่ใช่ — หมุนเวียนชุดให้ทันใจ โดยไม่ตุนเกินจำเป็น</div>
     </section>
 
     <!-- AI สแกน -->
@@ -112,7 +112,7 @@
   const SCAN_URL=SUPABASE_URL+'/functions/v1/market-scan';
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // วิ่งผ่าน gateway (LINE login + role)
-  if(window.opsGuard) window.opsGuard();
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
   let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',3200);}
@@ -121,7 +121,7 @@
   async function scan(){
     $('scanBtn').disabled=true; $('scanBtn').textContent='กำลังสแกน… (อาจใช้เวลาสักครู่)';
     try{
-      const res=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({id_token:(window.opsIdToken?window.opsIdToken():'')})});
+      const res=await fetch(SCAN_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:'{}'});
       const j=await res.json().catch(()=>null);
       if(j&&j.skipped==='no_key'){ $('scanNote').innerHTML='<div class="notice">ยังไม่ได้ตั้ง ANTHROPIC key — AI สแกนจะทำงานเมื่อใส่ key แล้ว (ตอนนี้เพิ่มชุดเอง + watchlist ใช้ได้ปกติ)</div>'; }
       else if(!res.ok||!j||j.ok===false){ toast('สแกนไม่สำเร็จ: '+((j&&j.error)||('HTTP '+res.status)),true); }

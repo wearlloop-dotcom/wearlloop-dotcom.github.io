@@ -13,36 +13,28 @@
   .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
   .bar h1{font-family:var(--display);font-size:18px;font-weight:700}
   .bar .tag{font-size:12px;background:#3a3a3a;padding:3px 10px;border-radius:20px}
-  .wrap{max-width:660px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:18px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 18px 24px;scroll-margin-top:64px}
+  .wrap{max-width:660px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 18px 22px;scroll-margin-top:64px}
   .card h2{font-family:var(--display);font-size:15px;margin-bottom:3px}
-  .card .sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+  .card .sub{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
   /* กลุ่มหัวข้อย่อยในการ์ดเดียว — แบ่งสายตาไม่ให้เป็นกำแพงช่องกรอก */
-  .grp{margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
-  .grp.first{margin-top:6px;padding-top:0;border-top:none}
-  .grp .gt{font-size:12.5px;font-weight:700;color:var(--ink);letter-spacing:.3px;margin-bottom:4px}
-  label{display:block;font-size:13px;color:var(--muted);margin:16px 0 6px;font-weight:500}
-  .grp .gt + label{margin-top:8px}
-  /* min-width:0 + box-sizing → ทุกช่องย่อพอดีคอลัมน์ ขนาดเท่ากันเป๊ะ (กันช่องวันที่/ตัวเลขดันคอลัมน์) */
-  input,select,textarea{width:100%;min-width:0;box-sizing:border-box;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-size:16px;font-family:var(--sans);background:#fff;height:48px}
-  textarea{height:auto;min-height:64px;resize:vertical;line-height:1.5}
-  input[type=date],input[type=time]{-webkit-appearance:none;appearance:none}
-  input[type=file],input[type=color]{height:auto}
+  .grp{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+  .grp.first{margin-top:4px;padding-top:0;border-top:none}
+  .grp .gt{font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.3px;margin-bottom:2px}
+  label{display:block;font-size:13px;color:var(--muted);margin:14px 0 5px;font-weight:500}
+  .grp .gt + label{margin-top:6px}
+  input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-size:16px;font-family:var(--sans);background:#fff}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ok)}
+  textarea{min-height:62px;resize:vertical;line-height:1.5}
   .scan{display:flex;gap:10px}.scan input{flex:1;text-transform:uppercase;font-size:20px;letter-spacing:2px}
   .btn{border:none;border-radius:10px;padding:13px 18px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--sans)}
-  .btn.dark{background:var(--ink);color:#fff;height:48px}.btn.ok{background:var(--ok);color:#fff;width:100%;padding:16px;height:auto}
-  .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px 12px}
-  .g2>div,.g3>div{min-width:0}
+  .btn.dark{background:var(--ink);color:#fff}.btn.ok{background:var(--ok);color:#fff;width:100%;padding:16px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 10px}
   /* ตารางวัดตัว — ช่องตัวเลขสั้น จัด 3 คอลัมน์ เว้นแถวให้หายใจ ป้ายไม่ชนกัน */
-  .gm{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 12px}
-  .gm>div{min-width:0}.gm label{margin:0 0 6px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gm{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
+  .gm>div{min-width:0}.gm label{margin:0 0 5px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .gm input{padding:11px 8px;text-align:center}
-  /* หน่วยกำกับในช่อง (ซม./กก./นิ้ว) — ไม่กินที่ ไม่ทับตัวเลข */
-  .uin{position:relative}
-  .uin input{padding-right:30px;text-align:left}
-  .uin .u{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11.5px;color:var(--muted);pointer-events:none}
   .found{background:#E4F0EC;color:#04342C;border-radius:10px;padding:10px 14px;font-weight:600;margin-top:10px;display:none}
   .found.show{display:block}
   /* ตัวจริงของลูกค้า (LINE OA) — โชว์รูป+ชื่อจริง ตอนค้นเจอ */
@@ -160,22 +152,6 @@
   .earn .erow{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px;text-align:center;background:#fff}
   .earn .ev{display:block;font-family:var(--display,inherit);font-size:20px;font-weight:700;color:var(--ink)}
   .earn .el{display:block;font-size:11px;color:var(--muted);margin-top:2px}
-  /* Look Builder — กำหนดลุคให้ลูกค้า (ง่ายที่สุด: เพิ่มลุค → เพิ่มชิ้น) */
-  .lookblk{border:1.5px solid var(--line);border-radius:12px;padding:13px;margin:10px 0;background:#FbFaF8}
-  .lookblk .lbh{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .lookblk .lbh b{font-family:var(--display);font-size:14px;flex:1}
-  .lookblk .lbh .del{border:none;background:#F3E4E4;color:var(--danger);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:var(--sans)}
-  .lookblk .lbtop{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .lookblk .lbtop input,.lookblk .lk-note{margin:0}
-  .lookblk .lk-note{margin-top:8px}
-  .pcrow{display:grid;grid-template-columns:38px 96px 1fr 38px;gap:6px;align-items:center;margin-top:8px}
-  .pcrow input[type=color]{padding:2px;height:44px}
-  .pcrow select{height:44px;padding:8px 6px}
-  .pcrow input{height:44px}
-  .pcrow .prm{border:none;background:#F3E4E4;color:var(--danger);border-radius:8px;height:44px;cursor:pointer;font-size:16px}
-  .pcrow .pc-buy{grid-column:2/4}
-  .addbtn{border:1.5px dashed var(--line);background:#fff;color:var(--ok);border-radius:9px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);margin-top:9px}
-  .addlook{width:100%;border:1.5px dashed var(--ok);background:#EAF3F0;color:var(--ok);border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
 </style>
 </head>
 <body>
@@ -247,7 +223,7 @@
   <section class="phead">
     <div class="eyebrow">stylist partner</div>
     <h1>บันทึกตัวตนของลูกค้าทุกคน</h1>
-    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์</div>
+    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดที่วนต่อใช่กับเขาที่สุด</div>
     <div class="hello" id="hello"></div>
   </section>
 
@@ -285,7 +261,6 @@
     <button type="button" onclick="jumpTo('sec-body')">หุ่น</button>
     <button type="button" onclick="jumpTo('sec-measure')">วัดตัว</button>
     <button type="button" onclick="jumpTo('sec-style')">สไตล์</button>
-    <button type="button" onclick="jumpTo('sec-looks')">ลุค</button>
     <button type="button" onclick="jumpTo('sec-lookbook')">รูป/สรุป</button>
   </div>
   <div class="card" id="sec-service">
@@ -400,37 +375,36 @@
 
   <div class="card" id="sec-measure">
     <h2>วัดตัว (ละเอียด)</h2>
-    <div class="sub">กรอกเท่าที่มี เว้นว่างได้ — หน่วยกำกับอยู่ในแต่ละช่อง</div>
+    <div class="sub">หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก · กรอกเท่าที่มี เว้นว่างได้</div>
     <div class="grp first"><div class="gt">พื้นฐาน</div>
     <div class="gm">
-      <div><label>ส่วนสูง</label><div class="uin"><input id="height_cm" type="number" inputmode="numeric"><span class="u">ซม.</span></div></div>
-      <div><label>น้ำหนัก</label><div class="uin"><input id="weight_kg" type="number" inputmode="numeric"><span class="u">กก.</span></div></div>
+      <div><label>ส่วนสูง (ซม.)</label><input id="height_cm" type="number" inputmode="numeric"></div>
+      <div><label>น้ำหนัก (กก.)</label><input id="weight_kg" type="number" inputmode="numeric"></div>
       <div><label>ไซส์เดรส</label><input id="dress_size" placeholder="S/M/L"></div>
     </div></div>
     <div class="grp"><div class="gt">ช่วงบน</div>
     <div class="gm">
-      <div><label>รอบอก</label><div class="uin"><input id="bust_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>ใต้อก</label><div class="uin"><input id="underbust_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>รอบอก</label><input id="bust_in" type="number" inputmode="decimal"></div>
+      <div><label>ใต้อก</label><input id="underbust_in" type="number" inputmode="decimal"></div>
       <div><label>คัพ</label><input id="cup"></div>
-      <div><label>ไหล่</label><div class="uin"><input id="shoulder_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>ไหล่ถึงเอว</label><div class="uin"><input id="shoulder_to_waist_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>รอบคอ</label><div class="uin"><input id="neck_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>ไหล่</label><input id="shoulder_in" type="number" inputmode="decimal"></div>
+      <div><label>ไหล่ถึงเอว</label><input id="shoulder_to_waist_in" type="number" inputmode="decimal"></div>
+      <div><label>รอบคอ</label><input id="neck_in" type="number" inputmode="decimal"></div>
     </div></div>
     <div class="grp"><div class="gt">ช่วงล่าง</div>
     <div class="gm">
-      <div><label>รอบเอว</label><div class="uin"><input id="waist_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>สะโพก</label><div class="uin"><input id="hip_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>สะโพกบน</label><div class="uin"><input id="high_hip_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>ต้นขา</label><div class="uin"><input id="thigh_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>เป้า (inseam)</label><div class="uin"><input id="inseam_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>เบอร์รองเท้า</label><input id="shoe_size" placeholder="38 / EU39 / 24cm"></div>
-      <div><label>ไซส์นิ้ว (แหวน)</label><input id="ring_size" placeholder="52 มม. / US6"></div>
+      <div><label>รอบเอว</label><input id="waist_in" type="number" inputmode="decimal"></div>
+      <div><label>สะโพก</label><input id="hip_in" type="number" inputmode="decimal"></div>
+      <div><label>สะโพกบน</label><input id="high_hip_in" type="number" inputmode="decimal"></div>
+      <div><label>ต้นขา</label><input id="thigh_in" type="number" inputmode="decimal"></div>
+      <div><label>เป้า (inseam)</label><input id="inseam_in" type="number" inputmode="decimal"></div>
+      <div><label>เบอร์รองเท้า</label><input id="shoe_size"></div>
     </div></div>
     <div class="grp"><div class="gt">แขน-หลัง</div>
     <div class="gm">
-      <div><label>ความยาวแขน</label><div class="uin"><input id="arm_length_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>รอบต้นแขน</label><div class="uin"><input id="bicep_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
-      <div><label>ความยาวหลัง</label><div class="uin"><input id="back_length_in" type="number" inputmode="decimal"><span class="u">นิ้ว</span></div></div>
+      <div><label>ความยาวแขน</label><input id="arm_length_in" type="number" inputmode="decimal"></div>
+      <div><label>รอบต้นแขน</label><input id="bicep_in" type="number" inputmode="decimal"></div>
+      <div><label>ความยาวหลัง</label><input id="back_length_in" type="number" inputmode="decimal"></div>
     </div></div>
   </div>
 
@@ -456,13 +430,6 @@
     <input type="file" id="mood_board_up" accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.key,.heic" multiple onchange="uploadDocs(this,'mood_board','mood_board_chips')">
     <div class="files" id="mood_board_chips"></div>
     <label>หรือวางลิงก์ Mood Board (คั่นด้วย ,)</label><input id="mood_board" placeholder="https://...">
-  </div>
-
-  <div class="card" id="sec-looks">
-    <h2>ลุคของลูกค้า (Look Builder)</h2>
-    <div class="sub">กำหนดว่าแต่ละลุคใช้ชิ้นไหน — ลูกค้าจะเห็นเป็น “ลุคที่จัดไว้ให้คุณ” พร้อมปุ่มช้อป · เว้นว่างได้ ระบบจะใช้ลุคเริ่มต้นตามฤดู+หุ่นให้เอง</div>
-    <div id="looksWrap"></div>
-    <button type="button" class="addlook" onclick="addLook()">+ เพิ่มลุคใหม่</button>
   </div>
 
   <div class="card" id="sec-lookbook">
@@ -572,9 +539,6 @@
     return _sbClient ? _sbClient.storage : null;
   }});
   const $=id=>document.getElementById(id);
-  const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
-  const safeHref=u=>{ u=String(u||''); return /^(https?:\/\/|\/)/i.test(u)?u:'#'; };
-  const safeImg=u=>{ u=String(u||''); return (/^https:\/\//i.test(u)||/^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(u))?u:''; };
   let code=null, baseSeason='';
   const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2200);};
   const num=id=>{const v=$(id).value;return v?Number(v):undefined;};
@@ -590,7 +554,7 @@
     const { data, error } = res || {};
     if(error || !data || data.is_partner!==true){
       const m=(error&&error.message)||'';
-      const needLogin = /LINE|เข้าสู่ระบบ|idToken|unauthorized|เซสชัน|redirecting_to_login|login/i.test(m);
+      const needLogin = /LINE|เข้าสู่ระบบ|idToken|unauthorized|เซสชัน/i.test(m);
       $('gate').style.display='block'; $('main').style.display='none';
       // ----- diagnostic (เปิดด้วย ?diag) — โชว์สาเหตุจริงบนจอ -----
       if(/[?&]diag/i.test(location.search)){
@@ -616,7 +580,7 @@
     }
     $('gate').style.display='none'; $('main').style.display='flex';
     const who=data.org||data.name||'พาร์ทเนอร์';
-    $('hello').innerHTML='ลงชื่อเข้าใช้ในนาม <b>'+esc(who)+'</b>';
+    $('hello').innerHTML='ลงชื่อเข้าใช้ในนาม <b>'+who+'</b>';
     loadClients();
   }
 
@@ -725,18 +689,16 @@
     try{
       const { data } = await window.meRpc('partner_portal_clients', {});
       const box=$('myclients'); const arr=Array.isArray(data)?data:[];
-      const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
       if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีลูกค้าที่บันทึก — ค้นหาด้วยรหัสด้านล่างเพื่อเริ่ม</div>'; return; }
       box.innerHTML='';
       arr.forEach(c=>{
         const row=document.createElement('div'); row.className='clientrow';
         const nm=c.name||'ลูกค้า';
-        const pic=safeImg(c.picture);
-        const av=pic
-          ? '<div class="av2" style="background-image:url(&quot;'+esc(pic)+'&quot;)"></div>'
-          : '<div class="av2">'+esc(nm.trim().charAt(0).toUpperCase()||'?')+'</div>';
-        row.innerHTML=av+'<div><div class="nm">'+esc(nm)+'</div><div class="cd">'+esc(c.code||'')+'</div></div>'+
-          '<div class="hl">'+esc(c.headline||'')+'</div>';
+        const av=c.picture
+          ? '<div class="av2" style="background-image:url(&quot;'+c.picture+'&quot;)"></div>'
+          : '<div class="av2">'+(nm.trim().charAt(0).toUpperCase()||'?')+'</div>';
+        row.innerHTML=av+'<div><div class="nm">'+nm+'</div><div class="cd">'+(c.code||'')+'</div></div>'+
+          '<div class="hl">'+(c.headline||'')+'</div>';
         row.onclick=()=>{ $('code').value=c.code; lookup(); window.scrollTo({top:0,behavior:'smooth'}); };
         box.appendChild(row);
       });
@@ -819,7 +781,6 @@
   }
   async function loadCalendar(){
     const box=$('calList');
-    const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
     try{
       const { data } = await window.meRpc('partner_calendar_self', {});
       const arr=Array.isArray(data)?data:[];
@@ -833,7 +794,7 @@
         groups[k].forEach(s=>{
           const row=document.createElement('div'); row.className='slot'+(s.status==='booked'?' booked':'');
           let right = s.status==='booked'
-            ? '<span class="st">จองแล้ว · '+esc(s.customer||'ลูกค้า')+'</span>'
+            ? '<span class="st">จองแล้ว · '+(s.customer||'ลูกค้า')+'</span>'
             : '<span class="st">ว่าง</span><button class="rm" onclick="removeSlot(\''+s.id+'\')">ลบ</button>';
           row.innerHTML='<span class="tm">'+fmtTime(s.starts_at)+'</span>'+right;
           g.appendChild(row);
@@ -865,7 +826,6 @@
   async function loadBookings(){
     loadEarnings();
     const box=$('bookList');
-    const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
     try{
       const { data } = await window.meRpc('partner_bookings_self', {});
       const arr=Array.isArray(data)?data:[];
@@ -874,17 +834,14 @@
       arr.forEach(b=>{
         const div=document.createElement('div'); div.className='bkrow'+(b.status==='done'?' is-done':'');
         const when=new Date(b.starts_at).toLocaleString('th-TH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-        let html='<div class="bt">'+esc(b.customer||'ลูกค้า')+'<span class="bcode">'+(b.code?('รหัส '+esc(b.code)):'')+'</span></div>'+
-          '<div class="bn">'+when+(b.customer_note?(' · “'+esc(b.customer_note)+'”'):'')+'</div>';
+        let html='<div class="bt">'+(b.customer||'ลูกค้า')+'<span class="bcode">'+(b.code?('รหัส '+b.code):'')+'</span></div>'+
+          '<div class="bn">'+when+(b.customer_note?(' · “'+b.customer_note+'”'):'')+'</div>';
         if(b.status==='confirmed'){
           html+='<div class="bact">'+
-            (b.code?'<button onclick="goAnalyse(\''+esc(b.code)+'\')">กรอกผลวิเคราะห์</button>':'')+
-            '<button class="done" onclick="bookingAction(\''+esc(b.id)+'\',\'done\')">เสร็จงาน</button>'+
-            '<button onclick="bookingAction(\''+esc(b.id)+'\',\'cancel\')">ยกเลิก</button></div>';
-        }else{
-          const STLABEL={done:'เสร็จงานแล้ว',cancelled:'ยกเลิก',canceled:'ยกเลิก',no_show:'ไม่มา'};
-          html+='<div class="bn">'+esc(STLABEL[b.status]||'เสร็จงานแล้ว')+'</div>';
-        }
+            (b.code?'<button onclick="goAnalyse(\''+b.code+'\')">กรอกผลวิเคราะห์</button>':'')+
+            '<button class="done" onclick="bookingAction(\''+b.id+'\',\'done\')">เสร็จงาน</button>'+
+            '<button onclick="bookingAction(\''+b.id+'\',\'cancel\')">ยกเลิก</button></div>';
+        }else{ html+='<div class="bn">เสร็จงานแล้ว</div>'; }
         div.innerHTML=html; box.appendChild(div);
       });
     }catch(e){ box.innerHTML='<div class="empty">โหลดคิวไม่สำเร็จ</div>'; }
@@ -971,7 +928,7 @@
       if(data && data.found && Array.isArray(data.visits)) visits=data.visits;
     }catch(e){ return; }
     if(!visits.length) return;  // ลูกค้าใหม่ — ยังไม่มีประวัติ
-    const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
+    const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
     const rows=visits.map((v,i)=>{
       const m=v.measured||{}, mm=[];
       if(m.bust_in)mm.push('อก '+m.bust_in); if(m.waist_in)mm.push('เอว '+m.waist_in);
@@ -996,7 +953,6 @@
     });
     [['c1','#15233F'],['c2','#7A1F3D'],['c3','#0E0E0E'],['c4','#1E5C5A'],['c5','#C9A86A'],['a1','#E8C9A0'],['a2','#B7B7B7']].forEach(([id,v])=>{ if($(id)) $(id).value=v; });
     ['pc_file_chips','fb_file_chips','mood_board_chips','lookbook_thumbs','photos_thumbs'].forEach(id=>{ if($(id)) $(id).innerHTML=''; });
-    if($('looksWrap')) $('looksWrap').innerHTML='';
   }
   // map ค่ากลับเข้าฟอร์ม (โครงสร้างเดียวกับที่ save() สร้าง)
   function fillForm(d){
@@ -1031,7 +987,6 @@
     setV('core_style', st.core_style); setList('vibe', st.vibe); setV('mix_match', st.mix_match);
     const rec=st.recommend_categories||[];
     $('recommend').querySelectorAll('input[type=checkbox]').forEach(cb=>{ cb.checked=rec.includes(cb.value); });
-    renderLooks(st.looks);
     setList('must_have', st.must_have); setList('brands', st.brands);
     setV('occasions', st.occasions); setV('budget', st.budget); setV('dos_donts', st.dos_donts); setV('mood_board', st.mood_board); renderFileChips('mood_board','mood_board_chips');
     // lookbook / รูป / สรุป
@@ -1043,7 +998,7 @@
   function buildPayload(){
     autoSeason();
     const m={}; ['height_cm','weight_kg','bust_in','underbust_in','waist_in','hip_in','high_hip_in','shoulder_in','shoulder_to_waist_in','back_length_in','arm_length_in','bicep_in','neck_in','thigh_in','inseam_in'].forEach(k=>{const v=num(k);if(v!==undefined)m[k]=v;});
-    ['cup','dress_size','shoe_size','ring_size'].forEach(k=>{const v=str(k);if(v)m[k]=v;});
+    ['cup','dress_size','shoe_size'].forEach(k=>{const v=str(k);if(v)m[k]=v;});
     return {
       measurements:m,
       service:{date:str('service_date'), type:str('service_type'), price:num('service_price'),
@@ -1061,59 +1016,11 @@
         fabrics:str('fabrics'), camouflage:str('camouflage'), avoid_clothing:str('avoid_clothing'), fb_file:str('fb_file')},
       style:{core_style:str('core_style'), vibe:list('vibe'), mix_match:str('mix_match'),
         recommend_categories:checked('recommend'), must_have:list('must_have'), brands:list('brands'),
-        occasions:str('occasions'), budget:str('budget'), dos_donts:str('dos_donts'), mood_board:str('mood_board'),
-        looks:collectLooks()},
+        occasions:str('occasions'), budget:str('budget'), dos_donts:str('dos_donts'), mood_board:str('mood_board')},
       lookbook:list('lookbook'), photos:list('photos'),
       headline:str('headline'), analyst:str('analyst'), partner:str('partner'), analyst_tier:str('tier')
     };
   }
-
-  // ===== Look Builder — เก็บ/สร้างลุค (style.looks) =====
-  const PIECE_ROLES=['เสื้อ','กางเกง','กระโปรง','เดรส','จั๊มสูท','เสื้อนอก','รองเท้า','กระเป๋า','เครื่องประดับ','เข็มขัด','เลเยอร์'];
-  function pieceRow(p){
-    p=p||{};
-    const opts=PIECE_ROLES.map(r=>`<option${p.role===r?' selected':''}>${r}</option>`).join('');
-    const div=document.createElement('div'); div.className='pcrow';
-    div.innerHTML=`<input type="color" class="pc-sw" value="${(p.sw&&/^#[0-9a-fA-F]{3,8}$/.test(p.sw))?p.sw:'#C9A86A'}">`
-      +`<select class="pc-role">${opts}</select>`
-      +`<input class="pc-desc" placeholder="รายละเอียด เช่น เดรส wrap สีดินเผา" value="${(p.desc||'').replace(/"/g,'&quot;')}">`
-      +`<button type="button" class="prm" title="ลบชิ้น">×</button>`
-      +`<input class="pc-buy" placeholder="แบรนด์/ที่ซื้อ เช่น Zara / Pomelo" value="${(p.buy||'').replace(/"/g,'&quot;')}">`;
-    div.querySelector('.prm').onclick=()=>{div.remove();saveDraft&&saveDraft();};
-    return div;
-  }
-  function addPiece(btn,p){ btn.previousElementSibling.appendChild(pieceRow(p)); }
-  function lookBlock(lk){
-    lk=lk||{};
-    const wrap=$('looksWrap');
-    const n=wrap.querySelectorAll('.lookblk').length+1;
-    const blk=document.createElement('div'); blk.className='lookblk';
-    blk.innerHTML=`<div class="lbh"><b>ลุค ${n}</b><button type="button" class="del">ลบลุค</button></div>`
-      +`<div class="lbtop"><input class="lk-mood" placeholder="โอกาส เช่น Work / Elegant" value="${(lk.mood||'').replace(/"/g,'&quot;')}">`
-      +`<input class="lk-title" placeholder="ชื่อลุค เช่น จั๊มสูทครีมคาดเอว" value="${(lk.title||'').replace(/"/g,'&quot;')}"></div>`
-      +`<input class="lk-note" placeholder="ทำไมลุคนี้เวิร์ก (โน้ตสั้น ๆ)" value="${(lk.note||'').replace(/"/g,'&quot;')}">`
-      +`<div class="lk-pieces"></div>`
-      +`<button type="button" class="addbtn">+ เพิ่มชิ้น</button>`;
-    blk.querySelector('.del').onclick=()=>{blk.remove();renumberLooks();saveDraft&&saveDraft();};
-    blk.querySelector('.addbtn').onclick=function(){ addPiece(this); saveDraft&&saveDraft(); };
-    const pc=blk.querySelector('.lk-pieces');
-    (lk.pieces&&lk.pieces.length?lk.pieces:[{},{}]).forEach(p=>pc.appendChild(pieceRow(p)));
-    wrap.appendChild(blk);
-  }
-  function renumberLooks(){ $('looksWrap').querySelectorAll('.lookblk .lbh b').forEach((b,i)=>b.textContent='ลุค '+(i+1)); }
-  function addLook(lk){ lookBlock(lk); saveDraft&&saveDraft(); }
-  function collectLooks(){
-    return [...$('looksWrap').querySelectorAll('.lookblk')].map(blk=>{
-      const pieces=[...blk.querySelectorAll('.pcrow')].map(r=>({
-        sw:r.querySelector('.pc-sw').value, role:r.querySelector('.pc-role').value,
-        desc:r.querySelector('.pc-desc').value.trim(), buy:r.querySelector('.pc-buy').value.trim()
-      })).filter(p=>p.desc||p.buy);
-      return { mood:blk.querySelector('.lk-mood').value.trim(), title:blk.querySelector('.lk-title').value.trim(),
-        note:blk.querySelector('.lk-note').value.trim(), pieces };
-    }).filter(l=>l.title||l.pieces.length);
-  }
-  function renderLooks(arr){ $('looksWrap').innerHTML=''; (arr||[]).forEach(lk=>lookBlock(lk)); }
-  window.addLook=addLook;
 
   // ===== ฉบับร่างในเครื่อง (กันพิมพ์ครึ่งทางแล้วหลุด) =====
   const draftKey=c=>'partnerDraft:'+c;
@@ -1170,7 +1077,7 @@
         added.push(url);
         const local=URL.createObjectURL(file);
         const div=document.createElement('div'); div.className='th';
-        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${esc((file.name||'').slice(0,18))}</div>`;
+        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${(file.name||'').slice(0,18)}</div>`;
         thumbs.appendChild(div);
       }catch(e){
         $('upnote').style.display='block';
@@ -1219,8 +1126,8 @@
     const clip='<svg viewBox="0 0 24 24"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.6 1.6 0 0 1-2.3-2.3l7.8-7.8"/></svg>';
     list(targetId).forEach(url=>{
       let name=url; try{ name=decodeURIComponent(url.split('/').pop().split('?')[0]).replace(/^docs\//,'').replace(/^\d+-\d+-/,''); }catch(e){}
-      const a=document.createElement('a'); a.href=safeHref(url); a.target='_blank'; a.rel='noopener';
-      a.innerHTML=clip+'<span>'+esc((name||url).slice(0,40))+'</span>';
+      const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener';
+      a.innerHTML=clip+'<span>'+(name||url).slice(0,40)+'</span>';
       box.appendChild(a);
     });
   }
@@ -1231,7 +1138,7 @@
     'พอร์ทัลสไตลิสต์':'Stylist portal',
     'พาร์ทเนอร์ LLOOP':'LLOOP partner',
     'บันทึกตัวตนของลูกค้าทุกคน':"Record every client's profile",
-    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis.',
+    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดที่วนต่อใช่กับเขาที่สุด':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis — so every rotating piece suits them best.',
     'ลูกค้าของฉัน':'My clients',
     'ลูกค้าที่เคยบันทึกไว้ — แตะเพื่อเปิดแก้ไขต่อ (ไม่ต้องจำรหัส)':'Clients you have saved — tap to continue editing (no code needed)',
     'ยังไม่มีลูกค้าที่บันทึก':'No saved clients yet',
@@ -1239,7 +1146,7 @@
     'ค้นหาลูกค้า — รหัสจากแอป LLOOP':'Find client — code from the LLOOP app',
     'ค้นหา':'Search',
     'รหัส':'Code', 'มีผลวิเคราะห์เดิม (บันทึกทับได้)':'has a previous analysis (you can overwrite)', 'ลูกค้าใหม่':'new client',
-    'บริการ':'Service', 'สี':'Colour', 'หน้า':'Face', 'หุ่น':'Body', 'วัดตัว':'Measure', 'สไตล์':'Style', 'ลุค':'Looks', 'รูป/สรุป':'Photos',
+    'บริการ':'Service', 'สี':'Colour', 'หน้า':'Face', 'หุ่น':'Body', 'วัดตัว':'Measure', 'สไตล์':'Style', 'รูป/สรุป':'Photos',
     'ข้อมูลการให้บริการ':'Service details',
     'บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ':'Record what service and when — used for follow-up and receipts',
     'วันที่ให้บริการ':'Service date', 'บริการที่ใช้':'Service used', 'มูลค่าบริการ (฿)':'Service value (฿)',
@@ -1277,10 +1184,6 @@
     'เสื้อผ้า/ทรงที่ควรเลี่ยง':'Clothing/shapes to avoid', 'คอปาด, กระโปรงบานช่วงสะโพก':'boat neck, skirts flaring at hips',
     'ไฟล์งาน Face & Body (PDF/รูป/เอกสาร)':'Face & Body files (PDF/image/doc)',
     'วัดตัว (ละเอียด)':'Measurements (detailed)', 'หน่วยนิ้ว ยกเว้นส่วนสูง/น้ำหนัก':'Inches, except height/weight',
-    'กรอกเท่าที่มี เว้นว่างได้ — หน่วยกำกับอยู่ในแต่ละช่อง':'Fill in what you have — units are shown in each field',
-    'พื้นฐาน':'Basics', 'ช่วงบน':'Upper body', 'ช่วงล่าง':'Lower body', 'แขน-หลัง':'Arms & back',
-    'ซม.':'cm', 'กก.':'kg', 'นิ้ว':'in',
-    'ส่วนสูง':'Height', 'น้ำหนัก':'Weight',
     'ส่วนสูง (ซม.)':'Height (cm)', 'น้ำหนัก (กก.)':'Weight (kg)', 'ไซส์เดรส':'Dress size', 'รอบอก':'Bust', 'ใต้อก':'Underbust',
     'คัพ':'Cup', 'รอบเอว':'Waist', 'สะโพก':'Hip', 'สะโพกบน':'High hip', 'ไหล่':'Shoulder', 'ไหล่ถึงเอว':'Shoulder to waist',
     'ความยาวหลัง':'Back length', 'ความยาวแขน':'Arm length', 'รอบต้นแขน':'Bicep', 'รอบคอ':'Neck', 'ต้นขา':'Thigh',
@@ -1322,7 +1225,7 @@
     'ลูกค้าที่จองเข้ามา — เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ':'Clients who booked — open the note, search the code to record the analysis, then tap Done when finished.',
     'ยังไม่มีคิว':'No bookings yet',
   };
-  const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.pnav button,.card h2,.card .sub,.jump button,.empty,label,button.btn,option,.gm .u,.grp .gt';
+  const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.pnav button,.card h2,.card .sub,.jump button,.empty,label,button.btn,option';
   // ภาษาให้ตรงกับแถบ topbar ร่วม (nav.js เก็บใน lloop_lang) — ใช้เป็นแหล่งความจริงเดียว
   let plang=localStorage.getItem('lloop_lang')||localStorage.getItem('partnerLang')||'th', collected=false, _syncingLang=false;
   function collectI18n(){

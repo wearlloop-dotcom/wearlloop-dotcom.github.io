@@ -65,20 +65,16 @@
   .c-rates{margin-top:22px; display:flex; gap:34px; font-size:28px; color:#3a342c;}
   .c-rates b{font-family:'Poppins'; font-weight:500;}
   .c-rates .best{color:var(--sage);}
-  .c-foot{margin-top:auto;display:flex;align-items:flex-end;}
+  .c-foot{margin-top:auto;}
   .c-note{font-size:25px; color:var(--sage); line-height:1.6;}
   .c-cta{margin-top:24px; background:var(--ink); color:var(--cream); text-align:center;
     border-radius:14px; padding:30px; font-size:32px; letter-spacing:1.5px;}
-  /* โหมดแสดงผลเต็มจอ (เปิดด้วย ?display=1) — ซ่อนฟอร์ม โชว์เฉพาะการ์ด */
-  body.kiosk .wrap{grid-template-columns:1fr; max-width:560px;}
-  body.kiosk .left{display:none;}
-  body.kiosk .scaler{max-width:100%;}
 </style>
 </head>
 <body>
   <div class="wrap">
 
-    <div class="left">
+    <div>
       <h1>LLOOP · การ์ดราคา</h1>
       <p class="sub">สไลด์สุดท้ายของโพสต์เสื้อผ้า — ใส่รหัสชุดแล้วกด “ดึง” เพื่อเติมรูป/สี/ไซส์/ราคา 1·3·5 วันจากระบบอัตโนมัติ แล้วโหลด PNG</p>
 
@@ -86,7 +82,6 @@
         <div class="pull">
           <input id="f-code" placeholder="รหัสชุด เช่น LL-0241" onkeydown="if(event.key==='Enter')pull()">
           <button onclick="pull()">ดึงจากระบบ</button>
-          <button onclick="nfcScan()" id="nfcBtn" style="background:var(--sage)">แตะ NFC</button>
         </div>
         <p class="status" id="status">ใส่รหัสแล้วกดดึง · หรือกรอกมือด้านล่างก็ได้</p>
         <hr>
@@ -142,15 +137,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   const $ = id => document.getElementById(id);
   const v = id => $(id).value;
   const set = (id,val)=>{ const e=$(id); if(e!=null && val!=null) e.value=val; };
   const baht = n => '฿' + Number(n||0).toLocaleString('th-TH');
   const status = (m,err)=>{ const s=$('status'); s.textContent=m; s.className='status'+(err?' err':''); };
-  const esc=s=>(s==null?'':String(s)).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c]));
-  const safeImg=u=>{ u=String(u||''); return (/^https:\/\//i.test(u)||/^data:image\/(png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(u))?u:''; };
 
   function render(){
     const photo = v('f-photo').trim();
@@ -161,22 +153,22 @@
     const forr = v('f-for').trim();
     const price=v('f-price'), d1=v('f-d1'), d3=v('f-d3'), d5=v('f-d5'), best=$('f-best').checked;
 
-    const photoEl = safeImg(photo)
-      ? `<img class="c-photo" crossorigin="anonymous" src="${safeImg(photo)}" alt="">`
-      : `<div class="c-photo ph" style="background:${esc(hex||'#C9A86A')}">${esc((v('f-meta').split('·').pop()||'LLOOP').trim())}</div>`;
+    const photoEl = photo
+      ? `<img class="c-photo" crossorigin="anonymous" src="${photo}" alt="">`
+      : `<div class="c-photo ph" style="background:${hex||'#C9A86A'}">${(v('f-meta').split('·').pop()||'LLOOP').trim()}</div>`;
 
     const specs = [];
-    if (colorName) specs.push(`<div class="c-spec"><span class="c-swatch" style="background:${esc(hex)}"></span>${esc(colorName)}</div>`);
-    const sz = [bust&&`อก ${esc(bust)}`, waist&&`เอว ${esc(waist)}`, len&&`ยาว ${esc(len)} ซม.`].filter(Boolean).join(' · ');
+    if (colorName) specs.push(`<div class="c-spec"><span class="c-swatch" style="background:${hex}"></span>${colorName}</div>`);
+    const sz = [bust&&`อก ${bust}`, waist&&`เอว ${waist}`, len&&`ยาว ${len} ซม.`].filter(Boolean).join(' · ');
     if (sz) specs.push(`<div class="c-spec">${sz}</div>`);
 
     $('card').innerHTML = `
       ${photoEl}
       <div class="c-body">
         <div class="c-top"><div class="c-mark">LLOOP</div><div class="c-ring"></div></div>
-        <div class="c-name">${esc(name)}</div>
-        ${meta?`<div class="c-meta">${esc(meta)}</div>`:''}
-        ${forr?`<div class="c-for">เหมาะกับ ${esc(forr)}</div>`:''}
+        <div class="c-name">${name}</div>
+        ${meta?`<div class="c-meta">${meta}</div>`:''}
+        ${forr?`<div class="c-for">เหมาะกับ ${forr}</div>`:''}
         ${specs.length?`<div class="c-specs">${specs.join('')}</div>`:''}
         <div class="c-priceline"><span class="c-price">${baht(price)}</span><span class="c-per">/วัน เริ่มต้น</span></div>
         <div class="c-rates">
@@ -185,24 +177,10 @@
           <span>5 วัน <b>${baht(d5)}</b></span>
         </div>
         <div class="c-foot">
-          <div style="flex:1">
-            <div class="c-note">มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
-            <div class="c-cta">ทักแชต LLOOP เพื่อจอง</div>
-          </div>
-          <div id="c-qrwrap" style="display:none;flex:0 0 auto;text-align:center;margin-left:20px">
-            <div id="c-qr" style="background:#fff;padding:8px;border-radius:10px;display:inline-block"></div>
-            <div style="font-size:20px;color:var(--ink,#2a2a2a);margin-top:6px;font-weight:600">สแกนเช่าเลย</div>
-          </div>
+          <div class="c-note">มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
+          <div class="c-cta">ทักแชต LLOOP เพื่อจอง</div>
         </div>
       </div>`;
-    // QR → หน้าเช่าชุดนี้ (g.html?c=<code>) ใช้รหัสชุดจริงจากช่อง f-code หรือท้าย meta (brand · code)
-    const qrCode = (v('f-code') || (meta.split('·').pop() || '')).trim();
-    const qrWrap = $('c-qrwrap'), qrEl = $('c-qr');
-    if (qrEl && qrCode && window.QRCode) {
-      qrEl.innerHTML = '';
-      new QRCode(qrEl, { text: 'https://wearlloop-dotcom.github.io/g.html?c=' + encodeURIComponent(qrCode), width: 132, height: 132, correctLevel: QRCode.CorrectLevel.M });
-      if (qrWrap) qrWrap.style.display = 'block';
-    } else if (qrWrap) { qrWrap.style.display = 'none'; }
     fit();
   }
 
@@ -266,36 +244,7 @@
     const a=document.createElement('a'); a.download='lloop-price-'+code+'.png'; a.href=canvas.toDataURL('image/png'); a.click();
   }
 
-  // ===== Web NFC (Android Chrome) — จ่อแท็กแล้วเปลี่ยนการ์ดเอง =====
-  function codeFromUrl(s){ try{ const u=new URL(s); return u.searchParams.get('code')||u.searchParams.get('c')||''; }catch(e){ return ''; } }
-  async function nfcScan(){
-    if(!('NDEFReader' in window)){ status('เครื่องนี้อ่าน NFC ผ่านเว็บไม่ได้ — ใช้ Android Chrome หรือใช้แท็กแบบเก็บลิงก์แทน', true); return; }
-    try{
-      const r=new NDEFReader(); await r.scan();
-      status('จ่อมือถือกับป้าย NFC ที่ชุด…');
-      r.onreading=(e)=>{
-        let code='';
-        for(const rec of e.message.records){
-          const txt=()=>{ try{ return new TextDecoder(rec.encoding||'utf-8').decode(rec.data).trim(); }catch(_){ return ''; } };
-          if(rec.recordType==='url') code=codeFromUrl(txt());
-          else if(rec.recordType==='text'){ const t=txt(); code=codeFromUrl(t)||t; }
-          if(code) break;
-        }
-        if(code){ $('f-code').value=code; pull(); }
-        else status('อ่านป้ายได้ แต่ไม่พบรหัสชุดในป้าย — เขียนรหัส/ลิงก์ ?code= ลงแท็กก่อน', true);
-      };
-    }catch(e){ status('เริ่มสแกน NFC ไม่ได้: '+e.message, true); }
-  }
-
-  // ===== เปิดด้วย ?code= (จากแท็ก NFC ที่เก็บลิงก์ / QR) → โชว์การ์ดเอง · ?display=1 = เต็มจอ =====
-  (function init(){
-    const u=new URL(location.href);
-    if(u.searchParams.get('display')==='1') document.body.classList.add('kiosk');
-    const code=u.searchParams.get('code')||u.searchParams.get('c');
-    render();
-    if(code){ $('f-code').value=code; pull(); }
-    if(!('NDEFReader' in window)){ const b=$('nfcBtn'); if(b) b.style.display='none'; }
-  })();
+  render();
 </script>
 </body>
 </html>

@@ -35,20 +35,10 @@
   .gmeta{color:var(--muted);font-size:13px;margin-top:3px}
   .priceline{display:flex;align-items:baseline;gap:10px;margin-top:12px;flex-wrap:wrap}
   .priceline .now{font-family:var(--display);font-size:25px;font-weight:700;color:var(--ink)}
-  .priceline .was{font-size:15px;color:var(--muted)}
   .priceline .per{font-size:13px;color:var(--muted)}
   .priceline .worth{font-size:12.5px;color:var(--muted)}
   .priceline .worth b{color:var(--ink);font-weight:600}
   .trust{font-size:12px;color:var(--muted);margin-top:7px}
-  /* กล่องตำหนิ (แจ้งโปร่งใส) */
-  .defectbox{margin-top:14px;padding:12px 14px;background:#FBF3E4;border:1px solid #E8D5AC;border-radius:8px}
-  .defectbox .dftag{display:inline-block;font-size:11px;letter-spacing:.5px;font-weight:600;background:#8A5A00;color:#fff;padding:4px 10px;border-radius:30px}
-  .defectbox .dfoff{font-size:12.5px;color:#8A5A00;font-weight:500;margin-left:8px}
-  .defectbox .dfnote{font-size:13px;color:#5E4A22;line-height:1.55;margin-top:8px}
-  .defectbox .dfphotos{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-top:10px}
-  .defectbox .dfphotos::-webkit-scrollbar{display:none}
-  .defectbox .dfphotos img{height:110px;border-radius:6px;object-fit:cover;flex:0 0 auto;cursor:zoom-in;border:3px solid #fff;box-shadow:0 1px 6px rgba(80,64,38,.14)}
-  .defectbox .dfphotos img.zoom{height:auto;width:100%;cursor:zoom-out}
 
   .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:18px}
   .sectitle{font-family:var(--display);font-size:15px;font-weight:600;margin-bottom:3px}
@@ -102,10 +92,13 @@
 </style>
 </head>
 <body>
-<header class="lloop-topbar" data-back="index.html" data-back-th="ดูทั้งร้าน" data-back-en="Shop all"></header>
+<header><div class="contain hbar">
+  <div class="logo">LLOOP</div>
+  <a class="shopl" href="index.html"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg> ดูทั้งร้าน</a>
+</div></header>
 
 <div class="contain" id="root">
-  <div class="edge"><p data-i18n="Loading the piece…">กำลังโหลดชุด…</p></div>
+  <div class="edge"><p>กำลังโหลดชุด…</p></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -113,14 +106,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=51"></script>
-<script src="data.js?v=52"></script>
+<script src="data.js?v=51"></script>
 <script src="liffAuth.js?v=51"></script>
-<script src="me-api.js?v=61"></script>
+<script src="me-api.js?v=54"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=51"></script>
-<script src="api.js?v=61"></script>
-<script src="pixel.js?v=45"></script>
-<script src="nav.js?v=1"></script>
+<script src="api.js?v=54"></script>
 <script>
 // ============================================================
 //  g.html — สแกน QR ที่ป้ายชุด/บูธ → ดูชุด+ราคา → เลือกวัน → จองในระบบ
@@ -129,28 +120,10 @@
 // ============================================================
 const $ = s => document.querySelector(s);
 const baht = n => '฿' + Number(n || 0).toLocaleString('th-TH');
-function addDays(s, n){ const d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; } // local (กัน toISOString เลื่อนโซน +7)
+function addDays(s, n){ const d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0,10); }
 function fmtDate(s){ try { return new Date(s + 'T00:00:00').toLocaleDateString('th-TH', { day:'numeric', month:'short' }); } catch(e){ return s; } }
 function todayStr(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
 let _tt; function toast(m){ const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2600); }
-
-// ประวัติความสะอาดของชุดตัวนี้ (RPC พับลิก garment_hygiene_public — จาก supabase-p0-moats.sql)
-// ยังไม่ติดตั้ง RPC ก็เงียบไว้ บรรทัดพื้นฐานแสดงตามปกติ
-let _hygSb = null;   // client เดียวต่อหน้า — ไม่สร้างใหม่ทุกสแกน
-async function loadHygiene(){
-  try{
-    if(!G || !window.CONFIG || !window.supabase) return;
-    if(!_hygSb) _hygSb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-    const { data } = await _hygSb.rpc('garment_hygiene_public', { p_code: G.code });
-    if(!data) return;
-    const dd = s => { try{ return new Date(s).toLocaleDateString('th-TH', { day:'numeric', month:'short' }); }catch(e){ return ''; } };
-    const bits = [];
-    if(data.last_cleaned_at) bits.push(NAV.t('ซักล่าสุด ','Last cleaned ') + dd(data.last_cleaned_at) + (data.last_method ? ' · ' + data.last_method : ''));
-    if(data.last_qc_pass) bits.push(NAV.t('ตรวจสภาพผ่าน ','QC passed ') + dd(data.last_qc_pass));
-    const el = $('#hygLine');
-    if(bits.length && el) el.textContent = el.textContent + ' · ' + bits.join(' · ');
-  }catch(_e){}
-}
 
 let CUSTOMER = null, G = null, PAY = null, BOOKED = [];
 let gDur = 3, lastQuote = null, booked = false;
@@ -158,46 +131,9 @@ let gDur = 3, lastQuote = null, booked = false;
 // อ่านรหัสชุดจาก ?c= หรือ ?code= (เผื่อ path /g/<code> ที่ rewrite มา)
 function readCode(){
   const u = new URL(location.href);
-  let c = u.searchParams.get('c') || u.searchParams.get('code') || u.searchParams.get('g') || '';
-  // เผื่อกลับจาก LINE login ผ่าน LIFF deep-link — รหัสถูกห่อไว้ใน liff.state (แบบ pay.html)
-  if (!c) {
-    const st = u.searchParams.get('liff.state');
-    if (st) { const inner = new URLSearchParams(st.replace(/^\?/,'')); c = inner.get('c') || inner.get('code') || inner.get('g') || ''; }
-  }
+  let c = u.searchParams.get('c') || u.searchParams.get('code') || '';
   if (!c) { const m = location.pathname.match(/\/g\/([^/?#]+)/); if (m) c = decodeURIComponent(m[1]); }
-  c = (c || '').trim().toUpperCase();
-  // จำรหัสไว้ เผื่อ redirect กลับจาก LINE login แล้ว ?c หายไป (redirectUri เป็น baseUrl ตัด query)
-  try {
-    if (c) sessionStorage.setItem('gCode', c);
-    else c = (sessionStorage.getItem('gCode') || '').trim().toUpperCase();
-  } catch (_e) {}
-  return c;
-}
-
-// อ่าน ?ref (เหมือน readCode) — เก็บลง sessionStorage เผื่อ redirect กลับจาก LINE login แล้ว query หาย
-function readRef(){
-  const u = new URL(location.href);
-  let r = u.searchParams.get('ref') || '';
-  if (!r){ const st = u.searchParams.get('liff.state'); if (st){ const inner = new URLSearchParams(st.replace(/^\?/,'')); r = inner.get('ref') || ''; } }
-  r = (r || '').trim();
-  try { if (r) sessionStorage.setItem('gRef', r); else r = (sessionStorage.getItem('gRef') || '').trim(); } catch (_e) {}
-  return r;
-}
-
-// ?ref มี 2 ความหมายคนละระบบ (เหมือน app.js routeDeepLink): โค้ดชวนเพื่อนขึ้นต้น 'LOOP-' vs handle ครีเอเตอร์
-// แยก branch ก่อนยิง ไม่ให้ ref เดียวถูกนับเป็นทั้ง creator_ref และ apply_referral พร้อมกัน
-async function handleReferral(ref, code){
-  if (!ref) return;
-  if (/^loop-/i.test(ref)){
-    // โค้ดชวนเพื่อน → เก็บไว้ apply ตอน login (เครดิตทั้งคู่เมื่อเช่าครั้งแรก)
-    try { localStorage.setItem('lloop_ref', ref); } catch (_e) {}
-    if (CUSTOMER && CUSTOMER.id && window.API && window.API.applyReferral){
-      try { const res = await window.API.applyReferral(CUSTOMER, ref); if (res !== 'not_found'){ try { localStorage.removeItem('lloop_ref'); } catch (_e) {} } } catch (e) {}
-    }
-  } else if (window.API && window.API.logRef){
-    // ลิงก์ชวนเช่าของครีเอเตอร์ (?ref=handle) → log affiliate ให้ได้เครดิตแม้แชร์ลิงก์ชุดตรง
-    try { window.API.logRef(ref, code); } catch (e) {}
-  }
+  return (c || '').trim().toUpperCase();
 }
 
 // ช่วงที่ถูกจองทับกับ [from,to] ไหม (UX hint — ตัวจริง book_cart เป็นคนตัดสิน)
@@ -214,75 +150,57 @@ function rangeBusy(from, to){
   const code = readCode();
   let state = null;
   try { state = await window.API.init(); } catch (e) { console.warn(e); }
-  if (!state) { return renderEdge(NAV.t('โหลดไม่สำเร็จ','Couldn’t load'), NAV.t('ลองสแกนใหม่อีกครั้ง หรือเปิดดูทั้งร้านได้เลยค่ะ','Try scanning again, or browse the whole shop.')); }
+  if (!state) { return renderEdge('โหลดไม่สำเร็จ', 'ลองสแกนใหม่อีกครั้ง หรือเปิดดูทั้งร้านได้เลยค่ะ'); }
   CUSTOMER = state.CUSTOMER || {};
-  if (!code) return renderEdge(NAV.t('ไม่พบรหัสชุด','No item code'), NAV.t('สแกน QR ที่ป้ายชุดอีกครั้งนะคะ','Please scan the QR on the tag again.'));
+  if (!code) return renderEdge('ไม่พบรหัสชุด', 'สแกน QR ที่ป้ายชุดอีกครั้งนะคะ');
   G = (state.GARMENTS || []).find(x => String(x.code || '').toUpperCase() === code);
-  if (!G) return renderEdge(NAV.t('ชุดนี้ยังไม่เปิดให้เช่า','This piece isn’t available yet'), NAV.t('อาจกำลังซัก/เตรียม หรือรหัสไม่ตรง — เลือกชุดอื่นในร้านได้เลยค่ะ','It may be in cleaning or prep, or the code doesn’t match — browse other pieces in the shop.'));
+  if (!G) return renderEdge('ชุดนี้ยังไม่เปิดให้เช่า', 'อาจกำลังซัก/เตรียม หรือรหัสไม่ตรง — เลือกชุดอื่นในร้านได้เลยค่ะ');
   window.track?.('view_item', G.code, { price: G.price });
-  window.fbTrack?.('ViewContent', { content_ids:[G.code || G.id], content_name: G.name, content_type:'product', value: G.price, currency:'THB' });
-  handleReferral(readRef(), G.code);
   try { PAY = await window.API.payInfo(); } catch (e) {}
   try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) { BOOKED = []; }
   renderItem();
-  loadHygiene();   // ประวัติความสะอาดของชุดตัวนี้ (สแกนป้ายแล้วเห็นเลย) — ไม่มี RPC ก็เงียบไว้
 })();
 
 function renderEdge(title, body){
   $('#root').innerHTML = `<div class="edge">
     <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg></div>
     <h4>${title}</h4><p>${body}</p>
-    <a class="btn sage" href="index.html" style="display:block;text-decoration:none">${NAV.t('ดูทั้งร้าน','Shop all')}</a>
+    <a class="btn sage" href="index.html" style="display:block;text-decoration:none">ดูทั้งร้าน</a>
   </div>`;
 }
 
 function renderItem(){
   const signedIn = !!(CUSTOMER && CUSTOMER.id);
-  // ตำหนิ (แจ้งโปร่งใส): ป้าย + ราคาขีดฆ่าจากเรทปกติ + รูปจุดตำหนิ (กดดูใกล้ ๆ ได้)
-  const hasDefect = !!(G.defectNote || (G.defectPhotos && G.defectPhotos.length));
-  const defOff = (hasDefect && G.priceRegular > G.price) ? Math.round((1 - G.price / G.priceRegular) * 100) : null;
-  const defPh = (G.defectPhotos || []).map(u => `<img src="${u}" loading="lazy" alt="${NAV.t('รูปจุดตำหนิ','flaw photo')}" referrerpolicy="no-referrer" onclick="this.classList.toggle('zoom')">`).join('');
-  const defectBox = hasDefect ? `<div class="defectbox">
-      <span class="dftag">${NAV.t('มีตำหนิเล็กน้อย','Minor flaw')}</span>${defOff ? `<span class="dfoff">-${defOff}%</span>` : ''}
-      ${G.defectNote ? `<div class="dfnote">${G.defectNote}</div>` : ''}
-      ${defPh ? `<div class="dfphotos">${defPh}</div>` : ''}
-    </div>` : '';
   const photo = G.photo
     ? `<img class="photo" src="${G.photo}" alt="${G.name}" referrerpolicy="no-referrer">`
     : `<div class="photo ph" style="background:${G.bg || '#EFEDE9'}">${(G.code || 'LLOOP')}</div>`;
-  const worth = G.retail ? `<span class="worth">${NAV.t('มูลค่าชุด','Retail value')} <b>${baht(G.retail)}</b></span>` : '';
-  const rented = (G.timesRented > 0) ? NAV.t(`เคยถูกเช่า ${G.timesRented} ครั้ง`,`Rented ${G.timesRented} times`) : NAV.t('ชุดพร้อมเช่า','Ready to rent');
-  // มีประวัติซักแล้วค่อยเคลมเรื่องซัก — ชุดใหม่ยังไม่มีรอบซัก ใช้คำที่จริงเสมอ (ตรวจสภาพก่อนส่ง)
-  const hygiene = (G.washCount > 0
-      ? NAV.t('ซักและตรวจสภาพก่อนส่งทุกครั้ง · ดูแลมาแล้ว ' + G.washCount + ' รอบ', 'Cleaned & inspected before every rental · ' + G.washCount + ' care cycles logged')
-      : NAV.t('ตรวจสภาพและเตรียมชุดก่อนส่งทุกครั้ง', 'Inspected & prepared before every rental'))
-    + (G.grade ? ' · ' + NAV.t('เกรดสภาพ ', 'Condition grade ') + G.grade : '');
+  const worth = G.retail ? `<span class="worth">มูลค่าชุด <b>${baht(G.retail)}</b></span>` : '';
+  const rented = (G.timesRented > 0) ? `เคยถูกเช่า ${G.timesRented} ครั้ง` : 'ชุดพร้อมเช่า';
   const cta = signedIn
-    ? `<button class="btn" id="bookBtn" onclick="onBook()" disabled>${NAV.t('เลือกวันก่อนนะคะ','Pick a date first')}</button>`
-    : `<button class="btn sage" onclick="window.LiffAuth.signIn()">${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อจอง','Sign in with LINE to book')}</button>`;
+    ? `<button class="btn" id="bookBtn" onclick="onBook()" disabled>เลือกวันก่อนนะคะ</button>`
+    : `<button class="btn sage" onclick="window.LiffAuth.signIn()">เข้าสู่ระบบด้วย LINE เพื่อจอง</button>
+       <div class="signhint">เข้าระบบด้วย LINE ครั้งเดียว แล้วเลือกวันจองได้เลย</div>`;
   $('#root').innerHTML = `
     ${photo}
-    <div class="eyebrow">${NAV.t('เช่าชุดนี้','Rent this piece')}</div>
+    <div class="eyebrow">เช่าชุดนี้</div>
     <h1 class="gname">${G.name || G.code}</h1>
     <div class="gmeta">${[G.brand, G.code].filter(Boolean).join(' · ')}</div>
     <div class="priceline">
-      ${defOff ? `<s class="was">${baht(G.priceRegular)}</s>` : ''}<span class="now">${baht(G.price)}</span><span class="per">${NAV.t('/วัน เริ่มต้น','/day from')}</span>
+      <span class="now">${baht(G.price)}</span><span class="per">/วัน เริ่มต้น</span>
       ${worth}
     </div>
-    <div class="trust">${rented} · ${NAV.t('มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป','Deposit refunded after inspection · free shipping on 3+ day rentals')}</div>
-    <div class="trust" id="hygLine">${hygiene}</div>
-    ${defectBox}
+    <div class="trust">${rented} · มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
 
     <div class="sec">
-      <div class="sectitle">${NAV.t('เลือกวันที่จะใช้','Choose your date')}</div>
-      <div class="seccap">${NAV.t('วันแรกคือวันรับ/วันใช้งาน','The first day is your pickup/wear day')}</div>
-      <label class="fl">${NAV.t('วันที่ใช้งาน','Wear date')}</label>
+      <div class="sectitle">เลือกวันที่จะใช้</div>
+      <div class="seccap">วันแรกคือวันรับ/วันใช้งาน — เราเช็กให้ทันทีว่าว่างไหม</div>
+      <label class="fl">วันที่ใช้งาน</label>
       <input type="date" id="useDate" min="${todayStr()}" onchange="onPick()">
-      <label class="fl">${NAV.t('เช่ากี่วัน','How many days')}</label>
+      <label class="fl">เช่ากี่วัน</label>
       <div class="durchips" id="durchips">
-        <button data-d="1" onclick="setDur(1)">${NAV.t('1 วัน','1 day')}</button>
-        <button data-d="3" class="on" onclick="setDur(3)">${NAV.t('3 วัน','3 days')}</button>
-        <button data-d="5" onclick="setDur(5)">${NAV.t('5 วัน','5 days')}</button>
+        <button data-d="1" onclick="setDur(1)">1 วัน</button>
+        <button data-d="3" class="on" onclick="setDur(3)">3 วัน</button>
+        <button data-d="5" onclick="setDur(5)">5 วัน</button>
       </div>
       <div class="availmsg" id="availMsg"></div>
       <div id="summary"></div>
@@ -299,22 +217,17 @@ function setDur(d){
 async function onPick(){
   const from = $('#useDate') && $('#useDate').value;
   const sum = $('#summary'), msg = $('#availMsg'), btn = $('#bookBtn');
-  if (!from){ sum.innerHTML = ''; if (msg) msg.className = 'availmsg'; if (btn){ btn.disabled = true; btn.textContent = NAV.t('เลือกวันก่อนนะคะ','Pick a date first'); } return; }
+  if (!from){ sum.innerHTML = ''; if (msg) msg.className = 'availmsg'; if (btn){ btn.disabled = true; btn.textContent = 'เลือกวันก่อนนะคะ'; } return; }
   const to = addDays(from, gDur - 1);
   if (rangeBusy(from, to)){
     sum.innerHTML = '';
     msg.className = 'availmsg busy';
-    msg.textContent = NAV.t('ช่วงวันนี้มีคนจองอยู่ — ลองเลื่อนวัน หรือดูชุดคล้ายกันในร้านนะคะ','These dates are already booked — try other dates, or see similar pieces in the shop.');
-    if (btn){ btn.disabled = true; btn.textContent = NAV.t('ช่วงนี้ไม่ว่าง','Not available'); }
+    msg.textContent = 'ช่วงวันนี้มีคนจองอยู่ — ลองเลื่อนวัน หรือดูชุดคล้ายกันในร้านนะคะ';
+    if (btn){ btn.disabled = true; btn.textContent = 'ช่วงนี้ไม่ว่าง'; }
     return;
   }
   msg.className = 'availmsg free';
-  msg.textContent = NAV.t('ว่างช่วงวันนี้ — จองได้เลย','Available on these dates — ready to book');
-  // ยังไม่ล็อกอิน: ไม่เรียก quote (meRpc จะ reauth เด้งออกไป LINE login กลางคัน ทั้งที่แค่ดูราคา) — ชวนล็อกอินก่อน
-  if (!(CUSTOMER && CUSTOMER.id)){
-    sum.innerHTML = `<div class="qdates">${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อดูสรุปยอดและจองค่ะ','Sign in with LINE to see the summary and book.')}</div>`;
-    return;
-  }
+  msg.textContent = 'ว่างช่วงวันนี้ — จองได้เลย';
   let q = null;
   try { q = await window.API.quote(G.code, CUSTOMER, from, to); } catch (e) {}
   lastQuote = q;
@@ -323,41 +236,40 @@ async function onPick(){
     const hasPP = PAY && (PAY.pay_promptpay_id || PAY.pay_promptpay_qr);
     const payBlock = !hasPP ? '' : `
       <div class="paybox">
-        <div class="qhd">${NAV.t('ช่องทางชำระ','Payment')}</div>
+        <div class="qhd">ช่องทางชำระ</div>
         ${PAY.pay_promptpay_id ? `<div id="ppqr"></div>`
           : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
-        <div class="payamt">${NAV.t('สแกนแล้วโอน','Scan and transfer')} <b>${baht(q.total)}</b></div>
-        <div class="paynote">${PAY.pay_note || NAV.t('จองก่อนเพื่อล็อกชุด แล้วโอน + แนบสลิปในแชต LLOOP ได้เลยค่ะ','Book to lock the piece, then transfer and attach the slip in LLOOP chat.')}</div>
+        <div class="payamt">สแกนแล้วโอน <b>${baht(q.total)}</b></div>
+        <div class="paynote">${PAY.pay_note || 'จองก่อนเพื่อล็อกชุด แล้วโอน + แนบสลิปในแชต LLOOP ได้เลยค่ะ'}</div>
       </div>`;
     sum.innerHTML = `
-      <div class="qhd">${NAV.t('สรุปยอด','Summary')} · ${NAV.t(q.days + ' วัน', q.days + ' days')}</div>
-      ${row(NAV.t('ค่าเช่า','Rental'), baht(q.rate))}
-      ${q.deposit > 0 ? row(NAV.t('มัดจำ (คืนหลังตรวจชุด)','Deposit (refunded after inspection)'), baht(q.deposit)) : ''}
-      ${row(NAV.t('ค่าส่ง','Shipping'), q.shipping > 0 ? baht(q.shipping) : NAV.t('ส่งฟรี','Free'))}
-      ${row(NAV.t('รวมโอน','Total to transfer'), baht(q.total), true)}
-      <div class="qdates">${NAV.t('วันแรก (วันรับ/ใช้งาน):','First day (pickup/wear):')} <b>${fmtDate(q.use_date)}</b> · ${NAV.t('เช่า ' + q.days + ' วัน','rent ' + q.days + ' days')}</div>
-      <div class="qdates">${NAV.t('จัดส่งราว','Ships around')} ${fmtDate(q.ship_date)} · ${NAV.t('กำหนดคืน','Return by')} <b>${fmtDate(q.return_date)}</b></div>
-      ${q.kyc_required ? `<div class="qdates">${NAV.t('ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว (แนบบัตร + IG/FB) ช่วยลดมัดจำได้ — ทำในแชตหลังจองได้เลย','New customers verify once (ID card + IG/FB) to lower the deposit — do it in chat after booking.')}</div>` : ''}
+      <div class="qhd">สรุปยอด · ${q.days} วัน</div>
+      ${row('ค่าเช่า', baht(q.rate))}
+      ${q.deposit > 0 ? row('มัดจำ (คืนหลังตรวจชุด)', baht(q.deposit)) : ''}
+      ${row('ค่าส่ง', q.shipping > 0 ? baht(q.shipping) : 'ส่งฟรี')}
+      ${row('รวมโอน', baht(q.total), true)}
+      <div class="qdates">วันแรก (วันรับ/ใช้งาน): <b>${fmtDate(q.use_date)}</b> · เช่า ${q.days} วัน</div>
+      <div class="qdates">จัดส่งราว ${fmtDate(q.ship_date)} · กำหนดคืน <b>${fmtDate(q.return_date)}</b></div>
+      ${q.kyc_required ? `<div class="qdates">ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว (แนบบัตร + IG/FB) ช่วยลดมัดจำได้ — ทำในแชตหลังจองได้เลย</div>` : ''}
       ${payBlock}`;
     if (PAY && PAY.pay_promptpay_id && window.promptpayBrandedQR){
       const el = document.getElementById('ppqr');
       if (el) window.promptpayBrandedQR(el, PAY.pay_promptpay_id, q.total, PAY.pay_promptpay_type);
     }
   } else { sum.innerHTML = ''; }
-  if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
+  if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
 }
 
 async function onBook(){
   const from = $('#useDate') && $('#useDate').value;
-  if (!from){ toast(NAV.t('เลือกวันก่อนนะคะ','Pick a date first')); return; }
+  if (!from){ toast('เลือกวันก่อนนะคะ'); return; }
   if (!(CUSTOMER && CUSTOMER.id)){ window.LiffAuth.signIn(); return; }
   const to = addDays(from, gDur - 1);
-  window.fbTrack?.('InitiateCheckout', { content_ids:[G.code || G.id], content_name: G.name, value: G.price, currency:'THB' });
-  const btn = $('#bookBtn'); if (btn){ btn.disabled = true; btn.textContent = NAV.t('กำลังจอง…','Booking…'); }
+  const btn = $('#bookBtn'); if (btn){ btn.disabled = true; btn.textContent = 'กำลังจอง…'; }
   // เช็กว่างวันแรกอีกชั้น (กันชนนาทีสุดท้าย) — book_cart เป็นคนตัดสินจริง
-  let free = true; try { free = await window.API.availableRange(G.id, from, to); } catch (e) {}
+  let free = true; try { free = await window.API.availableOn(G.id, from); } catch (e) {}
   if (free === false){
-    if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
+    if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
     try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) {}
     onPick();
     return;
@@ -372,11 +284,10 @@ async function onBook(){
     const total = (data && typeof data.total === 'number') ? data.total : (lastQuote && lastQuote.total);
     const covered = !!(data && Array.isArray(data.items) && data.items.length && data.items.every(it => it.included));
     window.track?.('booked', G.code, { total });
-    window.fbTrack?.('Purchase', { content_ids:[G.code || G.id], content_name: G.name, value: (typeof total === 'number' ? total : G.price), currency:'THB' });
     renderDone(from, to, total, covered);
   } else {
-    if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
-    toast(NAV.t('ชุดนี้เพิ่งถูกจองช่วงนั้นพอดี ลองวันอื่นนะคะ','This piece was just booked for those dates — try other dates.'));
+    if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
+    toast('ชุดนี้เพิ่งถูกจองช่วงนั้นพอดี ลองวันอื่นนะคะ');
     try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) {}
     onPick();
   }
@@ -386,34 +297,30 @@ function renderDone(from, to, total, covered){
   const hasPP = PAY && (PAY.pay_promptpay_id || PAY.pay_promptpay_qr);
   // สมาชิกที่แพ็กคลุมชุดนี้ → ไม่ต้องจ่าย (จองสำเร็จเลย)
   const payBlock = covered
-    ? `<div class="paybox"><div class="paynote" style="text-align:center">${NAV.t('ชุดนี้รวมอยู่ในแพ็กสมาชิกของคุณแล้ว — ไม่ต้องโอนเพิ่ม จัดส่งตามวันที่เลือกค่ะ','This piece is included in your membership — nothing more to pay, shipped on your chosen date.')}</div></div>`
+    ? `<div class="paybox"><div class="paynote" style="text-align:center">ชุดนี้รวมอยู่ในแพ็กสมาชิกของคุณแล้ว — ไม่ต้องโอนเพิ่ม จัดส่งตามวันที่เลือกค่ะ</div></div>`
     : !(hasPP && total) ? '' : `
     <div class="paybox">
-      <div class="qhd">${NAV.t('โอนเพื่อยืนยัน','Transfer to confirm')}</div>
+      <div class="qhd">โอนเพื่อยืนยัน</div>
       ${PAY.pay_promptpay_id ? `<div id="ppqr2"></div>`
         : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
-      <div class="payamt">${NAV.t('สแกนแล้วโอน','Scan and transfer')} <b>${baht(total)}</b></div>
-      <div class="paynote">${NAV.t('โอนแล้วส่งสลิปในแชต LINE — ยืนยันแล้วจัดส่งตามวันที่เลือก','Transfer, send the slip on LINE — confirmed and shipped on your date')}</div>
-      <a href="${(window.CONFIG && CONFIG.LINE_OA_URL) || 'https://line.me/R/ti/p/@lloop'}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;background:#06C755;color:#fff;border-radius:12px;padding:11px;font-weight:600;text-decoration:none">${NAV.t('ส่งสลิปใน LINE','Send slip on LINE')}</a>
+      <div class="payamt">สแกนแล้วโอน <b>${baht(total)}</b></div>
+      <div class="paynote">โอนแล้วแนบสลิปในแชต LLOOP — ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ</div>
     </div>`;
   $('#root').innerHTML = `
     <div class="sec">
       <div class="done">
         <div class="di"><span class="ck"></span></div>
-        <h4>${NAV.t('ล็อกชุดไว้ให้แล้ว','Your piece is locked in')}</h4>
-        <p>${G.name || G.code} · ${NAV.t('ใช้วันที่','Wear date')} ${fmtDate(from)}${gDur > 1 ? `${NAV.t(' ถึง ',' to ')}${fmtDate(to)}` : ''}</p>
+        <h4>ล็อกชุดไว้ให้แล้ว</h4>
+        <p>${G.name || G.code} · ใช้วันที่ ${fmtDate(from)}${gDur > 1 ? ` ถึง ${fmtDate(to)}` : ''}</p>
       </div>
       ${payBlock}
-      <a class="btn" href="index.html?go=orders" style="display:block;text-decoration:none;text-align:center">${NAV.t('ดูออเดอร์ของฉัน','View my orders')}</a>
+      <a class="btn" href="index.html?go=orders" style="display:block;text-decoration:none;text-align:center">ดูออเดอร์ของฉัน</a>
     </div>`;
   if (PAY && PAY.pay_promptpay_id && total && window.promptpayBrandedQR){
     const el = document.getElementById('ppqr2');
     if (el) window.promptpayBrandedQR(el, PAY.pay_promptpay_id, total, PAY.pay_promptpay_type);
   }
 }
-
-// re-render page content (rendered via JS) when the language toggle flips
-window.addEventListener('lloop:lang', function(){ location.reload(); });
 </script>
 </body>
 </html>

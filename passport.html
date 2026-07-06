@@ -4,103 +4,87 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>เรื่องราวของชุด — LLOOP</title>
+<!-- passport build v8 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <style>
-  :root {
-    --cream: #FBFAF7;
-    --cream2: #F5F4F2;
-    --line: #E7E5E1;
-    --ink: #1A1A1A;
-    --muted: #8C8B86;
-    --sage: #6FB3A6;
-    --sage-light: #E4F0EC;
-    --sage-deep: #23554B;
-    --warm: #C9A86A;
-    --warm-light: #F9F2E3;
+  :root{
+    --cream:#FBFAF7; --cream2:#F5F4F2; --line:#E7E5E1; --ink:#1A1A1A; --muted:#8C8B86;
+    --sage:#6FB3A6; --sage-light:#E4F0EC; --sage-deep:#23554B; --warm:#C9A86A;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--cream);
-    color: var(--ink);
-    font-family: 'Inter', 'Prompt', -apple-system, sans-serif;
-    font-size: 15px;
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-  }
-  header {
-    background: #fff; border-bottom: 1px solid var(--line);
-    padding: 16px 24px; text-align: center;
-  }
-  header .wm { font-family: 'Poppins',sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 3px; }
-  header .sub { font-size: 11.5px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
-  .wrap { max-width: 480px; margin: 0 auto; padding: 18px 16px 70px; display: flex; flex-direction: column; gap: 16px; }
-  .state { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 14px; }
-  .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
-  .pad { padding: 20px; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--cream);color:var(--ink);
+       font-family:'Inter','Prompt',-apple-system,sans-serif;font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:16px 24px;text-align:center}
+  header .wm{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;letter-spacing:3px}
+  header .sub{font-size:11.5px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+  .wrap{max-width:480px;margin:0 auto;padding:18px 16px 70px;display:flex;flex-direction:column;gap:16px}
+  .state{text-align:center;color:var(--muted);padding:60px 20px;font-size:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .pad{padding:20px}
 
   /* hero */
-  .hero img { width: 100%; max-height: 340px; object-fit: cover; display: block; }
-  .hero .pad { text-align: center; }
-  .hero .brand { font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--warm); }
-  .hero h1 { font-family: 'Poppins','Prompt',sans-serif; font-size: 22px; font-weight: 600; margin-top: 4px; }
-  .hero .cat { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .hero img.cover{width:100%;max-height:340px;object-fit:cover;display:block}
+  .hero .pad{text-align:center}
+  .hero .brand{font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:var(--warm)}
+  .hero h1{font-family:'Poppins','Prompt',sans-serif;font-size:22px;font-weight:600;margin-top:4px}
+  .hero .cat{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .spec{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 20px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+  .spec .k{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+  .spec .v{font-size:14px;font-weight:600;margin-top:3px;display:flex;align-items:center;gap:6px;justify-content:center}
+  .spec .dot{width:13px;height:13px;border-radius:50%;border:1px solid var(--line)}
+  .value{margin-top:13px;font-size:13.5px;color:var(--muted)}
+  .value b{color:var(--ink)} .value .rent{color:var(--sage-deep);font-weight:600}
+  .care{margin-top:7px;font-size:12.5px;color:var(--muted)}
+  .care .ck{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;margin-right:7px}
 
-  /* spec strip — มินิมอล: ป้ายเล็ก + ค่า วางแถวเดียว */
-  .spec { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 20px;
-          margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
-  .spec .it { text-align: center; }
-  .spec .k { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
-  .spec .v { font-size: 14px; font-weight: 600; margin-top: 3px; display: flex; align-items: center; gap: 6px; justify-content: center; }
-  .spec .dot { width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--line); flex: 0 0 auto; }
-  .value { margin-top: 14px; font-size: 13.5px; color: var(--muted); }
-  .value b { color: var(--ink); font-weight: 600; }
-  .value .rent { color: var(--sage-deep); font-weight: 600; }
-  .care { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+  /* shared section head */
+  .shead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+  .shead .ey{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  .shead h3{font-size:16px;font-weight:600;margin-top:2px}
+  .shead .see{font-size:12px;color:var(--sage-deep);text-decoration:none;white-space:nowrap;font-weight:500}
 
-  /* story — คำโปรยตัวเอียง โชว์เฉพาะที่มี */
-  .tale { font-family: 'Prompt', serif; font-style: italic; font-size: 15px; line-height: 1.7;
-          color: var(--ink); text-align: center; padding: 4px 8px; opacity: .9; }
-  .tale::before { content: '\201C'; color: var(--warm); font-size: 26px; font-weight: 700;
-          font-style: normal; display: block; line-height: .6; margin-bottom: 8px; }
+  /* gallery */
+  .strip{display:flex;align-items:flex-start;gap:10px;overflow-x:auto;margin:0 -18px;padding:0 18px 4px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .strip::-webkit-scrollbar{height:0}
+  .strip .tile{position:relative;flex:0 0 47%;aspect-ratio:3/4;border-radius:13px;overflow:hidden;background:var(--cream2);scroll-snap-align:start}
+  .strip .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+
+  /* fabric */
+  .fabric .ey{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  .fabric h3{font-size:16px;font-weight:600;margin-top:5px}
+  .fabric h3 span{color:var(--muted);font-weight:400;font-size:13px}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .pill{font-size:12.5px;color:var(--sage-deep);background:var(--sage-light);border:1px solid #D3E6DF;border-radius:20px;padding:6px 13px}
+  .fnote{font-size:12px;color:var(--muted);margin-top:13px;line-height:1.55}
+
+  /* community */
+  .cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .look{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--cream2);display:block}
+  .look img{width:100%;height:100%;object-fit:cover;display:block}
+  .look .who{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:5px;padding:16px 8px 7px;color:#fff;font-size:10.5px;background:linear-gradient(transparent,rgba(20,18,15,.62))}
+  .look .av{width:16px;height:16px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#3A362E;background:#fff}
+  .look.more{background:var(--sage-deep);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:600;font-size:15px;text-decoration:none}
+  .look.more span{font-size:10.5px;font-weight:400;opacity:.9;margin-top:2px}
 
   /* charity */
-  .charity { background: var(--sage-light); border-color: #D4E6E0; text-align: center; }
-  .charity .eyebrow { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--sage-deep); }
-  .charity .big { font-family: 'Poppins','Prompt',sans-serif; font-size: 34px; font-weight: 700; color: var(--sage-deep); margin-top: 6px; line-height: 1.2; }
-  .charity .big small { font-size: 16px; font-weight: 600; }
-  .charity .how { font-size: 13px; color: var(--sage-deep); margin-top: 10px; line-height: 1.6; opacity: .85; }
-  .charity .post { margin-top: 14px; background: #fff; border-radius: 12px; overflow: hidden; text-align: left; }
-  .charity .post img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
-  .charity .post .cap { padding: 10px 14px; font-size: 12.5px; color: var(--muted); }
+  .give{background:linear-gradient(170deg,#EAF3EF,#E4F0EC);border:1px solid #D3E6DF;border-radius:18px;overflow:hidden}
+  .give .body{padding:22px 22px 18px;text-align:center}
+  .give .eyebrow{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--sage-deep);opacity:.9}
+  .give .big{font-size:26px;font-weight:700;color:var(--sage-deep);margin-top:8px;letter-spacing:.2px}
+  .give .sub{font-size:13px;color:#3C6258;margin-top:11px;line-height:1.65;max-width:32ch;margin:11px auto 0;opacity:.95}
+  .give figure{position:relative;margin-top:18px}
+  .give figure .media{display:block;width:100%;height:210px;object-fit:cover;background:#DCEAE3}
+  .give figure .scrim{position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(20,45,38,.6));pointer-events:none}
+  .give .vtag{position:absolute;top:12px;left:12px;font-size:10.5px;letter-spacing:.5px;color:#fff;background:rgba(20,45,38,.6);padding:4px 10px;border-radius:20px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .give .vtag .rec{width:6px;height:6px;border-radius:50%;background:#FF6B6B}
+  .give figcaption{position:absolute;left:16px;right:16px;bottom:12px;color:#fff;font-size:12.5px;line-height:1.5;text-align:left;text-shadow:0 1px 4px rgba(0,0,0,.4)}
 
-  /* story */
-  .story .h { font-weight: 600; font-size: 15px; margin-bottom: 10px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { background: var(--warm-light); color: #7A5F33; border-radius: 20px; padding: 6px 14px; font-size: 13px; }
-  .chip b { font-weight: 600; }
-  .story .none { font-size: 13.5px; color: var(--muted); }
-
-  /* condition */
-  .cond { display: flex; align-items: center; gap: 16px; }
-  .cond .grade {
-    flex: 0 0 auto; width: 64px; height: 64px; border-radius: 50%;
-    background: var(--cream2); display: flex; align-items: center; justify-content: center;
-    font-family: 'Poppins',sans-serif; font-size: 24px; font-weight: 700; color: var(--sage-deep);
-    border: 2px solid var(--sage);
-  }
-  .cond .t { font-weight: 600; font-size: 14.5px; }
-  .cond .d { font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.55; }
-  .cond .ok { color: var(--sage-deep); font-weight: 500; }
-
-  /* cta */
-  .cta { display: block; text-align: center; background: var(--ink); color: #fff; text-decoration: none;
-         border-radius: 14px; padding: 15px; font-weight: 600; font-size: 15px; }
-  .foot { text-align: center; font-size: 11.5px; color: var(--muted); }
-  .foot a { color: var(--muted); }
+  .cta{display:block;text-align:center;background:var(--ink);color:#fff;text-decoration:none;border-radius:14px;padding:15px;font-weight:600;font-size:15px}
+  .foot{text-align:center;font-size:11.5px;color:var(--muted)} .foot a{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -111,17 +95,14 @@
 
 <div class="wrap">
   <div id="loading" class="state">กำลังเปิดเรื่องราว…</div>
-
   <div id="off" class="state" style="display:none">
-    ชุดตัวนี้กำลังจะเปิดเล่าเรื่องราวเร็ว ๆ นี้ค่ะ<br>
-    ทุกการเดินทางของชุดถูกบันทึกไว้แล้ว — แวะกลับมาใหม่นะคะ
+    ชุดตัวนี้กำลังจะเปิดเล่าเรื่องราวเร็ว ๆ นี้ค่ะ<br>ทุกการเดินทางของชุดถูกบันทึกไว้แล้ว — แวะกลับมาใหม่นะคะ
   </div>
-
   <div id="nf" class="state" style="display:none">ไม่พบชุดรหัสนี้ค่ะ</div>
 
-  <div id="main" style="display:none; flex-direction:column; gap:16px">
+  <div id="main" style="display:none;flex-direction:column;gap:16px">
     <div class="card hero">
-      <img id="photo" alt="" style="display:none">
+      <img id="photo" class="cover" alt="" style="display:none">
       <div class="pad">
         <div class="brand" id="brand"></div>
         <h1 id="name"></h1>
@@ -132,41 +113,42 @@
       </div>
     </div>
 
-    <div class="card pad tale" id="tale" style="display:none"></div>
-
-    <div class="card charity pad">
-      <div class="eyebrow" id="charityName">โครงการเสื้อผ้าเพื่อน้อง</div>
-      <div class="big" id="kids"></div>
-      <div class="how" id="how"></div>
-      <div class="post" id="post" style="display:none">
-        <img id="postPhoto" alt="" style="display:none">
-        <div class="cap" id="postCap"></div>
-      </div>
+    <div class="card pad gallery" id="galleryCard" style="display:none">
+      <div class="shead"><div><div class="ey">The Look</div><h3 id="galCount"></h3></div></div>
+      <div class="strip" id="strip"></div>
     </div>
 
-    <div class="card story pad">
-      <div class="h">การเดินทางของชุดตัวนี้</div>
-      <div class="chips" id="chips"></div>
-      <div class="none" id="noStory" style="display:none">
-        ชุดตัวนี้กำลังรอโอกาสแรกที่จะได้ออกเดินทาง — และการเช่าครั้งแรกจะเริ่มต้นเส้นทางบุญของมันค่ะ
-      </div>
+    <div class="card pad fabric" id="fabricCard" style="display:none">
+      <div class="ey">The Fabric</div>
+      <h3 id="fabName"></h3>
+      <div class="pills" id="pills"></div>
+      <div class="fnote" id="fnote" style="display:none"></div>
     </div>
 
-    <div class="card cond pad">
-      <div class="grade" id="grade">–</div>
-      <div>
-        <div class="t">สภาพวันนี้</div>
-        <div class="d" id="qc"></div>
-        <div class="d">ซักและดูแลโดยมืออาชีพ<b>ทุกครั้ง</b>หลังการใส่</div>
+    <div class="card pad comm" id="commCard" style="display:none">
+      <div class="shead">
+        <div><div class="ey">Worn by the community</div><h3 id="commCount"></h3></div>
+        <a class="see" href="looks.html">The Loop Looks →</a>
       </div>
+      <div class="cgrid" id="cgrid"></div>
+    </div>
+
+    <div class="card give" id="giveCard">
+      <div class="body">
+        <div class="eyebrow">Giving Back</div>
+        <div class="big">You give back, too</div>
+        <div class="sub">ทุกครั้งที่ชุดตัวนี้ออกไปกับคุณ คือการร่วมส่งต่อเสื้อผ้าให้น้อง ๆ ที่ขาดแคลน — ขอบคุณที่เป็นอีกหนึ่งแรงค่ะ</div>
+      </div>
+      <figure id="giveFig" style="display:none">
+        <span id="giveMedia"></span>
+        <div class="scrim"></div>
+        <span class="vtag" id="giveVtag" style="display:none"><span class="rec"></span>Real footage</span>
+        <figcaption id="giveCap"></figcaption>
+      </figure>
     </div>
 
     <a class="cta" id="rentBtn" href="#">ให้ชุดตัวนี้ไปงานกับคุณ</a>
-
-    <div class="foot">
-      ทุกการเช่าช่วยส่งต่อเสื้อผ้าให้น้อง ๆ ที่ขาดแคลน ·
-      <a href="nfc.html">ทีมงาน LLOOP</a>
-    </div>
+    <div class="foot">ทุกการเช่าช่วยส่งต่อเสื้อผ้าให้น้อง ๆ ที่ขาดแคลน · <a href="nfc.html">ทีมงาน LLOOP</a></div>
   </div>
 </div>
 
@@ -174,87 +156,89 @@
 const $ = (s) => document.querySelector(s);
 const CONF = window.CONFIG || {};
 const sb = window.supabase.createClient(CONF.SUPABASE_URL, CONF.SUPABASE_ANON_KEY);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g,(m)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const thDate = (iso) => { if(!iso) return null; const d=new Date(iso), n=Math.floor((Date.now()-d.getTime())/86400000);
+  if(n<=0)return'วันนี้'; if(n===1)return'เมื่อวาน'; if(n<30)return n+' วันก่อน';
+  return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}); };
 
-const thDate = (iso) => {
-  if (!iso) return null;
-  const d = new Date(iso), days = Math.floor((Date.now() - d.getTime()) / 86400000);
-  if (days <= 0) return 'วันนี้';
-  if (days === 1) return 'เมื่อวาน';
-  if (days < 30) return days + ' วันก่อน';
-  return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
-};
-
-function paint(d) {
+function paint(d){
   const g = d.garment || {};
-  if (g.photo) { $('#photo').src = g.photo; $('#photo').style.display = ''; }
+  if(g.photo){ $('#photo').src=g.photo; $('#photo').style.display=''; }
   $('#brand').textContent = g.brand || 'LLOOP';
   $('#name').textContent = g.name || g.code;
   $('#cat').textContent = g.category || '';
 
-  // แถบสเปค — โชว์เฉพาะช่องที่มีข้อมูล (ว่าง=ข้าม ไม่รก)
-  const specs = [];
-  if (g.size)   specs.push('<div class="it"><div class="k">ไซส์</div><div class="v">' + esc(g.size) + '</div></div>');
-  if (g.fabric) specs.push('<div class="it"><div class="k">เนื้อผ้า</div><div class="v">' + esc(g.fabric) + '</div></div>');
-  if (g.color)  specs.push('<div class="it"><div class="k">สี</div><div class="v">' +
-      (g.color_hex ? '<span class="dot" style="background:' + esc(g.color_hex) + '"></span>' : '') + esc(g.color) + '</div></div>');
+  // spec (no fabric thumbnail)
+  const specs=[];
+  if(g.size)   specs.push('<div><div class="k">Size</div><div class="v">'+esc(g.size)+'</div></div>');
+  if(g.fabric) specs.push('<div><div class="k">Fabric</div><div class="v">'+esc(g.fabric)+'</div></div>');
+  if(g.color)  specs.push('<div><div class="k">Color</div><div class="v">'+(g.color_hex?'<span class="dot" style="background:'+esc(g.color_hex)+'"></span>':'')+esc(g.color)+'</div></div>');
   $('#spec').innerHTML = specs.join('');
+  if(g.retail){ $('#value').style.display=''; $('#value').innerHTML='Retail <b>฿'+Number(g.retail).toLocaleString()+'</b>'+(g.rent?' · Rent <span class="rent">฿'+Number(g.rent).toLocaleString()+'</span>':''); }
+  if(g.care){ $('#care').style.display=''; $('#care').innerHTML='<span class="ck">Care</span>'+esc(g.care); }
 
-  if (g.retail) {
-    $('#value').style.display = '';
-    $('#value').innerHTML = 'มูลค่าจริง <b>฿' + Number(g.retail).toLocaleString() + '</b>'
-      + (g.rent ? ' · เช่า <span class="rent">฿' + Number(g.rent).toLocaleString() + '</span>' : '');
+  // gallery
+  const photos = Array.isArray(g.photos)?g.photos.filter(Boolean):[];
+  if(photos.length>=2){
+    $('#galleryCard').style.display='';
+    $('#galCount').textContent = photos.length+' ภาพ';
+    $('#strip').innerHTML = photos.map(u=>'<div class="tile"><img src="'+esc(u)+'" alt="" loading="lazy"></div>').join('');
   }
-  if (g.care) { $('#care').style.display = ''; $('#care').textContent = '🧺 ' + g.care; }
 
-  if (g.story) { $('#tale').style.display = ''; $('#tale').textContent = g.story; }
-
-  const c = d.charity || {};
-  $('#charityName').textContent = c.name || 'โครงการเสื้อผ้าเพื่อน้อง';
-  if ((c.kids | 0) > 0) {
-    $('#kids').innerHTML = 'ช่วยน้องไปแล้ว ' + c.kids + ' <small>คน</small>';
-  } else {
-    $('#kids').innerHTML = 'กำลังเริ่มต้น<small>เส้นทางบุญ</small>';
+  // fabric qualities
+  const q = Array.isArray(g.fabric_qualities)?g.fabric_qualities:[];
+  if(q.length){
+    $('#fabricCard').style.display='';
+    $('#fabName').innerHTML = esc((g.fabric||'').split(' ')[0]||'เนื้อผ้า')+' <span>'+esc(g.fabric||'')+'</span>';
+    $('#pills').innerHTML = q.map(x=>'<span class="pill">'+esc(x)+'</span>').join('');
+    if(g.fabric_note){ $('#fnote').style.display=''; $('#fnote').textContent=g.fabric_note; }
   }
-  $('#how').textContent = 'ทุกครั้งที่ชุดตัวนี้ถูกเช่า ' + (c.pct ?? 3) + '% ของค่าเช่ากลายเป็นเสื้อผ้าใหม่ให้น้อง ๆ ที่ขาดแคลน'
-    + ((c.thb | 0) > 0 ? ' — สะสมแล้ว ' + Number(c.thb).toLocaleString() + ' บาท' : '');
+
+  // charity
   const p = d.latest_post;
-  if (p && (p.photo || p.caption)) {
-    $('#post').style.display = '';
-    if (p.photo) { $('#postPhoto').src = p.photo; $('#postPhoto').style.display = ''; }
-    $('#postCap').textContent = (p.caption || 'กิจกรรมล่าสุดของโครงการ') + (p.at ? ' · ' + thDate(p.at) : '');
+  if(p && (p.video || p.photo)){
+    $('#giveFig').style.display='';
+    if(p.video){
+      $('#giveMedia').innerHTML='<video class="media" src="'+esc(p.video)+'" controls playsinline'+(p.photo?' poster="'+esc(p.photo)+'"':'')+'></video>';
+      $('#giveVtag').style.display='';
+    } else {
+      $('#giveMedia').innerHTML='<img class="media" src="'+esc(p.photo)+'" alt="">';
+    }
+    $('#giveCap').textContent = (p.caption||'กิจกรรมส่งต่อเสื้อผ้าให้น้อง ๆ') + (p.at?' · '+thDate(p.at):'');
   }
 
-  const occ = Array.isArray(d.occasions) ? d.occasions : [];
-  if (occ.length) {
-    $('#chips').innerHTML = occ.map(o =>
-      '<span class="chip">' + esc(o.occasion) + (o.count > 1 ? ' <b>× ' + o.count + '</b>' : '') + '</span>'
-    ).join('');
-  } else {
-    $('#chips').style.display = 'none';
-    $('#noStory').style.display = '';
-  }
-
-  $('#grade').textContent = g.grade || 'A';
-  const qc = d.last_qc;
-  $('#qc').innerHTML = qc && qc.at
-    ? '<span class="ok">ตรวจสภาพล่าสุด ' + thDate(qc.at) + ' ✓</span>' + (qc.condition ? ' · ' + esc(qc.condition) : '')
-    : '<span class="ok">อยู่ในการดูแลของทีม LLOOP ✓</span>';
-
-  $('#rentBtn').href = 'garment.html?code=' + encodeURIComponent(g.code || '');
+  $('#rentBtn').href = 'garment.html?code='+encodeURIComponent(g.code||'');
 }
 
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) =>
-  ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+// ชุมชน The Loop Looks: ดึงฟีดจริงแล้วกรองเฉพาะลุคของชุดนี้
+async function loadCommunity(code){
+  let feed=[];
+  try{ const {data}=await sb.rpc('community_feed',{p_limit:60,p_before:null,p_occasion:null,p_tag:null}); feed=data||[]; }catch(e){ return; }
+  const mine=(feed||[]).filter(x=>x && (x.garment_code===code) && x.photo);
+  if(!mine.length) return;
+  $('#commCard').style.display='';
+  $('#commCount').textContent = mine.length+' คนใส่ชุดนี้';
+  const cells = mine.slice(0,5).map(x=>{
+    const h = x.handle ? ('@'+String(x.handle).replace(/^@/,'')) : 'LLOOP';
+    const initial = (x.handle||'L').replace(/^@/,'').charAt(0).toUpperCase();
+    const av = x.avatar ? '<span class="av" style="background-image:url('+esc(x.avatar)+');background-size:cover"></span>'
+                        : '<span class="av">'+esc(initial)+'</span>';
+    return '<a class="look" href="looks.html"><img src="'+esc(x.photo)+'" alt="" loading="lazy"><div class="who">'+av+esc(h)+'</div></a>';
+  });
+  if(mine.length>5) cells.push('<a class="look more" href="looks.html"><span>+'+(mine.length-5)+'</span><span>ดูทั้งหมด</span></a>');
+  $('#cgrid').innerHTML = cells.join('');
+}
 
-async function load() {
+async function load(){
   const code = new URLSearchParams(location.search).get('g') || new URLSearchParams(location.search).get('code');
-  if (!code) { $('#loading').style.display = 'none'; $('#nf').style.display = ''; return; }
-  const { data, error } = await sb.rpc('passport_public', { p_code: code });
-  $('#loading').style.display = 'none';
-  if (error || !data || data.enabled === false) { $('#off').style.display = ''; return; }
-  if (data.error === 'not_found') { $('#nf').style.display = ''; return; }
+  if(!code){ $('#loading').style.display='none'; $('#nf').style.display=''; return; }
+  const { data, error } = await sb.rpc('passport_public',{ p_code: code });
+  $('#loading').style.display='none';
+  if(error || !data || data.enabled===false){ $('#off').style.display=''; return; }
+  if(data.error==='not_found'){ $('#nf').style.display=''; return; }
   paint(data);
-  $('#main').style.display = 'flex';
+  $('#main').style.display='flex';
+  loadCommunity(code);
 }
 load();
 </script>

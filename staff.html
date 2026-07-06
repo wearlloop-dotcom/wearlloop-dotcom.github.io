@@ -58,18 +58,13 @@
   .howbtn.on{background:var(--sageDeep);color:#fff}
   .howpanel{max-width:560px;margin:10px auto 0;padding:0 14px}
   .guide-h{font-family:var(--display);font-size:18px;margin-bottom:6px}
-  .guide-item{border-bottom:1px solid var(--hair)}
+  .guide-item{padding:11px 0;border-bottom:1px solid var(--hair)}
   .guide-item:last-child{border-bottom:none}
-  .guide-item summary{padding:11px 0;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .guide-item summary::-webkit-details-marker{display:none}
-  .guide-item summary::after{content:'▸';color:var(--stone);font-size:11px;flex:none}
-  .guide-item[open] summary::after{content:'▾'}
-  .guide-item b{font-size:14px}
-  .guide-item p{font-size:13px;color:var(--stone);line-height:1.65;padding-bottom:11px}
+  .guide-item b{display:block;font-size:14px;margin-bottom:3px}
+  .guide-item p{font-size:13px;color:var(--stone);line-height:1.65}
 </style>
 </head>
 <body>
-<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="bar"><h1>LLOOP</h1><div class="t" id="barSub">STAFF · ทีมงาน</div></div>
 <div class="topctl">
   <select id="langSel" onchange="setLang(this.value)" aria-label="language"></select>
@@ -77,7 +72,7 @@
 </div>
 <div id="howPanel" class="howpanel hide"></div>
 <div class="wrap" id="wrap">
-  <div class="card center" id="loading"><p style="color:var(--stone);padding:30px 0" data-i18n="Loading…">กำลังโหลด…</p></div>
+  <div class="card center" id="loading"><p style="color:var(--stone);padding:30px 0">กำลังโหลด…</p></div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -87,13 +82,11 @@
 <script src="./config.js"></script>
 <script src="./analytics.js"></script>
 <script src="me-api.js"></script>
-<script src="nav.js?v=1"></script>
 <script>
   const sb=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY);
   if(window.meRpc) sb.rpc=window.meRpc;   // route ทุก rpc ผ่าน gateway me-rpc (override p_line_uid จาก idToken — กัน IDOR)
   const LIFF_ID=CONFIG.LIFF_ID;
   const $=id=>document.getElementById(id);
-  const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const wrap=$('wrap');
   const qs=new URLSearchParams(location.search);
   const verifyToken=qs.get('token');   // ผูก/ยืนยัน UID
@@ -110,14 +103,14 @@
       todayWorked:'วันนี้ทำงานไปแล้ว %s', notYet:'วันนี้ยังไม่ได้ลงเวลา', clockIn:'เข้างาน / ลงเวลา',
       mustLine:'ต้องเปิดผ่าน LINE', mustLineSub:'กรุณาเปิดพอร์ทัลนี้จากแอป LINE OA หลังบ้านค่ะ', cantWork:'ยังเข้าทำงานไม่ได้', copyUid:'คัดลอก UID',
       guide:[
-        {t:'เข้างาน / ออกงาน', s:'กด "เข้างาน" เมื่อเริ่ม · กด "ออกงาน" เมื่อเลิก ระบบนับชั่วโมงให้เอง'},
-        {t:'KPI — คะแนนการทำงาน', s:'ดูคะแนนแต่ละงวดเทียบกับเป้าหมาย'},
-        {t:'ประกาศ', s:'เรื่องที่ขึ้น "ยังไม่รับทราบ" ให้กด "กดรับทราบ"'},
-        {t:'ตารางเวร', s:'ดูเวรล่วงหน้า 14 วัน วันหยุดขึ้นว่า "หยุด"'},
-        {t:'ลางาน', s:'กด "+ ขอลา" เลือกประเภทและวันที่ แล้วรอฝ่ายบุคคลอนุมัติ'},
-        {t:'เบิกเงิน', s:'เบิกค่าใช้จ่าย (แนบใบเสร็จ) หรือเบิกเงินเดือนล่วงหน้า รอเจ้าของอนุมัติ'},
-        {t:'งาน', s:'ทำงานที่ได้รับมอบหมายเสร็จแล้วกด "เสร็จ"'},
-        {t:'เงินเดือน · เอกสาร · สัญญา · ยืนยันตัวตน', s:'ดูสลิป อัปโหลดเอกสาร ลงนามสัญญา และทำ KYC ในแท็บเหล่านี้'},
+        {t:'เข้างาน / ออกงาน', s:'กดปุ่ม "เข้างาน / ลงเวลา" เมื่อเริ่มงาน และกด "ออกงาน" เมื่อเลิกงาน ระบบจะนับชั่วโมงทำงานให้อัตโนมัติ'},
+        {t:'KPI — คะแนนการทำงาน', s:'ดูคะแนนการทำงานของคุณในแต่ละงวด เทียบกับเป้าหมาย'},
+        {t:'ประกาศ', s:'อ่านประกาศจากบริษัท เรื่องที่ขึ้นว่า "ยังไม่รับทราบ" ให้กดปุ่ม "กดรับทราบ"'},
+        {t:'ตารางเวร', s:'ดูวันและเวลาเข้างานล่วงหน้า 14 วัน วันหยุดจะขึ้นว่า "หยุด"'},
+        {t:'ลางาน', s:'กด "+ ขอลา" เลือกประเภท (ป่วย/กิจ/พักร้อน) และวันที่ แล้วรอฝ่ายบุคคลอนุมัติ'},
+        {t:'เบิกเงิน', s:'ขอเบิกค่าใช้จ่ายที่มีใบเสร็จ หรือเบิกเงินเดือนล่วงหน้า รอเจ้าของอนุมัติ'},
+        {t:'งาน', s:'ดูงานที่ได้รับมอบหมาย เมื่อทำเสร็จให้กดปุ่ม "เสร็จ"'},
+        {t:'เงินเดือน · เอกสาร · สัญญา · ยืนยันตัวตน', s:'ดูสลิปเงินเดือน อัปโหลดเอกสาร ลงนามสัญญาจ้าง และยืนยันตัวตน (KYC) ได้ในแท็บเหล่านี้'},
       ] },
     en:{ langName:'English', barSub:'STAFF · Team', howBtn:'How to work', howClose:'Close guide', guideTitle:'Work guide',
       t_kpi:'KPI', t_ann:'Announcements', t_sched:'Schedule', t_leave:'Leave', t_claim:'Claims', t_task:'Tasks', t_pay:'Payroll', t_doc:'Documents', t_contract:'Contract', t_kyc:'ID verify',
@@ -126,14 +119,14 @@
       todayWorked:'Worked %s today', notYet:'Not clocked in yet', clockIn:'Clock in',
       mustLine:'Open via LINE', mustLineSub:'Please open this portal from the LINE OA app.', cantWork:'Cannot work yet', copyUid:'Copy UID',
       guide:[
-        {t:'Clock in / Clock out', s:'Tap "Clock in" when you start · "Clock out" when you finish. Hours are counted automatically.'},
-        {t:'KPI — your score', s:'See your score each period vs the target.'},
-        {t:'Announcements', s:'Tap "Acknowledge" on items marked "not acknowledged".'},
-        {t:'Schedule', s:'See shifts 14 days ahead. Days off show "Off".'},
-        {t:'Leave', s:'Tap "+ Request leave", pick type and dates, wait for HR approval.'},
-        {t:'Claims', s:'Claim expenses (attach receipt) or request a salary advance. Owner approves.'},
-        {t:'Tasks', s:'Tap "Done" when you finish an assigned task.'},
-        {t:'Payroll · Documents · Contract · ID verify', s:'Payslips, documents, contract signing, and KYC live in these tabs.'},
+        {t:'Clock in / Clock out', s:'Tap "Clock in" when you start and "Clock out" when you finish. Your hours are counted automatically.'},
+        {t:'KPI — your score', s:'See your performance score for each period against the target.'},
+        {t:'Announcements', s:'Read company announcements. For items marked "not acknowledged", tap "Acknowledge".'},
+        {t:'Schedule', s:'See your shifts for the next 14 days. Days off show as "Off".'},
+        {t:'Leave', s:'Tap "+ Request leave", choose the type (sick/personal/vacation) and dates, then wait for HR approval.'},
+        {t:'Claims', s:'Claim expenses with a receipt, or request a salary advance. Wait for the owner to approve.'},
+        {t:'Tasks', s:'See your assigned tasks. Tap "Done" when you finish one.'},
+        {t:'Payroll · Documents · Contract · ID verify', s:'View payslips, upload documents, sign your contract, and verify your identity (KYC) in these tabs.'},
       ] },
     my:{ langName:'မြန်မာ', barSub:'STAFF · အဖွဲ့သား', howBtn:'အလုပ်လုပ်နည်း', howClose:'လမ်းညွှန် ပိတ်ရန်', guideTitle:'အလုပ်လုပ်နည်း လမ်းညွှန်',
       t_kpi:'KPI', t_ann:'ကြေညာချက်', t_sched:'အလုပ်ဇယား', t_leave:'ခွင့်ယူ', t_claim:'ငွေတောင်းခံ', t_task:'အလုပ်', t_pay:'လစာ', t_doc:'စာရွက်စာတမ်း', t_contract:'စာချုပ်', t_kyc:'အထောက်အထား',
@@ -168,10 +161,7 @@
         {t:'ເງິນເດືອນ · ເອກະສານ · ສັນຍາ · ຢືນຢັນຕົວຕົນ', s:'ເບິ່ງສະລິບເງິນເດືອນ, ອັບໂຫຼດເອກະສານ, ເຊັນສັນຍາ ແລະ ຢືນຢັນຕົວຕົນ (KYC) ໄດ້ໃນແທັບເຫຼົ່ານີ້.'},
       ] },
   };
-  // เริ่มต้นตามแถบ topbar ร่วม (nav.js เก็บ lloop_lang เป็น th/en) ถ้ามี — ไม่งั้นใช้ staffLang (รองรับ my/lo)
-  const _navLang=localStorage.getItem('lloop_lang');
-  let LANG=(_navLang==='en'?'en':(localStorage.getItem('staffLang')||'th')); if(!STAFF_I18N[LANG])LANG='th';
-  let _syncingLang=false;
+  let LANG=localStorage.getItem('staffLang')||'th'; if(!STAFF_I18N[LANG])LANG='th';
   let howOpen=false, activeRender=null;
   function t(k){const d=STAFF_I18N[LANG]||STAFF_I18N.th;return d[k]!=null?d[k]:STAFF_I18N.th[k];}
   function tf(k){const a=[].slice.call(arguments,1);let s=t(k);a.forEach(x=>{s=s.replace('%s',x);});return s;}
@@ -181,13 +171,9 @@
     const bs=$('barSub'); if(bs) bs.textContent=t('barSub');
     const hb=$('howBtn'); if(hb) hb.textContent=howOpen?t('howClose'):t('howBtn');
   }
-  function renderHow(){const g=t('guide')||[];$('howPanel').innerHTML=`<div class="card"><div class="guide-h">${t('guideTitle')}</div>${g.map(it=>`<details class="guide-item"><summary><b>${it.t}</b></summary><p>${it.s}</p></details>`).join('')}</div>`;}
+  function renderHow(){const g=t('guide')||[];$('howPanel').innerHTML=`<div class="card"><div class="guide-h">${t('guideTitle')}</div>${g.map(it=>`<div class="guide-item"><b>${it.t}</b><p>${it.s}</p></div>`).join('')}</div>`;}
   function toggleHow(){howOpen=!howOpen;const p=$('howPanel'),b=$('howBtn');if(howOpen){p.classList.remove('hide');renderHow();b.classList.add('on');}else{p.classList.add('hide');b.classList.remove('on');}b.textContent=howOpen?t('howClose'):t('howBtn');}
-  function setLang(l){if(!STAFF_I18N[l])return;LANG=l;localStorage.setItem('staffLang',l);applyStatic();if(howOpen)renderHow();if(activeRender)activeRender();
-    // sync แถบ topbar ร่วม เฉพาะ th/en (my/lo ไม่มีปุ่มบน topbar — คงค่าเดิมไว้)
-    if(!_syncingLang && window.NAV && (l==='th'||l==='en') && NAV.lang!==l){ _syncingLang=true; try{ NAV.setLang(l); }catch(e){} _syncingLang=false; }}
-  // แถบ topbar ร่วมสลับภาษา → ขับเครื่องแปลเดิม (render สดอยู่แล้ว ไม่ต้อง reload)
-  window.addEventListener('lloop:lang', function(e){ if(_syncingLang) return; const l=(e.detail&&e.detail.lang)||'th'; if((l==='th'||l==='en') && l!==LANG){ _syncingLang=true; setLang(l); const sel=document.getElementById('langSel'); if(sel) sel.value=l; _syncingLang=false; } });
+  function setLang(l){if(!STAFF_I18N[l])return;LANG=l;localStorage.setItem('staffLang',l);applyStatic();if(howOpen)renderHow();if(activeRender)activeRender();}
 
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const KYC_FN=(CONFIG.SUPABASE_URL||'https://rprwilsbjptdnvsibjgi.supabase.co')+'/functions/v1/kyc';
@@ -204,7 +190,7 @@
     if(!r.ok||!out.ok){const e=new Error(out.error||('kyc '+r.status));e.code=out.error||('http_'+r.status);throw e;}
     return out;
   }
-  const ROLE_TH={owner:'เจ้าของ',manager:'ผู้จัดการ',hr_admin:'หัวหน้าบุคคล',care:'ดูแลชุด',stock:'สต๊อก',marketing:'การตลาด',accounting:'บัญชี',stylist:'สไตลิสต์',sales:'ขาย',admin:'แอดมิน',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง'};
+  const ROLE_TH={admin:'แอดมิน',stylist:'สไตลิสต์',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง',sales:'ขาย',owner:'เจ้าของ'};
   const ST_TH={applicant:'ผู้สมัคร',interview:'สัมภาษณ์',offer:'เสนองาน',hired:'จ้างแล้ว',probation:'ทดลองงาน',active:'ทำงาน',suspended:'พักงาน',resigned:'ลาออก',rejected:'ไม่ผ่าน'};
 
   // ---------- โหมดยืนยัน UID ----------
@@ -228,7 +214,7 @@
     const {data,error}=await sb.rpc('hr_verify_bind',{p_token:verifyToken,p_line_uid:lineUid});
     if(error){toast('ไม่สำเร็จ: '+error.message);$('bindBtn').disabled=false;return;}
     if(data&&data.error){
-      const m={bad_token:'ลิงก์ไม่ถูกต้องหรือหมดอายุ',uid_taken:'LINE นี้ถูกผูกกับพนักงานคนอื่นแล้ว',token_used:'ลิงก์นี้ถูกใช้ผูกบัญชีอื่นไปแล้ว — แจ้งแอดมินออกลิงก์ใหม่',no_uid:'อ่าน LINE UID ไม่ได้'}[data.error]||data.error;
+      const m={bad_token:'ลิงก์ไม่ถูกต้องหรือหมดอายุ',uid_taken:'LINE นี้ถูกผูกกับพนักงานคนอื่นแล้ว',no_uid:'อ่าน LINE UID ไม่ได้'}[data.error]||data.error;
       toast(m);$('bindBtn').disabled=false;return;
     }
     wrap.innerHTML=`<div class="card gate ok"><div class="icon">✓</div>
@@ -251,11 +237,11 @@
       ['วันเริ่มงาน',v.start_date],['วันสิ้นสุด',v.end_date],
       ['บอกเลิกล่วงหน้า',v.notice_days?(v.notice_days+' วัน'):null],
     ].filter(r=>r[1]);
-    const extra=(c.extra_clauses||[]).map((x,i)=>`<div class="clause"><b>${i+1}. ${esc(x.h||'')}</b><p>${esc(x.body||'')}</p></div>`).join('');
-    return `<h3>${esc(c.title||defaultTitle(c.template))}</h3>
-      <p>เลขที่สัญญา ${esc(c.contract_no)} · ทำขึ้นระหว่าง บริษัท LLOOP ("นายจ้าง") กับ <b>${esc(c.emp_name)}</b> ("ลูกจ้าง")</p>
-      ${c.scope?`<div class="clause"><b>ขอบเขตหน้าที่</b><p>${esc(c.scope)}</p></div>`:''}
-      <div style="margin:10px 0">${rows.map(r=>`<div class="kv"><span class="k">${r[0]}</span><span>${esc(r[1])}</span></div>`).join('')}</div>
+    const extra=(c.extra_clauses||[]).map((x,i)=>`<div class="clause"><b>${i+1}. ${x.h||''}</b><p>${x.body||''}</p></div>`).join('');
+    return `<h3>${c.title||defaultTitle(c.template)}</h3>
+      <p>เลขที่สัญญา ${c.contract_no} · ทำขึ้นระหว่าง บริษัท LLOOP ("นายจ้าง") กับ <b>${c.emp_name}</b> ("ลูกจ้าง")</p>
+      ${c.scope?`<div class="clause"><b>ขอบเขตหน้าที่</b><p>${c.scope}</p></div>`:''}
+      <div style="margin:10px 0">${rows.map(r=>`<div class="kv"><span class="k">${r[0]}</span><span>${r[1]}</span></div>`).join('')}</div>
       ${extra}
       <p style="margin-top:10px;color:var(--stone)">ลูกจ้างตกลงปฏิบัติตามระเบียบบริษัท รักษาความลับทางการค้า และดูแลทรัพย์สิน/ชุดเช่าด้วยความระมัดระวัง การลงนามอิเล็กทรอนิกส์นี้มีผลผูกพันตามกฎหมาย</p>`;
   }
@@ -496,7 +482,7 @@
     const list=(data&&!data.error)?data:[];
     if(!list.length){b.innerHTML='<div class="card center"><p style="color:var(--stone);padding:20px 0">ยังไม่มีสลิปเงินเดือนค่ะ</p></div>';return;}
     b.innerHTML=list.map(s=>`<div class="card">
-      <div class="sub">งวด ${s.period} · ${s.status==='paid'?'โอนแล้ว':(s.status==='draft'?'ร่าง (ยังไม่ออก)':'ออกสลิปแล้ว')}</div>
+      <div class="sub">งวด ${s.period} · ${s.status==='paid'?'โอนแล้ว':'ออกสลิปแล้ว'}</div>
       <div class="big" style="color:var(--sageDeep)">฿${Number(s.net).toLocaleString()}</div><div class="sub">ยอดสุทธิ</div>
       <div class="kv"><span class="k">เงินเดือนฐาน</span><span>฿${Number(s.base_salary).toLocaleString()}</span></div>
       ${(s.additions||[]).map(a=>`<div class="kv"><span class="k">+ ${a.label}</span><span>฿${Number(a.amount).toLocaleString()}</span></div>`).join('')}
@@ -624,10 +610,9 @@
 
   // ---------- boot ----------
   async function boot(){
-    try{ await liff.init({liffId:LIFF_ID, withLoginOnExternalBrowser:true});
-      if(liff.isLoggedIn()){sessionStorage.removeItem('staffLoginTried');const p=await liff.getProfile();lineUid=p.userId;lineName=p.displayName;}
-      // ยังไม่ login → เด้งเข้า LINE login แม้เปิดนอกแอป (withLoginOnExternalBrowser) กัน loop: ลองครั้งเดียวต่อ session
-      else if(!sessionStorage.getItem('staffLoginTried')){sessionStorage.setItem('staffLoginTried','1');liff.login({redirectUri:location.href});return;}
+    try{ await liff.init({liffId:LIFF_ID});
+      if(liff.isLoggedIn()){const p=await liff.getProfile();lineUid=p.userId;lineName=p.displayName;}
+      else if(liff.isInClient()){liff.login();return;}
     }catch(e){/* เบราว์เซอร์ปกติ — lineUid ว่าง */}
     buildLangSel(); applyStatic();
     if(verifyToken){ activeRender=showVerify; return showVerify(); }

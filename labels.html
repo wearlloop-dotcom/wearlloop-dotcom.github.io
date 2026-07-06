@@ -47,7 +47,7 @@
 <section class="phead" id="phead">
   <div class="eyebrow">qr label printing</div>
   <h1>ป้ายเล็ก ๆ ที่พาทุกชุดกลับบ้าน</h1>
-  <div class="sub">ปริ้นป้าย QR แปะถุง สแกนทีเดียวเห็นที่มา-ไซส์-สถานะของชุด</div>
+  <div class="sub">ปริ้นป้าย QR แปะถุง สแกนทีเดียวเห็นที่มา-ไซซ์-สถานะของชุด ให้ทุกตัวหมุนเวียนต่อได้อย่างไม่หลงทาง</div>
 </section>
 <div class="sheet" id="sheet"><div class="empty">กำลังโหลดชุดจากฐานข้อมูล…</div></div>
 
@@ -60,7 +60,7 @@
   // === ตั้งค่า (publishable key ปลอดภัยที่จะฝัง) ===
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
-  const QR_BASE=(window.CONFIG&&CONFIG.GARMENT_URL)||'https://wearlloop-dotcom.github.io/g.html?c=';  // ฐาน URL กลางอยู่ที่ config.js (GARMENT_URL)
+  const QR_BASE='https://lloop.app/g/'; // QR เข้ารหัสเป็นลิงก์ตามด้วย code ของชุด (เปลี่ยนเป็นโดเมนจริงทีหลัง)
 
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // R-4: RPC ผ่าน gateway (LINE idToken + role)

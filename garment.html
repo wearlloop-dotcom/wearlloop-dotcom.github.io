@@ -52,13 +52,13 @@
   <section class="phead">
     <div class="eyebrow">garment lifecycle</div>
     <h1>ทุกชุดมีเรื่องราว</h1>
-    <div class="sub">ย้อนดูทุกรอบการดูแล สภาพ และรูปแต่ละรอบ</div>
+    <div class="sub">สแกนโค้ดชุด แล้วย้อนดูทุกรอบการดูแล สภาพ รูปถ่าย และการเดินทาง — เพราะชุดที่หมุนเวียนดี คือชุดที่เราใส่ใจทุกครั้ง</div>
   </section>
   <div class="scan">
     <input id="code" placeholder="ใส่/สแกนโค้ดชุด เช่น g1" autocomplete="off">
     <button class="btn" onclick="load()">ดู</button>
   </div>
-  <div id="out"></div>
+  <div id="out"><div class="empty">สแกน QR บนชุด หรือใส่โค้ด เพื่อดูประวัติแต่ละรอบ + รูป</div></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -76,7 +76,6 @@
   const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'';
   const COND={good:['ดี ✓','good'],stain:['เปื้อน','stain'],damage:['ชำรุด','damage'],missing:['ของขาด','missing']};
   const EVT={shipped:'ส่งออก',delivered:'ถึงมือลูกค้า',return_shipped:'ลูกค้าส่งคืน',returned:'รับคืน',in_transit:'กำลังส่ง',out_for_delivery:'ออกส่ง',return_arrived:'ถึงร้าน'};
-  const GST={available:'ว่าง',reserved:'จองแล้ว',out:'อยู่กับลูกค้า',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',returned:'รับคืนแล้ว',lost:'หาย',needs_review:'รอตรวจ'}; // สถานะชุด (map ไทย ให้ตรงกับ stock.html/putaway.html)
 
   async function load(){
     const code=$('code').value.trim().toLowerCase(); if(!code){ return; }
@@ -104,13 +103,13 @@
         <div class="gname">${esc(g.name)}</div>
         <div style="color:var(--muted);font-size:13px">โค้ด ${esc(g.code)}${g.brand?' · '+esc(g.brand):''}</div>
         <div class="stat">
-          <span class="pill">สถานะ: ${esc(GST[g.status]||g.status)}</span>
+          <span class="pill">สถานะ: ${esc(g.status)}</span>
           <span class="pill">ซักมา ${g.wash_count} ครั้ง</span>
           ${gradePill(g.grade)}
         </div>
       </div>
       <div class="card">
-        <h2>รอบการดูแล</h2>
+        <h2>รอบการดูแล (สภาพ + รูปแต่ละรอบ)</h2>
         ${cycles?`<div class="tl">${cycles}</div>`:'<div class="empty">ยังไม่มีรอบการดูแล</div>'}
       </div>
       <div class="card">

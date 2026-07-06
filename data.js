@@ -14,7 +14,7 @@ window.MOCK = {
     title:'งานแต่งเพื่อน', day:'12', month:'ก.ค.',
     occasion:'wedding_guest', dress_code:'ค็อกเทล',
   },
-  // สถานที่ dress code + สีที่เหมาะ (mock; production = LLOOP Atelier บน Claude)
+  // สถานที่ dress code + สีที่เหมาะ (mock; production = AI Stylist บน Claude)
   VENUES: [
     { match:['โรงแรม','hotel','บอลรูม','ballroom','รูฟท็อป','rooftop'], venue_type:'โรงแรม/รูฟท็อป โทนหรู', dress_code:'ค็อกเทล', occasion:'party',
       colors:['#15233F','#0E8A5F','#F3C6D3'], photo_tip:'แสงวอร์มของโรงแรมรับโทนเข้ม-อัญมณี ทำให้ผิวดูสว่าง ถ่ายออกมาหรู',
@@ -70,10 +70,7 @@ window.MOCK = {
       colors:[['mustard','#D6A02E'],['terracotta','#C77B4E']],
       season:'autumn', occasion_tags:['cafe','festival','merit'], bg:'#E7D6B8', isNew:false,
       styling_tips:['ใส่บราปกติ','ผ้าฝ้ายใส่สบาย ระบายอากาศ','รองเท้าแตะ/สนีกเกอร์'],
-      tips_en:['A regular bra is fine','Breathable, comfy cotton','Sandals or sneakers'],
-      // ตัวอย่างชุดมีตำหนิ (แจ้งโปร่งใส): ราคาลดจากเรทปกติ + รูปจุดตำหนิ (placeholder สำหรับ mock)
-      priceRegular:220, defectNote:'รอยเปื้อนจางที่ชายกระโปรงด้านหลัง มองแทบไม่เห็นตอนใส่',
-      defectPhotos:['https://picsum.photos/seed/lloop-defect1/600/800','https://picsum.photos/seed/lloop-defect2/600/800'] },
+      tips_en:['A regular bra is fine','Breathable, comfy cotton','Sandals or sneakers'] },
     { id:'g6', name:'Azure halter gown', brand:'Azur', tier:'Premium', price:580,
       fabric:'ซาตินไหมเทียม', fabric_en:'Faux-silk satin', stretch:'none', lining:true, sheer:false, weight:'หนา ทิ้งตัว',
       bust:[32,35], waist:[25,29], hip:null, length:140,

@@ -40,7 +40,6 @@
   .status.ok{color:var(--ok)}.status.err{color:var(--danger)}
   .loading{color:var(--muted);text-align:center;padding:34px}
   .hint{font-size:12.5px;color:var(--muted);line-height:1.55;background:var(--soft);border-radius:10px;padding:12px 14px}
-  .inf{display:inline-flex;width:15px;height:15px;border-radius:50%;border:1px solid var(--muted);color:var(--muted);font-size:10px;align-items:center;justify-content:center;vertical-align:1px;margin-left:6px;cursor:help}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
 </head>
@@ -53,7 +52,7 @@
   <section class="phead">
     <div class="eyebrow">hub feature flags</div>
     <h1>เปิดไฟทีละดวงให้ฮับ</h1>
-    <div class="sub">เปิด/ปิดฟีเจอร์ให้ลูกค้าเห็น มีผลทันที</div>
+    <div class="sub">สวิตช์เล็ก ๆ ที่ค่อย ๆ เปิดบริการรับเอง ล็อกเกอร์ และบูธสไตลิสต์ให้ลูกค้า — เปิดเมื่อพร้อม ปิดได้ทันที โดยไม่ต้อง deploy ใหม่</div>
   </section>
   <div id="status" class="status"></div>
 
@@ -117,11 +116,12 @@
 
   <div class="card" id="partnerCard" style="display:none">
     <h2>พาร์ทเนอร์สไตลิสต์ลงทะเบียนเอง</h2>
-    <div class="desc">เปิดให้สไตลิสต์สมัครเป็นพาร์ทเนอร์เองผ่าน LINE<span class="inf" title="เปิด = ใครเปิดพอร์ทัลสไตลิสต์ผ่าน LINE จะเห็นปุ่ม “สมัครเป็นพาร์ทเนอร์” กรอกชื่อแล้วใช้ได้ทันที · ปิด = รับเฉพาะคนที่ออกสัญญาจากหลังบ้าน">i</span></div>
+    <div class="desc">เปิด = ใครก็ตามที่เปิดหน้าพอร์ทัลสไตลิสต์ผ่าน LINE จะเห็นปุ่ม “สมัครเป็นพาร์ทเนอร์” กรอกชื่อแล้วเข้าใช้พอร์ทัลได้ทันที (ผูกบัญชี LINE เป็นพาร์ทเนอร์) · ปิด = รับเฉพาะคนที่ออกสัญญาให้จากหลังบ้านเท่านั้น</div>
     <div class="feat">
       <div class="info">
         <div class="name">เปิดรับสมัครพาร์ทเนอร์ด้วยตนเอง</div>
-        <div class="note">ปิดสวิตช์ไม่ถอนสิทธิ์คนที่สมัครแล้ว — ตรวจ/เพิกถอนรายตัวที่หน้าสัญญา</div>
+        <div class="note">เหมาะตอนเปิดรับสไตลิสต์ใหม่จำนวนมาก · ปิดสวิตช์ไม่ถอนสิทธิ์คนที่สมัครไปแล้ว (เพิกถอนรายตัวที่หน้าสัญญา)</div>
+        <div class="need">ผู้สมัครจะถูกบันทึกเป็นสัญญา self-register — ตรวจ/เพิกถอนได้ที่ ops/contracts.html</div>
       </div>
       <label class="sw" data-key="partner_self_register_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
     </div>
@@ -129,12 +129,13 @@
 
   <div class="card" id="premiumCard" style="display:none">
     <h2>ระบบคุ้มครองชุดออกงาน (ชุดแพง)</h2>
-    <div class="desc">เตือนเจ้าของให้ทำขั้นตอนคุ้มครองทุกครั้งที่ชุดแพงถูกจอง<span class="inf" title="ขั้นตอนคุ้มครอง เช่น วิดีโอก่อนแพค/ตอนแกะของ · ควรมีหน้าเก็บวิดีโอ มัดจำ pre-auth และประกันความเสียหายก่อนเปิดใช้จริง · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก">i</span></div>
+    <div class="desc">เปิดเมื่อพร้อมเริ่มปล่อยเช่าชุดราคาแพง — พอเปิด ระบบจะ “เตือนเจ้าของอัตโนมัติ” ทุกครั้งที่ชุดแพงถูกจอง ให้ทำขั้นตอนคุ้มครอง (วิดีโอก่อนแพค/ตอนแกะของ ฯลฯ) ลดความผิดพลาดของคน · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก</div>
 
     <div class="feat">
       <div class="info">
         <div class="name">เปิดระบบคุ้มครองชุดแพง</div>
-        <div class="note">เตือนเจ้าของ + บังคับขั้นตอนคุ้มครองสำหรับชุดที่เข้าเกณฑ์</div>
+        <div class="note">สวิตช์หลัก — เปิดทั้งโมดูล เตือนเจ้าของ + บังคับขั้นตอนคุ้มครองสำหรับชุดที่เข้าข่ายแพง</div>
+        <div class="need">ต้องมี: หน้าเก็บวิดีโอแกะของ / มัดจำ pre-auth / ประกันความเสียหาย ก่อนเปิดใช้จริง</div>
       </div>
       <label class="sw" data-key="premium_protection_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
     </div>
@@ -157,7 +158,7 @@
 
   <div class="card" id="financeCard" style="display:none">
     <h2>กองทุนซื้อชุดใหม่ &amp; กำไรต่อชุด</h2>
-    <div class="desc">ทุกการเช่ากันเงินส่วนหนึ่งไว้ซื้อชุดใหม่อัตโนมัติ · เช็กกำไรสุทธิต่อชุดได้รายตัว<span class="inf" title="กำไรสุทธิหักค่าซักตามคลาสผ้า + ค่าคน/ส่ง/แพ็ก/กันสำรอง/restock">i</span></div>
+    <div class="desc">ทุกการเช่ากันเงินส่วนหนึ่งไว้ “ซื้อชุดใหม่” อัตโนมัติ (restock) — คลังโตเองไม่ต้องเติมทุน · เช็กกำไรสุทธิต่อชุดได้รายตัว (หักค่าซักตามคลาสผ้า + ค่าคน/ส่ง/แพ็ก/กันสำรอง/restock)</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 14px">
       <div style="text-align:center"><div id="rsBal" style="font-size:20px;font-weight:700">–</div><div class="sub">คงเหลือในกอง</div></div>
       <div style="text-align:center"><div id="rsProv" style="font-size:20px;font-weight:700">–</div><div class="sub">กันสะสมทั้งหมด</div></div>
@@ -173,54 +174,10 @@
     <div id="mgOut" class="sub" style="margin-top:8px;line-height:1.6"></div>
   </div>
 
-  <div class="card" id="expansionCard" style="display:none">
-    <h2>โมเดลขยายเฟส 1 — Trust score &amp; สมุดพกชุด</h2>
-    <div class="desc">สวิตช์ของแผนขยาย (docs/expansion-strategy.md) — ระบบเก็บประวัติเช่า-คืน-QC อยู่ตลอดไม่ว่าสวิตช์จะเปิดหรือปิด (คะแนนสะสมเงียบ ๆ ตั้งแต่วันนี้) สวิตช์คุมแค่ “การแสดงผล” กับ “ผลต่อราคา” — เปิดเมื่อพร้อม ปิดได้ทันที</div>
-
-    <div class="feat">
-      <div class="info">
-        <div class="name">แสดงสมุดพกลูกค้า (trust tier)</div>
-        <div class="note">ลูกค้าเห็นระดับความเชื่อใจ + สิทธิ์ถัดไปของตัวเองใน LINE · เปิดวันไหน ลูกค้าเก่าเห็นคะแนนสะสมย้อนหลังทันที ไม่เริ่มนับศูนย์</div>
-        <div class="need">หน้า trust.html พร้อมแล้ว — ต้องมี: ติดตั้ง sql/2026-07-expansion-flags-trust.sql + เพิ่ม trust_me เข้า allowlist ของ me-rpc</div>
-      </div>
-      <label class="sw" data-key="trust_show_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
-    </div>
-
-    <div class="feat">
-      <div class="info">
-        <div class="name">คะแนนมีผลกับมัดจำจริง</div>
-        <div class="note">quote_rental ยกเว้น/ลดมัดจำอัตโนมัติให้ลูกค้าที่ประวัติผ่านเกณฑ์ (เช็ค flag ฝั่ง server เท่านั้น — หน้าเว็บปลดเองไม่ได้) · ถ้าเปิดแล้วเคลมพุ่ง ปิดสวิตช์นี้ได้ทันทีโดยสมุดพกยังแสดงอยู่</div>
-        <div class="need">ต้องมี: patch quote_rental ตามตัวอย่างในไฟล์ SQL + KYC ยังบังคับเสมอ</div>
-      </div>
-      <label class="sw" data-key="trust_pricing_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
-    </div>
-
-    <div class="feat">
-      <div class="info">
-        <div class="name">สมุดพกชุดสาธารณะ (garment passport)</div>
-        <div class="note">หน้า timeline ประวัติซัก-ซ่อม-รอบใส่ต่อชุด เปิดจากการแตะ NFC / สแกน (tag_lookup) ให้คนนอกดูได้ — จุดขายความโปร่งใส + ฐานราคาขายต่อ</div>
-        <div class="need">ต้องมี: หน้า passport สาธารณะ (เริ่มจากชุด top-50 ที่หมุนบ่อย)</div>
-      </div>
-      <label class="sw" data-key="passport_public_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
-    </div>
-
-    <div class="feat">
-      <div class="info">
-        <div class="name">เปิดรับฝากเช่า (เฟส 2)</div>
-        <div class="note">แสดงปุ่ม/หน้าเชิญฝากตู้ให้ลูกค้า tier สูง (invite-only ก่อน) · ปิดไว้จนกว่าเฟส 1 ผ่านเกณฑ์</div>
-        <div class="need">ต้องมี: โฟลว์ประเมินชุด + สัญญาฝาก + dashboard เจ้าของตู้</div>
-      </div>
-      <label class="sw" data-key="consign_open_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
-    </div>
-
-    <div class="disc">
-      <label>ยกเว้นมัดจำเมื่อคืนสมบูรณ์ครบ<div class="sub">จำนวนครั้งขั้นต่ำที่คืนตรงเวลา + สภาพผ่าน QC (มีผลเมื่อเปิด “คะแนนมีผลกับมัดจำจริง”)</div></label>
-      <input id="trustWaive" type="number" min="1" max="50" step="1" inputmode="numeric">
-      <span class="unit">ครั้ง</span>
-    </div>
+  <div class="hint" id="hint" style="display:none">
+    หมายเหตุ: สวิตช์เป็นแค่ “สวิตช์เปิดไฟ” — โค้ดหน้าจอ/edge function/ฮาร์ดแวร์ที่อ่านค่านี้ต้องสร้างก่อนถึงจะเห็นผลจริง
+    ค่าทั้งหมดเก็บใน app_settings และอ่านในระบบผ่าน get_setting() · แก้ไขได้เฉพาะเจ้าของ
   </div>
-
-  <div class="hint" id="hint" style="display:none">แก้ไขได้เฉพาะเจ้าของ</div>
 
   <div id="loading" class="loading">กำลังโหลด…</div>
 </div>
@@ -245,7 +202,6 @@ function paint(s){
   $('#premVal').value = s.premium_value_threshold ?? '3000';
   $('#premRetail').value = s.premium_retail_threshold ?? '8000';
   $('#premTiers').value = s.premium_tiers ?? 'Premium,Luxury';
-  $('#trustWaive').value = s.trust_waive_min_returns ?? '3';
 }
 
 async function load(){
@@ -258,7 +214,6 @@ async function load(){
   $('#partnerCard').style.display = '';
   $('#premiumCard').style.display = '';
   $('#financeCard').style.display = '';
-  $('#expansionCard').style.display = '';
   $('#hint').style.display = '';
   loadFinance();
 }
@@ -331,11 +286,6 @@ $('#premRetail').addEventListener('change', (e) => {
 });
 $('#premTiers').addEventListener('change', (e) => {
   save('premium_tiers', (e.target.value || '').trim() || 'Premium,Luxury');
-});
-// เกณฑ์ยกเว้นมัดจำ trust score (1–50 ครั้ง)
-$('#trustWaive').addEventListener('change', (e) => {
-  const v = String(Math.min(50, Math.max(1, parseInt(e.target.value || '3', 10) || 3)));
-  save('trust_waive_min_returns', v);
 });
 
 load();

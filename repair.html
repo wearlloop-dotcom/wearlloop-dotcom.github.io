@@ -69,7 +69,7 @@
   <section class="phead">
     <div class="eyebrow">repair · mending</div>
     <h1>ชุบชีวิตให้ทุกชุด</h1>
-    <div class="sub">ประเมินการซ่อม ส่งช่างในเครือ แล้วติดตามจนเสร็จ</div>
+    <div class="sub">ซ่อมแซมอย่างใส่ใจ ยืดอายุผ้า ลดขยะแฟชั่น — ทุกตะเข็บมีความหมาย</div>
     <div class="kpis">
       <div class="kpi"><span class="n" id="kpiQueue">–</span><span class="l">งานในคิว</span></div>
       <div class="kpi"><span class="n" id="kpiSent">–</span><span class="l">ส่งช่างแล้ว</span></div>
@@ -161,7 +161,7 @@
     const note=prompt('อาการเสียหาย (พิมพ์สั้น ๆ) — ถ้ามีรูปวางลิงก์ต่อท้ายด้วย URL ก็ได้','ซิปหลังขาด'); if(note===null) return;
     const m=note.match(/https?:\/\/\S+/); const photo=m?m[0]:null; const dmg=m?note.replace(m[0],'').trim():note;
     toast('AI กำลังประเมิน…');
-    const { data, error } = await sb.functions.invoke('repair-advise',{ body:{ garment_code:current, photo_url:photo, damage_note:dmg, id_token:(window.opsIdToken?window.opsIdToken():'') } });
+    const { data, error } = await sb.functions.invoke('repair-advise',{ body:{ garment_code:current, photo_url:photo, damage_note:dmg } });
     if(error||!data||data.error){ toast('AI ยังไม่พร้อม (ยังไม่ deploy) — กรอกเองได้ค่ะ'); return; }
     pickRepairable(!!data.repairable);
     if(data.repairable){
@@ -215,11 +215,9 @@
   async function sendRepair(){
     if(!sel.type){ toast('เลือกประเภทการซ่อมก่อนค่ะ'); return; }
     const vendor=$('vendor').value; if(!vendor){ toast('เลือกช่างก่อนค่ะ'); return; }
-    const cv=$('cost').value.trim(), cn=Number(cv);
-    const instr=$('instr').value.trim(), cost=(cv!==''&&Number.isFinite(cn))?cn:null, eta=$('eta').value||null;
+    const instr=$('instr').value.trim(), cost=Number($('cost').value)||null, eta=$('eta').value||null;
     // บันทึกการประเมิน (เผื่อยังไม่เคยประเมิน)
-    const as=await sb.rpc('repair_assess',{ p_code:current, p_repairable:true, p_type:sel.type, p_instructions:instr, p_est_cost:cost, p_photos:null });
-    if(as.error||(as.data&&as.data.error)){ toast('ผิดพลาด: '+(as.error?.message||as.data.error)); return; }
+    await sb.rpc('repair_assess',{ p_code:current, p_repairable:true, p_type:sel.type, p_instructions:instr, p_est_cost:cost, p_photos:null });
     const { data, error } = await sb.rpc('repair_assign',{ p_code:current, p_vendor_id:vendor, p_cost:cost, p_eta:eta, p_notes:instr });
     if(error||(data&&data.error)){ toast('ผิดพลาด: '+(error?.message||data.error)); return; }
     toast(`ส่งซ่อม ${current} → ${data.vendor} (฿${data.cost})`);
@@ -262,13 +260,12 @@
   }
   async function pick(code){ $('code').value=code; await load(); window.scrollTo({top:0,behavior:'smooth'}); }
   async function done(code){
-    const actual=prompt('ค่าซ่อมจริง (บาท) เว้นว่าง=ตามที่ตั้งไว้',''); if(actual===null) return;
-    const av=actual.trim(), an=Number(av);
-    const { error } = await sb.rpc('repair_complete',{ p_code:code, p_actual_cost:(av!==''&&Number.isFinite(an))?an:null, p_notes:null });
+    const actual=prompt('ค่าซ่อมจริง (บาท) เว้นว่าง=ตามที่ตั้งไว้','');
+    const { error } = await sb.rpc('repair_complete',{ p_code:code, p_actual_cost:actual?Number(actual):null, p_notes:null });
     if(error){ toast('ผิดพลาด'); return; } toast(`${code} ซ่อมเสร็จ เข้าคิวซักต่อ`); loadQueue();
   }
   async function cant(code){
-    const reason=prompt('เพราะอะไรถึงซ่อมไม่ได้',''); if(reason===null) return;
+    const reason=prompt('เพราะอะไรถึงซ่อมไม่ได้','')||''; if(reason===null) return;
     const { error } = await sb.rpc('repair_cant',{ p_code:code, p_reason:reason });
     if(error){ toast('ผิดพลาด'); return; } toast(`${code} ซ่อมไม่ได้ แจ้งเจ้าของแล้ว`); loadQueue();
   }

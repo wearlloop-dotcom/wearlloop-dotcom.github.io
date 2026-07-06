@@ -43,16 +43,6 @@
   .gate h2{font-family:var(--display);font-size:22px;margin-bottom:6px}
   .gate p{color:var(--stone);font-size:13px;margin-bottom:14px}
   .muted{color:var(--stone);font-size:12px}
-  .sumgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
-  .sumcard{background:var(--surface);border:1px solid var(--hair);border-radius:4px;padding:11px 13px}
-  .sumcard .lb{font-size:11px;color:var(--stone);letter-spacing:.3px}
-  .sumcard .v{font-family:var(--display);font-size:17px;font-weight:700;margin-top:3px}
-  .sumcard .n{font-size:11px;color:var(--stone);margin-top:1px}
-  .drange{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--stone)}
-  .drange input{border:1px solid var(--hair);border-radius:2px;padding:6px 8px;font-family:var(--sans);font-size:12px;color:var(--ink);background:#fff}
-  .drange .dclear{border:1px solid var(--hair);background:#fff;color:var(--stone);border-radius:20px;padding:6px 12px;font-size:12px;font-family:var(--sans);cursor:pointer}
-  .drange .dclear:hover{border-color:var(--ink);color:var(--ink)}
-  .slip .diff{font-size:11px;color:var(--danger);margin-top:2px}
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:30px;opacity:0;transition:.3s;z-index:9;font-size:13px}
   .toast.show{opacity:1}
   .hide{display:none!important}
@@ -92,19 +82,13 @@
     <span class="tab" data-f="pending" onclick="go(this)">รอยืนยันมือ</span>
     <span class="tab" data-f="problem" onclick="go(this)">ตรวจไม่ผ่าน</span>
   </div>
-  <div class="drange">
-    <label>จาก <input type="date" id="dFrom" onchange="render()"></label>
-    <label>ถึง <input type="date" id="dTo" onchange="render()"></label>
-    <button type="button" class="dclear" onclick="clearDates()">ล้างช่วงวันที่</button>
-  </div>
-  <div id="sum"></div>
   <div id="view"><div class="empty">กำลังโหลด…</div></div>
-  <div class="muted" style="margin-top:14px;text-align:center">แสดง 200 รายการล่าสุด — ยอดรวมคำนวณจากรายการที่แสดงเท่านั้น</div>
 </div>
 
 <div id="toast" class="toast"></div>
 
 <script>
+  const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const baht=n=>n==null?'—':'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -124,53 +108,20 @@
   };
   const resOf=r=>RES[r]||{th:r||'-',cls:'warn',grp:'problem'};
 
-  const api=(action,extra)=>window.opsAcct(action,extra).catch(e=>{
-    if(e.message==='unauth') toast('ไม่มีสิทธิ์เข้าดูสลิป (เฉพาะเจ้าของ/ผู้จัดการ)');
-    throw e;
-  });
+  async function authHeader(){
+    if(!(await window.opsLogin())) throw new Error('redirecting');
+    return 'Bearer '+liff.getIDToken();
+  }
+  async function api(action, extra){
+    const r=await fetch(FN,{method:'POST',headers:{'Authorization':await authHeader(),'Content-Type':'application/json'},
+      body:JSON.stringify(Object.assign({action},extra||{}))});
+    if(r.status===401||r.status===403){ toast('ไม่มีสิทธิ์เข้าดูสลิป (เฉพาะเจ้าของ/ผู้จัดการ)'); throw new Error('unauth'); }
+    return r.json();
+  }
   function logout(){ try{ liff.logout(); }catch(e){} $('app').classList.add('hide'); $('gate').classList.remove('hide'); }
 
   let ROWS=[]; let filter='all';
   function go(el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); filter=el.dataset.f; render(); }
-
-  // วันที่แบบ YYYY-MM-DD (เวลาท้องถิ่น) ไว้เทียบกับ input[type=date]
-  const keyOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  const dayKey=s=>{ if(!s)return''; const d=new Date(s); return isNaN(d)?'':keyOf(d); };
-  function inRange(r){
-    const f=$('dFrom').value, t=$('dTo').value;
-    if(!f&&!t) return true;
-    const k=dayKey(r.created_at);
-    if(!k) return false;
-    if(f&&k<f) return false;
-    if(t&&k>t) return false;
-    return true;
-  }
-  function clearDates(){ $('dFrom').value=''; $('dTo').value=''; render(); }
-
-  const amtOf=r=>{ const a=r.provider_amount!=null?r.provider_amount:r.amount_expected; const n=Number(a); return isNaN(n)?0:n; };
-  function renderSummary(rows){
-    const today=keyOf(new Date()), mon=today.slice(0,7);
-    let tSum=0,tN=0,mSum=0,mN=0,pSum=0,pN=0,prob=0,dup=0;
-    // ยอดวันนี้/เดือนนี้ คิดจากทุกรายการที่โหลดมา — ไม่ผูกกับช่วงวันที่ที่เลือกกรอง
-    ROWS.forEach(r=>{
-      if(resOf(r.result).grp!=='confirmed') return;
-      const k=dayKey(r.created_at), a=amtOf(r);
-      if(k===today){ tSum+=a; tN++; }
-      if(k&&k.slice(0,7)===mon){ mSum+=a; mN++; }
-    });
-    rows.forEach(r=>{
-      const g=resOf(r.result).grp, a=amtOf(r);
-      if(g==='pending'){ pSum+=a; pN++; }
-      else if(g==='problem'){ prob++; if(r.result==='duplicate_slip') dup++; }   // ซ้ำ = ส่วนหนึ่งของตรวจไม่ผ่าน (ตรงกับแท็บ)
-    });
-    $('sum').innerHTML=`<div class="sumgrid">
-      <div class="sumcard"><div class="lb">ยอดยืนยันแล้ววันนี้</div><div class="v">${baht(tSum)}</div><div class="n">${tN} ใบ</div></div>
-      <div class="sumcard"><div class="lb">ยอดยืนยันแล้วเดือนนี้</div><div class="v">${baht(mSum)}</div><div class="n">${mN} ใบ</div></div>
-      <div class="sumcard"><div class="lb">รอยืนยัน</div><div class="v">${baht(pSum)}</div><div class="n">${pN} ใบ</div></div>
-      <div class="sumcard"><div class="lb">ตรวจไม่ผ่าน</div><div class="v">${prob}</div><div class="n">ใบ (รวมสลิปซ้ำ)</div></div>
-      <div class="sumcard"><div class="lb">สลิปซ้ำ</div><div class="v">${dup}</div><div class="n">ใบ</div></div>
-    </div>`;
-  }
 
   async function load(){
     try{
@@ -181,24 +132,18 @@
   }
 
   function render(){
-    const dRows=ROWS.filter(inRange);
-    renderSummary(dRows);
-    const rows=dRows.filter(r=> filter==='all' ? true : resOf(r.result).grp===filter);
+    const rows=ROWS.filter(r=> filter==='all' ? true : resOf(r.result).grp===filter);
     if(!rows.length){ $('view').innerHTML='<div class="empty">ยังไม่มีสลิปในหมวดนี้ค่ะ</div>'; return; }
     $('view').innerHTML='<div class="grid">'+rows.map(r=>{
       const R=resOf(r.result);
       const amt=r.provider_amount!=null?r.provider_amount:r.amount_expected;
       const hasImg=!!r.slip_path;
-      const pa=r.provider_amount!=null?Number(r.provider_amount):null;
-      const ex=r.amount_expected!=null?Number(r.amount_expected):null;
-      const diff=(pa!=null&&ex!=null&&!isNaN(pa)&&!isNaN(ex)&&pa!==ex)
-        ? `<div class="diff">คาด ${baht(ex)} · สลิป ${baht(pa)} (ต่าง ${baht(Math.abs(pa-ex))})</div>` : '';
       return `<div class="slip">
         <div class="top">
           <div><div class="nm">${esc(r.customer_name||'ลูกค้า')}</div><div class="dt">${fmtDate(r.created_at)}</div></div>
           <span class="badge ${R.cls}">${esc(R.th)}</span>
         </div>
-        <div class="amt">${baht(amt)}</div>${diff}
+        <div class="amt">${baht(amt)}</div>
         <div class="meta">${esc(r.purpose||'-')}${r.provider_ref?' · ref '+esc(r.provider_ref):''}${r.source&&r.source!=='customer'?' · '+esc(r.source):''}</div>
         <button class="view" ${hasImg?'':'disabled'} onclick="viewSlip('${esc(r.slip_path)}',this)">${hasImg?'ดูรูปสลิป':'ไม่มีรูป'}</button>
       </div>`;

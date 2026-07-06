@@ -101,7 +101,7 @@
   <section class="phead">
     <div class="eyebrow">marketing studio</div>
     <h1>เล่าเรื่องชุดให้โลกได้ยิน</h1>
-    <div class="sub">วางปฏิทิน เขียนแคปชั่น และปั้นคอนเทนต์จากชุดจริง</div>
+    <div class="sub">วางปฏิทิน เขียนแคปชั่น และปั้นคอนเทนต์จากชุดจริง ให้ทุกชุดที่หมุนเวียนมีเรื่องราวของมันเอง</div>
   </section>
 
   <div class="toolrow">
@@ -235,7 +235,7 @@
   // Generic AI caller. Returns {ok,data} or {ok:false,reason:'config'|'net',msg}
   async function callAI(body){
     try{
-      const res=await fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify(Object.assign({},body,{id_token:(window.opsIdToken?window.opsIdToken():'')}))});
+      const res=await fetch(AI_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify(body)});
       let j=null; try{ j=await res.json(); }catch(e){ j=null; }
       if(!res.ok || (j&&j.error)){
         const m=(j&&j.error)||('HTTP '+res.status);
@@ -375,8 +375,7 @@
     $('gGrid').innerHTML='<div class="grid-g">'+G_LIST.map((g,i)=>
       '<div class="gcard"><img class="ph" src="'+esc(g.photo||'')+'" alt=""><div class="gi">'+
       '<div class="gn">'+esc(g.name||'')+'</div><div class="gc">'+esc(g.code||'')+(g.color_name?' · '+esc(g.color_name):'')+'</div>'+
-      '<select id="gplat'+i+'" style="margin-top:auto"><option value="tiktok">TikTok</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option></select>'+
-      '<button class="btn clay sm" onclick="genGarmentPost('+i+')">ให้ AI เขียนโพสต์</button>'+
+      '<button class="btn clay sm" style="margin-top:auto" onclick="genGarmentPost('+i+')">ให้ AI เขียนโพสต์</button>'+
       '<div id="gout'+i+'"></div></div></div>').join('')+'</div>';
   }
   let GARMENT_RESULTS={};
