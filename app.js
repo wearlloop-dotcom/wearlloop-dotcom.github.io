@@ -617,6 +617,20 @@ function groupByStyle(list){
   });
   return out;
 }
+// รวม "ทรงเดียวหลายสี" (คนละ SKU/สี) เป็นการ์ดเดียว — swatch หลายสี, กรองสีไหนโชว์สีนั้น
+function colorGroupKey(g){ const nm = String(g.name||'').toLowerCase().replace(/\s*[\[(].*$/,'').trim(); return [String(g.brand||'').toLowerCase().trim(), nm].join('|'); }
+function groupByColor(cards){
+  const m = new Map();
+  cards.forEach(c => { const k = colorGroupKey(c); if(!m.has(k)) m.set(k, []); m.get(k).push(c); });
+  const out = [];
+  m.forEach(sibs => {
+    if (sibs.length === 1) { out.push(sibs[0]); return; }
+    let rep = sibs[0];
+    if (fColors.length) { const hit = sibs.find(s => [...familiesOf(s)].some(f => fColors.includes(f))); if (hit) rep = hit; }
+    out.push(Object.assign({}, rep, { _colorSiblings: sibs }));
+  });
+  return out;
+}
 // รูปตารางไซส์ = ภาพที่ OCR ระบุไว้จริง (source_meta.size_chart_url) — ไม่เดาจาก "รูปสุดท้าย"
 function sizeChartPhoto(g){ return (g.sourceMeta && g.sourceMeta.size_chart_url) || null; }
 // แกลเลอรี = รูปทั้งหมด ยกภาพตารางไซส์ออก (โชว์แยกในบล็อกตารางไซส์)
@@ -650,7 +664,7 @@ function renderGrid() {
     return;
   }
   // continuous feed: เก็บลิสต์เต็ม แล้วโหลดทีละหน้า (มีจุดหยุดพอดี — ไม่ใช่ infinite loop เสพติด)
-  gGridList = groupByStyle(list);   // รวมไซส์ของสไตล์เดียวกันเป็นการ์ดเดียว
+  gGridList = groupByColor(groupByStyle(list));   // รวมไซส์ + รวมสี (ทรงเดียวหลายสี) เป็นการ์ดเดียว
   gGridShown = 0;
   $('#grid').innerHTML = '';
   renderGridPage();
@@ -666,7 +680,10 @@ function gridCardHtml(g) {
   const sizeList = [...new Set(vs.map(v => String(v.size||'').toUpperCase()).filter(Boolean))].sort((a,b)=> sizeRank(a)-sizeRank(b));
   const sizeLbl = sizeList.length ? `<div class="psizes">${lang==='th'?'ไซส์':'Size'} ${sizeList.map(s=> s==='FREE'?(lang==='th'?'ฟรีไซส์':'Free'):s).join(' · ')}</div>` : '';
   const sv = savingsPct(g);
-  const dots = g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
+  const sibs = g._colorSiblings || null;   // ทรงเดียวหลายสี → swatch กดสลับสีได้
+  const dots = sibs
+    ? sibs.map(s => { const hex=(s.colors&&s.colors[0]&&s.colors[0][1])||s.bg||'#E7E2DA'; const nm=(s.colors&&s.colors[0]&&s.colors[0][0])||''; const cur=s.id===g.id?'outline:2px solid var(--ink,#1a1a1a);outline-offset:1px':''; return `<i style="background:${hex};cursor:pointer;${cur}" title="${String(nm).replace(/"/g,'')}" onclick="openDetail('${s.id}');event.stopPropagation()"></i>`; }).join('')
+    : g.colors.map(c =>`<i style="background:${c[1]}"></i>`).join('');
   const ph = gPhoto(g);
   const ph2 = (Array.isArray(g.photos) && g.photos[1] && g.photos[1] !== ph) ? g.photos[1] : '';  // รูปที่ 2 = โชว์ตอน hover (เห็นอีกมุม)
   return`<div class="pcard ${gUseDate && !av ? 'busy' : ''}" onclick="openDetail('${g.id}')">
