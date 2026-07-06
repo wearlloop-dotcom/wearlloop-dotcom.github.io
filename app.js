@@ -978,22 +978,13 @@ function openDetail(id) {
       <div class="cbrand">${g.brand ||''}</div>
       <div class="dname">${g.name}</div>
       <div class="dmeta">${g.tier} · ${t('rotating')}</div>
-      ${sizeChips ? `<div class="sec">${lang==='th'?'เลือกไซส์':'Select size'}</div>${sizeChips}` : ''}
+      ${sizeSection(g)}
       <div id="ratingline" class="ratingline"></div>
       <div id="socialproof" class="socialproof"></div>
-      ${fit!= null?`<div class="fitbox"><div class="pct">${fit}%</div>
-        <div><div style="font-size:13px;font-weight:500;color:#04342C">${t('fitTitle')}</div>
-        <div style="font-size:11px;color:var(--ok)">${t('fitFromPre')} ${g.stretch!=='none'? t('stretchHelp') : t('noStretchHelp')}</div></div></div>`:''}
-      ${tips?`<div class="sec">${t('secWear')}</div><div class="tips">${tips}</div>`:''}
+      ${tips?`<details class="tipwrap"><summary class="sec" style="cursor:pointer">${t('secWear')} <span style="font-weight:400;color:var(--muted,#8C8B86);font-size:12px">${lang==='th'?'· แตะดู':'· tap'}</span></summary><div class="tips">${tips}</div></details>`:''}
       <div class="sec">${lang ==='th'?'ครบลุค — ทรงผม & เครื่องประดับ':'Complete the look'}</div>
       <div id="lookbox" class="lookbox"><button class="lookbtn" onclick="loadLook('${g.code || g.id}','${(g.occasion_tags||[])[0]||''}')">${lang ==='th'?'ดูทรงผม & เครื่องประดับที่เข้ากับชุดนี้':'See hair & accessories for this look'}</button></div>
       <div id="ugcWrap" style="display:none"><div class="sec">${lang ==='th'?'รูปจริงจากลูกค้า':'Real customer photos'}</div><div id="ugcbox" class="ugcbox"></div></div>
-      ${(g.bust||g.waist||g.hip||g.length)
-        ? `<div class="sec secrow">${t('secSize')}<span class="munit">${['in','cm'].map(u=>`<button data-u="${u}" class="${gMUnit===u?'on':''}" onclick="setMUnit('${u}')">${u==='in'?(lang==='th'?'นิ้ว':'inch'):(lang==='th'?'ซม.':'cm')}</button>`).join('')}</span></div>
-      <div class="measure" id="measureBox">${measureCells(g)}</div>
-      ${fitMatch(g)}`
-        : (ourSizesLabel ? `<div class="sec">${lang==='th'?'ไซส์':'Size'}</div>` : '')}
-      ${ourSizesLabel ? `<div class="dscnote">${lang==='th'?`ไซส์ที่เรามีให้เช่า: <b>${ourSizesLabel}</b>`:`We rent: <b>${ourSizesLabel}</b>`}</div>` : ''}
       ${chart ? `<div class="sec">${lang==='th'?'ตารางไซส์ (อ้างอิงจากแบรนด์)':'Size chart (brand reference)'}</div><div class="dsizechart"><img src="${chart}" alt="size chart" loading="lazy"></div>` : ''}
       <div id="fitsummary"></div>
       ${g.fabric ? `<div class="sec">${t('secFabric')}</div>
@@ -1061,7 +1052,49 @@ function measureCells(g){
   return [[t('bust'),rng(g.bust)],[t('waist'),rng(g.waist)],[t('hip'),one(g.hip)],[t('length'),len]]
     .map(m=>`<div class="mcell"><span>${m[0]}</span>${m[1]}</div>`).join('');
 }
-function setMUnit(u){ gMUnit=u; const box=document.getElementById('measureBox'); const g=GARMENTS.find(x=>x.id===window._curDetailId); if(box&&g){ box.innerHTML=measureCells(g); const fb=document.getElementById('fitmatchBox'); if(fb) fb.outerHTML=fitMatch(g); } document.querySelectorAll('.munit button').forEach(b=>b.classList.toggle('on', b.dataset.u===u)); }
+function setMUnit(u){ gMUnit=u; const g=GARMENTS.find(x=>x.id===window._curDetailId); const box=document.getElementById('sizeBody'); if(box&&g) box.innerHTML=sizeBody(g,sizesOf(g), sizesOf(g).length<=1); document.querySelectorAll('.munit button').forEach(b=>b.classList.toggle('on', b.dataset.u===u)); }
+
+// ===== เลือกไซส์ S/M/L/XL + สัดส่วนต่อไซส์ + best match (ผูกสัดส่วนลูกค้า) =====
+let gSelSize = 0, gSelSizeFor = null;
+function sizesOf(g){ const raw=String(g.size||'').toUpperCase().trim(); if(!raw) return []; if(raw==='FREE'||raw==='FREESIZE') return ['FREE']; return raw.split('/').map(s=>s.trim()).filter(Boolean); }
+function sizePt(rng, idx, n){ return rng ? (n<=1 ? (rng[0]+rng[1])/2 : rng[0] + (rng[1]-rng[0])*idx/(n-1)) : null; }  // สัดส่วนต่อไซส์ (interpolate ช่วง)
+function bestSizeIdx(g, sizes){ const c=CUSTOMER||{}; if(g.bust && c.bust_in!=null){ let b=0,bd=1e9; for(let i=0;i<sizes.length;i++){ const v=sizePt(g.bust,i,sizes.length); const d=Math.abs(v-c.bust_in); if(d<bd){bd=d;b=i;} } return b; } const us=String(c.size||'').toUpperCase(); const i=sizes.indexOf(us); return i>=0?i:Math.floor((sizes.length-1)/2); }
+function sizeSection(g){
+  const th=lang==='th'; const sizes=sizesOf(g); const hasM=!!(g.bust||g.waist||g.hip||g.length);
+  if(!sizes.length && !hasM) return '';
+  const free = sizes.length<=1;
+  if(gSelSizeFor!==g.id){ gSelSize = free?0:bestSizeIdx(g,sizes); gSelSizeFor=g.id; }
+  const best = free?0:bestSizeIdx(g,sizes);
+  const pills = (!sizes.length) ? '' : (free
+    ? `<button class="on">${sizes[0]==='FREE'||!sizes[0]?(th?'ฟรีไซส์':'Free size'):sizes[0]}</button>`
+    : sizes.map((s,i)=>`<button class="${i===gSelSize?'on':''}" onclick="setGSize(${i})">${s}${i===best?`<span style="font-size:9px;color:#0F6E56;margin-left:3px">${th?'พอดี':'best'}</span>`:''}</button>`).join(''));
+  return `${pills?`<div class="sec">${th?'เลือกไซส์':'Select size'}</div><div class="dsizes">${pills}</div>`:''}
+    <div id="sizeBody">${sizeBody(g,sizes,free)}</div>`;
+}
+function sizeBody(g,sizes,free){
+  const th=lang==='th'; const u=gMUnit; const n=sizes.length; const idx=free?0:gSelSize;
+  const hasM=!!(g.bust||g.waist||g.hip||g.length); if(!hasM) return '';
+  const cv=v=> v==null?null:(u==='cm'?Math.round(v*2.54):Math.round(v*10)/10); const uni=u==='cm'?t('cm'):'"';
+  const b=sizePt(g.bust,idx,n||1), w=sizePt(g.waist,idx,n||1), h=g.hip, len=g.length;
+  const cell=(lb,val)=> val==null?'':`<div class="mcell"><span>${lb}</span>${cv(val)}${uni}</div>`;
+  // ความยาวเก็บเป็น "ซม." เสมอ — คนละหน่วยกับอก/เอว/สะโพก (นิ้ว)
+  const lenTxt = len==null?'':(u==='cm'?`${Math.round(len)} ${t('cm')}`:`${Math.round(len/2.54*2)/2}"`);
+  const lenCell = len==null?'':`<div class="mcell"><span>${t('length')}</span>${lenTxt}</div>`;
+  let out=`<div class="sec secrow" style="margin-top:6px">${th?'ขนาดตัวชุด':'Measurements'}${(!free&&sizes[idx])?` · ${th?'ไซส์':'size'} ${sizes[idx]}`:''}<span class="munit">${['in','cm'].map(x=>`<button data-u="${x}" class="${gMUnit===x?'on':''}" onclick="setMUnit('${x}')">${x==='in'?(th?'นิ้ว':'in'):(th?'ซม.':'cm')}</button>`).join('')}</span></div>
+    <div class="measure">${cell(t('bust'),b)}${cell(t('waist'),w)}${cell(t('hip'),h)}${lenCell}</div>`;
+  const c=CUSTOMER||{};
+  if(c.bust_in!=null||c.waist_in!=null){
+    const slack=g.stretch==='stretchy'?2:g.stretch==='slight'?1:0;
+    const okB=(b==null||c.bust_in==null)||c.bust_in<=b+slack+0.5;
+    const okW=(w==null||c.waist_in==null)||c.waist_in<=w+slack+0.5;
+    const good=okB&&okW; const col=good?'#0F6E56':'#B4232A';
+    out+=`<div style="margin-top:8px;font-size:13px;font-weight:600;color:${col}">${good?(th?'✓ ไซส์นี้พอดีตัวคุณ':'✓ This size fits you'):(th?'⚠ อาจคับ — ลองเผื่อไซส์':'⚠ May be snug — try sizing up')}</div>`;
+  } else {
+    out+=`<button onclick="closeDetail();openProfile()" style="margin-top:8px;border:0;background:#04342C;color:#fff;border-radius:9px;padding:8px 14px;font-size:12.5px;cursor:pointer">${th?'ใส่สัดส่วนเพื่อเช็คไซส์ที่พอดี':'Add your measurements to check fit'}</button>`;
+  }
+  return out;
+}
+function setGSize(i){ gSelSize=i; const g=GARMENTS.find(x=>x.id===window._curDetailId); const box=document.getElementById('sizeBody'); if(g&&box){ box.innerHTML=sizeBody(g,sizesOf(g),false); document.querySelectorAll('.dsizes button').forEach((b,bi)=>b.classList.toggle('on',bi===i)); } }
 
 // เทียบสัดส่วนลูกค้า ↔ ช่วงที่ชุดรับได้จริง (ข้อมูลหลังบ้าน) → ตอบ "พอดีตัวคุณไหม" + ผูกกับไซส์ที่เลือก
 function fitMatch(g){
