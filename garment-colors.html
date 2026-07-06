@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · แก้สีชุด (เลือกสีเอง)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--sans:'Inter','Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif;--ok:#0F6E56}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:14px}
+  .bar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .bar h1{font-family:var(--display);font-size:18px;font-weight:700}
+  .bar .sub{font-size:12px;color:var(--muted)}
+  .wrap{max-width:1040px;margin:16px auto;padding:0 14px}
+  .search{width:100%;max-width:360px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-bottom:14px;font-family:var(--sans)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;gap:12px}
+  .card .pic{width:78px;height:104px;flex:none;border-radius:7px;background-size:cover;background-position:center;display:flex;align-items:flex-end;justify-content:center}
+  .card .body{flex:1;min-width:0}
+  .card .br{font-size:10px;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+  .card .nm{font-size:14px;font-weight:600;line-height:1.25}
+  .card .cur{display:flex;align-items:center;gap:7px;margin:5px 0 8px;font-size:12px;color:var(--muted)}
+  .card .cur i{width:16px;height:16px;border-radius:50%;border:1px solid #0002;flex:none}
+  .fams{display:flex;flex-wrap:wrap;gap:6px}
+  .fams button{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #0002;cursor:pointer;padding:0;position:relative}
+  .fams button.on{box-shadow:0 0 0 2px var(--ink)}
+  .fams button.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;text-shadow:0 0 2px #0008}
+  .nmrow{display:flex;gap:6px;margin-top:8px}
+  .nmrow input{flex:1;min-width:0;padding:6px 9px;border:1px solid var(--line);border-radius:7px;font-size:12px;font-family:var(--sans)}
+  .nmrow button{border:1px solid var(--ink);background:#fff;border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer}
+  .saved{color:var(--ok);font-size:11px;font-weight:600;margin-left:6px;opacity:0;transition:opacity .2s}
+  .saved.show{opacity:1}
+  .empty{text-align:center;color:var(--muted);padding:40px}
+</style>
+<link rel="stylesheet" href="ops-ui.css">
+</head>
+<body>
+<div class="bar">
+  <div><h1>แก้สีชุด</h1><div class="sub">กดเลือกกลุ่มสีที่ถูกต้องของแต่ละชุด — มีผลกับตัวกรองสีหน้าลูกค้าทันที · <a href="/labels.html" style="color:#A75F3A">ป้าย QR ></a></div></div>
+</div>
+<div class="wrap">
+  <input class="search" id="q" placeholder="ค้นหาชื่อ / รหัส / แบรนด์…" oninput="render()">
+  <div class="grid" id="grid"><div class="empty">กำลังโหลด…</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
+  const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  if(window.opsRpc) sb.rpc=window.opsRpc;
+  if(window.opsLogin) window.opsLogin().catch(()=>{});
+
+  // ต้องตรงกับ COLOR_FAMILIES ในหน้าลูกค้า (liff/app.js)
+  const FAMILIES = [
+    {key:'pink',th:'ชมพู',hex:'#E6A6B6'},{key:'red',th:'แดง',hex:'#C25B5B'},
+    {key:'peach',th:'พีช/ส้ม',hex:'#E6B295'},{key:'yellow',th:'เหลือง',hex:'#E6CE8E'},
+    {key:'green',th:'เขียว',hex:'#9CB089'},{key:'blue',th:'ฟ้า/น้ำเงิน',hex:'#9DB6CC'},
+    {key:'purple',th:'ม่วง',hex:'#B3A8C9'},{key:'brown',th:'น้ำตาล',hex:'#A6845C'},
+    {key:'cream',th:'ครีม/ขาว',hex:'#F1EADC'},{key:'grey',th:'เทา',hex:'#B6B2AA'},
+    {key:'black',th:'ดำ',hex:'#2E2E2E'},
+  ];
+  let GARMENTS=[];
+
+  async function save(code, family, name, hex, el){
+    const { data, error } = await sb.rpc('ops_set_garment_color', { p_code:code, p_family:family, p_name:name||null, p_hex:hex||null });
+    if(error || (data&&data.ok===false)){ alert('บันทึกไม่ได้: '+(error?error.message:(data&&data.error))); return false; }
+    const g=GARMENTS.find(x=>x.code===code); if(g){ g.color_family=family; g.color_name=name; g.color_hex=hex; }
+    if(el){ el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200); }
+    return true;
+  }
+  window.pickFam=async function(code,key){
+    const f=FAMILIES.find(x=>x.key===key); const g=GARMENTS.find(x=>x.code===code);
+    const nm=document.getElementById('nm_'+code); const savedEl=document.getElementById('sv_'+code);
+    const name=(nm&&nm.value.trim())|| (g&&g.color_name) || f.th;
+    if(await save(code,key,name,f.hex,savedEl)) render();
+  };
+  window.saveName=async function(code){
+    const g=GARMENTS.find(x=>x.code===code); const nm=document.getElementById('nm_'+code); const savedEl=document.getElementById('sv_'+code);
+    await save(code, g&&g.color_family, nm.value.trim(), g&&g.color_hex, savedEl);
+  };
+
+  function render(){
+    const q=(document.getElementById('q').value||'').toLowerCase().trim();
+    const list=GARMENTS.filter(g=>!q || (g.code+' '+(g.name||'')+' '+(g.brand||'')).toLowerCase().includes(q));
+    const grid=document.getElementById('grid');
+    if(!list.length){ grid.innerHTML='<div class="empty">ไม่พบชุด</div>'; return; }
+    grid.innerHTML=list.map(g=>{
+      const photo=(g.photos&&g.photos[0])||'';
+      const fams=FAMILIES.map(f=>`<button class="${g.color_family===f.key?'on':''}" style="background:${f.hex}" title="${f.th}" onclick="pickFam('${g.code}','${f.key}')"></button>`).join('');
+      return `<div class="card">
+        <div class="pic" style="background-image:url('${photo}')"></div>
+        <div class="body">
+          <div class="br">${g.brand||''} · ${g.code}</div>
+          <div class="nm">${g.name||g.code}</div>
+          <div class="cur"><i style="background:${g.color_hex||'#EDEAE4'}"></i>${g.color_name||'—'}${g.color_family?` · ${g.color_family}`:' · ยังไม่ตั้งกลุ่มสี'}<span class="saved" id="sv_${g.code}">บันทึกแล้ว ✓</span></div>
+          <div class="fams">${fams}</div>
+          <div class="nmrow"><input id="nm_${g.code}" value="${(g.color_name||'').replace(/"/g,'&quot;')}" placeholder="ชื่อสี (เช่น French Rose)"><button onclick="saveName('${g.code}')">บันทึกชื่อ</button></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  (async function(){
+    const { data, error } = await sb.rpc('ops_garments');
+    if(error||!data){ document.getElementById('grid').innerHTML=`<div class="empty">โหลดไม่ได้: ${error?error.message:'ไม่มีข้อมูล'}</div>`; return; }
+    GARMENTS=(data||[]).filter(g=>g.code).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+    render();
+  })();
+</script>
+</body>
+</html>

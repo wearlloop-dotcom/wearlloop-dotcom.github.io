@@ -104,7 +104,7 @@ async function loadQueue(){
   if (error){ box.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${esc(error.message)}</div>`; return; }
   const rows = data || [];
   $('#rqn').textContent = rows.length ? rows.length+' รายการ' : '';
-  if (!rows.length){ box.innerHTML = `<div class="empty">ไม่มีรูปค้างรีวิว — เคลียร์หมดแล้ว ✓</div>`; return; }
+  if (!rows.length){ box.innerHTML = `<div class="empty">ไม่มีรูปค้างรีวิว 🎉</div>`; return; }
   box.innerHTML = rows.map(r => {
     const reasons = (r.audit && r.audit.reasons || []).join(' · ');
     const bk = r.bucket==='pass_unpaid' ? 'ผ่าน · รอจ่าย (เกินเพดาน)' : (r.bucket==='failed' ? 'ตกออดิท' : esc(r.bucket));
@@ -115,7 +115,7 @@ async function loadQueue(){
         <div class="meta">creator: ${esc(r.creator_handle||r.creator_uid||'-')} · <span class="tag ${esc(r.bucket)}">${bk}</span></div>
         ${reasons?`<div class="meta">${esc(reasons)}</div>`:''}
         <div class="acts">
-          <button class="btn ok sm" onclick="approve('${r.asset_id}', this)">อนุมัติ + จ่าย</button>
+          <button class="btn ok sm" onclick="approve('${r.asset_id}')">อนุมัติ + จ่าย</button>
           <button class="btn dg sm" onclick="reject('${r.asset_id}')">ปฏิเสธ</button>
         </div>
       </div></div>`;
@@ -137,13 +137,9 @@ async function loadList(){
       </div></div>`).join('');
 }
 
-async function approve(asset,btn){ if(btn) btn.disabled=true; setStatus('กำลังอนุมัติ…');
-  try{
-    const {data,error}=await rpc('gig_approve',{p_asset:asset});
-    if(error||data&&data.error){ setStatus((error&&error.message)||data.error,'err'); return; }
-    setStatus(data.capped?'จ่ายแล้ว':'อนุมัติ + จ่ายแล้ว','ok'); loadQueue(); loadList();
-  } finally { if(btn) btn.disabled=false; }
-}
+async function approve(asset){ setStatus('กำลังอนุมัติ…'); const {data,error}=await rpc('gig_approve',{p_asset:asset});
+  if(error||data&&data.error){ setStatus((error&&error.message)||data.error,'err'); return; }
+  setStatus(data.capped?'จ่ายแล้ว':'อนุมัติ + จ่ายแล้ว','ok'); loadQueue(); loadList(); }
 async function reject(asset){ if(!confirm('ปฏิเสธรูปนี้? งานจะถูกคืนให้ creator ส่งใหม่')) return;
   const {data,error}=await rpc('ugc_reject',{p_asset:asset});
   if(error||data&&data.error){ setStatus((error&&error.message)||data.error,'err'); return; }

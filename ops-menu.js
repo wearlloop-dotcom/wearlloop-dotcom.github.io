@@ -20,6 +20,7 @@
     { section: 'สต๊อก', items: [
       { href: 'stock.html',    label: 'สต๊อก',         icon: '▦', roles: ['care','stock','manager'] },
       { href: 'garment.html',  label: 'ชุด',           icon: '❖', roles: ['care','stock','manager'] },
+      { href: 'garment-colors.html', label: 'แก้สีชุด', icon: '◐', roles: ['stock','manager'] },
       { href: 'seller.html',   label: 'รับซื้อมือสอง',  icon: '⇄', roles: ['care','manager'] },
     ] },
     { section: 'การตลาด', items: [

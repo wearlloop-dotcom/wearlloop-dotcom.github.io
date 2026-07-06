@@ -18,7 +18,7 @@
   .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:18px}
   .card h2{font-family:var(--display);font-size:20px;margin-bottom:2px}
   .card .sub{font-size:12px;color:var(--stone);margin-bottom:12px}
-  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
   .kpi{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:14px}
   .kpi .n{font-family:var(--display);font-size:26px;font-weight:700}
   .kpi .l{font-size:11px;color:var(--stone);letter-spacing:.5px;margin-top:2px}
@@ -53,12 +53,11 @@
     <div class="kpi"><div class="n" id="k_confirmed">–</div><div class="l">รอทำ</div></div>
     <div class="kpi"><div class="n" id="k_done">–</div><div class="l">เสร็จแล้ว</div></div>
     <div class="kpi"><div class="n" id="k_cancelled">–</div><div class="l">ยกเลิก</div></div>
-    <div class="kpi"><div class="n" id="k_no_show">–</div><div class="l">ไม่มา</div></div>
   </div>
 
   <div class="card">
     <h2>ค่าตอบแทนสไตลิสต์</h2>
-    <div class="sub">ค่าตอบแทนตามโครงสัญญาของแต่ละพาร์ทเนอร์ — ดู/แก้ได้ที่หน้า <a href="contracts.html">สัญญา</a> · กด “จ่าย” เพื่อล้างยอดค้างและลงบัญชี (เจ้าของเท่านั้น)</div>
+    <div class="sub">฿1,000 ต่อการวิเคราะห์ที่ทำเสร็จ — กด “จ่าย” เพื่อล้างยอดค้างและลงบัญชี (เจ้าของเท่านั้น)</div>
     <div class="list" id="payouts"><div class="empty">กำลังโหลด…</div></div>
   </div>
 
@@ -70,7 +69,6 @@
       <button data-s="confirmed" onclick="setFilter('confirmed',this)">รอทำ</button>
       <button data-s="done" onclick="setFilter('done',this)">เสร็จแล้ว</button>
       <button data-s="cancelled" onclick="setFilter('cancelled',this)">ยกเลิก</button>
-      <button data-s="no_show" onclick="setFilter('no_show',this)">ไม่มา</button>
     </div>
     <div class="list" id="list" style="margin-top:12px"><div class="empty">กำลังโหลด…</div></div>
   </div>
@@ -138,7 +136,6 @@
     $('k_confirmed').textContent=by('confirmed');
     $('k_done').textContent=by('done');
     $('k_cancelled').textContent=by('cancelled');
-    $('k_no_show').textContent=by('no_show');
   }
   function setFilter(s,btn){ curFilter=s; document.querySelectorAll('#filt button').forEach(b=>b.classList.toggle('on',b===btn)); render(); }
   function render(){
@@ -152,7 +149,7 @@
       let html=`<div class="top"><span class="when">${when} น.</span><span class="badge ${a.status}">${STLABEL[a.status]||a.status}</span></div>`;
       html+=`<div class="who">สไตลิสต์ <b>${esc(a.partner||'—')}</b>${a.studio?` · ${esc(a.studio)}`:''}</div>`;
       html+=`<div class="meta">ลูกค้า ${esc(a.customer||'—')}`+
-        (a.customer_phone?` · โทร ${esc(a.customer_phone)}`:'')+
+        (a.customer_phone?` · ☎ ${esc(a.customer_phone)}`:'')+
         (a.code?` · รหัส ${esc(a.code)}`:'')+`</div>`;
       if(a.customer_note) html+=`<div class="note">โน้ตลูกค้า: ${esc(a.customer_note)}</div>`;
       if(a.partner_note)  html+=`<div class="note">โน้ตสไตลิสต์: ${esc(a.partner_note)}</div>`;

@@ -80,7 +80,7 @@
 <section class="phead">
   <div class="eyebrow">care label · sew-in tag</div>
   <h1>ป้ายดูแลที่อยู่กับชุดไปทุกที่</h1>
-  <div class="sub">พิมพ์ป้ายเย็บติดชุดเช่า ทั้งวิธีดูแลและ QR เช็คชุด เพื่อให้ทุกตัวกลับมาหมุนเวียนได้นานที่สุด</div>
+  <div class="sub">พิมพ์ป้ายเย็บติดชุดเช่า ทั้งวิธีดูแลและ QR เช็คชุด เพื่อให้ทุกตัวอยู่ใน loop ได้นานที่สุด</div>
 </section>
 
 <div class="sheet" id="careSheet"><div class="empty">กำลังโหลดชุดจากฐานข้อมูล…</div></div>
@@ -94,7 +94,7 @@
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
-  const QR_BASE='https://lloop.app/g/';           // QR = ลิงก์เช็คชุด (เปลี่ยนเป็นโดเมนจริงทีหลัง)
+  const QR_BASE='https://wearlloop-dotcom.github.io/g.html?c=';  // หน้าเช่าชุดนี้ (g.html รับ ?c=<code> → เลือกวัน+จอง) · ใช้ github.io ที่ออนไลน์จริง (lloop.app ยังไม่ผูก DNS)
   const CONTACT='LINE @lloop';                     // ช่องติดต่อเวลาพบชุดหาย
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -118,7 +118,7 @@
     ROWS=data;
     // ป้ายดูแลหลัก
     cs.innerHTML=ROWS.map(g=>{
-      const sz=g.size?`ไซซ์ ${esc(g.size)}`:'';
+      const sz=g.size?`ไซส์ ${esc(g.size)}`:'';
       const wash=g.wash?esc(g.wash):'ซักตามชนิดผ้า แนะนำซักมือ/ซักแห้ง';
       return `<div class="care">
         <div class="top">LLOOP</div>

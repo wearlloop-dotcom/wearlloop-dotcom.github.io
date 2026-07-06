@@ -48,6 +48,8 @@
     }
   }
 
+  // ออดิท: id_token ของ staff สำหรับ gate edge functions ที่เรียก AI (marketing-ai/intake-tagger/repair-advise)
+  window.opsIdToken = function () { try { return (window.liff && liff.getIDToken && liff.getIDToken()) || ''; } catch (e) { return ''; } };
   window.opsLogin = opsLogin;
   window.opsRpc = opsRpc;
 })();

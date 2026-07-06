@@ -409,7 +409,7 @@
       const res=await fetch(SUPABASE_URL+'/functions/v1/marketing-ai',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},
-        body:JSON.stringify({task:'insights', summary:lastSummary, by_platform:lastSummary.by_platform||[]})
+        body:JSON.stringify({task:'insights', summary:lastSummary, by_platform:lastSummary.by_platform||[],id_token:(window.opsIdToken?window.opsIdToken():'')})
       });
       let data=null;
       try{ data=await res.json(); }catch(e){ data=null; }

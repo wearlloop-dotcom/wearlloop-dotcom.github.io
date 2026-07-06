@@ -161,7 +161,7 @@
     const note=prompt('อาการเสียหาย (พิมพ์สั้น ๆ) — ถ้ามีรูปวางลิงก์ต่อท้ายด้วย URL ก็ได้','ซิปหลังขาด'); if(note===null) return;
     const m=note.match(/https?:\/\/\S+/); const photo=m?m[0]:null; const dmg=m?note.replace(m[0],'').trim():note;
     toast('AI กำลังประเมิน…');
-    const { data, error } = await sb.functions.invoke('repair-advise',{ body:{ garment_code:current, photo_url:photo, damage_note:dmg } });
+    const { data, error } = await sb.functions.invoke('repair-advise',{ body:{ garment_code:current, photo_url:photo, damage_note:dmg, id_token:(window.opsIdToken?window.opsIdToken():'') } });
     if(error||!data||data.error){ toast('AI ยังไม่พร้อม (ยังไม่ deploy) — กรอกเองได้ค่ะ'); return; }
     pickRepairable(!!data.repairable);
     if(data.repairable){

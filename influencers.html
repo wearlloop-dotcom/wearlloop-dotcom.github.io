@@ -183,7 +183,7 @@
   async function callAI(payload){
     const r=await fetch(AI_URL,{method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},
-      body:JSON.stringify(payload)});
+      body:JSON.stringify(Object.assign({},payload,{id_token:(window.opsIdToken?window.opsIdToken():'')}))});
     let j=null; try{j=await r.json();}catch(e){}
     if(!r.ok||!j||j.error) throw new Error((j&&j.error)||('HTTP '+r.status));
     return j;
