@@ -28,13 +28,21 @@ argument-hint: "<ชื่อหนัง> [สิ่งที่อยากใ
 
 ตัวอย่างผลลัพธ์: `emerald and gold color grading, opulent warm tungsten lighting, glossy editorial 85mm shallow depth, soft film grain, luxurious romantic celebratory mood`
 
-## จังหวะ 2 — ประกอบ prompt สุดท้าย
+## จังหวะ 2 — ประกอบ prompt สุดท้าย (โหมดภาพถ่ายสมจริงเป็นค่าเริ่มต้น)
 
-ถ้า user บอก subject มาแล้ว ให้ประกอบเลย ถ้าไม่ได้บอก ให้ default เป็นภาพแนวการตลาดเช่าชุดของ LLOOP (นางแบบใส่ชุดเด่น ฉากหรู เห็นรายละเอียดผ้า):
+ถ้า user บอก subject มาแล้ว ให้ประกอบเลย ถ้าไม่ได้บอก ให้ default เป็นภาพแนวการตลาดเช่าชุดของ LLOOP (นางแบบใส่ชุดเด่น ฉากหรู เห็นรายละเอียดผ้า) โครง prompt ต้องเขียนเหมือนบรีฟช่างภาพจริง:
 
 ```
-Photo of <subject>, in this exact style: <style recipe จากจังหวะ 1>
+RAW editorial fashion photograph, shot on <กล้อง เช่น Sony A7R V>, <เลนส์+รูรับแสง เช่น 85mm f/1.4 at f/2>, ISO <400>, <1/160s>, <subject>, <ฉาก>, <ทิศแสง: key light จากไหน + rim light จากไหน>, visible fabric sheen and weave, natural skin texture with visible pores, a few loose hair strands, slight motion blur where natural, shallow depth of field with creamy bokeh, subtle 35mm film grain, <โทนสีจาก style recipe แบบ muted>, photorealistic --no CGI, render, illustration, sparkle particles, glowing effects
 ```
+
+กติกาความสมจริง (สำคัญมาก ภาพจะหลุดเป็น CGI ถ้าพลาด):
+
+- **ห้ามใช้คำแฟนตาซี** ใน prompt สุดท้าย — `magical`, `sparkle particles`, `fairy-tale haze`, `enchanted`, `glowing` ดันภาพไปทางภาพวาด/เรนเดอร์ทันที ให้แปลงอารมณ์จาก style recipe เป็นภาษาแสง/สีแทน (เช่น "magical candlelight" → "warm candlelit chandeliers, candle glow as rim light")
+- **ต้องมีสมอถ่ายภาพครบ 3 ชุด**: (1) กล้อง+เลนส์+ค่าแสง (2) ทิศแสง key/rim จากแหล่งจริงในฉาก (3) ความไม่เพอร์เฟกต์ (ผิวเห็นรูขุมขน ผมหลุดร่าย motion blur) — ความไม่เพอร์เฟกต์คือสิ่งที่ทำให้ดูถ่ายจริง
+- **ปิดท้ายด้วย negative เสมอ**: `--no CGI, render, illustration, sparkle particles, glowing effects` (Midjourney ใช้ `--no` / Gemini เขียนเป็นประโยค "no CGI, no render, ...")
+- เลนส์แนะนำตามงาน: พอร์เทรตชุด → `85mm f/1.4`, เห็นฉากกว้าง → `35mm f/2`, รายละเอียดผ้าโคลสอัพ → `100mm macro`
+- ถ้า user อยากได้ลุคแฟนตาซี/ภาพวาดจริง ๆ ค่อยถอดกติกานี้ออก
 
 ส่งให้ user ทั้งสูตร (เผื่อเอาไปใช้ซ้ำกับ subject อื่น) และ prompt สุดท้าย พร้อมเวอร์ชันภาษาไทยสั้น ๆ อธิบายว่าสูตรนี้ให้ลุคแบบไหน
 
