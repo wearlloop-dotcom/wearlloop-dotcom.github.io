@@ -2799,22 +2799,7 @@ function openWallet(focusRef) {
 async function openImpact() {
   const im = CUSTOMER._impact || { rentals: 0, water_l: 0, co2_kg: 0, charity_thb: 0, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   let posts = []; try { posts = await window.API.recentCharity?.() || []; } catch (e) { /**/ }
-  let cp = null; try { cp = await window.API.charityPublic?.() || null; } catch (e) { /**/ }
   const en = lang === 'en';
-  // บล็อก "โอนจริง โปร่งใส" — ยอดที่โอนถึงมูลนิธิจริง + น้องที่ช่วยจริง (แยกจากคำมั่นรายคน)
-  const verified = (cp && (Number(cp.disbursed_thb) > 0 || Number(cp.kids_total) > 0)) ? (() => {
-    const parts = (Array.isArray(cp.partners) && cp.partners.length) ? cp.partners.join(' · ') : (cp.name || (en ? 'children in need' : 'เด็กยากไร้'));
-    const on = cp.last_donated_on ? new Date(cp.last_donated_on).toLocaleDateString(en ? 'en-GB' : 'th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) : '';
-    return `<div class="iverified">
-      <div class="ivk">${en ? 'verified — really donated' : 'ยืนยันแล้ว — โอนถึงมูลนิธิจริง'}</div>
-      <div class="ivrow">
-        <div><b data-to="${Math.round(cp.disbursed_thb || 0)}" data-prefix="฿">฿0</b><span>${en ? 'donated in total' : 'ยอดโอนสะสม'}</span></div>
-        <div class="div"></div>
-        <div><b data-to="${cp.kids_total || 0}">0</b><span>${en ? 'children helped' : 'น้องที่ได้รับจริง'}</span></div>
-      </div>
-      <div class="ivto">${en ? 'to ' : 'ส่งต่อให้ '}${esc(parts)}${on ? (en ? ' · latest ' : ' · ล่าสุด ') + on : ''}</div>
-    </div>`;
-  })() : '';
   const gallery = posts.length ? posts.map(p => {
     const d = new Date(p.posted_at).toLocaleDateString(en ? 'en-GB' : 'th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
     const imgs = (p.photos || []).map(u => `<img src="${u}" loading="lazy" onclick="this.classList.toggle('zoom')">`).join('');
@@ -2838,9 +2823,7 @@ async function openImpact() {
       </div>
       <div style="font-size:11px;color:#A39472;margin-top:14px">${en ? '* water & carbon are estimates based on industry averages' : '* ตัวเลขน้ำและคาร์บอนเป็นค่าประมาณจากค่าเฉลี่ยอุตสาหกรรม'}</div>
       <div class="icharity">${en ? 'and you have passed on' : 'และคุณได้ส่งต่อ'} <b data-to="${im.charity_thb || 0}" data-prefix="฿">฿0</b> ${en ? 'to ' + (im.charity_name || 'children in need') : 'ให้' + (im.charity_name || 'เด็กยากไร้')}</div>
-      <div class="icharity-note">${en ? '* your contribution accrues from every rental (a pledge of the shared fund)' : '* ยอดของคุณคือส่วนแบ่งที่สะสมจากทุกการเช่า (คำมั่นในกองบุญรวม)'}</div>
     </div>
-    ${verified}
     <div class="igallery">
       <div class="igtitle">${en ? 'moments you are part of' : 'ภาพกิจกรรมที่คุณเป็นส่วนหนึ่ง'}</div>
       ${gallery}

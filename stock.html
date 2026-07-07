@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LLOOP · สต๊อก + รอยรั่ว</title>
+<title>LLOOP · สต๊อก</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,12 +11,115 @@
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
 <link rel="stylesheet" href="ops-ui.css">
-<style>.btn{width:auto;margin-top:0}</style>
+<style>
+  .btn{width:auto;margin-top:0}
+  .wrap{max-width:1080px}
+
+  /* ── แถบเครื่องมือค้นหา/กรอง ── */
+  .toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  .toolbar .search{flex:1;min-width:200px;position:relative}
+  .toolbar .search input{padding-left:38px}
+  .toolbar .search::before{content:"⌕";position:absolute;left:13px;top:50%;transform:translateY(-54%);font-size:19px;color:var(--faint)}
+  .seg{display:flex;border:1px solid var(--hair);border-radius:var(--r-sm);overflow:hidden;background:var(--soft)}
+  .seg button{border:none;background:transparent;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--stone);
+    padding:10px 14px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px}
+  .seg button.on{background:var(--forest3);color:#fff}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+  .chip{font-size:12.5px;font-weight:500;border:1px solid var(--hair);background:#fff;color:var(--stone);
+    padding:6px 12px;border-radius:20px;cursor:pointer;user-select:none;transition:.15s;white-space:nowrap}
+  .chip:hover{border-color:var(--sage)}
+  .chip.on{background:var(--forest3);border-color:var(--forest3);color:#fff}
+  .chip .n{font-family:var(--display);font-weight:700;margin-left:4px;opacity:.75;font-size:11.5px}
+  .selrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .selrow select{flex:1;min-width:110px;width:auto;font-size:13.5px;padding:8px 10px}
+  .found{font-size:12.5px;color:var(--stone);margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .found a{color:var(--clay);cursor:pointer;text-decoration:none}
+
+  /* ── มุมมอง grid ── */
+  .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:11px;margin-top:12px}
+  .gcard{background:#fff;border:1px solid var(--hair);border-radius:var(--r-sm);overflow:hidden;cursor:pointer;
+    transition:.15s;animation:rise .3s cubic-bezier(.2,.7,.3,1) both}
+  .gcard:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--sage)}
+  .gcard .ph{position:relative;aspect-ratio:3/4;background:var(--soft2);display:flex;align-items:center;justify-content:center;
+    color:rgba(0,0,0,.3);font-family:var(--display);font-weight:600;font-size:13px;text-align:center;padding:6px;overflow:hidden}
+  .gcard .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .gcard .st{position:absolute;top:7px;left:7px}
+  .gcard .rev{position:absolute;top:7px;right:7px;font-size:10.5px;background:rgba(38,35,32,.78);color:#F0CE84;padding:3px 8px;border-radius:12px}
+  .gcard .in{padding:9px 11px 11px}
+  .gcard .cd{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.4px}
+  .gcard .nm{font-size:12.5px;line-height:1.35;color:var(--ink);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
+  .gcard .mt{font-size:11.5px;color:var(--stone);margin-top:3px;display:flex;justify-content:space-between;gap:4px}
+  .gcard .due{font-size:11px;margin-top:5px;color:var(--goldDeep)}
+  .gcard .due.late{color:var(--danger);font-weight:600}
+
+  /* ── มุมมอง list ── */
+  .glist{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+  .grow{display:flex;gap:11px;align-items:center;background:#fff;border:1px solid var(--hair);border-radius:var(--r-sm);
+    padding:8px 12px 8px 8px;cursor:pointer;transition:.15s;animation:rise .25s cubic-bezier(.2,.7,.3,1) both}
+  .grow:hover{border-color:var(--sage);background:var(--sageWash)}
+  .grow .th{width:44px;height:56px;border-radius:7px;background:var(--soft2);flex:0 0 auto;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:12px;color:rgba(0,0,0,.3)}
+  .grow .th img{width:100%;height:100%;object-fit:cover}
+  .grow .bd{flex:1;min-width:0}
+  .grow .l1{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .grow .cd{font-family:var(--display);font-weight:700;font-size:13.5px}
+  .grow .nm{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:34ch}
+  .grow .l2{font-size:12px;color:var(--stone);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap}
+  .grow .l2 .late{color:var(--danger);font-weight:600}
+  .grow .rt{text-align:right;flex:0 0 auto;display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+  .grow .pr{font-family:var(--display);font-weight:700;font-size:14px}
+
+  /* ── ป้ายสถานะ ── */
+  .stag{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;border:1px solid transparent}
+  .stag.ok{background:var(--okWash);color:var(--ok);border-color:#cfe6da}
+  .stag.warn{background:var(--warnWash);color:var(--goldDeep);border-color:#e8ddbc}
+  .stag.clay{background:var(--clayWash);color:var(--clay);border-color:#ecd8cc}
+  .stag.info{background:#E7EFF5;color:#33607F;border-color:#cfdfeb}
+  .stag.bad{background:var(--dangerWash);color:var(--danger);border-color:#f0c9c6}
+  .stag.mut{background:var(--soft);color:var(--stone);border-color:var(--hair)}
+
+  /* ── แผงรายละเอียด/แก้ไข (drawer) ── */
+  .ovl{position:fixed;inset:0;background:rgba(38,35,32,.42);z-index:70;opacity:0;pointer-events:none;transition:.22s}
+  .ovl.show{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100vw);background:var(--canvas);z-index:80;
+    transform:translateX(102%);transition:.26s cubic-bezier(.2,.7,.3,1);display:flex;flex-direction:column;box-shadow:-14px 0 44px -20px rgba(0,0,0,.4)}
+  .drawer.show{transform:none}
+  .drawer .dh{display:flex;align-items:center;gap:10px;padding:13px 16px;background:#fff;border-bottom:1px solid var(--hair);flex:0 0 auto}
+  .drawer .dh .cd{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.5px}
+  .drawer .dh .x{margin-left:auto;border:none;background:var(--soft);border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;color:var(--stone)}
+  .drawer .db{flex:1;overflow-y:auto;padding:15px 16px 40px;display:flex;flex-direction:column;gap:13px}
+  .dcard{background:#fff;border:1px solid var(--hair);border-radius:var(--r-sm);padding:14px}
+  .dcard h3{font-family:var(--display);font-size:13.5px;font-weight:600;margin-bottom:10px;color:var(--ink)}
+  .dtop{display:flex;gap:13px}
+  .dtop .ph{width:108px;height:140px;border-radius:9px;background:var(--soft2);overflow:hidden;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:12px;color:rgba(0,0,0,.3);text-align:center;padding:4px}
+  .dtop .ph img{width:100%;height:100%;object-fit:cover}
+  .dtop .facts{font-size:12.5px;color:var(--stone);display:flex;flex-direction:column;gap:5px;min-width:0}
+  .dtop .facts b{color:var(--ink);font-weight:600}
+  .dlinks{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+  .dlinks a{font-size:12px;color:var(--forest);background:var(--sageWash);border:1px solid #cfe6da;
+    padding:5px 11px;border-radius:20px;text-decoration:none}
+  .trow{display:flex;gap:7px;flex-wrap:wrap}
+  .tbtn{border:1px solid var(--hair);background:#fff;font-family:var(--sans);font-size:12.5px;font-weight:600;
+    color:var(--ink);padding:8px 13px;border-radius:20px;cursor:pointer;transition:.15s}
+  .tbtn:hover{border-color:var(--sage);background:var(--sageWash)}
+  .tbtn:disabled{opacity:.5;cursor:default}
+  .frm .row{margin-bottom:10px}
+  .frm .occ{display:flex;flex-wrap:wrap;gap:6px}
+  .frm .occ .chip{padding:5px 11px;font-size:12px}
+  .binrow{display:flex;gap:8px}
+  .binrow input{flex:1}
+  .binrow .btn{flex:0 0 auto;margin:0}
+  @media(max-width:560px){
+    .drawer{top:auto;left:0;width:100vw;height:92dvh;border-radius:16px 16px 0 0;transform:translateY(103%)}
+    .drawer.show{transform:none}
+  }
+</style>
 </head>
 <body>
   <div class="bar">
     <h1>สต๊อก</h1>
-    <div class="nav"><a href="/today.html">งานวันนี้</a><a href="/laundry.html">ซัก/QC</a><a href="/garment.html">ชุด</a><a href="/putaway.html">เก็บเข้าช่อง</a></div>
+    <div class="nav"><a href="/today.html">งานวันนี้</a><a href="/intake.html">รับเข้า</a><a href="/laundry.html">ซัก/QC</a><a href="/garment.html">ชุด</a><a href="/putaway.html">เก็บเข้าช่อง</a></div>
   </div>
 
   <div class="wrap">
@@ -24,14 +127,49 @@
     <section class="phead">
       <div class="eyebrow">stock health</div>
       <h1>สต๊อกที่หมุนได้จริง</h1>
-      <div class="sub">ดูทั้งคลังในหน้าเดียว — มีกี่ชุด ปล่อยเช่าได้กี่ชุด และมีรอยรั่วตรงไหนให้อุด</div>
+      <div class="sub">ทั้งคลังในหน้าเดียว — ค้นหา กรอง แก้ไขได้ทันที และเห็นเลยว่าชุดไหนมีคิวจอง ชุดไหนต้องตามกลับ</div>
       <div class="kpis">
         <div class="kpi"><div class="n" id="k_total">—</div><div class="l">ชุดทั้งหมด</div></div>
         <div class="kpi ok"><div class="n" id="k_rentable">—</div><div class="l">ปล่อยเช่าได้</div></div>
+        <div class="kpi warn"><div class="n" id="k_busy">—</div><div class="l">ติดจอง/ออกไป</div></div>
         <div class="kpi bad"><div class="n" id="k_leak">—</div><div class="l">จุดรอยรั่ว</div></div>
       </div>
     </section>
 
+    <!-- ── รายการสินค้า ── -->
+    <div class="card">
+      <h2>คลังสินค้า <span class="when" id="invWhen"></span></h2>
+      <div class="toolbar">
+        <div class="search"><input id="q" placeholder="ค้นหา โค้ด / ชื่อ / แบรนด์ / สี / ช่องเก็บ…" autocomplete="off"></div>
+        <div class="seg" id="segView">
+          <button data-v="grid" title="มุมมองรูป">▦ กริด</button>
+          <button data-v="list" title="มุมมองรายการ">☰ ลิสต์</button>
+        </div>
+        <a class="btn sm" style="text-decoration:none;display:inline-flex;align-items:center" href="/intake.html">+ เพิ่มชุดใหม่</a>
+      </div>
+      <div class="chips" id="stChips"></div>
+      <div class="selrow">
+        <select id="fCat"><option value="">หมวด: ทั้งหมด</option></select>
+        <select id="fSize"><option value="">ไซซ์: ทั้งหมด</option></select>
+        <select id="fBrand"><option value="">แบรนด์: ทั้งหมด</option></select>
+        <select id="fSort">
+          <option value="code">เรียง: โค้ด</option>
+          <option value="due">เรียง: คิวใกล้สุดก่อน</option>
+          <option value="price_desc">เรียง: ค่าเช่า สูง→ต่ำ</option>
+          <option value="price_asc">เรียง: ค่าเช่า ต่ำ→สูง</option>
+          <option value="rented">เรียง: เช่าบ่อยสุด</option>
+          <option value="updated">เรียง: อัปเดตล่าสุด</option>
+        </select>
+      </div>
+      <div class="chips" style="margin-top:8px">
+        <span class="chip" id="fBooked">มีคิวจอง/ค้างคืน 📅</span>
+        <span class="chip" id="fReview">รอตรวจข้อมูล</span>
+      </div>
+      <div class="found"><span id="foundN"></span><a id="clearF" style="display:none">ล้างตัวกรอง ✕</a></div>
+      <div id="inv"><div class="loading">กำลังโหลดคลัง…</div></div>
+    </div>
+
+    <!-- ── สรุปตามสถานะ ── -->
     <div class="card">
       <h2>สต๊อกตามสถานะ <span class="when" id="when"></span></h2>
       <div id="summary"><div class="loading">กำลังโหลด…</div></div>
@@ -41,6 +179,7 @@
       </div>
     </div>
 
+    <!-- ── รอยรั่ว ── -->
     <div class="card">
       <h2>รอยรั่วของสต๊อก <span class="when" id="leakWhen"></span></h2>
       <div id="leaks"><div class="loading">กำลังตรวจ…</div></div>
@@ -50,6 +189,14 @@
       </div>
     </div>
   </div>
+
+  <!-- ── แผงรายละเอียด + แก้ไข ── -->
+  <div class="ovl" id="ovl" onclick="closeDrawer()"></div>
+  <aside class="drawer" id="drawer" aria-label="รายละเอียดชุด">
+    <div class="dh"><span class="cd" id="d_code"></span><span id="d_stag"></span><span id="d_rev"></span>
+      <button class="x" onclick="closeDrawer()" title="ปิด">✕</button></div>
+    <div class="db" id="dbody"></div>
+  </aside>
 
   <div class="toast" id="toast"></div>
 
@@ -61,22 +208,299 @@
   if(window.opsLogin) window.opsLogin().catch(()=>{});
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
-  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',3000);}
-  const ST_TH={available:'ว่าง',reserved:'จองแล้ว',out:'ออกไป',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',lost:'หาย',needs_review:'รอตรวจ'};
+  let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':'');clearTimeout(T);T=setTimeout(()=>t.className='toast',3200);}
+  const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'';
+  const baht=n=>n==null?'—':'฿'+Number(n).toLocaleString('th-TH');
 
+  // สถานะชุด: [ป้ายไทย, โทนสี]
+  const ST={available:['ว่าง','ok'],ready:['พร้อมปล่อย','ok'],reserved:['จองแล้ว','warn'],out:['ออกไป','clay'],
+    hold:['พักไว้','warn'],cleaning:['กำลังซัก','info'],repair:['ซ่อม','warn'],retired:['ปลดระวาง','mut'],
+    lost:['หาย','bad'],needs_review:['รอตรวจ','warn']};
+  const ST_ORDER=['available','ready','reserved','out','hold','cleaning','repair','needs_review','retired','lost'];
+  // เส้นทางเปลี่ยนสถานะที่ backend ยอมรับ (ต้องตรงกับ garment_transition ใน repo lloop)
+  const TRANS={available:['reserved','out','hold','cleaning','repair','retired'],
+    ready:['reserved','out','hold','cleaning','repair','retired'],
+    reserved:['out','available'],hold:['available'],out:['cleaning','repair'],
+    cleaning:['available','repair','retired'],repair:['cleaning','available','retired'],retired:['available']};
+  const CATS={dress:'เดรส',set:'เซ็ต',top:'เสื้อ',skirt:'กระโปรง',pants:'กางเกง',jumpsuit:'จัมพ์สูท',outerwear:'เอาเตอร์'};
+  const SIZES=['XS','S','M','L','XL','XXL','FREE'];
+  const OCC={wedding_guest:'งานแต่ง',dinner:'ดินเนอร์',party:'งานเลี้ยง',work:'ทำงาน',cafe:'คาเฟ่',graduation:'รับปริญญา',merit:'งานบุญ',festival:'เทศกาล',trip:'ทริป',content:'คอนเทนต์'};
+
+  // ── state ──
+  let ROWS=[];                       // แถวจาก ops_garments + active_due (merge จาก stock_export_rows)
+  let F={q:'',st:'all',cat:'',size:'',brand:'',booked:false,review:false,sort:localStorage.stockSort||'code'};
+  let VIEW=localStorage.stockView||'grid';
+  let CUR=null;                      // ชุดที่เปิดใน drawer
+
+  // ── โหลดคลัง: ops_garments (ข้อมูลเต็ม+รูป) + stock_export_rows (วันครบกำหนดของจอง/ออก) ──
+  async function loadInv(){
+    const [g,x]=await Promise.all([sb.rpc('ops_garments'),sb.rpc('stock_export_rows')]);
+    if(g.error){ $('inv').innerHTML='<div class="empty">โหลดคลังไม่สำเร็จ: '+esc(g.error.message)+'</div>'; return; }
+    const due={}; (x.data||[]).forEach(r=>{ if(r.active_due) due[r.code]=r.active_due; });
+    ROWS=(g.data||[]).map(r=>({...r,active_due:due[r.code]||null}));
+    buildFilterOptions();
+    render();
+    $('invWhen').textContent=ROWS.length+' รายการ';
+  }
+
+  function buildFilterOptions(){
+    const opt=(el,vals,label)=>{ const cur=el.value;
+      el.innerHTML=`<option value="">${label}: ทั้งหมด</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(CATS[v]||v)}</option>`).join('');
+      el.value=cur; };
+    opt($('fCat'),[...new Set(ROWS.map(r=>r.category).filter(Boolean))].sort(),'หมวด');
+    opt($('fSize'),SIZES.filter(s=>ROWS.some(r=>(r.size||'').toUpperCase()===s)),'ไซซ์');
+    opt($('fBrand'),[...new Set(ROWS.map(r=>r.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th')),'แบรนด์');
+  }
+
+  function filtered(){
+    const q=F.q.trim().toLowerCase();
+    let rs=ROWS.filter(r=>{
+      if(F.st!=='all'&&r.status!==F.st) return false;
+      if(F.cat&&r.category!==F.cat) return false;
+      if(F.size&&(r.size||'').toUpperCase()!==F.size) return false;
+      if(F.brand&&r.brand!==F.brand) return false;
+      if(F.booked&&!r.active_due) return false;
+      if(F.review&&r.data_status!=='needs_review') return false;
+      if(q){ const hay=[r.code,r.name,r.brand,r.color_name,r.bin].map(v=>(v||'').toLowerCase()).join(' ');
+        if(!hay.includes(q)) return false; }
+      return true;
+    });
+    const by={code:(a,b)=>(a.code||'').localeCompare(b.code||'',undefined,{numeric:true}),
+      due:(a,b)=>(a.active_due?0:1)-(b.active_due?0:1)||String(a.active_due||'').localeCompare(String(b.active_due||'')),
+      price_desc:(a,b)=>(b.rental_price||0)-(a.rental_price||0),
+      price_asc:(a,b)=>(a.rental_price||0)-(b.rental_price||0),
+      rented:(a,b)=>(b.times_rented||0)-(a.times_rented||0),
+      updated:(a,b)=>String(b.updated_at||'').localeCompare(String(a.updated_at||''))};
+    return rs.sort(by[F.sort]||by.code);
+  }
+
+  const stag=s=>{const x=ST[s]||[s,'mut'];return `<span class="stag ${x[1]}">${esc(x[0])}</span>`;};
+  function dueLine(r){
+    if(!r.active_due) return '';
+    const late=r.status==='out'&&r.active_due<new Date().toISOString().slice(0,10);
+    const label=late?'เลยกำหนดคืน':(r.status==='out'?'คืน':'จองถึง');
+    return `<span class="${late?'late':''}">📅 ${label} ${dt(r.active_due)}</span>`;
+  }
+  const phBox=r=>{const p=(r.photos||[])[0];
+    return p?`<img src="${esc(p)}" loading="lazy" alt="">`
+      :`<span style="${r.color_hex?'color:#fff;background:'+esc(r.color_hex)+';width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:6px':''}">${esc(r.name||r.code||'')}</span>`;};
+
+  function render(){
+    // ชิปสถานะ + จำนวน
+    const cnt={}; ROWS.forEach(r=>cnt[r.status]=(cnt[r.status]||0)+1);
+    const chips=[`<span class="chip ${F.st==='all'?'on':''}" data-st="all">ทั้งหมด<span class="n">${ROWS.length}</span></span>`]
+      .concat(ST_ORDER.filter(s=>cnt[s]).map(s=>
+        `<span class="chip ${F.st===s?'on':''}" data-st="${s}">${ST[s][0]}<span class="n">${cnt[s]}</span></span>`));
+    $('stChips').innerHTML=chips.join('');
+    $('stChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{F.st=c.dataset.st;render();});
+    $('fBooked').classList.toggle('on',F.booked);
+    $('fReview').classList.toggle('on',F.review);
+    $('segView').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===VIEW));
+
+    const rs=filtered();
+    const hasF=F.q||F.st!=='all'||F.cat||F.size||F.brand||F.booked||F.review;
+    $('foundN').textContent=hasF?`ตรงเงื่อนไข ${rs.length} จาก ${ROWS.length} รายการ`:`ทั้งหมด ${ROWS.length} รายการ`;
+    $('clearF').style.display=hasF?'':'none';
+    if(!rs.length){ $('inv').innerHTML='<div class="empty"><span class="ico">👗</span>ไม่พบชุดตามเงื่อนไข ลองล้างตัวกรองดูค่ะ</div>'; return; }
+
+    if(VIEW==='grid'){
+      $('inv').innerHTML=`<div class="ggrid">`+rs.map((r,i)=>`
+        <div class="gcard" style="animation-delay:${Math.min(i*.02,.3)}s" onclick="openDrawer('${esc(r.code)}')">
+          <div class="ph">${phBox(r)}<span class="st">${stag(r.status)}</span>${r.data_status==='needs_review'?'<span class="rev">รอตรวจ</span>':''}</div>
+          <div class="in">
+            <div class="cd">${esc(r.code)}${r.bin?` <span style="font-weight:400;color:var(--faint);font-size:11px">· ${esc(r.bin)}</span>`:''}</div>
+            <div class="nm">${esc(r.name||'—')}</div>
+            <div class="mt"><span>${esc(r.brand||'')}${r.size?' · '+esc(r.size):''}</span><b>${baht(r.rental_price)}</b></div>
+            ${r.active_due?`<div class="due ${r.status==='out'&&r.active_due<new Date().toISOString().slice(0,10)?'late':''}">${dueLine(r)}</div>`:''}
+          </div>
+        </div>`).join('')+`</div>`;
+    }else{
+      $('inv').innerHTML=`<div class="glist">`+rs.map((r,i)=>`
+        <div class="grow" style="animation-delay:${Math.min(i*.015,.25)}s" onclick="openDrawer('${esc(r.code)}')">
+          <div class="th">${phBox(r)}</div>
+          <div class="bd">
+            <div class="l1"><span class="cd">${esc(r.code)}</span><span class="nm">${esc(r.name||'—')}</span></div>
+            <div class="l2">
+              <span>${esc(r.brand||'—')}${r.size?' · '+esc(r.size):''}${r.category?' · '+esc(CATS[r.category]||r.category):''}</span>
+              ${r.bin?`<span>ช่อง ${esc(r.bin)}</span>`:''}
+              <span>เช่าแล้ว ${r.times_rented||0} ครั้ง</span>
+              ${dueLine(r)}
+            </div>
+          </div>
+          <div class="rt"><span class="pr">${baht(r.rental_price)}</span>${stag(r.status)}</div>
+        </div>`).join('')+`</div>`;
+    }
+  }
+
+  // ── ตัวกรอง events ──
+  let QT=null;
+  $('q').addEventListener('input',e=>{clearTimeout(QT);QT=setTimeout(()=>{F.q=e.target.value;render();},180);});
+  ['fCat','fSize','fBrand'].forEach(id=>$(id).addEventListener('change',e=>{F[id.slice(1).toLowerCase()]=e.target.value;render();}));
+  $('fSort').value=F.sort;
+  $('fSort').addEventListener('change',e=>{F.sort=e.target.value;localStorage.stockSort=F.sort;render();});
+  $('fBooked').onclick=()=>{F.booked=!F.booked;render();};
+  $('fReview').onclick=()=>{F.review=!F.review;render();};
+  $('clearF').onclick=()=>{F={...F,q:'',st:'all',cat:'',size:'',brand:'',booked:false,review:false};
+    $('q').value='';$('fCat').value='';$('fSize').value='';$('fBrand').value='';render();};
+  $('segView').querySelectorAll('button').forEach(b=>b.onclick=()=>{VIEW=b.dataset.v;localStorage.stockView=VIEW;render();});
+
+  // ── drawer: รายละเอียด + แก้ไข ──
+  function openDrawer(code){
+    CUR=ROWS.find(r=>r.code===code); if(!CUR) return;
+    $('d_code').textContent=CUR.code;
+    $('d_stag').innerHTML=stag(CUR.status);
+    $('d_rev').innerHTML=CUR.data_status==='needs_review'?'<span class="stag warn">ข้อมูลรอตรวจ</span>':'';
+    $('dbody').innerHTML=drawerHtml(CUR);
+    bindDrawer(CUR);
+    $('ovl').classList.add('show'); $('drawer').classList.add('show');
+  }
+  function closeDrawer(){ $('ovl').classList.remove('show'); $('drawer').classList.remove('show'); CUR=null; }
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
+
+  function drawerHtml(r){
+    const trans=(TRANS[r.status]||[]).map(s=>
+      `<button class="tbtn" data-to="${s}">→ ${ST[s]?ST[s][0]:s}</button>`).join('');
+    const occChips=Object.entries(OCC).map(([k,v])=>
+      `<span class="chip ${(r.occasion_tags||[]).includes(k)?'on':''}" data-occ="${k}">${v}</span>`).join('');
+    const sizeOpts='<option value="">— ไม่ระบุ —</option>'+SIZES.map(s=>`<option ${(r.size||'').toUpperCase()===s?'selected':''}>${s}</option>`).join('');
+    const catOpts='<option value="">— ไม่ระบุ —</option>'+Object.entries(CATS).map(([k,v])=>`<option value="${k}" ${r.category===k?'selected':''}>${v}</option>`).join('');
+    const grOpts='<option value="">— ไม่ระบุ —</option>'+['A','B','C'].map(g=>`<option ${r.condition_grade===g?'selected':''}>${g}</option>`).join('');
+    const tierOpts=['Standard','Premium','Value'].map(t=>`<option ${r.tier===t?'selected':''}>${t}</option>`).join('');
+    return `
+    <div class="dcard">
+      <div class="dtop">
+        <div class="ph">${phBox(r)}</div>
+        <div class="facts">
+          <span><b>${esc(r.name||'—')}</b></span>
+          <span>${esc(r.brand||'—')}${r.size?' · ไซซ์ '+esc(r.size):''} · ${baht(r.rental_price)}/ครั้ง</span>
+          <span>เช่าแล้ว <b>${r.times_rented||0}</b> ครั้ง · ซักแล้ว <b>${r.wash_count||0}</b>${r.wash_limit?'/'+r.wash_limit:''} ครั้ง${r.condition_grade?' · เกรด <b>'+esc(r.condition_grade)+'</b>':''}</span>
+          ${r.active_due?`<span>${dueLine(r)}</span>`:''}
+          <span>ช่องเก็บ: <b>${esc(r.bin||'ยังไม่เก็บ')}</b>${r.last_seen_at?' · เห็นล่าสุด '+dt(r.last_seen_at):''}</span>
+        </div>
+      </div>
+      <div class="dlinks">
+        <a href="/garment.html?code=${encodeURIComponent(r.code)}">ไทม์ไลน์ชุด ›</a>
+        <a href="/labels.html">ป้าย QR ›</a>
+        <a href="/passport.html?code=${encodeURIComponent(r.code)}">พาสปอร์ต ›</a>
+      </div>
+    </div>
+
+    <div class="dcard">
+      <h3>เปลี่ยนสถานะ (บันทึกประวัติอัตโนมัติ)</h3>
+      <div class="trow" id="dTrans">${trans||'<span class="muted">สถานะนี้เปลี่ยนจากหน้างานที่เกี่ยวข้อง</span>'}</div>
+      ${r.data_status==='needs_review'
+        ?'<button class="btn sage" id="dReady" style="width:100%;margin-top:11px">✓ ข้อมูลครบแล้ว — พร้อมขึ้นเว็บ</button>'
+        :'<button class="btn ghost" id="dUnready" style="width:100%;margin-top:11px">ดึงกลับมาตรวจข้อมูลใหม่</button>'}
+    </div>
+
+    <div class="dcard">
+      <h3>เก็บเข้าช่อง</h3>
+      <div class="binrow"><input id="dBin" placeholder="เช่น A-03" value="${esc(r.bin||'')}"><button class="btn sm" id="dBinGo">ย้าย</button></div>
+    </div>
+
+    <div class="dcard frm">
+      <h3>แก้ไขข้อมูลชุด</h3>
+      <div class="row"><div><label>ชื่อชุด</label><input id="e_name" value="${esc(r.name||'')}"></div></div>
+      <div class="row">
+        <div><label>แบรนด์</label><input id="e_brand" value="${esc(r.brand||'')}"></div>
+        <div><label>ไซซ์</label><select id="e_size">${sizeOpts}</select></div>
+      </div>
+      <div class="row">
+        <div><label>หมวด</label><select id="e_cat">${catOpts}</select></div>
+        <div><label>ระดับ (tier)</label><select id="e_tier">${tierOpts}</select></div>
+      </div>
+      <div class="row">
+        <div><label>ค่าเช่า/ครั้ง (บาท)</label><input id="e_price" type="number" value="${r.rental_price??''}"></div>
+        <div><label>เกรดสภาพ</label><select id="e_grade">${grOpts}</select></div>
+        <div><label>ลิมิตซัก (ครั้ง)</label><input id="e_washlim" type="number" value="${r.wash_limit??''}"></div>
+      </div>
+      <div class="row">
+        <div><label>สี (ชื่อ)</label><input id="e_colorname" value="${esc(r.color_name||'')}"></div>
+        <div><label>โค้ดสี</label><input id="e_colorhex" type="color" value="${/^#[0-9a-fA-F]{6}$/.test(r.color_hex||'')?r.color_hex:'#C9A86A'}"></div>
+      </div>
+      <div class="row"><div><label>เนื้อผ้า</label><input id="e_fabric" value="${esc(r.fabric_composition||'')}"></div></div>
+      <div class="row"><div><label>โอกาสที่ใส่ได้</label><div class="occ" id="e_occ">${occChips}</div></div></div>
+      <div class="row"><div><label>วิธีใส่ให้สวย (คั่นด้วย ,)</label><textarea id="e_tips" rows="2">${esc((r.styling_tips||[]).join(', '))}</textarea></div></div>
+      <div class="row"><div><label>ลิงก์รูป (บรรทัดละ 1 รูป — รูปแรกใช้เป็นรูปหลัก)</label><textarea id="e_photos" rows="3">${esc((r.photos||[]).join('\n'))}</textarea></div></div>
+      <button class="btn" id="dSave" style="width:100%">บันทึกการแก้ไข</button>
+    </div>`;
+  }
+
+  function bindDrawer(r){
+    const code=r.code;
+    // เปลี่ยนสถานะ
+    document.querySelectorAll('#dTrans .tbtn').forEach(b=>b.onclick=async()=>{
+      const to=b.dataset.to;
+      if(to==='retired'&&!confirm(`ปลดระวาง ${code} — ชุดจะไม่ถูกปล่อยเช่าอีก ยืนยัน?`)) return;
+      b.disabled=true;
+      const {data,error}=await sb.rpc('garment_transition',{p_code:code,p_to:to});
+      b.disabled=false;
+      if(error||data?.error){ toast('เปลี่ยนสถานะไม่สำเร็จ: '+esc(error?.message||data.error),true); return; }
+      toast(`${code} → ${ST[to]?ST[to][0]:to} แล้ว`);
+      await loadInv(); loadSummary();
+      if(ROWS.find(x=>x.code===code)) openDrawer(code);
+    });
+    // ตรวจข้อมูล ⇄ พร้อมขึ้นเว็บ
+    const rd=$('dReady'),ur=$('dUnready');
+    if(rd) rd.onclick=async()=>{ rd.disabled=true;
+      const {error}=await sb.rpc('mark_garment_ready',{p_code:code}); rd.disabled=false;
+      if(error){ toast('ไม่สำเร็จ: '+esc(error.message),true); return; }
+      toast(code+' พร้อมขึ้นเว็บแล้ว ✓'); await loadInv(); openDrawer(code); };
+    if(ur) ur.onclick=async()=>{ ur.disabled=true;
+      const {error}=await sb.rpc('mark_garment_unready',{p_code:code}); ur.disabled=false;
+      if(error){ toast('ไม่สำเร็จ: '+esc(error.message),true); return; }
+      toast(code+' กลับไปรอตรวจข้อมูล'); await loadInv(); openDrawer(code); };
+    // เก็บเข้าช่อง
+    $('dBinGo').onclick=async()=>{
+      const bin=$('dBin').value.trim(); if(!bin){ toast('ใส่ชื่อช่องก่อนค่ะ',true); return; }
+      $('dBinGo').disabled=true;
+      const {data,error}=await sb.rpc('put_away',{p_code:code,p_bin:bin});
+      $('dBinGo').disabled=false;
+      if(error||data?.error){ toast('ย้ายไม่สำเร็จ: '+esc(error?.message||data.error),true); return; }
+      toast(`${code} → ช่อง ${bin} แล้ว`); await loadInv(); openDrawer(code);
+    };
+    // occasion chips
+    document.querySelectorAll('#e_occ .chip').forEach(c=>c.onclick=()=>c.classList.toggle('on'));
+    // บันทึกแก้ไข
+    $('dSave').onclick=async()=>{
+      const p={code,
+        name:$('e_name').value.trim(), brand:$('e_brand').value.trim(),
+        size:$('e_size').value, category:$('e_cat').value, tier:$('e_tier').value,
+        rental_price:$('e_price').value, condition_grade:$('e_grade').value,
+        wash_limit:$('e_washlim').value,
+        color_name:$('e_colorname').value.trim(), color_hex:$('e_colorhex').value,
+        fabric_composition:$('e_fabric').value.trim(),
+        occasion_tags:[...document.querySelectorAll('#e_occ .chip.on')].map(c=>c.dataset.occ),
+        styling_tips:$('e_tips').value.split(',').map(s=>s.trim()).filter(Boolean),
+        photos:$('e_photos').value.split('\n').map(s=>s.trim()).filter(Boolean)};
+      $('dSave').disabled=true; $('dSave').textContent='กำลังบันทึก…';
+      const {data,error}=await sb.rpc('garment_update',{p});
+      $('dSave').disabled=false; $('dSave').textContent='บันทึกการแก้ไข';
+      if(error){
+        const msg=/ไม่อนุญาต|not_allowed/.test(error.message||'')
+          ?'ฟีเจอร์แก้ไขรอ backend (PR repo lloop) merge ก่อนค่ะ':'บันทึกไม่สำเร็จ: '+error.message;
+        toast(msg,true); return;
+      }
+      if(data?.error){ toast('บันทึกไม่สำเร็จ: '+esc(data.error),true); return; }
+      toast('บันทึก '+code+' แล้ว ✓'); await loadInv(); openDrawer(code);
+    };
+  }
+
+  // ── สรุปตามสถานะ (ของเดิม) ──
   async function loadSummary(){
     const {data,error}=await sb.rpc('stock_summary');
     if(error){ $('summary').innerHTML='<div class="loading">โหลดไม่สำเร็จ</div>'; return; }
     const bs=data.by_status||{};
-    const order=['available','reserved','out','cleaning','repair','retired','lost','needs_review'];
-    const keys=[...new Set([...order.filter(k=>bs[k]!=null),...Object.keys(bs)])];
-    const cells=keys.map(k=>`<div class="b"><div class="n">${bs[k]}</div><div class="l">${esc(ST_TH[k]||k)}</div></div>`).join('');
+    const keys=[...new Set([...ST_ORDER.filter(k=>bs[k]!=null),...Object.keys(bs)])];
+    const cells=keys.map(k=>`<div class="b"><div class="n">${bs[k]}</div><div class="l">${esc(ST[k]?.[0]||k)}</div></div>`).join('');
     $('summary').innerHTML=`<div class="stat">${cells}</div>`+
       `<div class="when" style="margin-top:10px">รวม ${data.total} ตัว · ปล่อยเช่าได้ ${data.rentable} ตัว</div>`;
     $('when').textContent='อัปเดต '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
     $('k_total').textContent=data.total; $('k_rentable').textContent=data.rentable;
+    $('k_busy').textContent=(bs.reserved||0)+(bs.out||0);
   }
 
+  // ── รอยรั่ว (ของเดิม) ──
   async function loadLeaks(){
     const {data,error}=await sb.rpc('stock_audit');
     if(error){ $('leaks').innerHTML='<div class="loading">ตรวจไม่สำเร็จ: '+esc(error.message)+'</div>'; return; }
@@ -95,7 +519,6 @@
       const more=l.count>8?`<div class="more">…และอีก ${l.count-8} รายการ</div>`:'';
       return `<div class="leak ${l.sev}"><div class="lh"><span class="ll">${esc(l.label)}</span><span class="cnt">${l.count}</span></div><div class="rows">${rows}</div>${more}</div>`;
     }).join('');
-    // หมวดที่ 0 — สรุปสั้น ๆ ว่าผ่าน
     const passed=leaks.filter(l=>l.count===0).map(l=>esc(l.label)).length;
     if((data.total||0)>0) html+=`<div class="when" style="margin-top:6px">ผ่าน ${passed} หมวด · พบปัญหา ${leaks.filter(l=>l.count>0).length} หมวด (วิกฤต ${data.critical||0} รายการ)</div>`;
     $('leaks').innerHTML=html;
@@ -139,7 +562,7 @@
     loadAll();
   }
 
-  function loadAll(){ loadSummary(); loadLeaks(); }
+  function loadAll(){ loadInv(); loadSummary(); loadLeaks(); }
   loadAll();
 </script>
 <script src="ops-menu.js"></script>

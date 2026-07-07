@@ -38,10 +38,19 @@
       });
       const out = await r.json().catch(() => ({}));
       if (!r.ok || out.error) {
+        // idToken ของ LINE หมดอายุ (~1 ชม.) → พาไป login ใหม่อัตโนมัติครั้งเดียวแล้วเด้งกลับหน้าเดิม
+        // (กันลูป: ถ้ากลับมาแล้วยัง unauthorized อยู่ = ปัญหาอื่น ให้โชว์ข้อความแทน)
+        if (out.error === 'unauthorized' && !sessionStorage.getItem('opsReauth')) {
+          sessionStorage.setItem('opsReauth', '1');
+          try { liff.logout(); } catch (_) {}
+          liff.login({ redirectUri: window.location.href });
+          return { data: null, error: { message: 'กำลังพาเข้าสู่ระบบใหม่…' } };
+        }
         const map = { unauthorized: 'เซสชันหมดอายุ เข้าสู่ระบบใหม่', no_access: 'ไม่มีสิทธิ์ใช้งานหลังบ้าน',
           owner_only: 'คำสั่งนี้สำหรับเจ้าของเท่านั้น', fn_not_allowed: 'คำสั่งนี้ไม่อนุญาต' };
         return { data: null, error: { message: map[out.error] || out.message || ('ops-rpc ' + r.status) } };
       }
+      sessionStorage.removeItem('opsReauth');
       return { data: out.data, error: null };
     } catch (e) {
       return { data: null, error: { message: (e && e.message) || 'ops-rpc failed' } };
