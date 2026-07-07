@@ -20,7 +20,7 @@
   .offer-row .nm{font-weight:600}
   .offer-row .meta{font-size:12.5px;color:var(--muted,#86857F)}
   .st{font-size:12px;padding:2px 10px;border-radius:99px;white-space:nowrap;align-self:center}
-  .st.new{background:#FFF3D6}.st.priced{background:#E8F0FB}.st.accepted{background:#E3F2EC}.st.paid{background:#DCEFE4;font-weight:600}.st.rejected{background:#F3E9E7;color:#A32D2D}.st.stocked{background:#EEEDE9}
+  .st.submitted,.st.new{background:#FFF3D6}.st.priced{background:#E8F0FB}.st.accepted{background:#E3F2EC}.st.paid{background:#DCEFE4;font-weight:600}.st.rejected{background:#F3E9E7;color:#A32D2D}.st.stocked{background:#EEEDE9}
   .photos{display:flex;gap:8px;overflow-x:auto;margin:8px 0}
   .photos img{height:110px;border-radius:10px}
   .kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;font-size:13.5px;margin:8px 0}
@@ -86,7 +86,7 @@
   // RPC ยังไม่ติดตั้ง (ก่อนรัน supabase-p0-moats.sql) → โชว์แบนเนอร์แทนพัง
   const missingRpc=e=>/function|not.*found|does not exist|404/i.test(e?.message||'');
 
-  const ST_TH={new:'ใหม่',priced:'ตีราคาแล้ว',accepted:'ตกลงซื้อ',paid:'จ่ายแล้ว',rejected:'ไม่รับ',stocked:'เข้าคลังแล้ว'};
+  const ST_TH={submitted:'ใหม่',new:'ใหม่',priced:'ตีราคาแล้ว',accepted:'ตกลงซื้อ',paid:'จ่ายแล้ว',rejected:'ไม่รับ',stocked:'เข้าคลังแล้ว'};
   const COND_MAP={'ใหม่ป้ายห้อย':'new','new':'new','ดีมาก':'good','ดี':'good','good':'good','พอใช้':'fair','fair':'fair','ต้องซ่อม':'poor','ซ่อม':'poor','poor':'poor'};
   let TAB='pending', CUR=null;
 
@@ -107,7 +107,7 @@
       return `<div class="offer-row" onclick="openOffer('${esc(o.id)}')">
         <div><div class="nm">${esc(label)}</div>
           <div class="meta">${esc(o.seller_name||'')}${o.seller_phone?' · '+esc(o.seller_phone):''}${price?' · '+price:''}</div></div>
-        <span class="st ${esc(o.status||'new')}">${esc(ST_TH[o.status]||o.status||'ใหม่')}</span>
+        <span class="st ${esc(o.status||'submitted')}">${esc(ST_TH[o.status]||o.status||'ใหม่')}</span>
       </div>`;
     }).join('');
   }
@@ -130,7 +130,7 @@
       ['ราคาที่ผู้ขายขอ',o.asking_price!=null?baht(o.asking_price):'—'],
       ['ใบรับซื้อ',o.voucher_no||'ยังไม่ออก'],['หมายเหตุ',o.note],
     ].filter(([,v])=>v!=null&&v!=='').map(([k,v])=>`<div class="k">${k}</div><div>${esc(v)}</div>`).join('');
-    const canDecide=['new','priced'].includes(o.status||'new');
+    const canDecide=['submitted','new','priced'].includes(o.status||'submitted');
     const canPay=o.status==='accepted';
     const canStock=['paid','accepted'].includes(o.status);
     $('detail').innerHTML=`
