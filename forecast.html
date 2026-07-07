@@ -69,58 +69,57 @@
 </style>
 </head>
 <body>
-<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="wrap" id="app">
   <div class="lock" id="lock">
     <div class="ic">LLOOP</div>
-    <h2 data-i18n="Owners only">หน้านี้สำหรับเจ้าของเท่านั้น</h2>
+    <h2>หน้านี้สำหรับเจ้าของเท่านั้น</h2>
     <p id="lockmsg">กำลังตรวจสอบสิทธิ์…</p>
     <div id="uidbox" class="hidden">
-      <input id="uidin" placeholder="วาง LINE UID เจ้าของ (ขึ้นต้น U…)" data-i18n-ph="Paste the owner LINE UID (starts with U…)">
-      <button onclick="unlock()" data-i18n="Unlock">ปลดล็อก</button>
+      <input id="uidin" placeholder="วาง LINE UID เจ้าของ (ขึ้นต้น U…)">
+      <button onclick="unlock()">ปลดล็อก</button>
     </div>
   </div>
 
   <div id="main" class="hidden">
     <div class="top">
       <span class="brand">LLOOP</span>
-      <span class="sub" id="who" data-i18n="Forecast">ประมาณการตัวเลข</span>
+      <span class="sub" id="who">ประมาณการตัวเลข</span>
     </div>
 
     <div class="tabs">
-      <button id="tabPlan" class="on" onclick="setMode('plan')" data-i18n="Forecast (before kick-off)">ประมาณการ (ก่อน kick-off)</button>
-      <button id="tabReal" onclick="setMode('real')" data-i18n="Actuals (this month)">ของจริง (เดือนนี้)</button>
+      <button id="tabPlan" class="on" onclick="setMode('plan')">ประมาณการ (ก่อน kick-off)</button>
+      <button id="tabReal" onclick="setMode('real')">ของจริง (เดือนนี้)</button>
     </div>
 
     <div id="planMode">
       <div class="card">
-        <h2 data-i18n="Targets &amp; assumptions (editable)">ตั้งเป้า &amp; สมมติฐาน (แก้ได้)</h2>
+        <h2>ตั้งเป้า &amp; สมมติฐาน (แก้ได้)</h2>
         <div class="tt">
-          <span class="ttl" data-i18n="Set target by">ตั้งเป้าจาก</span>
-          <button id="ttRev" class="on" onclick="setTarget('rev')" data-i18n="Revenue">ยอดขาย</button>
-          <button id="ttNet" onclick="setTarget('net')" data-i18n="Net profit">กำไรสุทธิ</button>
+          <span class="ttl">ตั้งเป้าจาก</span>
+          <button id="ttRev" class="on" onclick="setTarget('rev')">ยอดขาย</button>
+          <button id="ttNet" onclick="setTarget('net')">กำไรสุทธิ</button>
         </div>
-        <button class="pullbtn" id="pullAll" onclick="applyReal('all')" data-i18n="Pull this month’s actuals (rev/rental · util · rentals/customer)">ดึงตัวเลขจริงเดือนนี้มาใส่ (รายได้/การเช่า · util · เช่า/ลูกค้า)</button>
+        <button class="pullbtn" id="pullAll" onclick="applyReal('all')">ดึงตัวเลขจริงเดือนนี้มาใส่ (รายได้/การเช่า · util · เช่า/ลูกค้า)</button>
         <div class="grid">
-          <div class="f"><label id="lb_target" data-i18n="Revenue target / month (THB)">เป้ายอดขาย / เดือน (บาท)</label><input type="number" id="i_target" value="300000"></div>
-          <div class="f"><label data-i18n="Avg revenue / rental">รายได้เฉลี่ย / การเช่า</label><input type="number" id="i_rpr" value="286"><button class="rbtn off" id="rb_rpr" onclick="applyReal('rpr')">จริง: —</button></div>
-          <div class="f"><label data-i18n="Rentals / customer / month">เช่า / ลูกค้า / เดือน</label><input type="number" id="i_freq" value="2"><button class="rbtn off" id="rb_freq" onclick="applyReal('freq')">จริง: —</button></div>
-          <div class="f"><label data-i18n="Gross profit / rental">กำไรขั้นต้น / การเช่า</label><input type="number" id="i_contrib" value="174"></div>
-          <div class="f"><label data-i18n="Rentals / piece / month (util)">เช่า / ชุด / เดือน (util)</label><input type="number" step="0.1" id="i_util" value="2.7"><button class="rbtn off" id="rb_util" onclick="applyReal('util')">จริง: —</button></div>
-          <div class="f"><label data-i18n="Customers one handler can manage">ลูกค้าที่ 1 คนจับชุดดูแลได้</label><input type="number" id="i_cap" value="190"></div>
-          <div class="f"><label data-i18n="Salary / handler">เงินเดือน / คนจับชุด</label><input type="number" id="i_ops" value="18000"></div>
-          <div class="f"><label data-i18n="Support team salary (stylist + content)">เงินเดือนทีมเสริม (สไตลิสต์+คอนเทนต์)</label><input type="number" id="i_support" value="18000"></div>
-          <div class="f"><label data-i18n="Owner salary">เงินเดือนเจ้าของ</label><input type="number" id="i_owner" value="30000"></div>
-          <div class="f"><label data-i18n="Fixed costs (rent + misc)">ค่าใช้จ่ายคงที่ (เช่า+จิปาถะ)</label><input type="number" id="i_fixed" value="8000"></div>
-          <div class="f"><label data-i18n="Marketing / ads budget (fixed)">งบการตลาด / แอด (คงที่)</label><input type="number" id="i_ads" value="30000"></div>
-          <div class="f"><label data-i18n="Or ads budget = % of revenue (0 = use fixed)">หรือ งบแอด = % ของยอดขาย (0=ใช้ค่าคงที่)</label><input type="number" step="0.5" id="i_adspct" value="0"></div>
-          <div class="f"><label data-i18n="Shipping we cover / rental (members ship free)">ค่าส่งที่ร้านออก/การเช่า (สมาชิกส่งฟรี)</label><input type="number" id="i_ship" value="40"></div>
-          <div class="f"><label data-i18n="Cost / piece (bulk ~266, single ~520)">ทุน / ชุด (เหมา ~266, ทีละตัว ~520)</label><input type="number" id="i_stock" value="266"></div>
+          <div class="f"><label id="lb_target">เป้ายอดขาย / เดือน (บาท)</label><input type="number" id="i_target" value="300000"></div>
+          <div class="f"><label>รายได้เฉลี่ย / การเช่า</label><input type="number" id="i_rpr" value="286"><button class="rbtn off" id="rb_rpr" onclick="applyReal('rpr')">จริง: —</button></div>
+          <div class="f"><label>เช่า / ลูกค้า / เดือน</label><input type="number" id="i_freq" value="2"><button class="rbtn off" id="rb_freq" onclick="applyReal('freq')">จริง: —</button></div>
+          <div class="f"><label>กำไรขั้นต้น / การเช่า</label><input type="number" id="i_contrib" value="174"></div>
+          <div class="f"><label>เช่า / ชุด / เดือน (util)</label><input type="number" step="0.1" id="i_util" value="2.7"><button class="rbtn off" id="rb_util" onclick="applyReal('util')">จริง: —</button></div>
+          <div class="f"><label>ลูกค้าที่ 1 คนจับชุดดูแลได้</label><input type="number" id="i_cap" value="190"></div>
+          <div class="f"><label>เงินเดือน / คนจับชุด</label><input type="number" id="i_ops" value="18000"></div>
+          <div class="f"><label>เงินเดือนทีมเสริม (สไตลิสต์+คอนเทนต์)</label><input type="number" id="i_support" value="18000"></div>
+          <div class="f"><label>เงินเดือนเจ้าของ</label><input type="number" id="i_owner" value="30000"></div>
+          <div class="f"><label>ค่าใช้จ่ายคงที่ (เช่า+จิปาถะ)</label><input type="number" id="i_fixed" value="8000"></div>
+          <div class="f"><label>งบการตลาด / แอด (คงที่)</label><input type="number" id="i_ads" value="30000"></div>
+          <div class="f"><label>หรือ งบแอด = % ของยอดขาย (0=ใช้ค่าคงที่)</label><input type="number" step="0.5" id="i_adspct" value="0"></div>
+          <div class="f"><label>ค่าส่งที่ร้านออก/การเช่า (สมาชิกส่งฟรี)</label><input type="number" id="i_ship" value="40"></div>
+          <div class="f"><label>ทุน / ชุด (เหมา ~266, ทีละตัว ~520)</label><input type="number" id="i_stock" value="266"></div>
         </div>
       </div>
 
       <div class="card">
-        <h2 data-i18n="What you need to prepare">ต้องเตรียมเท่าไหร่</h2>
+        <h2>ต้องเตรียมเท่าไหร่</h2>
         <div class="res" id="planStats"></div>
         <div class="bar" id="planBar"></div>
         <div class="leg" id="planLeg"></div>
@@ -128,21 +127,21 @@
       </div>
 
       <div class="card">
-        <h2 data-i18n="Membership pack margin (incl. shipping + damage buffer)">มาร์จิ้นแพ็กสมาชิก (รวมค่าส่ง + เผื่อชุดเสีย)</h2>
+        <h2>มาร์จิ้นแพ็กสมาชิก (รวมค่าส่ง + เผื่อชุดเสีย)</h2>
         <div class="grid" style="margin-bottom:12px">
-          <div class="f"><label data-i18n="Damage/loss buffer (% of revenue)">เผื่อชุดเสีย/สูญหาย (% ของยอด)</label><input type="number" step="1" id="i_damage" value="10" oninput="loadPlanMargin()"></div>
-          <div class="f"><label data-i18n="Minimum acceptable margin (%)">มาร์จิ้นขั้นต่ำที่ยอมรับ (%)</label><input type="number" step="1" id="i_minmargin" value="10" oninput="loadPlanMargin()"></div>
+          <div class="f"><label>เผื่อชุดเสีย/สูญหาย (% ของยอด)</label><input type="number" step="1" id="i_damage" value="10" oninput="loadPlanMargin()"></div>
+          <div class="f"><label>มาร์จิ้นขั้นต่ำที่ยอมรับ (%)</label><input type="number" step="1" id="i_minmargin" value="10" oninput="loadPlanMargin()"></div>
         </div>
-        <div id="planMargin" style="font-size:13px;color:var(--muted)" data-i18n="Loading…">กำลังโหลด…</div>
-        <div class="note" data-i18n="Calculated at full quota + highest tier + shipping every time + damage buffer (worst-case margin) · normal wear is already in the per-rental cost — this field is an extra buffer for heavy damage/loss · 🔴 = below threshold, consider raising the price">คิดแบบใช้เต็มโควต้า + ชั้นชุดสูงสุด + ค่าส่งทุกครั้ง + เผื่อชุดเสีย (มาร์จิ้นขั้นต่ำสุด) · ค่าชำรุดปกติอยู่ในต้นทุนต่อการเช่าแล้ว — ช่องนี้คือกันชน "เสียหนัก/หาย" เพิ่ม · 🔴 = ต่ำกว่าเกณฑ์ ควรปรับราคา</div>
+        <div id="planMargin" style="font-size:13px;color:var(--muted)">กำลังโหลด…</div>
+        <div class="note">คิดแบบใช้เต็มโควต้า + ชั้นชุดสูงสุด + ค่าส่งทุกครั้ง + เผื่อชุดเสีย (มาร์จิ้นขั้นต่ำสุด) · ค่าชำรุดปกติอยู่ในต้นทุนต่อการเช่าแล้ว — ช่องนี้คือกันชน "เสียหนัก/หาย" เพิ่ม · 🔴 = ต่ำกว่าเกณฑ์ ควรปรับราคา</div>
 
         <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px">
-          <div style="font-size:12px;color:var(--muted);margin-bottom:8px" data-i18n="Edit pack prices — saves to the live system (affects the customer side instantly)">แก้ราคาแพ็ก — บันทึกเข้าระบบจริง (มีผลกับหน้าลูกค้าทันที)</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">แก้ราคาแพ็ก — บันทึกเข้าระบบจริง (มีผลกับหน้าลูกค้าทันที)</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
-            <div class="f" style="flex:1;min-width:150px"><label data-i18n="Pack">แพ็ก</label><select id="ppPlan" onchange="ppFill()"></select></div>
-            <div class="f" style="width:110px"><label data-i18n="Price/cycle">ราคา/รอบ</label><input type="number" id="ppPrice"></div>
-            <div class="f" style="width:92px"><label data-i18n="Pieces/cycle">ชุด/รอบ</label><input type="number" id="ppRentals"></div>
-            <button class="applybtn" style="width:auto;padding:11px 18px" onclick="savePlanPrice()" data-i18n="Save">บันทึก</button>
+            <div class="f" style="flex:1;min-width:150px"><label>แพ็ก</label><select id="ppPlan" onchange="ppFill()"></select></div>
+            <div class="f" style="width:110px"><label>ราคา/รอบ</label><input type="number" id="ppPrice"></div>
+            <div class="f" style="width:92px"><label>ชุด/รอบ</label><input type="number" id="ppRentals"></div>
+            <button class="applybtn" style="width:auto;padding:11px 18px" onclick="savePlanPrice()">บันทึก</button>
           </div>
           <div id="ppMsg" style="font-size:12px;margin-top:8px"></div>
         </div>
@@ -151,20 +150,20 @@
 
     <div id="realMode" class="hidden">
       <div class="card">
-        <h2 id="realHd" data-i18n="This month (actuals from the system)">เดือนนี้ (ของจริงจากระบบ)</h2>
+        <h2 id="realHd">เดือนนี้ (ของจริงจากระบบ)</h2>
         <div class="res" id="realStats"></div>
         <div class="note" id="realTrendWrap" style="margin-top:14px">
-          <div style="font-size:12px;color:var(--muted);margin-bottom:2px" data-i18n="Revenue, last 6 months">รายได้ย้อนหลัง 6 เดือน</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:2px">รายได้ย้อนหลัง 6 เดือน</div>
           <div class="trend" id="realTrend"></div>
         </div>
       </div>
       <div class="card">
-        <h2 data-i18n="To hit this target, how much more do you need">ถ้าอยากได้ยอดเท่านี้ ต้องเพิ่มเท่าไหร่</h2>
-        <div class="f" style="margin-bottom:12px"><label data-i18n="Revenue target / month (THB)">เป้ายอดขาย / เดือน (บาท)</label><input type="number" id="r_target" value="300000"></div>
+        <h2>ถ้าอยากได้ยอดเท่านี้ ต้องเพิ่มเท่าไหร่</h2>
+        <div class="f" style="margin-bottom:12px"><label>เป้ายอดขาย / เดือน (บาท)</label><input type="number" id="r_target" value="300000"></div>
         <div class="prog"><i id="rProg"></i></div>
         <div class="note" id="rProgTxt" style="margin:0 0 10px"></div>
         <div id="gapRows"></div>
-        <div class="note" data-i18n="Uses revenue/rental and util from this month’s actuals (falls back to the forecast if no data yet). Cost/salary assumptions are editable on the “Forecast” tab.">ใช้รายได้/การเช่า และ util จากของจริงเดือนนี้ (ถ้ายังไม่มีข้อมูล ใช้ค่าประมาณการ). สมมติฐานค่าใช้จ่าย/เงินเดือน ปรับได้ในแท็บ "ประมาณการ".</div>
+        <div class="note">ใช้รายได้/การเช่า และ util จากของจริงเดือนนี้ (ถ้ายังไม่มีข้อมูล ใช้ค่าประมาณการ). สมมติฐานค่าใช้จ่าย/เงินเดือน ปรับได้ในแท็บ "ประมาณการ".</div>
       </div>
     </div>
   </div>
@@ -174,7 +173,6 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=38"></script>
 <script src="analytics.js?v=38"></script>
-<script src="nav.js?v=1"></script>
 <script>
 const NF = new Intl.NumberFormat('th-TH');
 const baht = n => '฿' + NF.format(Math.round(n));
@@ -233,8 +231,8 @@ function refreshRealChips(){
   const rv = realVals();
   [['rb_rpr','rpr'],['rb_freq','freq'],['rb_util','util']].forEach(([id,k])=>{
     const b = document.getElementById(id); if(!b) return;
-    if(rv[k]==null){ b.textContent=NAV.t('จริง: ยังไม่มีข้อมูล','Actual: no data'); b.classList.add('off'); }
-    else { b.textContent=NAV.t('ใช้จริง: ','Use actual: ')+rv[k]; b.classList.remove('off'); }
+    if(rv[k]==null){ b.textContent='จริง: ยังไม่มีข้อมูล'; b.classList.add('off'); }
+    else { b.textContent='ใช้จริง: '+rv[k]; b.classList.remove('off'); }
   });
 }
 function applyReal(which){
@@ -248,7 +246,7 @@ function setTarget(t){
   gTargetType = t;
   document.getElementById('ttRev').classList.toggle('on', t==='rev');
   document.getElementById('ttNet').classList.toggle('on', t==='net');
-  document.getElementById('lb_target').textContent = t==='net' ? NAV.t('เป้ากำไรสุทธิ / เดือน (บาท)','Net profit target / month (THB)') : NAV.t('เป้ายอดขาย / เดือน (บาท)','Revenue target / month (THB)');
+  document.getElementById('lb_target').textContent = t==='net' ? 'เป้ากำไรสุทธิ / เดือน (บาท)' : 'เป้ายอดขาย / เดือน (บาท)';
   const ti = document.getElementById('i_target');
   ti.value = t==='net' ? 500000 : 300000;
   if(t==='net' && num('i_adspct')===0) document.getElementById('i_adspct').value = 12;  // สเกลใหญ่ตั้งแอด 12% ให้สมจริง
@@ -259,31 +257,30 @@ function renderPlan(){
   const inp = planInputs();
   const r = planResult(inp);
   const revCard = inp.type==='net'
-    ? statHTML(NAV.t('ยอดขายที่ต้องทำ','Revenue needed'), baht(r.revenue), NAV.t('เพื่อกำไรสุทธิ ','for net profit ')+baht(inp.target), 'good')
-    : statHTML(NAV.t('กำไรสุทธิ/เดือน','Net profit/month'), baht(r.net), r.net>=0?NAV.t('หลังจ่ายทุกคน','after paying everyone'):NAV.t('ขาด — เพิ่มยอด/ลดต้นทุน','short — raise revenue/cut cost'), r.net>=0?'good':'bad');
+    ? statHTML('ยอดขายที่ต้องทำ', baht(r.revenue), 'เพื่อกำไรสุทธิ '+baht(inp.target), 'good')
+    : statHTML('กำไรสุทธิ/เดือน', baht(r.net), r.net>=0?'หลังจ่ายทุกคน':'ขาด — เพิ่มยอด/ลดต้นทุน', r.net>=0?'good':'bad');
   document.getElementById('planStats').innerHTML =
     revCard
-  + statHTML(NAV.t('ลูกค้า/เดือน','Customers/month'), NF.format(Math.round(r.customers))+NAV.t(' คน',''), '~'+NF.format(Math.round(r.rentals))+NAV.t(' ครั้งเช่า',' rentals'))
-  + statHTML(NAV.t('ชุดในคลัง','Pieces in stock'), NF.format(Math.round(r.dresses))+NAV.t(' ตัว',''), NAV.t('ทุน ','cost ')+baht(r.stock))
-  + statHTML(NAV.t('ทีมจับชุด','Handling team'), r.ops+NAV.t(' คน',' ppl'), '~'+Math.round(r.perDay)+NAV.t(' ชุด/วัน',' pieces/day'))
-  + statHTML(NAV.t('งบแอด/เดือน','Ads budget/month'), baht(r.ads), inp.adspct>0?inp.adspct+NAV.t('% ของยอดขาย','% of revenue'):NAV.t('คงที่','fixed'))
-  + statHTML(inp.type==='net'?NAV.t('กำไรสุทธิ/เดือน','Net profit/month'):NAV.t('เหลือสุทธิ/เดือน','Net left/month'), baht(r.net), NAV.t('หลังจ่ายทุกคน+เจ้าของ','after everyone + owner'), r.net>=0?'good':'bad');
+  + statHTML('ลูกค้า/เดือน', NF.format(Math.round(r.customers))+' คน', '~'+NF.format(Math.round(r.rentals))+' ครั้งเช่า')
+  + statHTML('ชุดในคลัง', NF.format(Math.round(r.dresses))+' ตัว', 'ทุน '+baht(r.stock))
+  + statHTML('ทีมจับชุด', r.ops+' คน', '~'+Math.round(r.perDay)+' ชุด/วัน')
+  + statHTML('งบแอด/เดือน', baht(r.ads), inp.adspct>0?inp.adspct+'% ของยอดขาย':'คงที่')
+  + statHTML(inp.type==='net'?'กำไรสุทธิ/เดือน':'เหลือสุทธิ/เดือน', baht(r.net), 'หลังจ่ายทุกคน+เจ้าของ', r.net>=0?'good':'bad');
 
   // build allocation (variable, shipping, fixed, team, owner, net>=0)
   const parts = [
-    [NAV.t('ต้นทุนผันแปร','Variable cost'), r.variable, '#9AA4B0'],
-    [NAV.t('ค่าส่งที่ร้านออก','Shipping we cover'), r.shipWe, '#C99A5B'],
-    [NAV.t('คงที่ + แอด','Fixed + ads'), r.fixed, '#E8B24A'],
-    [NAV.t('เงินเดือนทีม','Team salary'), r.team, '#6FB3A6'],
-    [NAV.t('เงินเดือนเจ้าของ','Owner salary'), num('i_owner'), '#4A4742'],
-    [NAV.t('เหลือสุทธิ','Net left'), Math.max(0,r.net), '#0F7B5A'],
+    ['ต้นทุนผันแปร', r.variable, '#9AA4B0'],
+    ['ค่าส่งที่ร้านออก', r.shipWe, '#C99A5B'],
+    ['คงที่ + แอด', r.fixed, '#E8B24A'],
+    ['เงินเดือนทีม', r.team, '#6FB3A6'],
+    ['เงินเดือนเจ้าของ', num('i_owner'), '#4A4742'],
+    ['เหลือสุทธิ', Math.max(0,r.net), '#0F7B5A'],
   ];
   const tot = parts.reduce((s,p)=>s+p[1],0) || 1;
   document.getElementById('planBar').innerHTML = parts.map(p=>`<i style="width:${(p[1]/tot*100).toFixed(1)}%;background:${p[2]}"></i>`).join('');
   document.getElementById('planLeg').innerHTML = parts.map(p=>`<span><span class="d" style="background:${p[2]}"></span>${p[0]}<b>${baht(p[1])}</b></span>`).join('');
-  document.getElementById('planNote').textContent = NAV.t(
-    `กำไรขั้นต้น (contribution) ฿${NF.format(Math.round(r.contribution))} = รายได้ลบต้นทุนผันแปร · คอขวดคือคนจับชุด (~${Math.round(r.perDay)} ชุด/วัน). ดันสมาชิกรายเดือนเพื่อใช้ลูกค้าใหม่น้อยลง.`,
-    `Gross profit (contribution) ฿${NF.format(Math.round(r.contribution))} = revenue minus variable cost · the bottleneck is handlers (~${Math.round(r.perDay)} pieces/day). Push monthly memberships to rely less on new customers.`);
+  document.getElementById('planNote').textContent =
+    `กำไรขั้นต้น (contribution) ฿${NF.format(Math.round(r.contribution))} = รายได้ลบต้นทุนผันแปร · คอขวดคือคนจับชุด (~${Math.round(r.perDay)} ชุด/วัน). ดันสมาชิกรายเดือนเพื่อใช้ลูกค้าใหม่น้อยลง.`;
 }
 
 // ---------- มาร์จิ้นแพ็กสมาชิก (รวมค่าส่งที่ร้านออก) ----------
@@ -292,7 +289,7 @@ async function loadPlanMargin(){
   const el = document.getElementById('planMargin'); if(!el) return;
   if(!_planEcon){ try { const { data } = await client().rpc('plan_economics'); _planEcon = data || []; } catch(e){ _planEcon = []; } }
   const plans = _planEcon;
-  if(!plans.length){ el.textContent = NAV.t('ยังไม่มีแพ็กเกจ','No packs yet'); return; }
+  if(!plans.length){ el.textContent = 'ยังไม่มีแพ็กเกจ'; return; }
   const ship = num('i_ship');
   const damagePct = num('i_damage');
   const minMargin = num('i_minmargin');
@@ -308,13 +305,13 @@ async function loadPlanMargin(){
     const inst = p.installment_per_month ? `฿${NF.format(p.installment_per_month)}/ด ×${p.installment_months}` : '—';
     return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)">
       <div style="flex:1"><div style="color:var(--ink);font-weight:500">${below?'🔴 ':''}${p.name}</div>
-        <div style="font-size:11px">฿${NF.format(p.price_per_month)}${NAV.t('/เดือน','/mo')} · ${p.rentals_per_cycle} ${NAV.t('ชุด/รอบ','pieces/cycle')} · ${NAV.t('ค่าส่ง','shipping')} ฿${NF.format(Math.round(p.rentals_per_cycle*ship))} · ${NAV.t('เผื่อเสีย','buffer')} ฿${NF.format(Math.round(reserve))}</div></div>
-      <div style="text-align:right;min-width:96px"><div style="color:${color};font-weight:600">฿${NF.format(marginMo)}${NAV.t('/ด','/mo')}</div>
-        <div style="font-size:11px;color:${color}">${NAV.t('มาร์จิ้น','margin')} ${pct}%</div></div>
-      <div style="text-align:right;min-width:84px;font-size:11px;color:var(--muted)">${NAV.t('ผ่อน','Instalment')}<br>${inst}</div>
+        <div style="font-size:11px">฿${NF.format(p.price_per_month)}/เดือน · ${p.rentals_per_cycle} ชุด/รอบ · ค่าส่ง ฿${NF.format(Math.round(p.rentals_per_cycle*ship))} · เผื่อเสีย ฿${NF.format(Math.round(reserve))}</div></div>
+      <div style="text-align:right;min-width:96px"><div style="color:${color};font-weight:600">฿${NF.format(marginMo)}/ด</div>
+        <div style="font-size:11px;color:${color}">มาร์จิ้น ${pct}%</div></div>
+      <div style="text-align:right;min-width:84px;font-size:11px;color:var(--muted)">ผ่อน<br>${inst}</div>
     </div>`;
   }).join('') +
-    `<div style="margin-top:10px;font-size:12px;font-weight:600;color:${belowCount?'#B4543A':'#0F7B5A'}">${belowCount ? NAV.t(`🔴 ${belowCount} แพ็กต่ำกว่าเกณฑ์ ${minMargin}% — ควรขึ้นราคา/ลดส่วนลด/จำกัดชุดพรีเมียม`,`🔴 ${belowCount} pack(s) below the ${minMargin}% threshold — raise prices / cut discounts / limit premium pieces`) : NAV.t(`ทุกแพ็กผ่านเกณฑ์มาร์จิ้น ≥ ${minMargin}%`,`All packs meet the ≥ ${minMargin}% margin threshold`)}</div>`;
+    `<div style="margin-top:10px;font-size:12px;font-weight:600;color:${belowCount?'#B4543A':'#0F7B5A'}">${belowCount ? `🔴 ${belowCount} แพ็กต่ำกว่าเกณฑ์ ${minMargin}% — ควรขึ้นราคา/ลดส่วนลด/จำกัดชุดพรีเมียม` : `ทุกแพ็กผ่านเกณฑ์มาร์จิ้น ≥ ${minMargin}%`}</div>`;
   populatePpSelect();
 }
 function populatePpSelect(){
@@ -335,28 +332,28 @@ async function savePlanPrice(){
   const code = document.getElementById('ppPlan').value;
   const price = Number(document.getElementById('ppPrice').value) || 0;
   const rentals = Number(document.getElementById('ppRentals').value) || null;
-  if(!code || price <= 0){ msg.style.color='#B4543A'; msg.textContent=NAV.t('ใส่ราคาให้ถูกต้องก่อนนะคะ','Please enter a valid price first'); return; }
-  msg.style.color='var(--color-text-secondary)'; msg.style.color='#7C8694'; msg.textContent=NAV.t('กำลังบันทึก…','Saving…');
+  if(!code || price <= 0){ msg.style.color='#B4543A'; msg.textContent='ใส่ราคาให้ถูกต้องก่อนนะคะ'; return; }
+  msg.style.color='var(--color-text-secondary)'; msg.style.color='#7C8694'; msg.textContent='กำลังบันทึก…';
   const { data, error } = await client().rpc('update_plan_price', { p_uid: OWNER_UID, p_code: code, p_price: price, p_rentals: rentals });
-  if(error || !data || data.error){ msg.style.color='#B4543A'; msg.textContent=NAV.t('บันทึกไม่สำเร็จ','Save failed') + (data&&data.error?(' ('+data.error+')'):''); return; }
+  if(error || !data || data.error){ msg.style.color='#B4543A'; msg.textContent='บันทึกไม่สำเร็จ' + (data&&data.error?(' ('+data.error+')'):''); return; }
   _planEcon = null;                                  // refetch ราคาใหม่
   await loadPlanMargin();
-  msg.style.color='#0F7B5A'; msg.textContent=NAV.t(`บันทึกแล้ว — ${code} ฿${NF.format(price)}${data.save_pct?` · ส่วนลด ${data.save_pct}%`:''} (หน้าลูกค้าอัปเดตทันที)`,`Saved — ${code} ฿${NF.format(price)}${data.save_pct?` · ${data.save_pct}% off`:''} (customer side updated instantly)`);
+  msg.style.color='#0F7B5A'; msg.textContent=`บันทึกแล้ว — ${code} ฿${NF.format(price)}${data.save_pct?` · ส่วนลด ${data.save_pct}%`:''} (หน้าลูกค้าอัปเดตทันที)`;
 }
 
 // ---------- actuals ----------
 function renderReal(){
   if(!ACT){ return; }
   const a = ACT;
-  document.getElementById('realHd').textContent = NAV.t(`เดือนนี้ · ${a.month} (ของจริงจากระบบ)`,`This month · ${a.month} (actuals from the system)`);
+  document.getElementById('realHd').textContent = `เดือนนี้ · ${a.month} (ของจริงจากระบบ)`;
   document.getElementById('realStats').innerHTML =
-    statHTML(NAV.t('รายได้เดือนนี้','Revenue this month'), baht(a.revenue||0), NAV.t('จากบัญชีจริง','from real books'))
-  + statHTML(NAV.t('ครั้งเช่า','Rentals'), NF.format(a.rentals||0)+NAV.t(' ครั้ง',''), (a.customers||0)+NAV.t(' ลูกค้า',' customers'))
-  + statHTML(NAV.t('ชุดพร้อมเช่า','Pieces ready'), NF.format(a.dresses_ready||0)+NAV.t(' ตัว',''), NAV.t('ทั้งหมด ','total ')+NF.format(a.dresses_total||0))
-  + statHTML(NAV.t('รายได้/การเช่า','Revenue/rental'), a.avg_rev_per_rental? baht(a.avg_rev_per_rental):'—', NAV.t('เฉลี่ยจริง','actual average'))
-  + statHTML(NAV.t('เช่า/ชุด (util)','Rentals/piece (util)'), (a.util!=null? a.util:'—'), NAV.t('รอบเช่าต่อชุด','rental cycles per piece'))
-  + statHTML(NAV.t('ลูกค้า','Customers'), NF.format(a.customers||0)+NAV.t(' คน',''), NAV.t('เดือนนี้','this month'))
-  + statHTML(NAV.t('กันชนชุดเสีย (กองทุน)','Damage buffer (fund)'), baht((a.reserve&&a.reserve.balance)||0), NAV.t(`ตั้งสำรอง ${(a.reserve&&a.reserve.pct)||5}% ของค่าเช่า`,`reserves ${(a.reserve&&a.reserve.pct)||5}% of rental`), 'good');
+    statHTML('รายได้เดือนนี้', baht(a.revenue||0), 'จากบัญชีจริง')
+  + statHTML('ครั้งเช่า', NF.format(a.rentals||0)+' ครั้ง', (a.customers||0)+' ลูกค้า')
+  + statHTML('ชุดพร้อมเช่า', NF.format(a.dresses_ready||0)+' ตัว', 'ทั้งหมด '+NF.format(a.dresses_total||0))
+  + statHTML('รายได้/การเช่า', a.avg_rev_per_rental? baht(a.avg_rev_per_rental):'—', 'เฉลี่ยจริง')
+  + statHTML('เช่า/ชุด (util)', (a.util!=null? a.util:'—'), 'รอบเช่าต่อชุด')
+  + statHTML('ลูกค้า', NF.format(a.customers||0)+' คน', 'เดือนนี้')
+  + statHTML('กันชนชุดเสีย (กองทุน)', baht((a.reserve&&a.reserve.balance)||0), `ตั้งสำรอง ${(a.reserve&&a.reserve.pct)||5}% ของค่าเช่า`, 'good');
 
   const series = a.series||[];
   const max = Math.max(1, ...series.map(s=>s.revenue||0));
@@ -378,18 +375,18 @@ function renderGap(){
   const prog = Math.min(100, (a.revenue||0)/Math.max(1,denom)*100);
   document.getElementById('rProg').style.width = prog.toFixed(0)+'%';
   document.getElementById('rProgTxt').textContent = inp.type==='net'
-    ? NAV.t(`ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของยอดขายที่ต้องทำ ${baht(need.revenue)} (เพื่อกำไรสุทธิ ${baht(T)})`,`Now ${baht(a.revenue||0)} = ${prog.toFixed(0)}% of the ${baht(need.revenue)} revenue needed (for net profit ${baht(T)})`)
-    : NAV.t(`ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของเป้า ${baht(T)}`,`Now ${baht(a.revenue||0)} = ${prog.toFixed(0)}% of the ${baht(T)} target`);
+    ? `ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของยอดขายที่ต้องทำ ${baht(need.revenue)} (เพื่อกำไรสุทธิ ${baht(T)})`
+    : `ตอนนี้ ${baht(a.revenue||0)} = ${prog.toFixed(0)}% ของเป้า ${baht(T)}`;
   const gC = Math.max(0, Math.round(need.customers) - (a.customers||0));
   const gD = Math.max(0, Math.round(need.dresses) - (a.dresses_ready||0));
   const gR = Math.max(0, Math.round(need.rentals) - (a.rentals||0));
   document.getElementById('gapRows').innerHTML =
-    `<div class="gaprow"><span>${NAV.t('ลูกค้า/เดือน','Customers/month')}</span><span>${a.customers||0} → <b>${Math.round(need.customers)}</b> (+${gC})</span></div>`
-  + `<div class="gaprow"><span>${NAV.t('ครั้งเช่า/เดือน','Rentals/month')}</span><span>${a.rentals||0} → <b>${Math.round(need.rentals)}</b> (+${gR})</span></div>`
-  + `<div class="gaprow"><span>${NAV.t('ชุดพร้อมเช่า','Pieces ready')}</span><span>${a.dresses_ready||0} → <b>${Math.round(need.dresses)}</b> (+${gD})</span></div>`
-  + `<div class="gaprow"><span>${NAV.t('ทีมจับชุด','Handling team')}</span><span><b>${need.ops}</b> ${NAV.t('คน','ppl')}</span></div>`
-  + `<div class="gaprow"><span>${NAV.t('ทุนสต็อกเพิ่ม','Extra stock cost')}</span><span><b>${baht(gD*num('i_stock'))}</b></span></div>`
-  + `<div class="gaprow"><span>${NAV.t('เหลือสุทธิที่เป้านี้','Net left at this target')}</span><span><b style="color:${need.net>=0?'#0F7B5A':'#B4543A'}">${baht(need.net)}</b>${NAV.t('/เดือน','/mo')}</span></div>`;
+    `<div class="gaprow"><span>ลูกค้า/เดือน</span><span>${a.customers||0} → <b>${Math.round(need.customers)}</b> (+${gC})</span></div>`
+  + `<div class="gaprow"><span>ครั้งเช่า/เดือน</span><span>${a.rentals||0} → <b>${Math.round(need.rentals)}</b> (+${gR})</span></div>`
+  + `<div class="gaprow"><span>ชุดพร้อมเช่า</span><span>${a.dresses_ready||0} → <b>${Math.round(need.dresses)}</b> (+${gD})</span></div>`
+  + `<div class="gaprow"><span>ทีมจับชุด</span><span><b>${need.ops}</b> คน</span></div>`
+  + `<div class="gaprow"><span>ทุนสต็อกเพิ่ม</span><span><b>${baht(gD*num('i_stock'))}</b></span></div>`
+  + `<div class="gaprow"><span>เหลือสุทธิที่เป้านี้</span><span><b style="color:${need.net>=0?'#0F7B5A':'#B4543A'}">${baht(need.net)}</b>/เดือน</span></div>`;
 }
 
 // ---------- mode + boot ----------
@@ -427,9 +424,9 @@ async function tryUid(uid){
 }
 async function unlock(){
   const uid = (document.getElementById('uidin').value||'').trim();
-  showLock(NAV.t('กำลังตรวจสอบ…','Checking…'), false);
+  showLock('กำลังตรวจสอบ…', false);
   if(await tryUid(uid)) showMain();
-  else showLock(NAV.t('UID นี้ไม่ใช่เจ้าของ ลองใหม่อีกครั้ง','That UID isn’t an owner — try again'), true);
+  else showLock('UID นี้ไม่ใช่เจ้าของ ลองใหม่อีกครั้ง', true);
 }
 async function boot(){
   let uid = null;
@@ -440,21 +437,9 @@ async function boot(){
   }catch(e){ /* นอก LINE */ }
   if(!uid) uid = localStorage.getItem('lloop_owner_uid');
   if(uid && await tryUid(uid)){ showMain(); return; }
-  showLock(NAV.t('เปิดผ่าน LINE ด้วยบัญชีเจ้าของ หรือใส่ UID เจ้าของด้านล่าง','Open via LINE with an owner account, or paste the owner UID below'), true);
+  showLock('เปิดผ่าน LINE ด้วยบัญชีเจ้าของ หรือใส่ UID เจ้าของด้านล่าง', true);
 }
 boot();
-
-// re-render dynamic content when the language toggle flips
-window.addEventListener('lloop:lang', function(){
-  refreshRealChips();
-  if (document.getElementById('main') && !document.getElementById('main').classList.contains('hidden')) {
-    renderPlan(); loadPlanMargin(); if (ACT) { renderReal(); }
-  } else {
-    // lock screen still showing — refresh the status line
-    const lm = document.getElementById('lockmsg');
-    if (lm) showLock(NAV.t('เปิดผ่าน LINE ด้วยบัญชีเจ้าของ หรือใส่ UID เจ้าของด้านล่าง','Open via LINE with an owner account, or paste the owner UID below'), !document.getElementById('uidbox').classList.contains('hidden'));
-  }
-});
 </script>
 </body>
 </html>
