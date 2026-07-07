@@ -72,27 +72,20 @@
   }
 
   const CSS = `
-  .opsm-btn{position:fixed;top:12px;left:12px;z-index:60;width:40px;height:40px;border:1px solid var(--line,#E0DED9);background:#fff;border-radius:10px;cursor:pointer;font-size:18px;line-height:1;color:var(--ink,#1A1A1A)}
+  .opsm-btn{position:fixed;top:12px;left:12px;z-index:60;width:42px;height:42px;border:1px solid var(--line,#E0DED9);background:#fff;border-radius:10px;cursor:pointer;font-size:20px;line-height:1;color:var(--ink,#1A1A1A)}
   .opsm-ov{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:70;opacity:0;visibility:hidden;transition:.18s}
   .opsm-ov.open{opacity:1;visibility:visible}
-  .opsm-drawer{position:fixed;top:0;left:0;bottom:0;width:232px;max-width:84vw;background:#fff;z-index:71;transform:translateX(-100%);transition:.2s;overflow-y:auto;box-shadow:2px 0 14px rgba(0,0,0,.12);font-family:'Prompt',var(--sans,sans-serif)}
+  .opsm-drawer{position:fixed;top:0;left:0;bottom:0;width:268px;max-width:84vw;background:#fff;z-index:71;transform:translateX(-100%);transition:.2s;overflow-y:auto;box-shadow:2px 0 14px rgba(0,0,0,.12);font-family:var(--sans,'Prompt',sans-serif)}
   .opsm-drawer.open{transform:none}
-  .opsm-head{padding:15px 16px 12px;border-bottom:1px solid var(--line,#E0DED9)}
-  .opsm-head .nm{font-weight:700;font-size:14.5px;color:var(--ink,#1A1A1A)}
-  .opsm-head .rl{margin-top:4px;font-size:11.5px;color:#fff;background:var(--ink,#1A1A1A);display:inline-block;padding:2px 10px;border-radius:20px}
-  .opsm-sec{padding:9px 0 3px}
-  .opsm-sec .t{font-size:10.5px;color:var(--muted,#86857F);padding:3px 16px;letter-spacing:.06em;text-transform:uppercase}
-  .opsm-link{display:flex;align-items:center;gap:10px;padding:8px 16px;text-decoration:none;color:var(--ink,#1A1A1A);font-size:13px}
+  .opsm-head{padding:18px 18px 14px;border-bottom:1px solid var(--line,#E0DED9)}
+  .opsm-head .nm{font-weight:700;font-size:17px;color:var(--ink,#1A1A1A)}
+  .opsm-head .rl{margin-top:4px;font-size:13px;color:#fff;background:var(--ink,#1A1A1A);display:inline-block;padding:2px 10px;border-radius:20px}
+  .opsm-sec{padding:12px 0 4px}
+  .opsm-sec .t{font-size:12px;color:var(--muted,#86857F);padding:4px 18px;letter-spacing:.04em}
+  .opsm-link{display:flex;align-items:center;gap:11px;padding:11px 18px;text-decoration:none;color:var(--ink,#1A1A1A);font-size:15px}
   .opsm-link:hover{background:var(--soft,#F5F4F2)}
   .opsm-link.active{background:var(--soft,#F5F4F2);font-weight:600;box-shadow:inset 3px 0 0 var(--ok,#0F6E56)}
-  .opsm-link .ic{width:18px;text-align:center;color:var(--muted,#86857F);font-size:13px}
-  /* ── จอใหญ่: เมนูตรึงซ้ายถาวรแบบ desktop app (ไม่ต้องกด ☰) ── */
-  @media(min-width:1100px){
-    .opsm-btn,.opsm-ov{display:none}
-    .opsm-drawer{transform:none;box-shadow:none;border-right:1px solid var(--line,#E7E5E1)}
-    body.opsm-docked{padding-left:232px}
-  }
-  @media print{.opsm-btn,.opsm-ov,.opsm-drawer{display:none!important}body.opsm-docked{padding-left:0}}
+  .opsm-link .ic{width:20px;text-align:center;color:var(--muted,#86857F);font-size:15px}
   body.opsm-pad{}`;
 
   function injectCSS() {
@@ -127,16 +120,9 @@
     dr.innerHTML = html;
 
     document.body.append(btn, ov, dr);
-    // จอใหญ่ = ตรึงเมนูถาวร (คลาสนี้ดัน padding-left ของ body) · จอเล็ก = เว้นแถบหัวให้พ้นปุ่ม ☰
+    // เว้นระยะแถบหัวของหน้าให้พ้นปุ่ม ☰ (ไม่ทับชื่อหน้า)
     const bar = document.querySelector('.bar');
-    const basePad = bar ? getComputedStyle(bar).paddingLeft : '';
-    const mq = window.matchMedia('(min-width:1100px)');
-    const applyMode = () => {
-      document.body.classList.toggle('opsm-docked', mq.matches);
-      if (bar) bar.style.paddingLeft = mq.matches ? basePad : ((parseInt(basePad) || 0) < 60 ? '64px' : basePad);
-    };
-    applyMode();
-    if (mq.addEventListener) mq.addEventListener('change', applyMode);
+    if (bar) { const pl = parseInt(getComputedStyle(bar).paddingLeft) || 0; if (pl < 60) bar.style.paddingLeft = '64px'; }
     const open = () => { ov.classList.add('open'); dr.classList.add('open'); };
     const close = () => { ov.classList.remove('open'); dr.classList.remove('open'); };
     btn.addEventListener('click', open); ov.addEventListener('click', close);

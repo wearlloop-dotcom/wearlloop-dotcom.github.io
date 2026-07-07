@@ -5,32 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LLOOP · หลังบ้าน</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Noto+Serif+Thai:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;
     --navy:#1C1B19;--sage:#D8C7A8;--sageDeep:#5E5746;--champ:#B8A179;--sageWash:#F4EEE1;--terra:#A75F3A;
-    /* ฟ้อนต์เดียวกันทั้งหลังบ้าน: Prompt (Poppins เฉพาะโลโก้/พาดหัวอังกฤษ/ตัวเลข) — เลิก serif */
-    --sans:'Prompt',system-ui,sans-serif;
-    --serif:'Poppins','Prompt',sans-serif;
-    --serifth:'Prompt',sans-serif;
+    --sans:'Noto Sans Thai',system-ui,sans-serif;
+    --serif:'Cormorant Garamond','Noto Serif Thai',serif;
+    --serifth:'Noto Serif Thai','Cormorant Garamond',serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:13.5px;line-height:1.55}
-  .bar{background:var(--surface);border-bottom:1px solid var(--hair);padding:12px 18px;display:flex;align-items:center;gap:10px}
-  .bar .wm{font-family:var(--serif);font-size:17px;font-weight:700;letter-spacing:3px}
+  body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:15px;line-height:1.5}
+  .bar{background:var(--surface);border-bottom:1px solid var(--hair);padding:14px 18px;display:flex;align-items:center;gap:10px}
+  .bar .wm{font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:3px}
   .bar .sm{font-size:11px;color:var(--stone);letter-spacing:2px;text-transform:uppercase}
   .wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px;display:flex;flex-direction:column;gap:22px}
 
   /* ===== hero ===== */
-  .hero{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:28px 24px 24px;text-align:center;position:relative;overflow:hidden}
+  .hero{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:40px 30px 32px;text-align:center;position:relative;overflow:hidden}
   .hero .ring{position:absolute;width:280px;height:280px;border:1px solid var(--hair);border-radius:50%;right:-120px;top:-120px;opacity:.6}
   .hero .ring.two{width:180px;height:180px;right:-70px;top:-70px;border-color:var(--sage);opacity:.35}
   .hero .eyebrow{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--champ);position:relative}
-  .hero h1{font-family:var(--serif);font-weight:700;font-size:25px;line-height:1.15;margin:10px 0 5px;position:relative}
-  .hero .th{font-family:var(--serifth);font-size:15.5px;color:var(--ink);font-weight:600;position:relative}
-  .hero .essence{font-size:12px;color:var(--stone);letter-spacing:1px;margin-top:12px;position:relative}
-  .hero .who{margin-top:18px;padding-top:15px;border-top:1px solid var(--hair);font-size:13.5px;color:var(--ink);position:relative}
+  .hero h1{font-family:var(--serif);font-weight:600;font-size:38px;line-height:1.08;margin:14px 0 6px;position:relative}
+  .hero .th{font-family:var(--serifth);font-size:20px;color:var(--ink);font-weight:600;position:relative}
+  .hero .essence{font-size:12.5px;color:var(--stone);letter-spacing:1px;margin-top:14px;position:relative}
+  .hero .who{margin-top:22px;padding-top:18px;border-top:1px solid var(--hair);font-size:15px;color:var(--ink);position:relative}
   .hero .who b{font-weight:600}
   .hero .who .rl{display:inline-block;font-size:12px;color:#fff;background:var(--sageDeep);padding:2px 11px;border-radius:20px;margin-left:6px;letter-spacing:.5px}
   .hero .who .dt{display:block;font-size:12.5px;color:var(--stone);margin-top:5px}
@@ -40,22 +39,22 @@
 
   /* ===== มากกว่าเงิน ===== */
   .more{background:#FBF7EF;border:1px solid #ECE0C8;border-radius:3px;padding:24px 22px}
-  .more .h{font-family:var(--serifth);font-size:14.5px;font-weight:600;color:#7a6730;text-align:center}
+  .more .h{font-family:var(--serifth);font-size:18px;font-weight:600;color:#7a6730;text-align:center}
   .more .sub{font-size:12.5px;color:var(--stone);text-align:center;margin:4px 0 16px}
   .more .items{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:460px){.more .items{grid-template-columns:1fr}}
   .more .it{display:flex;gap:11px;align-items:flex-start}
-  .more .it .k{font-family:var(--serif);font-size:18px;color:var(--champ);line-height:1;flex:0 0 auto}
-  .more .it .x .t{font-weight:600;font-size:13px}
+  .more .it .k{font-family:var(--serif);font-size:22px;color:var(--champ);line-height:1;flex:0 0 auto}
+  .more .it .x .t{font-weight:600;font-size:14px}
   .more .it .x .d{font-size:12px;color:var(--stone);line-height:1.5;margin-top:2px}
 
   /* ===== impact ===== */
   .impact{background:var(--sageWash);border:1px solid #E7DCC5;border-radius:3px;padding:24px 22px}
-  .impact .lead{font-family:var(--serifth);font-size:14.5px;font-weight:600;text-align:center;color:var(--sageDeep)}
+  .impact .lead{font-family:var(--serifth);font-size:18px;font-weight:600;text-align:center;color:var(--sageDeep)}
   .impact .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 14px}
   .stat{text-align:center}
-  .stat .n{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--terra);line-height:1}
-  .stat .n small{font-size:12.5px;color:var(--stone)}
+  .stat .n{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--terra);line-height:1}
+  .stat .n small{font-size:15px;color:var(--stone)}
   .stat .l{font-size:11.5px;color:var(--stone);margin-top:6px;letter-spacing:.3px}
   .impact .per{font-size:12.5px;color:var(--sageDeep);text-align:center;line-height:1.7;background:#fff;border:1px solid #E7DCC5;border-radius:3px;padding:12px 14px}
   .impact .per b{font-weight:600}
@@ -63,12 +62,12 @@
 
   /* ===== story ===== */
   .story{border-left:2px solid var(--champ);padding:4px 0 4px 20px}
-  .story .q{font-family:var(--serifth);font-size:14.5px;line-height:1.6;color:var(--ink);font-weight:500}
+  .story .q{font-family:var(--serifth);font-size:18px;line-height:1.6;color:var(--ink);font-weight:500}
   .story .by{font-size:12.5px;color:var(--stone);margin-top:10px}
   .story .by b{color:var(--sageDeep);font-weight:600}
 
   /* ===== values ===== */
-  .vh{font-family:var(--serifth);font-size:14px;font-weight:600;color:var(--ink);margin:2px 2px -4px}
+  .vh{font-family:var(--serifth);font-size:16px;font-weight:600;color:var(--ink);margin:2px 2px -4px}
   .vals{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .val{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:15px 16px}
   .val .vn{font-size:11px;color:var(--champ);letter-spacing:1px}
@@ -77,20 +76,18 @@
 
   /* ===== tools ===== */
   .th-row{display:flex;align-items:baseline;justify-content:space-between;margin:2px 2px -4px}
-  .th-row h2{font-family:var(--serifth);font-size:14px;font-weight:600}
+  .th-row h2{font-family:var(--serifth);font-size:16px;font-weight:600}
   .th-row .hint{font-size:12px;color:var(--stone)}
   .sec{display:flex;flex-direction:column;gap:9px;margin-top:4px}
   .sec > .t{font-size:11px;color:var(--stone);letter-spacing:2px;text-transform:uppercase;padding:0 2px}
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-  .tile{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:11px 13px;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:10px;transition:.12s}
+  .tile{background:var(--surface);border:1px solid var(--hair);border-radius:3px;padding:14px 15px;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:11px;transition:.12s}
   .tile:hover{border-color:var(--navy)}
-  .tile .ic{width:27px;height:27px;flex:0 0 auto;border-radius:50%;background:var(--canvas);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sageDeep)}
-  .tile .lb{font-weight:500;font-size:13px}
-  .tile.primary{grid-column:1/-1;background:var(--navy);border-color:var(--navy);color:#fff;justify-content:center;padding:13px}
+  .tile .ic{width:30px;height:30px;flex:0 0 auto;border-radius:50%;background:var(--canvas);border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--sageDeep)}
+  .tile .lb{font-weight:600;font-size:14.5px}
+  .tile.primary{grid-column:1/-1;background:var(--navy);border-color:var(--navy);color:#fff;justify-content:center;padding:16px}
   .tile.primary .ic{background:rgba(255,255,255,.14);border-color:transparent;color:#fff}
-  .tile.primary .lb{font-family:var(--serifth);font-size:14px;font-weight:600}
-  /* จอใหญ่ (เมนูตรึงซ้ายจาก ops-menu.js): การ์ดเครื่องมือเรียง 3 คอลัมน์ ใช้พื้นที่คุ้มขึ้น */
-  @media(min-width:1100px){.grid{grid-template-columns:repeat(3,1fr)}}
+  .tile.primary .lb{font-family:var(--serifth);font-size:16px}
 
   .loading{color:var(--stone);text-align:center;padding:60px 0;font-family:var(--serifth)}
   .err{color:#A32D2D;text-align:center;padding:40px 0;line-height:1.6}
