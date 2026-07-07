@@ -373,6 +373,7 @@ function _hexHSL(hex){ let h=String(hex||'').replace('#',''); if(h.length===3) h
 function classifyHex(hex){ const c=_hexHSL(hex); if(!c) return 'cream'; const {h,s,l}=c;
   if(l>=0.85 && (1-Math.abs(2*l-1))*s <= 0.12) return 'cream';  // สว่างมาก+อิ่มสีต่ำ = ครีม/ขาว (ชมพูอ่อน/ฟ้าอ่อนไม่นับ)
   if(l<=0.22) return 'black'; if(s<=0.12) return 'grey';
+  if(h>=25&&h<=55&&l>=0.6&&l<=0.86&&s<=0.45) return 'cream';  // beige/nude/แซนด์/แชมเปญ = โทนครีม (โผล่ตอนกรอง "ครีม")
   if(h>=15&&h<=50&&s<=0.5&&l<=0.6) return 'brown';
   if(h<15||h>=330) return (s<0.5||l>0.62)?'pink':'red';
   if(h<45) return 'peach'; if(h<68) return 'yellow'; if(h<165) return 'green';
@@ -404,7 +405,7 @@ function expandColorSel(sel){ const s=new Set(sel); sel.forEach(k=>(COLOR_NEAR[k
 
 function renderFilters() {
   // ปุ่มสีเดียว (rainbow) → เปิด modal เลือกสี/ดูดสีจากรูป
-  const brands = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
+  const brands = [...new Set(GARMENTS.map(g => gbrand(g)).filter(Boolean))];  // canonical — ให้ตรงกับที่ filter เทียบ (gbrand) ไม่งั้นบางแบรนด์กรองแล้วว่าง
   const selFams = fColors.map(k => COLOR_FAMILIES.find(f => f.key === k)).filter(Boolean);
   const colorBtn = `<button class="colorpick ${fColors.length?'on':''}" onclick="openColorModal()">${selFams.length ? `<span class="cpdots">${selFams.slice(0,6).map(f=>`<i style="background:${f.hex}"></i>`).join('')}</span>${lang==='th'?`${selFams.length} สี`:`${selFams.length}`}` : `<i class="rainbow"></i>${lang==='th'?'เลือกสี':'Colour'}`}</button>`;
   // ปุ่ม "ลาย/เนื้อผ้า" — เปิด picker เหมือนปุ่มสี (ไอคอนลายจุด 24px ให้สูงเท่าปุ่มสี)
@@ -659,7 +660,7 @@ function groupByColor(cards){
   m.forEach(sibs => {
     if (sibs.length === 1) { out.push(sibs[0]); return; }
     let rep = sibs[0];
-    if (fColors.length) { const sel=expandColorSel(fColors); const hit = sibs.find(s => [...familiesOf(s)].some(f => sel.includes(f))); if (hit) rep = hit; }
+    if (fColors.length) { const hit = sibs.find(s => [...familiesOf(s)].some(f => fColors.includes(f))); if (hit) rep = hit; }
     out.push(Object.assign({}, rep, { _colorSiblings: sibs }));
   });
   return out;
@@ -672,7 +673,7 @@ function galleryPhotos(g){ const p = Array.isArray(g.photos)? g.photos : []; con
 function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
-    (!fColors.length || (function(){ const sel=expandColorSel(fColors); return [...familiesOf(g)].some(fam => sel.includes(fam)); })()) &&
+    (!fColors.length || [...familiesOf(g)].some(fam => fColors.includes(fam))) &&
     (!fFabric.length || (Array.isArray(g.tags) && g.tags.some(tg => fFabric.includes(tg)))) &&
     (!fBrand || gbrand(g).toLowerCase() === String(fBrand).toLowerCase()) &&
     (!fMood || garmentGroup(g) === fMood) &&

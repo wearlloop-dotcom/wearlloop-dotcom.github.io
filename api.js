@@ -54,7 +54,8 @@ window.API = (function () {
       season: r.color_season, occasion_tags: r.occasion_tags || [],
       tags: Array.isArray(r.tags) ? r.tags : [],   // ลาย/เนื้อผ้า (lace/floral/satin…) ไว้ค้นหา
       colorFamily: r.color_family || null,          // กลุ่มสีที่ operator ตั้งเอง (คุมตัวกรองสีตรง ๆ)
-      bg: r.color_hex ||'#E7E2DA', isNew: false,
+      bg: r.color_hex ||'#E7E2DA',
+      isNew: r.created_at ? (Date.now() - new Date(r.created_at).getTime()) < 14*864e5 : false,  // เพิ่มเข้าคลังใน 14 วัน = มาใหม่
     };
   }
 
