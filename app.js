@@ -8,6 +8,8 @@ let fOccasion = null, fColors = [], fBrand ='', fMood = null, fToneOnly = false,
 let fFabric = [];  // filter ลาย/เนื้อผ้า (lace/floral/satin…) จาก g.tags
 const FABRIC_LABELS = { lace:['ลูกไม้','Lace'], floral:['ลายดอก','Floral'], print:['ลายพิมพ์','Print'], solid:['สีพื้น','Solid'], embroidered:['ปัก','Embroidered'], sequin:['เลื่อม','Sequin'], glitter:['กลิตเตอร์','Glitter'], ruffle:['ระบาย','Ruffle'], pleated:['อัดพลีท','Pleated'], satin:['ซาติน','Satin'], chiffon:['ชีฟอง','Chiffon'], tulle:['ตาข่าย','Tulle'], velvet:['กำมะหยี่','Velvet'], knit:['ไหมพรม','Knit'], sheer:['ซีทรู','Sheer'], cutout:['เว้าโชว์','Cutout'], bow:['โบว์','Bow'], feather:['ขนนก','Feather'] };
 function fabricLabel(k){ const m=FABRIC_LABELS[k]; return m ? (lang==='th'?m[0]:m[1]) : k; }
+// คำค้นหาของแต่ละลาย/เนื้อผ้า (อังกฤษ+ไทย+คำพ้อง) — ให้พิมพ์ "ลูกไม้/ลายดอก/lace/floral" ในช่องค้นหาแล้วเจอ
+const TAG_SEARCH = { lace:'lace ลูกไม้', floral:'floral flower ลายดอก ดอกไม้ ดอก', print:'print pattern ลายพิมพ์ ลาย', solid:'solid plain เรียบ สีพื้น พื้น', embroidered:'embroidered embroidery ปัก งานปัก', sequin:'sequin เลื่อม', glitter:'glitter กลิตเตอร์ ประกาย', ruffle:'ruffle ระบาย', pleated:'pleated pleat อัดพลีท พลีท จีบ', satin:'satin silk ซาติน ผ้ามัน มันวาว', chiffon:'chiffon ชีฟอง', tulle:'tulle mesh ตาข่าย', velvet:'velvet กำมะหยี่', knit:'knit ไหมพรม', sheer:'sheer โปร่ง ซีทรู', cutout:'cutout เว้า เว้าโชว์', bow:'bow โบว์', feather:'feather ขนนก' };
 let gPersonalRecs = [];  // โค้ดชุดแนะนำเฉพาะบุคคล (collaborative) — เรียงตามความเกี่ยวข้อง
 let gQuery = '';  // คำค้นหา catalog (ชื่อ/แบรนด์/โอกาส/สี)
 let _searchTimer = null;
@@ -23,8 +25,9 @@ function matchQuery(g) {
   // brand alias/positioning → ค้นหา "มิตร", "celeb", "ราตรี", สะกดต่าง ก็เจอ
   const bm = window.LLOOP_BRANDS && window.LLOOP_BRANDS.lookup(g.brand);
   const bx = bm ? (bm.aliases.join(' ') + ' ' + bm.note + ' ' + (bm.types || []).join(' ')) : '';
+  const tagWords = (g.tags || []).map(tg => TAG_SEARCH[tg] || tg).join(' ');   // ลาย/เนื้อผ้า + คำพ้อง (ไทย/อังกฤษ)
   const hay = [g.name, g.brand, bx, g.category, (g.occasion_tags || []).map(occName).join(' '),
-    g.colors.map(c => c[0]).join(' ')].join(' ').toLowerCase();
+    g.colors.map(c => c[0]).join(' '), tagWords, g.fabric || ''].join(' ').toLowerCase();
   return hay.includes(gQuery);
 }
 let gUseDate = null, gAvailSet = null, gOnlyAvail = false;  // เลือกวันใช้ตั้งแต่หน้าแรก
@@ -403,10 +406,13 @@ function renderFilters() {
   const brands = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
   const selFams = fColors.map(k => COLOR_FAMILIES.find(f => f.key === k)).filter(Boolean);
   const colorBtn = `<button class="colorpick ${fColors.length?'on':''}" onclick="openColorModal()">${selFams.length ? `<span class="cpdots">${selFams.slice(0,6).map(f=>`<i style="background:${f.hex}"></i>`).join('')}</span>${lang==='th'?`${selFams.length} สี`:`${selFams.length}`}` : `<i class="rainbow"></i>${lang==='th'?'เลือกสี':'Colour'}`}</button>`;
+  // ปุ่ม "ลาย/เนื้อผ้า" — เปิด picker เหมือนปุ่มสี (โชว์เฉพาะเมื่อมีลายในสต็อก)
+  const fabricBtn = fabricsPresent().length ? `<button class="colorpick ${fFabric.length?'on':''}" onclick="openFabricModal()">${fFabric.length ? (lang==='th'?`${fFabric.length} ลาย`:`${fFabric.length}`) : (lang==='th'?'ลาย/ผ้า':'Fabric')}</button>` : '';
   const opts = [`<option value="">${t('allBrands')}</option>`].concat(brands.map(b =>`<option value="${b}"${fBrand === b?'selected':''}>${b}</option>`)).join('');
   $('#filters').innerHTML =`
     <button class="tone ${fToneOnly?'':'off'}" onclick="toggleTone()">● ${t('myTone')}</button>
     ${colorBtn}
+    ${fabricBtn}
     <select class="brandsel" onchange="setBrand(this.value)">${opts}</select>`;
   renderBrandChips();
   renderQuickFilters();
@@ -424,15 +430,34 @@ function renderQuickFilters(){
     `<button class="qf ${fNewOnly?'on':''}" onclick="setNewOnly()">${TH?'มาใหม่':'New'}</button>`+
     `<button class="qf ${fPrice?'on':''}" onclick="cyclePrice()">${TH?'งบ':'Budget'} · ${priceLabel}</button>`+
     `<button class="qf ${availOn?'on':''}" onclick="quickAvail()">${TH?'ว่างวันฉัน':'Free on date'}${gUseDate?' · '+fmtDate(gUseDate):''}</button>`;
-  // ลาย/เนื้อผ้า — โชว์เฉพาะ tag ที่มีจริงในสต็อก
-  const FABRIC_ORDER=['lace','floral','print','solid','satin','chiffon','tulle','velvet','knit','embroidered','sequin','glitter','ruffle','pleated','sheer','cutout','bow','feather'];
-  const present=FABRIC_ORDER.filter(k=>GARMENTS.some(g=>Array.isArray(g.tags)&&g.tags.includes(k)));
-  if(present.length){
-    el.innerHTML += `<span style="width:1px;align-self:center;height:16px;background:var(--line,#E7E5E1);margin:0 4px"></span>`
-      + present.map(k=>`<button class="qf ${fFabric.includes(k)?'on':''}" onclick="setFabric('${k}')">${fabricLabel(k)}</button>`).join('');
-  }
 }
-function setFabric(k){ const i=fFabric.indexOf(k); if(i<0) fFabric.push(k); else fFabric.splice(i,1); renderQuickFilters(); renderGrid(); }
+// ลาย/เนื้อผ้าที่มีจริงในสต็อก (เรียงตามลำดับที่อ่านง่าย)
+const FABRIC_ORDER=['lace','floral','print','embroidered','sequin','glitter','ruffle','pleated','bow','cutout','sheer','satin','chiffon','tulle','velvet','knit','feather','solid'];
+function fabricsPresent(){ return FABRIC_ORDER.filter(k=>GARMENTS.some(g=>Array.isArray(g.tags)&&g.tags.includes(k))); }
+function openFabricModal(){
+  const TH=lang==='th'; const present=fabricsPresent();
+  const chip=k=>{ const n=GARMENTS.filter(g=>(g.tags||[]).includes(k)).length; const on=fFabric.includes(k);
+    return `<button data-fk="${k}" onclick="toggleFabricPick('${k}',this)" style="border:1px solid ${on?'#04342C':'#E0DED9'};background:${on?'#04342C':'#fff'};color:${on?'#fff':'#1a1a1a'};border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer">${fabricLabel(k)} <span style="opacity:.55;font-size:11px">${n}</span></button>`; };
+  const ov=document.createElement('div'); ov.id='fabricModal';
+  ov.style.cssText='position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.35);display:flex;align-items:flex-end;justify-content:center';
+  ov.onclick=e=>{ if(e.target===ov) closeFabricModal(); };
+  ov.innerHTML=`<div style="background:#fff;width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:18px 18px 22px;max-height:80vh;overflow:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-weight:700;font-size:16px">${TH?'ลาย / เนื้อผ้า':'Pattern / Fabric'}</div>
+      <button onclick="closeFabricModal()" style="border:0;background:none;font-size:22px;cursor:pointer;line-height:1">×</button></div>
+    <div style="font-size:12px;color:#86857F;margin-bottom:14px">${TH?'เลือกได้หลายอย่าง — ตัวเลข = จำนวนชุด':'Pick any — number = dresses'}</div>
+    <div id="fabricChips" style="display:flex;flex-wrap:wrap;gap:8px">${present.map(chip).join('')}</div>
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button onclick="clearFabric()" style="flex:1;border:1px solid #E0DED9;background:#fff;border-radius:10px;padding:11px;cursor:pointer">${TH?'ล้าง':'Clear'}</button>
+      <button onclick="closeFabricModal()" style="flex:2;border:0;background:#04342C;color:#fff;border-radius:10px;padding:11px;cursor:pointer;font-weight:600">${TH?'ดูชุด':'Show dresses'}</button></div></div>`;
+  document.body.appendChild(ov); document.body.style.overflow='hidden';
+}
+function closeFabricModal(){ const o=document.getElementById('fabricModal'); if(o) o.remove(); document.body.style.overflow=''; }
+function toggleFabricPick(k,btn){ const i=fFabric.indexOf(k); if(i<0)fFabric.push(k); else fFabric.splice(i,1); const on=fFabric.includes(k);
+  if(btn){ btn.style.background=on?'#04342C':'#fff'; btn.style.color=on?'#fff':'#1a1a1a'; btn.style.borderColor=on?'#04342C':'#E0DED9'; }
+  renderFilters(); renderGrid(); }
+function clearFabric(){ fFabric=[]; document.querySelectorAll('#fabricChips button').forEach(b=>{ b.style.background='#fff'; b.style.color='#1a1a1a'; b.style.borderColor='#E0DED9'; }); renderFilters(); renderGrid(); }
+function setFabric(k){ toggleFabricPick(k); }  // เผื่อโค้ดเก่าเรียก
 function setNewOnly(){ fNewOnly=!fNewOnly; renderQuickFilters(); renderGrid(); }
 function cyclePrice(){ const o=[null,'lo','mid','hi']; fPrice=o[(o.indexOf(fPrice)+1)%o.length]; renderQuickFilters(); renderGrid(); }
 function quickAvail(){
@@ -934,8 +959,9 @@ function openDetail(id) {
   const credit = Math.min(CUSTOMER.credit_balance || 0, Math.round(g.price * 0.5));
   const fabric = lang ==='th'? g.fabric : (g.fabric_en || g.fabric);
   const tipList = lang ==='th'? (g.styling_tips || []) : (g.tips_en || g.styling_tips || []);
-  const fabricTags = [
-`<span class="ftag main">${fabric ||'—'}</span>`,
+  const patternTags = (g.tags||[]).map(tg=>`<span class="ftag main">${fabricLabel(tg)}</span>`).join('');  // ลาย/เนื้อผ้า (ลูกไม้/ลายดอก…) โชว์เด่น
+  const fabricTags = [ patternTags,
+`<span class="ftag">${fabric ||'—'}</span>`,
 `<span class="ftag">${stretchLabel(g.stretch)}</span>`,
     g.lining?`<span class="ftag">${t('lining')}</span>`:'',
     g.weight?`<span class="ftag">${weightName(g.weight)}</span>`:'',
