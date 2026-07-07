@@ -406,8 +406,9 @@ function renderFilters() {
   const brands = [...new Set(GARMENTS.map(g => g.brand).filter(Boolean))];
   const selFams = fColors.map(k => COLOR_FAMILIES.find(f => f.key === k)).filter(Boolean);
   const colorBtn = `<button class="colorpick ${fColors.length?'on':''}" onclick="openColorModal()">${selFams.length ? `<span class="cpdots">${selFams.slice(0,6).map(f=>`<i style="background:${f.hex}"></i>`).join('')}</span>${lang==='th'?`${selFams.length} สี`:`${selFams.length}`}` : `<i class="rainbow"></i>${lang==='th'?'เลือกสี':'Colour'}`}</button>`;
-  // ปุ่ม "ลาย/เนื้อผ้า" — เปิด picker เหมือนปุ่มสี (โชว์เฉพาะเมื่อมีลายในสต็อก)
-  const fabricBtn = fabricsPresent().length ? `<button class="colorpick ${fFabric.length?'on':''}" onclick="openFabricModal()">${fFabric.length ? (lang==='th'?`${fFabric.length} ลาย`:`${fFabric.length}`) : (lang==='th'?'ลาย/ผ้า':'Fabric')}</button>` : '';
+  // ปุ่ม "ลาย/เนื้อผ้า" — เปิด picker เหมือนปุ่มสี (ไอคอนลายจุด 24px ให้สูงเท่าปุ่มสี)
+  const fabIcon = `<i style="width:24px;height:24px;border-radius:50%;background:radial-gradient(rgba(90,70,110,.85) 1.2px,transparent 1.5px) 0 0/5px 5px, #EFE9DE;border:1px solid rgba(0,0,0,.08);flex:none"></i>`;
+  const fabricBtn = fabricsPresent().length ? `<button class="colorpick ${fFabric.length?'on':''}" onclick="openFabricModal()">${fabIcon}${fFabric.length ? (lang==='th'?`${fFabric.length} ลาย`:`${fFabric.length}`) : (lang==='th'?'ลาย/ผ้า':'Fabric')}</button>` : '';
   const opts = [`<option value="">${t('allBrands')}</option>`].concat(brands.map(b =>`<option value="${b}"${fBrand === b?'selected':''}>${b}</option>`)).join('');
   $('#filters').innerHTML =`
     <button class="tone ${fToneOnly?'':'off'}" onclick="toggleTone()">● ${t('myTone')}</button>
