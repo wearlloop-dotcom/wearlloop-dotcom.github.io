@@ -385,12 +385,18 @@ function classifyName(name){ const n=String(name||'').toLowerCase();
   if(/pink|blush|rosy|\brose\b|flamingo|cherry|sugar|fleur|bouquet|sakura|magenta|fuchsia|dandelion/.test(n)) return 'pink';
   if(/\bred\b|ruby|scarlet|crimson|wine|burgundy/.test(n)) return 'red';
   return 'cream'; }
+// สีหลักของชุด (1 สี) — operator ตั้งเอง > เดาจาก hex > เดาจากชื่อ
 function familiesOf(g){ const fams=new Set();
-  // 1) ถ้า operator ตั้งกลุ่มสีเอง (หลังบ้าน) → ใช้เลย แม่นสุด
-  if(g.colorFamily){ fams.add(g.colorFamily); return fams; }
-  // 2) ไม่งั้นเดาจากสีจริงที่สต็อก (color_hex/color_name) — เลิกใช้ color_variants ของร้านต้นทาง
+  if(g.colorFamily) fams.add(g.colorFamily);
   (g.colors||[]).forEach(c=>{ const hex=c[1]; if(hex&&hex!==PLACEHOLDER_HEX) fams.add(classifyHex(hex)); else if(c[0]&&c[0]!=='—') fams.add(classifyName(c[0])); });
   if(!fams.size) fams.add('cream'); return fams; }
+// สีใกล้เคียง (algorithm เดียวทุกชุด) — เลือกสีไหน โชว์สีข้างเคียงที่ตากลมกลืนด้วย (เช่น ครีม↔แซนด์เบจ/เทา)
+const COLOR_NEAR = {
+  cream:['peach','grey','brown'], peach:['cream','yellow','pink','brown'], brown:['cream','peach','grey'],
+  grey:['cream','brown'], yellow:['peach','cream','green'], pink:['peach','red','purple'],
+  red:['pink','brown'], purple:['pink','blue'], blue:['purple','grey','green'], green:['yellow','blue'], black:['grey'],
+};
+function expandColorSel(sel){ const s=new Set(sel); sel.forEach(k=>(COLOR_NEAR[k]||[]).forEach(n=>s.add(n))); return [...s]; }
 
 function renderFilters() {
   // ปุ่มสีเดียว (rainbow) → เปิด modal เลือกสี/ดูดสีจากรูป
@@ -626,7 +632,7 @@ function groupByColor(cards){
   m.forEach(sibs => {
     if (sibs.length === 1) { out.push(sibs[0]); return; }
     let rep = sibs[0];
-    if (fColors.length) { const hit = sibs.find(s => [...familiesOf(s)].some(f => fColors.includes(f))); if (hit) rep = hit; }
+    if (fColors.length) { const sel=expandColorSel(fColors); const hit = sibs.find(s => [...familiesOf(s)].some(f => sel.includes(f))); if (hit) rep = hit; }
     out.push(Object.assign({}, rep, { _colorSiblings: sibs }));
   });
   return out;
@@ -639,7 +645,7 @@ function galleryPhotos(g){ const p = Array.isArray(g.photos)? g.photos : []; con
 function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
-    (!fColors.length || [...familiesOf(g)].some(fam => fColors.includes(fam))) &&
+    (!fColors.length || (function(){ const sel=expandColorSel(fColors); return [...familiesOf(g)].some(fam => sel.includes(fam)); })()) &&
     (!fFabric.length || (Array.isArray(g.tags) && g.tags.some(tg => fFabric.includes(tg)))) &&
     (!fBrand || gbrand(g).toLowerCase() === String(fBrand).toLowerCase()) &&
     (!fMood || garmentGroup(g) === fMood) &&
@@ -936,13 +942,14 @@ function openDetail(id) {
     g.sheer?`<span class="ftag">${t('sheer')}</span>`:`<span class="ftag">${t('notSheer')}</span>`,
 ].join('');
   window._curDetailId = g.id;  // ให้ปุ่มสลับหน่วยเรียก measureCells ใหม่ได้
-  const swatches = g.colors.map(c =>`<div class="swatch"><i style="background:${c[1]}"></i><span>${c[0]}</span></div>`).join('');
-  // ใช้ color_variants เฉพาะตัวที่มี "รูปจริง" — กันช่องเทาเปล่า (variant ที่ image=null) ขึ้นเป็นสีลวงตา
-  const cvars = ((g.sourceMeta && g.sourceMeta.color_variants) || []).filter(c => c && c.image);
-  window._cvars = cvars;
-  const colorSel = cvars.length
-    ? `<div class="sec">${lang==='th'?'สีที่มี':'Colors'} (${cvars.length})</div><div class="dcolors" id="dcolors">${cvars.map((c,i)=>`<button class="dcolor${i===0?' on':''}" onclick="setGColor(${i})" title="${(c.name||'').replace(/"/g,'')}">${c.image?`<i style="background-image:url('${c.image}')"></i>`:`<i class="noimg"></i>`}<span>${c.name||''}</span></button>`).join('')}</div>`
-    : `<div class="sec">${t('secColor')}</div><div class="colors">${swatches}</div>`;
+  // สีของ "ทรงเดียวกัน" ทุก SKU (คนละสี = คนละตัว) → swatch สลับสีได้ในการ์ด
+  const _cgSeen = new Set();
+  const colorSibs = GARMENTS.filter(x => colorGroupKey(x)===colorGroupKey(g))
+    .filter(x => { const k=String((x.colors&&x.colors[0]&&x.colors[0][0])||x.id).toLowerCase(); if(_cgSeen.has(k)) return false; _cgSeen.add(k); return true; });
+  const swatches = colorSibs.map(s => { const c=(s.colors&&s.colors[0])||['สี','#E7E2DA']; const cur=s.id===g.id;
+    return `<div class="swatch" ${cur?'':`onclick="openDetail('${s.id}')" style="cursor:pointer"`} title="${String(c[0]).replace(/"/g,'')}"><i style="background:${c[1]};${cur?'outline:2px solid var(--ink,#1a1a1a);outline-offset:2px':''}"></i><span>${c[0]}${(cur&&colorSibs.length>1)?' ✓':''}</span></div>`; }).join('');
+  window._cvars = [];
+  const colorSel = `<div class="sec">${t('secColor')}${colorSibs.length>1?` (${colorSibs.length})`:''}</div><div class="colors">${swatches}</div>`;
   const tips = tipList.map(x =>`<div class="trow"><i></i>${x}</div>`).join('');
 
   const galImgs = galleryPhotos(g);
