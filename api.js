@@ -69,22 +69,25 @@ window.API = (function () {
 
     // 2) upsert ลูกค้าจาก UID + log touchpoint (remarketing audience)
     let customer = window.MOCK.CUSTOMER;
+    // ทุกขั้นตอน login/โปรไฟล์ "ต้องไม่ทำให้แคตตาล็อกพัง" — แยก try/catch ต่อขั้น (เช่น anon write โดนบล็อก me_profile ยังทำงาน)
     if (lineUid) {
-      await c.from('customers').upsert(
+      try { await c.from('customers').upsert(
         { line_uid: lineUid, display_name: profile.displayName, picture_url: profile.pictureUrl },
-        { onConflict:'line_uid'});
-      await c.from('customer_touchpoints').insert(
-        { line_uid: lineUid, kind:'open_app', detail: { source:'liff'} });
-      // อ่านโปรไฟล์ของตัวเองผ่าน me-rpc (verify LINE idToken) — กัน anon อ่าน PII ลูกค้าทุกแถว (R-1)
-      const { data } = window.meRpc
-        ? await window.meRpc('me_profile', {})
-        : await c.from('customers').select('*').eq('line_uid', lineUid).single();
-      if (data) customer = data;
-      // สร้าง/ดึงรหัสนัดสไตลิสต์ (ให้พาร์ทเนอร์ค้นเจอ)
-      if (customer.id &&!customer.link_code) {
-        const { data: code } = await window.meRpc('ensure_link_code', { p_customer: customer.id });
-        if (code) customer.link_code = code;
-      }
+        { onConflict:'line_uid'}); } catch (e) { console.warn('LLOOP: customer upsert skipped', e); }
+      try { await c.from('customer_touchpoints').insert(
+        { line_uid: lineUid, kind:'open_app', detail: { source:'liff'} }); } catch (e) {}
+      try {
+        // อ่านโปรไฟล์ของตัวเองผ่าน me-rpc (verify LINE idToken) — กัน anon อ่าน PII ลูกค้าทุกแถว (R-1)
+        const { data } = window.meRpc
+          ? await window.meRpc('me_profile', {})
+          : await c.from('customers').select('*').eq('line_uid', lineUid).single();
+        if (data) customer = data;
+        // สร้าง/ดึงรหัสนัดสไตลิสต์ (ให้พาร์ทเนอร์ค้นเจอ)
+        if (customer.id &&!customer.link_code) {
+          const { data: code } = await window.meRpc('ensure_link_code', { p_customer: customer.id });
+          if (code) customer.link_code = code;
+        }
+      } catch (e) { console.warn('LLOOP: profile load skipped — showing catalog anyway', e); }
     }
 
     // 3) แคตตาล็อก (เฉพาะที่ data_status='ready')
