@@ -92,13 +92,10 @@
 </style>
 </head>
 <body>
-<header><div class="contain hbar">
-  <div class="logo">LLOOP</div>
-  <a class="shopl" href="index.html"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg> ดูทั้งร้าน</a>
-</div></header>
+<header class="lloop-topbar" data-back="index.html" data-back-th="ดูทั้งร้าน" data-back-en="Shop all"></header>
 
 <div class="contain" id="root">
-  <div class="edge"><p>กำลังโหลดชุด…</p></div>
+  <div class="edge"><p data-i18n="Loading the piece…">กำลังโหลดชุด…</p></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -112,6 +109,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=51"></script>
 <script src="api.js?v=54"></script>
+<script src="nav.js?v=1"></script>
 <script>
 // ============================================================
 //  g.html — สแกน QR ที่ป้ายชุด/บูธ → ดูชุด+ราคา → เลือกวัน → จองในระบบ
@@ -150,11 +148,11 @@ function rangeBusy(from, to){
   const code = readCode();
   let state = null;
   try { state = await window.API.init(); } catch (e) { console.warn(e); }
-  if (!state) { return renderEdge('โหลดไม่สำเร็จ', 'ลองสแกนใหม่อีกครั้ง หรือเปิดดูทั้งร้านได้เลยค่ะ'); }
+  if (!state) { return renderEdge(NAV.t('โหลดไม่สำเร็จ','Couldn’t load'), NAV.t('ลองสแกนใหม่อีกครั้ง หรือเปิดดูทั้งร้านได้เลยค่ะ','Try scanning again, or browse the whole shop.')); }
   CUSTOMER = state.CUSTOMER || {};
-  if (!code) return renderEdge('ไม่พบรหัสชุด', 'สแกน QR ที่ป้ายชุดอีกครั้งนะคะ');
+  if (!code) return renderEdge(NAV.t('ไม่พบรหัสชุด','No item code'), NAV.t('สแกน QR ที่ป้ายชุดอีกครั้งนะคะ','Please scan the QR on the tag again.'));
   G = (state.GARMENTS || []).find(x => String(x.code || '').toUpperCase() === code);
-  if (!G) return renderEdge('ชุดนี้ยังไม่เปิดให้เช่า', 'อาจกำลังซัก/เตรียม หรือรหัสไม่ตรง — เลือกชุดอื่นในร้านได้เลยค่ะ');
+  if (!G) return renderEdge(NAV.t('ชุดนี้ยังไม่เปิดให้เช่า','This piece isn’t available yet'), NAV.t('อาจกำลังซัก/เตรียม หรือรหัสไม่ตรง — เลือกชุดอื่นในร้านได้เลยค่ะ','It may be in cleaning or prep, or the code doesn’t match — browse other pieces in the shop.'));
   window.track?.('view_item', G.code, { price: G.price });
   try { PAY = await window.API.payInfo(); } catch (e) {}
   try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) { BOOKED = []; }
@@ -165,7 +163,7 @@ function renderEdge(title, body){
   $('#root').innerHTML = `<div class="edge">
     <div class="ei"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg></div>
     <h4>${title}</h4><p>${body}</p>
-    <a class="btn sage" href="index.html" style="display:block;text-decoration:none">ดูทั้งร้าน</a>
+    <a class="btn sage" href="index.html" style="display:block;text-decoration:none">${NAV.t('ดูทั้งร้าน','Shop all')}</a>
   </div>`;
 }
 
@@ -174,33 +172,33 @@ function renderItem(){
   const photo = G.photo
     ? `<img class="photo" src="${G.photo}" alt="${G.name}" referrerpolicy="no-referrer">`
     : `<div class="photo ph" style="background:${G.bg || '#EFEDE9'}">${(G.code || 'LLOOP')}</div>`;
-  const worth = G.retail ? `<span class="worth">มูลค่าชุด <b>${baht(G.retail)}</b></span>` : '';
-  const rented = (G.timesRented > 0) ? `เคยถูกเช่า ${G.timesRented} ครั้ง` : 'ชุดพร้อมเช่า';
+  const worth = G.retail ? `<span class="worth">${NAV.t('มูลค่าชุด','Retail value')} <b>${baht(G.retail)}</b></span>` : '';
+  const rented = (G.timesRented > 0) ? NAV.t(`เคยถูกเช่า ${G.timesRented} ครั้ง`,`Rented ${G.timesRented} times`) : NAV.t('ชุดพร้อมเช่า','Ready to rent');
   const cta = signedIn
-    ? `<button class="btn" id="bookBtn" onclick="onBook()" disabled>เลือกวันก่อนนะคะ</button>`
-    : `<button class="btn sage" onclick="window.LiffAuth.signIn()">เข้าสู่ระบบด้วย LINE เพื่อจอง</button>
-       <div class="signhint">เข้าระบบด้วย LINE ครั้งเดียว แล้วเลือกวันจองได้เลย</div>`;
+    ? `<button class="btn" id="bookBtn" onclick="onBook()" disabled>${NAV.t('เลือกวันก่อนนะคะ','Pick a date first')}</button>`
+    : `<button class="btn sage" onclick="window.LiffAuth.signIn()">${NAV.t('เข้าสู่ระบบด้วย LINE เพื่อจอง','Sign in with LINE to book')}</button>
+       <div class="signhint">${NAV.t('เข้าระบบด้วย LINE ครั้งเดียว แล้วเลือกวันจองได้เลย','Sign in once with LINE, then pick your dates.')}</div>`;
   $('#root').innerHTML = `
     ${photo}
-    <div class="eyebrow">เช่าชุดนี้</div>
+    <div class="eyebrow">${NAV.t('เช่าชุดนี้','Rent this piece')}</div>
     <h1 class="gname">${G.name || G.code}</h1>
     <div class="gmeta">${[G.brand, G.code].filter(Boolean).join(' · ')}</div>
     <div class="priceline">
-      <span class="now">${baht(G.price)}</span><span class="per">/วัน เริ่มต้น</span>
+      <span class="now">${baht(G.price)}</span><span class="per">${NAV.t('/วัน เริ่มต้น','/day from')}</span>
       ${worth}
     </div>
-    <div class="trust">${rented} · มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป</div>
+    <div class="trust">${rented} · ${NAV.t('มัดจำคืนหลังตรวจชุด · ส่งฟรีเมื่อเช่า 3 วันขึ้นไป','Deposit refunded after inspection · free shipping on 3+ day rentals')}</div>
 
     <div class="sec">
-      <div class="sectitle">เลือกวันที่จะใช้</div>
-      <div class="seccap">วันแรกคือวันรับ/วันใช้งาน — เราเช็กให้ทันทีว่าว่างไหม</div>
-      <label class="fl">วันที่ใช้งาน</label>
+      <div class="sectitle">${NAV.t('เลือกวันที่จะใช้','Choose your date')}</div>
+      <div class="seccap">${NAV.t('วันแรกคือวันรับ/วันใช้งาน — เราเช็กให้ทันทีว่าว่างไหม','The first day is your pickup/wear day — we check availability instantly.')}</div>
+      <label class="fl">${NAV.t('วันที่ใช้งาน','Wear date')}</label>
       <input type="date" id="useDate" min="${todayStr()}" onchange="onPick()">
-      <label class="fl">เช่ากี่วัน</label>
+      <label class="fl">${NAV.t('เช่ากี่วัน','How many days')}</label>
       <div class="durchips" id="durchips">
-        <button data-d="1" onclick="setDur(1)">1 วัน</button>
-        <button data-d="3" class="on" onclick="setDur(3)">3 วัน</button>
-        <button data-d="5" onclick="setDur(5)">5 วัน</button>
+        <button data-d="1" onclick="setDur(1)">${NAV.t('1 วัน','1 day')}</button>
+        <button data-d="3" class="on" onclick="setDur(3)">${NAV.t('3 วัน','3 days')}</button>
+        <button data-d="5" onclick="setDur(5)">${NAV.t('5 วัน','5 days')}</button>
       </div>
       <div class="availmsg" id="availMsg"></div>
       <div id="summary"></div>
@@ -217,17 +215,17 @@ function setDur(d){
 async function onPick(){
   const from = $('#useDate') && $('#useDate').value;
   const sum = $('#summary'), msg = $('#availMsg'), btn = $('#bookBtn');
-  if (!from){ sum.innerHTML = ''; if (msg) msg.className = 'availmsg'; if (btn){ btn.disabled = true; btn.textContent = 'เลือกวันก่อนนะคะ'; } return; }
+  if (!from){ sum.innerHTML = ''; if (msg) msg.className = 'availmsg'; if (btn){ btn.disabled = true; btn.textContent = NAV.t('เลือกวันก่อนนะคะ','Pick a date first'); } return; }
   const to = addDays(from, gDur - 1);
   if (rangeBusy(from, to)){
     sum.innerHTML = '';
     msg.className = 'availmsg busy';
-    msg.textContent = 'ช่วงวันนี้มีคนจองอยู่ — ลองเลื่อนวัน หรือดูชุดคล้ายกันในร้านนะคะ';
-    if (btn){ btn.disabled = true; btn.textContent = 'ช่วงนี้ไม่ว่าง'; }
+    msg.textContent = NAV.t('ช่วงวันนี้มีคนจองอยู่ — ลองเลื่อนวัน หรือดูชุดคล้ายกันในร้านนะคะ','These dates are already booked — try other dates, or see similar pieces in the shop.');
+    if (btn){ btn.disabled = true; btn.textContent = NAV.t('ช่วงนี้ไม่ว่าง','Not available'); }
     return;
   }
   msg.className = 'availmsg free';
-  msg.textContent = 'ว่างช่วงวันนี้ — จองได้เลย';
+  msg.textContent = NAV.t('ว่างช่วงวันนี้ — จองได้เลย','Available on these dates — ready to book');
   let q = null;
   try { q = await window.API.quote(G.code, CUSTOMER, from, to); } catch (e) {}
   lastQuote = q;
@@ -236,40 +234,40 @@ async function onPick(){
     const hasPP = PAY && (PAY.pay_promptpay_id || PAY.pay_promptpay_qr);
     const payBlock = !hasPP ? '' : `
       <div class="paybox">
-        <div class="qhd">ช่องทางชำระ</div>
+        <div class="qhd">${NAV.t('ช่องทางชำระ','Payment')}</div>
         ${PAY.pay_promptpay_id ? `<div id="ppqr"></div>`
           : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
-        <div class="payamt">สแกนแล้วโอน <b>${baht(q.total)}</b></div>
-        <div class="paynote">${PAY.pay_note || 'จองก่อนเพื่อล็อกชุด แล้วโอน + แนบสลิปในแชต LLOOP ได้เลยค่ะ'}</div>
+        <div class="payamt">${NAV.t('สแกนแล้วโอน','Scan and transfer')} <b>${baht(q.total)}</b></div>
+        <div class="paynote">${PAY.pay_note || NAV.t('จองก่อนเพื่อล็อกชุด แล้วโอน + แนบสลิปในแชต LLOOP ได้เลยค่ะ','Book to lock the piece, then transfer and attach the slip in LLOOP chat.')}</div>
       </div>`;
     sum.innerHTML = `
-      <div class="qhd">สรุปยอด · ${q.days} วัน</div>
-      ${row('ค่าเช่า', baht(q.rate))}
-      ${q.deposit > 0 ? row('มัดจำ (คืนหลังตรวจชุด)', baht(q.deposit)) : ''}
-      ${row('ค่าส่ง', q.shipping > 0 ? baht(q.shipping) : 'ส่งฟรี')}
-      ${row('รวมโอน', baht(q.total), true)}
-      <div class="qdates">วันแรก (วันรับ/ใช้งาน): <b>${fmtDate(q.use_date)}</b> · เช่า ${q.days} วัน</div>
-      <div class="qdates">จัดส่งราว ${fmtDate(q.ship_date)} · กำหนดคืน <b>${fmtDate(q.return_date)}</b></div>
-      ${q.kyc_required ? `<div class="qdates">ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว (แนบบัตร + IG/FB) ช่วยลดมัดจำได้ — ทำในแชตหลังจองได้เลย</div>` : ''}
+      <div class="qhd">${NAV.t('สรุปยอด','Summary')} · ${NAV.t(q.days + ' วัน', q.days + ' days')}</div>
+      ${row(NAV.t('ค่าเช่า','Rental'), baht(q.rate))}
+      ${q.deposit > 0 ? row(NAV.t('มัดจำ (คืนหลังตรวจชุด)','Deposit (refunded after inspection)'), baht(q.deposit)) : ''}
+      ${row(NAV.t('ค่าส่ง','Shipping'), q.shipping > 0 ? baht(q.shipping) : NAV.t('ส่งฟรี','Free'))}
+      ${row(NAV.t('รวมโอน','Total to transfer'), baht(q.total), true)}
+      <div class="qdates">${NAV.t('วันแรก (วันรับ/ใช้งาน):','First day (pickup/wear):')} <b>${fmtDate(q.use_date)}</b> · ${NAV.t('เช่า ' + q.days + ' วัน','rent ' + q.days + ' days')}</div>
+      <div class="qdates">${NAV.t('จัดส่งราว','Ships around')} ${fmtDate(q.ship_date)} · ${NAV.t('กำหนดคืน','Return by')} <b>${fmtDate(q.return_date)}</b></div>
+      ${q.kyc_required ? `<div class="qdates">${NAV.t('ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว (แนบบัตร + IG/FB) ช่วยลดมัดจำได้ — ทำในแชตหลังจองได้เลย','New customers verify once (ID card + IG/FB) to lower the deposit — do it in chat after booking.')}</div>` : ''}
       ${payBlock}`;
     if (PAY && PAY.pay_promptpay_id && window.promptpayBrandedQR){
       const el = document.getElementById('ppqr');
       if (el) window.promptpayBrandedQR(el, PAY.pay_promptpay_id, q.total, PAY.pay_promptpay_type);
     }
   } else { sum.innerHTML = ''; }
-  if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
+  if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
 }
 
 async function onBook(){
   const from = $('#useDate') && $('#useDate').value;
-  if (!from){ toast('เลือกวันก่อนนะคะ'); return; }
+  if (!from){ toast(NAV.t('เลือกวันก่อนนะคะ','Pick a date first')); return; }
   if (!(CUSTOMER && CUSTOMER.id)){ window.LiffAuth.signIn(); return; }
   const to = addDays(from, gDur - 1);
-  const btn = $('#bookBtn'); if (btn){ btn.disabled = true; btn.textContent = 'กำลังจอง…'; }
+  const btn = $('#bookBtn'); if (btn){ btn.disabled = true; btn.textContent = NAV.t('กำลังจอง…','Booking…'); }
   // เช็กว่างวันแรกอีกชั้น (กันชนนาทีสุดท้าย) — book_cart เป็นคนตัดสินจริง
   let free = true; try { free = await window.API.availableOn(G.id, from); } catch (e) {}
   if (free === false){
-    if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
+    if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
     try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) {}
     onPick();
     return;
@@ -286,8 +284,8 @@ async function onBook(){
     window.track?.('booked', G.code, { total });
     renderDone(from, to, total, covered);
   } else {
-    if (btn){ btn.disabled = false; btn.textContent = 'จองชุดนี้ · ล็อกไว้ให้'; }
-    toast('ชุดนี้เพิ่งถูกจองช่วงนั้นพอดี ลองวันอื่นนะคะ');
+    if (btn){ btn.disabled = false; btn.textContent = NAV.t('จองชุดนี้ · ล็อกไว้ให้','Book this piece · lock it in'); }
+    toast(NAV.t('ชุดนี้เพิ่งถูกจองช่วงนั้นพอดี ลองวันอื่นนะคะ','This piece was just booked for those dates — try other dates.'));
     try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) {}
     onPick();
   }
@@ -297,30 +295,33 @@ function renderDone(from, to, total, covered){
   const hasPP = PAY && (PAY.pay_promptpay_id || PAY.pay_promptpay_qr);
   // สมาชิกที่แพ็กคลุมชุดนี้ → ไม่ต้องจ่าย (จองสำเร็จเลย)
   const payBlock = covered
-    ? `<div class="paybox"><div class="paynote" style="text-align:center">ชุดนี้รวมอยู่ในแพ็กสมาชิกของคุณแล้ว — ไม่ต้องโอนเพิ่ม จัดส่งตามวันที่เลือกค่ะ</div></div>`
+    ? `<div class="paybox"><div class="paynote" style="text-align:center">${NAV.t('ชุดนี้รวมอยู่ในแพ็กสมาชิกของคุณแล้ว — ไม่ต้องโอนเพิ่ม จัดส่งตามวันที่เลือกค่ะ','This piece is included in your membership — nothing more to pay, shipped on your chosen date.')}</div></div>`
     : !(hasPP && total) ? '' : `
     <div class="paybox">
-      <div class="qhd">โอนเพื่อยืนยัน</div>
+      <div class="qhd">${NAV.t('โอนเพื่อยืนยัน','Transfer to confirm')}</div>
       ${PAY.pay_promptpay_id ? `<div id="ppqr2"></div>`
         : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
-      <div class="payamt">สแกนแล้วโอน <b>${baht(total)}</b></div>
-      <div class="paynote">โอนแล้วแนบสลิปในแชต LLOOP — ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ</div>
+      <div class="payamt">${NAV.t('สแกนแล้วโอน','Scan and transfer')} <b>${baht(total)}</b></div>
+      <div class="paynote">${NAV.t('โอนแล้วแนบสลิปในแชต LLOOP — ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ','Transfer and attach the slip in LLOOP chat — once the team confirms, the piece is yours, shipped on your chosen date.')}</div>
     </div>`;
   $('#root').innerHTML = `
     <div class="sec">
       <div class="done">
         <div class="di"><span class="ck"></span></div>
-        <h4>ล็อกชุดไว้ให้แล้ว</h4>
-        <p>${G.name || G.code} · ใช้วันที่ ${fmtDate(from)}${gDur > 1 ? ` ถึง ${fmtDate(to)}` : ''}</p>
+        <h4>${NAV.t('ล็อกชุดไว้ให้แล้ว','Your piece is locked in')}</h4>
+        <p>${G.name || G.code} · ${NAV.t('ใช้วันที่','Wear date')} ${fmtDate(from)}${gDur > 1 ? `${NAV.t(' ถึง ',' to ')}${fmtDate(to)}` : ''}</p>
       </div>
       ${payBlock}
-      <a class="btn" href="index.html?go=orders" style="display:block;text-decoration:none;text-align:center">ดูออเดอร์ของฉัน</a>
+      <a class="btn" href="index.html?go=orders" style="display:block;text-decoration:none;text-align:center">${NAV.t('ดูออเดอร์ของฉัน','View my orders')}</a>
     </div>`;
   if (PAY && PAY.pay_promptpay_id && total && window.promptpayBrandedQR){
     const el = document.getElementById('ppqr2');
     if (el) window.promptpayBrandedQR(el, PAY.pay_promptpay_id, total, PAY.pay_promptpay_type);
   }
 }
+
+// re-render page content (rendered via JS) when the language toggle flips
+window.addEventListener('lloop:lang', function(){ location.reload(); });
 </script>
 </body>
 </html>

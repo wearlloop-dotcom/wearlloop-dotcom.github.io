@@ -62,10 +62,11 @@ window.API = (function () {
     if (CONFIG.USE_MOCK) {
       return {...window.MOCK, lineUid: null };
     }
-    // 1) LINE login + ดึง UID มาเก็บ (remarketing)
-    const profile = await window.LiffAuth.login(); // {userId, displayName, pictureUrl} | null
-    lineUid = profile && profile.userId;
     const c = client();
+    // 1) LINE login — ต้องไม่ทำให้แคตตาล็อกพัง (ถ้า LIFF/redirect error ก็โหลดชุดแบบ anon)
+    let profile = null;
+    try { profile = await window.LiffAuth.login(); } catch (e) { console.warn('LLOOP: LIFF login failed — catalog only', e); }
+    lineUid = profile && profile.userId;
 
     // 2) upsert ลูกค้าจาก UID + log touchpoint (remarketing audience)
     let customer = window.MOCK.CUSTOMER;
