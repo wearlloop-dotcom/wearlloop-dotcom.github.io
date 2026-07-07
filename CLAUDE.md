@@ -32,5 +32,6 @@ trigger เจาะจงไฟล์ผ่าน `actions_run_trigger` ก็�
 
 ## เอกสารสำคัญ
 
-- `docs/expansion-strategy.md` — แผนขยายธุรกิจ 5 โมเดล + 3 เฟส (trust score, passport, ฝากเช่า ฯลฯ)
+- `docs/expansion-strategy.md` — แผนขยายธุรกิจ 6 โมเดล + 3 เฟส (trust score, passport, ฝากเช่า, resale loop ฯลฯ)
+- `docs/market-research-resale-loop.md` — ผลศึกษาตลาดมือสอง/buyback/ฝากขาย (ข้อมูลผ่านการตรวจสอบ, ก.ค. 2026)
 - งานที่เสร็จแล้ว: trust score (trust.html), garment passport (passport.html), สวิตช์ทั้งหมดใน settings.html
