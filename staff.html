@@ -65,6 +65,7 @@
 </style>
 </head>
 <body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 <div class="bar"><h1>LLOOP</h1><div class="t" id="barSub">STAFF · ทีมงาน</div></div>
 <div class="topctl">
   <select id="langSel" onchange="setLang(this.value)" aria-label="language"></select>
@@ -72,7 +73,7 @@
 </div>
 <div id="howPanel" class="howpanel hide"></div>
 <div class="wrap" id="wrap">
-  <div class="card center" id="loading"><p style="color:var(--stone);padding:30px 0">กำลังโหลด…</p></div>
+  <div class="card center" id="loading"><p style="color:var(--stone);padding:30px 0" data-i18n="Loading…">กำลังโหลด…</p></div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -82,6 +83,7 @@
 <script src="./config.js"></script>
 <script src="./analytics.js"></script>
 <script src="me-api.js"></script>
+<script src="nav.js?v=1"></script>
 <script>
   const sb=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_ANON_KEY);
   if(window.meRpc) sb.rpc=window.meRpc;   // route ทุก rpc ผ่าน gateway me-rpc (override p_line_uid จาก idToken — กัน IDOR)
@@ -161,7 +163,10 @@
         {t:'ເງິນເດືອນ · ເອກະສານ · ສັນຍາ · ຢືນຢັນຕົວຕົນ', s:'ເບິ່ງສະລິບເງິນເດືອນ, ອັບໂຫຼດເອກະສານ, ເຊັນສັນຍາ ແລະ ຢືນຢັນຕົວຕົນ (KYC) ໄດ້ໃນແທັບເຫຼົ່ານີ້.'},
       ] },
   };
-  let LANG=localStorage.getItem('staffLang')||'th'; if(!STAFF_I18N[LANG])LANG='th';
+  // เริ่มต้นตามแถบ topbar ร่วม (nav.js เก็บ lloop_lang เป็น th/en) ถ้ามี — ไม่งั้นใช้ staffLang (รองรับ my/lo)
+  const _navLang=localStorage.getItem('lloop_lang');
+  let LANG=(_navLang==='en'?'en':(localStorage.getItem('staffLang')||'th')); if(!STAFF_I18N[LANG])LANG='th';
+  let _syncingLang=false;
   let howOpen=false, activeRender=null;
   function t(k){const d=STAFF_I18N[LANG]||STAFF_I18N.th;return d[k]!=null?d[k]:STAFF_I18N.th[k];}
   function tf(k){const a=[].slice.call(arguments,1);let s=t(k);a.forEach(x=>{s=s.replace('%s',x);});return s;}
@@ -173,7 +178,11 @@
   }
   function renderHow(){const g=t('guide')||[];$('howPanel').innerHTML=`<div class="card"><div class="guide-h">${t('guideTitle')}</div>${g.map(it=>`<div class="guide-item"><b>${it.t}</b><p>${it.s}</p></div>`).join('')}</div>`;}
   function toggleHow(){howOpen=!howOpen;const p=$('howPanel'),b=$('howBtn');if(howOpen){p.classList.remove('hide');renderHow();b.classList.add('on');}else{p.classList.add('hide');b.classList.remove('on');}b.textContent=howOpen?t('howClose'):t('howBtn');}
-  function setLang(l){if(!STAFF_I18N[l])return;LANG=l;localStorage.setItem('staffLang',l);applyStatic();if(howOpen)renderHow();if(activeRender)activeRender();}
+  function setLang(l){if(!STAFF_I18N[l])return;LANG=l;localStorage.setItem('staffLang',l);applyStatic();if(howOpen)renderHow();if(activeRender)activeRender();
+    // sync แถบ topbar ร่วม เฉพาะ th/en (my/lo ไม่มีปุ่มบน topbar — คงค่าเดิมไว้)
+    if(!_syncingLang && window.NAV && (l==='th'||l==='en') && NAV.lang!==l){ _syncingLang=true; try{ NAV.setLang(l); }catch(e){} _syncingLang=false; }}
+  // แถบ topbar ร่วมสลับภาษา → ขับเครื่องแปลเดิม (render สดอยู่แล้ว ไม่ต้อง reload)
+  window.addEventListener('lloop:lang', function(e){ if(_syncingLang) return; const l=(e.detail&&e.detail.lang)||'th'; if((l==='th'||l==='en') && l!==LANG){ _syncingLang=true; setLang(l); const sel=document.getElementById('langSel'); if(sel) sel.value=l; _syncingLang=false; } });
 
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
   const KYC_FN=(CONFIG.SUPABASE_URL||'https://rprwilsbjptdnvsibjgi.supabase.co')+'/functions/v1/kyc';
@@ -214,7 +223,7 @@
     const {data,error}=await sb.rpc('hr_verify_bind',{p_token:verifyToken,p_line_uid:lineUid});
     if(error){toast('ไม่สำเร็จ: '+error.message);$('bindBtn').disabled=false;return;}
     if(data&&data.error){
-      const m={bad_token:'ลิงก์ไม่ถูกต้องหรือหมดอายุ',uid_taken:'LINE นี้ถูกผูกกับพนักงานคนอื่นแล้ว',no_uid:'อ่าน LINE UID ไม่ได้'}[data.error]||data.error;
+      const m={bad_token:'ลิงก์ไม่ถูกต้องหรือหมดอายุ',uid_taken:'LINE นี้ถูกผูกกับพนักงานคนอื่นแล้ว',token_used:'ลิงก์นี้ถูกใช้ผูกบัญชีอื่นไปแล้ว — แจ้งแอดมินออกลิงก์ใหม่',no_uid:'อ่าน LINE UID ไม่ได้'}[data.error]||data.error;
       toast(m);$('bindBtn').disabled=false;return;
     }
     wrap.innerHTML=`<div class="card gate ok"><div class="icon">✓</div>

@@ -430,7 +430,7 @@ function renderQuickFilters(){
   const priceLabel=fPrice?PL[fPrice]:(TH?'ทุกราคา':'Any');
   const availOn=!!(gUseDate&&gOnlyAvail);
   el.innerHTML =
-    `<button class="qf ${fNewOnly?'on':''}" onclick="setNewOnly()">${TH?'มาใหม่':'New'}</button>`+
+    (GARMENTS.some(g=>g.isNew) ? `<button class="qf ${fNewOnly?'on':''}" onclick="setNewOnly()">${TH?'มาใหม่':'New'}</button>` : '')+  // ซ่อนถ้าไม่มีของใหม่ (กันกดแล้วว่าง)
     `<button class="qf ${fPrice?'on':''}" onclick="cyclePrice()">${TH?'งบ':'Budget'} · ${priceLabel}</button>`+
     `<button class="qf ${availOn?'on':''}" onclick="quickAvail()">${TH?'ว่างวันฉัน':'Free on date'}${gUseDate?' · '+fmtDate(gUseDate):''}</button>`;
 }
@@ -598,10 +598,11 @@ function renderCatnav() {
     { label: t('all'), on:!fForYou &&!fOccasion &&!fToneOnly &&!fWishOnly, act:`setForYouOff();setOccasion(null);setToneOff();setWishOff();renderCatnav();renderGrid()`},
     { label: t('myTone'), on: fToneOnly, act:`toggleTone()`},
     { label: (lang ==='th'?'ที่หมายตา':'Saved'), on: fWishOnly, act:`toggleWishOnly()`},
-    { label: occName('wedding_guest'), on: fOccasion ==='wedding_guest', act:`setOccasion('wedding_guest')`},
-    { label: occName('work'), on: fOccasion ==='work', act:`setOccasion('work')`},
-    { label: occName('cafe'), on: fOccasion ==='cafe', act:`setOccasion('cafe')`},
 ];
+  // โอกาส: data-driven — โชว์เฉพาะที่มีชุดจริง (ไม่โชว์ "งาน/คาเฟ่" ที่ไม่มีชุด → กันกดแล้วว่าง)
+  const OCC_ORDER=['wedding_guest','dinner','party','cafe','work'];
+  const presentOcc=[...new Set(GARMENTS.flatMap(g=>g.occasion_tags||[]))].sort((a,b)=>{const i=OCC_ORDER.indexOf(a),j=OCC_ORDER.indexOf(b);return (i<0?9:i)-(j<0?9:j);});
+  presentOcc.forEach(tg=>items.push({ label: occName(tg), on: fOccasion===tg, act:`setOccasion('${tg}')` }));
   // หมายเหตุ: รายการบัญชี/นำทาง (ครอบครัว/ออเดอร์/สมาชิก/impact/โปรไฟล์) ย้ายไปอยู่ใน
   // เมนูรวม (☰ openMenu) แล้ว — catnav เหลือเฉพาะ "ฟิลเตอร์สินค้า" เพื่อไม่ให้ปนหน้าที่กัน
   el.innerHTML = items.map(i =>`<a onclick="${i.act}" style="${i.on?'border-bottom:2px solid var(--ink);padding-bottom:2px':''}">${i.label}</a>`).join('');
@@ -3943,6 +3944,8 @@ async function boot() {
   catch (e) { console.warn('init failed, fallback to mock', e); s = window.MOCK; }
   OCCASIONS = s.OCCASIONS; CUSTOMER = s.CUSTOMER; EVENT = s.EVENT; GARMENTS = s.GARMENTS;
   normalizeGarmentColors();   // เติมเฉดสีให้ชุดที่ยังไม่ได้แท็กสี → แถบกรองสีเลือกได้จริง
+  // "มาใหม่": ถ้าเกือบทั้งคลังเพิ่งลงพร้อมกัน (เปิดตัว/bulk import) → ยังไม่ถือว่ามีของใหม่ (กัน badge/ฟิลเตอร์ NEW ขึ้นทั้งคลัง)
+  { const nc = GARMENTS.filter(g => g.isNew).length; if (GARMENTS.length && nc > GARMENTS.length*0.5) GARMENTS.forEach(g => g.isNew = false); }
   STAFF_PCT = Number(s.staff_pct) || 0;   // พนักงาน → โชว์ราคาลด + ป้าย
   VENUES = window.MOCK.VENUES;
   // มีโปรไฟล์ (ไซส์/โทนสี/สไตล์จากพาร์ทเนอร์) เปิด"แนะนำสำหรับคุณ"เป็นค่าเริ่มต้น
