@@ -59,7 +59,7 @@
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('LLOOP', size / 2, size / 2 + 1);
     const img = new Image(); img.alt = 'PromptPay LLOOP';
-    img.style.cssText = 'display:block;margin:0 auto;width:210px;max-width:72%;border-radius:8px';
+    img.style.cssText = 'width:210px;max-width:72%;border-radius:8px';
     img.src = c.toDataURL('image/png');
     el.innerHTML = ''; el.appendChild(img);
   }
