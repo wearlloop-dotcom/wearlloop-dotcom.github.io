@@ -4,6 +4,18 @@ Repo นี้คือ **หน้าเว็บ static ของ LLOOP** (เ
 merge เข้า `main` = ขึ้นเว็บจริง https://wearlloop-dotcom.github.io ภายใน ~1-2 นาที
 Backend (SQL + Edge Functions) อยู่คนละ repo: `wearlloop-dotcom/lloop`
 
+## ⚠️ ห้ามแก้หน้า ops ตรงในรีโปนี้ — จะโดน auto-deploy ทับ
+
+repo `lloop` มี workflow `deploy-site.yml` (อยู่บน branch ที่กำลังพัฒนา เช่น `new-arrivals-notify-fix`)
+คอย **copy `lloop/ops/*` + `lloop/liff/*` มาเขียนทับรีโปนี้** ทุกครั้งที่มี push
+(commit ชื่อ "Auto-deploy from lloop@…" / "Publish customer site") —
+เคยเกิดแล้ว: หน้า stock ใหม่ merge ที่นี่ตรง ๆ แล้วโดนทับกลับเป็นของเก่าภายใน 20 นาที
+
+**ต้นทางจริงคือ `lloop/ops/`**: ทุกหน้า ops (`stock.html`, `home.html`, `today.html` ฯลฯ)
++ `ops-api.js`, `ops-ui.css`, `ops-menu.js`, `scan.js`, `qc-photo.js`
+→ แก้ที่ `lloop/ops/` แล้วให้ deploy-site publish มาเอง (path ใน lloop ใช้ `../liff/config.js`
+— ตัว deploy sed เป็น `config.js` ให้ตอน publish) · หน้าลูกค้าต้นทางอยู่ `lloop/liff/`
+
 ## ⚡ ถ้างานต้องแตะ SQL/backend
 
 ไม่ต้องให้ user ก็อบ SQL ไปวางใน SQL Editor เอง — ขอ add repo `wearlloop-dotcom/lloop` เข้าเซสชัน แล้ว:
