@@ -127,6 +127,19 @@
     </div>
   </div>
 
+  <div class="card" id="quizCard" style="display:none">
+    <h2>เกมการ์ดสไตลิสต์ — ฝากวันงาน (เก็บ lead)</h2>
+    <div class="desc">เปิด = หน้าเกม quiz โชว์ฟอร์ม “ฝากวันงานให้เช็คชุดว่าง” หลังเล่นจบ — คนที่ยังไม่กล้าทัก LINE จะทิ้งวันงาน+ไซซ์+งบ+ช่องทางติดต่อไว้ให้เราทักกลับ · lead ใหม่แจ้งเตือนเจ้าของอัตโนมัติ · ปิด = เกมเล่นได้ปกติ ไม่มีฟอร์ม</div>
+    <div class="feat">
+      <div class="info">
+        <div class="name">ฟอร์มฝากวันงานหลังเล่นเกม</div>
+        <div class="note">เหมาะตอนเริ่มยิงโฆษณาเข้าหน้า quiz — วัดผลได้ว่าโฆษณาเปลี่ยนเป็น lead กี่คน</div>
+        <div class="need">ต้องมี: รัน supabase/quiz_funnel.sql ก่อน (ตาราง quiz_leads + RPC)</div>
+      </div>
+      <label class="sw" data-key="quiz_lead_capture_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+  </div>
+
   <div class="card" id="premiumCard" style="display:none">
     <h2>ระบบคุ้มครองชุดออกงาน (ชุดแพง)</h2>
     <div class="desc">เปิดเมื่อพร้อมเริ่มปล่อยเช่าชุดราคาแพง — พอเปิด ระบบจะ “เตือนเจ้าของอัตโนมัติ” ทุกครั้งที่ชุดแพงถูกจอง ให้ทำขั้นตอนคุ้มครอง (วิดีโอก่อนแพค/ตอนแกะของ ฯลฯ) ลดความผิดพลาดของคน · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก</div>
@@ -212,6 +225,7 @@ async function load(){
   $('#panel').style.display = '';
   $('#stylistCard').style.display = '';
   $('#partnerCard').style.display = '';
+  $('#quizCard').style.display = '';
   $('#premiumCard').style.display = '';
   $('#financeCard').style.display = '';
   $('#hint').style.display = '';
