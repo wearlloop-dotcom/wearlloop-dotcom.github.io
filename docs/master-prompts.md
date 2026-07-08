@@ -38,6 +38,16 @@ Describe this dress as a hyper-detailed text-to-image prompt fragment in English
 - ห้ามให้ AI จัดฉากเกินจริง (เทียนเรียงวงบนพื้น กลีบกุหลาบโปรย) — ของพวกนี้ฟ้องว่าปลอม
 - ถ้ายังไม่พอ: Midjourney `--style raw` เก่งภาพถ่ายคนกว่า Gemini หรือใช้ image-to-image จากรูปชุดจริง
 
+### นางแบบต้องเป็นคนไทย (Gemini ชอบเบี้ยวเป็นฝรั่ง)
+
+คำว่า `a Thai woman` เฉย ๆ ไม่พอ — ต้องขยายเป็นลักษณะรูปธรรมและวางไว้**ต้น prompt**:
+
+```
+a beautiful Thai woman in her mid-20s with warm tan skin, dark brown eyes, black hair in a loose low bun, and Southeast Asian facial features,
+```
+
+✅ สูตรที่พิสูจน์แล้วว่าได้ภาพสมจริง (ทดสอบ 8 ก.ค. 2026): candid BTS + iPhone + แสงผสม + ผ้ายับ + ทีมงานเบลอหลังฉาก = ผ่าน เหลือแค่คุมหน้านางแบบด้วยท่อนข้างบน
+
 ## คลัง DRESS SPEC (เพิ่มเรื่อย ๆ)
 
 ### PS-06 — Blossom Dress (Sky Blue, ซาติน, โบว์) — เช่า 600.-
