@@ -14,7 +14,11 @@ description: สร้างรูป IG 9 รูปแรกของ LLOOP ส
    - `docs/lloop-ig-ai-prompts.md` — prompt ทั้ง 9 โพสต์ + ก้อน [MODEL]/[LOCATION]/[STYLE]/[NEG] + คลังคำศัพท์
    - `docs/lloop-ig-visual-template.md` — ผังกริด 9 รูป (ข้อ 15) + กฎ layout
 3. **ถามผู้ใช้ 1 คำถามก่อนเริ่ม** (ถ้ายังไม่ได้ระบุ): ธีมของบล็อกนี้คืออะไร? (default: "The Graduation Club" รับปริญญา) และมีรูปชุดจริง/รูปนางแบบอ้างอิงไหม
-4. **Gen ทีละโพสต์ตามลำดับ 1→9** ตาม prompt ในไฟล์ โดย:
+4. **Gen ทีละโพสต์ตามลำดับ 1→9** ตาม prompt ในไฟล์ โดยใช้ **เทคนิค self-reference chain**:
+   - รูปที่ 1-2 (teaser + ปกธีม): gen จาก text prompt ล้วน → ให้ผู้ใช้เลือกใบที่ชอบก่อนไปต่อ
+   - รูปที่ 3-9: **แนบรูปปกที่ผู้ใช้เลือกเป็น image reference** ทุกครั้ง (ล็อกหน้านางแบบ/โทน/แสงทั้งชุด และทุกภาพเป็นของ LLOOP 100%)
+   - ❌ ห้ามใช้รูปจาก IG ของ lookbook เป็น image reference ตรง ๆ (เสี่ยงได้ภาพเหมือนต้นฉบับเกินไป = ประเด็นลิขสิทธิ์/ภาพลักษณ์) — ref จาก lookbook ให้ใช้ผ่าน "คำ" ใน prompt pack เท่านั้น ถ้าผู้ใช้ยืนยันจะแนบรูป lookbook ให้กำกับว่า "ใช้ดูโทนสี/แสงเท่านั้น ห้ามเลียนใบหน้า ฉาก หรือองค์ประกอบเฉพาะ" และห้ามบันทึกรูปนั้นลง repo (repo เป็น public)
+   และ:
    - ประกอบ prompt เต็มตามโครงสร้าง 10 ส่วน (ภาค 2 ของไฟล์ prompts)
    - ทุก prompt ใช้ก้อน [MODEL] เดิมคำต่อคำ เพื่อล็อกหน้านางแบบ
    - Nano Banana ไม่รองรับ --no: แปลง negative เป็นประโยคบวก เช่น "strictly warm color palette, natural realistic skin with visible texture"
