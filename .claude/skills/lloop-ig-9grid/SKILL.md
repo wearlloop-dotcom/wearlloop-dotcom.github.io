@@ -9,7 +9,15 @@ description: สร้างรูป IG 9 รูปแรกของ LLOOP ส
 
 ## ขั้นตอนการทำงาน (ทำตามลำดับ ห้ามข้าม)
 
-1. **หาเครื่องมือ gen รูป**: ใช้ ToolSearch ค้น "image generation" / "banana" / "gemini image" — ถ้าไม่มีเครื่องมือ gen รูปในเซสชัน ให้แจ้งผู้ใช้ว่าต้องเปิดใช้ปลั๊กอิน Nano Banana ก่อน แล้วหยุด อย่า gen ด้วยวิธีอื่น (SVG/Canva ไม่ใช่ภาพถ่าย ห้ามใช้แทน)
+1. **หาเครื่องมือ gen รูป** ตามลำดับ:
+   1. ใช้ ToolSearch ค้น "image generation" / "banana" / "gemini image" — ถ้ามี MCP tool ให้ใช้ตัวนั้น
+   2. ถ้าไม่มี MCP: เช็ค `GEMINI_API_KEY` ใน env (`[ -n "$GEMINI_API_KEY" ]` — ห้าม echo ค่า key) — ถ้ามี ให้**เรียก Gemini API ตรงผ่าน Bash**:
+      - Endpoint: `POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent` header `x-goog-api-key: $GEMINI_API_KEY` + `Content-Type: application/json`
+      - Body: `{"contents":[{"parts":[{"text":"<PROMPT>"}]}],"generationConfig":{"responseModalities":["IMAGE"],"imageConfig":{"aspectRatio":"4:5"}}}`
+      - สำหรับ self-reference (รูป 3-9): เพิ่ม part `{"inline_data":{"mime_type":"image/png","data":"<base64 ของรูปปกที่เลือก>"}}` ก่อน part text
+      - Response: ถอด base64 จาก `candidates[0].content.parts[].inlineData.data` บันทึกเป็น .png ใน scratchpad (เขียน script Python ช่วยถอดได้)
+      - ถ้า model ชื่อนี้ 404 ให้ลอง `gemini-2.5-flash-image-preview` / ถ้า aspectRatio ไม่รองรับ ให้ gen แล้ว crop เป็น 4:5 ด้วย Python PIL
+   3. ถ้าไม่มีทั้งสองทาง: แจ้งผู้ใช้ว่าต้องใส่ `GEMINI_API_KEY` ใน environment secrets แล้วเปิดเซสชันใหม่ จากนั้นหยุด — อย่า gen ด้วยวิธีอื่น (SVG/Canva ไม่ใช่ภาพถ่าย ห้ามใช้แทน)
 2. **อ่านไฟล์อ้างอิง 2 ไฟล์** (อยู่ใน repo นี้):
    - `docs/lloop-ig-ai-prompts.md` — prompt ทั้ง 9 โพสต์ + ก้อน [MODEL]/[LOCATION]/[STYLE]/[NEG] + คลังคำศัพท์
    - `docs/lloop-ig-visual-template.md` — ผังกริด 9 รูป (ข้อ 15) + กฎ layout
