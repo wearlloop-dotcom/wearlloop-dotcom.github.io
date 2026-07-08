@@ -182,6 +182,156 @@ leaving upper-right corner clear for a badge, [STYLE] [NEG]
 | `outfit tone-on-tone with background palette, single red accent detail` | กฎสี: ชุดกลืนฉาก + สีเด้งจุดเดียว |
 | `real props: fresh flowers, wicker basket, vintage radio` | props ของจริงตามธีม — กัน AI แถมของประหลาด |
 
+---
+---
+
+# ภาค 2: คู่มือเขียน Prompt ฉบับละเอียด (สำหรับทีมที่อยากปรับเอง)
+
+## 1. โครงสร้างประโยค Prompt 10 ส่วน — สูตรประกอบมาตรฐาน LLOOP
+
+เขียนเรียงตามลำดับนี้เสมอ (ส่วนไหนไม่ใช้ข้ามได้ แต่ห้ามสลับลำดับ):
+
+```
+[1 ประกาศชนิดภาพ] [2 ตัวแบบ] [3 ชุด+ผ้า] [4 ท่าโพส+มือ] [5 ฉาก+props]
+[6 แสง] [7 กล้อง/เลนส์/ระยะ] [8 องค์ประกอบ] [9 โทนสี/grade+ความไม่เพอร์เฟกต์]
+[10 negative]
+```
+
+| ส่วน | ทำหน้าที่ | ถ้าขาดจะเกิดอะไร |
+|---|---|---|
+| 1. ประกาศชนิดภาพ | `RAW editorial fashion photograph, shot on Kodak Portra 400` | ได้ภาพลุคเรนเดอร์/การ์ตูน |
+| 2. ตัวแบบ | ก้อน [MODEL] เดิมทุกภาพ | หน้านางแบบเปลี่ยนไปทุกใบ |
+| 3. ชุด+ผ้า | บรรยายผ้า+ดีเทลให้เจาะจง (ดูคลังหมวดผ้า) | ได้ "เดรสทั่วไป" ไม่มีคาแรกเตอร์ |
+| 4. ท่าโพส+มือ | ท่า + **มือทำอะไร** เสมอ | มือห้อยเฉย ๆ ดูแข็ง + มือเพี้ยนง่าย |
+| 5. ฉาก+props | ฉากเจาะจง + props ของจริง | ฉากหลัง generic ไม่เข้าธีม |
+| 6. แสง | 1 สูตรจาก 6 สูตร (ห้ามผสม) | แสงเรือง ๆ ทั้งภาพแบบ AI |
+| 7. กล้อง | เลนส์+รูรับแสง+ระยะห่าง | perspective มั่ว ขาบิด |
+| 8. องค์ประกอบ | center/thirds + negative space | ครอปมั่ว วางข้อความไม่ได้ |
+| 9. Grade+imperfection | โทนฟิล์ม + ผมปลิว/ผ้าพลิ้ว | ภาพนิ่งแข็งเป็นหุ่น |
+| 10. Negative | ก้อน [NEG] v2 | ลุค CGI หลุดมา |
+
+## 2. คลังคำศัพท์ละเอียดรายหมวด
+
+### หมวดผ้าและดีเทลชุด (สำคัญสุดสำหรับร้านเช่า — ยิ่งเจาะจง ชุดยิ่งดูแพง)
+| คำ | ความหมาย/ใช้เมื่อ |
+|---|---|
+| `delicate ivory lace with scalloped edges` | ลูกไม้ขอบหยัก — ชุดสายหวาน |
+| `sheer organza overlay, crisp and airy` | ผ้าแก้วบางโปร่งซ้อนชั้น — ชุดออกงานดูแพง |
+| `liquid satin with soft sheen, bias-cut` | ซาตินเงานุ่มตัดเฉียง — ราตรี/ดินเนอร์ |
+| `layered soft tulle skirt` | กระโปรงทูลฟูหลายชั้น — บัลเลต์คอร์/รับปริญญา |
+| `smocked bodice, stretchy fit` | ตัวเสื้อสม็อคยืด — ชุด freesize |
+| `puff sleeves with elastic cuffs` | แขนพอง — สายหวาน coquette |
+| `structured corset bodice with visible boning` | คอร์เซ็ตมีโครง — ปาร์ตี้/gala |
+| `ruffled tiered hem` | ชายกระโปรงระบายเป็นชั้น |
+| `tiny fabric-covered buttons down the back` | กระดุมหุ้มผ้าเรียงหลัง — ดีเทล close-up |
+| `crochet knit texture` | นิตโครเชต์ — ธีมทะเล/summer |
+| `satin bow detail at the waist` | โบว์ซาตินที่เอว — จุดขายยุคนี้ |
+| `soft chiffon that catches the breeze` | ชีฟองพลิ้วลม — ภาพ outdoor |
+
+### หมวดท่าโพส (7 ท่าลายเซ็น → ภาษา prompt)
+| ท่า | คำ prompt |
+|---|---|
+| ยืนขายชุดหลัก | `standing straight with hands on hips, weight on one leg, calm doll-like expression looking at camera` |
+| นั่งพื้น/หญ้า | `sitting on the grass with legs folded to one side, hands resting on her lap, blank serene expression` |
+| มือไม่ว่าง | `one hand adjusting her hat brim / holding a bouquet close to her chest / tugging the end of her braid / holding fresh cherries` |
+| ยกแขนเปิดเอว | `one arm raised above her head shielding her eyes from the sun, elongating her silhouette` |
+| ท่าคู่ | `two friends with heads at different heights, one standing one sitting, arms linked, one looking at camera one laughing at her friend` |
+| ท่านอน top-down | `lying on the grass with hair fanned out, photographed directly from above, arms relaxed beside her head` |
+| candid เดิน | `mid-stride crossing the street, looking away from camera, holding an iced coffee, natural walking motion` |
+
+### หมวดระยะภาพ + มุมกล้อง
+| คำ | ได้ภาพแบบ |
+|---|---|
+| `extreme close-up of fabric texture, object fills 80% of frame` | ดีเทลผ้า (Recipe E) |
+| `close-up head and shoulders portrait` | beauty (Recipe D) |
+| `waist-up medium shot` / `cropped at mid-thigh` | ครึ่งตัว (Recipe C) |
+| `full body head to toe, shoes fully visible` | เต็มตัว (Recipe B) — **ต้องมี shoes fully visible เสมอ** |
+| `environmental wide shot, subject small in frame` | ฉากใหญ่คนเล็ก (Recipe A) |
+| `photographed directly from above, top-down 90 degrees` | flat lay / ท่านอน |
+| `eye-level camera at chest height` | มุมมาตรฐาน 60% ของฟีด |
+| `slight low angle, camera tilted up 15 degrees` | เงยนิด — ท่ามั่นใจ/แดดจัด |
+| `slight high angle looking down at seated subject` | กดลงนิด — ท่านั่ง doll-like |
+| `dutch tilt 15 degrees, playful energy` | เอียงกล้อง — ธีมสนุกเท่านั้น |
+
+### หมวดแสงละเอียด (ขยายจาก 6 สูตร — คำหลัก + คำเสริม + เวลาถ่ายจริง)
+| สูตร | คำหลัก | คำเสริมให้สมจริงขึ้น | เทียบเวลาจริง |
+|---|---|---|---|
+| Golden hour | `golden hour low sun, warm rim light through hair` | `long soft shadows stretching across the grass, lens catching slight warm flare` | 16:30-17:45 |
+| Overcast | `soft overcast open shade, wraparound diffused light` | `matte porcelain skin, muted colors, no visible shadows, European film mood` | วันครึ้มทั้งวัน |
+| แดดจัด | `harsh midday sun, crisp defined shadows` | `model squinting slightly, wearing small vintage sunglasses, shadow shapes as graphic design element` | 11:00-14:00 |
+| Softbox ครีม | `large window softbox from 45 degrees` | `gentle wrapping shadow on the far cheek, cream wall evenly lit, still-air studio calm` | สตูดิโอ |
+| Flash ปาร์ตี้ | `direct on-camera flash, paparazzi snapshot energy` | `hard shadow outline cast on the wall directly behind subject, slightly overexposed skin, saturated colors` | ในร่ม/กลางคืน |
+| Tungsten วินเทจ | `warm tungsten lamp visible in frame, amber glow` | `halation blooming around the bulbs, slight motion blur from slow shutter, Black Pro-Mist diffusion softness` | ในร่มโคมส้ม |
+
+### หมวดฉากไทยที่เข้าธีม LLOOP (พร้อมใช้)
+| ธีม | คำ prompt ฉาก |
+|---|---|
+| รับปริญญา | `Thai university campus garden with cream colonial architecture and lush green trees` |
+| เพื่อนเจ้าสาว | `tropical garden wedding venue with white draped fabric arch and pastel flower arrangements` |
+| ราตรี/gala | `vintage grand hotel corridor with warm lamp light, patterned carpet and brass details` |
+| คาเฟ่/เดท | `minimal cream-toned cafe with arched windows, warm wood furniture and dried flowers` |
+| ทะเล/summer | `white sand beach with turquoise water, striped beach umbrella and wicker basket` |
+| สงกรานต์/ผ้าไทย | `old Thai teak wooden house veranda with golden afternoon light and tropical plants` |
+
+## 3. Syntax เฉพาะแพลตฟอร์ม
+
+### Midjourney (v6/v7)
+```
+[prompt] --ar 4:5 --style raw --v 6.1
+```
+- `--style raw` สำคัญมาก — ปิดการ "แต่งสวย" อัตโนมัติที่ทำให้ภาพดู AI
+- **ล็อกหน้านางแบบ:** gen ภาพแรกให้ได้หน้าที่ชอบ → copy URL รูป → ทุก prompt ถัดไปเติม `--cref [URL] --cw 100`
+- **ล็อกโทนภาพทั้งชุด:** `--sref [URL รูปแรก] --sw 300`
+- negative ใช้ `--no` ตามก้อน [NEG]
+
+### Flux / Nano Banana / Firefly (ไม่รองรับ --no)
+- แปลง negative เป็นประโยคบวก: แทน `--no plastic skin` ด้วย `natural realistic skin with visible texture`
+- แทน `--no cool blue tone` ด้วย `strictly warm color palette throughout`
+- ล็อกความสม่ำเสมอ: ใช้ seed เดิม + prompt ก้อน [MODEL] เดิมคำต่อคำ
+- Nano Banana เก่งเรื่องแก้ภาพ: gen ภาพหลักก่อน แล้วสั่งแก้เป็นภาษาธรรมชาติ ("เปลี่ยนชุดเป็นเดรสชมพู แสงเดิม ท่าเดิม")
+
+## 4. ตารางแก้ปัญหา — gen แล้วไม่ได้ลุค lookbook
+
+| อาการ | สาเหตุ | คำที่ใช้แก้ |
+|---|---|---|
+| ภาพดูเป็นการ์ตูน/เรนเดอร์ | ไม่ได้ประกาศชนิดภาพ | เติม `RAW editorial fashion photograph` ไว้หน้าสุด + `--style raw` (MJ) |
+| ผิวเนียนพลาสติก | AI default beauty | `natural skin texture with visible pores, no retouching` + ตัด `beautiful/perfect` ออกจาก prompt |
+| ภาพสด/คมเกินไป ดูดิจิทัล | ขาด grade ฟิล์ม | เติม 3 คำเทพ: `lifted blacks, no pure black no pure white, subtle halation` |
+| โทนออกฟ้า/เย็น | model ไม่รู้ทิศสี | `strictly warm ivory-cream color palette, Kodak Portra 400` + negative `cool blue tone` |
+| แสงเรือง ๆ ไม่มีทิศ | ไม่ระบุสูตรแสง | เลือก 1 สูตรจากหมวดแสง + ระบุทิศ (`from 45 degrees`, `backlight`) |
+| หน้านางแบบเปลี่ยนทุกใบ | ไม่ล็อกตัวละคร | `--cref` (MJ) / seed เดิม + [MODEL] คำต่อคำ |
+| ขายาวผิดปกติ/ตัวบิด | AI ใช้เลนส์กว้างเอง | `50mm lens, subject 3 meters away, natural proportions` |
+| ตัดรองเท้า/ครอปมั่ว | ไม่คุมเฟรม | `full body head to toe, shoes fully visible, feet well inside frame` |
+| มือเพี้ยน | มือว่างไม่มีงานทำ | ให้มือถือของเสมอ (`holding a bouquet`) + negative `deformed hands, extra fingers` |
+| ฉากหลังรก/ของแปลกโผล่ | ฉากไม่เจาะจง | บรรยายฉากละเอียด + `clean uncluttered background` + props ระบุชิ้น |
+| ภาพสวยแต่ "ไม่ใช่แบรนด์เรา" | สีหลุด palette | เติม `outfit tone-on-tone with background, single accent color detail` + `--sref` รูปที่ผ่านแล้ว |
+
+## 5. ตัวอย่างประกอบสูตรเต็ม (before → after)
+
+**Before (สั้นเกิน — ได้ภาพ generic):**
+```
+a woman in a cream dress in a garden, film look, 4:5
+```
+
+**After (ประกอบครบ 10 ส่วน — ได้ลุค lookbook):**
+```
+RAW editorial fashion photograph, shot on Kodak Portra 400, | a young Thai
+woman in her early 20s, long dark brown hair, calm doll-like expression, |
+wearing a cream delicate lace midi dress with scalloped edges, puff sleeves
+and tiny fabric-covered buttons, nude block heels, | standing with one hand
+adjusting her white headscarf, the other holding a graduation bouquet, |
+in a Thai university campus garden with cream colonial architecture, |
+golden hour low sun with warm rim light through her hair, long soft
+shadows, | eye-level 50mm lens at f/3.5, subject 3 meters away, full body
+head to toe with shoes fully visible, | centered composition with clean
+negative space above her head, | lifted blacks, no pure black no pure
+white, creamy ivory highlights, muted saturation, subtle halation, loose
+hair strands catching the breeze, | --ar 4:5 --style raw
+--no CGI, 3D render, illustration, airbrushed plastic skin, cool blue tone,
+text, watermark, deformed hands
+```
+(เครื่องหมาย | ใส่ให้เห็นรอยต่อ 10 ส่วน — ตอนใช้จริงลบออก)
+
 ## เช็คลิสต์หลัง gen ครบ 9 ภาพ
 - [ ] เปิดดูพร้อมกันทั้ง 9 ใบ — โทนอุ่นครีมเหมือนกันหมด ไม่มีใบไหนออกฟ้า
 - [ ] นางแบบหน้าเดียวกันทุกใบ (ถ้าเพี้ยน gen ใหม่ด้วย --cref/seed เดิม)
