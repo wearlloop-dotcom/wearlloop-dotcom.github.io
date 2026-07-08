@@ -23,6 +23,21 @@ Describe this dress as a hyper-detailed text-to-image prompt fragment in English
 
 ---
 
+## เร่งความสมจริง (ใช้เมื่อภาพยังดูเป็น AI)
+
+ลุค "editorial" คือต้นเหตุความกลอสซี่ — สลับไปลุค "ภาพหลุดกองถ่าย" แทน:
+
+- เปิดด้วย `candid behind-the-scenes photo taken on an iPhone at a real fashion shoot` แทน `RAW editorial fashion photograph`
+- แสงต้องเละแบบสถานที่จริง: `mixed lighting with warm tungsten and cool daylight, uneven color temperature`
+- ความบังเอิญ: `laughing between takes`, `slightly imperfect framing with extra headroom`, `crew members blurred in background`
+- ผ้าจริงมีรอย: `visible creases in the satin where her hand holds the skirt`
+- ผิวจริง: `unretouched natural skin with uneven tone and faint under-eye shadows`
+- ปิดท้าย: `looks like a photo from someone's camera roll, not edited, no CGI, no render`
+- **หน้าคนหลุดง่ายสุด** → `looking away over her shoulder` หรือ `photographed from behind` ช่วยมากและยังขายชุดได้เต็มตัว
+- **ฉากใกล้ตัวลูกค้าเชื่อง่ายกว่า**: `Bangkok luxury hotel ballroom` / `Thai wedding venue` ดีกว่าวังยุโรป
+- ห้ามให้ AI จัดฉากเกินจริง (เทียนเรียงวงบนพื้น กลีบกุหลาบโปรย) — ของพวกนี้ฟ้องว่าปลอม
+- ถ้ายังไม่พอ: Midjourney `--style raw` เก่งภาพถ่ายคนกว่า Gemini หรือใช้ image-to-image จากรูปชุดจริง
+
 ## คลัง DRESS SPEC (เพิ่มเรื่อย ๆ)
 
 ### PS-06 — Blossom Dress (Sky Blue, ซาติน, โบว์) — เช่า 600.-
