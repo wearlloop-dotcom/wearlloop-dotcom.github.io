@@ -42,6 +42,14 @@ trigger เจาะจงไฟล์ผ่าน `actions_run_trigger` ก็�
 เพิ่มสวิตช์ใหม่: การ์ดใน settings.html + seed คีย์ + เพิ่ม allowlist `hub_settings_set` (repo lloop)
 ฟีเจอร์ใหม่ควร ship แบบปิดไว้ก่อน (dark launch) ให้ user เขี่ยเปิดเองเมื่อพร้อม
 
+## สกิล /banana — สร้าง/แก้รูปด้วย Gemini (Nano Banana)
+
+สกิลอยู่ที่ `.claude/skills/banana/` (เขียนขึ้นเองในรีโปนี้ ตรวจสอบได้ทั้งไฟล์) —
+ใช้สั่งสร้างรูป หรืออัปโหลดรูปให้ redesign เช่น จัดห้องใหม่แบบ interior designer
+หรือแต่งรูปสินค้า/ชุดของ LLOOP · **ต้องตั้ง env var `GOOGLE_AI_API_KEY`**
+ใน environment settings ของ Claude Code ก่อน (ขอคีย์ฟรีที่ https://aistudio.google.com/apikey)
+— ห้าม commit คีย์ลงรีโป และห้าม commit รูปที่ generate ลงรีโป (เซฟลง scratchpad แล้วส่งให้ user)
+
 ## เอกสารสำคัญ
 
 - `docs/expansion-strategy.md` — แผนขยายธุรกิจ 5 โมเดล + 3 เฟส (trust score, passport, ฝากเช่า ฯลฯ)
