@@ -31,18 +31,21 @@ a Thai university campus garden with cream colonial architecture, lush green
 trees, warm late-afternoon golden light
 ```
 
-**[STYLE] — ท้ายทุก prompt:**
+**[STYLE] v2 — ท้ายทุก prompt (อัปเกรดด้วยคำศัพท์ realism):**
 ```
-soft muted warm film photography, Kodak Portra pastel tones, lifted blacks,
-creamy ivory highlights, low-medium saturation, subtle film grain, natural
-skin texture, vertical 4:5 composition
+RAW editorial fashion photograph, shot on Kodak Portra 400, lifted blacks,
+faded film curve, no pure black no pure white, creamy ivory highlights,
+muted saturation, fine film grain, subtle halation, natural skin texture
+with visible pores and rosy blush, no retouching, loose hair strands,
+vertical 4:5 composition
 ```
 
-**[NEG] — negative prompt ทุกภาพ:**
+**[NEG] v2 — negative prompt ทุกภาพ (แบนลุค AI/เรนเดอร์):**
 ```
---no harsh HDR, neon colors, cool blue tone, plastic skin, heavy vignette,
-teal-orange grade, oversaturated, text, watermark, logo, extra fingers,
-deformed hands
+--no CGI, 3D render, illustration, anime, airbrushed plastic skin,
+oversharpened, studio seamless backdrop, harsh HDR glow, neon colors,
+cool blue tone, teal-orange grade, heavy vignette, oversaturated,
+perfect symmetric face, text, watermark, logo, extra fingers, deformed hands
 ```
 
 ---
@@ -138,6 +141,46 @@ leaving upper-right corner clear for a badge, [STYLE] [NEG]
 → เติมตรา "เปิดคิวจองแล้ว" สีเขียวเข้ม #0F6E56 ใน Canva มุมขวาบน
 
 ---
+
+## 📖 คลังคำศัพท์เทคนิค — ถอดจากลุคจริงของ lookbook (คำ → ทำหน้าที่)
+
+> ใช้เสริม/สลับใน prompt ตามสถานการณ์ — แบ่ง 4 กลุ่ม
+
+### กลุ่ม 1: ประกาศความเป็น "ภาพถ่ายฟิล์ม" (ใช้ทุกภาพ — รวมอยู่ใน [STYLE] v2 แล้ว)
+| คำ | ทำหน้าที่ |
+|---|---|
+| `RAW editorial fashion photograph, shot on Kodak Portra 400` | ประกาศเป็นภาพถ่ายนิตยสาร + ฟิล์มที่ตรงโทน lookbook สุด |
+| `lifted blacks, faded film curve, no pure black no pure white` | สูตร grade หลัก — ดำไม่สนิท ขาวไม่จ้า แบนนุ่มแบบฟิล์ม |
+| `fine film grain, subtle halation` | เกรน + แสงฟุ้งรอบไฮไลต์ = ลายเซ็นภาพในร่ม |
+| `natural skin texture with visible pores, rosy blush, no retouching` | ผิวจริงไม่พลาสติก + บลัชชมพูชัด (เมคอัพประจำแบรนด์) |
+
+### กลุ่ม 2: กล้อง/เลนส์ (เลือกตามระยะภาพ)
+| คำ | ทำหน้าที่ |
+|---|---|
+| `35mm lens at f/4, subject 3 meters away` | ภาพเต็มตัว — perspective ธรรมชาติ หลังเบลอนุ่มแต่ยังอ่านออก (lookbook ไม่ใช้ f/1.2 ละลายหมด) |
+| `85mm f/2, ISO 400, 1/160s` | close-up beauty — หน้าไม่บิด + ค่ากล้องสมจริงบังคับ noise แบบภาพถ่าย |
+| `shot on iPhone, 26mm wide, casual HDR daylight, slightly off-center framing` | ภาพ candid คั่นบล็อก — จงใจ "หลุดกล้อง" |
+| `slight motion blur from slow shutter, dreamy diffusion filter (Black Pro-Mist)` | ภาพในร่มไฟส้ม — ฟุ้งมีแฮโล |
+
+### กลุ่ม 3: สูตรแสง (เลือก 1 สูตรต่อธีม — ห้ามผสมในบล็อกเดียว)
+| คำ | ใช้กับธีม |
+|---|---|
+| `golden hour low sun, warm rim light through hair, long soft shadows` | สวน/เดท/รับปริญญาช่วงเย็น |
+| `soft overcast open shade, wraparound diffused light, low contrast` | สวนเขียวหม่น/ชุดขาว/สายหวาน |
+| `harsh midday sun, crisp defined shadows as design element, model squinting slightly` | ทะเล/summer — เงาแข็งคือดีไซน์ |
+| `large window softbox from 45 degrees, gentle wrapping shadow` | สตูดิโอครีม/ชุดออกงาน |
+| `direct on-camera flash, hard shadow on wall behind subject, paparazzi snapshot energy` | ปาร์ตี้/ปีใหม่/สีจัด |
+| `warm tungsten lamp visible in frame, amber glow, halation around bulbs` | โรงแรมวินเทจ/ราตรี — โคมไฟต้องอยู่ในเฟรม |
+
+### กลุ่ม 4: องค์ประกอบ/ความสมจริง (ลายเซ็น lookbook)
+| คำ | ทำหน้าที่ |
+|---|---|
+| `centered symmetrical composition, Wes Anderson style` | จัดกลางเฟรมสมมาตร (~70% ของฟีดต้นแบบ) |
+| `shot through blurred foreground flowers, layered depth` | ยิงผ่านของหน้าเลนส์ — สร้างมิติ ใช้ได้ทุกบล็อก |
+| `cropped at mid-thigh, face cropped above the lips` | ครอปตัดหัวจงใจ บังคับสายตาไปที่ชุด (ภาพ medium) |
+| `loose hair strands, fabric caught mid-breeze, one hand adjusting hat brim` | ความไม่เพอร์เฟกต์ + ท่า "มือไม่ว่าง" |
+| `outfit tone-on-tone with background palette, single red accent detail` | กฎสี: ชุดกลืนฉาก + สีเด้งจุดเดียว |
+| `real props: fresh flowers, wicker basket, vintage radio` | props ของจริงตามธีม — กัน AI แถมของประหลาด |
 
 ## เช็คลิสต์หลัง gen ครบ 9 ภาพ
 - [ ] เปิดดูพร้อมกันทั้ง 9 ใบ — โทนอุ่นครีมเหมือนกันหมด ไม่มีใบไหนออกฟ้า
