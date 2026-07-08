@@ -11,7 +11,7 @@ description: สร้างรูป IG 9 รูปแรกของ LLOOP ส
 
 1. **หาเครื่องมือ gen รูป** ตามลำดับ:
    1. ใช้ ToolSearch ค้น "image generation" / "banana" / "gemini image" — ถ้ามี MCP tool ให้ใช้ตัวนั้น
-   2. ถ้าไม่มี MCP: เช็ค `GEMINI_API_KEY` ใน env (`[ -n "$GEMINI_API_KEY" ]` — ห้าม echo ค่า key) — ถ้ามี ให้**เรียก Gemini API ตรงผ่าน Bash**:
+   2. ถ้าไม่มี MCP: เช็ค API key ใน env — รับได้ทั้ง `GEMINI_API_KEY` หรือ `GOOGLE_AI_API_KEY` (`KEY="${GEMINI_API_KEY:-$GOOGLE_AI_API_KEY}"` — ห้าม echo ค่า key เด็ดขาด) — ถ้ามี ให้**เรียก Gemini API ตรงผ่าน Bash**:
       - Endpoint: `POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent` header `x-goog-api-key: $GEMINI_API_KEY` + `Content-Type: application/json`
       - Body: `{"contents":[{"parts":[{"text":"<PROMPT>"}]}],"generationConfig":{"responseModalities":["IMAGE"],"imageConfig":{"aspectRatio":"4:5"}}}`
       - สำหรับ self-reference (รูป 3-9): เพิ่ม part `{"inline_data":{"mime_type":"image/png","data":"<base64 ของรูปปกที่เลือก>"}}` ก่อน part text
