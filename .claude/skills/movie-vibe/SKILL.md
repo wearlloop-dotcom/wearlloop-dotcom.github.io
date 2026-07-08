@@ -16,19 +16,14 @@ argument-hint: "<ชื่อหนัง> [สิ่งที่อยากใ
 - **user ให้แต่ธีมหนัง** → แนะนำชุดจากสต็อกที่เข้าธีม 2-3 ตัว: query ชุด `status = 'available'` กรองด้วย `color_name/color_family/tags/occasion_tags` ที่เข้ากับสูตรสไตล์ แสดงชื่อ + รหัส + ราคาเช่า แล้วทำ prompt ให้ตัวที่เข้าที่สุด (หรือทุกตัวถ้า user ขอ)
 - ถ้าไม่มี Supabase MCP ในเซสชัน หรือหาชุดไม่เจอ → ทำแบบปกติ (จังหวะ 1-2) แล้วบอก user ว่าไม่ได้อิงสต็อกจริง
 
-### โหมดรูปจริง (image-to-image) — สมจริงที่สุด ใช้เป็นอันดับแรกเสมอถ้าชุดมีรูป
+### Master prompt แบบตัวอักษรล้วน (วิธีหลักที่ user เลือกใช้)
 
-ถ้าชุดมีรูปใน `photos[]` (URL ใน Supabase storage หรือ CDN) อย่าให้ AI วาดชุดจากคำบรรยาย — ให้ user เอา**รูปจริงเป็นตัวตั้ง**แล้วเปลี่ยนแค่นางแบบ/ฉากแทน เพราะพิกเซลของชุดมาจากภาพถ่ายจริง ผลลัพธ์จะสมจริงกว่า text-to-image เสมอ และชุดในภาพตรงกับชุดที่ลูกค้าได้จริง:
+user เก็บคลัง prompt ไว้ที่ `docs/master-prompts.md` — โครงคือ `[DRESS SPEC]` (ถอดจากรูปชุดจริงเป็นข้อความ ทำครั้งเดียวต่อชุด) + `[SCENE]` (ตามธีมหนัง) + โครงกล้อง-แสงคงที่ เวลาทำงาน:
 
-1. ส่ง URL รูปจริงของชุดให้ user (จาก `photos[]`) บอกให้เปิดรูปแล้วแนบเข้า Gemini/Nano Banana
-2. แนบ prompt คู่กันโครงนี้ (สั่งให้ "คงชุดเดิมทุกประการ" คือหัวใจ):
-
-```
-Using the dress in the attached photo — keep its exact color, fabric, cut, and every detail unchanged — generate a photorealistic editorial fashion photo of a Thai woman wearing this dress, <ฉาก+แสงจาก style recipe แปลงเป็นภาษาถ่ายภาพแล้ว>, shot on 85mm f/2, natural skin texture, subtle film grain, photorealistic, no CGI, no render, do not alter the dress design
-```
-
-3. ถ้าอยากคุมฉากด้วย → แนบรูปสถานที่จริงเป็นภาพที่ 2 แล้วเติม "place the scene in the second attached photo"
-4. text-to-image (จังหวะ 2 ปกติ) ใช้เป็น fallback เฉพาะชุดที่ยังไม่มีรูปในระบบ
+1. **เช็คคลังก่อน** — ถ้าชุดนั้นมี DRESS SPEC ใน `docs/master-prompts.md` แล้ว ให้ประกอบ master prompt จากคลังทันที ไม่ต้องถอดใหม่
+2. **ยังไม่มี spec + user แนบรูปชุดมาในแชต** → ถอดเองเลย: บรรยายชุดจากรูปเป็น fragment ภาษาอังกฤษละเอียดยิบ (ทรง คอ แขน เอว กระโปรง เนื้อผ้า สี ดีเทลโบว์/จีบ/ตะเข็บ การทิ้งตัวของผ้า) ห้ามใส่นางแบบ/ฉาก/อารมณ์ แล้วบันทึกเข้า `docs/master-prompts.md` (commit ให้ด้วยถ้า user ต้องการ)
+3. **ยังไม่มี spec + ไม่มีรูปในแชต** → ส่ง URL รูปจาก `photos[]` + prompt ถอดชุด (อยู่ใน master-prompts.md) ให้ user ไปรันใน Gemini แล้วเอาผลกลับมาเก็บเข้าคลัง
+4. จังหวะ 1-2 ยังใช้ผลิตส่วน `[SCENE]` — แปลง style recipe ของหนังเป็นภาษาถ่ายภาพแล้วเก็บเข้าคลัง SCENE ด้วย
 
 ## จังหวะ 1 — ถอดสูตร (style recipe)
 
