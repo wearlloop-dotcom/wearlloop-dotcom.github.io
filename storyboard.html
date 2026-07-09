@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · Storyboard Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--gold:#C9A86A;--soft:#F5F2EC;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700;color:var(--clay)}
+  .wrap{max-width:860px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .card h2 .hint{font-family:var(--sans);font-size:12px;font-weight:400;color:var(--muted)}
+  .btn{border:none;border-radius:9px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+  .btn.clay{background:var(--clay)} .btn.sage{background:var(--sage)}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .btn:disabled{opacity:.55;cursor:default}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
+  input[type=text],select,textarea{width:100%;font-family:var(--sans);font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#fff}
+  textarea{resize:vertical;min-height:60px;line-height:1.5}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:13px;padding:5px 12px;border-radius:20px;background:var(--soft);color:var(--ink);border:1px solid var(--line);cursor:pointer;white-space:nowrap}
+  .chip.on{background:var(--clay);color:#fff;border-color:var(--clay)}
+  .chip.gold{border-color:var(--gold)}
+  .tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tab{flex:1;text-align:center;padding:9px;border-radius:9px;background:var(--soft);border:1px solid var(--line);cursor:pointer;font-size:14px;font-weight:600}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .shotgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .shot{border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;background:#fff}
+  .shot.on{border-color:var(--clay);background:#FBF4EF}
+  .shot .n{font-family:var(--display);font-weight:700;font-size:14px;color:var(--clay)}
+  .shot .t{font-size:12px;line-height:1.35;margin-top:2px}
+  .shot .d{font-size:11px;color:var(--muted);margin-top:3px}
+  .meta{font-size:13px;color:var(--muted)}
+  .refrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:9px}
+  .refbox{border:1px dashed var(--line);border-radius:10px;padding:8px;text-align:center;background:var(--soft)}
+  .refbox img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px;display:block;margin-bottom:6px;background:#fff}
+  .refbox .ph{width:100%;aspect-ratio:1;border-radius:7px;background:#EDEAE3;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;margin-bottom:6px;padding:6px;line-height:1.3}
+  .refbox .nm{font-size:12px;font-weight:600;margin-bottom:5px}
+  .refbox.miss{border-color:var(--clay)}
+  .result img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+  .fbrow{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .notice{background:#F0ECE2;border:1px solid #E2D8BE;color:#7A6516;border-radius:9px;padding:11px 13px;font-size:14px;line-height:1.5}
+  .err{color:var(--clay)}
+  .loading{color:var(--muted);text-align:center;padding:22px}
+  .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+  @media(max-width:640px){.stat{grid-template-columns:repeat(2,1fr)}}
+  .stat .b{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:11px;text-align:center}
+  .stat .b .n{font-family:var(--display);font-size:20px;font-weight:700;color:var(--clay)}
+  .stat .b .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .hrow{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;flex-wrap:wrap}
+  .hrow:last-child{border-bottom:none}
+  .tag{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--soft);white-space:nowrap}
+  .tag.ok{background:#E9F0EC;color:#0F6E56}.tag.error{background:#F7E7EC;color:#9C3F5E}
+  .tag.pass{background:#EAEFE8;color:var(--sage)}.tag.fail{background:#F7E7EC;color:#9C3F5E}
+  .promptbox{white-space:pre-wrap;font-size:12px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px;max-height:260px;overflow:auto;margin-top:10px;display:none}
+  .fields{font-size:13px;line-height:1.6;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:11px;margin:10px 0}
+  .fields b{color:var(--clay)}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>Storyboard Studio</h1>
+  <div class="meta" id="whoami"></div>
+</div>
+<div class="wrap">
+  <div id="flagNote" class="notice" style="display:none"></div>
+
+  <div class="card" id="refCard">
+    <h2>รูป Reference <span class="hint">อัปโหลดครั้งเดียว ใช้ทุกการเจน — ระบบเลือกแนบให้ตามช็อตอัตโนมัติ</span></h2>
+    <div class="refrow" id="refRow"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+
+  <div class="card">
+    <h2>เลือกช็อต <span class="hint">LLOOP Hero Video · 31 ช็อต · 2 ซีน</span></h2>
+    <div class="tabs">
+      <div class="tab on" data-scene="1">ซีน 1 · องก์ปัญหา (1–15)</div>
+      <div class="tab" data-scene="2">ซีน 2 · Endless Wardrobe (16–30)</div>
+    </div>
+    <div class="shotgrid" id="shotGrid"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+
+  <div class="card" id="genCard" style="display:none">
+    <h2 id="genTitle">เจนภาพ</h2>
+    <div class="fields" id="shotFields"></div>
+    <label>Preset แก้งานด่วน (กดเลือกได้ ไม่ต้องพิมพ์)</label>
+    <div class="chips" id="presetChips" style="margin-bottom:10px"></div>
+    <label>โน้ตเพิ่มเติม (ถ้ามี) — บอกสิ่งที่อยากแก้เป็นภาษาไทยหรืออังกฤษ</label>
+    <textarea id="fixNote" placeholder="เช่น ตู้ต้องเปิดอยู่ มีผ้ากำลังร่วง / แสงอุ่นขึ้นอีก"></textarea>
+    <div id="skuWrap" style="display:none;margin-top:10px">
+      <label>รหัสชุดพระเอก (SKU จริงจากคลัง เช่น LBK-20-M) — ช็อตนี้ต้องใช้รูปชุดจริง</label>
+      <input type="text" id="skuInput" placeholder="LBK-20-M">
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn clay" id="genBtn">✦ เจนภาพช็อตนี้</button>
+      <span class="meta" id="genStatus"></span>
+    </div>
+    <div class="result" id="result" style="display:none;margin-top:14px">
+      <img id="resultImg" alt="">
+      <div class="fbrow">
+        <button class="btn sage sm" id="fbPass">ผ่าน ✓</button>
+        <button class="btn sm" style="background:#9C3F5E" id="fbFail">ไม่ผ่าน ✕</button>
+        <input type="text" id="fbNote" placeholder="เพราะอะไร เช่น หน้าไม่ตรง / ตู้ไม่เปิด (เข้าระบบออดิท)" style="flex:1;min-width:200px">
+        <button class="btn ghost sm" id="showPrompt">ดู prompt</button>
+        <a class="btn ghost sm" id="dlBtn" download>ดาวน์โหลด</a>
+      </div>
+      <div class="meta" id="fbStatus" style="margin-top:6px"></div>
+      <div class="promptbox" id="promptBox"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>ประวัติ + ออดิท <span class="hint" id="histHint"></span></h2>
+    <div class="stat" id="statRow" style="display:none"></div>
+    <div id="histList"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const CONF = window.CONFIG || {};
+const FN = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1/storyboard-gen';
+
+const PRESETS = [
+  { label: 'แก้ตู้/ฉากหลังให้ต่อเนื่อง', note: 'Fix continuity: the wardrobe must be OPEN with clothes mid-collapse where the story requires; the background behind Meili must be the same condo bedroom (linen-curtained window, wooden wardrobe, bed) — never a second wardrobe or a different room.' },
+  { label: 'หน้าตรง reference เป๊ะ', note: 'Match Meili\'s face to the character reference EXACTLY: same face shape, freckles across nose and cheeks, single beauty mark below the outer corner of her LEFT eye, same hairstyle and age (early twenties). No age drift, no different person.' },
+  { label: 'คุมโทนทองอบอุ่น', note: 'Grade the light warmer: soft golden 3200K-3600K practical glow motivated by the phone screen; premium and gentle, never neon, never cold blue.' },
+  { label: 'ลดความรก ดูแพงขึ้น', note: 'Reduce clutter slightly: clothing piles stay soft, elegant and stylish — fashion-editorial mess, not dirty or chaotic.' },
+  { label: 'จอมือถือแบบหน้าเว็บจริง', note: 'The phone screen must look like a real minimal e-commerce web page showing one hero dress photo with a subtle golden circular LLOOP ring motif — clean UI, no readable text, no fake app icons.' },
+];
+const REF_TH = { meili: 'หน้า Meili', outfit: 'ชุดอยู่บ้าน', room: 'ห้องปกติ', room_messy: 'ห้องรก', logo: 'โลโก้ LLOOP', hero_dress: 'ชุดพระเอก' };
+
+let SHOTS = [], SEL = null, SCENE = 1, LAST_GEN = null, IS_OWNER = false;
+
+async function sgb(task, args) {
+  if (!(await window.opsLogin())) return { error: { message: 'redirecting_to_login' } };
+  const r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id_token: liff.getIDToken(), task, ...(args || {}) }) });
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok || out.error) {
+    const map = { unauthorized: 'เซสชันหมดอายุ รีเฟรชหน้าแล้วล็อกอินใหม่', no_access: 'ไม่มีสิทธิ์ใช้งานหลังบ้าน',
+      role_denied: 'สิทธิ์ไม่พอ (ต้องเป็นทีมการตลาด/ผู้จัดการ/เจ้าของ)', feature_disabled: 'ฟีเจอร์ยังปิดอยู่ — ให้เจ้าของเปิดที่หน้า Settings',
+      no_api_key: 'ยังไม่ได้ตั้ง GOOGLE_AI_API_KEY ฝั่งเซิร์ฟเวอร์', gen_failed: out.message || 'เจนไม่สำเร็จ' };
+    return { error: { code: out.error, message: map[out.error] || out.message || out.error || ('http ' + r.status) }, data: out };
+  }
+  return { data: out.data };
+}
+
+// ── refs ──
+async function loadRefs() {
+  const { data, error } = await sgb('refs_list');
+  const row = $('#refRow');
+  if (error) { row.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
+  row.innerHTML = '';
+  for (const k of Object.keys(REF_TH)) {
+    const url = data[k];
+    const d = document.createElement('div');
+    d.className = 'refbox' + (url ? '' : ' miss');
+    d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">ยังไม่มีรูป</div>`) +
+      `<div class="nm">${REF_TH[k]}</div><button class="btn ghost sm">${url ? 'เปลี่ยน' : 'อัปโหลด'}</button>`;
+    d.querySelector('button').onclick = () => pickRef(k);
+    row.appendChild(d);
+  }
+}
+function pickRef(name) {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = async () => {
+    const f = inp.files[0]; if (!f) return;
+    const b64 = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+    const { error } = await sgb('ref_upload', { name, image: b64, media_type: f.type || 'image/png' });
+    if (error) alert('อัปโหลดไม่สำเร็จ: ' + error.message); else loadRefs();
+  };
+  inp.click();
+}
+
+// ── shots ──
+async function loadShots() {
+  const { data, error } = await sgb('shots');
+  if (error) { $('#shotGrid').innerHTML = '<div class="err">' + error.message + '</div>'; return; }
+  SHOTS = data.shots; IS_OWNER = data.is_owner;
+  if (!data.enabled) {
+    const n = $('#flagNote'); n.style.display = '';
+    n.textContent = data.is_owner
+      ? 'สวิตช์ Storyboard Studio ยังปิดอยู่ — เจ้าของทดสอบได้ แต่ทีมยังใช้ไม่ได้ (เปิดที่หน้า Settings)'
+      : 'ฟีเจอร์ยังปิดอยู่ — แจ้งเจ้าของให้เปิดสวิตช์ที่หน้า Settings ก่อนนะคะ';
+  }
+  renderShots();
+}
+function renderShots() {
+  const g = $('#shotGrid'); g.innerHTML = '';
+  for (const s of SHOTS.filter((x) => x.scene === SCENE)) {
+    const d = document.createElement('div');
+    d.className = 'shot' + (SEL && SEL.shot === s.shot ? ' on' : '');
+    d.innerHTML = `<div class="n">SHOT ${s.shot}</div><div class="t">${s.title}</div><div class="d">${s.duration || ''} · ${s.emotion || ''}</div>`;
+    d.onclick = () => selectShot(s.shot);
+    g.appendChild(d);
+  }
+}
+function selectShot(no) {
+  SEL = SHOTS.find((x) => x.shot === no);
+  renderShots();
+  $('#genCard').style.display = '';
+  $('#genTitle').textContent = `เจนภาพ · SHOT ${SEL.shot} — ${SEL.title}`;
+  $('#shotFields').innerHTML = `<b>หน้าที่ในเรื่อง:</b> ${SEL.story_function || '-'}<br><b>อารมณ์:</b> ${SEL.emotion || '-'}<br><b>Reference ที่จะแนบ:</b> ${(SEL.refs_needed || []).map((r) => REF_TH[r] || r).join(' · ')}`;
+  $('#skuWrap').style.display = (SEL.refs_needed || []).includes('hero_dress') ? '' : 'none';
+  $('#result').style.display = 'none';
+  document.querySelectorAll('#presetChips .chip').forEach((c) => c.classList.remove('on'));
+  $('#genCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── presets ──
+const chipsEl = $('#presetChips');
+PRESETS.forEach((p) => {
+  const c = document.createElement('div');
+  c.className = 'chip gold'; c.textContent = p.label;
+  c.onclick = () => c.classList.toggle('on');
+  c.dataset.note = p.note; c.dataset.label = p.label;
+  chipsEl.appendChild(c);
+});
+
+// ── generate ──
+$('#genBtn').onclick = async () => {
+  if (!SEL) return;
+  const picked = [...document.querySelectorAll('#presetChips .chip.on')];
+  const note = [picked.map((c) => c.dataset.note).join(' '), $('#fixNote').value.trim()].filter(Boolean).join(' ');
+  const btn = $('#genBtn'); btn.disabled = true;
+  $('#genStatus').textContent = 'กำลังเจน… (ราว 10-30 วินาที)';
+  const { data, error } = await sgb('generate', { shot: SEL.shot, fix_note: note || undefined,
+    sku: $('#skuInput').value.trim() || undefined, preset: picked.map((c) => c.dataset.label).join('+') || undefined });
+  btn.disabled = false;
+  if (error) { $('#genStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return; }
+  $('#genStatus').textContent = (data.refs_missing || []).length ? 'สำเร็จ (แต่ขาด ref: ' + data.refs_missing.map((r) => REF_TH[r] || r).join(', ') + ')' : 'สำเร็จ';
+  LAST_GEN = data;
+  $('#result').style.display = '';
+  $('#resultImg').src = data.url;
+  $('#dlBtn').href = data.url;
+  $('#promptBox').textContent = data.prompt; $('#promptBox').style.display = 'none';
+  $('#fbStatus').textContent = ''; $('#fbNote').value = '';
+  loadHistory();
+};
+$('#showPrompt').onclick = () => { const b = $('#promptBox'); b.style.display = b.style.display === 'none' ? '' : 'none'; };
+async function sendFb(rating) {
+  if (!LAST_GEN?.gen_id) return;
+  const { error } = await sgb('feedback', { gen_id: LAST_GEN.gen_id, rating, note: $('#fbNote').value.trim() || undefined });
+  $('#fbStatus').textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : 'บันทึกความเห็นแล้ว — ขอบคุณค่ะ (เข้าระบบออดิทให้เจ้าของดูแล้ว)';
+  loadHistory();
+}
+$('#fbPass').onclick = () => sendFb('pass');
+$('#fbFail').onclick = () => sendFb('fail');
+
+// ── history + audit ──
+async function loadHistory() {
+  const { data, error } = await sgb('history', { limit: 30 });
+  const el = $('#histList');
+  if (error) { el.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
+  $('#histHint').textContent = data.all_visible ? 'เห็นของทุกคน (เจ้าของ)' : 'เห็นเฉพาะงานของฉัน';
+  const s = data.summary;
+  if (data.all_visible && s) {
+    const st = $('#statRow'); st.style.display = '';
+    st.innerHTML = `<div class="b"><div class="n">${s.total}</div><div class="l">เจนทั้งหมด</div></div>
+      <div class="b"><div class="n">฿${(s.cost_thb || 0).toFixed(0)}</div><div class="l">ค่าใช้จ่ายประมาณ</div></div>
+      <div class="b"><div class="n">${s.passes}/${s.fails}</div><div class="l">ผ่าน/ไม่ผ่าน</div></div>
+      <div class="b"><div class="n">${s.errors}</div><div class="l">เจนพัง</div></div>`;
+  }
+  if (!data.rows.length) { el.innerHTML = '<div class="loading">ยังไม่มีประวัติ</div>'; return; }
+  el.innerHTML = '';
+  for (const r of data.rows) {
+    const d = document.createElement('div');
+    d.className = 'hrow';
+    const when = new Date(r.created_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+    const fb = r.feedback_rating ? `<span class="tag ${r.feedback_rating}">${r.feedback_rating === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</span>` : '';
+    const note = r.feedback_note ? `<div class="meta">“${r.feedback_note}” — ${r.feedback_by || ''}</div>` : (r.fix_note ? `<div class="meta">โน้ต: ${r.fix_note.slice(0, 90)}</div>` : '');
+    d.innerHTML = `<div><b>SHOT ${r.shot}</b> · ${r.employee_name || '-'} <span class="meta">· ${when} · ${r.preset || 'มาตรฐาน'}</span>${note}</div>
+      <div><span class="tag ${r.status}">${r.status === 'ok' ? 'สำเร็จ' : 'พัง'}</span> ${fb}</div>`;
+    if (r.url) d.onclick = () => window.open(r.url, '_blank');
+    el.appendChild(d);
+  }
+}
+
+// ── tabs + boot ──
+document.querySelectorAll('.tab').forEach((t) => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach((x) => x.classList.remove('on'));
+  t.classList.add('on'); SCENE = parseInt(t.dataset.scene, 10); renderShots();
+});
+(async () => {
+  try {
+    if (!(await window.opsLogin())) return;
+    const { data } = await window.opsRpc('ops_me', {});
+    if (data) $('#whoami').textContent = (data.name || data.nickname || '') + (data.is_owner ? ' · เจ้าของ' : '');
+    loadShots(); loadRefs(); loadHistory();
+  } catch (e) { $('#shotGrid').innerHTML = '<div class="err">' + e.message + '</div>'; }
+})();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu && window.opsMenu.mount();</script>
+</body>
+</html>

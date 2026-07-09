@@ -140,6 +140,19 @@
     </div>
   </div>
 
+  <div class="card" id="storyboardCard" style="display:none">
+    <h2>Storyboard Studio — เจนภาพ storyboard ด้วย AI</h2>
+    <div class="desc">เปิด = ทีมการตลาดเข้า ops/storyboard.html กดเจนภาพ storyboard ของ LLOOP Hero Video ได้เองตาม preset ที่ล็อกไว้ (ไม่ต้องเขียน prompt) — ทุกการเจนเข้าระบบออดิท: ใครเจน ช็อตไหน ค่าใช้จ่ายสะสม พร้อมคอมเมนต์ผ่าน/ไม่ผ่านจากทีม · ปิด = ใช้ได้เฉพาะเจ้าของ (โหมดทดสอบ)</div>
+    <div class="feat">
+      <div class="info">
+        <div class="name">เปิดให้ทีมใช้ Storyboard Studio</div>
+        <div class="note">มีค่าใช้จ่ายต่อรูปที่เจน (Gemini API ราว 1-2 บาท/รูป) — ดูยอดสะสมและ feedback ได้ในหน้า studio</div>
+        <div class="need">ต้องมี: รัน supabase/storyboard_studio.sql + ตั้ง secret GOOGLE_AI_API_KEY ใน Supabase → Edge Functions ก่อน</div>
+      </div>
+      <label class="sw" data-key="storyboard_studio_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+  </div>
+
   <div class="card" id="premiumCard" style="display:none">
     <h2>ระบบคุ้มครองชุดออกงาน (ชุดแพง)</h2>
     <div class="desc">เปิดเมื่อพร้อมเริ่มปล่อยเช่าชุดราคาแพง — พอเปิด ระบบจะ “เตือนเจ้าของอัตโนมัติ” ทุกครั้งที่ชุดแพงถูกจอง ให้ทำขั้นตอนคุ้มครอง (วิดีโอก่อนแพค/ตอนแกะของ ฯลฯ) ลดความผิดพลาดของคน · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก</div>
@@ -226,6 +239,7 @@ async function load(){
   $('#stylistCard').style.display = '';
   $('#partnerCard').style.display = '';
   $('#quizCard').style.display = '';
+  $('#storyboardCard').style.display = '';
   $('#premiumCard').style.display = '';
   $('#financeCard').style.display = '';
   $('#hint').style.display = '';
