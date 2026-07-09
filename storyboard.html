@@ -220,8 +220,20 @@ let SHOTS = [], SEL = null, SCENE = 1, IS_OWNER = false, CHAR_SEL = null, SKU_SE
 
 async function sgb(task, args) {
   if (!(await window.opsLogin())) return { error: { message: 'redirecting_to_login' } };
-  const r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id_token: liff.getIDToken(), task, ...(args || {}) }) });
+  // timeout กันค้าง: งานเจนรูปให้เวลานาน (200 วิ) งานอื่นสั้น (30 วิ)
+  const ctrl = new AbortController();
+  const tmo = setTimeout(() => ctrl.abort(), task === 'generate' ? 200000 : 30000);
+  let r;
+  try {
+    r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: liff.getIDToken(), task, ...(args || {}) }), signal: ctrl.signal });
+  } catch (e) {
+    clearTimeout(tmo);
+    const to = e && e.name === 'AbortError';
+    return { error: { code: to ? 'timeout' : 'network', message: to
+      ? 'ใช้เวลานานเกินไป — ลองลดจำนวนท่าโพส (เจนทีละ 1-2 ท่า) แล้วลองใหม่' : 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง' } };
+  }
+  clearTimeout(tmo);
   const out = await r.json().catch(() => ({}));
   if (!r.ok || out.error) {
     const map = { unauthorized: 'เซสชันหมดอายุ รีเฟรชหน้าแล้วล็อกอินใหม่', no_access: 'ไม่มีสิทธิ์ใช้งานหลังบ้าน',
