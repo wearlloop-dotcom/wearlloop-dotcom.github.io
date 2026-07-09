@@ -71,6 +71,14 @@
 <div class="wrap">
   <div id="flagNote" class="notice" style="display:none"></div>
 
+  <div class="card">
+    <h2>วันนี้จะทำงานแบบไหนคะ?</h2>
+    <div class="tabs" style="margin-bottom:0">
+      <div class="tab on" data-mode="sb" style="padding:14px">🎬 Storyboard<br><span style="font-size:12px;font-weight:400">ทำภาพประกอบวิดีโอ Hero Video ทีละช็อต</span></div>
+      <div class="tab" data-mode="lb" style="padding:14px">🛍 Lookbook<br><span style="font-size:12px;font-weight:400">ทำรูปนางแบบ+ชุดจริง ไปโพสต์เว็บ/โซเชียล</span></div>
+    </div>
+  </div>
+
   <div class="card" id="refCard">
     <h2>รูป Reference <span class="hint">อัปโหลดครั้งเดียว ใช้ทุกการเจน — ระบบเลือกแนบให้ตามช็อตอัตโนมัติ</span></h2>
     <div class="refrow" id="refRow"><div class="loading">กำลังโหลด…</div></div>
@@ -92,7 +100,7 @@
     <div style="margin-top:10px"><button class="btn ghost sm" id="locAdd">+ เพิ่มสถานที่เข้าคลัง</button></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="shotCard">
     <h2>เลือกช็อต <span class="hint">LLOOP Hero Video · 31 ช็อต · 2 ซีน</span></h2>
     <div class="tabs">
       <div class="tab on" data-scene="1">ซีน 1 · องก์ปัญหา (1–15)</div>
@@ -509,13 +517,28 @@ async function loadHistory() {
   }
 }
 
+// ── สลับโหมดงาน: storyboard (วิดีโอ) ↔ lookbook (รูปโพสต์) ──
+let WORK = 'sb';
+function applyMode() {
+  const sb = WORK === 'sb';
+  $('#refCard').style.display = sb ? '' : 'none';
+  $('#locCard').style.display = sb ? '' : 'none';
+  $('#shotCard').style.display = sb ? '' : 'none';
+  $('#genCard').style.display = sb && SEL ? '' : 'none';
+  $('#lbCard').style.display = sb ? 'none' : '';
+  $('#resultCard').style.display = 'none';
+  document.querySelectorAll('[data-mode]').forEach((t) => t.classList.toggle('on', t.dataset.mode === WORK));
+}
+document.querySelectorAll('[data-mode]').forEach((t) => t.onclick = () => { WORK = t.dataset.mode; applyMode(); });
+
 // ── tabs + boot ──
-document.querySelectorAll('.tab').forEach((t) => t.onclick = () => {
-  document.querySelectorAll('.tab').forEach((x) => x.classList.remove('on'));
+document.querySelectorAll('.tab[data-scene]').forEach((t) => t.onclick = () => {
+  document.querySelectorAll('.tab[data-scene]').forEach((x) => x.classList.remove('on'));
   t.classList.add('on'); SCENE = parseInt(t.dataset.scene, 10); renderShots();
 });
 (async () => {
   try {
+    applyMode();
     if (!(await window.opsLogin())) return;
     const { data } = await window.opsRpc('ops_me', {});
     if (data) $('#whoami').textContent = (data.name || data.nickname || '') + (data.is_owner ? ' · เจ้าของ' : '');
