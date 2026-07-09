@@ -76,6 +76,12 @@
     <div class="refrow" id="refRow"><div class="loading">กำลังโหลด…</div></div>
   </div>
 
+  <div class="card" id="charCard">
+    <h2>ตัวละคร / นางแบบ <span class="hint">กดเลือกว่าจะเจนด้วยหน้าใคร — เพิ่มรูปตัวละครที่เจนไว้เข้าคลังได้เลย</span></h2>
+    <div class="refrow" id="charRow"><div class="loading">กำลังโหลด…</div></div>
+    <div style="margin-top:10px"><button class="btn ghost sm" id="charAdd">+ เพิ่มตัวละครเข้าคลัง</button></div>
+  </div>
+
   <div class="card">
     <h2>เลือกช็อต <span class="hint">LLOOP Hero Video · 31 ช็อต · 2 ซีน</span></h2>
     <div class="tabs">
@@ -93,12 +99,27 @@
     <label>โน้ตเพิ่มเติม (ถ้ามี) — บอกสิ่งที่อยากแก้เป็นภาษาไทยหรืออังกฤษ</label>
     <textarea id="fixNote" placeholder="เช่น ตู้ต้องเปิดอยู่ มีผ้ากำลังร่วง / แสงอุ่นขึ้นอีก"></textarea>
     <div id="skuWrap" style="display:none;margin-top:10px">
-      <label>รหัสชุดพระเอก (SKU จริงจากคลัง เช่น LBK-20-M) — ช็อตนี้ต้องใช้รูปชุดจริง</label>
-      <input type="text" id="skuInput" placeholder="LBK-20-M">
+      <label>ชุดพระเอก — ช็อตนี้ต้องใช้รูปชุดจริงจากคลัง (ค้นหาแล้วกดเลือก)</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="skuInput" placeholder="ค้นหาชื่อชุด / รหัส / แบรนด์ เช่น LBK-20-M, firr">
+        <button class="btn ghost" id="skuSearch">ค้นหา</button>
+      </div>
+      <div class="refrow" id="skuGrid" style="margin-top:9px"></div>
+      <div class="meta" id="skuSel" style="margin-top:6px"></div>
     </div>
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button class="btn clay" id="genBtn">✦ เจนภาพช็อตนี้</button>
       <span class="meta" id="genStatus"></span>
+    </div>
+    <div class="meta" style="margin-top:8px">กติกา: ต้องกด "ผ่าน/ไม่ผ่าน" รูปก่อนหน้าของตัวเอง ก่อนถึงจะเจนรูปใหม่ได้ — ความเห็นทุกอันเข้าระบบออดิท</div>
+    <div class="notice" id="pendWrap" style="display:none;margin-top:10px">
+      <div style="margin-bottom:8px"><b>ยังมีรูปที่ยังไม่ได้ตัดสิน</b> (SHOT <span id="pendShot"></span>) — กดผ่าน/ไม่ผ่านก่อน แล้วค่อยเจนใหม่ค่ะ</div>
+      <img id="pendImg" style="width:100%;border-radius:9px;display:block;margin-bottom:8px">
+      <div class="fbrow" style="margin-top:0">
+        <button class="btn sage sm" id="pendPass">ผ่าน ✓</button>
+        <button class="btn sm" style="background:#9C3F5E" id="pendFail">ไม่ผ่าน ✕</button>
+        <input type="text" id="pendNote" placeholder="เพราะอะไร (เข้าระบบออดิท)" style="flex:1;min-width:180px">
+      </div>
     </div>
     <div class="result" id="result" style="display:none;margin-top:14px">
       <img id="resultImg" alt="">
@@ -136,9 +157,10 @@ const PRESETS = [
   { label: 'ลดความรก ดูแพงขึ้น', note: 'Reduce clutter slightly: clothing piles stay soft, elegant and stylish — fashion-editorial mess, not dirty or chaotic.' },
   { label: 'จอมือถือแบบหน้าเว็บจริง', note: 'The phone screen must look like a real minimal e-commerce web page showing one hero dress photo with a subtle golden circular LLOOP ring motif — clean UI, no readable text, no fake app icons.' },
 ];
-const REF_TH = { meili: 'หน้า Meili', outfit: 'ชุดอยู่บ้าน', room: 'ห้องปกติ', room_messy: 'ห้องรก', logo: 'โลโก้ LLOOP', hero_dress: 'ชุดพระเอก' };
+const REF_TH = { meili: 'หน้า Meili', outfit: 'ชุดอยู่บ้าน', room: 'ห้องปกติ', room_messy: 'ห้องรก', logo: 'โลโก้ LLOOP', hero_dress: 'ชุดพระเอก',
+  woman_a: 'Woman A (30-35 ผมรวบ)', woman_b: 'Woman B (22-25 ผมยาว)', woman_c: 'Woman C (25-30 ผมยาวสีทอง หน้าม้า)' };
 
-let SHOTS = [], SEL = null, SCENE = 1, LAST_GEN = null, IS_OWNER = false;
+let SHOTS = [], SEL = null, SCENE = 1, LAST_GEN = null, IS_OWNER = false, CHAR_SEL = null, SKU_SEL = null;
 
 async function sgb(task, args) {
   if (!(await window.opsLogin())) return { error: { message: 'redirecting_to_login' } };
@@ -181,6 +203,60 @@ function pickRef(name) {
   };
   inp.click();
 }
+
+// ── คลังตัวละคร ──
+async function loadChars() {
+  const { data, error } = await sgb('chars_list');
+  const row = $('#charRow');
+  if (error) { row.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
+  row.innerHTML = '';
+  const mk = (key, label, url) => {
+    const d = document.createElement('div');
+    d.className = 'refbox';
+    d.style.cursor = 'pointer';
+    if (CHAR_SEL === key) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
+    d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">ใช้รูป reference<br>"หน้า Meili" ด้านบน</div>`) +
+      `<div class="nm">${label}${CHAR_SEL === key ? ' ✓' : ''}</div>`;
+    d.onclick = () => { CHAR_SEL = key; loadChars(); };
+    row.appendChild(d);
+  };
+  mk(null, 'Meili (มาตรฐาน)', null);
+  for (const c of data) mk(c.key, c.label, c.url);
+}
+$('#charAdd').onclick = () => {
+  const label = (window.prompt('ตั้งชื่อตัวละคร/นางแบบ (เช่น "Meili แบบ 2 ผมบ็อบ")') || '').trim();
+  if (!label) return;
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = async () => {
+    const f = inp.files[0]; if (!f) return;
+    const b64 = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+    const { data, error } = await sgb('char_upload', { label, image: b64, media_type: f.type || 'image/png' });
+    if (error) { alert('เพิ่มไม่สำเร็จ: ' + error.message); return; }
+    CHAR_SEL = data.key; loadChars();
+  };
+  inp.click();
+};
+
+// ── เลือกชุดจริงจากคลัง (ผ่าน gateway ops-rpc — RPC เดียวกับหน้า marketing) ──
+$('#skuSearch').onclick = async () => {
+  const q = $('#skuInput').value.trim();
+  const g = $('#skuGrid'); g.innerHTML = '<div class="loading">กำลังค้นหา…</div>';
+  const { data, error } = await window.opsRpc('garments_pick', { p_q: q || null, p_limit: 12 });
+  if (error) { g.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
+  if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด</div>'; return; }
+  g.innerHTML = '';
+  for (const it of data) {
+    const d = document.createElement('div');
+    d.className = 'refbox'; d.style.cursor = 'pointer';
+    if (SKU_SEL === it.code) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
+    d.innerHTML = (it.photo ? `<img src="${it.photo}">` : `<div class="ph">ไม่มีรูป</div>`) +
+      `<div class="nm">${it.name || it.code}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
+    d.onclick = () => { SKU_SEL = it.code; $('#skuSel').textContent = 'เลือกแล้ว: ' + (it.name || '') + ' (' + it.code + ')'; $('#skuSearch').click(); };
+    g.appendChild(d);
+  }
+};
+$('#skuInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#skuSearch').click(); });
 
 // ── shots ──
 async function loadShots() {
@@ -235,9 +311,13 @@ $('#genBtn').onclick = async () => {
   const btn = $('#genBtn'); btn.disabled = true;
   $('#genStatus').textContent = 'กำลังเจน… (ราว 10-30 วินาที)';
   const { data, error } = await sgb('generate', { shot: SEL.shot, fix_note: note || undefined,
-    sku: $('#skuInput').value.trim() || undefined, preset: picked.map((c) => c.dataset.label).join('+') || undefined });
+    sku: SKU_SEL || undefined, character: CHAR_SEL || undefined,
+    preset: picked.map((c) => c.dataset.label).join('+') || undefined });
   btn.disabled = false;
-  if (error) { $('#genStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return; }
+  if (error) {
+    if (error.code === 'feedback_required' && data && data.pending) { showPending(data.pending); return; }
+    $('#genStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return;
+  }
   $('#genStatus').textContent = (data.refs_missing || []).length ? 'สำเร็จ (แต่ขาด ref: ' + data.refs_missing.map((r) => REF_TH[r] || r).join(', ') + ')' : 'สำเร็จ';
   LAST_GEN = data;
   $('#result').style.display = '';
@@ -256,6 +336,27 @@ async function sendFb(rating) {
 }
 $('#fbPass').onclick = () => sendFb('pass');
 $('#fbFail').onclick = () => sendFb('fail');
+
+// ── กติกาบังคับตัดสินรูปค้าง: โชว์รูปที่ยังไม่ได้ตัดสิน ให้กดก่อนเจนใหม่ ──
+let PEND = null;
+function showPending(p) {
+  PEND = p;
+  $('#genStatus').innerHTML = '<span class="err">ต้องตัดสินรูปก่อนหน้าก่อนค่ะ</span>';
+  $('#pendWrap').style.display = '';
+  $('#pendShot').textContent = p.shot || '-';
+  $('#pendImg').src = p.url || '';
+  $('#pendWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+async function judgePending(rating) {
+  if (!PEND) return;
+  const { error } = await sgb('feedback', { gen_id: PEND.gen_id, rating, note: $('#pendNote').value.trim() || undefined });
+  if (error) { alert('บันทึกไม่สำเร็จ: ' + error.message); return; }
+  PEND = null; $('#pendWrap').style.display = 'none'; $('#pendNote').value = '';
+  $('#genStatus').textContent = 'ตัดสินแล้ว — กดเจนได้เลยค่ะ';
+  loadHistory();
+}
+$('#pendPass').onclick = () => judgePending('pass');
+$('#pendFail').onclick = () => judgePending('fail');
 
 // ── history + audit ──
 async function loadHistory() {
@@ -296,7 +397,7 @@ document.querySelectorAll('.tab').forEach((t) => t.onclick = () => {
     if (!(await window.opsLogin())) return;
     const { data } = await window.opsRpc('ops_me', {});
     if (data) $('#whoami').textContent = (data.name || data.nickname || '') + (data.is_owner ? ' · เจ้าของ' : '');
-    loadShots(); loadRefs(); loadHistory();
+    loadShots(); loadRefs(); loadChars(); loadHistory();
   } catch (e) { $('#shotGrid').innerHTML = '<div class="err">' + e.message + '</div>'; }
 })();
 </script>
