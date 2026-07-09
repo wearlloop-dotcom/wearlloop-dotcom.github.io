@@ -8,8 +8,10 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
+<link rel="stylesheet" href="ops-ui.css">
 <style>
-  :root{--ink:#1a1a1a;--line:#999;--muted:#666;--navy:#0C3A33;--red:#9a2b2b}
+  /* ใช้พาเลตต์แบรนด์จาก ops-ui.css — โทเคนเดิม (--line:#999/--muted:#666) เป็นเทาทึบนอกแบรนด์ ปรับให้อ้างแบรนด์ */
+  :root{--line:var(--hair);--muted:var(--stone);--navy:var(--forest);--red:var(--danger)}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Sarabun',sans-serif;color:var(--ink);background:#eee;font-size:14px;padding:16px}
   .wrap{max-width:960px;margin:0 auto}

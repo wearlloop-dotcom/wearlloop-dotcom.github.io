@@ -105,6 +105,8 @@
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
@@ -114,7 +116,8 @@
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
   const FUNCTIONS=SUPABASE_URL.replace('.supabase.co','.functions.supabase.co');
-  const QR_BASE='https://lloop.app/g/';
+  // QR ลิงก์หน้าชุดจริง (โดเมนกลางอยู่ที่ config.js → SITE_URL)
+  const qrUrl=code=>(window.CONFIG?.SITE_URL||'https://wearlloop-dotcom.github.io')+'/g.html?c='+encodeURIComponent(code);
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;             // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
@@ -132,15 +135,16 @@
     const photo=$('f_photo').value;
     $('p_pic').innerHTML= photo?`<img src="${photo}">`: ($('f_name').value||'รูปชุด');
     $('p_pic').style.background=$('f_colorhex').value;
-    $('p_qr').innerHTML=''; qr=new QRCode($('p_qr'),{text:QR_BASE+(code==='(auto)'?'preview':code),width:70,height:70});
+    $('p_qr').innerHTML=''; qr=new QRCode($('p_qr'),{text:qrUrl(code==='(auto)'?'preview':code),width:70,height:70});
   }
   syncPreview();
+  let _T=null; function toast(m,bad){ const t=$('toast'); if(!t){ return; } t.textContent=m; t.className='toast show'+(bad?' bad':' ok'); clearTimeout(_T); _T=setTimeout(()=>t.className='toast',3200); }
 
   async function aiFill(){
     const photo=$('f_photo').value;
-    if(!photo){ alert('วางลิงก์รูปก่อนค่ะ'); return; }
+    if(!photo){ toast('วางลิงก์รูปก่อนค่ะ',true); return; }
     try{
-      const r=await fetch(FUNCTIONS+'/intake-tagger',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer'+SUPABASE_KEY},body:JSON.stringify({image_url:photo})});
+      const r=await fetch(FUNCTIONS+'/intake-tagger',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+SUPABASE_KEY},body:JSON.stringify({image_url:photo})});
       if(!r.ok) throw new Error('not deployed');
       const t=await r.json();
       $('f_name').value=t.name||$('f_name').value; $('f_category').value=t.category||'dress';
@@ -148,7 +152,7 @@
       $('f_season').value=t.color_season||''; $('f_fabric').value=t.fabric_guess||'';
       (t.occasion_tags||[]).forEach(k=>{const el=document.querySelector(`.chip[data-k="${k}"]`); if(el&&!sel.has(k)){sel.add(k);el.classList.add('on')}});
       syncPreview();
-    }catch(e){ alert('AI ช่วยกรอกยังไม่พร้อม — ต้องตั้ง Anthropic key + deploy ฟังก์ชัน intake-tagger ก่อน (พรุ่งนี้) ค่ะ\nตอนนี้กรอกมือไปก่อนได้เลย'); }
+    }catch(e){ toast('AI ช่วยกรอกยังไม่พร้อม — กรอกมือไปก่อนได้เลยค่ะ',true); }
   }
 
   async function save(){
@@ -165,7 +169,7 @@
       condition:$('f_condition').value||null
     };
     const { data, error } = await sb.rpc('intake_garment',{ p: payload });
-    if(error){ alert('บันทึกไม่ได้:'+error.message); return; }
+    if(error){ toast('บันทึกไม่ได้: '+(error.message||''),true); return; }
     $('f_code').value=data; syncPreview();
     // เก็บเข้าช่องทันทีถ้าระบุ (ของใหม่มีตำแหน่งตั้งแต่วันแรก)
     let binMsg='';
