@@ -75,6 +75,8 @@
   const esc=s=>(s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
   const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'';
   const COND={good:['ดี ✓','good'],stain:['เปื้อน','stain'],damage:['ชำรุด','damage'],missing:['ของขาด','missing']};
+  const ST={available:'ว่าง',cleaning:'กำลังซัก',out:'ถูกเช่า',reserved:'จองแล้ว',repair:'ซ่อม',retired:'ปลดระวาง',needs_review:'รอตรวจ',lost:'หาย'};
+  const stTH=s=>ST[s]||(s==null?'':String(s));
   const EVT={shipped:'ส่งออก',delivered:'ถึงมือลูกค้า',return_shipped:'ลูกค้าส่งคืน',returned:'รับคืน',in_transit:'กำลังส่ง',out_for_delivery:'ออกส่ง',return_arrived:'ถึงร้าน'};
 
   async function load(){
@@ -103,7 +105,7 @@
         <div class="gname">${esc(g.name)}</div>
         <div style="color:var(--muted);font-size:13px">โค้ด ${esc(g.code)}${g.brand?' · '+esc(g.brand):''}</div>
         <div class="stat">
-          <span class="pill">สถานะ: ${esc(g.status)}</span>
+          <span class="pill">สถานะ: ${esc(stTH(g.status))}</span>
           <span class="pill">ซักมา ${g.wash_count} ครั้ง</span>
           ${gradePill(g.grade)}
         </div>

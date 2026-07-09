@@ -271,7 +271,8 @@
     if(!confirm('ประกาศไลฟ์นี้ไปทุกช่องที่เลือกเลยไหม? (LINE จะ broadcast หา follower ทุกคน)')) return;
     btn.disabled=true; btn.innerHTML='<span class="spin"></span>กำลังกระจาย...';
     try{
-      const res=await fetch(BROADCAST_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({live_id:id})});
+      const idTok=(window.liff&&liff.getIDToken&&liff.getIDToken())||null;   // แนบ LINE idToken เพื่อระบุตัวสตาฟ (backend ใช้ตรวจสิทธิ์)
+      const res=await fetch(BROADCAST_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({live_id:id,id_token:idTok})});
       const j=await res.json().catch(()=>null);
       if(!res.ok||!j||j.error){ toast('กระจายไม่สำเร็จ: '+((j&&j.error)||('HTTP '+res.status)),true); }
       else toast('ประกาศไลฟ์แล้ว');

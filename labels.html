@@ -37,12 +37,22 @@
 <style>
   .phead{max-width:900px;margin:18px auto 0;padding:0 14px}
   @media print{ .phead{display:none} }
+  .lbltools{max-width:900px;margin:14px auto 0;padding:0 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .lbltools input{flex:1 1 200px;min-width:140px;border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-family:var(--sans);font-size:14px;background:#fff}
+  .lbltools button{background:var(--soft,#F5F2EC);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px 16px;font-size:13px;cursor:pointer;font-family:var(--sans)}
+  .lbltools .cnt{font-size:12px;color:var(--muted);flex:0 0 auto}
 </style>
 </head>
 <body>
 <div class="bar">
   <div><h1>ป้าย QR ชุด</h1><div class="sub">ปริ้นแล้วตัดแปะที่ชุด / หน้าถุง — สแกน QR เพื่อดู/เช็คชุด · <a href="/care-label.html" style="color:#A75F3A">ป้ายเย็บติดชุด ></a></div></div>
   <button onclick="window.print()"> ปริ้นทั้งหมด</button>
+</div>
+<div class="lbltools noprint" id="lblTools">
+  <input id="fltText" placeholder="กรองด้วยโค้ด/ชื่อชุด เช่น g1 หรือ เดรส" autocomplete="off">
+  <input id="fltCodes" placeholder="ปริ้นเฉพาะโค้ดนี้ (คั่นด้วย ,) เช่น g1,g4,g7" autocomplete="off">
+  <button id="fltClear" type="button">ล้าง</button>
+  <span class="cnt" id="fltCount"></span>
 </div>
 <section class="phead" id="phead">
   <div class="eyebrow">qr label printing</div>
@@ -60,16 +70,33 @@
   // === ตั้งค่า (publishable key ปลอดภัยที่จะฝัง) ===
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
-  const QR_BASE='https://lloop.app/g/'; // QR เข้ารหัสเป็นลิงก์ตามด้วย code ของชุด (เปลี่ยนเป็นโดเมนจริงทีหลัง)
+  // QR เข้ารหัสเป็นลิงก์หน้าชุดจริง (โดเมนกลางอยู่ที่ config.js → SITE_URL)
+  const qrUrl=code=>(window.CONFIG?.SITE_URL||'https://wearlloop-dotcom.github.io')+'/g.html?c='+encodeURIComponent(code);
 
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // R-4: RPC ผ่าน gateway (LINE idToken + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});
-  (async function(){
-    const { data, error } = await sb.rpc('ops_garments');
-    const sheet = document.getElementById('sheet');
-    if (error ||!data ||!data.length){ sheet.innerHTML =`<div class="empty">โหลดไม่ได้: ${error?error.message:'ไม่มีข้อมูล'}</div>`; return; }
-    sheet.innerHTML = data.map(g=>{
+  const sheet = document.getElementById('sheet');
+  let ALL = [];   // ชุดทั้งหมดที่โหลดมา (ไว้กรองฝั่ง client)
+
+  function currentList(){
+    const q = ($('fltText')?$('fltText').value:'').trim().toLowerCase();
+    const codesRaw = ($('fltCodes')?$('fltCodes').value:'').trim().toLowerCase();
+    const only = codesRaw ? codesRaw.split(',').map(s=>s.trim()).filter(Boolean) : null;
+    return ALL.filter(g=>{
+      if(only && !only.includes(String(g.code||'').toLowerCase())) return false;
+      if(q){
+        const hay = ((g.code||'')+' '+(g.name||'')+' '+(g.brand||'')).toLowerCase();
+        if(!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+  function draw(){
+    const list = currentList();
+    const cnt = $('fltCount'); if(cnt) cnt.textContent = list.length+' / '+ALL.length+' ป้าย';
+    if(!list.length){ sheet.innerHTML='<div class="empty">ไม่พบชุดตามที่กรอง</div>'; return; }
+    sheet.innerHTML = list.map(g=>{
       const photo = (g.photos&&g.photos[0])?`<img src="${g.photos[0]}">`: g.name;
       const bust = g.bust_min_in?`อก ${g.bust_min_in}-${g.bust_max_in}"`:'';
       const occ = (g.occasion_tags||[]).slice(0,3).join(' · ');
@@ -84,7 +111,18 @@
         </div>
       </div>`;
     }).join('');
-    data.forEach(g=>{ new QRCode(document.getElementById('qr_'+g.code), { text: QR_BASE+g.code, width:74, height:74, correctLevel: QRCode.CorrectLevel.M }); });
+    list.forEach(g=>{ new QRCode(document.getElementById('qr_'+g.code), { text: qrUrl(g.code), width:74, height:74, correctLevel: QRCode.CorrectLevel.M }); });
+  }
+  const $=id=>document.getElementById(id);
+  $('fltText').addEventListener('input', draw);
+  $('fltCodes').addEventListener('input', draw);
+  $('fltClear').addEventListener('click', ()=>{ $('fltText').value=''; $('fltCodes').value=''; draw(); });
+
+  (async function(){
+    const { data, error } = await sb.rpc('ops_garments');
+    if (error ||!data ||!data.length){ sheet.innerHTML =`<div class="empty">โหลดไม่ได้: ${error?error.message:'ไม่มีข้อมูล'}</div>`; return; }
+    ALL = data;
+    draw();
   })();
 </script>
 <script src="ops-menu.js"></script>
