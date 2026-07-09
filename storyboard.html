@@ -88,8 +88,8 @@
   <div class="card">
     <h2>วันนี้จะทำงานแบบไหนคะ?</h2>
     <div class="tabs" style="margin-bottom:0">
-      <div class="tab on" data-mode="sb" style="padding:14px">🎬 Storyboard<br><span style="font-size:12px;font-weight:400">ทำภาพประกอบวิดีโอ Hero Video ทีละช็อต</span></div>
-      <div class="tab" data-mode="lb" style="padding:14px">🛍 Lookbook<br><span style="font-size:12px;font-weight:400">ทำรูปนางแบบ+ชุดจริง ไปโพสต์เว็บ/โซเชียล</span></div>
+      <div class="tab on" data-mode="sb" style="padding:14px">Storyboard<br><span style="font-size:12px;font-weight:400">ทำภาพประกอบวิดีโอ Hero Video ทีละช็อต</span></div>
+      <div class="tab" data-mode="lb" style="padding:14px">Lookbook<br><span style="font-size:12px;font-weight:400">ทำรูปนางแบบ+ชุดจริง ไปโพสต์เว็บ/โซเชียล</span></div>
     </div>
   </div>
 
@@ -97,7 +97,7 @@
     <h2>รูป Reference <span class="hint">อัปโหลดครั้งเดียว ใช้ทุกการเจน — ระบบเลือกแนบให้ตามช็อตอัตโนมัติ</span></h2>
     <div class="refrow" id="refRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button class="btn sage sm" id="seedBtn">⬇ โหลดรูปตั้งต้นจากระบบ (Meili · ห้อง · ชุด · โลโก้ + ตัวละคร 8 สไตล์)</button>
+      <button class="btn sage sm" id="seedBtn">โหลดรูปตั้งต้นจากระบบ (Meili · ห้อง · ชุด · โลโก้ + ตัวละคร 8 สไตล์)</button>
       <span class="meta" id="seedStatus"></span>
     </div>
   </div>
@@ -142,7 +142,7 @@
       <div class="meta" id="skuSel" style="margin-top:6px"></div>
     </div>
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button class="btn clay" id="genBtn">✦ เจนภาพช็อตนี้</button>
+      <button class="btn clay" id="genBtn">เจนภาพช็อตนี้</button>
       <span class="meta" id="genStatus"></span>
     </div>
     <div class="meta" style="margin-top:8px">กติกา: ต้องกด "ผ่าน/ไม่ผ่าน" รูปก่อนหน้าของตัวเอง ก่อนถึงจะเจนรูปใหม่ได้ — ความเห็นทุกอันเข้าระบบออดิท</div>
@@ -150,8 +150,8 @@
       <div style="margin-bottom:8px"><b>ยังมีรูปที่ยังไม่ได้ตัดสิน</b> (SHOT <span id="pendShot"></span>) — กดผ่าน/ไม่ผ่านก่อน แล้วค่อยเจนใหม่ค่ะ</div>
       <img id="pendImg" style="width:100%;border-radius:9px;display:block;margin-bottom:8px">
       <div class="fbrow" style="margin-top:0">
-        <button class="btn sage sm" id="pendPass">ผ่าน ✓</button>
-        <button class="btn sm" style="background:#9C3F5E" id="pendFail">ไม่ผ่าน ✕</button>
+        <button class="btn sage sm" id="pendPass">ผ่าน</button>
+        <button class="btn sm" style="background:#9C3F5E" id="pendFail">ไม่ผ่าน</button>
         <input type="text" id="pendNote" placeholder="เพราะอะไร (เข้าระบบออดิท)" style="flex:1;min-width:180px">
       </div>
     </div>
@@ -178,7 +178,7 @@
     <label>โน้ตเพิ่มเติม (ท่าโพส มู้ด ฯลฯ)</label>
     <textarea id="lbNote" placeholder="เช่น ท่าเดินแบบสบาย ๆ มองกล้อง / หมุนตัวให้เห็นชายกระโปรง"></textarea>
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button class="btn clay" id="lbGenBtn">✦ เจนภาพ Lookbook</button>
+      <button class="btn clay" id="lbGenBtn">เจนภาพ Lookbook</button>
       <span class="meta" id="lbStatus"></span>
     </div>
   </div>
@@ -289,8 +289,8 @@ function makeLib(cfg) {
       d.className = 'refbox'; d.style.cursor = 'pointer'; d.style.position = 'relative';
       if (cfg.get() === key) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
       d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">${cfg.defaultHint}</div>`) +
-        `<div class="nm">${label}${cfg.get() === key ? ' ✓' : ''}</div>` +
-        (url ? `<button class="viewbtn" title="ดูชัด ๆ">🔍</button>` : '');
+        `<div class="nm">${label}${cfg.get() === key ? ' (เลือกอยู่)' : ''}</div>` +
+        (url ? `<button class="viewbtn" title="ดูชัด ๆ">ดู</button>` : '');
       d.onclick = () => { cfg.set(key); load(); };
       const vb = d.querySelector('.viewbtn');
       if (vb) vb.onclick = (e) => { e.stopPropagation(); openView(url, label); };
@@ -340,7 +340,7 @@ function makeSkuPicker(cfg) {
       d.className = 'refbox'; d.style.cursor = 'pointer';
       if (cfg.get() === it.code) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
       d.innerHTML = (it.photo ? `<img src="${it.photo}">` : `<div class="ph">ไม่มีรูป</div>`) +
-        `<div class="nm">${it.name || it.code}${cfg.get() === it.code ? ' ✓' : ''}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
+        `<div class="nm">${it.name || it.code}${cfg.get() === it.code ? ' (เลือกอยู่)' : ''}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
       d.onclick = () => { cfg.set(it.code); $(cfg.sel).textContent = 'เลือกแล้ว: ' + (it.name || '') + ' (' + it.code + ')'; search(); };
       g.appendChild(d);
     }
@@ -385,7 +385,7 @@ const getCam = makeChips('#camChips', CAMS, false);
 const getLbCam = makeChips('#lbCamChips', CAMS, false);
 const getLbBg = makeChips('#lbBgChips', BGS, true);
 const getLbStyle = makeChips('#lbStyleChips', [
-  { key: 'film', label: '🎞 ฟิล์ม lookbook (สูตรวิจัย Portra 400)' }, { key: 'studio', label: 'สตูดิโอคลีน' },
+  { key: 'film', label: 'ฟิล์ม lookbook (สูตรวิจัย Portra 400)' }, { key: 'studio', label: 'สตูดิโอคลีน' },
 ], true);
 const getLbPoses = makeChips('#lbPoseChips', [
   { key: 'front', label: 'หน้าตรงเต็มตัว' }, { key: 'side34', label: 'หันข้าง 3/4' },
@@ -476,8 +476,8 @@ function showResult(data, title) {
     d.innerHTML = `<img src="${it.url}" style="width:100%;border-radius:8px;display:block">
       ${it.pose ? `<div class="meta" style="margin-top:6px">ท่า: ${POSE_TH[it.pose] || it.pose}</div>` : ''}
       <div class="fbrow" style="margin-top:8px">
-        <button class="btn sage sm">ผ่าน ✓</button>
-        <button class="btn sm" style="background:#9C3F5E">ไม่ผ่าน ✕</button>
+        <button class="btn sage sm">ผ่าน</button>
+        <button class="btn sm" style="background:#9C3F5E">ไม่ผ่าน</button>
         <a class="btn ghost sm" href="${it.url}" download>โหลด</a>
         <button class="btn ghost sm">prompt</button>
       </div>
@@ -490,7 +490,7 @@ function showResult(data, title) {
     promptB.onclick = () => { pb.style.display = pb.style.display === 'none' || !pb.style.display ? 'block' : 'none'; };
     const judge = async (rating) => {
       const { error } = await sgb('feedback', { gen_id: it.gen_id, rating, note: noteI.value.trim() || undefined });
-      st.textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : (rating === 'pass' ? 'ผ่าน ✓ บันทึกแล้ว' : 'ไม่ผ่าน ✕ บันทึกแล้ว');
+      st.textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : (rating === 'pass' ? 'ผ่าน — บันทึกแล้ว' : 'ไม่ผ่าน — บันทึกแล้ว');
       if (!error) { passB.disabled = true; failB.disabled = true; noteI.disabled = true; loadHistory(); }
     };
     passB.onclick = () => judge('pass');
