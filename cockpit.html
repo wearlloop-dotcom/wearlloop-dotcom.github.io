@@ -44,6 +44,22 @@
   .barline > i{display:block;height:100%;background:var(--ok)}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
+<style>
+  /* คอกพิตใช้การ์ดพื้นสว่าง — ops-ui.css ออกแบบ .kpi ไว้สำหรับ hero พื้นเข้ม (ตัวเลข #fff, พื้นโปร่ง)
+     โหลดทีหลังเลยชนะ cascade ทำให้ตัวเลขขาวหายไปบนการ์ดสว่าง — คืนสไตล์ให้ถูกที่นี่ (โหลดหลัง ops-ui.css) */
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 12px;text-align:center;min-width:0;backdrop-filter:none}
+  .kpi .n{color:var(--ink)}
+  .kpi .l{color:var(--muted)}   /* ops-ui.css ตั้ง .kpi .l เป็นสีครีมอ่อน (สำหรับ hero มืด) — คืนเป็นเทา muted บนการ์ดสว่าง */
+  .kpi.hot{border-color:#EAC4C4;background:#FCF1F1}.kpi.hot .n{color:var(--danger)}
+  .kpi.good{border-color:#BFE0D4;background:#F0F7F4}.kpi.good .n{color:var(--ok)}
+  .kpi.warn .n{color:var(--warn)}
+  .kpi.zero .n{color:var(--muted)}
+  /* ตัวเลขที่กดเพื่อไปแก้ปัญหาต่อได้ (subtle) */
+  .kpi-link{display:block;text-decoration:none;color:inherit;height:100%}
+  .kpi-link .kpi{position:relative;height:100%;transition:border-color .15s,box-shadow .15s}
+  .kpi-link:hover .kpi{border-color:var(--ok);box-shadow:0 4px 14px -8px rgba(15,110,86,.45)}
+  .kpi-link .kpi::after{content:'›';position:absolute;top:7px;right:10px;color:var(--muted);font-size:14px;opacity:.55}
+</style>
 </head>
 <body>
 <div class="bar">
@@ -81,7 +97,10 @@
   let ROI=[];          // เก็บ fleet_roi ไว้สลับมุมมอง
   let roiView='idle';  // idle = ทุนยังไม่คืน/ชุดนิ่ง · top = ทำเงินสูงสุด
 
-  function kpi(n,l,s,cls){ return `<div class="kpi ${cls||''}"><div class="n">${n}</div><div class="l">${l}</div>${s?`<div class="s">${s}</div>`:''}</div>`; }
+  function kpi(n,l,s,cls,href){
+    const inner=`<div class="kpi ${cls||''}"><div class="n">${n}</div><div class="l">${l}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+    return href?`<a class="kpi-link" href="${href}">${inner}</a>`:inner;
+  }
 
   function moneyCard(c){
     const tNet=(c.today.income||0)-(c.today.expense||0);
@@ -90,7 +109,7 @@
       <div class="kpis">
         ${kpi(baht(tNet), 'สุทธิวันนี้', `รับ ${baht(c.today.income)} · จ่าย ${baht(c.today.expense)}`, tNet>=0?'good':'hot')}
         ${kpi(baht(mNet), 'สุทธิเดือนนี้', `รับ ${baht(c.month.income)} · จ่าย ${baht(c.month.expense)}`, mNet>=0?'good':'hot')}
-        ${kpi(baht(c.pending.amount), 'รอยืนยันจ่าย', `${c.pending.count} รายการ`, c.pending.count>0?'warn':'zero')}
+        ${kpi(baht(c.pending.amount), 'รอยืนยันจ่าย', `${c.pending.count} รายการ`, c.pending.count>0?'warn':'zero', 'slips.html')}
       </div></div>`;
   }
 
@@ -100,13 +119,13 @@
       <div class="kpis">
         ${kpi(util+'%', 'หมุนใน 30 วัน', `${f.total||0} ตัวในคลัง`, util>=50?'good':(util>=25?'warn':'hot'))}
         ${kpi(f.idle_30d||0, 'ชุดนิ่ง', 'ว่างแต่ไม่ถูกเช่า', (f.idle_30d>0)?'warn':'zero')}
-        ${kpi(c.rentals.out_now||0, 'ออกไปอยู่', (c.rentals.overdue>0?`เลยกำหนด ${c.rentals.overdue}`:'ตรงเวลา'), c.rentals.overdue>0?'hot':'')}
+        ${kpi(c.rentals.out_now||0, 'ออกไปอยู่', (c.rentals.overdue>0?`เลยกำหนด ${c.rentals.overdue}`:'ตรงเวลา'), c.rentals.overdue>0?'hot':'', 'today.html')}
       </div>
       <div class="barline"><i style="width:${Math.min(util,100)}%"></i></div>
       <div class="kpis" style="margin-top:12px">
         ${kpi(f.available||0,'ว่างพร้อมเช่า','','good')}
         ${kpi(f.cleaning||0,'ซัก/ซ่อม','',f.cleaning>0?'warn':'zero')}
-        ${kpi(c.needs_review||0,'รอตรวจขึ้นร้าน','',c.needs_review>0?'warn':'zero')}
+        ${kpi(c.needs_review||0,'รอตรวจขึ้นร้าน','',c.needs_review>0?'warn':'zero', 'intake.html')}
       </div></div>`;
   }
 

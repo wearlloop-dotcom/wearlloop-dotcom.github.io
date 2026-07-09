@@ -1,12 +1,13 @@
 // ===== scan.js — สแกน QR ด้วยกล้อง / แตะ NFC → เติมรหัสลงช่อง input (กรอกง่าย ไม่ต้องพิมพ์) =====
 // ใช้: <script src="https://cdn.jsdelivr.net/npm/html5-qrcode"></script><script src="scan.js"></script>
 //   ปุ่ม: <button onclick="scanInto('wsCode', doSend)">สแกน</button>  (arg2 = callback หลังเติม ไม่บังคับ)
-// QR ป้ายชุดเข้ารหัสเป็น lloop.app/g/<code> หรือรหัสตรง ๆ → ดึง <code> ออกมา
+// QR ป้ายชุดเข้ารหัสเป็น .../g.html?c=<code> (หรือ /g/<code>, garment=, รหัสตรง ๆ) → ดึง <code> ออกมา
 (function () {
   function parseCode(txt) {
     if (!txt) return '';
     txt = String(txt).trim();
     if (txt.includes('/g/')) return txt.split('/g/').pop().split(/[/?#]/)[0];   // .../g/g1
+    if (/[?&]c=/.test(txt)) return decodeURIComponent(txt.split(/[?&]c=/).pop().split('&')[0].split('#')[0]); // .../g.html?c=g1
     if (txt.includes('garment=')) return decodeURIComponent(txt.split('garment=').pop().split('&')[0]);
     if (/^https?:/i.test(txt)) return txt.split('/').filter(Boolean).pop();      // เผื่อ url อื่น
     return txt;                                                                   // รหัสตรง ๆ

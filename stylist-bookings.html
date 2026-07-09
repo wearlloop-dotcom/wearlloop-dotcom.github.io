@@ -6,13 +6,15 @@
 <title>LLOOP · คิวสไตลิสต์ Personal Color (หลังบ้าน)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ops-ui.css">
 <style>
   :root{--canvas:#FAF8F5;--surface:#fff;--ink:#1C1B19;--stone:#6E6A63;--hair:#E7E2DA;--navy:#1A1A1A;--sage:#6FB3A6;--champ:#C9A86A;--ok:#0F6E56;--danger:#A32D2D;--clay:#A75F3A;
     --sans:'Prompt',system-ui,sans-serif;--display:'Poppins','Prompt',sans-serif}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:var(--sans);color:var(--ink);background:var(--canvas);font-size:15px}
   .bar{background:var(--ink);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}
-  .bar h1{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:1px}
+  .bar h1{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:1px;color:#fff}
+  .bar h1::before{color:var(--sage);border-right-color:rgba(255,255,255,.25)}
   .bar .tag{font-size:11px;background:#33312d;padding:3px 10px;border-radius:20px;letter-spacing:1px}
   .wrap{max-width:820px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
   .card{background:var(--surface);border:1px solid var(--hair);border-radius:2px;padding:18px}
@@ -42,6 +44,10 @@
   .payb{border:none;border-radius:4px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ok);color:#fff;width:100%}
   .empty{font-size:13px;color:var(--stone);padding:18px 2px;text-align:center}
   .gate{font-size:14px;color:var(--stone);padding:24px;text-align:center}
+  .bk .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .actb{border:1px solid var(--hair);background:var(--surface);border-radius:4px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);color:var(--stone)}
+  .actb.no{border-color:var(--danger);color:var(--danger)}
+  .actb:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
@@ -68,11 +74,13 @@
       <button class="on" data-s="" onclick="setFilter('',this)">ทั้งหมด</button>
       <button data-s="confirmed" onclick="setFilter('confirmed',this)">รอทำ</button>
       <button data-s="done" onclick="setFilter('done',this)">เสร็จแล้ว</button>
+      <button data-s="no_show" onclick="setFilter('no_show',this)">ไม่มา</button>
       <button data-s="cancelled" onclick="setFilter('cancelled',this)">ยกเลิก</button>
     </div>
     <div class="list" id="list" style="margin-top:12px"><div class="empty">กำลังโหลด…</div></div>
   </div>
 </div>
+<div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -88,6 +96,7 @@
   let ALL=[], curFilter='';
   const esc=s=>String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
   const STLABEL={confirmed:'รอทำ',done:'เสร็จแล้ว',cancelled:'ยกเลิก',no_show:'ไม่มา'};
+  let _tT=null; function toast(m,bad){ const t=$('toast'); if(!t){ return; } t.textContent=m; t.className='toast show'+(bad?' bad':' ok'); clearTimeout(_tT); _tT=setTimeout(()=>t.className='toast',2600); }
 
   async function load(){
     let rows=[];
@@ -126,9 +135,9 @@
     try{
       const { data, error } = await sb.rpc('ops_partner_payout_settle', { p_partner_uid: uid });
       if(error) throw error;
-      alert('จ่ายแล้ว ฿'+Number((data&&data.paid)||0).toLocaleString());
+      toast('จ่ายแล้ว ฿'+Number((data&&data.paid)||0).toLocaleString());
       loadPayouts();
-    }catch(e){ alert('จ่ายไม่สำเร็จ — ต้องเป็นสิทธิ์เจ้าของ'); }
+    }catch(e){ toast((e&&e.message)||'จ่ายไม่สำเร็จ — ต้องเป็นสิทธิ์เจ้าของ', true); }
   }
   function renderKpis(){
     const by=s=>ALL.filter(a=>a.status===s).length;
@@ -153,8 +162,26 @@
         (a.code?` · รหัส ${esc(a.code)}`:'')+`</div>`;
       if(a.customer_note) html+=`<div class="note">โน้ตลูกค้า: ${esc(a.customer_note)}</div>`;
       if(a.partner_note)  html+=`<div class="note">โน้ตสไตลิสต์: ${esc(a.partner_note)}</div>`;
+      // นัดที่ "รอทำ" ให้ทำเครื่องหมาย "ไม่มา" ได้ (เดิม no_show เป็น dead-end โชว์ได้แต่ตั้งค่าไม่ได้)
+      if(a.status==='confirmed' && a.id){
+        html+=`<div class="acts"><button class="actb no" onclick="markNoShow('${esc(a.id)}',this)">ทำเครื่องหมาย: ลูกค้าไม่มา</button></div>`;
+      }
       div.innerHTML=html; box.appendChild(div);
     });
+  }
+  // ตั้งสถานะ "ไม่มา" (no_show) — ต้องมี ops RPC ฝั่งหลังบ้าน (ดูหมายเหตุด้านล่าง)
+  async function markNoShow(id, btn){
+    if(!confirm('ยืนยันว่าลูกค้าไม่มาตามนัดนี้? สถานะจะเปลี่ยนเป็น "ไม่มา"')) return;
+    if(btn){ btn.disabled=true; btn.textContent='กำลังบันทึก…'; }
+    try{
+      const { data, error } = await sb.rpc('ops_pc_appt_set_status', { p_id:id, p_status:'no_show' });
+      if(error) throw error;
+      const row=ALL.find(a=>a.id===id); if(row) row.status='no_show';
+      toast('บันทึกแล้ว: ลูกค้าไม่มา'); renderKpis(); render();
+    }catch(e){
+      if(btn){ btn.disabled=false; btn.textContent='ทำเครื่องหมาย: ลูกค้าไม่มา'; }
+      toast((e&&e.message)||'ตั้งสถานะไม่สำเร็จ', true);
+    }
   }
   load();
 </script>

@@ -79,11 +79,18 @@
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
   function thdate(s){ return s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'—'; }
+  // QR ลิงก์หน้าชุดจริง (โดเมนกลางอยู่ที่ config.js → SITE_URL)
+  const qrUrl=code=>(window.CONFIG?.SITE_URL||'https://wearlloop-dotcom.github.io')+'/g.html?c='+encodeURIComponent(code);
 
   async function load(){
     const code=$('code').value.trim().toLowerCase(); if(!code){ $('hint').textContent='ใส่โค้ดก่อนค่ะ'; return; }
     const { data, error } = await sb.rpc('shipout_info',{ p_code: code });
-    if(error||!data||!data.garment){ $('sheets').innerHTML='<div class="placeholder" style="color:#A32D2D">ไม่พบชุด'+esc(code)+'</div>'; return; }
+    if(error){
+      // error จาก gateway (เซสชันหมดอายุ ฯลฯ) — ต่างจาก "ไม่พบชุด" ล้วน ๆ; แสดงข้อความไทยที่ ops-api แปลไว้แล้ว
+      $('sheets').innerHTML='<div class="placeholder" style="color:#B5860B"><b>เชื่อมระบบไม่ได้</b><br>'+esc(error.message||'ลองใหม่อีกครั้ง')+'</div>';
+      return;
+    }
+    if(!data||!data.garment){ $('sheets').innerHTML='<div class="placeholder" style="color:#A32D2D">ไม่พบชุด '+esc(code)+'</div>'; return; }
     render(code, data);
   }
   function render(code, d){
@@ -133,8 +140,8 @@
         </div>
         <div class="ret-note"> ถุงนี้สำหรับ <b>ส่งชุดกลับ LLOOP</b> — ใส่ชุดในถุงเดิม แปะใบนี้หน้าถุง แล้วส่งกลับภายในกำหนด ${d.due?'('+thdate(d.due)+')':''} · มีปัญหาแจ้งในแชต LINE ได้เลยค่ะ</div>
       </div>`;
-    new QRCode($('qrG'),{text:'https://lloop.app/g/'+g.code,width:96,height:96});
-    new QRCode($('qrR'),{text:'https://lloop.app/g/'+g.code,width:84,height:84});
+    new QRCode($('qrG'),{text:qrUrl(g.code),width:96,height:96});
+    new QRCode($('qrR'),{text:qrUrl(g.code),width:84,height:84});
     $('hint').textContent='พร้อมปริ้น — กด';
     qcCode=g.code; qcShotCount=0; const qb=$('qcBtn'); if(qb){ qb.style.display=''; $('qcShotN').textContent=''; }
   }
@@ -146,6 +153,9 @@
     else if(r.error!=='ยกเลิก'){ $('hint').textContent='รูปไม่สำเร็จ: '+r.error; }
   }
   $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') load(); });
+  // เปิดจาก deep-link (งานวันนี้ / NFC / QR): /shipout.html?code=g1 (รับ ?c= ด้วย)
+  const _sp=new URLSearchParams(location.search); const _q=_sp.get('code')||_sp.get('c');
+  if(_q){ $('code').value=_q; load(); }
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>

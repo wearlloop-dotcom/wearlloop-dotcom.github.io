@@ -215,7 +215,7 @@
   // โค้ด sb.rpc('fn',{...}) เดิมไม่ต้องแก้ · gateway ใช้ secret key เรียก RPC ฝั่ง server
   if(window.opsRpc) sb.rpc = window.opsRpc;
   if(window.opsLogin) window.opsLogin().catch(()=>{}); // ให้ staff login ตั้งแต่เปิดหน้า
-  const STAFF_BASE=(location.origin.includes('http')?location.origin:'https://lloop.app').replace('lloop-ops','lloop')+'/liff/staff.html';
+  const STAFF_BASE=(location.origin.includes('http')?location.origin:'https://lloop.app').replace('lloop-ops','lloop')+'/staff.html';
 
   const $=id=>document.getElementById(id);
   const v=id=>$(id).value.trim();
@@ -441,7 +441,7 @@
         <div><label>หักอื่น ๆ (฿)</label><input id="payDed" type="number" placeholder="0"></div></div>
       <div class="hint">ประกันสังคม 5% (สูงสุด 750) หักให้อัตโนมัติในสลิป — ช่อง "หักอื่น ๆ" สำหรับรายการอื่น</div>
       <button class="btn sage sm" style="margin-top:10px" onclick="makeSlip()">ออก/อัปเดตสลิป (ร่าง)</button>
-      ${rows?`<table style="margin-top:14px"><thead><tr><th>งวด</th><th>สุทธิ</th><th>สถานะ</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<p class="hint" style="margin-top:10px">ยังไม่มีสลิป</p>'}
+      ${rows?`<div style="overflow-x:auto"><table style="margin-top:14px"><thead><tr><th>งวด</th><th>สุทธิ</th><th>สถานะ</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="hint" style="margin-top:10px">ยังไม่มีสลิป</p>'}
       <div style="margin-top:16px;border-top:1px solid var(--hair);padding-top:12px">
         <button class="btn ghost sm" onclick="calcSeverance()">คำนวณค่าชดเชยเลิกจ้าง (ม.118)</button>
         <div id="sevResult" class="hint" style="margin-top:8px"></div>
@@ -500,7 +500,7 @@
         <div style="display:flex;align-items:flex-end"><button class="btn ghost sm" style="width:100%" onclick="uploadDoc()">อัปโหลด</button></div>
       </div>
       <div style="margin-top:14px">${list.length?list.map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hair);padding:8px 0;gap:8px">
-        <span><a href="${d.url}" target="_blank" style="color:var(--navy)">${d.name}</a> <span style="color:var(--stone);font-size:12px">(${DOC_KIND[d.kind]||d.kind})</span><br><span style="font-size:11px;color:var(--stone)">${new Date(d.created_at).toLocaleDateString('th-TH')}</span></span>
+        <span><a href="#" onclick="viewDoc('${(d.url||'').replace(/'/g,'%27')}');return false" style="color:var(--navy)">${d.name}</a> <span style="color:var(--stone);font-size:12px">(${DOC_KIND[d.kind]||d.kind})</span><br><span style="font-size:11px;color:var(--stone)">${new Date(d.created_at).toLocaleDateString('th-TH')}</span></span>
         <button class="mini" style="color:var(--danger)" onclick="deleteDoc('${d.id}')">ลบ</button>
       </div>`).join(''):'<p class="hint">ยังไม่มีเอกสาร</p>'}</div>`;
   }
@@ -514,6 +514,17 @@
     const {error}=await sb.rpc('hr_doc_add',{p:{employee_id:empId,kind,name:f.name,url:publicUrl,uploaded_by:'ops'}});
     if(error){toast('บันทึกไม่สำเร็จ: '+error.message);return;}
     toast('อัปโหลดเอกสารแล้ว');loadDoc();
+  }
+  // hr-docs เป็น bucket ส่วนตัว — getPublicUrl เปิดไม่ขึ้น ต้องขอ signed URL อายุสั้นทุกครั้งที่จะดู
+  async function viewDoc(u){
+    try{
+      const parts=String(u||'').split('/hr-docs/');
+      const path=parts.length>1?decodeURIComponent(parts.pop().split('?')[0]):null;
+      if(!path){ toast('ไม่พบไฟล์'); return; }
+      const {data,error}=await sb.storage.from('hr-docs').createSignedUrl(path,60);
+      if(error||!data||!data.signedUrl){ toast('เปิดไฟล์ไม่ได้'); return; }
+      window.open(data.signedUrl,'_blank');
+    }catch(e){ toast('เปิดไฟล์ไม่สำเร็จ'); }
   }
   async function deleteDoc(id){
     if(!confirm('ลบเอกสารนี้?'))return;
@@ -529,9 +540,9 @@
     if(!list.length){b.innerHTML='<p class="hint">ยังไม่มีบันทึกการลงเวลาค่ะ — พนักงานพิมพ์ "เข้างาน" ใน LINE OA หรือกดในพอร์ทัลพนักงาน</p>';return;}
     const total=list.reduce((s,a)=>s+(a.work_minutes||0),0);
     b.innerHTML=`<div class="hint">รวม ${list.length} วัน · ${hmin(total)}</div>
-      <table style="margin-top:8px"><thead><tr><th>วันที่</th><th>เข้า</th><th>ออก</th><th>รวม</th></tr></thead><tbody>
+      <div style="overflow-x:auto"><table style="margin-top:8px"><thead><tr><th>วันที่</th><th>เข้า</th><th>ออก</th><th>รวม</th></tr></thead><tbody>
       ${list.map(a=>`<tr><td>${dt2(a.work_date)}</td><td>${hhmm(a.check_in)}</td><td>${a.check_out?hhmm(a.check_out):'<span style="color:var(--champ)">ยังไม่ออก</span>'}</td><td>${a.work_minutes!=null?hmin(a.work_minutes):'-'}</td></tr>`).join('')}
-      </tbody></table>`;
+      </tbody></table></div>`;
   }
   function editEmp(){const e=curEmp;$('editId').value=e.id;$('name').value=e.name||'';$('nickname').value=e.nickname||'';
     $('role').value=e.role||'';$('department').value=e.department||'';$('emp_type').value=e.emp_type||'fulltime';
@@ -597,7 +608,7 @@
         <button class="mini" onclick="cp('${url}')">คัดลอก</button>
         ${c.status==='draft'||c.status==='viewed'||c.status==='sent'?`<button class="mini" onclick="sendEC('${c.id}')">ส่ง LINE</button>`:''}</td></tr>`;}).join('');
     body.innerHTML=`
-      ${list.length?`<table><thead><tr><th>เลขที่</th><th>สถานะ</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<p class="hint">ยังไม่มีสัญญาจ้าง</p>'}
+      ${list.length?`<div style="overflow-x:auto"><table><thead><tr><th>เลขที่</th><th>สถานะ</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="hint">ยังไม่มีสัญญาจ้าง</p>'}
       <h2 style="font-size:16px;margin-top:16px">ออกสัญญาจ้างใหม่</h2>
       <div class="g2">
         <div><label>ประเภท</label><select id="ec_template">

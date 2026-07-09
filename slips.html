@@ -37,6 +37,11 @@
   .slip .view{margin-top:11px;width:100%;border:1px solid var(--hair);background:none;color:var(--ink);border-radius:2px;padding:9px;font-size:13px;font-weight:600;font-family:var(--sans);cursor:pointer}
   .slip .view:hover{border-color:var(--ink)}
   .slip .view[disabled]{opacity:.4;cursor:default}
+  .slip .acts{display:flex;gap:8px;margin-top:9px}
+  .slip .act{flex:1;border:1px solid var(--hair);border-radius:2px;padding:8px;font-size:13px;font-weight:600;font-family:var(--sans);cursor:pointer;background:#fff;color:var(--ink)}
+  .slip .act.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+  .slip .act.bad{background:#fff;color:var(--danger);border-color:var(--danger)}
+  .slip .act[disabled]{opacity:.4;cursor:default}
   .empty{text-align:center;color:var(--stone);padding:50px 20px;font-size:14px}
   .btn{border:none;border-radius:2px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--navy);color:#fff;margin-top:12px}
   .gate{max-width:420px;margin:80px auto;text-align:center;padding:0 20px}
@@ -138,6 +143,8 @@
       const R=resOf(r.result);
       const amt=r.provider_amount!=null?r.provider_amount:r.amount_expected;
       const hasImg=!!r.slip_path;
+      const isConfirmed=R.grp==='confirmed';
+      const pid=r.payment_id||'';
       return `<div class="slip">
         <div class="top">
           <div><div class="nm">${esc(r.customer_name||'ลูกค้า')}</div><div class="dt">${fmtDate(r.created_at)}</div></div>
@@ -146,6 +153,10 @@
         <div class="amt">${baht(amt)}</div>
         <div class="meta">${esc(r.purpose||'-')}${r.provider_ref?' · ref '+esc(r.provider_ref):''}${r.source&&r.source!=='customer'?' · '+esc(r.source):''}</div>
         <button class="view" ${hasImg?'':'disabled'} onclick="viewSlip('${esc(r.slip_path)}',this)">${hasImg?'ดูรูปสลิป':'ไม่มีรูป'}</button>
+        ${isConfirmed?'':`<div class="acts">
+          <button class="act ok" ${pid?'':'disabled'} onclick="confirmSlip('${esc(pid)}',this)">ยืนยัน</button>
+          <button class="act bad" onclick="rejectSlip('${esc(pid)}',this)">ปฏิเสธ</button>
+        </div>`}
       </div>`;
     }).join('')+'</div>';
   }
@@ -160,6 +171,23 @@
     finally{ btn.textContent=old; btn.disabled=false; }
   }
 
+  // ยืนยันสลิปมือ → เรียก confirm_payment(p_payment uuid) ผ่าน gateway ops-rpc
+  // (RPC ลง GL รายได้ + ออกเครดิต/ปลด hold + แจ้งลูกค้าให้อัตโนมัติ) — p_payment = slip_inbox.payment_id
+  async function confirmSlip(pid, btn){
+    if(!pid){ toast('สลิปนี้ยังไม่มี payment ผูกไว้ ยืนยันมือไม่ได้'); return; }
+    if(!confirm('ยืนยันรับเงินสลิปนี้? ระบบจะลงบัญชีรายได้ + ออกเครดิต/แจ้งลูกค้าให้')) return;
+    const old=btn.textContent; btn.textContent='กำลังยืนยัน…'; btn.disabled=true;
+    try{
+      const { data, error } = await window.opsRpc('confirm_payment', { p_payment: pid });
+      if(error){ toast('ยืนยันไม่สำเร็จ: '+(error.message||'')); btn.textContent=old; btn.disabled=false; return; }
+      toast('ยืนยันแล้ว — ลงบัญชีรายได้เรียบร้อย'); load();
+    }catch(e){ toast('ยืนยันไม่สำเร็จ'); btn.textContent=old; btn.disabled=false; }
+  }
+  // ปฏิเสธสลิป — ยังไม่มี RPC void/reject ฝั่งหลังบ้าน จึงเป็น no-op พร้อมแจ้ง (ดูรายงาน: ต้องเพิ่ม RPC)
+  function rejectSlip(pid, btn){
+    toast('ยังไม่ได้เชื่อมปุ่มปฏิเสธกับหลังบ้าน (ต้องเพิ่ม RPC void/reject payment)');
+  }
+
   async function boot(){
     const ok=await window.opsLogin().catch(()=>false);
     if(!ok){ $('gate').classList.remove('hide'); $('app').classList.add('hide'); return; }
@@ -169,5 +197,6 @@
   boot();
 </script>
 <script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
 </body>
 </html>
