@@ -74,6 +74,10 @@
   <div class="card" id="refCard">
     <h2>รูป Reference <span class="hint">อัปโหลดครั้งเดียว ใช้ทุกการเจน — ระบบเลือกแนบให้ตามช็อตอัตโนมัติ</span></h2>
     <div class="refrow" id="refRow"><div class="loading">กำลังโหลด…</div></div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn sage sm" id="seedBtn">⬇ โหลดรูปตั้งต้นจากระบบ (Meili · ห้อง · ชุด · โลโก้ + ตัวละคร 8 สไตล์)</button>
+      <span class="meta" id="seedStatus"></span>
+    </div>
   </div>
 
   <div class="card" id="charCard">
@@ -209,6 +213,17 @@ function pickRef(name) {
   };
   inp.click();
 }
+
+// ── ปุ่มโหลดรูปตั้งต้น (ครั้งเดียวครบ — มีแล้วข้ามให้เอง) ──
+$('#seedBtn').onclick = async () => {
+  const b = $('#seedBtn'); b.disabled = true;
+  $('#seedStatus').textContent = 'กำลังโหลดรูปเข้าคลัง…';
+  const { data, error } = await sgb('seed_refs');
+  b.disabled = false;
+  if (error) { $('#seedStatus').innerHTML = '<span class="err">' + error.message + '</span>'; return; }
+  $('#seedStatus').textContent = data.done.length ? `เพิ่มแล้ว ${data.done.length} รูป` + (data.failed.length ? ` (พลาด ${data.failed.length})` : '') : 'มีครบอยู่แล้ว';
+  loadRefs(); loadChars();
+};
 
 // ── คลังตัวละคร + คลังสถานที่ (gallery กดเลือกจากรูป — โค้ดเดียวกัน) ──
 function makeLib(cfg) {
