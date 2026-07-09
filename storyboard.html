@@ -106,6 +106,8 @@
     <div class="fields" id="shotFields"></div>
     <label>Preset แก้งานด่วน (กดเลือกได้ ไม่ต้องพิมพ์)</label>
     <div class="chips" id="presetChips" style="margin-bottom:10px"></div>
+    <label>Preset กล้อง / แสง / เลนส์ (ใช้ซ้ำได้ — ถ้าเลือก จะทับค่ากล้องในบทช็อต)</label>
+    <div class="chips" id="camChips" style="margin-bottom:10px"></div>
     <label>โน้ตเพิ่มเติม (ถ้ามี) — บอกสิ่งที่อยากแก้เป็นภาษาไทยหรืออังกฤษ</label>
     <textarea id="fixNote" placeholder="เช่น ตู้ต้องเปิดอยู่ มีผ้ากำลังร่วง / แสงอุ่นขึ้นอีก"></textarea>
     <div id="skuWrap" style="display:none;margin-top:10px">
@@ -131,12 +133,38 @@
         <input type="text" id="pendNote" placeholder="เพราะอะไร (เข้าระบบออดิท)" style="flex:1;min-width:180px">
       </div>
     </div>
-    <div class="result" id="result" style="display:none;margin-top:14px">
+  </div>
+
+  <div class="card" id="lbCard">
+    <h2>Lookbook Studio <span class="hint">ภาพถ่ายสตูดิโอ นางแบบ + ชุดจริงจากคลัง — ไม่ต้องอิง storyboard · แนวตั้ง 3:4</span></h2>
+    <div class="meta" style="margin-bottom:10px">นางแบบ = ตัวละครที่เลือกในการ์ด "ตัวละคร/นางแบบ" ด้านบน</div>
+    <label>ชุดที่จะใส่ (ค้นหาจากคลังจริง แล้วกดเลือก)</label>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="lbSkuInput" placeholder="ค้นหาชื่อชุด / รหัส / แบรนด์">
+      <button class="btn ghost" id="lbSkuSearch">ค้นหา</button>
+    </div>
+    <div class="refrow" id="lbSkuGrid" style="margin-top:9px"></div>
+    <div class="meta" id="lbSkuSel" style="margin:6px 0 10px"></div>
+    <label>ฉากหลังสตูดิโอ</label>
+    <div class="chips" id="lbBgChips" style="margin-bottom:10px"></div>
+    <label>Preset กล้อง / แสง / เลนส์</label>
+    <div class="chips" id="lbCamChips" style="margin-bottom:10px"></div>
+    <label>โน้ตเพิ่มเติม (ท่าโพส มู้ด ฯลฯ)</label>
+    <textarea id="lbNote" placeholder="เช่น ท่าเดินแบบสบาย ๆ มองกล้อง / หมุนตัวให้เห็นชายกระโปรง"></textarea>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn clay" id="lbGenBtn">✦ เจนภาพ Lookbook</button>
+      <span class="meta" id="lbStatus"></span>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none">
+    <h2 id="resultTitle">ผลการเจน</h2>
+    <div class="result" id="result">
       <img id="resultImg" alt="">
       <div class="fbrow">
         <button class="btn sage sm" id="fbPass">ผ่าน ✓</button>
         <button class="btn sm" style="background:#9C3F5E" id="fbFail">ไม่ผ่าน ✕</button>
-        <input type="text" id="fbNote" placeholder="เพราะอะไร เช่น หน้าไม่ตรง / ตู้ไม่เปิด (เข้าระบบออดิท)" style="flex:1;min-width:200px">
+        <input type="text" id="fbNote" placeholder="เพราะอะไร เช่น หน้าไม่ตรง / ชุดไม่ตรง (เข้าระบบออดิท)" style="flex:1;min-width:200px">
         <button class="btn ghost sm" id="showPrompt">ดู prompt</button>
         <a class="btn ghost sm" id="dlBtn" download>ดาวน์โหลด</a>
       </div>
@@ -269,25 +297,59 @@ const loadLocs = makeLib({ listTask: 'locs_list', uploadTask: 'loc_upload', rowS
   defaultLabel: 'ตามบทช็อต (มาตรฐาน)', defaultHint: 'ใช้สถานที่ตามที่<br>บทของช็อตกำหนด',
   namePrompt: 'ตั้งชื่อสถานที่ (เช่น "คาเฟ่สาขาทองหล่อ", "ฮอลล์งานแต่ง")' });
 
-// ── เลือกชุดจริงจากคลัง (ผ่าน gateway ops-rpc — RPC เดียวกับหน้า marketing) ──
-$('#skuSearch').onclick = async () => {
-  const q = $('#skuInput').value.trim();
-  const g = $('#skuGrid'); g.innerHTML = '<div class="loading">กำลังค้นหา…</div>';
-  const { data, error } = await window.opsRpc('garments_pick', { p_q: q || null, p_limit: 12 });
-  if (error) { g.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
-  if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด</div>'; return; }
-  g.innerHTML = '';
-  for (const it of data) {
-    const d = document.createElement('div');
-    d.className = 'refbox'; d.style.cursor = 'pointer';
-    if (SKU_SEL === it.code) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
-    d.innerHTML = (it.photo ? `<img src="${it.photo}">` : `<div class="ph">ไม่มีรูป</div>`) +
-      `<div class="nm">${it.name || it.code}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
-    d.onclick = () => { SKU_SEL = it.code; $('#skuSel').textContent = 'เลือกแล้ว: ' + (it.name || '') + ' (' + it.code + ')'; $('#skuSearch').click(); };
-    g.appendChild(d);
+// ── เลือกชุดจริงจากคลัง (RPC เดียวกับหน้า marketing) — ใช้ทั้ง storyboard และ lookbook ──
+function makeSkuPicker(cfg) {
+  async function search() {
+    const q = $(cfg.input).value.trim();
+    const g = $(cfg.grid); g.innerHTML = '<div class="loading">กำลังค้นหา…</div>';
+    const { data, error } = await window.opsRpc('garments_pick', { p_q: q || null, p_limit: 12 });
+    if (error) { g.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
+    if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด</div>'; return; }
+    g.innerHTML = '';
+    for (const it of data) {
+      const d = document.createElement('div');
+      d.className = 'refbox'; d.style.cursor = 'pointer';
+      if (cfg.get() === it.code) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
+      d.innerHTML = (it.photo ? `<img src="${it.photo}">` : `<div class="ph">ไม่มีรูป</div>`) +
+        `<div class="nm">${it.name || it.code}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
+      d.onclick = () => { cfg.set(it.code); $(cfg.sel).textContent = 'เลือกแล้ว: ' + (it.name || '') + ' (' + it.code + ')'; search(); };
+      g.appendChild(d);
+    }
   }
-};
-$('#skuInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#skuSearch').click(); });
+  $(cfg.btn).onclick = search;
+  $(cfg.input).addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+}
+makeSkuPicker({ input: '#skuInput', btn: '#skuSearch', grid: '#skuGrid', sel: '#skuSel', get: () => SKU_SEL, set: (v) => { SKU_SEL = v; } });
+let LB_SKU = null;
+makeSkuPicker({ input: '#lbSkuInput', btn: '#lbSkuSearch', grid: '#lbSkuGrid', sel: '#lbSkuSel', get: () => LB_SKU, set: (v) => { LB_SKU = v; } });
+
+// ── Preset กล้อง/แสง/เลนส์ (ใช้ซ้ำได้ทั้งสองโหมด) + ฉากหลัง lookbook ──
+const CAMS = [
+  { key: 'wide35', label: 'มุมกว้าง 35mm เต็มตัว' }, { key: 'portrait50', label: 'Portrait 50mm ชัดตื้น' },
+  { key: 'closeup85', label: 'โคลสอัพ 85mm' }, { key: 'herolow', label: 'มุมต่ำ Hero เต็มตัว' },
+  { key: 'goldwarm', label: 'แสงทองอุ่น' }, { key: 'coolwindow', label: 'แสงหน้าต่างเย็น' },
+  { key: 'studiosoft', label: 'ไฟสตูดิโอนุ่ม' },
+];
+const BGS = [
+  { key: 'cream', label: 'ครีม LLOOP' }, { key: 'white', label: 'ขาวคลีน' },
+  { key: 'greige', label: 'เทาอุ่น' }, { key: 'terracotta', label: 'ดินเผา' },
+];
+function makeChips(sel, items, single) {
+  const el = $(sel);
+  for (const it of items) {
+    const c = document.createElement('div');
+    c.className = 'chip'; c.textContent = it.label; c.dataset.key = it.key;
+    c.onclick = () => {
+      if (single) el.querySelectorAll('.chip').forEach((x) => { if (x !== c) x.classList.remove('on'); });
+      c.classList.toggle('on');
+    };
+    el.appendChild(c);
+  }
+  return () => [...el.querySelectorAll('.chip.on')].map((c) => c.dataset.key);
+}
+const getCam = makeChips('#camChips', CAMS, false);
+const getLbCam = makeChips('#lbCamChips', CAMS, false);
+const getLbBg = makeChips('#lbBgChips', BGS, true);
 
 // ── shots ──
 async function loadShots() {
@@ -319,7 +381,7 @@ function selectShot(no) {
   $('#genTitle').textContent = `เจนภาพ · SHOT ${SEL.shot} — ${SEL.title}`;
   $('#shotFields').innerHTML = `<b>หน้าที่ในเรื่อง:</b> ${SEL.story_function || '-'}<br><b>อารมณ์:</b> ${SEL.emotion || '-'}<br><b>Reference ที่จะแนบ:</b> ${(SEL.refs_needed || []).map((r) => REF_TH[r] || r).join(' · ')}`;
   $('#skuWrap').style.display = (SEL.refs_needed || []).includes('hero_dress') ? '' : 'none';
-  $('#result').style.display = 'none';
+  $('#resultCard').style.display = 'none';
   document.querySelectorAll('#presetChips .chip').forEach((c) => c.classList.remove('on'));
   $('#genCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -341,22 +403,50 @@ $('#genBtn').onclick = async () => {
   const note = [picked.map((c) => c.dataset.note).join(' '), $('#fixNote').value.trim()].filter(Boolean).join(' ');
   const btn = $('#genBtn'); btn.disabled = true;
   $('#genStatus').textContent = 'กำลังเจน… (ราว 10-30 วินาที)';
+  const camKeys = getCam();
   const { data, error } = await sgb('generate', { shot: SEL.shot, fix_note: note || undefined,
     sku: SKU_SEL || undefined, character: CHAR_SEL || undefined, location: LOC_SEL || undefined,
-    preset: picked.map((c) => c.dataset.label).join('+') || undefined });
+    camera: camKeys.length ? camKeys : undefined,
+    preset: [...picked.map((c) => c.dataset.label), ...camKeys].join('+') || undefined });
   btn.disabled = false;
   if (error) {
     if (error.code === 'feedback_required' && data && data.pending) { showPending(data.pending); return; }
     $('#genStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return;
   }
   $('#genStatus').textContent = (data.refs_missing || []).length ? 'สำเร็จ (แต่ขาด ref: ' + data.refs_missing.map((r) => REF_TH[r] || r).join(', ') + ')' : 'สำเร็จ';
+  showResult(data, `ผลการเจน · SHOT ${SEL.shot} — ${SEL.title}`);
+};
+
+function showResult(data, title) {
   LAST_GEN = data;
-  $('#result').style.display = '';
+  $('#resultCard').style.display = '';
+  $('#resultTitle').textContent = title;
   $('#resultImg').src = data.url;
   $('#dlBtn').href = data.url;
   $('#promptBox').textContent = data.prompt; $('#promptBox').style.display = 'none';
   $('#fbStatus').textContent = ''; $('#fbNote').value = '';
+  $('#resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
   loadHistory();
+}
+
+// ── Lookbook Studio ──
+$('#lbGenBtn').onclick = async () => {
+  if (!LB_SKU) { $('#lbStatus').innerHTML = '<span class="err">เลือกชุดจากคลังก่อนค่ะ</span>'; return; }
+  const btn = $('#lbGenBtn'); btn.disabled = true;
+  $('#lbStatus').textContent = 'กำลังเจน… (ราว 10-30 วินาที)';
+  const camKeys = getLbCam(), bg = getLbBg()[0];
+  const { data, error } = await sgb('generate', { mode: 'lookbook', sku: LB_SKU,
+    character: CHAR_SEL || undefined, background: bg || undefined,
+    camera: camKeys.length ? camKeys : undefined,
+    fix_note: $('#lbNote').value.trim() || undefined,
+    preset: ['lookbook', bg, ...camKeys].filter(Boolean).join('+') });
+  btn.disabled = false;
+  if (error) {
+    if (error.code === 'feedback_required' && data && data.pending) { showPending(data.pending); return; }
+    $('#lbStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return;
+  }
+  $('#lbStatus').textContent = 'สำเร็จ';
+  showResult(data, 'ผลการเจน · Lookbook — ' + LB_SKU);
 };
 $('#showPrompt').onclick = () => { const b = $('#promptBox'); b.style.display = b.style.display === 'none' ? '' : 'none'; };
 async function sendFb(rating) {
@@ -411,7 +501,8 @@ async function loadHistory() {
     const when = new Date(r.created_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
     const fb = r.feedback_rating ? `<span class="tag ${r.feedback_rating}">${r.feedback_rating === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</span>` : '';
     const note = r.feedback_note ? `<div class="meta">“${r.feedback_note}” — ${r.feedback_by || ''}</div>` : (r.fix_note ? `<div class="meta">โน้ต: ${r.fix_note.slice(0, 90)}</div>` : '');
-    d.innerHTML = `<div><b>SHOT ${r.shot}</b> · ${r.employee_name || '-'} <span class="meta">· ${when} · ${r.preset || 'มาตรฐาน'}</span>${note}</div>
+    const what = r.mode === 'lookbook' ? `Lookbook · ${r.sku || ''}` : `SHOT ${r.shot}`;
+    d.innerHTML = `<div><b>${what}</b> · ${r.employee_name || '-'} <span class="meta">· ${when} · ${r.preset || 'มาตรฐาน'}</span>${note}</div>
       <div><span class="tag ${r.status}">${r.status === 'ok' ? 'สำเร็จ' : 'พัง'}</span> ${fb}</div>`;
     if (r.url) d.onclick = () => window.open(r.url, '_blank');
     el.appendChild(d);
