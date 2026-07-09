@@ -82,6 +82,12 @@
     <div style="margin-top:10px"><button class="btn ghost sm" id="charAdd">+ เพิ่มตัวละครเข้าคลัง</button></div>
   </div>
 
+  <div class="card" id="locCard">
+    <h2>สถานที่ / ฉาก <span class="hint">อัปโหลดสถานที่เองได้ (คาเฟ่ อีเวนต์ ร้านจริง ฯลฯ) — ถ้าเลือก ระบบจะใช้แทนสถานที่ในบทของช็อตนั้น</span></h2>
+    <div class="refrow" id="locRow"><div class="loading">กำลังโหลด…</div></div>
+    <div style="margin-top:10px"><button class="btn ghost sm" id="locAdd">+ เพิ่มสถานที่เข้าคลัง</button></div>
+  </div>
+
   <div class="card">
     <h2>เลือกช็อต <span class="hint">LLOOP Hero Video · 31 ช็อต · 2 ซีน</span></h2>
     <div class="tabs">
@@ -160,7 +166,7 @@ const PRESETS = [
 const REF_TH = { meili: 'หน้า Meili', outfit: 'ชุดอยู่บ้าน', room: 'ห้องปกติ', room_messy: 'ห้องรก', logo: 'โลโก้ LLOOP', hero_dress: 'ชุดพระเอก',
   woman_a: 'Woman A (30-35 ผมรวบ)', woman_b: 'Woman B (22-25 ผมยาว)', woman_c: 'Woman C (25-30 ผมยาวสีทอง หน้าม้า)' };
 
-let SHOTS = [], SEL = null, SCENE = 1, LAST_GEN = null, IS_OWNER = false, CHAR_SEL = null, SKU_SEL = null;
+let SHOTS = [], SEL = null, SCENE = 1, LAST_GEN = null, IS_OWNER = false, CHAR_SEL = null, SKU_SEL = null, LOC_SEL = null;
 
 async function sgb(task, args) {
   if (!(await window.opsLogin())) return { error: { message: 'redirecting_to_login' } };
@@ -204,39 +210,49 @@ function pickRef(name) {
   inp.click();
 }
 
-// ── คลังตัวละคร ──
-async function loadChars() {
-  const { data, error } = await sgb('chars_list');
-  const row = $('#charRow');
-  if (error) { row.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
-  row.innerHTML = '';
-  const mk = (key, label, url) => {
-    const d = document.createElement('div');
-    d.className = 'refbox';
-    d.style.cursor = 'pointer';
-    if (CHAR_SEL === key) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
-    d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">ใช้รูป reference<br>"หน้า Meili" ด้านบน</div>`) +
-      `<div class="nm">${label}${CHAR_SEL === key ? ' ✓' : ''}</div>`;
-    d.onclick = () => { CHAR_SEL = key; loadChars(); };
-    row.appendChild(d);
+// ── คลังตัวละคร + คลังสถานที่ (gallery กดเลือกจากรูป — โค้ดเดียวกัน) ──
+function makeLib(cfg) {
+  async function load() {
+    const { data, error } = await sgb(cfg.listTask);
+    const row = $(cfg.rowSel);
+    if (error) { row.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
+    row.innerHTML = '';
+    const mk = (key, label, url) => {
+      const d = document.createElement('div');
+      d.className = 'refbox'; d.style.cursor = 'pointer';
+      if (cfg.get() === key) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
+      d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">${cfg.defaultHint}</div>`) +
+        `<div class="nm">${label}${cfg.get() === key ? ' ✓' : ''}</div>`;
+      d.onclick = () => { cfg.set(key); load(); };
+      row.appendChild(d);
+    };
+    mk(null, cfg.defaultLabel, null);
+    for (const c of data) mk(c.key, c.label, c.url);
+  }
+  $(cfg.addSel).onclick = () => {
+    const label = (window.prompt(cfg.namePrompt) || '').trim();
+    if (!label) return;
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = async () => {
+      const f = inp.files[0]; if (!f) return;
+      const b64 = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+      const { data, error } = await sgb(cfg.uploadTask, { label, image: b64, media_type: f.type || 'image/png' });
+      if (error) { alert('เพิ่มไม่สำเร็จ: ' + error.message); return; }
+      cfg.set(data.key); load();
+    };
+    inp.click();
   };
-  mk(null, 'Meili (มาตรฐาน)', null);
-  for (const c of data) mk(c.key, c.label, c.url);
+  return load;
 }
-$('#charAdd').onclick = () => {
-  const label = (window.prompt('ตั้งชื่อตัวละคร/นางแบบ (เช่น "Meili แบบ 2 ผมบ็อบ")') || '').trim();
-  if (!label) return;
-  const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = 'image/*';
-  inp.onchange = async () => {
-    const f = inp.files[0]; if (!f) return;
-    const b64 = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
-    const { data, error } = await sgb('char_upload', { label, image: b64, media_type: f.type || 'image/png' });
-    if (error) { alert('เพิ่มไม่สำเร็จ: ' + error.message); return; }
-    CHAR_SEL = data.key; loadChars();
-  };
-  inp.click();
-};
+const loadChars = makeLib({ listTask: 'chars_list', uploadTask: 'char_upload', rowSel: '#charRow', addSel: '#charAdd',
+  get: () => CHAR_SEL, set: (v) => { CHAR_SEL = v; },
+  defaultLabel: 'Meili (มาตรฐาน)', defaultHint: 'ใช้รูป reference<br>"หน้า Meili" ด้านบน',
+  namePrompt: 'ตั้งชื่อตัวละคร/นางแบบ (เช่น "The Siren", "Meili ผมบ็อบ")' });
+const loadLocs = makeLib({ listTask: 'locs_list', uploadTask: 'loc_upload', rowSel: '#locRow', addSel: '#locAdd',
+  get: () => LOC_SEL, set: (v) => { LOC_SEL = v; },
+  defaultLabel: 'ตามบทช็อต (มาตรฐาน)', defaultHint: 'ใช้สถานที่ตามที่<br>บทของช็อตกำหนด',
+  namePrompt: 'ตั้งชื่อสถานที่ (เช่น "คาเฟ่สาขาทองหล่อ", "ฮอลล์งานแต่ง")' });
 
 // ── เลือกชุดจริงจากคลัง (ผ่าน gateway ops-rpc — RPC เดียวกับหน้า marketing) ──
 $('#skuSearch').onclick = async () => {
@@ -311,7 +327,7 @@ $('#genBtn').onclick = async () => {
   const btn = $('#genBtn'); btn.disabled = true;
   $('#genStatus').textContent = 'กำลังเจน… (ราว 10-30 วินาที)';
   const { data, error } = await sgb('generate', { shot: SEL.shot, fix_note: note || undefined,
-    sku: SKU_SEL || undefined, character: CHAR_SEL || undefined,
+    sku: SKU_SEL || undefined, character: CHAR_SEL || undefined, location: LOC_SEL || undefined,
     preset: picked.map((c) => c.dataset.label).join('+') || undefined });
   btn.disabled = false;
   if (error) {
@@ -397,7 +413,7 @@ document.querySelectorAll('.tab').forEach((t) => t.onclick = () => {
     if (!(await window.opsLogin())) return;
     const { data } = await window.opsRpc('ops_me', {});
     if (data) $('#whoami').textContent = (data.name || data.nickname || '') + (data.is_owner ? ' · เจ้าของ' : '');
-    loadShots(); loadRefs(); loadChars(); loadHistory();
+    loadShots(); loadRefs(); loadChars(); loadLocs(); loadHistory();
   } catch (e) { $('#shotGrid').innerHTML = '<div class="err">' + e.message + '</div>'; }
 })();
 </script>
