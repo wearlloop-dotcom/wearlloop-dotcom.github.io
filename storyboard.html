@@ -62,7 +62,8 @@
   .promptbox{white-space:pre-wrap;font-size:12px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px;max-height:260px;overflow:auto;margin-top:10px;display:none}
   .fields{font-size:13px;line-height:1.6;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:11px;margin:10px 0}
   .fields b{color:var(--clay)}
-  .viewbtn{position:absolute;top:12px;right:12px;border:none;background:rgba(255,255,255,.9);border-radius:8px;width:30px;height:30px;font-size:14px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .viewbtn{position:absolute;top:12px;right:12px;border:none;background:rgba(255,255,255,.9);border-radius:8px;padding:0 8px;height:28px;font-size:12px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .addangle{position:absolute;top:12px;left:12px;border:none;background:rgba(255,255,255,.9);border-radius:8px;padding:0 8px;height:28px;font-size:12px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15)}
   .modal-bg{position:fixed;inset:0;background:rgba(40,36,28,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
   .modal-bg.show{display:flex}
   .modal-box{background:#fff;border-radius:14px;padding:14px;max-width:520px;width:100%;max-height:92vh;display:flex;flex-direction:column}
@@ -104,7 +105,7 @@
   </div>
 
   <div class="card" id="charCard">
-    <h2>ตัวละคร / นางแบบ <span class="hint">กดเลือกว่าจะเจนด้วยหน้าใคร — เพิ่มรูปตัวละครที่เจนไว้เข้าคลังได้เลย</span></h2>
+    <h2>ตัวละคร / นางแบบ <span class="hint">กดเลือกว่าจะเจนด้วยหน้าใคร — อัปได้หลายมุม (หน้าตรง/ข้าง/เต็มตัว) ล็อกหน้าแม่นขึ้น · ปุ่ม "+ มุม" เพิ่มมุมให้ตัวเดิม</span></h2>
     <div class="refrow" id="charRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px"><button class="btn ghost sm" id="charAdd">+ เพิ่มตัวละครเข้าคลัง</button></div>
   </div>
@@ -290,41 +291,52 @@ function makeLib(cfg) {
     const row = $(cfg.rowSel);
     if (error) { row.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
     row.innerHTML = '';
-    const mk = (key, label, url) => {
+    const mk = (key, label, url, count) => {
       const d = document.createElement('div');
       d.className = 'refbox' + (cfg.portrait ? ' portrait' : ''); d.style.cursor = 'pointer'; d.style.position = 'relative';
       if (cfg.get() === key) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
+      const sel = cfg.get() === key;
+      const nbadge = count > 1 ? ` · ${count} มุม` : '';
       d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">${cfg.defaultHint}</div>`) +
-        `<div class="nm">${label}${cfg.get() === key ? ' (เลือกอยู่)' : ''}</div>` +
-        (url ? `<button class="viewbtn" title="ดูชัด ๆ">ดู</button>` : '');
+        `<div class="nm">${label}${sel ? ' (เลือกอยู่)' : ''}${nbadge}</div>` +
+        (url ? `<button class="viewbtn" title="ดูชัด ๆ">ดู</button>` : '') +
+        (url && cfg.portrait ? `<button class="addangle" title="เพิ่มมุมของตัวละครนี้">+ มุม</button>` : '');
       d.onclick = () => { cfg.set(key); load(); };
       const vb = d.querySelector('.viewbtn');
       if (vb) vb.onclick = (e) => { e.stopPropagation(); openView(url, label); };
+      const ab = d.querySelector('.addangle');
+      if (ab) ab.onclick = (e) => { e.stopPropagation(); pickFiles(label, key); };
       row.appendChild(d);
     };
-    mk(null, cfg.defaultLabel, null);
-    for (const c of data) mk(c.key, c.label, c.url);
+    mk(null, cfg.defaultLabel, null, 1);
+    for (const c of data) mk(c.key, c.label, c.url, c.count || 1);
   }
-  $(cfg.addSel).onclick = () => {
-    const label = (window.prompt(cfg.namePrompt) || '').trim();
-    if (!label) return;
+  // เลือกไฟล์ 1+ รูป แล้วอัปเป็นรายการใหม่ (key ว่าง) หรือเพิ่มมุมให้รายการเดิม (มี key)
+  async function pickFiles(label, key) {
     const inp = document.createElement('input');
-    inp.type = 'file'; inp.accept = 'image/*';
+    inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = !!cfg.portrait;
     inp.onchange = async () => {
-      const f = inp.files[0]; if (!f) return;
-      const b64 = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
-      const { data, error } = await sgb(cfg.uploadTask, { label, image: b64, media_type: f.type || 'image/png' });
+      const files = [...inp.files].slice(0, 4); if (!files.length) return;
+      const images = await Promise.all(files.map((f) => new Promise((res) => {
+        const r = new FileReader(); r.onload = () => res({ image: r.result, media_type: f.type || 'image/png' }); r.readAsDataURL(f);
+      })));
+      const { data, error } = await sgb(cfg.uploadTask, { label, key, images });
       if (error) { alert('เพิ่มไม่สำเร็จ: ' + error.message); return; }
       cfg.set(data.key); load();
     };
     inp.click();
+  }
+  $(cfg.addSel).onclick = () => {
+    const label = (window.prompt(cfg.namePrompt) || '').trim();
+    if (!label) return;
+    pickFiles(label, undefined);
   };
   return load;
 }
 const loadChars = makeLib({ listTask: 'chars_list', uploadTask: 'char_upload', rowSel: '#charRow', addSel: '#charAdd',
   get: () => CHAR_SEL, set: (v) => { CHAR_SEL = v; }, portrait: true,
   defaultLabel: 'Meili (มาตรฐาน)', defaultHint: 'ใช้รูป reference<br>"หน้า Meili" ด้านบน',
-  namePrompt: 'ตั้งชื่อตัวละคร/นางแบบ (เช่น "The Siren", "Meili ผมบ็อบ")' });
+  namePrompt: 'ตั้งชื่อตัวละคร/นางแบบ (เลือกได้หลายรูป = หลายมุม เช่น หน้าตรง/ข้าง/เต็มตัว)' });
 const loadLocs = makeLib({ listTask: 'locs_list', uploadTask: 'loc_upload', rowSel: '#locRow', addSel: '#locAdd',
   get: () => LOC_SEL, set: (v) => { LOC_SEL = v; },
   defaultLabel: 'ตามบทช็อต (มาตรฐาน)', defaultHint: 'ใช้สถานที่ตามที่<br>บทของช็อตกำหนด',
