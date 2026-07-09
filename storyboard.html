@@ -121,7 +121,7 @@
     <div id="skuWrap" style="display:none;margin-top:10px">
       <label>ชุดพระเอก — ช็อตนี้ต้องใช้รูปชุดจริงจากคลัง (ค้นหาแล้วกดเลือก)</label>
       <div style="display:flex;gap:8px">
-        <input type="text" id="skuInput" placeholder="ค้นหาชื่อชุด / รหัส / แบรนด์ เช่น LBK-20-M, firr">
+        <input type="text" id="skuInput" placeholder="พิมพ์กรองสด — ชื่อชุด / รหัส / แบรนด์ (ว่างไว้ = ชุดยอดนิยม)">
         <button class="btn ghost" id="skuSearch">ค้นหา</button>
       </div>
       <div class="refrow" id="skuGrid" style="margin-top:9px"></div>
@@ -148,7 +148,7 @@
     <div class="meta" style="margin-bottom:10px">นางแบบ = ตัวละครที่เลือกในการ์ด "ตัวละคร/นางแบบ" ด้านบน</div>
     <label>ชุดที่จะใส่ (ค้นหาจากคลังจริง แล้วกดเลือก)</label>
     <div style="display:flex;gap:8px">
-      <input type="text" id="lbSkuInput" placeholder="ค้นหาชื่อชุด / รหัส / แบรนด์">
+      <input type="text" id="lbSkuInput" placeholder="พิมพ์กรองสด — ชื่อชุด / รหัส / แบรนด์ (ว่างไว้ = ชุดยอดนิยม)">
       <button class="btn ghost" id="lbSkuSearch">ค้นหา</button>
     </div>
     <div class="refrow" id="lbSkuGrid" style="margin-top:9px"></div>
@@ -301,29 +301,36 @@ const loadLocs = makeLib({ listTask: 'locs_list', uploadTask: 'loc_upload', rowS
 
 // ── เลือกชุดจริงจากคลัง (RPC เดียวกับหน้า marketing) — ใช้ทั้ง storyboard และ lookbook ──
 function makeSkuPicker(cfg) {
+  let loaded = false, timer = null;
   async function search() {
+    loaded = true;
     const q = $(cfg.input).value.trim();
     const g = $(cfg.grid); g.innerHTML = '<div class="loading">กำลังค้นหา…</div>';
     const { data, error } = await window.opsRpc('garments_pick', { p_q: q || null, p_limit: 12 });
     if (error) { g.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
-    if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด</div>'; return; }
+    if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด — ลองคำอื่น</div>'; return; }
     g.innerHTML = '';
     for (const it of data) {
       const d = document.createElement('div');
       d.className = 'refbox'; d.style.cursor = 'pointer';
       if (cfg.get() === it.code) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
       d.innerHTML = (it.photo ? `<img src="${it.photo}">` : `<div class="ph">ไม่มีรูป</div>`) +
-        `<div class="nm">${it.name || it.code}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
+        `<div class="nm">${it.name || it.code}${cfg.get() === it.code ? ' ✓' : ''}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
       d.onclick = () => { cfg.set(it.code); $(cfg.sel).textContent = 'เลือกแล้ว: ' + (it.name || '') + ' (' + it.code + ')'; search(); };
       g.appendChild(d);
     }
   }
   $(cfg.btn).onclick = search;
-  $(cfg.input).addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+  $(cfg.input).addEventListener('keydown', (e) => { if (e.key === 'Enter') { clearTimeout(timer); search(); } });
+  // พิมพ์แล้วกรองสด (debounce 350ms)
+  $(cfg.input).addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, 350); });
+  // โหลดชุดยอดนิยมให้เลือกทันทีเมื่อเปิดครั้งแรก
+  cfg.ensure = () => { if (!loaded) search(); };
+  return cfg;
 }
-makeSkuPicker({ input: '#skuInput', btn: '#skuSearch', grid: '#skuGrid', sel: '#skuSel', get: () => SKU_SEL, set: (v) => { SKU_SEL = v; } });
+const sbSkuPicker = makeSkuPicker({ input: '#skuInput', btn: '#skuSearch', grid: '#skuGrid', sel: '#skuSel', get: () => SKU_SEL, set: (v) => { SKU_SEL = v; } });
 let LB_SKU = null;
-makeSkuPicker({ input: '#lbSkuInput', btn: '#lbSkuSearch', grid: '#lbSkuGrid', sel: '#lbSkuSel', get: () => LB_SKU, set: (v) => { LB_SKU = v; } });
+const lbSkuPicker = makeSkuPicker({ input: '#lbSkuInput', btn: '#lbSkuSearch', grid: '#lbSkuGrid', sel: '#lbSkuSel', get: () => LB_SKU, set: (v) => { LB_SKU = v; } });
 
 // ── Preset กล้อง/แสง/เลนส์ (ใช้ซ้ำได้ทั้งสองโหมด) + ฉากหลัง lookbook ──
 const CAMS = [
@@ -393,7 +400,9 @@ function selectShot(no) {
   $('#genCard').style.display = '';
   $('#genTitle').textContent = `เจนภาพ · SHOT ${SEL.shot} — ${SEL.title}`;
   $('#shotFields').innerHTML = `<b>หน้าที่ในเรื่อง:</b> ${SEL.story_function || '-'}<br><b>อารมณ์:</b> ${SEL.emotion || '-'}<br><b>Reference ที่จะแนบ:</b> ${(SEL.refs_needed || []).map((r) => REF_TH[r] || r).join(' · ')}`;
-  $('#skuWrap').style.display = (SEL.refs_needed || []).includes('hero_dress') ? '' : 'none';
+  const needDress = (SEL.refs_needed || []).includes('hero_dress');
+  $('#skuWrap').style.display = needDress ? '' : 'none';
+  if (needDress) sbSkuPicker.ensure();   // ช็อตที่ต้องใช้ชุด → โชว์ชุดให้เลือกทันที
   $('#resultCard').style.display = 'none';
   document.querySelectorAll('#presetChips .chip').forEach((c) => c.classList.remove('on'));
   $('#genCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -552,6 +561,7 @@ function applyMode() {
   $('#lbCard').style.display = sb ? 'none' : '';
   $('#resultCard').style.display = 'none';
   document.querySelectorAll('[data-mode]').forEach((t) => t.classList.toggle('on', t.dataset.mode === WORK));
+  if (!sb) lbSkuPicker.ensure();   // เข้าโหมด Lookbook → โชว์ชุดยอดนิยมให้เลือกทันที
 }
 document.querySelectorAll('[data-mode]').forEach((t) => t.onclick = () => { WORK = t.dataset.mode; applyMode(); });
 
