@@ -76,7 +76,7 @@
 <div class="modal-bg" id="viewModal">
   <div class="modal-box">
     <img id="viewImg" alt="">
-    <div class="cap"><b id="viewCap"></b><button class="x" id="viewClose">ปิด</button></div>
+    <div class="cap"><b id="viewCap"></b><span style="display:flex;gap:8px"><a class="x" id="viewDl" download>โหลด</a><button class="x" id="viewClose">ปิด</button></span></div>
   </div>
 </div>
 <div class="bar">
@@ -278,6 +278,7 @@ $('#seedBtn').onclick = async () => {
 // ── โมดัลดูรูปตัวละคร/สถานที่ชัด ๆ ──
 function openView(url, label) {
   $('#viewImg').src = url; $('#viewCap').textContent = label || '';
+  $('#viewDl').href = url;
   $('#viewModal').classList.add('show');
 }
 $('#viewClose').onclick = () => $('#viewModal').classList.remove('show');
@@ -364,20 +365,26 @@ const lbSkuPicker = makeSkuPicker({ input: '#lbSkuInput', btn: '#lbSkuSearch', g
 
 // ── Preset กล้อง/แสง/เลนส์ (ใช้ซ้ำได้ทั้งสองโหมด) + ฉากหลัง lookbook ──
 const CAMS = [
-  { key: 'wide35', label: 'มุมกว้าง 35mm เต็มตัว' }, { key: 'portrait50', label: 'Portrait 50mm ชัดตื้น' },
-  { key: 'closeup85', label: 'โคลสอัพ 85mm' }, { key: 'herolow', label: 'มุมต่ำ Hero เต็มตัว' },
-  { key: 'goldwarm', label: 'แสงทองอุ่น' }, { key: 'coolwindow', label: 'แสงหน้าต่างเย็น' },
-  { key: 'studiosoft', label: 'ไฟสตูดิโอนุ่ม' },
+  { key: 'wide35', label: 'มุมกว้าง 35mm เต็มตัว', desc: 'เห็นเต็มตัว+พื้นที่รอบ ๆ เลนส์กว้าง เหมาะโชว์ทั้งลุค' },
+  { key: 'portrait50', label: 'Portrait 50mm ชัดตื้น', desc: 'ระยะครึ่งตัว หลังเบลอนุ่ม เน้นตัวแบบ' },
+  { key: 'closeup85', label: 'โคลสอัพ 85mm', desc: 'ระยะใกล้ เก็บดีเทลหน้า/ผ้า หลังละลาย' },
+  { key: 'herolow', label: 'มุมต่ำ Hero เต็มตัว', desc: 'มุมกล้องต่ำ ตัวแบบดูสูงสง่า แบบภาพโฆษณา' },
+  { key: 'goldwarm', label: 'แสงทองอุ่น', desc: 'แสงทอง 3200K อบอุ่น พรีเมียม' },
+  { key: 'coolwindow', label: 'แสงหน้าต่างเย็น', desc: 'แสงธรรมชาติจากหน้าต่าง โทนเย็นนุ่ม' },
+  { key: 'studiosoft', label: 'ไฟสตูดิโอนุ่ม', desc: 'ไฟ softbox กระจายทั่ว เงานุ่ม แบบถ่ายสตูดิโอ' },
 ];
 const BGS = [
-  { key: 'cream', label: 'ครีม LLOOP' }, { key: 'white', label: 'ขาวคลีน' },
-  { key: 'greige', label: 'เทาอุ่น' }, { key: 'terracotta', label: 'ดินเผา' },
+  { key: 'cream', label: 'ครีม LLOOP', desc: 'ฉากครีม #ECE6DA โทนแบรนด์ มีเงาพื้นนุ่ม' },
+  { key: 'white', label: 'ขาวคลีน', desc: 'ฉากขาวเรียบ สว่าง โปร่ง' },
+  { key: 'greige', label: 'เทาอุ่น', desc: 'ฉากเทา-น้ำตาลอุ่น เรียบหรู' },
+  { key: 'terracotta', label: 'ดินเผา', desc: 'ฉากสีดินเผา อุ่น งานคราฟต์' },
 ];
 function makeChips(sel, items, single) {
   const el = $(sel);
   for (const it of items) {
     const c = document.createElement('div');
     c.className = 'chip'; c.textContent = it.label; c.dataset.key = it.key;
+    if (it.desc) c.title = it.desc;
     c.onclick = () => {
       if (single) el.querySelectorAll('.chip').forEach((x) => { if (x !== c) x.classList.remove('on'); });
       c.classList.toggle('on');
@@ -390,12 +397,16 @@ const getCam = makeChips('#camChips', CAMS, false);
 const getLbCam = makeChips('#lbCamChips', CAMS, false);
 const getLbBg = makeChips('#lbBgChips', BGS, true);
 const getLbStyle = makeChips('#lbStyleChips', [
-  { key: 'film', label: 'ฟิล์ม lookbook (สูตรวิจัย Portra 400)' }, { key: 'studio', label: 'สตูดิโอคลีน' },
+  { key: 'film', label: 'ฟิล์ม lookbook (สูตรวิจัย Portra 400)', desc: 'สูตรลุค @lookbooklookbook — โทนครีมอุ่น ฟิล์ม Portra เกรนนุ่ม ผิวจริง' },
+  { key: 'studio', label: 'สตูดิโอคลีน', desc: 'ภาพสตูดิโอคมชัด เรียบพรีเมียม' },
 ], true);
 const getLbPoses = makeChips('#lbPoseChips', [
-  { key: 'front', label: 'หน้าตรงเต็มตัว' }, { key: 'side34', label: 'หันข้าง 3/4' },
-  { key: 'back', label: 'ด้านหลังชุด' }, { key: 'walk', label: 'เดินแบบ' },
-  { key: 'detail', label: 'โคลสอัพดีเทลชุด' }, { key: 'sit', label: 'ท่านั่ง' },
+  { key: 'front', label: 'หน้าตรงเต็มตัว', desc: 'ยืนหน้าตรง เห็นชุดเต็ม มองกล้อง' },
+  { key: 'side34', label: 'หันข้าง 3/4', desc: 'หันตัว 3/4 เห็นทรงชุดด้านข้าง' },
+  { key: 'back', label: 'ด้านหลังชุด', desc: 'หันหลัง โชว์ดีเทลด้านหลังชุด' },
+  { key: 'walk', label: 'เดินแบบ', desc: 'ท่าเดิน ผ้าพลิ้ว เป็นธรรมชาติ' },
+  { key: 'detail', label: 'โคลสอัพดีเทลชุด', desc: 'ระยะใกล้เก็บเนื้อผ้า/ดีเทลชุด' },
+  { key: 'sit', label: 'ท่านั่ง', desc: 'ท่านั่งสง่า ชุดทิ้งตัวสวย' },
 ], false);
 // ค่าเริ่มต้น: สไตล์ฟิล์ม (สูตรวิจัย) + ท่าหน้าตรง
 document.querySelector('#lbStyleChips .chip[data-key="film"]').classList.add('on');
@@ -478,7 +489,7 @@ function showResult(data, title) {
   for (const it of items) {
     const d = document.createElement('div');
     d.style.cssText = 'border:1px solid var(--line);border-radius:11px;padding:10px;background:#fff';
-    d.innerHTML = `<img src="${it.url}" style="width:100%;border-radius:8px;display:block">
+    d.innerHTML = `<img src="${it.url}" style="width:100%;border-radius:8px;display:block;cursor:zoom-in" title="กดเพื่อขยาย">
       ${it.pose ? `<div class="meta" style="margin-top:6px">ท่า: ${POSE_TH[it.pose] || it.pose}</div>` : ''}
       <div class="fbrow" style="margin-top:8px">
         <button class="btn sage sm">ผ่าน</button>
@@ -489,6 +500,7 @@ function showResult(data, title) {
       <input type="text" placeholder="เพราะอะไร (เข้าออดิท)" style="margin-top:7px">
       <div class="meta fbst" style="margin-top:5px"></div>
       <div class="promptbox"></div>`;
+    d.querySelector('img').onclick = () => openView(it.url, (title || '') + (it.pose ? ' · ' + (POSE_TH[it.pose] || it.pose) : ''));
     const [passB, failB, , promptB] = d.querySelectorAll('button, a');
     const noteI = d.querySelector('input'), st = d.querySelector('.fbst'), pb = d.querySelector('.promptbox');
     pb.textContent = it.prompt || '';
