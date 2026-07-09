@@ -226,7 +226,11 @@ async function sgb(task, args) {
     const map = { unauthorized: 'เซสชันหมดอายุ รีเฟรชหน้าแล้วล็อกอินใหม่', no_access: 'ไม่มีสิทธิ์ใช้งานหลังบ้าน',
       role_denied: 'สิทธิ์ไม่พอ (ต้องเป็นทีมการตลาด/ผู้จัดการ/เจ้าของ)', feature_disabled: 'ฟีเจอร์ยังปิดอยู่ — ให้เจ้าของเปิดที่หน้า Settings',
       no_api_key: 'ยังไม่ได้ตั้ง GOOGLE_AI_API_KEY ฝั่งเซิร์ฟเวอร์', gen_failed: out.message || 'เจนไม่สำเร็จ' };
-    return { error: { code: out.error, message: map[out.error] || out.message || out.error || ('http ' + r.status) }, data: out };
+    let msg = map[out.error] || out.message || out.error || ('http ' + r.status);
+    if (/IMAGE_SAFETY|SAFETY|PROHIBITED/i.test(String(out.message || out.error || ''))) {
+      msg = 'ตัวกรองของ Gemini บล็อกรูปนี้ — ลองกดเจนใหม่อีกครั้ง (บางทีผ่าน) หรือเปลี่ยนชุด/นางแบบ/ท่าโพส หรือเลี่ยงชุดที่เปิดเผยมาก';
+    }
+    return { error: { code: out.error, message: msg }, data: out };
   }
   return { data: out.data };
 }
