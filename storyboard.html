@@ -153,6 +153,10 @@
     </div>
     <div class="refrow" id="lbSkuGrid" style="margin-top:9px"></div>
     <div class="meta" id="lbSkuSel" style="margin:6px 0 10px"></div>
+    <label>สไตล์ภาพ</label>
+    <div class="chips" id="lbStyleChips" style="margin-bottom:10px"></div>
+    <label>ท่าโพส — เลือกได้หลายท่า (สูงสุด 4) จะได้รูปหลายมุมจาก setup เดียวเหมือนถ่าย lookbook จริง</label>
+    <div class="chips" id="lbPoseChips" style="margin-bottom:10px"></div>
     <label>ฉากหลังสตูดิโอ</label>
     <div class="chips" id="lbBgChips" style="margin-bottom:10px"></div>
     <label>Preset กล้อง / แสง / เลนส์</label>
@@ -167,18 +171,8 @@
 
   <div class="card" id="resultCard" style="display:none">
     <h2 id="resultTitle">ผลการเจน</h2>
-    <div class="result" id="result">
-      <img id="resultImg" alt="">
-      <div class="fbrow">
-        <button class="btn sage sm" id="fbPass">ผ่าน ✓</button>
-        <button class="btn sm" style="background:#9C3F5E" id="fbFail">ไม่ผ่าน ✕</button>
-        <input type="text" id="fbNote" placeholder="เพราะอะไร เช่น หน้าไม่ตรง / ชุดไม่ตรง (เข้าระบบออดิท)" style="flex:1;min-width:200px">
-        <button class="btn ghost sm" id="showPrompt">ดู prompt</button>
-        <a class="btn ghost sm" id="dlBtn" download>ดาวน์โหลด</a>
-      </div>
-      <div class="meta" id="fbStatus" style="margin-top:6px"></div>
-      <div class="promptbox" id="promptBox"></div>
-    </div>
+    <div class="meta" style="margin-bottom:10px">กด "ผ่าน/ไม่ผ่าน" ให้ครบทุกรูปก่อนเจนรอบถัดไป — ความเห็นเข้าระบบออดิทให้เจ้าของ</div>
+    <div id="resultGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px"></div>
   </div>
 
   <div class="card">
@@ -206,7 +200,7 @@ const PRESETS = [
 const REF_TH = { meili: 'หน้า Meili', outfit: 'ชุดอยู่บ้าน', room: 'ห้องปกติ', room_messy: 'ห้องรก', logo: 'โลโก้ LLOOP', hero_dress: 'ชุดพระเอก',
   woman_a: 'Woman A (30-35 ผมรวบ)', woman_b: 'Woman B (22-25 ผมยาว)', woman_c: 'Woman C (25-30 ผมยาวสีทอง หน้าม้า)' };
 
-let SHOTS = [], SEL = null, SCENE = 1, LAST_GEN = null, IS_OWNER = false, CHAR_SEL = null, SKU_SEL = null, LOC_SEL = null;
+let SHOTS = [], SEL = null, SCENE = 1, IS_OWNER = false, CHAR_SEL = null, SKU_SEL = null, LOC_SEL = null;
 
 async function sgb(task, args) {
   if (!(await window.opsLogin())) return { error: { message: 'redirecting_to_login' } };
@@ -358,6 +352,17 @@ function makeChips(sel, items, single) {
 const getCam = makeChips('#camChips', CAMS, false);
 const getLbCam = makeChips('#lbCamChips', CAMS, false);
 const getLbBg = makeChips('#lbBgChips', BGS, true);
+const getLbStyle = makeChips('#lbStyleChips', [
+  { key: 'film', label: '🎞 ฟิล์ม lookbook (สูตรวิจัย Portra 400)' }, { key: 'studio', label: 'สตูดิโอคลีน' },
+], true);
+const getLbPoses = makeChips('#lbPoseChips', [
+  { key: 'front', label: 'หน้าตรงเต็มตัว' }, { key: 'side34', label: 'หันข้าง 3/4' },
+  { key: 'back', label: 'ด้านหลังชุด' }, { key: 'walk', label: 'เดินแบบ' },
+  { key: 'detail', label: 'โคลสอัพดีเทลชุด' }, { key: 'sit', label: 'ท่านั่ง' },
+], false);
+// ค่าเริ่มต้น: สไตล์ฟิล์ม (สูตรวิจัย) + ท่าหน้าตรง
+document.querySelector('#lbStyleChips .chip[data-key="film"]').classList.add('on');
+document.querySelector('#lbPoseChips .chip[data-key="front"]').classList.add('on');
 
 // ── shots ──
 async function loadShots() {
@@ -426,13 +431,38 @@ $('#genBtn').onclick = async () => {
 };
 
 function showResult(data, title) {
-  LAST_GEN = data;
+  const items = (data.results && data.results.length ? data.results : [data]).filter((r) => r.url);
   $('#resultCard').style.display = '';
-  $('#resultTitle').textContent = title;
-  $('#resultImg').src = data.url;
-  $('#dlBtn').href = data.url;
-  $('#promptBox').textContent = data.prompt; $('#promptBox').style.display = 'none';
-  $('#fbStatus').textContent = ''; $('#fbNote').value = '';
+  $('#resultTitle').textContent = title + (items.length > 1 ? ` · ${items.length} รูป` : '');
+  const grid = $('#resultGrid'); grid.innerHTML = '';
+  const POSE_TH = { front: 'หน้าตรง', side34: 'หันข้าง 3/4', back: 'ด้านหลัง', walk: 'เดินแบบ', detail: 'ดีเทลชุด', sit: 'ท่านั่ง' };
+  for (const it of items) {
+    const d = document.createElement('div');
+    d.style.cssText = 'border:1px solid var(--line);border-radius:11px;padding:10px;background:#fff';
+    d.innerHTML = `<img src="${it.url}" style="width:100%;border-radius:8px;display:block">
+      ${it.pose ? `<div class="meta" style="margin-top:6px">ท่า: ${POSE_TH[it.pose] || it.pose}</div>` : ''}
+      <div class="fbrow" style="margin-top:8px">
+        <button class="btn sage sm">ผ่าน ✓</button>
+        <button class="btn sm" style="background:#9C3F5E">ไม่ผ่าน ✕</button>
+        <a class="btn ghost sm" href="${it.url}" download>โหลด</a>
+        <button class="btn ghost sm">prompt</button>
+      </div>
+      <input type="text" placeholder="เพราะอะไร (เข้าออดิท)" style="margin-top:7px">
+      <div class="meta fbst" style="margin-top:5px"></div>
+      <div class="promptbox"></div>`;
+    const [passB, failB, , promptB] = d.querySelectorAll('button, a');
+    const noteI = d.querySelector('input'), st = d.querySelector('.fbst'), pb = d.querySelector('.promptbox');
+    pb.textContent = it.prompt || '';
+    promptB.onclick = () => { pb.style.display = pb.style.display === 'none' || !pb.style.display ? 'block' : 'none'; };
+    const judge = async (rating) => {
+      const { error } = await sgb('feedback', { gen_id: it.gen_id, rating, note: noteI.value.trim() || undefined });
+      st.textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : (rating === 'pass' ? 'ผ่าน ✓ บันทึกแล้ว' : 'ไม่ผ่าน ✕ บันทึกแล้ว');
+      if (!error) { passB.disabled = true; failB.disabled = true; noteI.disabled = true; loadHistory(); }
+    };
+    passB.onclick = () => judge('pass');
+    failB.onclick = () => judge('fail');
+    grid.appendChild(d);
+  }
   $('#resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
   loadHistory();
 }
@@ -442,12 +472,16 @@ $('#lbGenBtn').onclick = async () => {
   if (!LB_SKU) { $('#lbStatus').innerHTML = '<span class="err">เลือกชุดจากคลังก่อนค่ะ</span>'; return; }
   const btn = $('#lbGenBtn'); btn.disabled = true;
   $('#lbStatus').textContent = 'กำลังเจน… (ราว 10-30 วินาที)';
-  const camKeys = getLbCam(), bg = getLbBg()[0];
+  const camKeys = getLbCam(), bg = getLbBg()[0], style = getLbStyle()[0] || 'film';
+  const poses = getLbPoses();
+  if (poses.length > 4) { $('#lbStatus').innerHTML = '<span class="err">เลือกท่าโพสได้สูงสุด 4 ท่าค่ะ</span>'; return; }
+  $('#lbStatus').textContent = `กำลังเจน ${poses.length || 1} รูป… (ราวรูปละ 10-30 วินาที)`;
   const { data, error } = await sgb('generate', { mode: 'lookbook', sku: LB_SKU,
-    character: CHAR_SEL || undefined, background: bg || undefined,
+    character: CHAR_SEL || undefined, background: bg || undefined, style,
+    poses: poses.length ? poses : undefined,
     camera: camKeys.length ? camKeys : undefined,
     fix_note: $('#lbNote').value.trim() || undefined,
-    preset: ['lookbook', bg, ...camKeys].filter(Boolean).join('+') });
+    preset: ['lookbook', style, bg, ...camKeys].filter(Boolean).join('+') });
   btn.disabled = false;
   if (error) {
     if (error.code === 'feedback_required' && data && data.pending) { showPending(data.pending); return; }
@@ -456,16 +490,6 @@ $('#lbGenBtn').onclick = async () => {
   $('#lbStatus').textContent = 'สำเร็จ';
   showResult(data, 'ผลการเจน · Lookbook — ' + LB_SKU);
 };
-$('#showPrompt').onclick = () => { const b = $('#promptBox'); b.style.display = b.style.display === 'none' ? '' : 'none'; };
-async function sendFb(rating) {
-  if (!LAST_GEN?.gen_id) return;
-  const { error } = await sgb('feedback', { gen_id: LAST_GEN.gen_id, rating, note: $('#fbNote').value.trim() || undefined });
-  $('#fbStatus').textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : 'บันทึกความเห็นแล้ว — ขอบคุณค่ะ (เข้าระบบออดิทให้เจ้าของดูแล้ว)';
-  loadHistory();
-}
-$('#fbPass').onclick = () => sendFb('pass');
-$('#fbFail').onclick = () => sendFb('fail');
-
 // ── กติกาบังคับตัดสินรูปค้าง: โชว์รูปที่ยังไม่ได้ตัดสิน ให้กดก่อนเจนใหม่ ──
 let PEND = null;
 function showPending(p) {
