@@ -330,14 +330,44 @@ $('#genBtn').onclick = async () => {
     preset: [getMotion(), getAspect(), dur + 's'].join('+') };
   if (SRC.sku) args.sku = SRC.sku; else { args.image = SRC.image; args.media_type = SRC.media_type; }
   const { data, error } = await vgb('generate', args);
-  btn.disabled = false;
   if (error) {
+    btn.disabled = false;
     if (error.code === 'feedback_required' && data && data.pending) { showPending(data.pending); return; }
     $('#genStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return;
   }
-  $('#genStatus').textContent = 'สำเร็จ';
-  showResult(data);
+  // งานถูกส่งเข้าคิว (async) — วิดีโอใช้เวลา 2–5 นาที ต้อง poll สถานะจนเสร็จ
+  $('#genStatus').textContent = 'ส่งเข้าคิวแล้ว กำลังสร้างคลิป… (2–5 นาที · เปิดหน้านี้ค้างไว้)';
+  loadHistory();
+  pollJob(data, btn);
 };
+
+// ── poll สถานะงานวิดีโอจนเสร็จ (video-poll cron ฝั่ง server เป็นตัวทำจริง) ──
+async function pollJob(meta, btn) {
+  const started = Date.now();
+  const tick = async () => {
+    if (Date.now() - started > 360000) {   // 6 นาที = ยอมแพ้ (งานยังอาจเสร็จใน LINE)
+      btn.disabled = false;
+      $('#genStatus').innerHTML = '<span class="err">รอนานเกินไป — คลิปอาจยังสร้างอยู่ ดูในประวัติด้านล่างอีกครั้งใน 1–2 นาที หรือเช็คใน LINE</span>';
+      loadHistory(); return;
+    }
+    const { data, error } = await vgb('job_status', { gen_id: meta.gen_id });
+    if (error) { setTimeout(tick, 6000); return; }   // ชั่วคราว — ลองใหม่
+    if (data.status === 'ok' && data.url) {
+      btn.disabled = false;
+      $('#genStatus').textContent = 'สำเร็จ';
+      showResult({ ...meta, url: data.url });
+      return;
+    }
+    if (data.status === 'error') {
+      btn.disabled = false;
+      const m = { safety_blocked: 'ติดตัวกรองความปลอดภัยของ Veo — ลองปรับโน้ต/เปลี่ยนชุดแล้วเจนใหม่ (ถูกบล็อกไม่คิดเงิน)',
+        timeout: 'Veo ใช้เวลานานเกินไป ลองใหม่อีกครั้ง' }[data.raw] || 'สร้างคลิปไม่สำเร็จ — ดูรายละเอียดในประวัติ';
+      $('#genStatus').innerHTML = '<span class="err">' + m + '</span>'; loadHistory(); return;
+    }
+    setTimeout(tick, 6000);   // ยังสร้างอยู่ → เช็คอีกใน 6 วิ
+  };
+  setTimeout(tick, 8000);     // เริ่ม poll หลัง 8 วิ (ให้ Veo ตั้งตัว)
+}
 
 function showResult(data) {
   $('#resultCard').style.display = '';
