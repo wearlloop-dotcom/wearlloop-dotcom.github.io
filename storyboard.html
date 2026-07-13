@@ -149,6 +149,8 @@
     <div class="chips" id="presetChips" style="margin-bottom:10px"></div>
     <label>Preset กล้อง / แสง / เลนส์ (ใช้ซ้ำได้ — ถ้าเลือก จะทับค่ากล้องในบทช็อต)</label>
     <div class="chips" id="camChips" style="margin-bottom:10px"></div>
+    <label>ธีมหนัง (Movie Vibe) — ใส่สูตรสี/แสง/มู้ดของหนัง (เลือกได้ 1 หรือไม่เลือก)</label>
+    <div class="chips" id="movieChips" style="margin-bottom:10px"></div>
     <label>โน้ตเพิ่มเติม (ถ้ามี) — บอกสิ่งที่อยากแก้เป็นภาษาไทยหรืออังกฤษ</label>
     <textarea id="fixNote" placeholder="เช่น ตู้ต้องเปิดอยู่ มีผ้ากำลังร่วง / แสงอุ่นขึ้นอีก"></textarea>
     <div id="skuWrap" style="display:none;margin-top:10px">
@@ -213,6 +215,8 @@
     <div class="meta" id="lbSkuSel" style="margin:6px 0 10px"></div>
     <label>สไตล์ภาพ</label>
     <div class="chips" id="lbStyleChips" style="margin-bottom:10px"></div>
+    <label>ธีมหนัง (Movie Vibe) — ใส่สูตรสี/แสง/มู้ดของหนัง (เลือกได้ 1 หรือไม่เลือก)</label>
+    <div class="chips" id="lbMovieChips" style="margin-bottom:10px"></div>
     <label>ท่าโพส — เลือกได้หลายท่า (สูงสุด 4) จะได้รูปหลายมุมจาก setup เดียวเหมือนถ่าย lookbook จริง</label>
     <div class="chips" id="lbPoseChips" style="margin-bottom:10px"></div>
     <label>ฉากหลังสตูดิโอ</label>
@@ -489,7 +493,8 @@ $('#nsGenBtn').onclick = async () => {
   const btn = $('#nsGenBtn'); btn.disabled = true;
   $('#nsStatus').textContent = 'กำลังเจน… (ราว 10-30 วินาที)';
   const { data, error } = await sgb('generate', { mode: 'storyboard', custom_prompt: p,
-    character: CHAR_SEL || undefined, location: LOC_SEL || undefined, sku: NS_SKU || undefined });
+    character: CHAR_SEL || undefined, location: LOC_SEL || undefined, sku: NS_SKU || undefined,
+    movie: getMovie()[0] || undefined });
   btn.disabled = false;
   if (error) {
     if (error.code === 'feedback_required' && data && data.pending) { showPending(data.pending); return; }
@@ -529,7 +534,20 @@ function makeChips(sel, items, single) {
   }
   return () => [...el.querySelectorAll('.chip.on')].map((c) => c.dataset.key);
 }
+const MOVIES = [
+  { key: 'crazyrich', label: 'Crazy Rich Asians', desc: 'มรกต-ทอง หรูหรา แสงทังสเตนอุ่น งานเฉลิมฉลอง' },
+  { key: 'gatsby', label: 'The Great Gatsby', desc: 'อาร์ตเดโค แชมเปญ-ทอง แสงโคมระย้า หรูยุค 20s' },
+  { key: 'buppe', label: 'บุพเพสันนิวาส', desc: 'โทนทองอบอุ่น แสงธรรมชาติ ไม้สักทอง ย้อนยุคไทย' },
+  { key: 'lalaland', label: 'La La Land', desc: 'ม่วง-ฟ้าตอนโพล้เพล้ แสงโรแมนติก' },
+  { key: 'cmbyn', label: 'Call Me By Your Name', desc: 'ซัมเมอร์อิตาลี ฟิล์มอุ่น แสงบ่าย โนสตัลเจีย' },
+  { key: 'inthemood', label: 'In the Mood for Love', desc: 'แดงเข้ม-เขียวหม่น low-key เซ็กซี่โนสตัลเจีย' },
+  { key: 'barbie', label: 'Barbie', desc: 'ชมพูสด high-key สว่างเงา playful' },
+  { key: 'dune', label: 'Dune', desc: 'ทราย-อำพัน แสงแข็ง มินิมอลอลังการ' },
+  { key: 'marie', label: 'Marie Antoinette', desc: 'พาสเทลโรโกโก แสงเทียนนุ่ม หวานหรู' },
+];
 const getCam = makeChips('#camChips', CAMS, false);
+const getMovie = makeChips('#movieChips', MOVIES, true);
+const getLbMovie = makeChips('#lbMovieChips', MOVIES, true);
 const getLbCam = makeChips('#lbCamChips', CAMS, false);
 const getLbBg = makeChips('#lbBgChips', BGS, true);
 const getLbStyle = makeChips('#lbStyleChips', [
@@ -626,6 +644,7 @@ $('#genBtn').onclick = async () => {
   const { data, error } = await sgb('generate', { shot: SEL.shot, fix_note: note || undefined,
     sku: SKU_SEL || undefined, character: CHAR_SEL || undefined, location: LOC_SEL || undefined,
     camera: camKeys.length ? camKeys : undefined, custom_prompt: edited || undefined,
+    movie: getMovie()[0] || undefined,
     preset: [...picked.map((c) => c.dataset.label), ...camKeys].join('+') || undefined });
   btn.disabled = false;
   if (error) {
@@ -690,8 +709,8 @@ $('#lbGenBtn').onclick = async () => {
     character: CHAR_SEL || undefined, background: bg || undefined, style,
     poses: poses.length ? poses : undefined,
     camera: camKeys.length ? camKeys : undefined,
-    fix_note: $('#lbNote').value.trim() || undefined,
-    preset: ['lookbook', style, bg, ...camKeys].filter(Boolean).join('+') });
+    fix_note: $('#lbNote').value.trim() || undefined, movie: getLbMovie()[0] || undefined,
+    preset: ['lookbook', style, bg, getLbMovie()[0] ? 'movie:' + getLbMovie()[0] : '', ...camKeys].filter(Boolean).join('+') });
   btn.disabled = false;
   if (error) {
     if (error.code === 'feedback_required' && data && data.pending) { showPending(data.pending); return; }
