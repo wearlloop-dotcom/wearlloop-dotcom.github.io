@@ -450,8 +450,11 @@ async function loadHistory() {
     const fb = r.feedback_rating ? `<span class="tag ${r.feedback_rating}">${r.feedback_rating === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</span>` : '';
     const note = r.feedback_note ? `<div class="meta">“${r.feedback_note}” — ${r.feedback_by || ''}</div>` : (r.note ? `<div class="meta">โน้ต: ${r.note.slice(0, 90)}</div>` : '');
     const what = `${r.sku || 'อัปโหลด'} · ${r.duration || '?'}วิ ${r.aspect || ''}`;
+    const stTag = r.status === 'ok' ? '<span class="tag ok">สำเร็จ</span>'
+      : r.status === 'pending' ? '<span class="tag" style="background:#F0ECE2;color:#7A6516">กำลังสร้าง…</span>'
+      : '<span class="tag error">พัง</span>';
     d.innerHTML = `<div><b>${what}</b> · ${r.employee_name || '-'} <span class="meta">· ${when} · ${r.preset || 'มาตรฐาน'}</span>${note}</div>
-      <div><span class="tag ${r.status}">${r.status === 'ok' ? 'สำเร็จ' : 'พัง'}</span> ${fb}</div>`;
+      <div>${stTag} ${fb}</div>`;
     if (r.url) d.onclick = () => openView(r.url, what);
     el.appendChild(d);
   }
