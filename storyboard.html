@@ -78,6 +78,23 @@
   <div class="modal-box">
     <img id="viewImg" alt="">
     <div class="cap"><b id="viewCap"></b><span style="display:flex;gap:8px"><a class="x" id="viewDl" download>โหลด</a><button class="x" id="viewClose">ปิด</button></span></div>
+    <div id="viewDescWrap" style="display:none;margin-top:10px">
+      <label style="display:flex;justify-content:space-between;align-items:center">คำบรรยาย (AI ใช้ล็อกตอนเจน)
+        <button class="x" id="viewRegenDesc" style="padding:4px 10px">สร้างใหม่จากรูป</button></label>
+      <textarea id="viewDesc" style="min-height:110px;font-size:12px;line-height:1.5"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <button class="btn ghost sm" id="viewSaveDesc">บันทึกคำบรรยาย</button>
+        <button class="btn ghost sm" id="viewTestDesc">ทดสอบ prompt (เจนรูปจากคำบรรยายอย่างเดียว)</button>
+      </div>
+      <span class="meta" id="viewDescStatus"></span>
+      <div id="viewTestWrap" style="display:none;margin-top:8px">
+        <div class="meta">ซ้าย = รูปจริง · ขวา = รูปที่ AI เจนจากคำบรรยาย (ถ้าตรงกัน = คำบรรยายนิ่งดี)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+          <img id="viewTestReal" style="width:100%;border-radius:8px;border:1px solid var(--line)">
+          <img id="viewTestGen" style="width:100%;border-radius:8px;border:1px solid var(--line)">
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <div class="bar">
@@ -212,6 +229,7 @@
 
   <div class="card" id="resultCard" style="display:none">
     <h2 id="resultTitle">ผลการเจน</h2>
+    <div class="meta" id="resultRef" style="margin-bottom:4px;color:var(--sage)"></div>
     <div class="meta" style="margin-bottom:10px">กด "ผ่าน/ไม่ผ่าน" ให้ครบทุกรูปก่อนเจนรอบถัดไป — ความเห็นเข้าระบบออดิทให้เจ้าของ</div>
     <div id="resultGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px"></div>
   </div>
@@ -314,13 +332,52 @@ $('#seedBtn').onclick = async () => {
 
 // ── คลังตัวละคร + คลังสถานที่ (gallery กดเลือกจากรูป — โค้ดเดียวกัน) ──
 // ── โมดัลดูรูปตัวละคร/สถานที่ชัด ๆ ──
-function openView(url, label) {
+let VIEW_EDIT = null; // {kind, key} ถ้าเปิดจากคลังตัวละคร/สถานที่ (แก้คำบรรยายได้)
+function openView(url, label, editCfg) {
   $('#viewImg').src = url; $('#viewCap').textContent = label || '';
   $('#viewDl').href = url;
+  VIEW_EDIT = editCfg || null;
+  const wrap = $('#viewDescWrap');
+  if (VIEW_EDIT) {
+    wrap.style.display = ''; $('#viewDesc').value = VIEW_EDIT.desc || '';
+    $('#viewDescStatus').textContent = VIEW_EDIT.desc ? '' : 'ยังไม่มีคำบรรยาย — กด "สร้างใหม่จากรูป"';
+  } else { wrap.style.display = 'none'; }
   $('#viewModal').classList.add('show');
 }
 $('#viewClose').onclick = () => $('#viewModal').classList.remove('show');
 $('#viewModal').onclick = (e) => { if (e.target === $('#viewModal')) $('#viewModal').classList.remove('show'); };
+$('#viewRegenDesc').onclick = async () => {
+  if (!VIEW_EDIT) return;
+  $('#viewDescStatus').textContent = 'กำลังให้ AI อ่านรูป…';
+  const { data, error } = VIEW_EDIT.sku
+    ? await sgb('garment_desc', { sku: VIEW_EDIT.sku, regen: true })
+    : await sgb('set_desc', { kind: VIEW_EDIT.kind, key: VIEW_EDIT.key, desc: '' });
+  if (error) { $('#viewDescStatus').textContent = 'ไม่สำเร็จ: ' + error.message; return; }
+  $('#viewDesc').value = data.desc || ''; $('#viewDescStatus').textContent = 'สร้างใหม่แล้ว — กดบันทึกถ้าโอเค';
+};
+$('#viewSaveDesc').onclick = async () => {
+  if (!VIEW_EDIT) return;
+  if (VIEW_EDIT.sku) {
+    const { error } = await sgb('garment_desc', { sku: VIEW_EDIT.sku, desc: $('#viewDesc').value.trim() });
+    $('#viewDescStatus').textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : 'บันทึกแล้ว';
+    if (!error) VIEW_EDIT.desc = $('#viewDesc').value.trim();
+    return;
+  }
+  const { error } = await sgb('set_desc', { kind: VIEW_EDIT.kind, key: VIEW_EDIT.key, desc: $('#viewDesc').value.trim() });
+  $('#viewDescStatus').textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : 'บันทึกแล้ว';
+  if (!error) { VIEW_EDIT.desc = $('#viewDesc').value.trim(); if (VIEW_EDIT.kind === 'chars') loadChars(); else loadLocs(); }
+};
+$('#viewTestDesc').onclick = async () => {
+  if (!VIEW_EDIT) return;
+  $('#viewDescStatus').textContent = 'กำลังเจนรูปทดสอบจากคำบรรยาย… (10-30 วิ)';
+  const args = VIEW_EDIT.sku ? { sku: VIEW_EDIT.sku } : { kind: VIEW_EDIT.kind, key: VIEW_EDIT.key };
+  const { data, error } = await sgb('desc_preview', args);
+  if (error) { $('#viewDescStatus').textContent = 'ไม่สำเร็จ: ' + error.message; return; }
+  $('#viewTestWrap').style.display = '';
+  $('#viewTestReal').src = $('#viewImg').src;
+  $('#viewTestGen').src = data.url;
+  $('#viewDescStatus').textContent = 'เทียบดูว่าตรงไหม — ถ้าไม่ตรง แก้คำบรรยายแล้วกดทดสอบใหม่';
+};
 
 function makeLib(cfg) {
   async function load() {
@@ -328,25 +385,26 @@ function makeLib(cfg) {
     const row = $(cfg.rowSel);
     if (error) { row.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
     row.innerHTML = '';
-    const mk = (key, label, url, count) => {
+    const mk = (key, label, url, count, desc) => {
       const d = document.createElement('div');
       d.className = 'refbox' + (cfg.portrait ? ' portrait' : ''); d.style.cursor = 'pointer'; d.style.position = 'relative';
       if (cfg.get() === key) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
       const sel = cfg.get() === key;
       const nbadge = count > 1 ? ` · ${count} มุม` : '';
+      const dbadge = desc ? ' · มีคำบรรยาย' : '';
       d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">${cfg.defaultHint}</div>`) +
-        `<div class="nm">${label}${sel ? ' (เลือกอยู่)' : ''}${nbadge}</div>` +
-        (url ? `<button class="viewbtn" title="ดูชัด ๆ">ดู</button>` : '') +
+        `<div class="nm">${label}${sel ? ' (เลือกอยู่)' : ''}${nbadge}${dbadge}</div>` +
+        (url ? `<button class="viewbtn" title="ดู/แก้คำบรรยาย">ดู</button>` : '') +
         (url && cfg.portrait ? `<button class="addangle" title="เพิ่มมุมของตัวละครนี้">+ มุม</button>` : '');
       d.onclick = () => { cfg.set(key); load(); };
       const vb = d.querySelector('.viewbtn');
-      if (vb) vb.onclick = (e) => { e.stopPropagation(); openView(url, label); };
+      if (vb) vb.onclick = (e) => { e.stopPropagation(); openView(url, label, { kind: cfg.kind, key, desc: desc || '' }); };
       const ab = d.querySelector('.addangle');
       if (ab) ab.onclick = (e) => { e.stopPropagation(); pickFiles(label, key); };
       row.appendChild(d);
     };
-    mk(null, cfg.defaultLabel, null, 1);
-    for (const c of data) mk(c.key, c.label, c.url, c.count || 1);
+    mk(null, cfg.defaultLabel, null, 1, '');
+    for (const c of data) mk(c.key, c.label, c.url, c.count || 1, c.desc || '');
   }
   // เลือกไฟล์ 1+ รูป แล้วอัปเป็นรายการใหม่ (key ว่าง) หรือเพิ่มมุมให้รายการเดิม (มี key)
   async function pickFiles(label, key) {
@@ -370,11 +428,11 @@ function makeLib(cfg) {
   };
   return load;
 }
-const loadChars = makeLib({ listTask: 'chars_list', uploadTask: 'char_upload', rowSel: '#charRow', addSel: '#charAdd',
+const loadChars = makeLib({ listTask: 'chars_list', uploadTask: 'char_upload', rowSel: '#charRow', addSel: '#charAdd', kind: 'chars',
   get: () => CHAR_SEL, set: (v) => { CHAR_SEL = v; }, portrait: true,
   defaultLabel: 'Meili (มาตรฐาน)', defaultHint: 'ใช้รูป reference<br>"หน้า Meili" ด้านบน',
   namePrompt: 'ตั้งชื่อตัวละคร/นางแบบ (เลือกได้หลายรูป = หลายมุม เช่น หน้าตรง/ข้าง/เต็มตัว)' });
-const loadLocs = makeLib({ listTask: 'locs_list', uploadTask: 'loc_upload', rowSel: '#locRow', addSel: '#locAdd',
+const loadLocs = makeLib({ listTask: 'locs_list', uploadTask: 'loc_upload', rowSel: '#locRow', addSel: '#locAdd', kind: 'locs',
   get: () => LOC_SEL, set: (v) => { LOC_SEL = v; },
   defaultLabel: 'ตามบทช็อต (มาตรฐาน)', defaultHint: 'ใช้สถานที่ตามที่<br>บทของช็อตกำหนด',
   namePrompt: 'ตั้งชื่อสถานที่ (เช่น "คาเฟ่สาขาทองหล่อ", "ฮอลล์งานแต่ง")' });
@@ -392,11 +450,20 @@ function makeSkuPicker(cfg) {
     g.innerHTML = '';
     for (const it of data) {
       const d = document.createElement('div');
-      d.className = 'refbox'; d.style.cursor = 'pointer';
+      d.className = 'refbox'; d.style.cursor = 'pointer'; d.style.position = 'relative';
       if (cfg.get() === it.code) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
       d.innerHTML = (it.photo ? `<img src="${it.photo}">` : `<div class="ph">ไม่มีรูป</div>`) +
-        `<div class="nm">${it.name || it.code}${cfg.get() === it.code ? ' (เลือกอยู่)' : ''}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
+        `<div class="nm">${it.name || it.code}${cfg.get() === it.code ? ' (เลือกอยู่)' : ''}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>` +
+        (it.photo ? `<button class="viewbtn" title="ดู/แก้/ทดสอบคำบรรยายชุด">prompt</button>` : '');
       d.onclick = () => { cfg.set(it.code); $(cfg.sel).textContent = 'เลือกแล้ว: ' + (it.name || '') + ' (' + it.code + ')'; search(); };
+      const vb = d.querySelector('.viewbtn');
+      if (vb) vb.onclick = async (e) => {
+        e.stopPropagation();
+        openView(it.photo, (it.name || it.code), { sku: it.code, desc: '' });
+        $('#viewDescStatus').textContent = 'กำลังโหลดคำบรรยาย…';
+        const { data } = await sgb('garment_desc', { sku: it.code });
+        if (data) { $('#viewDesc').value = data.desc || ''; VIEW_EDIT && (VIEW_EDIT.desc = data.desc || ''); $('#viewDescStatus').textContent = data.desc ? '' : 'ยังไม่มีคำบรรยาย — กด "สร้างใหม่จากรูป"'; }
+      };
       g.appendChild(d);
     }
   }
@@ -572,6 +639,9 @@ function showResult(data, title) {
   const items = (data.results && data.results.length ? data.results : [data]).filter((r) => r.url);
   $('#resultCard').style.display = '';
   $('#resultTitle').textContent = title + (items.length > 1 ? ` · ${items.length} รูป` : '');
+  // โชว์ว่าใช้อะไรเป็น reference จริง ๆ (กี่มุม + มีคำบรรยายไหม) — ความโปร่งใส
+  const rd = (data.ref_detail || []).join(' · ');
+  $('#resultRef').innerHTML = rd ? 'ใช้ reference: ' + rd : '';
   const grid = $('#resultGrid'); grid.innerHTML = '';
   const POSE_TH = { front: 'หน้าตรง', side34: 'หันข้าง 3/4', back: 'ด้านหลัง', walk: 'เดินแบบ', detail: 'ดีเทลชุด', sit: 'ท่านั่ง' };
   for (const it of items) {
