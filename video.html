@@ -106,8 +106,17 @@
     </div>
   </div>
 
+  <div class="card" id="charCard">
+    <h2>2 · นางแบบ (ไม่บังคับ) <span class="hint">เลือก = ประกอบรูป "หน้านางแบบเรา ใส่ชุดนี้" ก่อน แล้วค่อยขยับ (เฉพาะชุดจากคลัง)</span></h2>
+    <div class="refrow" id="charRow"><div class="loading">กำลังโหลด…</div></div>
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn ghost sm" id="charAdd">+ เพิ่มนางแบบ (อัปรูปหน้า ได้หลายมุม)</button>
+      <span class="meta" id="charStatus"></span>
+    </div>
+  </div>
+
   <div class="card">
-    <h2>2 · การเคลื่อนไหว <span class="hint">เลือกท่ากล้อง/การขยับ — คลิปสั้นเพี้ยนน้อยกว่า</span></h2>
+    <h2>3 · การเคลื่อนไหว <span class="hint">เลือกท่ากล้อง/การขยับ — คลิปสั้นเพี้ยนน้อยกว่า</span></h2>
     <label>โมชันสำเร็จรูป (กดเลือก 1 แบบ)</label>
     <div class="chips" id="motionChips" style="margin-bottom:12px"></div>
     <label>สัดส่วนภาพ</label>
@@ -126,7 +135,7 @@
   </div>
 
   <div class="card">
-    <h2>3 · เจนคลิป</h2>
+    <h2>4 · เจนคลิป</h2>
     <div class="meta" id="costHint" style="margin-bottom:10px"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button class="btn clay" id="genBtn">เจนคลิปวิดีโอ</button>
@@ -164,10 +173,39 @@
 const $ = (s) => document.querySelector(s);
 const CONF = window.CONFIG || {};
 const FN = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1/video-gen';
+const SGB = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1/storyboard-gen';
 
 let IS_OWNER = false, SRC = null;   // SRC = { sku } | { image, media_type } | null
 let COST = null;                    // ตารางราคาโดยประมาณ (บาท) จาก config ของ edge function
+let CHAR_SEL = null;                // นางแบบที่เลือกจากคลัง (null = ไม่ใช้ ประกอบรูป)
 let MOTIONS = [];
+
+// ── เรียก storyboard-gen (ใช้คลังตัวละคร + ประกอบรูปนางแบบใส่ชุด) ──
+async function sgb2(task, args) {
+  if (!(await window.opsLogin())) return { error: { message: 'redirecting_to_login' } };
+  const ctrl = new AbortController();
+  const tmo = setTimeout(() => ctrl.abort(), task === 'compose' ? 90000 : 30000);
+  let r;
+  try {
+    r = await fetch(SGB, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: liff.getIDToken(), task, ...(args || {}) }), signal: ctrl.signal });
+  } catch (e) { clearTimeout(tmo); return { error: { message: e && e.name === 'AbortError' ? 'ประกอบรูปนานเกินไป ลองใหม่' : 'เชื่อมต่อไม่สำเร็จ' } }; }
+  clearTimeout(tmo);
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok || out.error) {
+    const map = { feature_disabled: 'ฟีเจอร์ยังปิด — ให้เจ้าของเปิด Video Studio ที่ Settings', no_sku: 'ต้องเลือกชุดจากคลังก่อน',
+      no_garment_photo: 'ชุดนี้ไม่มีรูปในคลัง', safety_blocked: 'ตัวกรองบล็อกรูปนี้ — ลองเปลี่ยนชุด/นางแบบ', compose_failed: out.message || 'ประกอบรูปไม่สำเร็จ' };
+    return { error: { code: out.error, message: map[out.error] || out.message || 'storyboard-gen error' } };
+  }
+  return { data: out.data };
+}
+
+// โหลดรูปจาก signed URL → base64 (เอาไปป้อน image-to-video)
+async function urlToB64(url) {
+  const r = await fetch(url); const blob = await r.blob();
+  const data = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
+  return { data, mime: blob.type || 'image/png' };
+}
 
 // ── เรียก edge function video-gen (รูปแบบเดียวกับ storyboard sgb) ──
 async function vgb(task, args) {
@@ -260,6 +298,39 @@ function setSrcPreview(url, name, meta) {
   updateCostHint();   // สลับ catalog/upload → อัปเดตราคา (catalog = 8 วิ)
 }
 
+// ── คลังนางแบบ (reuse chars_list/char_upload ของ storyboard-gen) ──
+async function loadChars() {
+  const { data, error } = await sgb2('chars_list');
+  const row = $('#charRow');
+  if (error) { row.innerHTML = '<div class="meta">โหลดคลังนางแบบไม่ได้: ' + error.message + '</div>'; return; }
+  row.innerHTML = '';
+  const mk = (key, label, url) => {
+    const on = CHAR_SEL === key;
+    const d = document.createElement('div');
+    d.className = 'refbox'; d.style.cursor = 'pointer';
+    if (on) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
+    d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">ไม่ใช้<br>นางแบบ</div>`) + `<div class="nm">${label}${on ? ' ✓' : ''}</div>`;
+    d.onclick = () => { CHAR_SEL = key; loadChars(); };
+    row.appendChild(d);
+  };
+  mk(null, 'ไม่ใช้ (ใช้รูปชุดตรง ๆ)', null);
+  for (const c of (data || [])) mk(c.key, c.label, c.url);
+}
+$('#charAdd').onclick = () => {
+  const label = (window.prompt('ตั้งชื่อนางแบบ (อัปได้หลายมุม = ล็อกหน้าแม่นขึ้น)') || '').trim();
+  if (!label) return;
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true;
+  inp.onchange = async () => {
+    const files = [...inp.files].slice(0, 4); if (!files.length) return;
+    $('#charStatus').textContent = 'กำลังอัป…';
+    const images = await Promise.all(files.map((f) => new Promise((res) => { const fr = new FileReader(); fr.onload = () => res({ image: fr.result, media_type: f.type || 'image/png' }); fr.readAsDataURL(f); })));
+    const { data, error } = await sgb2('char_upload', { label, images });
+    $('#charStatus').textContent = error ? ('ไม่สำเร็จ: ' + error.message) : 'เพิ่มแล้ว';
+    if (!error && data) { CHAR_SEL = data.key; loadChars(); }
+  };
+  inp.click();
+};
+
 // ── chips ──
 function makeChips(sel, items, single, def) {
   const el = $(sel);
@@ -332,7 +403,19 @@ $('#genBtn').onclick = async () => {
   const args = { motion: getMotion(), aspect: getAspect(), duration: parseInt(dur, 10),
     note: $('#note').value.trim() || undefined, custom_prompt: edited || undefined,
     preset: [getMotion(), getAspect(), dur + 's'].join('+') };
-  if (SRC.sku) args.sku = SRC.sku; else { args.image = SRC.image; args.media_type = SRC.media_type; }
+
+  // นางแบบเลือกไว้ + ชุดจากคลัง → ประกอบรูป "นางแบบเราใส่ชุดนี้" ก่อน (Gemini) แล้วเอาไปขยับ
+  if (CHAR_SEL && SRC.sku) {
+    $('#genStatus').textContent = 'กำลังประกอบรูปนางแบบใส่ชุด… (10–30 วินาที)';
+    const comp = await sgb2('compose', { sku: SRC.sku, character: CHAR_SEL, style: 'film', pose: 'front' });
+    if (comp.error) { btn.disabled = false; $('#genStatus').innerHTML = '<span class="err">ประกอบรูปไม่สำเร็จ: ' + comp.error.message + '</span>'; return; }
+    let b64;
+    try { b64 = await urlToB64(comp.data.url); } catch (e) { btn.disabled = false; $('#genStatus').innerHTML = '<span class="err">โหลดรูปที่ประกอบไม่สำเร็จ</span>'; return; }
+    args.image = b64.data; args.media_type = b64.mime; args.sku = SRC.sku;   // ใช้รูปประกอบเป็นเฟรมเริ่ม + เก็บ sku ใน audit
+    args.preset += '+model';
+    $('#genStatus').textContent = `ประกอบรูปเสร็จ กำลังทำเป็นวิดีโอ ${dur} วิ…`;
+  } else if (SRC.sku) { args.sku = SRC.sku; } else { args.image = SRC.image; args.media_type = SRC.media_type; }
+
   const { data, error } = await vgb('generate', args);
   if (error) {
     btn.disabled = false;
@@ -484,6 +567,7 @@ async function loadHistory() {
       const n = $('#flagNote'); n.style.display = ''; n.textContent = cfg.error.message;
     }
     ensureCatalog();
+    loadChars();
     loadHistory();
   } catch (e) { $('#histList').innerHTML = '<div class="err">' + e.message + '</div>'; }
 })();
