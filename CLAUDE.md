@@ -50,7 +50,21 @@ trigger เจาะจงไฟล์ผ่าน `actions_run_trigger` ก็�
 ใน environment settings ของ Claude Code ก่อน (ขอคีย์ฟรีที่ https://aistudio.google.com/apikey)
 — ห้าม commit คีย์ลงรีโป และห้าม commit รูปที่ generate ลงรีโป (เซฟลง scratchpad แล้วส่งให้ user)
 
+## 🧠 Wiki / Second Brain — อ่าน index ก่อนเสมอ (สำคัญ)
+
+มี second brain แบบ LLM-wiki อยู่ที่ `docs/wiki/` (แนวคิด Karpathy — ดู `docs/second-brain-memo.md`)
+
+- **กติกา retrieval:** ก่อนตอบคำถามที่ต้องรู้บริบทโปรเจค → อ่าน `docs/wiki/index.md` ก่อนเสมอ
+  แล้วเปิดเฉพาะหน้า `docs/wiki/<domain>.md` ที่เกี่ยว **ห้าม** scan ไฟล์ `.html`/`.js`/AUDIT ใหญ่ทั้งก้อน (เปลือง token)
+- **Page types:** `index.md` (สารบัญ/PARA) · `log.md` (บันทึก append-only) ·
+  `<domain>.md` (distilled: flow/insight/decision/issues/next-action) · `AUDIT-SUMMARY.md` (รวม issue ทุกโดเมน)
+- **ingest ของใหม่:** เขียน/แก้หน้า distilled → อัปเดต index 1 บรรทัด → ต่อท้าย log
+- **สร้างหน้าใหม่** เมื่อเป็นหัวข้อใหม่จริง ๆ ไม่งั้นแก้หน้าเดิม (กัน orphan) · ไฟล์ดิบ (AUDIT/JOURNEY/FIXES) = raw อ่านได้ห้ามแก้
+- ⚠️ อย่าเก็บ PII (ชื่อ/เบอร์/ประวัติลูกค้า) ใน wiki — เก็บฝั่ง Supabase เท่านั้น
+
 ## เอกสารสำคัญ
 
+- `docs/wiki/` — **second brain** (index + หน้า distilled ต่อโดเมน + AUDIT-SUMMARY) เริ่มที่นี่
+- `docs/second-brain-memo.md` / `second-brain-plan.md` — วิธีทำ + แผนขยายระบบ second brain/multi-agent
 - `docs/expansion-strategy.md` — แผนขยายธุรกิจ 5 โมเดล + 3 เฟส (trust score, passport, ฝากเช่า ฯลฯ)
 - งานที่เสร็จแล้ว: trust score (trust.html), garment passport (passport.html), สวิตช์ทั้งหมดใน settings.html
