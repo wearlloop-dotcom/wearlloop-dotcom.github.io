@@ -77,8 +77,9 @@
   <div id="flagNote" class="notice" style="display:none"></div>
 
   <div class="notice" style="background:#EEF2EC;border-color:#CFE0C7;color:#3F5B39">
-    ทำ <b>คลิปสั้น 4–8 วินาที</b> จากรูปชุด (image-to-video) — เอาลง IG Reels / TikTok / หน้าเว็บ ·
-    เริ่มจาก <b>รูปที่ล็อกแล้ว</b> ให้ผลนิ่งกว่า และลดคลิปเสีย · ทุกการเจนเข้าระบบออดิท (ใครทำ · ค่าใช้จ่ายสะสม)
+    ทำ <b>คลิปสั้น</b> จากรูปชุด — เอาลง IG Reels / TikTok / หน้าเว็บ ·
+    <b>ชุดจากคลังใช้รูป ref สูงสุด 3 รูป</b> ให้ Veo ศึกษาชุดรอบด้าน (ชุดเพี้ยนน้อยลง · คลิป 8 วิ) ·
+    อัปโหลดเองใช้รูปเดียว (เลือก 4–8 วิได้) · ทุกการเจนเข้าระบบออดิท + <b>ลงบัญชีอัตโนมัติ</b> (5180 ค่า AI)
   </div>
 
   <div class="card">
@@ -256,6 +257,7 @@ $('#uploadBtn').onclick = () => {
 function setSrcPreview(url, name, meta) {
   $('#srcPrev').style.display = ''; $('#srcImg').src = url;
   $('#srcName').textContent = name || ''; $('#srcMeta').textContent = meta || '';
+  updateCostHint();   // สลับ catalog/upload → อัปเดตราคา (catalog = 8 วิ)
 }
 
 // ── chips ──
@@ -295,11 +297,13 @@ const getDur = makeChips('#durChips', [
 
 function updateCostHint() {
   if (!COST) { $('#costHint').textContent = ''; return; }
-  const dur = parseInt(getDur(), 10) || 4;
+  const isCatalog = !!(SRC && SRC.sku);            // ชุดจากคลัง = โหมด ref (ล็อก 8 วิ)
+  const dur = isCatalog ? 8 : (parseInt(getDur(), 10) || 4);
   const per = COST.thb_per_second || 0;
   const est = Math.round(per * dur);
-  $('#costHint').innerHTML = `ต้นทุนโดยประมาณ <b>~฿${est}</b> ต่อคลิป (${COST.model || 'video'} · ${dur} วิ · ~฿${per}/วิ) · ` +
-    `<span style="color:var(--clay)">เผื่อคลิปเสีย 2–3 ครั้งต่อคลิปที่ใช้ได้จริง</span>`;
+  const modeNote = isCatalog ? ' · ชุดจากคลัง = ref สูงสุด 3 รูป → 8 วิ' : '';
+  $('#costHint').innerHTML = `ต้นทุนจริง <b>~฿${est}</b> ต่อคลิป (${dur} วิ · ~฿${per}/วิ · คิดเฉพาะคลิปสำเร็จ)${modeNote} · ` +
+    `<span style="color:var(--clay)">ลงบัญชี 5180 อัตโนมัติเมื่อคลิปเสร็จ</span>`;
 }
 
 // ── ดู & แก้ prompt เต็ม ──
