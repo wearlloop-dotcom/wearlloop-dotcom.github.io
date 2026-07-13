@@ -50,6 +50,7 @@
       { href: 'stylist-bookings.html', label: 'คิวสไตลิสต์', icon: '◷', roles: ['owner','manager'] },
       { href: 'disputes.html',  label: 'ทะเบียนคดี',     icon: '⚖', roles: ['owner','manager'] },
       { href: 'case-file.html', label: 'แฟ้มหลักฐาน',    icon: '☰', roles: ['owner','manager'] },
+      { href: 'feedback.html',  label: 'Feedback ทีม',   icon: '✎', roles: ['owner'] },
       { href: 'settings.html',  label: 'ตั้งค่าฮับ',     icon: '⚙', roles: ['owner'] },
     ] },
   ];
@@ -143,6 +144,19 @@
     const open = () => { ov.classList.add('open'); dr.classList.add('open'); };
     const close = () => { ov.classList.remove('open'); dr.classList.remove('open'); };
     btn.addEventListener('click', open); ov.addEventListener('click', close);
+
+    // ── ปุ่มลอย "ส่ง feedback ระบบ" — โผล่ทุกหน้า ops (โหลด ops-feedback.js ครั้งเดียว) ──
+    mountFeedback();
+  }
+
+  function mountFeedback() {
+    if (window.__opsFeedbackLoaded) { if (window.opsFeedback) window.opsFeedback.mount(); return; }
+    window.__opsFeedbackLoaded = true;
+    if (window.opsFeedback) { window.opsFeedback.mount(); return; }
+    const s = document.createElement('script');
+    s.src = 'ops-feedback.js';
+    s.onload = () => { if (window.opsFeedback) window.opsFeedback.mount(); };
+    document.head.appendChild(s);
   }
 
   window.OPS_NAV = OPS_NAV;
