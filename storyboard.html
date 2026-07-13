@@ -143,6 +143,14 @@
       <div class="refrow" id="skuGrid" style="margin-top:9px"></div>
       <div class="meta" id="skuSel" style="margin-top:6px"></div>
     </div>
+    <div style="margin-top:12px">
+      <button class="btn ghost sm" id="editPromptBtn">ดู & แก้ prompt เต็ม (ขยาย/เขียนเพิ่มเองได้)</button>
+      <div id="editPromptWrap" style="display:none;margin-top:8px">
+        <label>Prompt เต็ม — แก้ได้เต็มที่ (ล้างช่องนี้ = กลับไปใช้ prompt ที่ระบบสร้าง)</label>
+        <textarea id="editPrompt" style="min-height:180px;font-size:12px;line-height:1.5"></textarea>
+        <div class="meta" style="margin-top:4px">ถ้ามีข้อความในช่องนี้ตอนกดเจน ระบบจะใช้ prompt นี้แทน (รูป reference ยังแนบให้เหมือนเดิม)</div>
+      </div>
+    </div>
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button class="btn clay" id="genBtn">เจนภาพช็อตนี้</button>
       <span class="meta" id="genStatus"></span>
@@ -156,6 +164,23 @@
         <button class="btn sm" style="background:#9C3F5E" id="pendFail">ไม่ผ่าน</button>
         <input type="text" id="pendNote" placeholder="เพราะอะไร (เข้าระบบออดิท)" style="flex:1;min-width:180px">
       </div>
+    </div>
+  </div>
+
+  <div class="card" id="newSceneCard" style="display:none">
+    <h2>สร้าง scene ใหม่เอง <span class="hint">เขียน prompt เองสำหรับ scene ที่ยังไม่มีในลิสต์ — ใช้นางแบบ/ชุด/สถานที่ที่เลือกด้านบน</span></h2>
+    <label>Prompt scene ใหม่ (ภาษาอังกฤษได้ผลดีกว่า — บรรยายฉาก ตัวละคร การกระทำ มุมกล้อง แสง องค์ประกอบให้ครบ)</label>
+    <textarea id="newScenePrompt" style="min-height:150px" placeholder="เช่น: Cinematic wide shot of Meili standing by a sunlit window in a warm cream bedroom, holding a LLOOP dress, soft golden morning light, 35mm, complete balanced composition, all elements in frame..."></textarea>
+    <div class="meta" style="margin-top:6px">เลือกชุดพระเอกให้ scene นี้ (ถ้าต้องการ) — ค้นหาแล้วกดเลือก</div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <input type="text" id="nsSkuInput" placeholder="พิมพ์กรองสด — ชื่อชุด / รหัส / แบรนด์">
+      <button class="btn ghost" id="nsSkuSearch">ค้นหา</button>
+    </div>
+    <div class="refrow" id="nsSkuGrid" style="margin-top:9px"></div>
+    <div class="meta" id="nsSkuSel" style="margin:6px 0 10px"></div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn clay" id="nsGenBtn">เจน scene ใหม่</button>
+      <span class="meta" id="nsStatus"></span>
     </div>
   </div>
 
@@ -386,6 +411,25 @@ function makeSkuPicker(cfg) {
 const sbSkuPicker = makeSkuPicker({ input: '#skuInput', btn: '#skuSearch', grid: '#skuGrid', sel: '#skuSel', get: () => SKU_SEL, set: (v) => { SKU_SEL = v; } });
 let LB_SKU = null;
 const lbSkuPicker = makeSkuPicker({ input: '#lbSkuInput', btn: '#lbSkuSearch', grid: '#lbSkuGrid', sel: '#lbSkuSel', get: () => LB_SKU, set: (v) => { LB_SKU = v; } });
+let NS_SKU = null;
+const nsSkuPicker = makeSkuPicker({ input: '#nsSkuInput', btn: '#nsSkuSearch', grid: '#nsSkuGrid', sel: '#nsSkuSel', get: () => NS_SKU, set: (v) => { NS_SKU = v; } });
+
+// ── สร้าง scene ใหม่เอง (custom prompt ไม่อิงช็อต) ──
+$('#nsGenBtn').onclick = async () => {
+  const p = $('#newScenePrompt').value.trim();
+  if (!p) { $('#nsStatus').innerHTML = '<span class="err">เขียน prompt scene ก่อนค่ะ</span>'; return; }
+  const btn = $('#nsGenBtn'); btn.disabled = true;
+  $('#nsStatus').textContent = 'กำลังเจน… (ราว 10-30 วินาที)';
+  const { data, error } = await sgb('generate', { mode: 'storyboard', custom_prompt: p,
+    character: CHAR_SEL || undefined, location: LOC_SEL || undefined, sku: NS_SKU || undefined });
+  btn.disabled = false;
+  if (error) {
+    if (error.code === 'feedback_required' && data && data.pending) { showPending(data.pending); return; }
+    $('#nsStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return;
+  }
+  $('#nsStatus').textContent = 'สำเร็จ';
+  showResult(data, 'ผลการเจน · Scene ใหม่ (เขียนเอง)');
+};
 
 // ── Preset กล้อง/แสง/เลนส์ (ใช้ซ้ำได้ทั้งสองโหมด) + ฉากหลัง lookbook ──
 const CAMS = [
@@ -470,8 +514,27 @@ function selectShot(no) {
   if (needDress) sbSkuPicker.ensure();   // ช็อตที่ต้องใช้ชุด → โชว์ชุดให้เลือกทันที
   $('#resultCard').style.display = 'none';
   document.querySelectorAll('#presetChips .chip').forEach((c) => c.classList.remove('on'));
+  // รีเซ็ตช่องแก้ prompt เมื่อเปลี่ยนช็อต
+  $('#editPromptWrap').style.display = 'none'; $('#editPrompt').value = '';
   $('#genCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// ── ดู & แก้ prompt เต็ม (ขยาย/เขียนเพิ่ม) ──
+$('#editPromptBtn').onclick = async () => {
+  const w = $('#editPromptWrap');
+  if (w.style.display === 'none') {
+    if (!SEL) return;
+    if (!$('#editPrompt').value.trim()) {
+      $('#editPromptBtn').disabled = true;
+      const camKeys = getCam();
+      const { data, error } = await sgb('preview_prompt', { shot: SEL.shot,
+        fix_note: $('#fixNote').value.trim() || undefined, camera: camKeys.length ? camKeys : undefined });
+      $('#editPromptBtn').disabled = false;
+      if (!error && data) $('#editPrompt').value = data.prompt;
+    }
+    w.style.display = '';
+  } else { w.style.display = 'none'; }
+};
 
 // ── presets ──
 const chipsEl = $('#presetChips');
@@ -491,9 +554,10 @@ $('#genBtn').onclick = async () => {
   const btn = $('#genBtn'); btn.disabled = true;
   $('#genStatus').textContent = 'กำลังเจน… (ราว 10-30 วินาที)';
   const camKeys = getCam();
+  const edited = $('#editPromptWrap').style.display !== 'none' ? $('#editPrompt').value.trim() : '';
   const { data, error } = await sgb('generate', { shot: SEL.shot, fix_note: note || undefined,
     sku: SKU_SEL || undefined, character: CHAR_SEL || undefined, location: LOC_SEL || undefined,
-    camera: camKeys.length ? camKeys : undefined,
+    camera: camKeys.length ? camKeys : undefined, custom_prompt: edited || undefined,
     preset: [...picked.map((c) => c.dataset.label), ...camKeys].join('+') || undefined });
   btn.disabled = false;
   if (error) {
@@ -624,6 +688,7 @@ function applyMode() {
   $('#locCard').style.display = sb ? '' : 'none';
   $('#shotCard').style.display = sb ? '' : 'none';
   $('#genCard').style.display = sb && SEL ? '' : 'none';
+  $('#newSceneCard').style.display = sb ? '' : 'none';
   $('#lbCard').style.display = sb ? 'none' : '';
   $('#resultCard').style.display = 'none';
   document.querySelectorAll('[data-mode]').forEach((t) => t.classList.toggle('on', t.dataset.mode === WORK));
