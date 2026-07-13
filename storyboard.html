@@ -128,7 +128,7 @@
   </div>
 
   <div class="card" id="locCard">
-    <h2>สถานที่ / ฉาก <span class="hint">อัปโหลดสถานที่เองได้ (คาเฟ่ อีเวนต์ ร้านจริง ฯลฯ) — ถ้าเลือก ระบบจะใช้แทนสถานที่ในบทของช็อตนั้น</span></h2>
+    <h2>สถานที่ / ฉาก <span class="hint">อัปได้หลายมุม/หลายด้านของฉากเดียว (คาเฟ่ อีเวนต์ ร้านจริง) → ฉากนิ่งไม่เปลี่ยนทุกครั้งที่เจน · มีคำบรรยาย+ทดสอบได้เหมือนตัวละคร · เพิ่มฉากใหม่ได้เรื่อย ๆ</span></h2>
     <div class="refrow" id="locRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px"><button class="btn ghost sm" id="locAdd">+ เพิ่มสถานที่เข้าคลัง</button></div>
   </div>
@@ -395,7 +395,7 @@ function makeLib(cfg) {
       d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">${cfg.defaultHint}</div>`) +
         `<div class="nm">${label}${sel ? ' (เลือกอยู่)' : ''}${nbadge}${dbadge}</div>` +
         (url ? `<button class="viewbtn" title="ดู/แก้คำบรรยาย">ดู</button>` : '') +
-        (url && cfg.portrait ? `<button class="addangle" title="เพิ่มมุมของตัวละครนี้">+ มุม</button>` : '');
+        (url && cfg.multi ? `<button class="addangle" title="เพิ่มมุม">+ มุม</button>` : '');
       d.onclick = () => { cfg.set(key); load(); };
       const vb = d.querySelector('.viewbtn');
       if (vb) vb.onclick = (e) => { e.stopPropagation(); openView(url, label, { kind: cfg.kind, key, desc: desc || '' }); };
@@ -409,7 +409,7 @@ function makeLib(cfg) {
   // เลือกไฟล์ 1+ รูป แล้วอัปเป็นรายการใหม่ (key ว่าง) หรือเพิ่มมุมให้รายการเดิม (มี key)
   async function pickFiles(label, key) {
     const inp = document.createElement('input');
-    inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = !!cfg.portrait;
+    inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = !!cfg.multi;
     inp.onchange = async () => {
       const files = [...inp.files].slice(0, 4); if (!files.length) return;
       const images = await Promise.all(files.map((f) => new Promise((res) => {
@@ -429,13 +429,13 @@ function makeLib(cfg) {
   return load;
 }
 const loadChars = makeLib({ listTask: 'chars_list', uploadTask: 'char_upload', rowSel: '#charRow', addSel: '#charAdd', kind: 'chars',
-  get: () => CHAR_SEL, set: (v) => { CHAR_SEL = v; }, portrait: true,
+  get: () => CHAR_SEL, set: (v) => { CHAR_SEL = v; }, portrait: true, multi: true,
   defaultLabel: 'Meili (มาตรฐาน)', defaultHint: 'ใช้รูป reference<br>"หน้า Meili" ด้านบน',
   namePrompt: 'ตั้งชื่อตัวละคร/นางแบบ (เลือกได้หลายรูป = หลายมุม เช่น หน้าตรง/ข้าง/เต็มตัว)' });
-const loadLocs = makeLib({ listTask: 'locs_list', uploadTask: 'loc_upload', rowSel: '#locRow', addSel: '#locAdd', kind: 'locs',
+const loadLocs = makeLib({ listTask: 'locs_list', uploadTask: 'loc_upload', rowSel: '#locRow', addSel: '#locAdd', kind: 'locs', multi: true,
   get: () => LOC_SEL, set: (v) => { LOC_SEL = v; },
   defaultLabel: 'ตามบทช็อต (มาตรฐาน)', defaultHint: 'ใช้สถานที่ตามที่<br>บทของช็อตกำหนด',
-  namePrompt: 'ตั้งชื่อสถานที่ (เช่น "คาเฟ่สาขาทองหล่อ", "ฮอลล์งานแต่ง")' });
+  namePrompt: 'ตั้งชื่อสถานที่ (เลือกได้หลายรูป = หลายมุม/หลายด้านของฉากเดียวกัน)' });
 
 // ── เลือกชุดจริงจากคลัง (RPC เดียวกับหน้า marketing) — ใช้ทั้ง storyboard และ lookbook ──
 function makeSkuPicker(cfg) {
