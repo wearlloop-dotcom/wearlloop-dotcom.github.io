@@ -265,7 +265,8 @@ async function sgb(task, args) {
   if (!(await window.opsLogin())) return { error: { message: 'redirecting_to_login' } };
   // timeout กันค้าง: งานเจนรูปให้เวลานาน (200 วิ) งานอื่นสั้น (30 วิ)
   const ctrl = new AbortController();
-  const tmo = setTimeout(() => ctrl.abort(), task === 'generate' ? 200000 : 30000);
+  const AI_TASKS = ['generate', 'desc_preview', 'set_desc', 'garment_desc', 'char_upload', 'loc_upload'];
+  const tmo = setTimeout(() => ctrl.abort(), AI_TASKS.includes(task) ? 200000 : 30000);
   let r;
   try {
     r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' },
