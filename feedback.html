@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · Feedback ทีม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1A1A1A;--line:#E0DED9;--muted:#86857F;--soft:#F5F4F2;--ok:#0F6E56;--warn:#B5860B;--danger:#A32D2D;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:#F2F1EE;font-size:16px}
+  .bar{background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+  .wrap{max-width:720px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:14px}
+  .filters{display:flex;gap:7px;flex-wrap:wrap}
+  .fchip{padding:7px 14px;border:1px solid var(--line);background:#fff;border-radius:20px;cursor:pointer;font-size:13px;color:var(--ink)}
+  .fchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card.new{border-left:3px solid var(--ok)}
+  .row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+  .kind{font-weight:600;font-size:12px;padding:2px 9px;border-radius:14px}
+  .kind.bug{background:#FBECEC;color:#A32D2D}
+  .kind.idea{background:#EAF3EE;color:#0F6E56}
+  .kind.other{background:#F0EEEA;color:#6B6A65}
+  .st{font-size:11px;padding:2px 8px;border-radius:12px;background:var(--soft);color:var(--muted)}
+  .st.new{background:#E7F3EF;color:#0F6E56}
+  .msg{font-size:14.5px;line-height:1.55;margin:9px 0;white-space:pre-wrap;word-break:break-word}
+  .imgs{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+  .imgs a{display:block;width:96px;height:96px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .imgs img{width:100%;height:100%;object-fit:cover}
+  .att{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+  .att a{font-size:12.5px;color:var(--ok);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:5px 10px;word-break:break-all}
+  .lnk a{display:block;font-size:12.5px;color:var(--ok);word-break:break-all;margin-top:3px}
+  .meta{font-size:11.5px;color:var(--muted);margin-top:8px}
+  .acts{display:flex;gap:7px;margin-top:12px}
+  .b{padding:7px 13px;border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer;font-size:12.5px;font-family:var(--sans);color:var(--ink)}
+  .b:hover{background:var(--soft)}
+  .b.done{border-color:var(--ok);color:var(--ok)}
+  .loading{color:var(--muted);text-align:center;padding:40px}
+  .empty{color:var(--muted);text-align:center;padding:40px;background:#fff;border:1px dashed var(--line);border-radius:12px}
+  .err{color:var(--danger);text-align:center;padding:20px}
+</style>
+</head>
+<body>
+<div class="bar"><h1>Feedback ทีม</h1><div id="badge" class="row1"></div></div>
+<div class="wrap">
+  <div class="filters" id="filters">
+    <div class="fchip on" data-s="">ทั้งหมด</div>
+    <div class="fchip" data-s="new">ใหม่</div>
+    <div class="fchip" data-s="seen">อ่านแล้ว</div>
+    <div class="fchip" data-s="done">จัดการแล้ว</div>
+  </div>
+  <div id="list"><div class="loading">กำลังโหลด…</div></div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+const CONF = window.CONFIG || {};
+const FN = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1/ops-feedback';
+const KIND_TH = { bug: 'พบปัญหา/บั๊ก', idea: 'ไอเดีย', other: 'อื่นๆ' };
+const ST_TH = { new: 'ใหม่', seen: 'อ่านแล้ว', done: 'จัดการแล้ว' };
+let curStatus = '';
+
+async function api(task, args) {
+  if (!(await window.opsLogin())) return { error: { message: 'redirecting_to_login' } };
+  let r;
+  try {
+    r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: liff.getIDToken(), task, ...(args || {}) }) });
+  } catch (e) { return { error: { message: 'เชื่อมต่อไม่สำเร็จ' } }; }
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok || out.error) {
+    const map = { unauthorized: 'เซสชันหมดอายุ รีเฟรชแล้วล็อกอินใหม่', no_access: 'ไม่มีสิทธิ์ใช้งาน',
+      owner_only: 'หน้านี้สำหรับเจ้าของเท่านั้น' };
+    return { error: { message: map[out.error] || out.message || out.error || ('http ' + r.status) } };
+  }
+  return { data: out.data };
+}
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmtDate(s){ try{ return new Date(s).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); }catch(_){ return s; } }
+
+function cardHtml(r) {
+  const imgs = (r.images||[]).filter(x=>x.url).map(x=>`<a href="${x.url}" target="_blank" rel="noopener"><img src="${x.url}"></a>`).join('');
+  const files = (r.files||[]).filter(x=>x.url).map(x=>`<a href="${x.url}" target="_blank" rel="noopener" download>${esc(x.name||'ไฟล์')}</a>`).join('');
+  const links = (r.links||[]).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join('');
+  const who = esc(r.employee_name || r.role || 'พนักงาน');
+  return `<div class="card ${r.status==='new'?'new':''}">
+    <div class="row1">
+      <span class="kind ${esc(r.kind)}">${KIND_TH[r.kind]||r.kind}</span>
+      <span class="st ${esc(r.status)}">${ST_TH[r.status]||r.status}</span>
+      <span>${who}</span><span>·</span><span>${fmtDate(r.created_at)}</span>
+      ${r.page?`<span>·</span><span>${esc(r.page)}</span>`:''}
+    </div>
+    ${r.message?`<div class="msg">${esc(r.message)}</div>`:''}
+    ${imgs?`<div class="imgs">${imgs}</div>`:''}
+    ${files?`<div class="att">${files}</div>`:''}
+    ${links?`<div class="lnk">${links}</div>`:''}
+    ${r.user_agent?`<div class="meta">${esc(r.user_agent)}</div>`:''}
+    <div class="acts">
+      ${r.status!=='seen'?`<button class="b" data-id="${r.id}" data-st="seen">ทำเครื่องหมายอ่านแล้ว</button>`:''}
+      ${r.status!=='done'?`<button class="b done" data-id="${r.id}" data-st="done">จัดการแล้ว</button>`:''}
+      ${r.status!=='new'?`<button class="b" data-id="${r.id}" data-st="new">กลับเป็นใหม่</button>`:''}
+    </div>
+  </div>`;
+}
+
+async function load() {
+  const list = document.getElementById('list');
+  list.innerHTML = '<div class="loading">กำลังโหลด…</div>';
+  const { data, error } = await api('list', { status: curStatus || undefined });
+  if (error) { list.innerHTML = `<div class="err">${esc(error.message)}</div>`; return; }
+  const rows = data.rows || [];
+  document.getElementById('badge').innerHTML = (data.new_count>0) ? `<span class="st new">ใหม่ ${data.new_count}</span>` : '';
+  if (!rows.length) { list.innerHTML = '<div class="empty">ยังไม่มี feedback ในหมวดนี้</div>'; return; }
+  list.innerHTML = rows.map(cardHtml).join('');
+  list.querySelectorAll('.b').forEach(b => b.onclick = async () => {
+    b.disabled = true; b.textContent = '…';
+    const { error } = await api('mark', { id: b.dataset.id, status: b.dataset.st });
+    if (error) { b.disabled = false; b.textContent = 'ลองใหม่'; alert(error.message); return; }
+    load();
+  });
+}
+
+document.getElementById('filters').addEventListener('click', (e) => {
+  const c = e.target.closest('.fchip'); if (!c) return;
+  document.querySelectorAll('.fchip').forEach(x => x.classList.toggle('on', x === c));
+  curStatus = c.dataset.s || ''; load();
+});
+
+load();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu&&window.opsMenu.mount();</script>
+</body>
+</html>
