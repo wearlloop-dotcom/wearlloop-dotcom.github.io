@@ -1,0 +1,19 @@
+-- =============================================================================
+-- LLOOP · Video Studio — feature flag + audit (video_jobs) + edge function
+--
+-- ⚠ ต้นทางจริง (canonical) อยู่ที่ repo backend: wearlloop-dotcom/lloop
+--   PR: https://github.com/wearlloop-dotcom/lloop/pull/41  (branch claude/ops-video-studio → main)
+--     • supabase/video_studio.sql       — คอลัมน์ ops ใน video_jobs + seed flag
+--     • supabase/hub_settings.sql        — allowlist video_studio_enabled
+--     • supabase/functions/video-gen/    — edge function (image-to-video, async)
+--     • ops/video.html                   — หน้า Video Studio (deploy-site เผยแพร่มาที่นี่)
+--
+-- ทำไมต้องอยู่ lloop: SQL รันจาก main ผ่าน supabase-sql.yml · edge function deploy จาก lloop
+-- (repo หน้าเว็บนี้ไม่รัน SQL / ไม่ deploy function ให้)
+--
+-- ไฟล์ในรีโปหน้าเว็บที่คู่กัน (ไม่มีต้นทางใน lloop/ops ตอนนี้ — แก้ตรงที่นี่):
+--   • settings.html  — การ์ดสวิตช์ video_studio_enabled
+--   • ops-menu.js    — เมนู Video Studio
+--
+-- go-live: ดู checklist ใน PR #41 (รัน SQL 2 ไฟล์ + deploy video-gen + เจ้าของเปิดสวิตช์)
+-- =============================================================================

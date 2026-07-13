@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · Video Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--gold:#C9A86A;--soft:#F5F2EC;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:16px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700;color:var(--clay)}
+  .wrap{max-width:860px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .card h2 .hint{font-family:var(--sans);font-size:12px;font-weight:400;color:var(--muted)}
+  .btn{border:none;border-radius:9px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+  .btn.clay{background:var(--clay)} .btn.sage{background:var(--sage)}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .btn:disabled{opacity:.55;cursor:default}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px}
+  input[type=text],select,textarea{width:100%;font-family:var(--sans);font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:#fff}
+  textarea{resize:vertical;min-height:60px;line-height:1.5}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:13px;padding:5px 12px;border-radius:20px;background:var(--soft);color:var(--ink);border:1px solid var(--line);cursor:pointer;white-space:nowrap}
+  .chip.on{background:var(--clay);color:#fff;border-color:var(--clay)}
+  .chip.gold{border-color:var(--gold)}
+  .tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tab{flex:1;text-align:center;padding:9px;border-radius:9px;background:var(--soft);border:1px solid var(--line);cursor:pointer;font-size:14px;font-weight:600}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .meta{font-size:13px;color:var(--muted)}
+  .refrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:9px}
+  .refbox{border:1px dashed var(--line);border-radius:10px;padding:8px;text-align:center;background:var(--soft)}
+  .refbox img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top center;border-radius:7px;display:block;margin-bottom:6px;background:#fff}
+  .refbox .ph{width:100%;aspect-ratio:3/4;border-radius:7px;background:#EDEAE3;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;margin-bottom:6px;padding:6px;line-height:1.3}
+  .refbox .nm{font-size:12px;font-weight:600;margin-bottom:5px}
+  .srcprev{display:flex;gap:12px;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
+  .srcprev img{width:80px;aspect-ratio:3/4;object-fit:cover;border-radius:8px;background:#fff}
+  .notice{background:#F0ECE2;border:1px solid #E2D8BE;color:#7A6516;border-radius:9px;padding:11px 13px;font-size:14px;line-height:1.5}
+  .err{color:var(--clay)}
+  .loading{color:var(--muted);text-align:center;padding:22px}
+  .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+  @media(max-width:640px){.stat{grid-template-columns:repeat(2,1fr)}}
+  .stat .b{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:11px;text-align:center}
+  .stat .b .n{font-family:var(--display);font-size:20px;font-weight:700;color:var(--clay)}
+  .stat .b .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .hrow{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer;flex-wrap:wrap}
+  .hrow:last-child{border-bottom:none}
+  .tag{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--soft);white-space:nowrap}
+  .tag.ok{background:#E9F0EC;color:#0F6E56}.tag.error{background:#F7E7EC;color:#9C3F5E}
+  .tag.pass{background:#EAEFE8;color:var(--sage)}.tag.fail{background:#F7E7EC;color:#9C3F5E}
+  .promptbox{white-space:pre-wrap;font-size:12px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px;max-height:260px;overflow:auto;margin-top:10px;display:none}
+  .fbrow{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .result video{width:100%;border-radius:10px;border:1px solid var(--line);display:block;background:#000}
+  .modal-bg{position:fixed;inset:0;background:rgba(40,36,28,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal-box{background:#fff;border-radius:14px;padding:14px;max-width:520px;width:100%;max-height:92vh;display:flex;flex-direction:column}
+  .modal-box video{width:100%;border-radius:10px;object-fit:contain;max-height:78vh;background:#000}
+  .modal-box .cap{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px}
+  .modal-box .x{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:var(--sans);font-size:14px}
+</style>
+</head>
+<body>
+<div class="modal-bg" id="viewModal">
+  <div class="modal-box">
+    <video id="viewVid" controls playsinline></video>
+    <div class="cap"><b id="viewCap"></b><span style="display:flex;gap:8px"><a class="x" id="viewDl" download>โหลด</a><button class="x" id="viewClose">ปิด</button></span></div>
+  </div>
+</div>
+<div class="bar">
+  <h1>Video Studio</h1>
+  <div class="meta" id="whoami"></div>
+</div>
+<div class="wrap">
+  <div id="flagNote" class="notice" style="display:none"></div>
+
+  <div class="notice" style="background:#EEF2EC;border-color:#CFE0C7;color:#3F5B39">
+    ทำ <b>คลิปสั้น 4–8 วินาที</b> จากรูปชุด (image-to-video) — เอาลง IG Reels / TikTok / หน้าเว็บ ·
+    เริ่มจาก <b>รูปที่ล็อกแล้ว</b> ให้ผลนิ่งกว่า และลดคลิปเสีย · ทุกการเจนเข้าระบบออดิท (ใครทำ · ค่าใช้จ่ายสะสม)
+  </div>
+
+  <div class="card">
+    <h2>1 · รูปตั้งต้น <span class="hint">เลือกชุดจากคลังจริง หรืออัปโหลดรูปเอง — คลิปจะถูกสร้างจากรูปนี้</span></h2>
+    <div class="tabs">
+      <div class="tab on" data-src="catalog">ชุดจากคลัง</div>
+      <div class="tab" data-src="upload">อัปโหลดรูปเอง</div>
+    </div>
+    <div id="catalogPane">
+      <label>ค้นหาชุด (ชื่อ / รหัส / แบรนด์)</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="skuInput" placeholder="พิมพ์กรองสด — ว่างไว้ = ชุดยอดนิยม">
+        <button class="btn ghost" id="skuSearch">ค้นหา</button>
+      </div>
+      <div class="refrow" id="skuGrid" style="margin-top:9px"></div>
+    </div>
+    <div id="uploadPane" style="display:none">
+      <button class="btn ghost sm" id="uploadBtn">เลือกรูปจากเครื่อง</button>
+      <div class="meta" style="margin-top:6px">รองรับ JPG/PNG — แนะนำรูปแนวตั้ง 3:4 เห็นชุดเต็มตัว</div>
+    </div>
+    <div class="srcprev" id="srcPrev" style="display:none">
+      <img id="srcImg" alt="">
+      <div><div id="srcName" style="font-weight:600"></div><div class="meta" id="srcMeta"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2 · การเคลื่อนไหว <span class="hint">เลือกท่ากล้อง/การขยับ — คลิปสั้นเพี้ยนน้อยกว่า</span></h2>
+    <label>โมชันสำเร็จรูป (กดเลือก 1 แบบ)</label>
+    <div class="chips" id="motionChips" style="margin-bottom:12px"></div>
+    <label>สัดส่วนภาพ</label>
+    <div class="chips" id="aspectChips" style="margin-bottom:12px"></div>
+    <label>ความยาวคลิป <span class="meta">(ยิ่งสั้นยิ่งเพี้ยนน้อย + ถูกกว่า)</span></label>
+    <div class="chips" id="durChips" style="margin-bottom:12px"></div>
+    <label>โน้ตเพิ่มเติม (ภาษาไทย/อังกฤษ) — บอกการเคลื่อนไหวที่อยากได้</label>
+    <textarea id="note" placeholder="เช่น นางแบบหมุนตัวช้า ๆ ชายกระโปรงพลิ้วตามลม แสงทองอุ่น กล้องดันเข้าเบา ๆ"></textarea>
+    <div style="margin-top:12px">
+      <button class="btn ghost sm" id="editPromptBtn">ดู & แก้ prompt เต็ม</button>
+      <div id="editPromptWrap" style="display:none;margin-top:8px">
+        <label>Prompt เต็ม (ล้างช่อง = กลับไปใช้ prompt ที่ระบบสร้าง)</label>
+        <textarea id="editPrompt" style="min-height:120px;font-size:12px;line-height:1.5"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3 · เจนคลิป</h2>
+    <div class="meta" id="costHint" style="margin-bottom:10px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn clay" id="genBtn">เจนคลิปวิดีโอ</button>
+      <span class="meta" id="genStatus"></span>
+    </div>
+    <div class="meta" style="margin-top:8px">วิดีโอใช้เวลา ~30–120 วินาที กรุณาอย่าปิดหน้านี้ · กติกา: ตัดสิน "ผ่าน/ไม่ผ่าน" คลิปก่อนหน้าของตัวเองก่อนถึงจะเจนใหม่ได้</div>
+    <div class="notice" id="pendWrap" style="display:none;margin-top:10px">
+      <div style="margin-bottom:8px"><b>ยังมีคลิปที่ยังไม่ได้ตัดสิน</b> — กดผ่าน/ไม่ผ่านก่อน แล้วค่อยเจนใหม่ค่ะ</div>
+      <video id="pendVid" controls playsinline style="width:100%;border-radius:9px;display:block;margin-bottom:8px;background:#000"></video>
+      <div class="fbrow" style="margin-top:0">
+        <button class="btn sage sm" id="pendPass">ผ่าน</button>
+        <button class="btn sm" style="background:#9C3F5E" id="pendFail">ไม่ผ่าน</button>
+        <input type="text" id="pendNote" placeholder="เพราะอะไร (เข้าระบบออดิท)" style="flex:1;min-width:180px">
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none">
+    <h2 id="resultTitle">ผลการเจน</h2>
+    <div class="meta" style="margin-bottom:10px">กด "ผ่าน/ไม่ผ่าน" ก่อนเจนรอบถัดไป — ความเห็นเข้าระบบออดิทให้เจ้าของ</div>
+    <div id="resultBox"></div>
+  </div>
+
+  <div class="card">
+    <h2>ประวัติ + ออดิท <span class="hint" id="histHint"></span></h2>
+    <div class="stat" id="statRow" style="display:none"></div>
+    <div id="histList"><div class="loading">กำลังโหลด…</div></div>
+  </div>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+const $ = (s) => document.querySelector(s);
+const CONF = window.CONFIG || {};
+const FN = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1/video-gen';
+
+let IS_OWNER = false, SRC = null;   // SRC = { sku } | { image, media_type } | null
+let COST = null;                    // ตารางราคาโดยประมาณ (บาท) จาก config ของ edge function
+let MOTIONS = [];
+
+// ── เรียก edge function video-gen (รูปแบบเดียวกับ storyboard sgb) ──
+async function vgb(task, args) {
+  if (!(await window.opsLogin())) return { error: { message: 'redirecting_to_login' } };
+  const ctrl = new AbortController();
+  // วิดีโอใช้เวลานาน → ให้ generate 300 วิ งานอื่น 30 วิ
+  const tmo = setTimeout(() => ctrl.abort(), task === 'generate' ? 300000 : 30000);
+  let r;
+  try {
+    r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_token: liff.getIDToken(), task, ...(args || {}) }), signal: ctrl.signal });
+  } catch (e) {
+    clearTimeout(tmo);
+    const to = e && e.name === 'AbortError';
+    return { error: { code: to ? 'timeout' : 'network', message: to
+      ? 'ใช้เวลานานเกินไป — ลองลดความยาวคลิป (4 วิ) แล้วลองใหม่' : 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง' } };
+  }
+  clearTimeout(tmo);
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok || out.error) {
+    const map = { unauthorized: 'เซสชันหมดอายุ รีเฟรชหน้าแล้วล็อกอินใหม่', no_access: 'ไม่มีสิทธิ์ใช้งานหลังบ้าน',
+      role_denied: 'สิทธิ์ไม่พอ (ต้องเป็นทีมการตลาด/ผู้จัดการ/เจ้าของ)',
+      feature_disabled: 'ฟีเจอร์ยังปิดอยู่ — ให้เจ้าของเปิดที่หน้า Settings',
+      no_api_key: 'ยังไม่ได้ตั้งคีย์ผู้ให้บริการวิดีโอฝั่งเซิร์ฟเวอร์', no_source: 'ยังไม่ได้เลือกรูปตั้งต้น',
+      gen_failed: out.message || 'เจนไม่สำเร็จ' };
+    let msg = map[out.error] || out.message || out.error || ('http ' + r.status);
+    if (/SAFETY|PROHIBITED|BLOCK/i.test(String(out.message || out.error || ''))) {
+      msg = 'ตัวกรองของผู้ให้บริการบล็อกคลิปนี้ — ลองเจนใหม่ หรือเปลี่ยนชุด/ท่าโพส/โน้ต';
+    }
+    return { error: { code: out.error, message: msg }, data: out };
+  }
+  return { data: out.data };
+}
+
+// ── เลือกแหล่งรูป: คลัง vs อัปโหลด ──
+document.querySelectorAll('[data-src]').forEach((t) => t.onclick = () => {
+  document.querySelectorAll('[data-src]').forEach((x) => x.classList.toggle('on', x === t));
+  const cat = t.dataset.src === 'catalog';
+  $('#catalogPane').style.display = cat ? '' : 'none';
+  $('#uploadPane').style.display = cat ? 'none' : '';
+  if (cat) ensureCatalog();
+});
+
+// ── ค้นชุดจากคลังจริง (RPC เดียวกับหน้า marketing/storyboard) ──
+let catLoaded = false, catTimer = null;
+async function searchSku() {
+  catLoaded = true;
+  const q = $('#skuInput').value.trim();
+  const g = $('#skuGrid'); g.innerHTML = '<div class="loading">กำลังค้นหา…</div>';
+  const { data, error } = await window.opsRpc('garments_pick', { p_q: q || null, p_limit: 12 });
+  if (error) { g.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
+  if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด — ลองคำอื่น</div>'; return; }
+  g.innerHTML = '';
+  for (const it of data) {
+    const d = document.createElement('div');
+    d.className = 'refbox'; d.style.cursor = 'pointer';
+    const on = SRC && SRC.sku === it.code;
+    if (on) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
+    d.innerHTML = (it.photo ? `<img src="${it.photo}">` : `<div class="ph">ไม่มีรูป</div>`) +
+      `<div class="nm">${it.name || it.code}${on ? ' (เลือกอยู่)' : ''}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
+    d.onclick = () => {
+      if (!it.photo) { alert('ชุดนี้ยังไม่มีรูป — เลือกชุดที่มีรูป หรืออัปโหลดเอง'); return; }
+      SRC = { sku: it.code };
+      setSrcPreview(it.photo, it.name || it.code, it.code + ' · ' + (it.brand || '-'));
+      searchSku();
+    };
+    g.appendChild(d);
+  }
+}
+function ensureCatalog(){ if (!catLoaded) searchSku(); }
+$('#skuSearch').onclick = searchSku;
+$('#skuInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { clearTimeout(catTimer); searchSku(); } });
+$('#skuInput').addEventListener('input', () => { clearTimeout(catTimer); catTimer = setTimeout(searchSku, 350); });
+
+// ── อัปโหลดรูปเอง ──
+$('#uploadBtn').onclick = () => {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = async () => {
+    const f = inp.files[0]; if (!f) return;
+    const b64 = await new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+    SRC = { image: b64, media_type: f.type || 'image/png' };
+    setSrcPreview(b64, f.name, 'อัปโหลดเอง');
+  };
+  inp.click();
+};
+function setSrcPreview(url, name, meta) {
+  $('#srcPrev').style.display = ''; $('#srcImg').src = url;
+  $('#srcName').textContent = name || ''; $('#srcMeta').textContent = meta || '';
+}
+
+// ── chips ──
+function makeChips(sel, items, single, def) {
+  const el = $(sel);
+  for (const it of items) {
+    const c = document.createElement('div');
+    c.className = 'chip'; c.textContent = it.label; c.dataset.key = it.key;
+    if (it.desc) c.title = it.desc;
+    if (it.key === def) c.classList.add('on');
+    c.onclick = () => {
+      if (single) el.querySelectorAll('.chip').forEach((x) => { if (x !== c) x.classList.remove('on'); });
+      c.classList.toggle('on');
+      if (sel === '#durChips' || sel === '#aspectChips') updateCostHint();
+    };
+    el.appendChild(c);
+  }
+  return () => { const on = [...el.querySelectorAll('.chip.on')].map((c) => c.dataset.key); return single ? (on[0] || def) : on; };
+}
+const MOTION_ITEMS = [
+  { key: 'spin', label: 'หมุนตัว 360°', desc: 'นางแบบหมุนช้า ๆ โชว์ชุดรอบตัว' },
+  { key: 'catwalk', label: 'เดินแคทวอล์ค', desc: 'เดินเข้าหากล้อง ผ้าพลิ้วตามจังหวะ' },
+  { key: 'fabric', label: 'ผ้าพลิ้วตามลม', desc: 'ยืนนิ่ง ชายกระโปรง/ผ้าพลิ้วเบา ๆ' },
+  { key: 'pushin', label: 'กล้องดันเข้า', desc: 'กล้องเคลื่อนเข้าหาชุดช้า ๆ เก็บดีเทล' },
+  { key: 'subtle', label: 'ขยับเล็กน้อย (นิ่งสุด)', desc: 'ขยับน้อยที่สุด เพี้ยนน้อยสุด เหมาะชุดดีเทลเยอะ' },
+];
+const getMotion = makeChips('#motionChips', MOTION_ITEMS, true, 'spin');
+const getAspect = makeChips('#aspectChips', [
+  { key: '9:16', label: '9:16 แนวตั้ง (Reels/TikTok)' },
+  { key: '16:9', label: '16:9 แนวนอน (เว็บ/YouTube)' },
+], true, '9:16');
+const getDur = makeChips('#durChips', [
+  { key: '4', label: '4 วินาที' },
+  { key: '6', label: '6 วินาที' },
+  { key: '8', label: '8 วินาที' },
+], true, '4');
+
+function updateCostHint() {
+  if (!COST) { $('#costHint').textContent = ''; return; }
+  const dur = parseInt(getDur(), 10) || 4;
+  const per = COST.thb_per_second || 0;
+  const est = Math.round(per * dur);
+  $('#costHint').innerHTML = `ต้นทุนโดยประมาณ <b>~฿${est}</b> ต่อคลิป (${COST.model || 'video'} · ${dur} วิ · ~฿${per}/วิ) · ` +
+    `<span style="color:var(--clay)">เผื่อคลิปเสีย 2–3 ครั้งต่อคลิปที่ใช้ได้จริง</span>`;
+}
+
+// ── ดู & แก้ prompt เต็ม ──
+$('#editPromptBtn').onclick = async () => {
+  const w = $('#editPromptWrap');
+  if (w.style.display === 'none') {
+    if (!$('#editPrompt').value.trim()) {
+      $('#editPromptBtn').disabled = true;
+      const { data, error } = await vgb('preview_prompt', {
+        motion: getMotion(), note: $('#note').value.trim() || undefined,
+        sku: SRC && SRC.sku || undefined });
+      $('#editPromptBtn').disabled = false;
+      if (!error && data) $('#editPrompt').value = data.prompt;
+    }
+    w.style.display = '';
+  } else { w.style.display = 'none'; }
+};
+
+// ── generate ──
+$('#genBtn').onclick = async () => {
+  if (!SRC) { $('#genStatus').innerHTML = '<span class="err">เลือกรูปตั้งต้นก่อนค่ะ (ชุดจากคลัง หรืออัปโหลด)</span>'; return; }
+  const btn = $('#genBtn'); btn.disabled = true;
+  const dur = getDur();
+  $('#genStatus').textContent = `กำลังเจนคลิป ${dur} วิ… (~30–120 วินาที อย่าปิดหน้า)`;
+  const edited = $('#editPromptWrap').style.display !== 'none' ? $('#editPrompt').value.trim() : '';
+  const args = { motion: getMotion(), aspect: getAspect(), duration: parseInt(dur, 10),
+    note: $('#note').value.trim() || undefined, custom_prompt: edited || undefined,
+    preset: [getMotion(), getAspect(), dur + 's'].join('+') };
+  if (SRC.sku) args.sku = SRC.sku; else { args.image = SRC.image; args.media_type = SRC.media_type; }
+  const { data, error } = await vgb('generate', args);
+  if (error) {
+    btn.disabled = false;
+    if (error.code === 'feedback_required' && data && data.pending) { showPending(data.pending); return; }
+    $('#genStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return;
+  }
+  // งานถูกส่งเข้าคิว (async) — วิดีโอใช้เวลา 2–5 นาที ต้อง poll สถานะจนเสร็จ
+  $('#genStatus').textContent = 'ส่งเข้าคิวแล้ว กำลังสร้างคลิป… (2–5 นาที · เปิดหน้านี้ค้างไว้)';
+  loadHistory();
+  pollJob(data, btn);
+};
+
+// ── poll สถานะงานวิดีโอจนเสร็จ (video-poll cron ฝั่ง server เป็นตัวทำจริง) ──
+async function pollJob(meta, btn) {
+  const started = Date.now();
+  const tick = async () => {
+    if (Date.now() - started > 360000) {   // 6 นาที = ยอมแพ้ (งานยังอาจเสร็จใน LINE)
+      btn.disabled = false;
+      $('#genStatus').innerHTML = '<span class="err">รอนานเกินไป — คลิปอาจยังสร้างอยู่ ดูในประวัติด้านล่างอีกครั้งใน 1–2 นาที หรือเช็คใน LINE</span>';
+      loadHistory(); return;
+    }
+    const { data, error } = await vgb('job_status', { gen_id: meta.gen_id });
+    if (error) { setTimeout(tick, 6000); return; }   // ชั่วคราว — ลองใหม่
+    if (data.status === 'ok' && data.url) {
+      btn.disabled = false;
+      $('#genStatus').textContent = 'สำเร็จ';
+      showResult({ ...meta, url: data.url });
+      return;
+    }
+    if (data.status === 'error') {
+      btn.disabled = false;
+      const m = { safety_blocked: 'ติดตัวกรองความปลอดภัยของ Veo — ลองปรับโน้ต/เปลี่ยนชุดแล้วเจนใหม่ (ถูกบล็อกไม่คิดเงิน)',
+        timeout: 'Veo ใช้เวลานานเกินไป ลองใหม่อีกครั้ง' }[data.raw] || 'สร้างคลิปไม่สำเร็จ — ดูรายละเอียดในประวัติ';
+      $('#genStatus').innerHTML = '<span class="err">' + m + '</span>'; loadHistory(); return;
+    }
+    setTimeout(tick, 6000);   // ยังสร้างอยู่ → เช็คอีกใน 6 วิ
+  };
+  setTimeout(tick, 8000);     // เริ่ม poll หลัง 8 วิ (ให้ Veo ตั้งตัว)
+}
+
+function showResult(data) {
+  $('#resultCard').style.display = '';
+  $('#resultTitle').textContent = 'ผลการเจน' + (data.duration ? ` · ${data.duration} วิ` : '') + (data.aspect ? ` · ${data.aspect}` : '');
+  const box = $('#resultBox');
+  box.innerHTML = `<div style="border:1px solid var(--line);border-radius:11px;padding:10px;background:#fff" class="result">
+    <video src="${data.url}" controls playsinline style="width:100%;border-radius:8px;display:block;cursor:zoom-in"></video>
+    <div class="fbrow" style="margin-top:8px">
+      <button class="btn sage sm">ผ่าน</button>
+      <button class="btn sm" style="background:#9C3F5E">ไม่ผ่าน</button>
+      <a class="btn ghost sm" href="${data.url}" download>โหลด</a>
+      <button class="btn ghost sm">prompt</button>
+    </div>
+    <input type="text" placeholder="เพราะอะไร (เข้าออดิท)" style="margin-top:7px">
+    <div class="meta fbst" style="margin-top:5px"></div>
+    <div class="promptbox"></div></div>`;
+  box.querySelector('video').onclick = () => openView(data.url, 'ผลการเจน');
+  const [passB, failB, , promptB] = box.querySelectorAll('button, a');
+  const noteI = box.querySelector('input'), st = box.querySelector('.fbst'), pb = box.querySelector('.promptbox');
+  pb.textContent = data.prompt || '';
+  promptB.onclick = () => { pb.style.display = (pb.style.display === 'none' || !pb.style.display) ? 'block' : 'none'; };
+  const judge = async (rating) => {
+    const { error } = await vgb('feedback', { gen_id: data.gen_id, rating, note: noteI.value.trim() || undefined });
+    st.textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : (rating === 'pass' ? 'ผ่าน — บันทึกแล้ว' : 'ไม่ผ่าน — บันทึกแล้ว');
+    if (!error) { passB.disabled = true; failB.disabled = true; noteI.disabled = true; loadHistory(); }
+  };
+  passB.onclick = () => judge('pass');
+  failB.onclick = () => judge('fail');
+  $('#resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  loadHistory();
+}
+
+// ── โมดัลดูคลิปเต็มจอ ──
+function openView(url, cap) {
+  $('#viewVid').src = url; $('#viewCap').textContent = cap || ''; $('#viewDl').href = url;
+  $('#viewModal').classList.add('show');
+}
+$('#viewClose').onclick = () => { $('#viewVid').pause(); $('#viewModal').classList.remove('show'); };
+$('#viewModal').onclick = (e) => { if (e.target === $('#viewModal')) { $('#viewVid').pause(); $('#viewModal').classList.remove('show'); } };
+
+// ── กติกาบังคับตัดสินคลิปค้าง ──
+let PEND = null;
+function showPending(p) {
+  PEND = p;
+  $('#genStatus').innerHTML = '<span class="err">ต้องตัดสินคลิปก่อนหน้าก่อนค่ะ</span>';
+  $('#pendWrap').style.display = ''; $('#pendVid').src = p.url || '';
+  $('#pendWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+async function judgePending(rating) {
+  if (!PEND) return;
+  const { error } = await vgb('feedback', { gen_id: PEND.gen_id, rating, note: $('#pendNote').value.trim() || undefined });
+  if (error) { alert('บันทึกไม่สำเร็จ: ' + error.message); return; }
+  PEND = null; $('#pendWrap').style.display = 'none'; $('#pendNote').value = '';
+  $('#genStatus').textContent = 'ตัดสินแล้ว — กดเจนได้เลยค่ะ';
+  loadHistory();
+}
+$('#pendPass').onclick = () => judgePending('pass');
+$('#pendFail').onclick = () => judgePending('fail');
+
+// ── history + audit ──
+async function loadHistory() {
+  const { data, error } = await vgb('history', { limit: 30 });
+  const el = $('#histList');
+  if (error) { el.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
+  $('#histHint').textContent = data.all_visible ? 'เห็นของทุกคน (เจ้าของ)' : 'เห็นเฉพาะงานของฉัน';
+  const s = data.summary;
+  if (data.all_visible && s) {
+    const st = $('#statRow'); st.style.display = '';
+    st.innerHTML = `<div class="b"><div class="n">${s.total}</div><div class="l">เจนทั้งหมด</div></div>
+      <div class="b"><div class="n">฿${(s.cost_thb || 0).toFixed(0)}</div><div class="l">ค่าใช้จ่ายประมาณ</div></div>
+      <div class="b"><div class="n">${s.passes}/${s.fails}</div><div class="l">ผ่าน/ไม่ผ่าน</div></div>
+      <div class="b"><div class="n">${s.errors}</div><div class="l">เจนพัง</div></div>`;
+  }
+  if (!data.rows.length) { el.innerHTML = '<div class="loading">ยังไม่มีประวัติ</div>'; return; }
+  el.innerHTML = '';
+  for (const r of data.rows) {
+    const d = document.createElement('div');
+    d.className = 'hrow';
+    const when = new Date(r.created_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
+    const fb = r.feedback_rating ? `<span class="tag ${r.feedback_rating}">${r.feedback_rating === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</span>` : '';
+    const note = r.feedback_note ? `<div class="meta">“${r.feedback_note}” — ${r.feedback_by || ''}</div>` : (r.note ? `<div class="meta">โน้ต: ${r.note.slice(0, 90)}</div>` : '');
+    const what = `${r.sku || 'อัปโหลด'} · ${r.duration || '?'}วิ ${r.aspect || ''}`;
+    d.innerHTML = `<div><b>${what}</b> · ${r.employee_name || '-'} <span class="meta">· ${when} · ${r.preset || 'มาตรฐาน'}</span>${note}</div>
+      <div><span class="tag ${r.status}">${r.status === 'ok' ? 'สำเร็จ' : 'พัง'}</span> ${fb}</div>`;
+    if (r.url) d.onclick = () => openView(r.url, what);
+    el.appendChild(d);
+  }
+}
+
+// ── boot ──
+(async () => {
+  try {
+    if (!(await window.opsLogin())) return;
+    const { data } = await window.opsRpc('ops_me', {});
+    if (data) $('#whoami').textContent = (data.name || data.nickname || '') + (data.is_owner ? ' · เจ้าของ' : '');
+    const cfg = await vgb('config');
+    if (cfg.data) {
+      IS_OWNER = !!cfg.data.is_owner; COST = cfg.data.cost || null;
+      updateCostHint();
+      if (!cfg.data.enabled) {
+        const n = $('#flagNote'); n.style.display = '';
+        n.textContent = IS_OWNER
+          ? 'สวิตช์ Video Studio ยังปิดอยู่ — เจ้าของทดสอบได้ แต่ทีมยังใช้ไม่ได้ (เปิดที่หน้า Settings)'
+          : 'ฟีเจอร์ยังปิดอยู่ — แจ้งเจ้าของให้เปิดสวิตช์ที่หน้า Settings ก่อนนะคะ';
+      }
+    } else if (cfg.error) {
+      const n = $('#flagNote'); n.style.display = ''; n.textContent = cfg.error.message;
+    }
+    ensureCatalog();
+    loadHistory();
+  } catch (e) { $('#histList').innerHTML = '<div class="err">' + e.message + '</div>'; }
+})();
+</script>
+<script src="ops-menu.js"></script>
+<script>window.opsMenu && window.opsMenu.mount();</script>
+</body>
+</html>
