@@ -153,6 +153,19 @@
     </div>
   </div>
 
+  <div class="card" id="videoCard" style="display:none">
+    <h2>Video Studio — เจนคลิปวิดีโอสั้นด้วย AI</h2>
+    <div class="desc">เปิด = ทีมการตลาดเข้า ops/video.html ทำคลิปสั้น 4–8 วิ จากรูปชุด (image-to-video) ไปลง Reels/TikTok/เว็บได้เอง — ทุกการเจนเข้าระบบออดิท: ใครเจน ชุดไหน ค่าใช้จ่ายสะสม พร้อมผ่าน/ไม่ผ่านจากทีม · ปิด = ใช้ได้เฉพาะเจ้าของ (โหมดทดสอบ)</div>
+    <div class="feat">
+      <div class="info">
+        <div class="name">เปิดให้ทีมใช้ Video Studio</div>
+        <div class="note">มีค่าใช้จ่ายต่อคลิปที่เจน (Veo/Gemini ราว 15–120 บาท/คลิปตามความยาว) — ดูยอดสะสมและ feedback ได้ในหน้า studio · คลิปเสียก็คิดเงิน ควบคุมการใช้ให้ดี</div>
+        <div class="need">ต้องมี: deploy edge function video-gen + รัน supabase/video_studio.sql + ตั้ง secret GOOGLE_AI_API_KEY (หรือ VIDEO_PROVIDER/คีย์ผู้ให้บริการ) ใน Supabase → Edge Functions ก่อน</div>
+      </div>
+      <label class="sw" data-key="video_studio_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
+    </div>
+  </div>
+
   <div class="card" id="premiumCard" style="display:none">
     <h2>ระบบคุ้มครองชุดออกงาน (ชุดแพง)</h2>
     <div class="desc">เปิดเมื่อพร้อมเริ่มปล่อยเช่าชุดราคาแพง — พอเปิด ระบบจะ “เตือนเจ้าของอัตโนมัติ” ทุกครั้งที่ชุดแพงถูกจอง ให้ทำขั้นตอนคุ้มครอง (วิดีโอก่อนแพค/ตอนแกะของ ฯลฯ) ลดความผิดพลาดของคน · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก</div>
@@ -240,6 +253,7 @@ async function load(){
   $('#partnerCard').style.display = '';
   $('#quizCard').style.display = '';
   $('#storyboardCard').style.display = '';
+  $('#videoCard').style.display = '';
   $('#premiumCard').style.display = '';
   $('#financeCard').style.display = '';
   $('#hint').style.display = '';

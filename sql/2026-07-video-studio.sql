@@ -1,0 +1,16 @@
+-- =============================================================================
+-- LLOOP · Video Studio — feature flag + audit table
+--
+-- ⚠ ไฟล์นี้เป็น pointer — ฉบับจริง (canonical) อยู่ที่ repo backend:
+--     wearlloop-dotcom/lloop → supabase/video_studio.sql
+--   (ฉบับ staged พร้อมย้าย: backend/lloop-staged/supabase/video_studio.sql ในรีโปนี้)
+--
+-- ทำไมต้องอยู่ lloop: deploy-site.yml copy ops/* + liff/* มาทับรีโปหน้าเว็บ แต่
+-- ไม่รัน SQL / ไม่ deploy edge function ให้ — ต้องรันจาก lloop ผ่าน supabase-sql.yml
+--
+-- สิ่งที่ต้องทำ (รายละเอียดใน backend/lloop-staged/README.md):
+--   1. รัน supabase/video_studio.sql (ตาราง video_gen_log + seed video_studio_enabled=false)
+--   2. เพิ่มคีย์ 'video_studio_enabled' เข้า allowlist ของ hub_settings_set (ใน dashboard)
+--   3. deploy edge function video-gen + ตั้ง secret GOOGLE_AI_API_KEY, LINE_OPS_CHANNEL_ID
+--   4. มิเรอร์ video.html / settings.html / ops-menu.js เข้า lloop/ops/ กัน auto-deploy ทับ
+-- =============================================================================

@@ -27,6 +27,7 @@
     { section: 'การตลาด', items: [
       { href: 'marketing.html',  label: 'การตลาด',       icon: '◆', roles: ['marketing','manager'] },
       { href: 'storyboard.html', label: 'Storyboard Studio', icon: '✦', roles: ['marketing','manager'] },
+      { href: 'video.html',      label: 'Video Studio',      icon: '▶', roles: ['marketing','manager'] },
       { href: 'live.html',       label: 'ไลฟ์',          icon: '▷', roles: ['marketing','manager'] },
       { href: 'influencers.html',label: 'อินฟลูเอนเซอร์', icon: '☆', roles: ['marketing','manager'] },
       { href: 'ugc.html',        label: 'งานถ่าย UGC',   icon: '◰', roles: ['marketing','manager'] },
