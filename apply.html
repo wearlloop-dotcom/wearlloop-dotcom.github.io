@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>สมัครงาน — LLOOP</title>
-<!-- apply build v1 · ใบสมัครสาธารณะ → ส่งเข้า hr_apply_public → โผล่สถานะ "ผู้สมัคร" ในหน้า HR -->
+<!-- apply build v2 · required แค่ 4 ช่อง · ที่เหลือ dropdown ลดการพิมพ์ · ส่งเข้า hr_apply_public -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
@@ -13,8 +13,7 @@
 <style>
   :root{
     --cream:#FBFAF7; --cream2:#F5F4F2; --line:#E7E5E1; --ink:#1A1A1A; --muted:#8C8B86;
-    --sage:#6FB3A6; --sage-light:#E4F0EC; --sage-deep:#23554B; --warm:#C9A86A;
-    --err:#B4453A;
+    --sage:#6FB3A6; --sage-light:#E4F0EC; --sage-deep:#23554B; --warm:#C9A86A; --err:#B4453A;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--cream);color:var(--ink);
@@ -26,36 +25,38 @@
   .card{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
   .pad{padding:20px}
 
-  .intro{text-align:center;padding:26px 22px 22px}
+  .intro{text-align:center;padding:26px 22px 20px}
   .intro .brand{font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:var(--warm)}
   .intro h1{font-family:'Poppins','Prompt',sans-serif;font-size:22px;font-weight:600;margin-top:6px}
   .intro p{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.6}
+  .intro .fast{display:inline-block;margin-top:12px;font-size:12px;font-weight:600;color:var(--sage-deep);
+    background:var(--sage-light);border:1px solid #D3E6DF;border-radius:20px;padding:6px 14px}
 
-  label{display:block;font-size:12.5px;font-weight:500;color:var(--ink);margin:14px 0 5px}
+  .sect{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);
+    margin:22px 0 2px;padding-top:16px;border-top:1px solid var(--line);font-weight:600}
+  .sect:first-of-type{border-top:none;padding-top:0;margin-top:2px}
+  label{display:block;font-size:12.5px;font-weight:500;color:var(--ink);margin:13px 0 5px}
   label .req{color:var(--sage-deep)}
   label .opt{color:var(--muted);font-weight:400}
   input,select,textarea{width:100%;font-family:inherit;font-size:14.5px;color:var(--ink);
     background:var(--cream);border:1px solid var(--line);border-radius:11px;padding:11px 13px;transition:border-color .15s,background .15s}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sage);background:#fff}
-  textarea{min-height:92px;resize:vertical;line-height:1.6}
+  textarea{min-height:80px;resize:vertical;line-height:1.6}
   select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238C8B86' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
   .g2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
-  .g2 label:first-child{margin-top:14px}
   @media(max-width:400px){.g2{grid-template-columns:1fr}}
-  .fnote{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .fnote{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5}
 
-  .btn{width:100%;margin-top:20px;font-family:inherit;font-size:15px;font-weight:600;letter-spacing:.3px;
+  .btn{width:100%;margin-top:22px;font-family:inherit;font-size:15px;font-weight:600;letter-spacing:.3px;
     color:#fff;background:var(--ink);border:none;border-radius:12px;padding:15px;cursor:pointer;transition:opacity .15s}
   .btn:active{opacity:.85}
   .btn:disabled{opacity:.5;cursor:default}
-
   .msg{margin-top:14px;font-size:13px;border-radius:11px;padding:12px 14px;display:none}
   .msg.err{display:block;color:var(--err);background:#FBEEEC;border:1px solid #F0D6D2}
 
   .privacy{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;padding:0 6px}
   .privacy a{color:var(--sage-deep)}
 
-  /* success */
   .done{text-align:center;padding:44px 26px}
   .done .tick{width:58px;height:58px;border-radius:50%;background:var(--sage-light);border:1px solid #D3E6DF;
     display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
@@ -64,7 +65,6 @@
   .done p{font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.65}
   .done .home{display:inline-block;margin-top:22px;font-size:13.5px;font-weight:500;color:var(--sage-deep);text-decoration:none;
     border:1px solid #D3E6DF;background:var(--sage-light);border-radius:11px;padding:11px 22px}
-
   footer{text-align:center;font-size:11px;color:var(--muted);padding:26px 16px 40px;letter-spacing:.3px}
 </style>
 </head>
@@ -75,32 +75,33 @@
 </header>
 
 <div class="wrap">
-  <!-- ฟอร์มสมัคร -->
   <div id="formView">
     <div class="card intro">
       <div class="brand">Join the loop</div>
       <h1>สมัครร่วมทีม LLOOP</h1>
-      <p>กรอกใบสมัครออนไลน์ได้เลย ทีมงานจะติดต่อกลับหลังพิจารณา<br>ใช้เวลาประมาณ 2 นาที</p>
+      <p>กรอกใบสมัครออนไลน์ ทีมงานจะติดต่อกลับหลังพิจารณา</p>
+      <div class="fast">กรอกแค่ 4 ช่องก็ส่งได้ · ที่เหลือเลือกจากลิสต์</div>
     </div>
 
     <div class="card pad">
       <form id="applyForm" novalidate>
+        <div class="sect">ข้อมูลติดต่อ</div>
         <label for="name">ชื่อ-นามสกุล <span class="req">*</span></label>
-        <input id="name" name="name" autocomplete="name" placeholder="ชื่อจริง นามสกุล" required>
-
+        <input id="name" autocomplete="name" placeholder="ชื่อจริง นามสกุล" required>
         <div class="g2">
           <div>
-            <label for="nickname">ชื่อเล่น <span class="opt">(ถ้ามี)</span></label>
-            <input id="nickname" name="nickname" placeholder="ชื่อเล่น">
+            <label for="phone">เบอร์โทร <span class="req">*</span></label>
+            <input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="08x-xxx-xxxx" required>
           </div>
           <div>
-            <label for="phone">เบอร์โทร <span class="req">*</span></label>
-            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="08x-xxx-xxxx" required>
+            <label for="line_id">LINE ID <span class="req">*</span></label>
+            <input id="line_id" placeholder="ไอดีไลน์ (ไว้ติดต่อกลับ)" required>
           </div>
         </div>
 
+        <div class="sect">งานที่สมัคร</div>
         <label for="applied_for">ตำแหน่งที่สนใจ <span class="req">*</span></label>
-        <select id="applied_for" name="applied_for" required>
+        <select id="applied_for" required>
           <option value="">— เลือกตำแหน่ง —</option>
           <option value="แอดมิน">แอดมิน / ดูแลลูกค้า</option>
           <option value="สไตลิสต์">สไตลิสต์ / จัดชุด</option>
@@ -108,30 +109,102 @@
           <option value="ช่างซ่อม">ช่างซ่อม / แก้ชุด</option>
           <option value="จัดส่ง">แพ็ก / จัดส่ง</option>
           <option value="ขาย">ขาย / การตลาด</option>
-          <option value="อื่น ๆ">อื่น ๆ (ระบุในหมายเหตุ)</option>
+          <option value="อื่น ๆ">อื่น ๆ</option>
+        </select>
+        <div class="g2">
+          <div>
+            <label for="emp_type">ลักษณะงาน <span class="opt">(เลือก)</span></label>
+            <select id="emp_type">
+              <option value="fulltime">ประจำ (Full-time)</option>
+              <option value="parttime">พาร์ทไทม์</option>
+              <option value="contract">สัญญาจ้าง</option>
+              <option value="freelance">ฟรีแลนซ์</option>
+            </select>
+          </div>
+          <div>
+            <label for="avail">เริ่มงานได้ <span class="opt">(เลือก)</span></label>
+            <select id="avail">
+              <option value="">— เลือก —</option>
+              <option value="ทันที">ทันที</option>
+              <option value="ภายใน 1 สัปดาห์">ภายใน 1 สัปดาห์</option>
+              <option value="ภายใน 2 สัปดาห์">ภายใน 2 สัปดาห์</option>
+              <option value="ภายใน 1 เดือน">ภายใน 1 เดือน</option>
+              <option value="มากกว่า 1 เดือน">มากกว่า 1 เดือน</option>
+            </select>
+          </div>
+        </div>
+        <label for="experience">ประสบการณ์ที่เกี่ยวข้อง <span class="opt">(เลือก)</span></label>
+        <select id="experience">
+          <option value="">— เลือก —</option>
+          <option value="ยังไม่มี / เด็กจบใหม่">ยังไม่มี / เด็กจบใหม่</option>
+          <option value="น้อยกว่า 1 ปี">น้อยกว่า 1 ปี</option>
+          <option value="1–3 ปี">1–3 ปี</option>
+          <option value="3–5 ปี">3–5 ปี</option>
+          <option value="มากกว่า 5 ปี">มากกว่า 5 ปี</option>
         </select>
 
-        <label for="emp_type">ลักษณะงานที่สนใจ</label>
-        <select id="emp_type" name="emp_type">
-          <option value="fulltime">ประจำ (Full-time)</option>
-          <option value="parttime">พาร์ทไทม์</option>
-          <option value="contract">สัญญาจ้าง</option>
-          <option value="freelance">ฟรีแลนซ์</option>
-        </select>
+        <div class="sect">ที่อยู่ / เขตที่สะดวก <span class="opt" style="text-transform:none;letter-spacing:0">(เลือก)</span></div>
+        <div class="g2">
+          <div>
+            <label for="province">จังหวัด</label>
+            <select id="province"><option value="">— เลือกจังหวัด —</option></select>
+          </div>
+          <div>
+            <label for="district">เขต / อำเภอ</label>
+            <div id="districtWrap">
+              <input id="district" placeholder="เลือกจังหวัดก่อน" disabled>
+            </div>
+          </div>
+        </div>
 
-        <label for="email">อีเมล <span class="opt">(ถ้ามี)</span></label>
-        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com">
+        <div class="sect">ผู้ติดต่อฉุกเฉิน <span class="opt" style="text-transform:none;letter-spacing:0">(เลือก)</span></div>
+        <label for="emg_name">ชื่อผู้ติดต่อ</label>
+        <input id="emg_name" placeholder="ชื่อคนที่ติดต่อได้กรณีฉุกเฉิน">
+        <div class="g2">
+          <div>
+            <label for="emg_relation">ความสัมพันธ์</label>
+            <select id="emg_relation">
+              <option value="">— เลือก —</option>
+              <option value="พ่อ/แม่">พ่อ / แม่</option>
+              <option value="คู่สมรส">คู่สมรส / แฟน</option>
+              <option value="พี่/น้อง">พี่ / น้อง</option>
+              <option value="ญาติ">ญาติ</option>
+              <option value="เพื่อน">เพื่อน</option>
+              <option value="อื่น ๆ">อื่น ๆ</option>
+            </select>
+          </div>
+          <div>
+            <label for="emg_phone">เบอร์ผู้ติดต่อ</label>
+            <input id="emg_phone" type="tel" inputmode="tel" placeholder="08x-xxx-xxxx">
+          </div>
+        </div>
 
-        <label for="address">ที่อยู่ / เขตที่สะดวกเดินทาง <span class="opt">(ถ้ามี)</span></label>
-        <input id="address" name="address" placeholder="เช่น เขตบางนา กรุงเทพฯ">
+        <div class="sect">เพิ่มเติม <span class="opt" style="text-transform:none;letter-spacing:0">(ไม่บังคับ)</span></div>
+        <div class="g2">
+          <div>
+            <label for="nickname">ชื่อเล่น</label>
+            <input id="nickname" placeholder="ชื่อเล่น">
+          </div>
+          <div>
+            <label for="source">รู้จักจากช่องทางไหน</label>
+            <select id="source">
+              <option value="">— เลือก —</option>
+              <option value="เพื่อนแนะนำ">เพื่อนแนะนำ</option>
+              <option value="JobThai">JobThai</option>
+              <option value="Facebook">Facebook</option>
+              <option value="Instagram">Instagram / IG</option>
+              <option value="TikTok">TikTok</option>
+              <option value="LINE OA">LINE ทางการ</option>
+              <option value="อื่น ๆ">อื่น ๆ</option>
+            </select>
+          </div>
+        </div>
+        <label for="email">อีเมล</label>
+        <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com">
+        <label for="intro">แนะนำตัว / ทำไมอยากร่วมงาน</label>
+        <textarea id="intro" placeholder="ประสบการณ์ ความถนัด ฯลฯ (ไม่บังคับ)"></textarea>
 
-        <label for="source">รู้จัก LLOOP จากช่องทางไหน <span class="opt">(ถ้ามี)</span></label>
-        <input id="source" name="source" placeholder="เช่น เพื่อนแนะนำ / JobThai / IG / TikTok">
-
-        <label for="notes">แนะนำตัว / ทำไมอยากร่วมงาน <span class="opt">(ถ้ามี)</span></label>
-        <textarea id="notes" name="notes" placeholder="ประสบการณ์ ความถนัด วันที่เริ่มงานได้ ฯลฯ"></textarea>
         <div class="fnote">* ยังไม่ต้องกรอกเงินเดือน/เลขบัญชี/บัตรประชาชนตอนนี้ — ทีมงานจะขอเมื่อถึงขั้นสัมภาษณ์</div>
-
         <button class="btn" type="submit" id="submitBtn">ส่งใบสมัคร</button>
         <div class="msg err" id="errMsg"></div>
       </form>
@@ -142,13 +215,12 @@
     </div>
   </div>
 
-  <!-- ส่งสำเร็จ -->
   <div id="doneView" class="card done" style="display:none">
     <div class="tick">
       <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#23554B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
     <h2>ส่งใบสมัครแล้ว 🎉</h2>
-    <p id="doneMsg">ขอบคุณที่สนใจร่วมงานกับ LLOOP<br>ทีมงานจะพิจารณาและติดต่อกลับทางเบอร์ที่ให้ไว้</p>
+    <p id="doneMsg">ขอบคุณที่สนใจร่วมงานกับ LLOOP<br>ทีมงานจะพิจารณาและติดต่อกลับทาง LINE / เบอร์ที่ให้ไว้</p>
     <a class="home" href="index.html">กลับหน้าหลัก</a>
   </div>
 </div>
@@ -156,6 +228,10 @@
 <footer>© LLOOP · เช่าชุด + AI สไตลิสต์</footer>
 
 <script>
+// ===== ข้อมูลจังหวัด (77) + เขตกรุงเทพฯ (50) สำหรับ dropdown เลือกที่อยู่ =====
+var PROVINCES = ["กรุงเทพมหานคร","กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา","ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก","นครนายก","นครปฐม","นครพนม","นครราชสีมา","นครศรีธรรมราช","นครสวรรค์","นนทบุรี","นราธิวาส","น่าน","บึงกาฬ","บุรีรัมย์","ปทุมธานี","ประจวบคีรีขันธ์","ปราจีนบุรี","ปัตตานี","พระนครศรีอยุธยา","พะเยา","พังงา","พัทลุง","พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน","ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ","สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี","สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ","อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"];
+var BKK_DISTRICTS = ["พระนคร","ดุสิต","หนองจอก","บางรัก","บางเขน","บางกะปิ","ปทุมวัน","ป้อมปราบศัตรูพ่าย","พระโขนง","มีนบุรี","ลาดกระบัง","ยานนาวา","สัมพันธวงศ์","พญาไท","ธนบุรี","บางกอกใหญ่","ห้วยขวาง","คลองสาน","ตลิ่งชัน","บางกอกน้อย","บางขุนเทียน","ภาษีเจริญ","หนองแขม","ราษฎร์บูรณะ","บางพลัด","ดินแดง","บึงกุ่ม","สาทร","บางซื่อ","จตุจักร","บางคอแหลม","ประเวศ","คลองเตย","สวนหลวง","จอมทอง","ดอนเมือง","ราชเทวี","ลาดพร้าว","วัฒนา","บางแค","หลักสี่","สายไหม","คันนายาว","สะพานสูง","วังทองหลาง","คลองสามวา","บางนา","ทวีวัฒนา","ทุ่งครุ","บางบอน"];
+
 (function(){
   var CONF = window.CONFIG || {};
   var sb = (window.supabase && CONF.SUPABASE_URL && CONF.SUPABASE_ANON_KEY)
@@ -165,9 +241,29 @@
   var btn  = document.getElementById('submitBtn');
   var err  = document.getElementById('errMsg');
 
-  function showErr(m){ err.textContent = m; err.classList.add('err'); }
+  // เติมจังหวัด
+  var provSel = document.getElementById('province');
+  PROVINCES.forEach(function(p){ var o=document.createElement('option'); o.value=p; o.textContent=p; provSel.appendChild(o); });
+
+  // จังหวัด → เขต/อำเภอ (กทม.เลือกจาก 50 เขต · จังหวัดอื่นพิมพ์เอง)
+  var dWrap = document.getElementById('districtWrap');
+  provSel.addEventListener('change', function(){
+    var p = provSel.value;
+    if(p === 'กรุงเทพมหานคร'){
+      var sel = '<select id="district"><option value="">— เลือกเขต —</option>';
+      BKK_DISTRICTS.forEach(function(d){ sel += '<option value="'+d+'">'+d+'</option>'; });
+      sel += '</select>';
+      dWrap.innerHTML = sel;
+    } else if(p){
+      dWrap.innerHTML = '<input id="district" placeholder="เช่น เมือง / อ.เมือง">';
+    } else {
+      dWrap.innerHTML = '<input id="district" placeholder="เลือกจังหวัดก่อน" disabled>';
+    }
+  });
+
+  function showErr(m){ err.textContent=m; err.classList.add('err'); }
   function clearErr(){ err.textContent=''; err.classList.remove('err'); }
-  function val(id){ var el=document.getElementById(id); return el ? el.value.trim() : ''; }
+  function val(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
 
   function done(){
     document.getElementById('formView').style.display='none';
@@ -179,26 +275,22 @@
     e.preventDefault();
     clearErr();
 
-    var name = val('name');
-    var phone = val('phone');
-    var applied = val('applied_for');
+    var name = val('name'), phone = val('phone'), line_id = val('line_id'), applied = val('applied_for');
     if(name.length < 2){ showErr('กรุณากรอกชื่อ-นามสกุล'); return; }
     if(phone.replace(/\D/g,'').length < 9){ showErr('กรุณากรอกเบอร์โทรให้ถูกต้อง'); return; }
+    if(!line_id){ showErr('กรุณากรอก LINE ID ไว้ติดต่อกลับ'); return; }
     if(!applied){ showErr('กรุณาเลือกตำแหน่งที่สนใจ'); return; }
 
     var payload = {
-      name: name,
-      nickname: val('nickname') || null,
-      phone: phone,
-      email: val('email') || null,
-      applied_for: applied,
-      emp_type: val('emp_type') || 'fulltime',
-      address: val('address') || null,
-      source: val('source') || null,
-      notes: val('notes') || null
+      name: name, nickname: val('nickname')||null, phone: phone, line_id: line_id,
+      email: val('email')||null, applied_for: applied, emp_type: val('emp_type')||'fulltime',
+      province: val('province')||null, district: val('district')||null,
+      avail: val('avail')||null, experience: val('experience')||null,
+      emg_name: val('emg_name')||null, emg_relation: val('emg_relation')||null, emg_phone: val('emg_phone')||null,
+      source: val('source')||null, notes: val('intro')||null
     };
 
-    if(!sb){ showErr('ระบบยังไม่พร้อมรับใบสมัคร (config.js ยังไม่ตั้งค่า) — กรุณาลองใหม่ภายหลัง'); return; }
+    if(!sb){ showErr('ระบบยังไม่พร้อมรับใบสมัคร — กรุณาลองใหม่ภายหลัง'); return; }
 
     btn.disabled = true; btn.textContent = 'กำลังส่ง…';
     try{
@@ -207,11 +299,8 @@
         var m = res.error.message || '';
         if(/hr_apply_public|does not exist|404|schema cache/i.test(m)){
           showErr('ระบบรับสมัครออนไลน์กำลังเปิดใช้งาน — ระหว่างนี้ทักแชต LINE ของ LLOOP เพื่อสมัครได้เลยค่ะ');
-        } else {
-          showErr('ส่งไม่สำเร็จ: ' + m);
-        }
-        btn.disabled=false; btn.textContent='ส่งใบสมัคร';
-        return;
+        } else { showErr('ส่งไม่สำเร็จ: ' + m); }
+        btn.disabled=false; btn.textContent='ส่งใบสมัคร'; return;
       }
       done();
     }catch(ex){
