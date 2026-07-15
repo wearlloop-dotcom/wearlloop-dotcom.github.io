@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>สมัครงาน — LLOOP</title>
-<!-- apply build v2 · required แค่ 4 ช่อง · ที่เหลือ dropdown ลดการพิมพ์ · ส่งเข้า hr_apply_public -->
+<!-- apply build v3 · ชื่อ/นามสกุลแยกช่อง + ชื่อเล่น + วันเกิด + ผู้ติดต่อฉุกเฉิน(ก็อบนามสกุล) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
@@ -38,6 +38,10 @@
   label{display:block;font-size:12.5px;font-weight:500;color:var(--ink);margin:13px 0 5px}
   label .req{color:var(--sage-deep)}
   label .opt{color:var(--muted);font-weight:400}
+  .lblrow{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .copybtn{font-family:inherit;font-size:11.5px;font-weight:500;color:var(--sage-deep);cursor:pointer;
+    background:var(--sage-light);border:1px solid #D3E6DF;border-radius:14px;padding:3px 10px;white-space:nowrap;transition:opacity .15s}
+  .copybtn:active{opacity:.7}
   input,select,textarea{width:100%;font-family:inherit;font-size:14.5px;color:var(--ink);
     background:var(--cream);border:1px solid var(--line);border-radius:11px;padding:11px 13px;transition:border-color .15s,background .15s}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sage);background:#fff}
@@ -80,14 +84,34 @@
       <div class="brand">Join the loop</div>
       <h1>สมัครร่วมทีม LLOOP</h1>
       <p>กรอกใบสมัครออนไลน์ ทีมงานจะติดต่อกลับหลังพิจารณา</p>
-      <div class="fast">กรอกแค่ 4 ช่องก็ส่งได้ · ที่เหลือเลือกจากลิสต์</div>
+      <div class="fast">ช่องที่เหลือเลือกจากลิสต์ได้เลย ลดการพิมพ์</div>
     </div>
 
     <div class="card pad">
       <form id="applyForm" novalidate>
-        <div class="sect">ข้อมูลติดต่อ</div>
-        <label for="name">ชื่อ-นามสกุล <span class="req">*</span></label>
-        <input id="name" autocomplete="name" placeholder="ชื่อจริง นามสกุล" required>
+        <div class="sect">ข้อมูลส่วนตัว</div>
+        <div class="g2">
+          <div>
+            <label for="first_name">ชื่อ <span class="req">*</span></label>
+            <input id="first_name" autocomplete="given-name" placeholder="ชื่อจริง" required>
+          </div>
+          <div>
+            <label for="last_name">นามสกุล <span class="req">*</span></label>
+            <input id="last_name" autocomplete="family-name" placeholder="นามสกุล" required>
+          </div>
+        </div>
+        <div class="g2">
+          <div>
+            <label for="nickname">ชื่อเล่น <span class="req">*</span></label>
+            <input id="nickname" placeholder="ชื่อเล่น" required>
+          </div>
+          <div>
+            <label for="dob">วันเดือนปีเกิด <span class="opt">(ถ้ามี)</span></label>
+            <input id="dob" type="date">
+          </div>
+        </div>
+
+        <div class="sect">ช่องทางติดต่อ</div>
         <div class="g2">
           <div>
             <label for="phone">เบอร์โทร <span class="req">*</span></label>
@@ -158,7 +182,10 @@
         </div>
 
         <div class="sect">ผู้ติดต่อฉุกเฉิน <span class="opt" style="text-transform:none;letter-spacing:0">(เลือก)</span></div>
-        <label for="emg_name">ชื่อผู้ติดต่อ</label>
+        <div class="lblrow">
+          <label for="emg_name">ชื่อผู้ติดต่อ</label>
+          <span class="copybtn" id="copySurname">＋ นามสกุลเดียวกัน</span>
+        </div>
         <input id="emg_name" placeholder="ชื่อคนที่ติดต่อได้กรณีฉุกเฉิน">
         <div class="g2">
           <div>
@@ -182,8 +209,8 @@
         <div class="sect">เพิ่มเติม <span class="opt" style="text-transform:none;letter-spacing:0">(ไม่บังคับ)</span></div>
         <div class="g2">
           <div>
-            <label for="nickname">ชื่อเล่น</label>
-            <input id="nickname" placeholder="ชื่อเล่น">
+            <label for="email">อีเมล</label>
+            <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com">
           </div>
           <div>
             <label for="source">รู้จักจากช่องทางไหน</label>
@@ -199,8 +226,6 @@
             </select>
           </div>
         </div>
-        <label for="email">อีเมล</label>
-        <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com">
         <label for="intro">แนะนำตัว / ทำไมอยากร่วมงาน</label>
         <textarea id="intro" placeholder="ประสบการณ์ ความถนัด ฯลฯ (ไม่บังคับ)"></textarea>
 
@@ -228,7 +253,7 @@
 <footer>© LLOOP · เช่าชุด + AI สไตลิสต์</footer>
 
 <script>
-// ===== ข้อมูลจังหวัด (77) + เขตกรุงเทพฯ (50) สำหรับ dropdown เลือกที่อยู่ =====
+// ===== จังหวัด (77) + เขตกรุงเทพฯ (50) สำหรับ dropdown เลือกที่อยู่ =====
 var PROVINCES = ["กรุงเทพมหานคร","กระบี่","กาญจนบุรี","กาฬสินธุ์","กำแพงเพชร","ขอนแก่น","จันทบุรี","ฉะเชิงเทรา","ชลบุรี","ชัยนาท","ชัยภูมิ","ชุมพร","เชียงราย","เชียงใหม่","ตรัง","ตราด","ตาก","นครนายก","นครปฐม","นครพนม","นครราชสีมา","นครศรีธรรมราช","นครสวรรค์","นนทบุรี","นราธิวาส","น่าน","บึงกาฬ","บุรีรัมย์","ปทุมธานี","ประจวบคีรีขันธ์","ปราจีนบุรี","ปัตตานี","พระนครศรีอยุธยา","พะเยา","พังงา","พัทลุง","พิจิตร","พิษณุโลก","เพชรบุรี","เพชรบูรณ์","แพร่","ภูเก็ต","มหาสารคาม","มุกดาหาร","แม่ฮ่องสอน","ยโสธร","ยะลา","ร้อยเอ็ด","ระนอง","ระยอง","ราชบุรี","ลพบุรี","ลำปาง","ลำพูน","เลย","ศรีสะเกษ","สกลนคร","สงขลา","สตูล","สมุทรปราการ","สมุทรสงคราม","สมุทรสาคร","สระแก้ว","สระบุรี","สิงห์บุรี","สุโขทัย","สุพรรณบุรี","สุราษฎร์ธานี","สุรินทร์","หนองคาย","หนองบัวลำภู","อ่างทอง","อำนาจเจริญ","อุดรธานี","อุตรดิตถ์","อุทัยธานี","อุบลราชธานี"];
 var BKK_DISTRICTS = ["พระนคร","ดุสิต","หนองจอก","บางรัก","บางเขน","บางกะปิ","ปทุมวัน","ป้อมปราบศัตรูพ่าย","พระโขนง","มีนบุรี","ลาดกระบัง","ยานนาวา","สัมพันธวงศ์","พญาไท","ธนบุรี","บางกอกใหญ่","ห้วยขวาง","คลองสาน","ตลิ่งชัน","บางกอกน้อย","บางขุนเทียน","ภาษีเจริญ","หนองแขม","ราษฎร์บูรณะ","บางพลัด","ดินแดง","บึงกุ่ม","สาทร","บางซื่อ","จตุจักร","บางคอแหลม","ประเวศ","คลองเตย","สวนหลวง","จอมทอง","ดอนเมือง","ราชเทวี","ลาดพร้าว","วัฒนา","บางแค","หลักสี่","สายไหม","คันนายาว","สะพานสูง","วังทองหลาง","คลองสามวา","บางนา","ทวีวัฒนา","ทุ่งครุ","บางบอน"];
 
@@ -252,8 +277,7 @@ var BKK_DISTRICTS = ["พระนคร","ดุสิต","หนองจอ�
     if(p === 'กรุงเทพมหานคร'){
       var sel = '<select id="district"><option value="">— เลือกเขต —</option>';
       BKK_DISTRICTS.forEach(function(d){ sel += '<option value="'+d+'">'+d+'</option>'; });
-      sel += '</select>';
-      dWrap.innerHTML = sel;
+      dWrap.innerHTML = sel + '</select>';
     } else if(p){
       dWrap.innerHTML = '<input id="district" placeholder="เช่น เมือง / อ.เมือง">';
     } else {
@@ -261,9 +285,20 @@ var BKK_DISTRICTS = ["พระนคร","ดุสิต","หนองจอ�
     }
   });
 
+  function val(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
   function showErr(m){ err.textContent=m; err.classList.add('err'); }
   function clearErr(){ err.textContent=''; err.classList.remove('err'); }
-  function val(id){ var el=document.getElementById(id); return el ? (el.value||'').trim() : ''; }
+
+  // ก็อบนามสกุลผู้สมัคร → ช่องชื่อผู้ติดต่อฉุกเฉิน (มักนามสกุลเดียวกัน)
+  document.getElementById('copySurname').addEventListener('click', function(){
+    var last = val('last_name');
+    if(!last){ showErr('กรอกนามสกุลก่อน แล้วค่อยกดปุ่มนี้'); return; }
+    clearErr();
+    var em = document.getElementById('emg_name');
+    var first = (em.value||'').replace(new RegExp('\\s*'+last+'\\s*$'),'').trim();
+    em.value = (first ? first+' ' : '') + last;
+    em.focus();
+  });
 
   function done(){
     document.getElementById('formView').style.display='none';
@@ -275,15 +310,18 @@ var BKK_DISTRICTS = ["พระนคร","ดุสิต","หนองจอ�
     e.preventDefault();
     clearErr();
 
-    var name = val('name'), phone = val('phone'), line_id = val('line_id'), applied = val('applied_for');
-    if(name.length < 2){ showErr('กรุณากรอกชื่อ-นามสกุล'); return; }
+    var first = val('first_name'), last = val('last_name'), nickname = val('nickname');
+    var phone = val('phone'), line_id = val('line_id'), applied = val('applied_for');
+    if(first.length < 1 || last.length < 1){ showErr('กรุณากรอกชื่อและนามสกุล'); return; }
+    if(!nickname){ showErr('กรุณากรอกชื่อเล่น'); return; }
     if(phone.replace(/\D/g,'').length < 9){ showErr('กรุณากรอกเบอร์โทรให้ถูกต้อง'); return; }
     if(!line_id){ showErr('กรุณากรอก LINE ID ไว้ติดต่อกลับ'); return; }
     if(!applied){ showErr('กรุณาเลือกตำแหน่งที่สนใจ'); return; }
 
     var payload = {
-      name: name, nickname: val('nickname')||null, phone: phone, line_id: line_id,
-      email: val('email')||null, applied_for: applied, emp_type: val('emp_type')||'fulltime',
+      name: first + ' ' + last, nickname: nickname, dob: val('dob')||null,
+      phone: phone, line_id: line_id, email: val('email')||null,
+      applied_for: applied, emp_type: val('emp_type')||'fulltime',
       province: val('province')||null, district: val('district')||null,
       avail: val('avail')||null, experience: val('experience')||null,
       emg_name: val('emg_name')||null, emg_relation: val('emg_relation')||null, emg_phone: val('emg_phone')||null,
