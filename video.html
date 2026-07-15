@@ -411,8 +411,15 @@ $('#genBtn').onclick = async () => {
 
   // นางแบบเลือกไว้ + ชุดจากคลัง → ประกอบรูป "นางแบบเราใส่ชุดนี้" ก่อน (Gemini) แล้วเอาไปขยับ
   if (CHAR_SEL && SRC.sku) {
+    // เช็คก่อนว่าเจนได้ไหม (กันเสียค่า compose ฟรี ถ้ามีคลิปค้างรอตัดสิน / เกินลิมิตวัน)
+    const chk = await vgb('can_generate', {});
+    if (chk.error) {
+      btn.disabled = false;
+      if (chk.error.code === 'feedback_required' && chk.data && chk.data.pending) { showPending(chk.data.pending); return; }
+      $('#genStatus').innerHTML = '<span class="err">' + chk.error.message + '</span>'; return;
+    }
     $('#genStatus').textContent = 'กำลังประกอบรูปนางแบบใส่ชุด… (10–30 วินาที)';
-    const comp = await sgb2('compose', { sku: SRC.sku, character: CHAR_SEL, style: 'film', pose: 'front' });
+    const comp = await sgb2('compose', { sku: SRC.sku, character: CHAR_SEL, style: 'film', pose: 'front', aspect: getAspect() });
     if (comp.error) { btn.disabled = false; $('#genStatus').innerHTML = '<span class="err">ประกอบรูปไม่สำเร็จ: ' + comp.error.message + '</span>'; return; }
     let b64;
     try { b64 = await urlToB64(comp.data.url); } catch (e) { btn.disabled = false; $('#genStatus').innerHTML = '<span class="err">โหลดรูปที่ประกอบไม่สำเร็จ</span>'; return; }

@@ -723,11 +723,16 @@ $('#lbGenBtn').onclick = async () => {
 let PEND = null;
 function showPending(p) {
   PEND = p;
-  $('#genStatus').innerHTML = '<span class="err">ต้องตัดสินรูปก่อนหน้าก่อนค่ะ</span>';
-  $('#pendWrap').style.display = '';
-  $('#pendShot').textContent = p.shot || '-';
+  const pw = document.getElementById('pendWrap');
+  // ย้าย pendWrap ขึ้นบนสุดของ .wrap ให้เห็นได้ทุกโหมด (เดิมอยู่ใน genCard ที่ถูกซ่อนในโหมด Lookbook → รูปไม่ขึ้น)
+  const wrap = document.querySelector('.wrap');
+  if (wrap && pw.parentElement !== wrap) wrap.insertBefore(pw, wrap.firstChild);
+  pw.style.display = '';
+  const gs = $('#genStatus'); if (gs) gs.innerHTML = '<span class="err">ต้องตัดสินรูปก่อนหน้าก่อนค่ะ</span>';
+  const lb = $('#lbStatus'); if (lb) lb.innerHTML = '<span class="err">มีรูปค้างรอตัดสิน — เลื่อนขึ้นไปกดผ่าน/ไม่ผ่านก่อนค่ะ</span>';
+  $('#pendShot').textContent = p.shot || '(Lookbook)';
   $('#pendImg').src = p.url || '';
-  $('#pendWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  pw.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 async function judgePending(rating) {
   if (!PEND) return;
