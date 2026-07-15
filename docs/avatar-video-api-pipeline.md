@@ -265,11 +265,25 @@ make.com มี integration สำเร็จรูปทั้ง HeyGen แ�
 | ข้อมูลวิ่งผ่าน third-party | ใช่ (ระวังข้อมูลลูกค้า — ห้ามส่ง PII) | ไม่ |
 | เหมาะกับ | **เฟส 1-2: พิสูจน์ workflow เร็ว ๆ** | **เฟส 2-3: ระบบถาวร ผูก backend** |
 
-**คำแนะนำ:** ใช้ make.com เป็น "สนามทดลอง" เฟสแรก (ต่อ script → ElevenLabs → HeyGen ให้ครบ loop
-โดยยังไม่เขียนโค้ด) → พอ workflow นิ่งแล้วค่อยย้ายเข้า Edge Functions เพื่อผูก second-brain +
-cost guard เต็มรูปแบบ · **กติกาที่ยืมมาใช้ได้ทันทีจากแนวปฏิบัติ make.com:**
+**กติกาที่ยืมมาใช้ได้ทันทีจากแนวปฏิบัติ make.com:**
 **"lock เสียงก่อน render เสมอ"** — อนุมัติสคริปต์ → gen เสียงจนพอใจ → ค่อยส่งเข้า render
 (กันเผาเครดิต render ซ้ำเพราะเสียงต้องแก้)
+
+### 11.1 ทำแทน make.com ด้วยของที่มีอยู่แล้ว (ไม่ต้องจ่าย subscription เพิ่ม)
+
+| ทางเลือก | เหมาะกับ | หมายเหตุ |
+|---|---|---|
+| **สกิล `/clip` ใน Claude Code** ⭐ | เฟส 0-1: ทดลอง + ทำจริงทีละคลิป | แพทเทิร์นเดียวกับสกิล `/banana` ที่มีอยู่: เก็บ `HEYGEN_API_KEY` / `ELEVENLABS_API_KEY` เป็น env var (ห้าม commit) · Claude เป็น orchestrator: อ่าน brand voice จาก second-brain → เขียนสคริปต์ → lock เสียง (อนุมัติในแชท) → render → ส่งไฟล์ + log ลง wiki · **ground กับ second-brain ได้ตรง ๆ ซึ่ง make.com ทำไม่ได้** |
+| **GitHub Actions (repo lloop)** | เฟส 2: งาน batch/ตามตาราง | แพทเทิร์นพิสูจน์แล้ว (`supabase-sql.yml`): secrets + workflow_dispatch/cron เช่น gen คลิปโปรทุกเช้าวันจันทร์ |
+| **n8n (self-host)** | ถ้าต้องการ visual no-code จริง ๆ | ฟรี (open-source) แต่ต้องมี server ดูแลเอง — สเกลปัจจุบัน overkill |
+| **Edge Functions ตรง ๆ** | เฟส 2-3: ระบบถาวร | ปลายทางเดิมตามแผน |
+
+**สรุปเส้นทางที่ปรับแล้ว (ตัด make.com ออก):**
+```
+เฟส 0-1: สกิล /clip (Claude Code)      → ทดลอง+ทำทีละคลิป human-in-the-loop ในแชท
+เฟส 2:   GitHub Actions (batch)        → คลิปประจำที่ทำซ้ำ
+เฟส 3:   Edge Functions เต็มระบบ        → volume คุ้มจริง + ผูก ops UI + cost guard
+```
 
 ---
 
