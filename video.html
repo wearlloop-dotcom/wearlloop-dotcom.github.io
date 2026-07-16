@@ -39,17 +39,12 @@
   .srcprev{display:flex;gap:12px;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px}
   .srcprev img{width:80px;aspect-ratio:3/4;object-fit:cover;border-radius:8px;background:#fff}
   .notice{background:#F0ECE2;border:1px solid #E2D8BE;color:#7A6516;border-radius:9px;padding:11px 13px;font-size:14px;line-height:1.5}
-  .howto{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .howto>summary{list-style:none;cursor:pointer;padding:15px 18px;font-family:var(--display);font-weight:600;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:8px}
-  .howto>summary::-webkit-details-marker{display:none}
-  .howto>summary .sub{font-size:12px;font-weight:400;color:var(--muted)}
-  .howto>summary::after{content:'▾';margin-left:auto;color:var(--muted);transition:transform .2s}
-  .howto[open]>summary::after{transform:rotate(180deg)}
-  .howto-body{padding:4px 20px 18px;border-top:1px solid var(--line)}
-  .howto-body ol{margin:12px 0 0;padding-left:20px}
-  .howto-body li{margin-bottom:9px;line-height:1.55;font-size:14.5px}
-  .howto-body li b{color:var(--ink)}
-  .howto-body .tip{margin-top:13px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--muted);line-height:1.5}
+  .qh{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--line);background:var(--soft);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;margin-left:7px;line-height:1;flex:0 0 auto;user-select:none;vertical-align:middle}
+  .qh:hover{border-color:var(--sage);color:var(--sage)}
+  .qh.on{background:var(--sage);border-color:var(--sage);color:#fff}
+  .fieldhelp{display:none;margin:0 0 12px;background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--sage);border-radius:9px;padding:11px 13px;font-size:13.5px;line-height:1.6;color:var(--ink)}
+  .fieldhelp.on{display:block}
+  .fieldhelp .rec{display:block;margin-top:6px;color:var(--sage);font-weight:600}
   .err{color:var(--clay)}
   .loading{color:var(--muted);text-align:center;padding:22px}
   .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
@@ -87,19 +82,6 @@
 <div class="wrap">
   <div id="flagNote" class="notice" style="display:none"></div>
 
-  <details class="howto">
-    <summary>📖 วิธีใช้งาน Video Studio <span class="sub">— กดดู</span></summary>
-    <div class="howto-body">
-      <ol>
-        <li><b>1 · รูปตั้งต้น</b> — เลือกชุดจากคลังจริง หรืออัปโหลดรูปเอง · คลิปจะถูกสร้างจากรูปนี้ (เลือกรูปที่ชัด เห็นชุดเต็ม ๆ ได้ผลดีสุด)</li>
-        <li><b>2 · นางแบบ</b> (ไม่บังคับ) — เลือกเพื่อประกอบรูป “หน้านางแบบเรา ใส่ชุดนี้” ก่อน แล้วค่อยขยับเป็นคลิป (เฉพาะชุดจากคลัง)</li>
-        <li><b>3 · การเคลื่อนไหว</b> — เลือกท่ากล้อง/การขยับ · เลือกการขยับน้อย ๆ คลิปจะเพี้ยนน้อยกว่า</li>
-        <li><b>4 · เจนคลิป</b> — กดสร้าง แล้วรอสักครู่ (คลิปใช้เวลาประมวลผลนานกว่ารูป)</li>
-        <li>ดู <b>ผลการเจน</b> ด้านล่าง · โหลด/ส่งต่อได้ · ดูย้อนหลังที่ <b>ประวัติ + ออดิท</b></li>
-      </ol>
-      <div class="tip">💡 สร้างคลิปด้วย AI (Veo) มีค่าใช้จ่ายต่อครั้งสูงกว่ารูป + มีลิมิตต่อคน/วัน — ตั้งค่าให้ครบทั้ง 3 ขั้นก่อนกดเจน จะได้ไม่ต้องเจนซ้ำ</div>
-    </div>
-  </details>
 
   <div class="notice" style="background:#EEF2EC;border-color:#CFE0C7;color:#3F5B39">
     ทำ <b>คลิปสั้น 4–8 วิ</b> จากรูปชุด (image-to-video) — ลง IG Reels / TikTok / เว็บ ·
@@ -108,7 +90,8 @@
   </div>
 
   <div class="card">
-    <h2>1 · รูปตั้งต้น <span class="hint">เลือกชุดจากคลังจริง หรืออัปโหลดรูปเอง — คลิปจะถูกสร้างจากรูปนี้</span></h2>
+    <h2>1 · รูปตั้งต้น <span class="hint">เลือกชุดจากคลังจริง หรืออัปโหลดรูปเอง — คลิปจะถูกสร้างจากรูปนี้</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">รูปเริ่มต้นที่คลิปจะขยับออกมา — เลือกชุดจากคลังจริง หรืออัปรูปเอง<span class="rec">แนะนำ: ใช้รูปที่ชัด เห็นชุดเต็มตัว แสงดี · รูปเบลอ/มืดจะทำให้คลิปเพี้ยน</span></div>
     <div class="tabs">
       <div class="tab on" data-src="catalog">ชุดจากคลัง</div>
       <div class="tab" data-src="upload">อัปโหลดรูปเอง</div>
@@ -132,7 +115,8 @@
   </div>
 
   <div class="card" id="charCard">
-    <h2>2 · นางแบบ (ไม่บังคับ) <span class="hint">เลือก = ประกอบรูป "หน้านางแบบเรา ใส่ชุดนี้" ก่อน แล้วค่อยขยับ (เฉพาะชุดจากคลัง)</span></h2>
+    <h2>2 · นางแบบ (ไม่บังคับ) <span class="hint">เลือก = ประกอบรูป "หน้านางแบบเรา ใส่ชุดนี้" ก่อน แล้วค่อยขยับ (เฉพาะชุดจากคลัง)</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">ถ้าเลือก ระบบจะประกอบรูป "หน้านางแบบเรา ใส่ชุดนี้" ก่อน แล้วค่อยขยับเป็นคลิป (เฉพาะชุดจากคลัง)<span class="rec">แนะนำ: อยากได้คลิปที่มีหน้านางแบบประจำร้านให้เลือก · ถ้าโชว์แค่ชุดข้ามได้</span></div>
     <div class="refrow" id="charRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <button class="btn ghost sm" id="charAdd">+ เพิ่มนางแบบ (อัปรูปหน้า ได้หลายมุม)</button>
@@ -146,7 +130,8 @@
   </div>
 
   <div class="card">
-    <h2>3 · การเคลื่อนไหว <span class="hint">เลือกท่ากล้อง/การขยับ — คลิปสั้นเพี้ยนน้อยกว่า</span></h2>
+    <h2>3 · การเคลื่อนไหว <span class="hint">เลือกท่ากล้อง/การขยับ — คลิปสั้นเพี้ยนน้อยกว่า</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">เลือกว่ากล้อง/ตัวแบบจะขยับแบบไหน (ซูม แพน หมุนเบา ๆ)<span class="rec">แนะนำ: เลือกการขยับน้อย ๆ นุ่ม ๆ คลิปจะเนียนกว่า · ขยับเยอะชุด/หน้าอาจเพี้ยน</span></div>
     <label>โมชันสำเร็จรูป (กดเลือก 1 แบบ)</label>
     <div class="chips" id="motionChips" style="margin-bottom:12px"></div>
     <label>สัดส่วนภาพ</label>
@@ -165,7 +150,8 @@
   </div>
 
   <div class="card">
-    <h2>4 · เจนคลิป</h2>
+    <h2>4 · เจนคลิป<span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">กดเพื่อให้ AI สร้างคลิปจากรูป+การเคลื่อนไหวที่ตั้งไว้ · คลิปใช้เวลาประมวลผลนานกว่ารูป รอสักครู่<span class="rec">แนะนำ: ตั้งค่าครบทั้ง 3 ขั้นก่อนกด · คลิป AI (Veo) มีค่าใช้จ่ายต่อครั้งสูงกว่ารูป + มีลิมิตต่อคน/วัน</span></div>
     <div class="meta" id="costHint" style="margin-bottom:10px"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button class="btn clay" id="genBtn">เจนคลิปวิดีโอ</button>
@@ -200,6 +186,12 @@
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
 <script>
+// "?" รายช่อง: กดสลับเปิด/ปิดกล่องช่วยเหลือที่อยู่ถัดจาก h2
+function qhToggle(el){
+  var h = el.closest('h2'); if(!h) return;
+  var box = h.nextElementSibling;
+  if(box && box.classList.contains('fieldhelp')){ box.classList.toggle('on'); el.classList.toggle('on'); }
+}
 const $ = (s) => document.querySelector(s);
 const CONF = window.CONFIG || {};
 const FN = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1/video-gen';
