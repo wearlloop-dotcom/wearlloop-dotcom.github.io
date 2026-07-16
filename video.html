@@ -42,9 +42,21 @@
   .qh{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--line);background:var(--soft);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;margin-left:7px;line-height:1;flex:0 0 auto;user-select:none;vertical-align:middle}
   .qh:hover{border-color:var(--sage);color:var(--sage)}
   .qh.on{background:var(--sage);border-color:var(--sage);color:#fff}
-  .fieldhelp{display:none;margin:0 0 12px;background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--sage);border-radius:9px;padding:11px 13px;font-size:13.5px;line-height:1.6;color:var(--ink)}
+  .fieldhelp{display:none;margin:0 0 12px;background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--sage);border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.6;color:var(--ink)}
   .fieldhelp.on{display:block}
   .fieldhelp .rec{display:block;margin-top:6px;color:var(--sage);font-weight:600}
+  label .qh{width:16px;height:16px;font-size:11px;margin-left:6px}
+  .optmodal{display:none;position:fixed;inset:0;background:rgba(30,26,20,.55);z-index:9999;padding:18px;overflow-y:auto}
+  .optmodal.on{display:flex;align-items:flex-start;justify-content:center}
+  .optmodal-box{background:var(--card);border-radius:14px;max-width:540px;width:100%;margin:auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+  .optmodal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink)}
+  .optmodal-x{cursor:pointer;color:var(--muted);font-size:13px;font-weight:600;white-space:nowrap}
+  .optmodal-x:hover{color:var(--ink)}
+  .optmodal-body{padding:6px 18px 18px;max-height:72vh;overflow-y:auto}
+  .optrow{padding:11px 0;border-bottom:1px solid var(--line)}
+  .optrow:last-child{border-bottom:none}
+  .optrow .ot{font-weight:600;font-size:13px;color:var(--ink)}
+  .optrow .od{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.55}
   .err{color:var(--clay)}
   .loading{color:var(--muted);text-align:center;padding:22px}
   .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
@@ -123,7 +135,7 @@
       <span class="meta" id="charStatus"></span>
     </div>
     <div class="meta" style="margin-top:8px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px 12px;line-height:1.6">
-      📸 <b>สเปกรูปหน้านางแบบ (ให้ล็อกหน้าแม่น):</b> ส่ง <b>3 รูป</b> — หน้าตรง / เอียง ¾ / เต็มตัว ·
+      <b>สเปกรูปหน้านางแบบ (ให้ล็อกหน้าแม่น):</b> ส่ง <b>3 รูป</b> — หน้าตรง / เอียง ¾ / เต็มตัว ·
       ≥1024px · พื้นหลังเรียบ · แสงสม่ำเสมอ · คนเดียวในรูป · <b>ชุด/ทรงผมเหมือนกันทั้ง 3 รูป</b> ·
       สีหน้าเป็นกลาง (อย่ายิ้มกว้างหรือหลับตา จะล็อกยาก)
     </div>
@@ -182,10 +194,27 @@
   </div>
 </div>
 
+<div id="optModal" class="optmodal" onclick="if(event.target===this)closeOptModal()">
+  <div class="optmodal-box">
+    <div class="optmodal-head"><span id="optModalTitle"></span><span class="optmodal-x" onclick="closeOptModal()">ปิด</span></div>
+    <div id="optModalBody" class="optmodal-body"></div>
+  </div>
+</div>
+
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
 <script>
+// ── modal อธิบายทุกตัวเลือกในกลุ่ม (กด "?" ข้าง label) ──
+function escH(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function openOptModal(title, items){
+  document.getElementById('optModalTitle').textContent = title;
+  document.getElementById('optModalBody').innerHTML = items.map(function(it){
+    return '<div class="optrow"><div class="ot">'+escH(it.label)+'</div>'+(it.desc?'<div class="od">'+escH(it.desc)+'</div>':'')+'</div>';
+  }).join('');
+  document.getElementById('optModal').classList.add('on');
+}
+function closeOptModal(){ document.getElementById('optModal').classList.remove('on'); }
 // "?" รายช่อง: กดสลับเปิด/ปิดกล่องช่วยเหลือที่อยู่ถัดจาก h2
 function qhToggle(el){
   var h = el.closest('h2'); if(!h) return;
@@ -331,7 +360,7 @@ async function loadChars() {
     const d = document.createElement('div');
     d.className = 'refbox'; d.style.cursor = 'pointer';
     if (on) { d.style.borderColor = 'var(--clay)'; d.style.borderStyle = 'solid'; d.style.background = '#FBF4EF'; }
-    d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">ไม่ใช้<br>นางแบบ</div>`) + `<div class="nm">${label}${on ? ' ✓' : ''}</div>`;
+    d.innerHTML = (url ? `<img src="${url}">` : `<div class="ph">ไม่ใช้<br>นางแบบ</div>`) + `<div class="nm">${label}${on ? ' · เลือกอยู่' : ''}</div>`;
     d.onclick = () => { CHAR_SEL = key; loadChars(); updateCostHint(); };
     row.appendChild(d);
   };
@@ -356,6 +385,15 @@ $('#charAdd').onclick = () => {
 // ── chips ──
 function makeChips(sel, items, single, def) {
   const el = $(sel);
+  // เพิ่มปุ่ม "?" ข้าง label ของกลุ่ม → กดดูคำอธิบายทุกตัวเลือก
+  const lbl = el.previousElementSibling;
+  if (lbl && lbl.tagName === 'LABEL' && items.some((x) => x.desc) && !lbl.querySelector('.qh')) {
+    const q = document.createElement('span');
+    q.className = 'qh'; q.textContent = '?'; q.title = 'ดูคำอธิบายตัวเลือก';
+    const t = lbl.textContent.trim();
+    q.onclick = (e) => { e.preventDefault(); openOptModal(t, items); };
+    lbl.appendChild(document.createTextNode(' ')); lbl.appendChild(q);
+  }
   for (const it of items) {
     const c = document.createElement('div');
     c.className = 'chip'; c.textContent = it.label; c.dataset.key = it.key;
@@ -371,21 +409,21 @@ function makeChips(sel, items, single, def) {
   return () => { const on = [...el.querySelectorAll('.chip.on')].map((c) => c.dataset.key); return single ? (on[0] || def) : on; };
 }
 const MOTION_ITEMS = [
-  { key: 'spin', label: 'หมุนตัว 360°', desc: 'นางแบบหมุนช้า ๆ โชว์ชุดรอบตัว' },
-  { key: 'catwalk', label: 'เดินแคทวอล์ค', desc: 'เดินเข้าหากล้อง ผ้าพลิ้วตามจังหวะ' },
-  { key: 'fabric', label: 'ผ้าพลิ้วตามลม', desc: 'ยืนนิ่ง ชายกระโปรง/ผ้าพลิ้วเบา ๆ' },
-  { key: 'pushin', label: 'กล้องดันเข้า', desc: 'กล้องเคลื่อนเข้าหาชุดช้า ๆ เก็บดีเทล' },
-  { key: 'subtle', label: 'ขยับเล็กน้อย (นิ่งสุด)', desc: 'ขยับน้อยที่สุด เพี้ยนน้อยสุด เหมาะชุดดีเทลเยอะ' },
+  { key: 'spin', label: 'หมุนตัว 360°', desc: 'นางแบบยืนกลางเฟรมแล้วหมุนตัวช้า ๆ รอบเดียว โชว์ชุดครบทุกด้าน (หน้า-ข้าง-หลัง) — เหมาะโชว์ทรงชุด/กระโปรงบาน · ชุดลายเยอะอาจเพี้ยนตอนหมุน' },
+  { key: 'catwalk', label: 'เดินแคทวอล์ค', desc: 'นางแบบเดินเข้าหากล้องแบบรันเวย์ ชายชุด/ผมพลิ้วตามจังหวะ ดูมีพลังหรู — เหมาะชุดราตรี/ชุดยาว' },
+  { key: 'fabric', label: 'ผ้าพลิ้วตามลม', desc: 'นางแบบยืนนิ่ง มีแค่ชายกระโปรง/ผ้าพลิ้วไหวเบา ๆ เหมือนมีลมอ่อน ดูพรีเมียมนุ่มนวล เพี้ยนน้อย — เหมาะเกือบทุกชุด' },
+  { key: 'pushin', label: 'กล้องดันเข้า', desc: 'กล้องค่อย ๆ เคลื่อนเข้าหาชุดช้า ๆ (ซูมเข้า) เน้นเก็บดีเทลผ้า/งานปัก — เหมาะโชว์รายละเอียดชุด' },
+  { key: 'subtle', label: 'ขยับเล็กน้อย (นิ่งสุด)', desc: 'ขยับน้อยที่สุด (ไหวเบา ๆ) ภาพเกือบนิ่งเหมือนรูป เพี้ยนน้อยสุด ปลอดภัยสุด — เหมาะชุดดีเทล/ลายละเอียดเยอะ' },
 ];
 const getMotion = makeChips('#motionChips', MOTION_ITEMS, true, 'spin');
 const getAspect = makeChips('#aspectChips', [
-  { key: '9:16', label: '9:16 แนวตั้ง (Reels/TikTok)' },
-  { key: '16:9', label: '16:9 แนวนอน (เว็บ/YouTube)' },
+  { key: '9:16', label: '9:16 แนวตั้ง (Reels/TikTok)', desc: 'จอแนวตั้งเต็มจอมือถือ เหมาะลง Reels / TikTok / Stories' },
+  { key: '16:9', label: '16:9 แนวนอน (เว็บ/YouTube)', desc: 'จอแนวนอน เหมาะเว็บไซต์ / YouTube / จอคอม' },
 ], true, '9:16');
 const getDur = makeChips('#durChips', [
-  { key: '4', label: '4 วินาที' },
-  { key: '6', label: '6 วินาที' },
-  { key: '8', label: '8 วินาที' },
+  { key: '4', label: '4 วินาที', desc: 'สั้นกระชับ เพี้ยนน้อยสุด + ค่าใช้จ่ายถูกสุด — เหมาะทดลอง/ลงโซเชียล' },
+  { key: '6', label: '6 วินาที', desc: 'ปานกลาง เล่าการเคลื่อนไหวได้มากขึ้นนิดหน่อย' },
+  { key: '8', label: '8 วินาที', desc: 'ยาวสุด เล่าเรื่องได้มากขึ้น แต่โอกาสเพี้ยน + ค่าใช้จ่ายสูงขึ้น' },
 ], true, '4');
 
 function updateCostHint() {
