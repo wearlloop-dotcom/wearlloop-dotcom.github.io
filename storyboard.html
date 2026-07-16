@@ -47,6 +47,17 @@
   .result img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
   .fbrow{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
   .notice{background:#F0ECE2;border:1px solid #E2D8BE;color:#7A6516;border-radius:9px;padding:11px 13px;font-size:14px;line-height:1.5}
+  .howto{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .howto>summary{list-style:none;cursor:pointer;padding:15px 18px;font-family:var(--display);font-weight:600;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .howto>summary::-webkit-details-marker{display:none}
+  .howto>summary .sub{font-size:12px;font-weight:400;color:var(--muted)}
+  .howto>summary::after{content:'▾';margin-left:auto;color:var(--muted);transition:transform .2s}
+  .howto[open]>summary::after{transform:rotate(180deg)}
+  .howto-body{padding:4px 20px 18px;border-top:1px solid var(--line)}
+  .howto-body ol{margin:12px 0 0;padding-left:20px}
+  .howto-body li{margin-bottom:9px;line-height:1.55;font-size:14.5px}
+  .howto-body li b{color:var(--ink)}
+  .howto-body .tip{margin-top:13px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--muted);line-height:1.5}
   .err{color:var(--clay)}
   .loading{color:var(--muted);text-align:center;padding:22px}
   .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
@@ -103,6 +114,21 @@
 </div>
 <div class="wrap">
   <div id="flagNote" class="notice" style="display:none"></div>
+
+  <details class="howto">
+    <summary>📖 วิธีใช้งาน Storyboard Studio <span class="sub">— กดดู</span></summary>
+    <div class="howto-body">
+      <ol>
+        <li><b>เลือกโหมดบนสุด</b> — <b>Storyboard</b> = ทำภาพประกอบวิดีโอ Hero ทีละช็อต · <b>Lookbook</b> = ทำรูปนางแบบ+ชุดจริงไปโพสต์โซเชียล</li>
+        <li><b>อัปรูป Reference</b> (ถ้ามี) — อัปครั้งเดียว ระบบแนบให้ทุกการเจนอัตโนมัติ ช่วยให้โทน/สไตล์คงเส้นคงวา</li>
+        <li><b>เพิ่มตัวละคร / นางแบบ</b> — อัปรูปหน้าได้หลายมุม (หน้าตรง/ข้าง/เต็มตัว) เพื่อล็อกหน้าคนเดิมให้แม่นทุกช็อต</li>
+        <li><b>เพิ่มสถานที่ / ฉาก</b> — อัปรูปฉาก (คาเฟ่/อีเวนต์/ร้านจริง) เพื่อให้ฉากนิ่งไม่เปลี่ยนทุกครั้งที่เจน</li>
+        <li><b>เลือกช็อต</b> จากลิสต์ (หรือ “สร้าง scene ใหม่เอง” เขียน prompt เอง) → กด <b>เจนภาพ</b></li>
+        <li>ดู <b>ผลการเจน</b> ด้านล่าง · ดูย้อนหลังได้ที่ <b>ประวัติ + ออดิท</b></li>
+      </ol>
+      <div class="tip">💡 เจนด้วย AI มีค่าใช้จ่ายต่อครั้ง + มีลิมิตต่อคน/วัน — เลือกช็อต/ตั้งค่าให้ครบก่อนกดเจน จะได้ไม่ต้องเจนซ้ำ</div>
+    </div>
+  </details>
 
   <div class="card">
     <h2>วันนี้จะทำงานแบบไหนคะ?</h2>
