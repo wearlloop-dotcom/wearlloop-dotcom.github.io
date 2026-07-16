@@ -120,6 +120,7 @@
           <option value="admin">แอดมิน</option><option value="stylist">สไตลิสต์</option>
           <option value="laundry">ซัก/ดูแลชุด</option><option value="repair">ช่างซ่อม</option>
           <option value="shipping">จัดส่ง</option><option value="sales">ขาย</option>
+          <option value="marketing">การตลาด (คอนเทนต์/คลิป AI)</option><option value="manager">ผู้จัดการ</option>
           <option value="owner">เจ้าของ/ผู้บริหาร</option></select></div>
         <div><label>แผนก</label><input id="department" placeholder="เช่น คลัง/ดูแลชุด"></div>
         <div><label>ประเภทจ้าง</label><select id="emp_type">
@@ -223,7 +224,7 @@
   let curStatus='', curEmp=null, curKpiPeriod=thisPeriod();
   function thisPeriod(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2500);}
-  const ROLE_TH={admin:'แอดมิน',stylist:'สไตลิสต์',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง',sales:'ขาย',owner:'เจ้าของ'};
+  const ROLE_TH={admin:'แอดมิน',stylist:'สไตลิสต์',laundry:'ซัก/ดูแลชุด',repair:'ช่างซ่อม',shipping:'จัดส่ง',sales:'ขาย',marketing:'การตลาด',manager:'ผู้จัดการ',owner:'เจ้าของ'};
   const ST_TH={applicant:'ผู้สมัคร',interview:'สัมภาษณ์',offer:'เสนองาน',hired:'จ้างแล้ว',probation:'ทดลองงาน',active:'ทำงาน',suspended:'พักงาน',resigned:'ลาออก',rejected:'ไม่ผ่าน'};
   function pill(s){return `<span class="pill ${s}">${ST_TH[s]||s}</span>`;}
 
