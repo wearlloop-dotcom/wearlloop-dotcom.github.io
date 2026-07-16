@@ -47,17 +47,12 @@
   .result img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
   .fbrow{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
   .notice{background:#F0ECE2;border:1px solid #E2D8BE;color:#7A6516;border-radius:9px;padding:11px 13px;font-size:14px;line-height:1.5}
-  .howto{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .howto>summary{list-style:none;cursor:pointer;padding:15px 18px;font-family:var(--display);font-weight:600;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:8px}
-  .howto>summary::-webkit-details-marker{display:none}
-  .howto>summary .sub{font-size:12px;font-weight:400;color:var(--muted)}
-  .howto>summary::after{content:'▾';margin-left:auto;color:var(--muted);transition:transform .2s}
-  .howto[open]>summary::after{transform:rotate(180deg)}
-  .howto-body{padding:4px 20px 18px;border-top:1px solid var(--line)}
-  .howto-body ol{margin:12px 0 0;padding-left:20px}
-  .howto-body li{margin-bottom:9px;line-height:1.55;font-size:14.5px}
-  .howto-body li b{color:var(--ink)}
-  .howto-body .tip{margin-top:13px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--muted);line-height:1.5}
+  .qh{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--line);background:var(--soft);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;margin-left:7px;line-height:1;flex:0 0 auto;user-select:none;vertical-align:middle}
+  .qh:hover{border-color:var(--sage);color:var(--sage)}
+  .qh.on{background:var(--sage);border-color:var(--sage);color:#fff}
+  .fieldhelp{display:none;margin:0 0 12px;background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--sage);border-radius:9px;padding:11px 13px;font-size:13.5px;line-height:1.6;color:var(--ink)}
+  .fieldhelp.on{display:block}
+  .fieldhelp .rec{display:block;margin-top:6px;color:var(--sage);font-weight:600}
   .err{color:var(--clay)}
   .loading{color:var(--muted);text-align:center;padding:22px}
   .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
@@ -115,23 +110,10 @@
 <div class="wrap">
   <div id="flagNote" class="notice" style="display:none"></div>
 
-  <details class="howto">
-    <summary>📖 วิธีใช้งาน Storyboard Studio <span class="sub">— กดดู</span></summary>
-    <div class="howto-body">
-      <ol>
-        <li><b>เลือกโหมดบนสุด</b> — <b>Storyboard</b> = ทำภาพประกอบวิดีโอ Hero ทีละช็อต · <b>Lookbook</b> = ทำรูปนางแบบ+ชุดจริงไปโพสต์โซเชียล</li>
-        <li><b>อัปรูป Reference</b> (ถ้ามี) — อัปครั้งเดียว ระบบแนบให้ทุกการเจนอัตโนมัติ ช่วยให้โทน/สไตล์คงเส้นคงวา</li>
-        <li><b>เพิ่มตัวละคร / นางแบบ</b> — อัปรูปหน้าได้หลายมุม (หน้าตรง/ข้าง/เต็มตัว) เพื่อล็อกหน้าคนเดิมให้แม่นทุกช็อต</li>
-        <li><b>เพิ่มสถานที่ / ฉาก</b> — อัปรูปฉาก (คาเฟ่/อีเวนต์/ร้านจริง) เพื่อให้ฉากนิ่งไม่เปลี่ยนทุกครั้งที่เจน</li>
-        <li><b>เลือกช็อต</b> จากลิสต์ (หรือ “สร้าง scene ใหม่เอง” เขียน prompt เอง) → กด <b>เจนภาพ</b></li>
-        <li>ดู <b>ผลการเจน</b> ด้านล่าง · ดูย้อนหลังได้ที่ <b>ประวัติ + ออดิท</b></li>
-      </ol>
-      <div class="tip">💡 เจนด้วย AI มีค่าใช้จ่ายต่อครั้ง + มีลิมิตต่อคน/วัน — เลือกช็อต/ตั้งค่าให้ครบก่อนกดเจน จะได้ไม่ต้องเจนซ้ำ</div>
-    </div>
-  </details>
 
   <div class="card">
-    <h2>วันนี้จะทำงานแบบไหนคะ?</h2>
+    <h2>วันนี้จะทำงานแบบไหนคะ?<span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">เลือกว่าจะทำงานแบบไหน — <b>Storyboard</b> ทำภาพประกอบวิดีโอ Hero ทีละช็อต (ต่อเนื่องเป็นเรื่อง) · <b>Lookbook</b> ทำรูปนางแบบใส่ชุดจริงไปโพสต์เว็บ/โซเชียล<span class="rec">แนะนำ: จะทำคลิปโปรโมตเลือก Storyboard · อยากได้รูปโพสต์ขายของเลือก Lookbook</span></div>
     <div class="tabs" style="margin-bottom:0">
       <div class="tab on" data-mode="sb" style="padding:14px">Storyboard<br><span style="font-size:12px;font-weight:400">ทำภาพประกอบวิดีโอ Hero Video ทีละช็อต</span></div>
       <div class="tab" data-mode="lb" style="padding:14px">Lookbook<br><span style="font-size:12px;font-weight:400">ทำรูปนางแบบ+ชุดจริง ไปโพสต์เว็บ/โซเชียล</span></div>
@@ -139,7 +121,8 @@
   </div>
 
   <div class="card" id="refCard">
-    <h2>รูป Reference <span class="hint">อัปโหลดครั้งเดียว ใช้ทุกการเจน — ระบบเลือกแนบให้ตามช็อตอัตโนมัติ</span></h2>
+    <h2>รูป Reference <span class="hint">อัปโหลดครั้งเดียว ใช้ทุกการเจน — ระบบเลือกแนบให้ตามช็อตอัตโนมัติ</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">รูปตัวอย่างโทน/สไตล์ที่อยากได้ (แสง สี อารมณ์) อัปครั้งเดียว ระบบแนบให้ทุกครั้งที่เจน เพื่อคุมโทนให้เหมือนกันทั้งชุด<span class="rec">แนะนำ: ใส่รูปที่มีแสง/โทนสีที่ต้องการ 1–3 รูปพอ ไม่ต้องเยอะ</span></div>
     <div class="refrow" id="refRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <button class="btn sage sm" id="seedBtn">โหลดรูปตั้งต้นจากระบบ (Meili · ห้อง · ชุด · โลโก้ + ตัวละคร 8 สไตล์)</button>
@@ -148,19 +131,22 @@
   </div>
 
   <div class="card" id="charCard">
-    <h2>ตัวละคร / นางแบบ <span class="hint">กดเลือกว่าจะเจนด้วยหน้าใคร — อัปได้หลายมุม (หน้าตรง/ข้าง/เต็มตัว) ล็อกหน้าแม่นขึ้น · ปุ่ม "+ มุม" เพิ่มมุมให้ตัวเดิม</span></h2>
+    <h2>ตัวละคร / นางแบบ <span class="hint">กดเลือกว่าจะเจนด้วยหน้าใคร — อัปได้หลายมุม (หน้าตรง/ข้าง/เต็มตัว) ล็อกหน้าแม่นขึ้น · ปุ่ม "+ มุม" เพิ่มมุมให้ตัวเดิม</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">รูปหน้าคนที่อยากให้ AI เจนออกมาเป็นคนเดิมทุกช็อต — ยิ่งอัปหลายมุม AI ยิ่งจำหน้าแม่น<span class="rec">แนะนำ: อัปหน้าตรงชัด ๆ อย่างน้อย 1 รูป + มุมข้าง/เต็มตัวถ้ามี · หน้าเบลอ/มืดจะทำให้หน้าเพี้ยน</span></div>
     <div class="refrow" id="charRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px"><button class="btn ghost sm" id="charAdd">+ เพิ่มตัวละครเข้าคลัง</button></div>
   </div>
 
   <div class="card" id="locCard">
-    <h2>สถานที่ / ฉาก <span class="hint">อัปได้หลายมุม/หลายด้านของฉากเดียว (คาเฟ่ อีเวนต์ ร้านจริง) → ฉากนิ่งไม่เปลี่ยนทุกครั้งที่เจน · มีคำบรรยาย+ทดสอบได้เหมือนตัวละคร · เพิ่มฉากใหม่ได้เรื่อย ๆ</span></h2>
+    <h2>สถานที่ / ฉาก <span class="hint">อัปได้หลายมุม/หลายด้านของฉากเดียว (คาเฟ่ อีเวนต์ ร้านจริง) → ฉากนิ่งไม่เปลี่ยนทุกครั้งที่เจน · มีคำบรรยาย+ทดสอบได้เหมือนตัวละคร · เพิ่มฉากใหม่ได้เรื่อย ๆ</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">รูปฉากจริง (คาเฟ่/อีเวนต์/ร้าน) เพื่อให้ฉากในทุกช็อตเป็นที่เดียวกัน ไม่เปลี่ยนไปมา<span class="rec">แนะนำ: ถ่ายฉากหลายมุมของที่เดียวกัน แล้วอัปรวมเป็นฉากเดียว จะได้ต่อช็อตเนียน</span></div>
     <div class="refrow" id="locRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px"><button class="btn ghost sm" id="locAdd">+ เพิ่มสถานที่เข้าคลัง</button></div>
   </div>
 
   <div class="card" id="shotCard">
-    <h2>เลือกช็อต <span class="hint">LLOOP Hero Video · 29 ช็อต · 2 ซีน</span></h2>
+    <h2>เลือกช็อต <span class="hint">LLOOP Hero Video · 29 ช็อต · 2 ซีน</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">เลือกช็อตจากสตอรี่บอร์ด Hero Video ที่วางไว้แล้ว — กดช็อตที่อยากเจน<span class="rec">แนะนำ: เริ่มจากช็อตเปิด (ซีนแรก) แล้วไล่ทีละช็อตให้ครบ จะได้คลิปที่ต่อกันเป็นเรื่อง</span></div>
     <div class="tabs">
       <div class="tab on" data-scene="1">ซีน 1 · องก์ปัญหา (1–14)</div>
       <div class="tab" data-scene="2">ซีน 2 · Endless Wardrobe (15–29)</div>
@@ -169,7 +155,8 @@
   </div>
 
   <div class="card" id="genCard" style="display:none">
-    <h2 id="genTitle">เจนภาพ</h2>
+    <h2 id="genTitle">เจนภาพ<span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">กดเพื่อให้ AI สร้างภาพช็อตที่เลือก โดยใช้ตัวละคร/ฉาก/reference ด้านบน<span class="rec">แนะนำ: ตรวจว่าเลือกตัวละคร+ฉากครบก่อนกด เพราะเจนแต่ละครั้งมีค่าใช้จ่าย + มีลิมิตต่อคน/วัน</span></div>
     <div class="fields" id="shotFields"></div>
     <label>Preset แก้งานด่วน (กดเลือกได้ ไม่ต้องพิมพ์)</label>
     <div class="chips" id="presetChips" style="margin-bottom:10px"></div>
@@ -213,7 +200,8 @@
   </div>
 
   <div class="card" id="newSceneCard" style="display:none">
-    <h2>สร้าง scene ใหม่เอง <span class="hint">เขียน prompt เองสำหรับ scene ที่ยังไม่มีในลิสต์ — ใช้นางแบบ/ชุด/สถานที่ที่เลือกด้านบน</span></h2>
+    <h2>สร้าง scene ใหม่เอง <span class="hint">เขียน prompt เองสำหรับ scene ที่ยังไม่มีในลิสต์ — ใช้นางแบบ/ชุด/สถานที่ที่เลือกด้านบน</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">เขียนบรรยายเองสำหรับซีนที่ยังไม่มีในลิสต์ ระบบจะใช้ตัวละคร/ชุด/สถานที่ที่เลือกไว้<span class="rec">แนะนำ: เขียนสั้น ชัด บอกมุมกล้อง+อารมณ์ เช่น "โคลสอัพใบหน้ายิ้ม แสงอุ่นตอนเย็น"</span></div>
     <label>Prompt scene ใหม่ (ภาษาอังกฤษได้ผลดีกว่า — บรรยายฉาก ตัวละคร การกระทำ มุมกล้อง แสง องค์ประกอบให้ครบ)</label>
     <textarea id="newScenePrompt" style="min-height:150px" placeholder="เช่น: Cinematic wide shot of Meili standing by a sunlit window in a warm cream bedroom, holding a LLOOP dress, soft golden morning light, 35mm, complete balanced composition, all elements in frame..."></textarea>
     <div class="meta" style="margin-top:6px">เลือกชุดพระเอกให้ scene นี้ (ถ้าต้องการ) — ค้นหาแล้วกดเลือก</div>
@@ -230,7 +218,8 @@
   </div>
 
   <div class="card" id="lbCard">
-    <h2>Lookbook Studio <span class="hint">ภาพถ่ายสตูดิโอ นางแบบ + ชุดจริงจากคลัง — ไม่ต้องอิง storyboard · แนวตั้ง 3:4</span></h2>
+    <h2>Lookbook Studio <span class="hint">ภาพถ่ายสตูดิโอ นางแบบ + ชุดจริงจากคลัง — ไม่ต้องอิง storyboard · แนวตั้ง 3:4</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">โหมดถ่ายรูปสตูดิโอ นางแบบใส่ชุดจริงจากคลัง ไม่ต้องอิงสตอรี่บอร์ด ได้รูปแนวตั้ง 3:4 ไปโพสต์ได้เลย<span class="rec">แนะนำ: เลือกชุดจากคลัง + นางแบบ แล้วกดเจน เหมาะทำรูปโพสต์ไอจี/ขายของ</span></div>
     <div class="meta" style="margin-bottom:10px">นางแบบ = ตัวละครที่เลือกในการ์ด "ตัวละคร/นางแบบ" ด้านบน</div>
     <label>ชุดที่จะใส่ (ค้นหาจากคลังจริง แล้วกดเลือก)</label>
     <div style="display:flex;gap:8px">
@@ -275,6 +264,12 @@
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
 <script>
+// "?" รายช่อง: กดสลับเปิด/ปิดกล่องช่วยเหลือที่อยู่ถัดจาก h2
+function qhToggle(el){
+  var h = el.closest('h2'); if(!h) return;
+  var box = h.nextElementSibling;
+  if(box && box.classList.contains('fieldhelp')){ box.classList.toggle('on'); el.classList.toggle('on'); }
+}
 const $ = (s) => document.querySelector(s);
 const CONF = window.CONFIG || {};
 const FN = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1/storyboard-gen';

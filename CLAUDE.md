@@ -4,6 +4,11 @@ Repo นี้คือ **หน้าเว็บ static ของ LLOOP** (เ
 merge เข้า `main` = ขึ้นเว็บจริง https://wearlloop-dotcom.github.io ภายใน ~1-2 นาที
 Backend (SQL + Edge Functions) อยู่คนละ repo: `wearlloop-dotcom/lloop`
 
+## สไตล์: ห้ามใช้ emoji ทั้งโปรเจค
+
+โปรเจคนี้ **ไม่ใช้ emoji เลย** ทั้งใน UI หน้าเว็บ, ปุ่ม, ข้อความ, ไอคอนช่วยเหลือ ฯลฯ —
+ใช้ตัวหนังสือ/สัญลักษณ์เรียบ ๆ (เช่น `?`, `▾`, `·`) หรือ SVG แทน · ห้าม commit emoji ลงหน้าเว็บ
+
 ## ⚠️ ห้ามแก้หน้า ops ตรงในรีโปนี้ — จะโดน auto-deploy ทับ
 
 repo `lloop` มี workflow `deploy-site.yml` (อยู่บน branch ที่กำลังพัฒนา เช่น `new-arrivals-notify-fix`)
