@@ -208,7 +208,7 @@
     if(!code){ status('ใส่รหัสชุดก่อนนะคะ', true); return; }
     if(!sb()){ status('ต่อระบบไม่ได้ (เปิดผ่านเซิร์ฟเวอร์ liff)', true); return; }
     status('กำลังดึง…');
-    const { data:g, error } = await sb().from('garments').select('*').ilike('code', code).maybeSingle();
+    const { data:g, error } = await sb().from('garments_public').select('*').ilike('code', code).maybeSingle();
     if(error || !g){ status('ไม่พบชุดรหัสนี้ (หรือยังไม่ ready)', true); return; }
 
     set('f-name', g.name||g.code);

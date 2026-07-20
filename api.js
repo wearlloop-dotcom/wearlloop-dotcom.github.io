@@ -93,7 +93,7 @@ window.API = (function () {
     }
 
     // 3) แคตตาล็อก (เฉพาะที่ data_status='ready')
-    const { data: rows } = await c.from('garments').select('*').eq('data_status','ready');
+    const { data: rows } = await c.from('garments_public').select('*').eq('data_status','ready');
     const garments = (rows || []).map(mapGarment);
 
     // 4) event ใกล้สุดของลูกค้า
