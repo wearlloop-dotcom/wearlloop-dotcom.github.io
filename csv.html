@@ -80,14 +80,9 @@
     <button class="howto-i" id="howtoI" aria-label="วิธีใช้งาน" title="วิธีใช้งาน — เอาเมาส์ชี้เพื่อดู">i</button>
     <div class="eyebrow">bulk data · csv</div>
     <h1>ชุดทั้งคลังในไฟล์เดียว</h1>
-    <div class="sub">ส่งออกทั้งคลังไปแก้ในชีต แล้วนำกลับเข้าระบบทีละเยอะ — ดูแลข้อมูลทุกชุดให้ครบถ้วนพร้อมหมุนเวียนต่อ</div>
+    <div class="sub">โหลด template ว่างไปกรอกในชีต แล้วนำเข้าระบบทีละเยอะ — เพิ่มชุดใหม่และใส่รูปได้ในไฟล์เดียว</div>
     <div class="howto-hint" id="howtoHint">วิธีใช้งานแบบละเอียด <b>พร้อมภาพ &rarr;</b></div>
   </section>
-  <div class="card">
-    <h2> Export — ดึงชุดทั้งหมดออกเป็น CSV</h2>
-    <p>ได้ไฟล์ <code>lloop_garments.csv</code> เปิดด้วย Excel/Google Sheets ได้ (รองรับภาษาไทย) — แก้ในชีตแล้วเอากลับมา import ได้</p>
-    <button class="btn" onclick="exportCSV()">ดาวน์โหลด CSV ทั้งหมด</button>
-  </div>
   <div class="card">
     <h2> Import — เพิ่ม/แก้ชุดทีละเยอะจาก CSV</h2>
     <p>หัวคอลัมน์ต้องตรง (โหลด template ด้านล่าง) · ฟิลด์หลายค่า (occasion_tags, styling_tips, photos) คั่นด้วย <code>;</code><br>โค้ดเดิม = อัปเดต · โค้ดใหม่/เว้นว่าง = เพิ่มใหม่ (สถานะ needs_review)</p>
@@ -122,8 +117,8 @@
           <text x="72" y="34" font-family="Poppins,sans-serif" font-size="7" font-weight="700" fill="#A3884E" text-anchor="middle">CSV</text>
         </svg></div>
         <div class="tx"><span class="n">ขั้น 1</span>
-          <h4>Export — ดาวน์โหลดชุดทั้งคลัง</h4>
-          <p>กด <b>ดาวน์โหลด CSV ทั้งหมด</b> จะได้ไฟล์ <code>lloop_garments.csv</code> เปิดด้วย Excel / Google Sheets ได้ (รองรับภาษาไทย)</p>
+          <h4>โหลด template ว่าง</h4>
+          <p>กด <b>โหลด template ว่าง</b> จะได้ไฟล์ <code>lloop_template.csv</code> ที่มีหัวคอลัมน์ครบ + แถวตัวอย่าง 1 แถว เปิดด้วย Excel / Google Sheets ได้ (รองรับภาษาไทย)</p>
         </div>
       </div>
 
@@ -139,8 +134,8 @@
           <rect x="37" y="35" width="17" height="10" fill="#F4EEE1" stroke="#C9A86A" stroke-width="1.4"/>
         </svg></div>
         <div class="tx"><span class="n">ขั้น 2</span>
-          <h4>แก้ในชีต</h4>
-          <p>เติม/แก้ราคาและข้อมูลในชีตได้ตามสบาย · ฟิลด์หลายค่า (<code>occasion_tags</code>, <code>styling_tips</code>, <code>photos</code>) คั่นแต่ละค่าด้วย <code>;</code></p>
+          <h4>กรอกข้อมูลลงชีต</h4>
+          <p>พิมพ์ข้อมูลชุดทีละแถว · ฟิลด์หลายค่า (<code>occasion_tags</code>, <code>styling_tips</code>, <code>photos</code>) คั่นแต่ละค่าด้วย <code>;</code></p>
         </div>
       </div>
 
@@ -225,12 +220,6 @@
   function log(msg,cls){ const l=$('log'); l.className='log show'; l.textContent += msg+'\n'; if(cls)l.style.color=cls; }
   function dl(name,text){ const b=new Blob(['﻿'+text],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); }
 
-  async function exportCSV(){
-    const { data, error } = await sb.rpc('ops_garments');
-    if(error){ log('ดึงไม่ได้: '+error.message,'#A32D2D'); return; }
-    const rows = data.map(g=>{ const o={}; COLS.forEach(c=> o[c]= MULTI.includes(c)? (g[c]||[]).join(';') : (g[c]??'')); return o; });
-    dl('lloop_garments.csv', Papa.unparse({fields:COLS, data:rows}));
-  }
   function downloadTemplate(){ dl('lloop_template.csv', Papa.unparse({fields:COLS, data:[{code:'',name:'ตัวอย่างเดรส',brand:'LLOOP',tier:'Standard',size:'M',condition:'good',rental_price:'320',acquisition_cost:'450',rate_1d:'',rate_3d:'',rate_5d:'',category:'dress',dress_code:'smart_casual',occasion_tags:'cafe;work',color_name:'navy',color_hex:'#15233F',color_season:'winter',bust_min_in:'32',bust_max_in:'36',waist_min_in:'26',waist_max_in:'30',length_cm:'92',stretch:'slight',fabric_composition:'ซาตินโพลี 95%',has_lining:'true',is_sheer:'false',fabric_weight:'ทิ้งตัว',styling_tips:'ใส่บราเกาะอก;ซ่อนสายในได้',photos:''}]})); }
 
   function importCSV(){
