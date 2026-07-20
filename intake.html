@@ -72,6 +72,10 @@
       <div class="field"><label>ค่าเช่า/ครั้ง</label><input id="f_price" type="number" placeholder="320"></div>
     </div>
     <div class="row2">
+      <div class="field"><label>ราคาเต็ม (ป้ายปกติ · โชว์หน้าเว็บ)</label><input id="f_retail" type="number" min="0" placeholder="เช่น 2500"></div>
+      <div class="field"><label>ราคาที่ซื้อมา/ทุน (มือสอง · ไม่โชว์ลูกค้า)</label><input id="f_acq" type="number" min="0" placeholder="เช่น 800"></div>
+    </div>
+    <div class="row2">
       <div class="field"><label>ไซส์ (size)</label><select id="f_size"><option value="">— ไม่ระบุ —</option><option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option><option value="FREE">FREE SIZE</option></select></div>
       <div class="field"><label>สภาพชุด (condition)</label><select id="f_condition"><option value="new">ใหม่มาก</option><option value="good">ดี</option><option value="fair">พอใช้</option><option value="poor">ต้องซ่อม</option></select></div>
     </div>
@@ -165,6 +169,8 @@
       waist_min_in:$('f_wmin').value, waist_max_in:$('f_wmax').value,
       fabric_composition:$('f_fabric').value, styling_tips:tips,
       photos:$('f_photo').value?[$('f_photo').value]:[],
+      retail_value:$('f_retail').value||null,
+      acquisition_cost:$('f_acq').value||null,
       size:$('f_size').value||null,
       condition:$('f_condition').value||null
     };

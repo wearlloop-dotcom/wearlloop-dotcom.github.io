@@ -415,6 +415,10 @@
         <div><label>ลิมิตซัก (ครั้ง)</label><input id="e_washlim" type="number" value="${r.wash_limit??''}"></div>
       </div>
       <div class="row">
+        <div><label>ราคาเต็ม (ป้ายปกติ · โชว์หน้าเว็บ)</label><input id="e_retail" type="number" min="0" placeholder="เช่น 2500" value="${r.retail_value??''}"></div>
+        <div><label>ราคาที่ซื้อมา/ทุน (มือสอง · ไม่โชว์ลูกค้า)</label><input id="e_acq" type="number" min="0" placeholder="เช่น 800" value="${r.acquisition_cost??''}"></div>
+      </div>
+      <div class="row">
         <div><label>สี (ชื่อ)</label><input id="e_colorname" value="${esc(r.color_name||'')}"></div>
         <div><label>โค้ดสี</label><input id="e_colorhex" type="color" value="${/^#[0-9a-fA-F]{6}$/.test(r.color_hex||'')?r.color_hex:'#C9A86A'}"></div>
       </div>
@@ -467,6 +471,7 @@
         name:$('e_name').value.trim(), brand:$('e_brand').value.trim(),
         size:$('e_size').value, category:$('e_cat').value, tier:$('e_tier').value,
         rental_price:$('e_price').value, condition_grade:$('e_grade').value,
+        retail_value:$('e_retail').value, acquisition_cost:$('e_acq').value,
         wash_limit:$('e_washlim').value,
         color_name:$('e_colorname').value.trim(), color_hex:$('e_colorhex').value,
         fabric_composition:$('e_fabric').value.trim(),

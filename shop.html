@@ -154,6 +154,10 @@
   function card(g){
     const photo = (Array.isArray(g.photos) && g.photos[0]) || g.photo || null;
     const price = g.rate_1d ?? g.rental_price ?? 0;
+    const retail = Number(g.retail_value) || 0;
+    const retailTag = retail > price
+      ? `<span style="text-decoration:line-through;color:#9a988f;font-weight:400;margin-right:5px">${baht(retail)}</span>`
+      : '';
     const out = !(g.status === 'available');
     const img = photo
       ? `<img src="${photo}" alt="${g.name||g.code||''}" loading="lazy">`
@@ -161,7 +165,7 @@
     return `<a class="pcard" href="${LINE}">
       <div class="pphoto">${img}${out?'<span class="pout">มีคิวจอง</span>':''}</div>
       <div class="pname">${g.name || g.code || ''}</div>
-      <div class="pprice">${baht(price)} <small>/ วัน</small></div>
+      <div class="pprice">${retailTag}${baht(price)} <small>/ วัน</small></div>
     </a>`;
   }
 
@@ -169,7 +173,7 @@
     if(!C.SUPABASE_URL || !window.supabase){ grid.innerHTML = '<div class="loading">ตั้งค่า config.js ก่อน</div>'; return; }
     const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
     const { data, error } = await sb.from('garments')
-      .select('id,code,name,rate_1d,rental_price,photos,status,color_name,times_rented')
+      .select('id,code,name,rate_1d,rental_price,retail_value,photos,status,color_name,times_rented')
       .eq('data_status','ready')
       .order('times_rented', { ascending:false })
       .limit(24);
