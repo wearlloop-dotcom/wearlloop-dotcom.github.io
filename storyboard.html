@@ -61,10 +61,14 @@
   .optmodal-x{cursor:pointer;color:var(--muted);font-size:13px;font-weight:600;white-space:nowrap}
   .optmodal-x:hover{color:var(--ink)}
   .optmodal-body{padding:6px 18px 18px;max-height:72vh;overflow-y:auto}
-  .optrow{padding:11px 0;border-bottom:1px solid var(--line)}
+  .optrow{padding:11px 0;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
   .optrow:last-child{border-bottom:none}
+  .optrow .optviz{flex:0 0 auto;width:50px;height:62px;border-radius:8px;border:1px solid var(--line);overflow:hidden;background:var(--soft);display:flex;align-items:center;justify-content:center}
+  .optrow .optviz svg,.optrow .optviz img{width:100%;height:100%;display:block;object-fit:cover}
+  .optrow .optmeta{flex:1;min-width:0}
   .optrow .ot{font-weight:600;font-size:13px;color:var(--ink)}
   .optrow .od{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.55}
+  .optnote{font-size:11.5px;color:var(--muted);margin:2px 0 10px;line-height:1.5;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
   .err{color:var(--clay)}
   .loading{color:var(--muted);text-align:center;padding:22px}
   .stat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
@@ -195,7 +199,12 @@
         <div class="meta" style="margin-top:4px">ถ้ามีข้อความในช่องนี้ตอนกดเจน ระบบจะใช้ prompt นี้แทน (รูป reference ยังแนบให้เหมือนเดิม)</div>
       </div>
     </div>
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px;color:var(--ink);cursor:pointer">
+      <input type="checkbox" id="contToggle" checked style="width:auto;margin:0">
+      โทนต่อเนื่องกับช็อตก่อนหน้า
+      <span class="qh" onclick="event.preventDefault();qhInfo('โทนต่อเนื่อง (continuity)','เมื่อเปิด ระบบจะแนบ “ช็อตล่าสุดที่คุณกดผ่าน” เป็นภาพอ้างอิงตอนเจนช็อตถัดไป แล้วสั่งให้ AI คุมโทนสี แสง มู้ด และความต่อเนื่องของฉากให้เหมือนกัน — แก้ปัญหาโทนภาพกระโดดระหว่างช็อต','เปิดไว้เป็นค่าเริ่มต้น · ช็อตแรก (ยังไม่มีรูปผ่าน) ระบบข้ามให้เอง · ถ้าอยากให้แต่ละช็อตอิสระจากกัน ค่อยปิด')">?</span>
+    </label>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button class="btn clay" id="genBtn">เจนภาพช็อตนี้</button>
       <span class="meta" id="genStatus"></span>
     </div>
@@ -283,13 +292,60 @@
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
 <script>
-// ── modal อธิบายทุกตัวเลือกในกลุ่ม (กด "?" ข้าง label) ──
+// ── modal อธิบายทุกตัวเลือกในกลุ่ม (กด "?" ข้าง label) + รูปประกอบ SVG ──
 function escH(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-function openOptModal(title, items){
+// สี/มู้ด/ผัง เป็น SVG (ไม่ต้อง gen รูป) — สีฉากเป็นสีจริง · มู้ดหนังเป็นไล่เฉดสี · ท่าโพส/มุมกล้องเป็นผัง
+var VIZ_SOLID = { cream:'#ECE6DA', white:'#F6F4F0', greige:'#D6CDBF', terracotta:'#B5734B' };
+var VIZ_GRAD = {
+  film:['#EDE3D2','#D3BE9C'], studio:['#F3F3F1','#D9D9D6'],
+  crazyrich:['#0B5D4E','#C9A86A'], gatsby:['#2E2413','#D8B24A'], buppe:['#6B4A2A','#D2AE72'],
+  lalaland:['#5B3B8C','#2E6FB0'], cmbyn:['#C4863A','#E7D6A2'], inthemood:['#5A1A1A','#2E3D2E'],
+  barbie:['#F06FB0','#FBD6E8'], dune:['#C79A5B','#E7CE9E'], marie:['#E6C4D6','#F2E2C6'],
+  goldwarm:['#E8C88A','#B5824A'], coolwindow:['#CFE0EA','#8FA9B8'], studiosoft:['#F0EFEC','#D2D0CB']
+};
+var _F='#C3BCAE', _D='#6E8A6A';
+var VIZ_SVG = {
+  front:'<svg viewBox="0 0 50 62"><circle cx="25" cy="16" r="7" fill="'+_F+'"/><circle cx="22.5" cy="15.5" r="1" fill="#fff"/><circle cx="27.5" cy="15.5" r="1" fill="#fff"/><path d="M15 52 Q25 24 35 52 Z" fill="'+_F+'"/></svg>',
+  side34:'<svg viewBox="0 0 50 62"><circle cx="28" cy="16" r="7" fill="'+_F+'"/><path d="M35 15 l3 1.5 -3 1.5Z" fill="'+_F+'"/><path d="M19 52 Q30 24 37 52 Z" fill="'+_F+'"/></svg>',
+  back:'<svg viewBox="0 0 50 62"><circle cx="25" cy="16" r="7" fill="'+_F+'"/><path d="M18 15 a7 7 0 0 1 14 0Z" fill="#9C9483"/><path d="M15 52 Q25 24 35 52 Z" fill="'+_F+'"/></svg>',
+  walk:'<svg viewBox="0 0 50 62"><circle cx="24" cy="15" r="6.5" fill="'+_F+'"/><path d="M16 50 Q24 24 32 44 L36 52 L30 52 L26 42 L20 53 L14 52 Z" fill="'+_F+'"/></svg>',
+  detail:'<svg viewBox="0 0 50 62"><rect x="8" y="10" width="34" height="42" rx="3" fill="'+_F+'" opacity="0.5"/><path d="M12 20 h26 M12 28 h26 M12 36 h26" stroke="#fff" stroke-width="1.4" opacity="0.7"/><rect x="16" y="24" width="20" height="16" fill="none" stroke="'+_D+'" stroke-width="1.6" stroke-dasharray="3 2"/></svg>',
+  sit:'<svg viewBox="0 0 50 62"><circle cx="24" cy="15" r="6.5" fill="'+_F+'"/><path d="M17 24 Q24 20 31 24 L33 40 L17 40 Z" fill="'+_F+'"/><path d="M17 40 h20 v6 h-6 v-3 h-14 Z" fill="'+_F+'"/></svg>',
+  wide35:'<svg viewBox="0 0 50 62"><rect x="6" y="6" width="38" height="50" fill="none" stroke="'+_D+'" stroke-width="1.6" stroke-dasharray="3 2"/><circle cx="25" cy="20" r="5" fill="'+_F+'"/><path d="M17 48 Q25 28 33 48 Z" fill="'+_F+'"/></svg>',
+  portrait50:'<svg viewBox="0 0 50 62"><circle cx="25" cy="18" r="6.5" fill="'+_F+'"/><path d="M14 52 Q25 26 36 52 Z" fill="'+_F+'"/><rect x="8" y="8" width="34" height="30" fill="none" stroke="'+_D+'" stroke-width="1.6" stroke-dasharray="3 2"/></svg>',
+  closeup85:'<svg viewBox="0 0 50 62"><path d="M12 56 Q25 32 38 56 Z" fill="'+_F+'"/><circle cx="25" cy="24" r="12" fill="'+_F+'"/><rect x="9" y="9" width="32" height="30" fill="none" stroke="'+_D+'" stroke-width="1.6" stroke-dasharray="3 2"/></svg>',
+  herolow:'<svg viewBox="0 0 50 62"><path d="M4 58 L46 58 M10 58 L22 30 M40 58 L28 30" stroke="#B9B2A4" stroke-width="1.2" opacity="0.6"/><circle cx="25" cy="18" r="6" fill="'+_F+'"/><path d="M17 46 Q25 26 33 46 Z" fill="'+_F+'"/></svg>',
+  // motion (video)
+  spin:'<svg viewBox="0 0 50 62"><path d="M25 40 a13 8 0 1 1 0.1 0" fill="none" stroke="'+_D+'" stroke-width="1.8" stroke-dasharray="3 2"/><path d="M37 38 l2 4 -5 -0.5Z" fill="'+_D+'"/><circle cx="25" cy="20" r="5.5" fill="'+_F+'"/><path d="M18 46 Q25 28 32 46 Z" fill="'+_F+'"/></svg>',
+  catwalk:'<svg viewBox="0 0 50 62"><circle cx="25" cy="16" r="6" fill="'+_F+'"/><path d="M17 48 Q25 26 33 44 L36 52 L30 52 L26 42 L20 53 L14 52 Z" fill="'+_F+'"/><path d="M6 58 h38" stroke="#B9B2A4" stroke-width="1.4"/><path d="M40 30 l6 4 -6 4" fill="none" stroke="'+_D+'" stroke-width="1.6"/></svg>',
+  fabric:'<svg viewBox="0 0 50 62"><circle cx="25" cy="16" r="6" fill="'+_F+'"/><path d="M17 48 Q25 26 33 48 Z" fill="'+_F+'"/><path d="M12 52 q4 -4 8 0 t8 0 t8 0" fill="none" stroke="'+_D+'" stroke-width="1.5"/></svg>',
+  pushin:'<svg viewBox="0 0 50 62"><circle cx="25" cy="20" r="6" fill="'+_F+'"/><path d="M18 48 Q25 30 32 48 Z" fill="'+_F+'"/><path d="M6 8 h8 M6 8 v8 M44 8 h-8 M44 8 v8 M6 54 h8 M6 54 v-8 M44 54 h-8 M44 54 v-8" stroke="'+_D+'" stroke-width="1.8" fill="none"/></svg>',
+  subtle:'<svg viewBox="0 0 50 62"><circle cx="25" cy="18" r="6" fill="'+_F+'"/><path d="M17 48 Q25 28 33 48 Z" fill="'+_F+'"/><circle cx="40" cy="40" r="2" fill="'+_D+'"/></svg>'
+};
+function _aspectSvg(w,h){ var maxW=38,maxH=50; var s=Math.min(maxW/w,maxH/h); var rw=w*s,rh=h*s; var x=(50-rw)/2,y=(62-rh)/2;
+  return '<svg viewBox="0 0 50 62"><rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+rw.toFixed(1)+'" height="'+rh.toFixed(1)+'" rx="2" fill="#D9D4C8" stroke="'+_D+'" stroke-width="1.5"/></svg>'; }
+function vizFor(key){
+  if(!key) return '';
+  if(key==='9:16') return _aspectSvg(9,16);
+  if(key==='16:9') return _aspectSvg(16,9);
+  if(VIZ_SOLID[key]) return '<svg viewBox="0 0 50 62"><rect width="50" height="62" fill="'+VIZ_SOLID[key]+'"/></svg>';
+  if(VIZ_GRAD[key]){ var id='vg'+key.replace(/[^a-z0-9]/gi,''); var g=VIZ_GRAD[key];
+    return '<svg viewBox="0 0 50 62"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+g[0]+'"/><stop offset="1" stop-color="'+g[1]+'"/></linearGradient></defs><rect width="50" height="62" fill="url(#'+id+')"/></svg>'; }
+  return VIZ_SVG[key] || '';
+}
+function openOptModal(title, items, note){
   document.getElementById('optModalTitle').textContent = title;
-  document.getElementById('optModalBody').innerHTML = items.map(function(it){
-    return '<div class="optrow"><div class="ot">'+escH(it.label)+'</div>'+(it.desc?'<div class="od">'+escH(it.desc)+'</div>':'')+'</div>';
+  var noteHtml = note ? '<div class="optnote">'+escH(note)+'</div>' : '';
+  document.getElementById('optModalBody').innerHTML = noteHtml + items.map(function(it){
+    var v = vizFor(it.key) || (it.img ? '<img src="'+escH(it.img)+'" alt="">' : '');
+    return '<div class="optrow">'+(v?'<div class="optviz">'+v+'</div>':'')+'<div class="optmeta"><div class="ot">'+escH(it.label)+'</div>'+(it.desc?'<div class="od">'+escH(it.desc)+'</div>':'')+'</div></div>';
   }).join('');
+  document.getElementById('optModal').classList.add('on');
+}
+// modal อธิบายสั้น ๆ ช่องเดียว (ใช้กับ toggle/ปุ่มช่วยเหลือเดี่ยว)
+function qhInfo(title, body, rec){
+  document.getElementById('optModalTitle').textContent = title;
+  document.getElementById('optModalBody').innerHTML = '<div class="od" style="font-size:13px;line-height:1.65">'+escH(body)+(rec?'<div style="margin-top:10px;color:'+_D+';font-weight:600">'+escH(rec)+'</div>':'')+'</div>';
   document.getElementById('optModal').classList.add('on');
 }
 function closeOptModal(){ document.getElementById('optModal').classList.remove('on'); }
@@ -704,6 +760,7 @@ $('#genBtn').onclick = async () => {
     sku: SKU_SEL || undefined, character: CHAR_SEL || undefined, location: LOC_SEL || undefined,
     camera: camKeys.length ? camKeys : undefined, custom_prompt: edited || undefined,
     movie: getMovie()[0] || undefined,
+    continuity: $('#contToggle') ? $('#contToggle').checked : true,
     preset: [...picked.map((c) => c.dataset.label), ...camKeys].join('+') || undefined });
   btn.disabled = false;
   if (error) {
