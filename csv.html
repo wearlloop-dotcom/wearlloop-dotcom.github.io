@@ -66,7 +66,21 @@
   .hm-note{background:#F4EEE1;border:1px solid rgba(154,122,18,.3);border-radius:10px;
     padding:11px 13px;margin-top:14px;font-size:12px;color:#6b551a;line-height:1.6}
   .hm-note b{color:#9A7A12}
-  @media(max-width:480px){.step .fig{flex:0 0 66px;height:56px}}
+  .hm-cols{margin-top:18px}
+  .hm-cols-title{font-family:'Poppins','Prompt',sans-serif;font-size:14px;font-weight:600;color:#262320;margin-bottom:3px}
+  .hm-cols-title span{font-weight:400;font-size:11.5px;color:#7C7361}
+  .hm-cols-sub{font-size:11.5px;color:#7C7361;margin-bottom:9px}
+  .hm-tblwrap{border:1px solid #E7E5E1;border-radius:10px;overflow:hidden}
+  .hm-tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+  .hm-tbl th{background:#0C3A33;color:#FBFAF8;text-align:left;padding:7px 9px;font-weight:600;font-size:10.5px;letter-spacing:.3px}
+  .hm-tbl td{padding:6px 9px;border-top:1px solid #EFEDE9;vertical-align:top;line-height:1.45}
+  .hm-tbl tr:nth-child(even) td{background:#F5F4F2}
+  .hm-tbl code{background:#EFEDE9;padding:1px 4px;border-radius:4px;font-size:10.5px;color:#A75F3A;white-space:nowrap}
+  .hm-tbl .ex{color:#0F6E56;font-family:'Prompt',monospace}
+  .hm-tag{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:20px;margin-left:4px;vertical-align:middle}
+  .hm-tag.req{background:#FBE3E3;color:#C9433B}
+  .hm-tag.sec{background:#F4EEE1;color:#9A7A12}
+  @media(max-width:480px){.step .fig{flex:0 0 66px;height:56px} .hm-tbl th:nth-child(3),.hm-tbl td:nth-child(3){display:none}}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
 </head>
@@ -187,11 +201,59 @@
 
       <div class="hm-note"><b>ควรรู้</b> · หน้านี้บันทึกลงฐานข้อมูลจริงทันที ไม่มีขั้นพรีวิว/ย้อนกลับ · ช่อง <code>acquisition_cost</code> (ทุน) เป็นข้อมูลลับ ถ้ายังไม่ได้ปิดการอ่านจาก anon key แนะนำเว้นว่างไว้ก่อน กรอกแค่ <code>rental_price</code></div>
 
+      <div class="hm-cols">
+        <div class="hm-cols-title">ความหมายของทุกคอลัมน์ <span>(กรอกอะไร · ตัวอย่าง)</span></div>
+        <div class="hm-cols-sub">ป้าย <span class="hm-tag req">จำเป็น</span> ต้องกรอก · <span class="hm-tag sec">ลับ</span> ข้อมูลทุน แนะนำเว้นว่าง · ฟิลด์หลายค่าคั่นด้วย <code>;</code></div>
+        <div class="hm-tblwrap">
+          <table class="hm-tbl"><thead><tr><th>คอลัมน์</th><th>กรอกอะไร</th><th>ตัวอย่าง</th></tr></thead>
+          <tbody id="colGuide"></tbody></table>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 <script>
   (function(){
+    // คู่มือคอลัมน์: [ชื่อคอลัมน์, กรอกอะไร, ตัวอย่าง, flag('req'|'sec'|'')]
+    var GUIDE=[
+      ['code','รหัสชุด — เว้นว่าง = เพิ่มชุดใหม่ · ใส่รหัสเดิม = อัปเดตทับ','(เว้นว่าง) / ED-01',''],
+      ['name','ชื่อชุด','เดรสซาตินสีกรม','req'],
+      ['brand','แบรนด์','LLOOP',''],
+      ['tier','ระดับชุด','Standard / Premium',''],
+      ['size','ไซซ์','S / M / L',''],
+      ['condition','สภาพชุด','good / like_new / fair',''],
+      ['rental_price','ราคาเช่า/วัน (บาท)','320',''],
+      ['acquisition_cost','ทุน/ราคาที่ซื้อมา (บาท)','450','sec'],
+      ['rate_1d','ราคาแพ็กเกจ 1 วัน (เว้นว่างได้)','',''],
+      ['rate_3d','ราคาแพ็กเกจ 3 วัน (เว้นว่างได้)','',''],
+      ['rate_5d','ราคาแพ็กเกจ 5 วัน (เว้นว่างได้)','',''],
+      ['category','ประเภทชุด','dress / top / skirt',''],
+      ['dress_code','โอกาส/โค้ดแต่งกาย','smart_casual',''],
+      ['occasion_tags','แท็กโอกาส (หลายค่า คั่น ;)','cafe;work',''],
+      ['color_name','ชื่อสี','navy',''],
+      ['color_hex','รหัสสี HEX','#15233F',''],
+      ['color_season','โทนสี/ซีซั่น','winter',''],
+      ['bust_min_in','รอบอกต่ำสุด (นิ้ว)','32',''],
+      ['bust_max_in','รอบอกสูงสุด (นิ้ว)','36',''],
+      ['waist_min_in','รอบเอวต่ำสุด (นิ้ว)','26',''],
+      ['waist_max_in','รอบเอวสูงสุด (นิ้ว)','30',''],
+      ['length_cm','ความยาวชุด (ซม.)','92',''],
+      ['stretch','ความยืดผ้า','none / slight / high',''],
+      ['fabric_composition','ส่วนผสมผ้า','ซาตินโพลี 95%',''],
+      ['has_lining','มีซับใน','true / false',''],
+      ['is_sheer','เนื้อโปร่ง/ซีทรู','true / false',''],
+      ['fabric_weight','น้ำหนัก/การทิ้งตัวผ้า','ทิ้งตัว',''],
+      ['styling_tips','ทริคแต่งตัว (หลายค่า คั่น ;)','ใส่บราเกาะอก;ซ่อนสายในได้',''],
+      ['photos','ลิงก์รูป URL (หลายรูป คั่น ;)','https://.../a.jpg;.../b.jpg','']
+    ];
+    var esc=function(s){ return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); };
+    var tag={req:'<span class="hm-tag req">จำเป็น</span>',sec:'<span class="hm-tag sec">ลับ</span>'};
+    var tb=document.getElementById('colGuide');
+    if(tb) tb.innerHTML=GUIDE.map(function(r){
+      return '<tr><td><code>'+r[0]+'</code>'+(tag[r[3]]||'')+'</td><td>'+esc(r[1])+'</td><td class="ex">'+(r[2]?esc(r[2]):'—')+'</td></tr>';
+    }).join('');
+
     var modal=document.getElementById('howtoModal');
     var openers=[document.getElementById('howtoI'),document.getElementById('howtoHint')];
     var closer=document.getElementById('howtoClose');
