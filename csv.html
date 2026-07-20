@@ -81,6 +81,11 @@
   .hm-tag.req{background:#FBE3E3;color:#C9433B}
   .hm-tag.sec{background:#F4EEE1;color:#9A7A12}
   @media(max-width:480px){.step .fig{flex:0 0 66px;height:56px} .hm-tbl th:nth-child(3),.hm-tbl td:nth-child(3){display:none}}
+
+  .tpl-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px}
+  .tpl-label{font-size:12.5px;color:var(--muted);font-weight:600}
+  .csv-note{font-size:12px;color:#6b551a;background:#F4EEE1;border:1px solid rgba(154,122,18,.32);border-radius:8px;padding:9px 11px;margin-bottom:12px;line-height:1.55}
+  .csv-note b{color:#9A7A12}
 </style>
 <link rel="stylesheet" href="ops-ui.css">
 </head>
@@ -98,12 +103,17 @@
     <div class="howto-hint" id="howtoHint">วิธีใช้งานแบบละเอียด <b>พร้อมภาพ &rarr;</b></div>
   </section>
   <div class="card">
-    <h2> Import — เพิ่ม/แก้ชุดทีละเยอะจาก CSV</h2>
-    <p>หัวคอลัมน์ต้องตรง (โหลด template ด้านล่าง) · ฟิลด์หลายค่า (occasion_tags, styling_tips, photos) คั่นด้วย <code>;</code><br>โค้ดเดิม = อัปเดต · โค้ดใหม่/เว้นว่าง = เพิ่มใหม่ (สถานะ needs_review)</p>
+    <h2>Import — เพิ่ม/แก้ชุดทีละเยอะ</h2>
+    <p>หัวคอลัมน์ต้องตรงกับ template · ฟิลด์หลายค่า (occasion_tags, styling_tips, photos) คั่นด้วย <code>;</code><br>โค้ดเดิม = อัปเดต · โค้ดใหม่/เว้นว่าง = เพิ่มใหม่ (สถานะ needs_review)</p>
+    <div class="tpl-row">
+      <span class="tpl-label">โหลด template:</span>
+      <button class="btn ghost" onclick="downloadTemplate()">.csv (ว่าง)</button>
+      <button class="btn ghost" onclick="downloadXlsx()">.xlsx (มีคำอธิบายในเซลล์)</button>
+    </div>
+    <p class="csv-note">กรอกใน <b>.xlsx</b> เสร็จแล้ว ต้อง <b>Save As / บันทึกเป็น .csv</b> ก่อน แล้วค่อยนำเข้า — หน้านี้รับ<b>เฉพาะไฟล์ .csv</b> เท่านั้น</p>
     <div class="row">
       <input type="file" id="file" accept=".csv">
       <button class="btn" onclick="importCSV()">นำเข้า</button>
-      <button class="btn ghost" onclick="downloadTemplate()">โหลด template ว่าง</button>
     </div>
     <div class="log" id="log"></div>
   </div>
@@ -131,8 +141,8 @@
           <text x="72" y="34" font-family="Poppins,sans-serif" font-size="7" font-weight="700" fill="#A3884E" text-anchor="middle">CSV</text>
         </svg></div>
         <div class="tx"><span class="n">ขั้น 1</span>
-          <h4>โหลด template ว่าง</h4>
-          <p>กด <b>โหลด template ว่าง</b> จะได้ไฟล์ <code>lloop_template.csv</code> ที่มีหัวคอลัมน์ครบ + แถวตัวอย่าง 1 แถว เปิดด้วย Excel / Google Sheets ได้ (รองรับภาษาไทย)</p>
+          <h4>โหลด template</h4>
+          <p>มีให้ 2 แบบ: <code>.csv</code> (ว่าง ใช้ได้เลย) หรือ <code>.xlsx</code> ที่<b>เอาเมาส์ชี้หัวคอลัมน์แล้วมีคำอธิบายเด้ง</b>บอกว่ากรอกอะไร + ตัวอย่าง · ทั้งคู่มีหัวคอลัมน์ครบ + แถวตัวอย่าง เปิดด้วย Excel / Google Sheets ได้ (รองรับภาษาไทย)</p>
         </div>
       </div>
 
@@ -164,7 +174,7 @@
         </svg></div>
         <div class="tx"><span class="n">ขั้น 3</span>
           <h4>Import — นำกลับเข้าระบบ</h4>
-          <p>เลือกไฟล์ &rarr; กด <b>นำเข้า</b> · ระบบจะขึ้นเว็บจริงทันที — แนะนำลองไฟล์เล็ก 2–3 แถวก่อน ดูว่าถูกแล้วค่อยทำทีละเยอะ</p>
+          <p>เลือกไฟล์ &rarr; กด <b>นำเข้า</b> · หน้านี้รับ<b>เฉพาะไฟล์ .csv</b> — ถ้ากรอกใน <code>.xlsx</code> ต้อง <b>Save As / บันทึกเป็น .csv</b> ก่อน · ระบบจะขึ้นเว็บจริงทันที แนะนำลองไฟล์เล็ก 2–3 แถวก่อน</p>
         </div>
       </div>
 
@@ -247,6 +257,7 @@
       ['styling_tips','ทริคแต่งตัว (หลายค่า คั่น ;)','ใส่บราเกาะอก;ซ่อนสายในได้',''],
       ['photos','ลิงก์รูป URL (หลายรูป คั่น ;)','https://.../a.jpg;.../b.jpg','']
     ];
+    window.COL_GUIDE=GUIDE; // ให้ตัวสร้าง .xlsx ใช้คำอธิบายชุดเดียวกัน
     var esc=function(s){ return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); };
     var tag={req:'<span class="hm-tag req">จำเป็น</span>',sec:'<span class="hm-tag sec">ลับ</span>'};
     var tb=document.getElementById('colGuide');
@@ -270,6 +281,7 @@
 <script src="config.js"></script>
 <script src="ops-api.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
@@ -282,7 +294,26 @@
   function log(msg,cls){ const l=$('log'); l.className='log show'; l.textContent += msg+'\n'; if(cls)l.style.color=cls; }
   function dl(name,text){ const b=new Blob(['﻿'+text],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); }
 
-  function downloadTemplate(){ dl('lloop_template.csv', Papa.unparse({fields:COLS, data:[{code:'',name:'ตัวอย่างเดรส',brand:'LLOOP',tier:'Standard',size:'M',condition:'good',rental_price:'320',acquisition_cost:'450',rate_1d:'',rate_3d:'',rate_5d:'',category:'dress',dress_code:'smart_casual',occasion_tags:'cafe;work',color_name:'navy',color_hex:'#15233F',color_season:'winter',bust_min_in:'32',bust_max_in:'36',waist_min_in:'26',waist_max_in:'30',length_cm:'92',stretch:'slight',fabric_composition:'ซาตินโพลี 95%',has_lining:'true',is_sheer:'false',fabric_weight:'ทิ้งตัว',styling_tips:'ใส่บราเกาะอก;ซ่อนสายในได้',photos:''}]})); }
+  const EXAMPLE={code:'',name:'ตัวอย่างเดรส',brand:'LLOOP',tier:'Standard',size:'M',condition:'good',rental_price:'320',acquisition_cost:'450',rate_1d:'',rate_3d:'',rate_5d:'',category:'dress',dress_code:'smart_casual',occasion_tags:'cafe;work',color_name:'navy',color_hex:'#15233F',color_season:'winter',bust_min_in:'32',bust_max_in:'36',waist_min_in:'26',waist_max_in:'30',length_cm:'92',stretch:'slight',fabric_composition:'ซาตินโพลี 95%',has_lining:'true',is_sheer:'false',fabric_weight:'ทิ้งตัว',styling_tips:'ใส่บราเกาะอก;ซ่อนสายในได้',photos:''};
+  function downloadTemplate(){ dl('lloop_template.csv', Papa.unparse({fields:COLS, data:[EXAMPLE]})); }
+
+  // template .xlsx: หัวคอลัมน์แต่ละช่องมี comment บอกว่ากรอกอะไร + ตัวอย่าง (เอาเมาส์ชี้เพื่อดู)
+  function downloadXlsx(){
+    if(!window.XLSX){ log('ยังโหลดตัวช่วย .xlsx ไม่เสร็จ ลองใหม่อีกครั้งค่ะ','#A32D2D'); return; }
+    const meta={}; (window.COL_GUIDE||[]).forEach(r=>{ meta[r[0]]={desc:r[1],ex:r[2],flag:r[3]}; });
+    const ws=XLSX.utils.aoa_to_sheet([COLS, COLS.map(c=>EXAMPLE[c]??'')]);
+    COLS.forEach((c,i)=>{
+      const addr=XLSX.utils.encode_cell({r:0,c:i}); const cell=ws[addr]; if(!cell) return;
+      const m=meta[c]||{}; let txt='กรอกอะไร: '+(m.desc||c);
+      if(m.ex) txt+='\nตัวอย่าง: '+m.ex;
+      if(m.flag==='req') txt+='\n[จำเป็นต้องกรอก]';
+      if(m.flag==='sec') txt+='\n[ข้อมูลลับ (ทุน) — แนะนำเว้นว่าง]';
+      cell.c=[{a:'LLOOP',t:txt}]; cell.c.hidden=true;
+    });
+    ws['!cols']=COLS.map(()=>({wch:16}));
+    const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'ชุด');
+    XLSX.writeFile(wb,'lloop_template.xlsx');
+  }
 
   function importCSV(){
     const f=$('file').files[0]; if(!f){ log('เลือกไฟล์ CSV ก่อนค่ะ','#A32D2D'); return; }
