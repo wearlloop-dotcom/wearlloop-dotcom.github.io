@@ -107,10 +107,49 @@
 
   function curFile() { const p = location.pathname.split('/').pop(); return p || 'home.html'; }
 
+  // หน้า ops เป็นไฟล์ static (ใครเปิด URL ก็เห็น HTML) — การกระทำถูกกันที่ gateway อยู่แล้ว
+  // แต่ถ้าเช็คสิทธิ์แล้ว "ไม่ใช่พนักงาน" → บังหน้าเต็มจอ กันเห็นฟอร์มหลังบ้าน + ชี้ทางไปสมัครงาน
+  // (ขึ้นเฉพาะตอน denied จริง — ถ้า getMe สำเร็จจะไม่มีอะไรบัง พนักงานจริงไม่มีทางโดนล็อก)
+  function showGate(msg) {
+    if (document.getElementById('opsGate')) return;
+    msg = msg || '';
+    var denied = /ไม่มีสิทธิ์|no_access|owner_only|role_denied|ไม่อนุญาต|not_allowed/i.test(msg);
+    var soft   = /redirect|เข้าสู่ระบบใหม่|กำลังพา|idToken|เซสชันหมดอายุ/i.test(msg);
+    var title = denied ? 'หน้านี้สำหรับพนักงาน LLOOP เท่านั้น'
+              : soft   ? 'กำลังเข้าสู่ระบบ…'
+              :          'ตรวจสอบสิทธิ์ไม่สำเร็จ';
+    var body  = denied ? 'บัญชี LINE นี้ยังไม่ได้เป็นพนักงาน หรือยังไม่ได้รับอนุมัติให้ใช้งานหลังบ้าน'
+              : soft   ? 'กำลังพาไปเข้าสู่ระบบด้วย LINE…'
+              :          'ลองเข้าสู่ระบบใหม่อีกครั้ง หรือรีเฟรชหน้า';
+    var g = document.createElement('div');
+    g.id = 'opsGate';
+    g.setAttribute('style', 'position:fixed;inset:0;z-index:9999;background:#F2F1EE;display:flex;align-items:center;justify-content:center;padding:24px;font-family:Prompt,system-ui,sans-serif');
+    g.innerHTML =
+      '<div style="max-width:360px;width:100%;background:#fff;border:1px solid #E0DED9;border-radius:14px;padding:28px 24px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.08)">' +
+        '<div style="font-family:Poppins,sans-serif;font-weight:700;font-size:20px;letter-spacing:.02em;color:#1A1A1A">LLOOP</div>' +
+        '<div style="font-weight:600;margin-top:14px;font-size:15.5px;color:#1A1A1A">' + title + '</div>' +
+        '<div style="color:#86857F;font-size:13px;margin-top:8px;line-height:1.6">' + body + '</div>' +
+        '<div style="margin-top:20px;display:flex;flex-direction:column;gap:9px">' +
+          '<button id="opsGateLogin" style="background:#1A1A1A;color:#fff;border:0;padding:12px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer">เข้าสู่ระบบด้วย LINE</button>' +
+          (denied ? '<a href="apply.html" style="color:#0F6E56;font-size:13px;text-decoration:none;padding:8px">ยังไม่ได้เป็นพนักงาน? สมัครงาน</a>' : '') +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(g);
+    var lb = document.getElementById('opsGateLogin');
+    if (lb) lb.onclick = function () {
+      try { sessionStorage.removeItem('opsLoginTried'); sessionStorage.removeItem('opsReauth'); } catch (_) {}
+      try { if (window.liff && liff.logout) liff.logout(); } catch (_) {}
+      try {
+        if (window.liff && liff.login) liff.login({ redirectUri: location.href });
+        else location.reload();
+      } catch (_) { location.reload(); }
+    };
+  }
+
   async function mount() {
     injectCSS();
     let me;
-    try { me = await getMe(); } catch (e) { console.warn('ops-menu:', e.message); return; }
+    try { me = await getMe(); } catch (e) { showGate(e && e.message); return; }
     const role = me.role || (me.is_owner ? 'owner' : '');
     const nav = visibleNav(role, me.is_owner === true);
     const cur = curFile();
