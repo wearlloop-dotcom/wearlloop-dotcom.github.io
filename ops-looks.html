@@ -29,13 +29,6 @@
   .empty{text-align:center;color:var(--muted,#86857F);padding:40px}
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--forest,#2A4D43);color:#fff;padding:13px 22px;border-radius:30px;opacity:0;transition:.3s;z-index:50}
   .toast.show{opacity:1}
-  /* rows คอมเมนต์/รายงาน — เดิมใช้ .lbrow/.lav/.lnm ที่ไม่ได้นิยาม ทำให้รูประเบิดเต็มจอ (คัดจาก looks.html) */
-  .lbrow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--hair,#E0DED9);border-radius:12px;padding:11px 13px;margin-bottom:9px}
-  .lbrow .lav{width:38px;height:38px;flex:0 0 38px;border-radius:50%;background:var(--soft,#F5F4F2);object-fit:cover;border:1px solid rgba(0,0,0,.06)}
-  .lbrow .lnm{flex:1;min-width:0;font-size:13.5px;font-weight:600}
-  .lbrow .lnm small{display:block;font-size:11px;color:var(--muted,#86857F);font-weight:500}
-  .lbrow button{flex:0 0 auto;border:1px solid var(--hair,#E0DED9);background:#fff;border-radius:8px;padding:7px 12px;font-family:var(--sans,'Prompt');font-size:12.5px;font-weight:600;cursor:pointer}
-  .lbrow button.danger{color:#B4543A}
 </style>
 </head>
 <body>
@@ -146,6 +139,5 @@
   document.addEventListener('DOMContentLoaded', ()=>load('published'));
 </script>
 <script src="ops-menu.js"></script>
-<script>window.opsMenu&&window.opsMenu.mount();</script>
 </body>
 </html>

@@ -539,8 +539,6 @@
     return _sbClient ? _sbClient.storage : null;
   }});
   const $=id=>document.getElementById(id);
-  // escape ค่าที่ผู้ใช้ป้อน (ชื่อ LINE, โน้ตลูกค้า, IG/TikTok, ชื่อไฟล์ ฯลฯ) ก่อนยัดเข้า innerHTML — กัน stored XSS
-  const esc=s=>String(s==null?'':s).replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
   let code=null, baseSeason='';
   const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2200);};
   const num=id=>{const v=$(id).value;return v?Number(v):undefined;};
@@ -582,7 +580,7 @@
     }
     $('gate').style.display='none'; $('main').style.display='flex';
     const who=data.org||data.name||'พาร์ทเนอร์';
-    $('hello').innerHTML='ลงชื่อเข้าใช้ในนาม <b>'+esc(who)+'</b>';
+    $('hello').innerHTML='ลงชื่อเข้าใช้ในนาม <b>'+who+'</b>';
     loadClients();
   }
 
@@ -697,10 +695,10 @@
         const row=document.createElement('div'); row.className='clientrow';
         const nm=c.name||'ลูกค้า';
         const av=c.picture
-          ? '<div class="av2" style="background-image:url(&quot;'+esc(c.picture)+'&quot;)"></div>'
-          : '<div class="av2">'+esc(nm.trim().charAt(0).toUpperCase()||'?')+'</div>';
-        row.innerHTML=av+'<div><div class="nm">'+esc(nm)+'</div><div class="cd">'+esc(c.code||'')+'</div></div>'+
-          '<div class="hl">'+esc(c.headline||'')+'</div>';
+          ? '<div class="av2" style="background-image:url(&quot;'+c.picture+'&quot;)"></div>'
+          : '<div class="av2">'+(nm.trim().charAt(0).toUpperCase()||'?')+'</div>';
+        row.innerHTML=av+'<div><div class="nm">'+nm+'</div><div class="cd">'+(c.code||'')+'</div></div>'+
+          '<div class="hl">'+(c.headline||'')+'</div>';
         row.onclick=()=>{ $('code').value=c.code; lookup(); window.scrollTo({top:0,behavior:'smooth'}); };
         box.appendChild(row);
       });
@@ -740,7 +738,7 @@
   }
   function renderProfilePhoto(){
     const url=($('pf_photo').value||'').trim(), box=$('pf_photo_thumb'); if(!box) return;
-    box.innerHTML = url ? '<div class="th"><img src="'+esc(url)+'" alt=""></div>' : '';
+    box.innerHTML = url ? '<div class="th"><img src="'+url+'" alt=""></div>' : '';
   }
   async function uploadProfilePhoto(input){
     const file=input.files&&input.files[0]; if(!file) return;
@@ -796,7 +794,7 @@
         groups[k].forEach(s=>{
           const row=document.createElement('div'); row.className='slot'+(s.status==='booked'?' booked':'');
           let right = s.status==='booked'
-            ? '<span class="st">จองแล้ว · '+esc(s.customer||'ลูกค้า')+'</span>'
+            ? '<span class="st">จองแล้ว · '+(s.customer||'ลูกค้า')+'</span>'
             : '<span class="st">ว่าง</span><button class="rm" onclick="removeSlot(\''+s.id+'\')">ลบ</button>';
           row.innerHTML='<span class="tm">'+fmtTime(s.starts_at)+'</span>'+right;
           g.appendChild(row);
@@ -836,8 +834,8 @@
       arr.forEach(b=>{
         const div=document.createElement('div'); div.className='bkrow'+(b.status==='done'?' is-done':'');
         const when=new Date(b.starts_at).toLocaleString('th-TH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-        let html='<div class="bt">'+esc(b.customer||'ลูกค้า')+'<span class="bcode">'+(b.code?('รหัส '+esc(b.code)):'')+'</span></div>'+
-          '<div class="bn">'+when+(b.customer_note?(' · “'+esc(b.customer_note)+'”'):'')+'</div>';
+        let html='<div class="bt">'+(b.customer||'ลูกค้า')+'<span class="bcode">'+(b.code?('รหัส '+b.code):'')+'</span></div>'+
+          '<div class="bn">'+when+(b.customer_note?(' · “'+b.customer_note+'”'):'')+'</div>';
         if(b.status==='confirmed'){
           html+='<div class="bact">'+
             (b.code?'<button onclick="goAnalyse(\''+b.code+'\')">กรอกผลวิเคราะห์</button>':'')+
@@ -897,7 +895,7 @@
     if(pic){ av.style.backgroundImage='url("'+pic+'")'; av.textContent=''; }
     else { av.style.backgroundImage='none'; av.textContent=(name||'?').trim().charAt(0).toUpperCase()||'?'; }
     $('chero_name').textContent=name||(plang==='en'?'Client':'ลูกค้า');
-    $('chero_meta').innerHTML=tr('รหัส')+' <b>'+esc(code)+'</b> · '+(hasProfile?tr('มีผลวิเคราะห์เดิม (บันทึกทับได้)'):tr('ลูกค้าใหม่'));
+    $('chero_meta').innerHTML=tr('รหัส')+' <b>'+code+'</b> · '+(hasProfile?tr('มีผลวิเคราะห์เดิม (บันทึกทับได้)'):tr('ลูกค้าใหม่'));
     $('chero').className='chero show';
   }
   function hideHero(){ const h=$('chero'); if(h) h.className='chero'; }
@@ -1079,7 +1077,7 @@
         added.push(url);
         const local=URL.createObjectURL(file);
         const div=document.createElement('div'); div.className='th';
-        div.innerHTML=`<img src="${esc(local)}" alt=""><div class="fn">${esc((file.name||'').slice(0,18))}</div>`;
+        div.innerHTML=`<img src="${local}" alt=""><div class="fn">${(file.name||'').slice(0,18)}</div>`;
         thumbs.appendChild(div);
       }catch(e){
         $('upnote').style.display='block';
@@ -1129,7 +1127,7 @@
     list(targetId).forEach(url=>{
       let name=url; try{ name=decodeURIComponent(url.split('/').pop().split('?')[0]).replace(/^docs\//,'').replace(/^\d+-\d+-/,''); }catch(e){}
       const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener';
-      a.innerHTML=clip+'<span>'+esc((name||url).slice(0,40))+'</span>';
+      a.innerHTML=clip+'<span>'+(name||url).slice(0,40)+'</span>';
       box.appendChild(a);
     });
   }

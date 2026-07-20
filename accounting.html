@@ -57,12 +57,6 @@
   .tab.on{background:#0C3A33;border-color:#0C3A33}
   .btn{background:#0C3A33}
   .kpi .v.pos{color:var(--ok)}.kpi .v.neg{color:var(--danger)}
-  /* ops-ui.css .kpi .l เป็นสีอ่อน (ทำมาเพื่อการ์ดเข้มใน phead) มากลบ label บนการ์ดขาว → คืนสีให้อ่านออก */
-  .kpi .l{color:var(--stone)}
-  /* กันเลข KPI ยาว ๆ (฿184,500.00) ล้นการ์ด/ดันจอเลื่อนแนวนอนบนมือถือ */
-  .kpi{min-width:0}
-  .kpi .v{overflow-wrap:anywhere}
-  @media(max-width:520px){ .big{gap:10px} .big .kpi{flex:1 1 calc(50% - 5px)} .kpi .v{font-size:20px} }
   .tot{border-top-color:#0C3A33}
 </style>
 </head>
@@ -288,6 +282,5 @@
   boot();
 </script>
 <script src="ops-menu.js"></script>
-<script>window.opsMenu&&window.opsMenu.mount();</script>
 </body>
 </html>

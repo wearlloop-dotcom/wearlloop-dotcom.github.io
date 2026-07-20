@@ -134,10 +134,7 @@
     $('k_active').textContent=vs.filter(v=>v.active).length;
     $('k_jobs').textContent=vs.reduce((s,v)=>s+(v.jobs_total||0),0);
     $('k_house').textContent=vs.filter(v=>v.kind==='in_house').length;
-    // จำร้านที่เลือกไว้ แล้วเลือกกลับหลัง rebuild — ไม่งั้นส่งตัวถัดไปเด้งไปร้านแรกเงียบ ๆ
-    const prevVendor=$('wsVendor').value;
     $('wsVendor').innerHTML=vs.filter(v=>v.active).map(v=>'<option value="'+v.id+'">'+esc(v.name)+(v.kind==='in_house'?' (in-house)':'')+'</option>').join('')||'<option value="">— ยังไม่มีร้าน —</option>';
-    if(prevVendor && $('wsVendor').querySelector('option[value="'+prevVendor+'"]')) $('wsVendor').value=prevVendor;
     $('vList').innerHTML=vs.length? vs.map(v=>
       '<div class="li"'+(v.active?'':' style="opacity:.5"')+'><div class="top"><b>'+esc(v.name)+'</b> '+
       '<span class="tag '+(v.kind==='in_house'?'house':'')+'">'+(v.kind==='in_house'?'in-house':'พาร์ทเนอร์')+'</span></div>'+

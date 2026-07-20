@@ -92,7 +92,7 @@
   const up=s=>(s||'').trim();
   let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':' ok');clearTimeout(T);T=setTimeout(()=>t.className='toast',2800);}
   function fl(el){ if(!el)return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
-  const ST={available:'ว่าง',reserved:'จองแล้ว',out:'อยู่กับลูกค้า',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',returned:'รับคืนแล้ว',needs_review:'รอตรวจ',lost:'หาย'};
+  const ST={available:'ว่าง',reserved:'จองแล้ว',out:'อยู่กับลูกค้า',cleaning:'กำลังซัก',repair:'ซ่อม',retired:'ปลดระวาง',returned:'รับคืนแล้ว'};
   const dt=s=>s?new Date(s).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
 
   async function doPutAway(){

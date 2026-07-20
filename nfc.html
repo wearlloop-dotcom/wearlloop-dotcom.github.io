@@ -26,7 +26,7 @@
   .btn.sage{background:var(--sage)}.btn.clay{background:var(--clay)}.btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
   .btn:disabled{opacity:.55}
   label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-  input{width:100%;font-family:var(--sans);font-size:16px;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}
+  input{width:100%;font-family:var(--sans);font-size:16px;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff;text-transform:uppercase}
   .big{text-align:center;padding:26px 14px;border:2px dashed var(--line);border-radius:14px;color:var(--muted);font-size:15px;line-height:1.6}
   .big.scan{border-color:var(--sage);color:var(--sage);background:#F2F7F1}
   .res{margin-top:14px}
@@ -78,7 +78,7 @@
 
     <!-- โหมดผูก tag -->
     <div class="card hide" id="pairCard">
-      <div class="field"><label>รหัสชุดที่จะผูก</label><input id="pairCode" placeholder="เช่น g1" autocapitalize="off"></div>
+      <div class="field"><label>รหัสชุดที่จะผูก</label><input id="pairCode" placeholder="เช่น G1" autocapitalize="characters"></div>
       <button class="btn clay" onclick="startScan('pair')" id="pairBtn">แตะ tag เปล่าเพื่อผูก + เขียนรหัส</button>
       <div class="res" id="pairRes"></div>
       <div class="muted">ผูกแล้ว: tag จะชี้กลับมาที่ระบบด้วยรหัสนี้ · แตะซ้ำได้ทุกเมื่อเพื่อเช็คชุด</div>
@@ -103,7 +103,7 @@
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
-  const CUSTOMER_SITE=(window.CONFIG?.SITE_URL||'https://wearlloop-dotcom.github.io'); // หน้าลูกค้า: แตะ tag → เปิดหน้าชุด /g.html?c=รหัส (โดเมนกลางที่ config.js)
+  const CUSTOMER_SITE='https://lloop.app';          // หน้าลูกค้า: แตะ tag → เปิดหน้าชุด ?g=รหัส (รูป/สไตล์/เช่าชุดนี้)
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   if(window.opsRpc) sb.rpc=window.opsRpc;            // วิ่งผ่าน gateway (LINE login + role)
   if(window.opsLogin) window.opsLogin().catch(()=>{});
@@ -131,7 +131,7 @@
   }
   async function writeUrl(code){
     // เขียน URL หน้าลูกค้าลง tag → ลูกค้าแตะเฉย ๆ มือถือเด้งหน้าชุด (ไม่ใช่หลังบ้าน)
-    try{ const w=new NDEFReader(); await w.write({records:[{recordType:'url',data:CUSTOMER_SITE+'/g.html?c='+encodeURIComponent(code)}]}); }catch(e){/* เขียนไม่ได้ไม่เป็นไร ผูกใน DB แล้ว */}
+    try{ const w=new NDEFReader(); await w.write({records:[{recordType:'url',data:CUSTOMER_SITE+'/?g='+encodeURIComponent(code)}]}); }catch(e){/* เขียนไม่ได้ไม่เป็นไร ผูกใน DB แล้ว */}
   }
 
   async function startScan(mode){
@@ -187,7 +187,7 @@
 
   // ผูก tag ใหม่
   async function doPair(uid){
-    const code=$('pairCode').value.trim().toLowerCase();
+    const code=$('pairCode').value.trim().toUpperCase();
     if(!code){ toast('ใส่รหัสชุดก่อน',true); return; }
     const {data,error}=await sb.rpc('tag_register',{p_tag_uid:uid,p_code:code,p_type:'nfc'});
     if(error){ toast('เชื่อมระบบไม่ได้',true); return; }

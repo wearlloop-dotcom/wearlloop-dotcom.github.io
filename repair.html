@@ -260,13 +260,13 @@
   }
   async function pick(code){ $('code').value=code; await load(); window.scrollTo({top:0,behavior:'smooth'}); }
   async function done(code){
-    const actual=prompt('ค่าซ่อมจริง (บาท) เว้นว่าง=ตามที่ตั้งไว้',''); if(actual===null) return; // กด Cancel = ไม่ปิดงาน
+    const actual=prompt('ค่าซ่อมจริง (บาท) เว้นว่าง=ตามที่ตั้งไว้','');
     const { error } = await sb.rpc('repair_complete',{ p_code:code, p_actual_cost:actual?Number(actual):null, p_notes:null });
     if(error){ toast('ผิดพลาด'); return; } toast(`${code} ซ่อมเสร็จ เข้าคิวซักต่อ`); loadQueue();
   }
   async function cant(code){
-    const reason=prompt('เพราะอะไรถึงซ่อมไม่ได้',''); if(reason===null) return; // จับค่าก่อน แล้วเช็ค Cancel ก่อนใส่ default
-    const { error } = await sb.rpc('repair_cant',{ p_code:code, p_reason:reason||'' });
+    const reason=prompt('เพราะอะไรถึงซ่อมไม่ได้','')||''; if(reason===null) return;
+    const { error } = await sb.rpc('repair_cant',{ p_code:code, p_reason:reason });
     if(error){ toast('ผิดพลาด'); return; } toast(`${code} ซ่อมไม่ได้ แจ้งเจ้าของแล้ว`); loadQueue();
   }
 

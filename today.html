@@ -130,7 +130,7 @@
       const isBulk = x.mode==='bulk';
       const label = isBulk ? ('ขายเหมา '+(x.count||0)+' ตัว') : 'เสนอขาย';
       const cls = isBulk ? 'bulk' : 'offer';
-      return rowLink('/acquisitions.html', esc(x.name||('คำขอ #'+esc(x.id))), x.seller?'ผู้ขาย '+esc(x.seller):'', `<span class="tag ${cls}">${esc(label)}</span>`);
+      return rowLink(null, esc(x.name||('คำขอ #'+esc(x.id))), x.seller?'ผู้ขาย '+esc(x.seller):'', `<span class="tag ${cls}">${esc(label)}</span>`);
     }).join('');
 
     $('out').innerHTML =
@@ -146,18 +146,7 @@
   async function load(){
     $('when').textContent='กำลังโหลด…';
     const { data, error } = await sb.rpc('ops_today');
-    if(error){
-      const m=error.message||'';
-      let inner;
-      if(/redirecting_to_login|พาเข้าสู่ระบบ/i.test(m)){
-        inner='<div class="empty">กำลังเข้าสู่ระบบ…</div>';
-      } else if(/เซสชันหมดอายุ|unauthorized/i.test(m)){
-        inner='<div class="empty" role="button" tabindex="0" style="cursor:pointer;color:var(--warn)" onclick="location.reload()">เซสชันหมดอายุ — แตะเพื่อเข้าสู่ระบบใหม่</div>';
-      } else {
-        inner='<div class="empty" style="color:var(--danger)">โหลดไม่สำเร็จ: '+esc(m)+'</div>';
-      }
-      $('out').innerHTML='<div class="card">'+inner+'</div>'; $('when').textContent=''; return;
-    }
+    if(error){ $('out').innerHTML='<div class="card"><div class="empty" style="color:var(--danger)">โหลดไม่สำเร็จ: '+esc(error.message)+'</div></div>'; $('when').textContent=''; return; }
     render(data);
     // ชุดที่ไม่ถูกสแกนนาน (กันหาย) — โผล่เฉพาะที่มี tag แล้วและหายเกินกำหนด
     try{
