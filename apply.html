@@ -236,7 +236,7 @@
         <textarea id="intro" placeholder="ประสบการณ์ ความถนัด ฯลฯ (ไม่บังคับ)"></textarea>
 
         <div class="fnote">* ยังไม่ต้องกรอกเงินเดือน/เลขบัญชี/บัตรประชาชนตอนนี้ — ทีมงานจะขอเมื่อถึงขั้นสัมภาษณ์</div>
-        <label class="consent"><input type="checkbox" id="consent"><span>ยินยอมให้ LLOOP เก็บและใช้ข้อมูลในใบสมัครนี้เพื่อพิจารณารับสมัครงาน และรับทราบว่าการส่งใบสมัครนี้ยังไม่ใช่การตกลงจ้างงาน · อ่าน<a href="privacy.html" target="_blank">นโยบายความเป็นส่วนตัว</a></span></label>
+        <label class="consent"><input type="checkbox" id="consent"><span>ยินดีที่สนใจร่วมงานกับ LLOOP — ยินยอมให้เราเก็บข้อมูลนี้ไว้ติดต่อกลับและพิจารณารับสมัครนะคะ · ดูแลข้อมูลตาม<a href="privacy.html" target="_blank">นโยบายความเป็นส่วนตัว</a></span></label>
         <button class="btn" type="submit" id="submitBtn">ส่งใบสมัคร</button>
         <div class="msg err" id="errMsg"></div>
       </form>
@@ -324,7 +324,7 @@ var BKK_DISTRICTS = ["พระนคร","ดุสิต","หนองจอ�
     if(phone.replace(/\D/g,'').length < 9){ showErr('กรุณากรอกเบอร์โทรให้ถูกต้อง'); return; }
     if(!line_id){ showErr('กรุณากรอก LINE ID ไว้ติดต่อกลับ'); return; }
     if(!applied){ showErr('กรุณาเลือกตำแหน่งที่สนใจ'); return; }
-    if(!document.getElementById('consent').checked){ showErr('กรุณาติ๊กยินยอมการเก็บข้อมูลก่อนส่งใบสมัคร'); return; }
+    if(!document.getElementById('consent').checked){ showErr('ติ๊กช่องยินยอมด้านล่างก่อนส่งนะคะ'); return; }
 
     var payload = {
       name: first + ' ' + last, nickname: nickname, dob: val('dob')||null,
