@@ -99,15 +99,18 @@ window.API = (function () {
     // 4) event ใกล้สุดของลูกค้า
     let event = null;
     if (customer.id) {
-      const { data: ev } = await c.from('customer_events')
-.select('*').eq('customer_id', customer.id).eq('notified', false)
-.order('event_date', { ascending: true }).limit(1).maybeSingle();
-      if (ev) {
-        const d = new Date(ev.event_date);
-        event = { title: ev.title, day: String(d.getDate()),
-          month: d.toLocaleDateString('th-TH', { month:'short'}),
-          occasion: ev.occasion, dress_code: ev.dress_code };
-      }
+      // ผ่าน gateway me-rpc (inject p_customer จาก idToken) — เลิกอ่าน customer_events ตรงด้วย anon
+      try {
+        const { data: evRes } = await window.meRpc('my_events', {});
+        const list = (evRes && evRes.enabled && Array.isArray(evRes.events)) ? evRes.events : [];
+        const ev = list[0];   // my_events เรียงตามวันแล้ว + คืนเฉพาะงานที่ยังไม่ถึง
+        if (ev) {
+          const d = new Date(ev.event_date);
+          event = { title: ev.title, day: String(d.getDate()),
+            month: d.toLocaleDateString('th-TH', { month:'short'}),
+            occasion: ev.occasion, dress_code: ev.dress_code };
+        }
+      } catch (_e) { /* event reminder เป็น optional */ }
     }
     // 5) ส่วนลดพนักงาน (ถ้า line_uid ตรงกับพนักงาน → % > 0) — ใช้โชว์ราคาพนักงานตอนไถดู
     let staff_pct = 0;
