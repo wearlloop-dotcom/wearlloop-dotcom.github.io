@@ -51,6 +51,7 @@
       { href: 'stylist-bookings.html', label: 'คิวสไตลิสต์', icon: '◷', roles: ['owner','manager'] },
       { href: 'disputes.html',  label: 'ทะเบียนคดี',     icon: '⚖', roles: ['owner','manager'] },
       { href: 'case-file.html', label: 'แฟ้มหลักฐาน',    icon: '☰', roles: ['owner','manager'] },
+      { href: 'sop-admin.html', label: 'คลังสอนงาน',    icon: '?', roles: ['owner','manager'] },
       { href: 'feedback.html',  label: 'Feedback ทีม',   icon: '✎', roles: ['owner'] },
       { href: 'settings.html',  label: 'ตั้งค่าฮับ',     icon: '⚙', roles: ['owner'] },
     ] },
