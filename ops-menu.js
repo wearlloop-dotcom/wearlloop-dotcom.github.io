@@ -46,7 +46,7 @@
       { href: 'branches.html',   label: 'สาขา / จุดรับ',  icon: '⌂', roles: ['owner','manager'] },
     ] },
     { section: 'เจ้าของ', items: [
-      { href: 'hr.html',        label: 'บุคคล (HR)',    icon: '☗', roles: ['owner'] },
+      { href: 'hr.html',        label: 'บุคคล (HR)',    icon: '☗', roles: ['owner','hr_admin'] },
       { href: 'ops-partner.html', label: 'พาร์ทเนอร์',    icon: '⚭', roles: ['owner'] },
       { href: 'stylist-bookings.html', label: 'คิวสไตลิสต์', icon: '◷', roles: ['owner','manager'] },
       { href: 'disputes.html',  label: 'ทะเบียนคดี',     icon: '⚖', roles: ['owner','manager'] },
@@ -55,7 +55,7 @@
       { href: 'settings.html',  label: 'ตั้งค่าฮับ',     icon: '⚙', roles: ['owner'] },
     ] },
   ];
-  const ROLE_TH = { owner: 'เจ้าของ', manager: 'ผู้จัดการ', care: 'ดูแลของ', stock: 'สต๊อก', marketing: 'การตลาด' };
+  const ROLE_TH = { owner: 'เจ้าของ', manager: 'ผู้จัดการ', care: 'ดูแลของ', stock: 'สต๊อก', marketing: 'การตลาด', hr_admin: 'ฝ่ายบุคคล' };
 
   function canSee(item, role, isOwner) {
     if (isOwner) return true;                 // เจ้าของเห็นหมด
