@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คู่มือซัก–รีด ถนอมผ้า — LLOOP</title>
+<meta name="description" content="ซักยังไง เข้าเครื่องได้ไหม รีดยังไงให้ถนอมผ้าที่สุด — คู่มือดูแลเสื้อผ้าตามชนิดผ้า อ่านป้ายดูแลเป็น โดย LLOOP">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBFAF7; --cream2:#F5F4F2; --line:#E7E5E1; --ink:#1A1A1A; --muted:#8C8B86;
+    --sage:#6FB3A6; --sage-light:#E4F0EC; --sage-deep:#23554B; --warm:#C9A86A;
+    --ok:#0F6E56; --warn:#B5860B; --danger:#A32D2D;
+    --sans:'Prompt',sans-serif; --display:'Poppins','Prompt',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--cream);color:var(--ink);
+       font-family:var(--sans);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:16px 24px;text-align:center;position:sticky;top:0;z-index:5}
+  header .wm{font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:3px}
+  header .sub{font-size:11.5px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+  .wrap{max-width:560px;margin:0 auto;padding:20px 16px 72px;display:flex;flex-direction:column;gap:16px}
+
+  .hero{text-align:center;padding:14px 6px 4px}
+  .hero .eyebrow{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--warm)}
+  .hero h1{font-family:var(--display);font-size:25px;font-weight:600;margin-top:7px;line-height:1.3}
+  .hero p{font-size:14px;color:var(--muted);margin-top:11px;line-height:1.7}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}
+  .card h2{font-family:var(--display);font-size:17px;font-weight:600;display:flex;align-items:baseline;gap:9px}
+  .card h2 .n{font-family:var(--display);font-size:12px;font-weight:700;color:var(--sage-deep);background:var(--sage-light);border:1px solid #D3E6DF;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;align-self:center}
+  .card > .lead{font-size:13.5px;color:var(--muted);margin:9px 0 4px}
+
+  /* quick-jump */
+  .jump{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .jump a{font-size:12.5px;color:var(--sage-deep);background:var(--sage-light);border:1px solid #D3E6DF;border-radius:20px;padding:6px 13px;text-decoration:none}
+
+  /* symbol legend */
+  .legend{display:flex;flex-direction:column;gap:2px;margin-top:14px}
+  .lrow{display:flex;gap:13px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
+  .lrow:first-child{border-top:none}
+  .sym{flex:none;width:46px;height:46px;border:1.8px solid var(--ink);border-radius:9px;display:flex;align-items:center;justify-content:center;position:relative;background:var(--cream)}
+  .sym.round{border-radius:50%}
+  .sym .dots{display:flex;gap:3px}
+  .sym .dot{width:5px;height:5px;border-radius:50%;background:var(--ink)}
+  .sym .txt{font-size:9px;font-weight:700;letter-spacing:.5px}
+  .sym.no::after{content:"";position:absolute;inset:-4px;border-top:1.8px solid var(--danger);transform:rotate(45deg)}
+  .lrow .d .t{font-weight:600;font-size:14px}
+  .lrow .d .s{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.5}
+
+  /* 3 buckets */
+  .bucket{border:1px solid var(--line);border-radius:13px;padding:15px 16px;margin-top:12px;border-left-width:4px}
+  .bucket.can{border-left-color:var(--ok);background:linear-gradient(90deg,#F3FAF6,#fff 60%)}
+  .bucket.care{border-left-color:var(--warn);background:linear-gradient(90deg,#FDF9EE,#fff 60%)}
+  .bucket.no{border-left-color:var(--danger);background:linear-gradient(90deg,#FCF2F2,#fff 60%)}
+  .bucket .h{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:8px}
+  .bucket.can .h{color:var(--ok)} .bucket.care .h{color:var(--warn)} .bucket.no .h{color:var(--danger)}
+  .bucket .h .k{font-size:11px;font-weight:700;letter-spacing:.5px;border:1.5px solid currentColor;border-radius:6px;padding:1px 7px}
+  .bucket .list{font-size:13px;color:#444;margin-top:8px;line-height:1.7}
+  .bucket .list b{color:var(--ink);font-weight:600}
+  .bucket .tip{font-size:12.5px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+
+  /* fabric cards */
+  .fab{border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-top:12px}
+  .fab summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--cream2)}
+  .fab summary::-webkit-details-marker{display:none}
+  .fab summary .nm{font-family:var(--display);font-weight:600;font-size:15px}
+  .fab summary .nm span{font-family:var(--sans);font-weight:400;font-size:12px;color:var(--muted);letter-spacing:.3px;margin-left:6px}
+  .fab summary .chev{color:var(--muted);font-size:13px;transition:transform .2s}
+  .fab[open] summary .chev{transform:rotate(180deg)}
+  .fab[open] summary{border-bottom:1px solid var(--line)}
+  .fab .body{padding:6px 16px 15px}
+  .fab .fr{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .fab .fr:last-child{border-bottom:none}
+  .fab .fr .ic{flex:none;width:20px;color:var(--sage-deep);font-weight:700;font-size:11px;letter-spacing:.5px;padding-top:1px}
+  .fab .fr .k{flex:none;width:74px;color:var(--muted);font-size:12px}
+  .fab .fr .v{color:#333;line-height:1.55}
+  .fab .fr .v b{font-weight:600;color:var(--ink)}
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:14px;margin-left:4px}
+  .badge.can{background:var(--sage-light);color:var(--ok)}
+  .badge.care{background:#FBF1D8;color:var(--warn)}
+  .badge.no{background:#FADEDE;color:var(--danger)}
+
+  /* temperature scale */
+  .temps{display:flex;flex-direction:column;gap:9px;margin-top:13px}
+  .trow{display:flex;align-items:center;gap:12px}
+  .tdots{flex:none;width:52px;display:flex;gap:4px;justify-content:center}
+  .tdots .d{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ink)}
+  .tdots .d.f{background:var(--ink)}
+  .trow .lab{font-weight:600;font-size:13.5px;flex:none;width:118px}
+  .trow .lab small{display:block;color:var(--muted);font-weight:400;font-size:11.5px}
+  .trow .use{font-size:12.5px;color:#555;line-height:1.5}
+
+  /* numbered tips */
+  .tips{counter-reset:t;margin-top:12px}
+  .tip-i{display:flex;gap:13px;padding:12px 0;border-top:1px solid var(--line)}
+  .tip-i:first-child{border-top:none}
+  .tip-i .num{counter-increment:t;flex:none;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--display);font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .tip-i .num::before{content:counter(t)}
+  .tip-i .tx{font-size:13.5px;line-height:1.6}
+  .tip-i .tx b{font-weight:600}
+  .tip-i .tx small{color:var(--muted);display:block;font-size:12px;margin-top:2px}
+
+  /* stains */
+  .stain{display:flex;gap:11px;padding:11px 0;border-top:1px solid var(--line);font-size:13px;line-height:1.55}
+  .stain:first-child{border-top:none}
+  .stain .w{flex:none;width:82px;font-weight:600}
+  .stain .h{color:#555}
+  .stain .h b{color:var(--sage-deep)}
+
+  .note{background:var(--sage-light);border:1px solid #D3E6DF;border-radius:12px;padding:14px 16px;font-size:13px;color:#2c4f47;line-height:1.65}
+  .note b{color:var(--sage-deep)}
+  .foot{text-align:center;font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:4px}
+  .foot a{color:var(--sage-deep);text-decoration:none}
+  .anchor{scroll-margin-top:78px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wm">LLOOP</div>
+  <div class="sub">คู่มือดูแลเสื้อผ้า</div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Care Guide</div>
+    <h1>ซักยังไง รีดยังไง<br>ให้ถนอมผ้าที่สุด</h1>
+    <p>ผ้าดี ๆ อยู่กับเราได้นานถ้าดูแลถูกวิธี · คู่มือนี้ตอบครบ — เข้าเครื่องได้ไหม ใช้น้ำร้อนหรือเย็น รีดกี่องศา แยกตามชนิดผ้า อ่านง่าย ทำตามได้จริง</p>
+  </div>
+
+  <div class="card">
+    <div class="jump">
+      <a href="#lloop">วิธีของ LLOOP</a>
+      <a href="#label">อ่านป้าย</a>
+      <a href="#machine">เข้าเครื่องไหม</a>
+      <a href="#fabric">ตามชนิดผ้า</a>
+      <a href="#water">น้ำร้อน/เย็น</a>
+      <a href="#dry">ตาก</a>
+      <a href="#iron">รีด</a>
+      <a href="#tips">เคล็ดลับ</a>
+      <a href="#stain">รอยเปื้อน</a>
+    </div>
+  </div>
+
+  <!-- วิธีของ LLOOP -->
+  <div class="card anchor" id="lloop" style="background:linear-gradient(170deg,#EAF3EF,#fff 55%);border-color:#D3E6DF">
+    <h2><span class="n" style="background:var(--sage-deep);color:#fff;border-color:var(--sage-deep)">L</span> วิธีของ LLOOP</h2>
+    <div class="lead" style="color:#3C6258">ชุดเช่าของเราแทบไม่เข้าเครื่องเลย — <b>ซักมือเป็นหลัก</b> เพราะถนอมเนื้อผ้าและสีได้ดีที่สุด ให้ชุดสวยหมุนเวียนได้นานที่สุด</div>
+    <div class="tips">
+      <div class="tip-i"><div class="num" style="background:var(--sage-deep)"></div><div class="tx"><b>ซักมือ ไม่เข้าเครื่อง</b><small>เบามือกับเนื้อผ้าและงานตกแต่ง ลดการเสียดสี ยืด และสีตกจากแรงปั่น</small></div></div>
+      <div class="tip-i"><div class="num" style="background:var(--sage-deep)"></div><div class="tx"><b>เลอะมาก = แช่ ไม่ต้องขยี้</b><small>แช่ทิ้งไว้ให้คราบคลายออกเอง แล้วซับ/ล้างเบา ๆ — ขยี้ทำผ้าเป็นขน สีถลอก และงานปักหลุด</small></div></div>
+      <div class="tip-i"><div class="num" style="background:var(--sage-deep)"></div><div class="tx"><b>น้ำยาซักน้อยมาก</b> กันสีเฟด<small>สีชุดอยู่ทนกว่ามาก · น้ำยาเยอะ = ตกค้างในใยผ้า ทำผ้าแข็งและเร่งสีซีด</small></div></div>
+      <div class="tip-i"><div class="num" style="background:var(--sage-deep)"></div><div class="tx"><b>คราบดื้อ ใช้สูตรถนอมสี</b><small>น้ำยาขจัดคราบชนิด “ถนอมสี / color-safe” (เช่น ไฮเตอร์ดัลเลอร์) ใช้ได้ทั้งผ้าสีและขาว — ไม่ใช่น้ำยาฟอกขาวคลอรีนที่กัดสี</small></div></div>
+      <div class="tip-i"><div class="num" style="background:var(--sage-deep)"></div><div class="tx"><b>บีบ/บิดหมาด แล้วตากในร่มเลย</b><small>ชุดทั่วไปบิดหมาดได้ · แต่ชุด<b>ไหม ลูกไม้ ปักเลื่อม</b> อย่าบิดแรง — กดน้ำออกเบา ๆ หรือม้วนผ้าขนหนูซับ กันเสียทรง</small></div></div>
+    </div>
+    <div class="note" style="background:#fff;border-color:#D3E6DF"><b>ทำไมต้องเบาขนาดนี้:</b> ชุดหนึ่งตัวต้องหมุนเวียนให้ลูกค้าหลายคน การซักมือเบา ๆ น้ำยาน้อย คือเคล็ดลับที่ทำให้สีสด เนื้อผ้าสวย และงานปักอยู่ครบทุกรอบ</div>
+  </div>
+
+  <!-- 0. อ่านป้าย -->
+  <div class="card anchor" id="label">
+    <h2><span class="n">0</span> อ่านป้ายดูแลก่อนเสมอ</h2>
+    <div class="lead">ป้ายเล็ก ๆ ที่คอเสื้อหรือตะเข็บข้างบอกทุกอย่าง — จำหลักง่าย ๆ ว่า “จุดยิ่งเยอะ = ยิ่งร้อน” และ “ขีดใต้อ่างยิ่งเยอะ = ยิ่งต้องเบามือ” ส่วน “กากบาท = ห้าม” เสมอ</div>
+    <div class="legend">
+      <div class="lrow">
+        <div class="sym"><div class="dots"><span class="dot"></span></div></div>
+        <div class="d"><div class="t">อ่างน้ำ + จุด = อุณหภูมิน้ำซัก</div><div class="s">1 จุด = เย็น (~30°C) · 2 จุด = อุ่น (~40°C) · 3 จุด = ร้อน (~60°C) — ยิ่งจุดเยอะยิ่งร้อน</div></div>
+      </div>
+      <div class="lrow">
+        <div class="sym"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V6.5a1.4 1.4 0 0 1 2.8 0V10M9.8 9.5V4.6a1.4 1.4 0 0 1 2.8 0V10M12.6 9.5V5.5a1.4 1.4 0 0 1 2.8 0V11M15.4 9.2a1.4 1.4 0 0 1 2.8 0v4.3a6 6 0 0 1-6 6H11a6 6 0 0 1-5.2-3l-1.5-2.6a1.4 1.4 0 0 1 2.4-1.4L7 14.2"/></svg></div>
+        <div class="d"><div class="t">มือในอ่าง = ซักมือเท่านั้น</div><div class="s">ห้ามปั่นเครื่อง · ขีด 1–2 เส้นใต้อ่าง = ต้องใช้รอบถนอมผ้า/รอบเบา</div></div>
+      </div>
+      <div class="lrow">
+        <div class="sym no"><div class="dots"><span class="dot"></span></div></div>
+        <div class="d"><div class="t">อ่างมีกากบาท = ห้ามซักน้ำ</div><div class="s">ต้องซักแห้ง (dry clean) เท่านั้น — ห้ามเอาลงน้ำ</div></div>
+      </div>
+      <div class="lrow">
+        <div class="sym"><div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+        <div class="d"><div class="t">รูปเตารีด + จุด = ความร้อนรีด</div><div class="s">1 จุด = ต่ำ (ไหม/ใยสังเคราะห์) · 2 จุด = กลาง (ขนสัตว์/โพลีเอสเตอร์) · 3 จุด = สูง (ฝ้าย/ลินิน)</div></div>
+      </div>
+      <div class="lrow">
+        <div class="sym no txt">IRON</div>
+        <div class="d"><div class="t">เตารีดมีกากบาท = ห้ามรีด</div><div class="s">ความร้อนจะทำผ้าเสีย เช่น เลื่อม กำมะหยี่ ใยสังเคราะห์บาง — ใช้ไอน้ำจากเครื่องสตีมแทน</div></div>
+      </div>
+      <div class="lrow">
+        <div class="sym round"><div class="dots"><span class="dot"></span></div></div>
+        <div class="d"><div class="t">วงกลม = การอบ/ซักแห้ง</div><div class="s">วงในสี่เหลี่ยม = อบผ้า (จุด = ความร้อน) · วงกลมเดี่ยว = ซักแห้งที่ร้าน · มีกากบาท = ห้ามอบ/ห้ามซักแห้ง</div></div>
+      </div>
+      <div class="lrow">
+        <div class="sym" style="border-radius:2px 2px 0 0;border-bottom:none;width:46px;height:38px;transform:none"><span style="font-size:9px;font-weight:700;letter-spacing:1px">▲</span></div>
+        <div class="d"><div class="t">สามเหลี่ยม = การฟอกขาว (bleach)</div><div class="s">สามเหลี่ยมโล่ง = ฟอกได้ · มีขีดเฉียง = น้ำยาไม่มีคลอรีนเท่านั้น · มีกากบาท = ห้ามฟอกขาว</div></div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:14px"><b>กฎเหล็ก:</b> ถ้าป้ายบอกอย่างไร ให้ทำตามป้ายก่อนคู่มือนี้เสมอ — ผู้ผลิตรู้จักเนื้อผ้าจริงของชุดนั้นดีที่สุด</div>
+  </div>
+
+  <!-- 1. เข้าเครื่องได้ไหม -->
+  <div class="card anchor" id="machine">
+    <h2><span class="n">1</span> เข้าเครื่องได้ไหม?</h2>
+    <div class="lead">แบ่งเสื้อผ้าเป็น 3 กลุ่มง่าย ๆ ก่อนตัดสินใจ</div>
+
+    <div class="bucket can">
+      <div class="h"><span class="k">เข้าเครื่องได้</span> เนื้อทน ปั่นได้สบาย</div>
+      <div class="list"><b>ฝ้าย · ยีน/เดนิม · โพลีเอสเตอร์ · ผ้ายืดใส่ประจำวัน · ผ้าเชิ้ตทั่วไป · ผ้าขนหนู</b></div>
+      <div class="tip">ถนอมสุด: ปั่น<b>รอบเบา (delicate/gentle)</b> น้ำเย็น · กลับด้านใน · ปิดซิป/ตะขอ · ไม่อัดเครื่องแน่นเกินไป</div>
+    </div>
+
+    <div class="bucket care">
+      <div class="h"><span class="k">เข้าได้ แต่ต้องถนอม</span> ใส่ถุงตาข่าย รอบเบาเท่านั้น</div>
+      <div class="list">ชุดชั้นใน · <b>บรา · ถุงน่อง</b> · ผ้ายืดบาง · ผ้าที่มีลูกไม้เล็กน้อย · เสื้อถักบาง</div>
+      <div class="tip">ใส่<b>ถุงซักผ้า (mesh bag)</b> เสมอ กันเกี่ยว-ยืด-ตะขอเกี่ยวผ้าอื่น · น้ำเย็น · รอบเบา · ห้ามปั่นแห้งแรง</div>
+    </div>
+
+    <div class="bucket no">
+      <div class="h"><span class="k">ห้ามเข้าเครื่อง</span> ซักมือ / ซักแห้งเท่านั้น</div>
+      <div class="list"><b>ไหมแท้ · ขนสัตว์/วูล · แคชเมียร์ · ชุดปักเลื่อม/ลูกปัด · ลูกไม้ละเอียด · ชุดราตรี/ชุดโครงสร้างมีโครง · หนัง/หนังกลับ · กำมะหยี่</b></div>
+      <div class="tip">แรงปั่นทำเลื่อมหลุด ลูกไม้ขาด ไหมด้าน วูลหด — ซักมือเบา ๆ หรือส่งซักแห้งปลอดภัยกว่ามาก</div>
+    </div>
+  </div>
+
+  <!-- 2. ตามชนิดผ้า -->
+  <div class="card anchor" id="fabric">
+    <h2><span class="n">2</span> วิธีดูแลตามชนิดผ้า</h2>
+    <div class="lead">แตะที่ชื่อผ้าเพื่อดูวิธีซัก อุณหภูมิน้ำ และวิธีรีดของแต่ละชนิด</div>
+
+    <details class="fab" open>
+      <summary><div class="nm">ฝ้าย <span>Cotton</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ได้</b> <span class="badge can">เครื่องได้</span> สีเข้มกลับด้านใน กันซีด</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v">เย็น–อุ่น <b>30–40°C</b> · สีขาวใช้ร้อนได้ แต่เสี่ยงหด ~2–3%</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>สูง ~200°C (3 จุด)</b> · รีดตอนผ้าหมาด + ไอน้ำ ลื่นสุด</div></div>
+      </div>
+    </details>
+
+    <details class="fab">
+      <summary><div class="nm">ลินิน <span>Linen</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ได้ รอบเบา</b> <span class="badge can">เครื่องได้</span> น้ำเย็น · ยับง่ายเป็นธรรมชาติของผ้า</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v">เย็น <b>30°C</b> · ห้ามบิดแรง แขวนหมาด ๆ ให้ทิ้งตัว</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>สูงสุด ~230°C (3 จุด)</b> · <b>รีดตอนยังหมาด</b> ไอน้ำเยอะ เรียบสวยที่สุด</div></div>
+      </div>
+    </details>
+
+    <details class="fab">
+      <summary><div class="nm">ไหม <span>Silk</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ไม่ควร</b> <span class="badge no">ซักมือ</span> น้ำเย็น น้ำยาซักไหม/อ่อนโยน ไม่ขยี้</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v">เย็นเท่านั้น · ซับด้วยผ้าขนหนู ห้ามบิด · ตากในร่ม ห้ามแดดจัด</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>ต่ำ (1 จุด)</b> · <b>กลับด้านใน</b> · ห้ามพ่นน้ำ (เป็นรอยด่าง) รองด้วยผ้าบาง</div></div>
+      </div>
+    </details>
+
+    <details class="fab">
+      <summary><div class="nm">ขนสัตว์ / วูล <span>Wool</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ไม่ควร</b> <span class="badge no">ซักมือ</span> เว้นแต่ป้ายเขียน “wool cycle” · น้ำยาซักวูล</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v">เย็น · <b>ห้ามน้ำร้อน + ห้ามขยี้</b> (ทำผ้าหด-สาก) · กดน้ำออกเบา ๆ <b>ตากราบ</b> ไม่แขวน</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>กลาง ~150°C (2 จุด)</b> · รองผ้า + ใช้ไอน้ำ กดเบา ๆ ห้ามถูไถแรง</div></div>
+      </div>
+    </details>
+
+    <details class="fab">
+      <summary><div class="nm">แคชเมียร์ <span>Cashmere</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ห้าม</b> <span class="badge no">ซักมือ</span> น้ำเย็น น้ำยาอ่อน ๆ แช่สั้น ๆ ไม่ขยี้</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v">เย็น · บีบน้ำเบา ๆ (ห้ามบิด) · <b>ตากราบบนผ้าขนหนู</b> จัดทรงให้เข้ารูป</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>ต่ำ + รองผ้า</b> หรือใช้เครื่องสตีมห่าง ๆ ดีกว่า</div></div>
+      </div>
+    </details>
+
+    <details class="fab">
+      <summary><div class="nm">โพลีเอสเตอร์ / ใยสังเคราะห์ <span>Polyester</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ได้</b> <span class="badge can">เครื่องได้</span> รอบปกติ/เบา น้ำเย็น–อุ่น</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v">เย็น–อุ่น <b>30–40°C</b> · น้ำร้อนทำผ้าย้วย/เสียทรง</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>ต่ำ–กลาง ~110–150°C</b> · ร้อนเกินผ้า<b>ละลาย/เป็นมัน</b> — กลับด้านในรีด</div></div>
+      </div>
+    </details>
+
+    <details class="fab">
+      <summary><div class="nm">ยีน / เดนิม <span>Denim</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ได้</b> <span class="badge can">เครื่องได้</span> <b>กลับด้านในเสมอ</b> กันสีตก · ซักเท่าที่จำเป็น</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v"><b>เย็น</b> รักษาสีเข้มได้นาน · แยกซักครั้งแรก ๆ กันสีเลอะ</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>สูง (3 จุด)</b> ได้ + ไอน้ำ · กลับด้านในกันเป็นมันเงา</div></div>
+      </div>
+    </details>
+
+    <details class="fab">
+      <summary><div class="nm">ลูกไม้ <span>Lace</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ไม่ควร</b> <span class="badge care">ถุงตาข่าย</span> ถ้าจำเป็นใส่ถุงซัก รอบเบาสุด · ที่ดีคือซักมือ</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v">เย็น · แช่เบา ๆ ไม่ขยี้ (เส้นด้ายเกี่ยวขาดง่าย) ซับหมาด ตากในร่ม</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>ต่ำ + รองผ้า</b> หรือสตีมห่าง ๆ · ระวังปลายเตารีดเกี่ยวลาย</div></div>
+      </div>
+    </details>
+
+    <details class="fab">
+      <summary><div class="nm">ผ้าปักเลื่อม / ลูกปัด <span>Sequins &amp; Beads</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ห้ามเด็ดขาด</b> <span class="badge no">ซักแห้ง</span> เลื่อมหลุด/ขูดผ้าอื่น · เช็ดเฉพาะจุด หรือส่งซักแห้ง</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v">เลี่ยงแช่น้ำทั้งตัว · ถ้าเปื้อนจุดเดียว เช็ดด้วยผ้าชุบน้ำเย็นหมาด ๆ</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>ห้ามรีดทับเลื่อม</b> (ละลาย/บิดงอ) · <b>กลับด้านใน</b> รีดต่ำ ๆ รองผ้า หรือใช้สตีม</div></div>
+      </div>
+    </details>
+
+    <details class="fab">
+      <summary><div class="nm">กำมะหยี่ <span>Velvet</span></div><div class="chev">▾</div></summary>
+      <div class="body">
+        <div class="fr"><div class="ic">ซัก</div><div class="k">เข้าเครื่อง</div><div class="v"><b>ไม่ควร</b> <span class="badge no">ซักแห้ง</span> ขนยุบง่าย · ทำตามป้ายเป็นหลัก</div></div>
+        <div class="fr"><div class="ic">น้ำ</div><div class="k">อุณหภูมิ</div><div class="v">ถ้าซักได้ใช้น้ำเย็น รอบเบา กลับด้านใน · แขวนตากในร่ม</div></div>
+        <div class="fr"><div class="ic">รีด</div><div class="k">ความร้อน</div><div class="v"><b>ห้ามรีดทับ</b> (ขนแบน) · <b>ใช้เครื่องสตีมเท่านั้น</b> จ่อไอน้ำด้านในแล้วปัดขนให้ฟู</div></div>
+      </div>
+    </details>
+  </div>
+
+  <!-- 3. อุณหภูมิน้ำ -->
+  <div class="card anchor" id="water">
+    <h2><span class="n">3</span> น้ำร้อน อุ่น หรือเย็น?</h2>
+    <div class="lead">ถ้าไม่แน่ใจ — <b>น้ำเย็นปลอดภัยที่สุด</b> กันหด กันสีตก ประหยัดไฟ และใช้ได้กับผ้าเกือบทุกชนิด</div>
+    <div class="temps">
+      <div class="trow">
+        <div class="tdots"><span class="d f"></span></div>
+        <div class="lab">เย็น ~30°C<small>1 จุดบนป้าย</small></div>
+        <div class="use">สีเข้ม ผ้าบอบบาง ผ้าใส่ประจำวัน — เลือกนี้ไว้ก่อนถ้าไม่แน่ใจ</div>
+      </div>
+      <div class="trow">
+        <div class="tdots"><span class="d f"></span><span class="d f"></span></div>
+        <div class="lab">อุ่น ~40°C<small>2 จุดบนป้าย</small></div>
+        <div class="use">ผ้าเปื้อนปานกลาง ผ้าฝ้าย/สังเคราะห์สีอ่อน ที่ไม่กลัวหด</div>
+      </div>
+      <div class="trow">
+        <div class="tdots"><span class="d f"></span><span class="d f"></span><span class="d f"></span></div>
+        <div class="lab">ร้อน ~60°C<small>3 จุดบนป้าย</small></div>
+        <div class="use">ผ้าขาว ผ้าเช็ดตัว ผ้าปูที่นอน ของที่ต้องฆ่าเชื้อ — เสี่ยงหด/ซีด อย่าใช้กับสีเข้ม</div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:14px"><b>แยกสีก่อนซักเสมอ</b> — ขาว / สีอ่อน / สีเข้ม แยกกอง · ของสีแดง-กรมท่า-ดำ 2–3 ครั้งแรกซักแยก เพราะสีตกง่าย</div>
+  </div>
+
+  <!-- 4. ตาก -->
+  <div class="card anchor" id="dry">
+    <h2><span class="n">4</span> ตากให้ถูก ผ้าอยู่ทรง</h2>
+    <div class="tips">
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>ตากในร่มที่ลมโกรก</b> ดีกว่าแดดเปรี้ยง<small>แดดจัดทำสีซีดและใยผ้าเปราะ โดยเฉพาะสีเข้มและผ้าบอบบาง</small></div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>ผ้าถัก วูล แคชเมียร์ = ตากราบ</b> ไม่แขวน<small>น้ำหนักน้ำจะดึงให้ยืดย้วยเสียทรง — วางราบบนผ้าขนหนูแล้วจัดทรง</small></div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>กลับด้านในตาก</b> กันสีซีดด้านนอก<small>ช่วยมากกับยีนและผ้าสีเข้ม</small></div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>เครื่องอบผ้าใช้ไฟต่ำ</b> และดูป้ายก่อน<small>ความร้อนสูงทำผ้าหดและใยเสื่อม · ผ้าบอบบางเลี่ยงเครื่องอบ</small></div></div>
+    </div>
+  </div>
+
+  <!-- 5. รีด -->
+  <div class="card anchor" id="iron">
+    <h2><span class="n">5</span> รีดให้เรียบ ไม่ทำผ้าพัง</h2>
+    <div class="lead">หลักคือ <b>เริ่มจากผ้าที่ทนความร้อนน้อยไปมาก</b> (เตารีดร้อนช้ากว่าเย็น) และรีดตอนผ้ายังหมาดจะเรียบง่ายที่สุด</div>
+    <div class="temps">
+      <div class="trow">
+        <div class="tdots"><span class="d f"></span></div>
+        <div class="lab">ต่ำ ~110°C<small>1 จุด</small></div>
+        <div class="use">ไหม · ใยสังเคราะห์ · ไนลอน · อะคริลิก — กลับด้านใน ไม่พ่นน้ำ</div>
+      </div>
+      <div class="trow">
+        <div class="tdots"><span class="d f"></span><span class="d f"></span></div>
+        <div class="lab">กลาง ~150°C<small>2 จุด</small></div>
+        <div class="use">ขนสัตว์/วูล · โพลีเอสเตอร์ · ผ้าผสม — รองผ้า ใช้ไอน้ำ</div>
+      </div>
+      <div class="trow">
+        <div class="tdots"><span class="d f"></span><span class="d f"></span><span class="d f"></span></div>
+        <div class="lab">สูง ~200–230°C<small>3 จุด</small></div>
+        <div class="use">ฝ้าย · ลินิน · ยีน — ไอน้ำเยอะ รีดตอนหมาด เรียบสวยสุด</div>
+      </div>
+    </div>
+    <div class="tips" style="margin-top:16px">
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>ไม่แน่ใจ เริ่มไฟต่ำก่อน</b><small>ทดลองมุมในสุดที่ไม่เห็น ค่อยเพิ่มความร้อนทีละนิด</small></div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>กลับด้านในรีด</b> สำหรับสีเข้ม ผ้ามัน เลื่อม ปัก<small>กันเป็นรอยมันเงาและกันความร้อนโดนผิวผ้าโดยตรง</small></div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>ใช้ผ้ารองรีด (pressing cloth)</b> กับผ้าบอบบาง<small>ผ้าฝ้ายบาง ๆ หรือผ้าเช็ดหน้าวางทับก่อนรีด</small></div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>เลื่อม กำมะหยี่ ผ้าปัก = ใช้เครื่องสตีมแทน</b><small>จ่อไอน้ำห่าง ๆ ไม่กดทับ — ปลอดภัยกับงานตกแต่งที่ละลาย/ยุบได้</small></div></div>
+    </div>
+  </div>
+
+  <!-- 6. เคล็ดลับถนอมผ้า -->
+  <div class="card anchor" id="tips">
+    <h2><span class="n">6</span> 8 เคล็ดลับถนอมผ้าให้อยู่นาน</h2>
+    <div class="tips">
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>ซักเท่าที่จำเป็น</b> — เสื้อนอก ยีน กางเกง ใส่ซ้ำได้ ผึ่งลมแทนซักทุกครั้ง ยืดอายุผ้ามาก</div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>กลับด้านในก่อนซัก</b> — ปกป้องผิวผ้าด้านนอก สี งานปัก และตัวพิมพ์</div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>ปิดซิป ติดตะขอ กระดุม</b> — กันตะขอเกี่ยวผ้าตัวอื่นขาด และกันซิปกัดเนื้อผ้า</div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>ใช้ถุงซักผ้าตาข่าย</b> — กับของบอบบาง บรา ถุงน่อง ผ้าลูกไม้</div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>น้ำยาซักแต่พอดี</b> — ใส่เยอะไม่ได้สะอาดกว่า แต่ตกค้างในใยผ้าทำผ้าแข็งกระด้าง</div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>อย่าอัดเครื่องแน่น</b> — ผ้าต้องมีที่ขยับ ถึงจะสะอาดและไม่ยับเป็นรอยลึก</div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>ผ้าบอบบางไม่บิด</b> — กดน้ำออกเบา ๆ หรือม้วนในผ้าขนหนูซับ กันใยขาดและเสียทรง</div></div>
+      <div class="tip-i"><div class="num"></div><div class="tx"><b>เก็บให้ถูก</b> — ผ้าถัก/วูลพับเก็บ (แขวนแล้วยืด) · ชุดสวย ๆ แขวนไม้แขวนบ่ากว้าง มีถุงคลุมกันฝุ่น</div></div>
+    </div>
+  </div>
+
+  <!-- 7. รอยเปื้อน -->
+  <div class="card anchor" id="stain">
+    <h2><span class="n">7</span> เจอรอยเปื้อน ทำทันที</h2>
+    <div class="lead">หลักสำคัญ: <b>รีบจัดการตอนยังสด · ซับ อย่าถู · ห้ามโดนความร้อนก่อนรอยออก</b> (ความร้อนทำรอยติดถาวร)</div>
+    <div style="margin-top:6px">
+      <div class="stain"><div class="w">เลือด / เหงื่อ</div><div class="h">ล้าง<b>น้ำเย็น</b>ทันที (น้ำร้อนทำติดแน่น) แช่แล้วซับออก</div></div>
+      <div class="stain"><div class="w">ไวน์ / กาแฟ</div><div class="h">ซับด้วยผ้าแห้ง แล้วซับ<b>น้ำเย็น</b> จากขอบเข้าใน · เลี่ยงถูให้บาน</div></div>
+      <div class="stain"><div class="w">น้ำมัน / อาหาร</div><div class="h">โรย<b>แป้ง/แป้งเด็ก</b>ดูดน้ำมัน ทิ้งไว้ปัดออก แล้วซักน้ำยาปกติ</div></div>
+      <div class="stain"><div class="w">ลิปสติก / เมคอัพ</div><div class="h">ซับเบา ๆ ห้ามถู · ผ้าสวย ๆ ราคาแพงส่ง<b>ซักแห้ง</b>ปลอดภัยกว่า</div></div>
+      <div class="stain"><div class="w">เหงื่อเหลืองที่รักแร้</div><div class="h">ผสม<b>เบกกิ้งโซดา+น้ำ</b>ทาทิ้งไว้ก่อนซัก · กับผ้าสีใช้<b>น้ำยาถนอมสี</b> — ห้ามฟอกขาวคลอรีน (กัดสีด่าง)</div></div>
+    </div>
+    <div class="note" style="margin-top:14px"><b>รอยที่กังวลหรือชุดราคาแพง</b> — อย่าเสี่ยงเอง ส่งร้านซักแห้งมืออาชีพ บอกชนิดคราบให้ชัด โอกาสรอดสูงกว่ามาก</div>
+  </div>
+
+  <div class="foot">
+    คู่มือนี้เป็นแนวทางทั่วไป — <b>ยึดป้ายดูแลบนตัวชุดเป็นหลักเสมอ</b><br>
+    ดูแลผ้าดี ๆ ให้อยู่กับเราไปนาน ๆ · <a href="index.html">LLOOP</a>
+  </div>
+
+</div>
+</body>
+</html>
