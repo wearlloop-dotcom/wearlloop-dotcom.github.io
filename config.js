@@ -9,6 +9,12 @@ window.CONFIG = {
   N8N_BASE_URL:'',                 // TODO: ใส่ URL เมื่อ deploy n8n เช่น https://n8n.lloop.app
   GOOGLE_MAPS_KEY:'AIzaSyDOz7Ruts01gnasSpgqhDJcHosO-fXhm9w', // Maps key (wearlloop-maps-web) — ล็อก 3 Maps API + โดเมน github.io/lloop.app
 
+  // ===== ข้อมูลติดต่อแบรนด์ (ค่ากลาง — ใช้ได้ทุกหน้า) =====
+  CONTACT_EMAIL:'wearlloop@gmail.com',
+  CONTACT_PHONE:'0622269897',
+  CONTACT_ADDRESS:'158/19 ศาลายา',
+  LINE_OA_URL:'https://line.me/R/ti/p/@lloop', // LINE OA @lloop (shop.html/quiz.html อ่านค่านี้อยู่แล้ว)
+
   // ===== วิดีโอ hero แบบ Dior (เปิดด้วย pain point ผู้หญิง → ทางออก LLOOP) =====
   // ใส่ลิงก์ไฟล์วิดีโอที่เรนเดอร์แล้ว (ดูพรอมป์ที่ brand/video-prompts.md — ชุด P1–P6 + คลิป #1 แชร์ตู้)
   // ใส่ได้หลายคลิป จะเล่นต่อเนื่องวนลูป (montage). เว้นว่าง = ใช้พื้นหลังไล่สีเดิม
