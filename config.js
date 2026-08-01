@@ -12,7 +12,7 @@ window.CONFIG = {
   // ===== ข้อมูลติดต่อแบรนด์ (ค่ากลาง — ใช้ได้ทุกหน้า) =====
   CONTACT_EMAIL:'wearlloop@gmail.com',
   CONTACT_PHONE:'0622269897',
-  CONTACT_ADDRESS:'158/19 ศาลายา',
+  CONTACT_ADDRESS:'158/19 ต.ศาลายา อ.พุทธมณฑล จ.นครปฐม 73170',
   LINE_OA_URL:'https://line.me/R/ti/p/@lloop', // LINE OA @lloop (shop.html/quiz.html อ่านค่านี้อยู่แล้ว)
 
   // ===== วิดีโอ hero แบบ Dior (เปิดด้วย pain point ผู้หญิง → ทางออก LLOOP) =====
