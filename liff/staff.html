@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LLOOP</title>
+<script>
+  // Redirect stub — หน้า staff จริงถูก deploy ไว้ที่ root (/staff.html) ไม่ใช่ /liff/
+  // ลิงก์เก่าที่เคยส่งให้พนักงานเป็น /liff/staff.html?token=... จะ 404 ถ้าไม่มีไฟล์นี้
+  // คงพารามิเตอร์ (?token=... / ?ec=...) และ hash ไว้ครบแล้วเด้งไปหน้าจริง
+  (function () {
+    var target = '/staff.html' + (location.search || '') + (location.hash || '');
+    location.replace(target);
+  })();
+</script>
+</head>
+<body>
+<noscript><a href="/staff.html">เปิดหน้ายืนยันตัวตน</a></noscript>
+<p style="font-family:system-ui,'Noto Sans Thai',sans-serif;text-align:center;margin-top:40px;color:#555">กำลังพาไปยังหน้ายืนยันตัวตน…</p>
+</body>
+</html>
