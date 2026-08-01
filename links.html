@@ -334,38 +334,22 @@ body::before{
     <div class="hero-line">circular fashion house</div>
   </div>
 
-  <!-- CAROUSEL: เพิ่ม/ลด slide ได้เลย ใส่ src จริงแทน placeholder -->
-  <div class="carousel placeholders-only" data-reveal id="heroCarousel">
+  <!-- CAROUSEL: lookbook — รูปจริงจาก storyboard-refs (เพิ่ม/ลด slide + dot ให้ตรงกัน) -->
+  <div class="carousel" data-reveal id="heroCarousel">
     <div class="carousel-track">
 
-      <!-- Slide 1 — แทนด้วย: <img src="photo1.jpg" alt=""> -->
-      <div class="carousel-slide">
-        <div class="slide-placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span data-i18n="photo.1">Photo 1</span>
-        </div>
-      </div>
-
-      <!-- Slide 2 — แทนด้วย: <img src="photo2.jpg" alt=""> -->
-      <div class="carousel-slide">
-        <div class="slide-placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span data-i18n="photo.2">Photo 2</span>
-        </div>
-      </div>
-
-      <!-- Slide 3 — แทนด้วย: <img src="photo3.jpg" alt=""> -->
-      <div class="carousel-slide">
-        <div class="slide-placeholder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span data-i18n="photo.3">Photo 3</span>
-        </div>
-      </div>
+      <div class="carousel-slide"><img src="storyboard-refs/02-boss-girl.jpg" alt="LLOOP look — red halter"></div>
+      <div class="carousel-slide"><img src="storyboard-refs/03-soft-coquette.jpg" alt="LLOOP look — soft coquette"></div>
+      <div class="carousel-slide"><img src="storyboard-refs/04-edgy-sensual.jpg" alt="LLOOP look — lace"></div>
+      <div class="carousel-slide"><img src="storyboard-refs/05-old-money.jpg" alt="LLOOP look — draped black"></div>
+      <div class="carousel-slide"><img src="storyboard-refs/01-the-siren.jpg" alt="LLOOP look — off-shoulder black"></div>
 
     </div>
-    <div class="carousel-count">1 / 3</div>
+    <div class="carousel-count">1 / 5</div>
     <div class="carousel-dots">
       <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
       <div class="dot"></div>
       <div class="dot"></div>
     </div>
