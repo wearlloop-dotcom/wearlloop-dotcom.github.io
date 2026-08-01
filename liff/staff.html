@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · กำลังพาไปหน้าพนักงาน</title>
+<script>
+  // หน้านี้เป็นตัว redirect เท่านั้น — ลิงก์เก่าถูกสร้างเป็น /liff/staff.html
+  // แต่ไฟล์จริงอยู่ที่ root (/staff.html) จึงพา query (?token=...) + hash ไปด้วย
+  (function(){
+    try{
+      var target = '/staff.html' + (location.search || '') + (location.hash || '');
+      location.replace(target);
+    }catch(e){
+      location.href = '/staff.html';
+    }
+  })();
+</script>
+<meta http-equiv="refresh" content="0; url=/staff.html">
+<style>
+  body{font-family:'Prompt',system-ui,sans-serif;background:#FAF8F5;color:#1C1B19;
+    display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;text-align:center;padding:24px}
+  a{color:#3F6F63}
+</style>
+</head>
+<body>
+  <div>
+    <p>กำลังพาไปหน้าพนักงาน...</p>
+    <p><a id="fallback" href="/staff.html">แตะที่นี่หากหน้าไม่เปลี่ยนอัตโนมัติ</a></p>
+  </div>
+  <script>
+    // เผื่อ meta refresh/JS แรกไม่ทำงาน ให้ปุ่ม fallback พา query ไปด้วย
+    (function(){
+      var a=document.getElementById('fallback');
+      if(a) a.href='/staff.html'+(location.search||'')+(location.hash||'');
+    })();
+  </script>
+</body>
+</html>
