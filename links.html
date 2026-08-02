@@ -310,6 +310,7 @@ body::before{
 }
 .lang-toggle button.active{background:var(--ink);color:var(--card)}
 </style>
+<script src="config.js"></script>
 </head>
 <body>
 <div id="pbar"></div>
@@ -334,15 +335,16 @@ body::before{
     <div class="hero-line">circular fashion house</div>
   </div>
 
-  <!-- CAROUSEL: lookbook — รูปจริงจาก storyboard-refs (เพิ่ม/ลด slide + dot ให้ตรงกัน) -->
+  <!-- CAROUSEL: ชุดจริงจากแคตตาล็อก — สคริปต์จะดึงชุดที่ว่างอยู่จริงจาก Supabase มาแทน
+       (รูปด้านล่างคือ fallback ชุดจริงในระบบ เผื่อโหลด catalog ไม่ได้ / ปิด JS) -->
   <div class="carousel" data-reveal id="heroCarousel">
     <div class="carousel-track">
 
-      <div class="carousel-slide"><img src="storyboard-refs/02-boss-girl.jpg" alt="LLOOP look — red halter"></div>
-      <div class="carousel-slide"><img src="storyboard-refs/03-soft-coquette.jpg" alt="LLOOP look — soft coquette"></div>
-      <div class="carousel-slide"><img src="storyboard-refs/04-edgy-sensual.jpg" alt="LLOOP look — lace"></div>
-      <div class="carousel-slide"><img src="storyboard-refs/05-old-money.jpg" alt="LLOOP look — draped black"></div>
-      <div class="carousel-slide"><img src="storyboard-refs/01-the-siren.jpg" alt="LLOOP look — off-shoulder black"></div>
+      <div class="carousel-slide"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/PA-10/0.jpg" alt="LLOOP — Magnetic Dress"></div>
+      <div class="carousel-slide"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/LRD-03/0.jpg" alt="LLOOP — Jellyfish Dress"></div>
+      <div class="carousel-slide"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-01/1.jpg" alt="LLOOP — Best Dress"></div>
+      <div class="carousel-slide"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/PS-02/0.jpg" alt="LLOOP — Peony Dress"></div>
+      <div class="carousel-slide"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-05/4.jpg" alt="LLOOP — Estelle Dress"></div>
 
     </div>
     <div class="carousel-count">1 / 5</div>
@@ -651,67 +653,102 @@ if (rw) {
   });
 }
 
-// ── CAROUSEL ──
+// ── CAROUSEL: ชุดจริงจากแคตตาล็อก ──
+// เริ่มจากรูป fallback (ชุดจริง) ที่อยู่ใน HTML แล้ว "อัปเกรด" เป็นชุดที่ว่างอยู่จริง
+// ดึงสดจาก Supabase (garments_public) — แหล่งเดียวกับหน้าเว็บหลัก
 (function() {
   const car = document.getElementById('heroCarousel');
   if (!car) return;
 
   const track = car.querySelector('.carousel-track');
-  const slides = car.querySelectorAll('.carousel-slide');
-  const dots = car.querySelectorAll('.dot');
+  const dotsWrap = car.querySelector('.carousel-dots');
   const count = car.querySelector('.carousel-count');
-  const total = slides.length;
-  let current = 0;
+  const esc = s => String(s == null ? '' : s)
+    .replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+  let slides = [], dots = [], total = 0, current = 0, timer = null;
   let startX = 0, isDragging = false, dragDelta = 0;
 
   function goTo(idx) {
+    if (!total) return;
     current = (idx + total) % total;
     track.style.transform = `translateX(-${current * 100}%)`;
     dots.forEach((d, i) => d.classList.toggle('active', i === current));
     if (count) count.textContent = `${current + 1} / ${total}`;
   }
+  function restartTimer() {
+    clearInterval(timer);
+    timer = setInterval(() => goTo(current + 1), 4000);
+  }
 
-  // dot clicks
-  dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
-
-  // touch / pointer swipe
-  car.addEventListener('pointerdown', e => {
-    startX = e.clientX;
-    isDragging = true;
+  // (re)build slides + dots from a list of { src, alt }
+  function build(list) {
+    if (!list || !list.length) return;
+    track.innerHTML = list.map(it =>
+      `<div class="carousel-slide"><img src="${esc(it.src)}" alt="${esc(it.alt) || 'LLOOP dress'}" loading="lazy"></div>`
+    ).join('');
+    dotsWrap.innerHTML = list.map((_, i) => `<div class="dot${i === 0 ? ' active' : ''}"></div>`).join('');
+    slides = [...car.querySelectorAll('.carousel-slide')];
+    dots = [...dotsWrap.querySelectorAll('.dot')];
+    total = slides.length;
+    current = 0;
     track.style.transition = 'none';
-    car.setPointerCapture(e.pointerId);
+    track.style.transform = 'translateX(0)';
+    requestAnimationFrame(() => { track.style.transition = ''; });
+    if (count) count.textContent = `1 / ${total}`;
+    dots.forEach((d, i) => d.addEventListener('click', () => { goTo(i); restartTimer(); }));
+    car.classList.remove('placeholders-only');
+    restartTimer();
+  }
+
+  // touch / pointer swipe — bound once, reads live `current`/`total`
+  car.addEventListener('pointerdown', e => {
+    startX = e.clientX; isDragging = true;
+    track.style.transition = 'none';
+    try { car.setPointerCapture(e.pointerId); } catch (_) {}
+    clearInterval(timer);
   });
   car.addEventListener('pointermove', e => {
     if (!isDragging) return;
     dragDelta = e.clientX - startX;
     track.style.transform = `translateX(calc(-${current * 100}% + ${dragDelta}px))`;
   });
-  car.addEventListener('pointerup', e => {
+  car.addEventListener('pointerup', () => {
     if (!isDragging) return;
-    isDragging = false;
-    track.style.transition = '';
+    isDragging = false; track.style.transition = '';
     if (dragDelta < -50) goTo(current + 1);
     else if (dragDelta > 50) goTo(current - 1);
     else goTo(current);
-    dragDelta = 0;
+    dragDelta = 0; restartTimer();
   });
   car.addEventListener('pointercancel', () => {
-    isDragging = false;
-    track.style.transition = '';
-    goTo(current);
+    isDragging = false; track.style.transition = ''; goTo(current);
   });
 
-  // auto-advance every 4s (pause on interaction)
-  let timer = setInterval(() => goTo(current + 1), 4000);
-  car.addEventListener('pointerdown', () => clearInterval(timer));
-  car.addEventListener('pointerup', () => {
-    clearInterval(timer);
-    timer = setInterval(() => goTo(current + 1), 4000);
-  });
+  // 1) เริ่มจากรูปชุดจริงที่อยู่ใน HTML แล้ว (fallback — ใช้ได้แม้ดึง catalog ไม่สำเร็จ)
+  build([...car.querySelectorAll('.carousel-slide img')]
+    .map(img => ({ src: img.getAttribute('src'), alt: img.getAttribute('alt') })));
 
-  // check if any real images exist
-  const hasReal = car.querySelector('img[src]');
-  if (hasReal) car.classList.remove('placeholders-only');
+  // 2) อัปเกรดเป็นชุดที่ "ว่างอยู่จริง" ในระบบ — สุ่มหมุนเวียนทุกครั้งที่เปิด
+  const cfg = window.CONFIG || {};
+  if (cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY) {
+    const url = `${cfg.SUPABASE_URL}/rest/v1/garments_public`
+      + `?select=name,photos&status=eq.available&data_status=eq.ready&limit=80`;
+    fetch(url, { headers: { apikey: cfg.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_ANON_KEY } })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(rows => {
+        const pool = (rows || [])
+          .filter(g => Array.isArray(g.photos) && g.photos[0])
+          .map(g => ({ src: g.photos[0], alt: g.name || 'LLOOP dress' }));
+        for (let i = pool.length - 1; i > 0; i--) {   // Fisher–Yates shuffle
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        const pick = pool.slice(0, 8);
+        if (pick.length) build(pick);
+      })
+      .catch(() => { /* คงรูป fallback ชุดจริงใน HTML ไว้ */ });
+  }
 })();
 
 // video play toggle
