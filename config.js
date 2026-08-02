@@ -31,4 +31,9 @@ window.CONFIG = {
   ABOUT_HERO_POSTER:'',  // รูปนิ่งคั่นระหว่างโหลด hero
   ABOUT_STORY_VIDEO:'',  // เช่น 'https://<storage>/lloop-the-loop.mp4'   (เว้นว่าง = โชว์การ์ด poster + ปุ่มเล่น)
   ABOUT_STORY_POSTER:'', // รูปนิ่งของคลิป the loop (โชว์เป็น poster ก่อนกดเล่น)
+
+  // ===== รูปทีเซอร์ "The Midnight Edit" (ท้ายหน้าแรก) =====
+  // ใส่ลิงก์/พาธรูปคอลเลกชันที่กำลังจะเข้า loop — จะโชว์หลังม่านเบลอ "unveiling soon"
+  // เว้นว่าง = คงพื้นหลังไล่สีเดิม (ยังไม่มีรูป). เช่น 'media/midnight-edit-teaser.jpg'
+  TEASER_IMAGE:'',
 };

@@ -194,6 +194,9 @@ function applyStatic() {
   // editorial ท้ายหน้า — eyebrow เล็กๆ คงอังกฤษแบรนด์ไว้ใน HTML, แปลเฉพาะหัวข้อ+เนื้อหา
   ['edEditTitle','maniLead','maniBody','howTitle','step1H','step1P','step2H','step2P','step3H','step3P','step4H','step4P','craftCap','craftBody','teaserBody'].forEach(k => set(k, k));
   const tb = $('#teaserBtn'); if (tb && !tb.disabled) tb.textContent = t('teaserBtn');
+  // รูปทีเซอร์ท้ายหน้า — มีลิงก์ใน CONFIG.TEASER_IMAGE ค่อยโชว์ (ไม่งั้นคงม่านไล่สีเดิม)
+  const ti = $('#teaserImg'), tiSrc = (window.CONFIG || {}).TEASER_IMAGE;
+  if (ti) { if (tiSrc) { ti.src = tiSrc; ti.hidden = false; } else { ti.removeAttribute('src'); ti.hidden = true; } }
 }
 
 function setLang(l) {
