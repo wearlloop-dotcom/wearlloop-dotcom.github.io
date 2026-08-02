@@ -966,6 +966,7 @@
   .ed-tin{display:flex;gap:32px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:760px;margin:0 auto;text-align:left}
   .ed-veil{width:190px;flex:0 0 190px;aspect-ratio:3/4;border-radius:110px 110px 8px 8px;
     background:linear-gradient(165deg,#F4EEE1,#EADFCB);position:relative;display:flex;align-items:center;justify-content:center}
+  .ed-veil img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
   .ed-veil::before{content:"";position:absolute;inset:0;border-radius:inherit;backdrop-filter:blur(6px);background:rgba(255,255,255,.42)}
   .ed-veil span{position:relative;font-family:var(--display);font-weight:600;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--clay)}
   .ed-tx{max-width:330px}
@@ -1196,7 +1197,7 @@
 
 <section class="ed-teaser">
   <div class="ed-tin">
-    <div class="ed-veil"><span>unveiling soon</span></div>
+    <div class="ed-veil"><img id="teaserImg" alt="" hidden><span>unveiling soon</span></div>
     <div class="ed-tx">
       <div class="ek">coming into the loop · soon</div>
       <h3>The Midnight Edit</h3>
