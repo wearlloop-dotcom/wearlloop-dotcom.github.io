@@ -35,5 +35,5 @@ window.CONFIG = {
   // ===== รูปทีเซอร์ "The Midnight Edit" (ท้ายหน้าแรก) =====
   // ใส่ลิงก์/พาธรูปคอลเลกชันที่กำลังจะเข้า loop — จะโชว์หลังม่านเบลอ "unveiling soon"
   // เว้นว่าง = คงพื้นหลังไล่สีเดิม (ยังไม่มีรูป). เช่น 'media/midnight-edit-teaser.jpg'
-  TEASER_IMAGE:'',
+  TEASER_IMAGE:'storyboard-refs/01-the-siren.jpg', // รูปชั่วคราว (ชุดราตรีดำเปิดไหล่) — เปลี่ยนเป็นรูปคอลเลกชันจริงได้ทีหลัง
 };
