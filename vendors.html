@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ไดเรกทอรีพาร์ทเนอร์ (ซัก · แก้ผ้า · แบรนด์ · แท็ก)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF9F5; --card:#fff; --ink:#1E1E1C; --muted:#86857F; --line:#E3E0D8; --line2:#EFEDE7;
+    --sage:#3F7A5E; --sage-bg:#E3F2EC; --sage-bg2:#DCEFE4;
+    --clay:#A32D2D; --clay-bg:#F3E9E7; --gold:#C99B3F; --gold-bg:#FFF9EC; --blue-bg:#E8F0FB;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Prompt','Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .bar{position:sticky;top:0;z-index:20;background:rgba(250,249,245,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .bar h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.2px}
+  .bar .nav{display:flex;gap:4px;flex-wrap:wrap}
+  .bar .nav a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 9px;border-radius:99px}
+  .bar .nav a:hover{background:#fff;color:var(--ink)}
+  .wrap{max-width:920px;margin:0 auto;padding:18px 16px 80px}
+  .phead{padding:14px 4px 6px}
+  .eyebrow{font-family:'Poppins',sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .phead h1{font-size:26px;margin:6px 0 6px;font-weight:700}
+  .phead .sub{color:var(--muted);font-size:14px;max-width:640px;line-height:1.6}
+  .kpis{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:96px}
+  .kpi .n{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;line-height:1}
+  .kpi .l{font-size:11.5px;color:var(--muted);margin-top:5px}
+  .kpi.ok .n{color:var(--sage)}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:20px 0 14px;position:sticky;top:56px;z-index:10;padding:6px 0;background:linear-gradient(var(--bg) 70%,transparent)}
+  .tabs button{font-family:inherit;font-size:13px;padding:8px 15px;border-radius:99px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink);transition:.12s}
+  .tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 16px 6px;margin-bottom:14px}
+  .card h2{font-size:15px;margin:0 0 4px;font-weight:600}
+  .card .hint{font-size:12.5px;color:var(--muted);margin:0 0 10px;line-height:1.55}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+  .chip{font-size:12px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--muted)}
+  .chip.on{background:var(--sage-bg);border-color:var(--sage);color:var(--sage);font-weight:600}
+  .v{border:1px solid var(--line2);border-radius:13px;padding:13px 14px;margin-bottom:10px;transition:.12s}
+  .v:hover{border-color:var(--line);background:#FDFCFA}
+  .v .head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .v .nm{font-weight:600;font-size:15px}
+  .v .who{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .v .meta{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.7}
+  .v .meta b{color:var(--ink);font-weight:600}
+  .v .price{font-size:12.5px;margin-top:8px;background:#FAF9F5;border-radius:10px;padding:9px 11px;line-height:1.65;white-space:pre-line;border:1px solid var(--line2)}
+  .v .note{font-size:12px;color:var(--muted);margin-top:7px;font-style:italic}
+  .st{font-size:11.5px;padding:3px 11px;border-radius:99px;white-space:nowrap;align-self:flex-start;font-weight:500}
+  .st.done{background:var(--sage-bg2);color:var(--sage)}
+  .st.trial{background:var(--blue-bg);color:#2C5AA0}
+  .st.wait{background:var(--gold-bg);color:#8A6A1E}
+  .st.none{background:var(--clay-bg);color:var(--clay)}
+  .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+  .tg{font-size:11px;padding:2px 9px;border-radius:6px;background:#F0EEE8;color:#6B6A64}
+  .tg.pickup{background:var(--sage-bg);color:var(--sage)}
+  .tg.rush{background:#FBEDE0;color:#9A5B21}
+  .acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+  .btn{font-family:inherit;font-size:12.5px;padding:8px 14px;border-radius:99px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);color:var(--ink);background:#fff}
+  .btn.call{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn.line{background:#06C755;color:#fff;border-color:#06C755}
+  .btn.map{background:#fff}
+  .btn[aria-disabled=true]{opacity:.4;pointer-events:none}
+  table.grid{width:100%;border-collapse:collapse;font-size:13px}
+  table.grid th,table.grid td{text-align:left;padding:10px 10px;border-bottom:1px solid var(--line2);vertical-align:top}
+  table.grid th{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+  .scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .stars{color:var(--gold);letter-spacing:1px;font-size:13px;white-space:nowrap}
+  .care{border-left:4px solid var(--sage);padding:12px 14px;border-radius:0 12px 12px 0;background:#fff;border:1px solid var(--line2);border-left-width:4px;margin-bottom:11px}
+  .care.A{border-left-color:#5B8DEF}.care.B{border-left-color:#3F7A5E}.care.C{border-left-color:var(--gold)}.care.D{border-left-color:var(--clay)}
+  .care .g{font-family:'Poppins',sans-serif;font-weight:700;font-size:13px}
+  .care .t{font-weight:600;font-size:14px;margin:2px 0 6px}
+  .care .kv{font-size:12.5px;color:var(--muted);line-height:1.7;margin-top:6px}
+  .care .kv b{color:var(--ink)}
+  .care .warn{font-size:12px;color:var(--clay);margin-top:7px}
+  .warnbox{border-left:3px solid var(--gold);background:var(--gold-bg);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:14px;line-height:1.6}
+  .hide{display:none}
+  footer{text-align:center;color:var(--muted);font-size:11.5px;padding:24px 0 0}
+</style>
+</head>
+<body>
+  <div class="bar">
+    <h1>LLOOP · ไดเรกทอรีพาร์ทเนอร์</h1>
+    <div class="nav">
+      <a href="/laundry-shops.html">ส่งซัก (ระบบ)</a>
+      <a href="/repair.html">ซ่อม</a>
+      <a href="/care-label.html">ป้ายดูแล</a>
+      <a href="/acquisitions.html">รับซื้อ</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section class="phead">
+      <div class="eyebrow">partner directory</div>
+      <h1>รวมพาร์ทเนอร์ + ข้อมูลจัดหา</h1>
+      <div class="sub">ทะเบียนร้านซัก-ร้านแก้ผ้าย่านศาลายา คู่มือคัดแยกผ้า แบรนด์สำหรับเข้าร้าน และตัวเลือกแท็กติดตามชุด — รวบจากงานวิจัยในชีตให้อยู่ที่เดียว กดโทร/เปิด LINE ได้ทันที</div>
+      <div class="kpis">
+        <div class="kpi ok"><div class="n" id="k_ready">—</div><div class="l">ติดต่อแล้ว/พร้อม</div></div>
+        <div class="kpi"><div class="n" id="k_laundry">—</div><div class="l">ร้านซัก</div></div>
+        <div class="kpi"><div class="n" id="k_tailor">—</div><div class="l">ร้านแก้ผ้า</div></div>
+        <div class="kpi"><div class="n" id="k_brand">—</div><div class="l">แบรนด์เข้าร้าน</div></div>
+      </div>
+    </section>
+
+    <div class="tabs" id="tabs">
+      <button data-tab="laundry" class="on">ร้านซัก</button>
+      <button data-tab="tailor">ร้านแก้ผ้า</button>
+      <button data-tab="care">คู่มือผ้า A–D</button>
+      <button data-tab="brand">แบรนด์เข้าร้าน</button>
+      <button data-tab="tag">แท็ก RFID/NFC</button>
+    </div>
+
+    <!-- ========== ร้านซัก ========== -->
+    <section data-panel="laundry">
+      <div class="card">
+        <h2>ร้านซัก-อบ-รีด · ศาลายา</h2>
+        <p class="hint">คัดจากรายชื่อที่ติดต่อไว้ กรองด้วยเงื่อนไขที่ใช้บ่อยของร้านเช่า — มีรับ-ส่ง และคุยจบแล้ว</p>
+        <div class="filters" data-scope="laundry">
+          <span class="chip on" data-f="all">ทั้งหมด</span>
+          <span class="chip" data-f="pickup">มีรับ-ส่ง</span>
+          <span class="chip" data-f="done">ติดต่อแล้ว</span>
+        </div>
+        <div id="list_laundry"></div>
+      </div>
+    </section>
+
+    <!-- ========== ร้านแก้ผ้า ========== -->
+    <section data-panel="tailor" class="hide">
+      <div class="card">
+        <h2>ร้านตัดเย็บ · แก้ทรง · ซ่อมผ้า</h2>
+        <p class="hint">งานแก้ส่วนใหญ่ต้องดูหน้างาน — คัดร้านที่รับงานเร่ง/รับล็อตใหญ่ได้ไว้ก่อน</p>
+        <div class="filters" data-scope="tailor">
+          <span class="chip on" data-f="all">ทั้งหมด</span>
+          <span class="chip" data-f="rush">งานเร่ง</span>
+          <span class="chip" data-f="done">ติดต่อแล้ว</span>
+        </div>
+        <div id="list_tailor"></div>
+      </div>
+    </section>
+
+    <!-- ========== คู่มือผ้า ========== -->
+    <section data-panel="care" class="hide">
+      <div class="card">
+        <h2>คัดแยกผ้าก่อนส่งซัก · กลุ่ม A–D</h2>
+        <p class="hint">ใช้เป็นมาตรฐานตัดสินใจว่าชุดแต่ละตัวซักเองได้ หรือต้องส่งผู้เชี่ยวชาญ / พักซ่อมก่อน แล้วจับคู่กับร้านให้ถูกกลุ่ม</p>
+        <div id="list_care"></div>
+      </div>
+    </section>
+
+    <!-- ========== แบรนด์ ========== -->
+    <section data-panel="brand" class="hide">
+      <div class="card">
+        <h2>แบรนด์สำหรับเข้าร้าน (จัดหาชุด)</h2>
+        <p class="hint">ดาว = ความเหมาะกับโมเดลเช่า · กรองตามบทบาทในสต๊อก</p>
+        <div class="filters" data-scope="brand">
+          <span class="chip on" data-f="all">ทั้งหมด</span>
+          <span class="chip" data-f="core">แบรนด์หลัก (5 ดาว)</span>
+          <span class="chip" data-f="fast">คืนทุนไว</span>
+          <span class="chip" data-f="sale">ซื้อเฉพาะ Sale</span>
+        </div>
+        <div class="scrollx">
+          <table class="grid" id="tbl_brand"></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== แท็ก ========== -->
+    <section data-panel="tag" class="hide">
+      <div class="card">
+        <div class="warnbox"><b>คำแนะนำสำหรับ LLOOP:</b> ชุดเช่าที่ต้องผ่านการซักซ้ำ ให้ใช้ <b>RFID UHF Laundry Tag</b> (ทนซัก + encode EPC รายตัว เช่น <code>LLOOP000001</code>) เสริม <b>NFC</b> ไว้ให้ลูกค้าแตะดูรายละเอียด/วิธีดูแลชุดทีละตัว — ยังไม่ใช้ Fabric Tag ธรรมดาเพราะไม่ได้ออกแบบให้ผ่านการซัก</div>
+        <h2>เทียบชนิดแท็กติดตามชุด</h2>
+        <div class="scrollx"><table class="grid" id="tbl_tag"></table></div>
+      </div>
+      <div class="card">
+        <h2>Supplier แท็ก <span class="hint" style="font-weight:400">· ข้อมูลยังไม่ครบ ต้องตามเก็บ</span></h2>
+        <div id="list_supplier"></div>
+        <div class="warnbox" style="border-left-color:var(--clay);background:var(--clay-bg)"><b>ต้องขอเพิ่มก่อนตัดสินใจ:</b> ราคา/ชิ้น · จำนวนขั้นต่ำ (MOQ) · ระยะอ่าน · ค่า Encode · Lead time · การรับประกัน/เคลม</div>
+      </div>
+    </section>
+
+    <footer>ข้อมูลจากชีตงานวิจัยพาร์ทเนอร์ LLOOP · หน้านี้เป็นไดเรกทอรีอ้างอิง (static) แยกจากระบบส่งซักจริงใน laundry-shops.html</footer>
+  </div>
+
+<script>
+const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const telHref=p=>'tel:'+String(p||'').replace(/[^0-9+]/g,'');
+// LINE: url ตรง / id / ถ้าเป็นเบอร์ถือว่าไม่มีปุ่ม
+function lineHref(v){
+  if(!v) return null;
+  v=String(v).trim();
+  if(/^https?:\/\//.test(v)) return v;
+  if(/^[0-9()\-\s]+$/.test(v)) return null;          // เป็นเบอร์ ไม่ใช่ id
+  return 'https://line.me/ti/p/~'+encodeURIComponent(v);
+}
+const ST={done:['ติดต่อแล้ว','done'],trial:['นัดทดลองงาน','trial'],wait:['ยังไม่ได้ติดต่อ','wait'],none:['ไม่ตอบกลับ','none']};
+
+/* ---------- DATA (จากชีต) ---------- */
+const LAUNDRY=[
+ {n:'ฟองหอมลอนดรี้ ศาลายา',area:'ศาลายา',tel:'097-227-1335',line:'https://lin.ee/URpaQZg',pickup:true,hours:'ทุกวัน',status:'done',
+  price:'ขั้นต่ำ 10 ชุด/รอบ — ชุดสั้น 150 · ยาว 200 · หนา/มีอะไหล่ +50\nแบบไม่มีขั้นต่ำ — ชุดสั้น 200 · ยาว 250 · หนา +50'},
+ {n:'ร้านเสื้อหอม ซัก อบ รีด',who:'เป้',area:'ศาลายา',tel:'063-952-1582',line:'siriwong2530',pickup:false,hours:'ทุกวัน',status:'done',
+  price:'ซักแห้ง 200 บาท/ตัว · ซักปกติขั้นต่ำ 20/รอบ ตัวละ 7 บาท',note:'รับประกันเสียหาย-สูญหาย 300 บาท/ตัว'},
+ {n:'คลีนแอนด์แคร์ ซักอบรีด',area:'ศาลายา',tel:'082-088-8422',line:'ann12057',status:'none'},
+ {n:'จิตราซักอบรีด',tel:'089 452 9408',status:''},
+ {n:'กุลจิรา ซัก อบ รีด ซักแห้ง',area:'หน้า รร.มหิดลนุสรณ์',tel:'02 889 3109 / 089-920-4951',line:'089-920-4951',hours:'หยุดวันพุธ',status:'',svc:['ซักแห้ง']},
+ {n:'O.T ซักอบรีด',tel:'092 479 8337',status:''},
+ {n:'คลองโยง ศาลายา รับ-ส่ง (รักษ์ผ้า)',who:'เปิ้ล',tel:'086 794 4801',pickup:true,hours:'ทุกวัน 08.00-19.00',status:'trial',
+  price:'ซักเครื่อง+พับ 18 บาท/ตัว (ขั้นต่ำ 20)\nซัก+รีด — ยาวถึงขา 30 · เลยเข่า 25 · เหนือเข่า 20\nพิเศษ 50 ชิ้น = 850 · เหมาไม่จำกัด 1,200',note:'รับส่งเป็นรอบ (รับเย็น ส่งเย็นวันถัดไป พร้อมรับรอบใหม่) · รับงานเยอะได้',rush:true},
+ {n:'Dobby Premium Laundry',area:'ซอยตั้งสิน',tel:'082 197 9966',status:'',
+  price:'เดรสสั้น เริ่ม 50 · ยาว 150 (ดูหน้างาน)',note:'ไม่มีขั้นต่ำ · ยอด 500 รับส่งฟรี 1 รอบ',pickup:true},
+];
+const TAILOR=[
+ {n:'ร้านเย็บผ้า บัวตอง',who:'บัวตอง',area:'ใกล้ร้านมาก (หลังคลังยากิเลน)',tel:'063 032 9829',pickup:true,hours:'ทุกวัน 6.00-23.00',status:'done',
+  price:'งานแก้เริ่มต้น 30 (ดูหน้างาน) · ไม่มีขั้นต่ำ',note:'ส่งถามในไลน์ได้ · งานเร่งรับทำ ส่งวัน/วัน รับเยอะได้',rush:true},
+ {n:'เจ๊อร ซ่อมผ้า เย็บผ้า',who:'เจ๊อร',area:'หลังสถานีรถไฟศาลายา',tel:'093 469 4995',hours:'ทุกวัน 7.30-19.30',status:'done',
+  price:'งานแก้ดูหน้างาน · ไม่มีขั้นต่ำ',note:'ส่งถามในไลน์ได้ · งานเร่งรับทำ ส่งวัน/วัน',rush:true},
+ {n:'ป้าจำเนียร เย็บผ้า',who:'ป้าจำเนียร',area:'อบต.ศาลายา',tel:'081 985 0371',hours:'ทุกวัน 8.00-20.00',status:'done',
+  price:'งานแก้ดูหน้างาน · ไม่มีขั้นต่ำ',note:'มาถามที่ร้าน · งานเร่งรับทำ',rush:true},
+ {n:'ป้ามาลี ตัดเสื้อ ซ่อมผ้า สาขา 1',who:'ป้ามาลี',area:'สหพร ซอย 3',tel:'082 338 4200',hours:'ทุกวัน 8.00-20.00',status:'done',
+  price:'งานแก้ดูหน้างาน · ไม่มีขั้นต่ำ',note:'ส่งถามในไลน์ได้ · รับ 1-5 ตัว (ไม่รับล็อตใหญ่)',svc:['ซักและรีด']},
+ {n:'รับซ่อมเสื้อผ้า ป้าใจ',who:'ป้าใจ',area:'ศาลายา ซอยตั้งสิน',tel:'080 068 1730',hours:'จ-ศ 12.00-17.30',status:'wait'},
+ {n:'ร้านกาญ รับซ่อมเสื้อผ้าทุกชนิด',who:'k.กาญ',area:'ศาลายา',tel:'096 869 4456',status:'wait'},
+ {n:'ร้านตัดเย็บ ป้าอุไร',who:'ป้าอุไร',area:'มหิดล ประตู 2',tel:'087 350 8281',status:'wait'},
+ {n:'ป้าติ๋ม ตัดเย็บ ซ่อมผ้า แก้ทรง',who:'ป้าติ๋ม',area:'สหพร 33',tel:'062 597 7442',hours:'ทุกวัน 8.00-20.00',status:'wait'},
+ {n:'ร้านรับซ่อมผ้า (ช่างนาง)',who:'พี่นาง',area:'ตลาดทวีทรัพย์',tel:'082 195 4691',hours:'ทุกวัน 8.00-18.00',status:'wait'},
+ {n:'ช่างสด รับแก้ ปะ เปลี่ยนทรงกางเกง',who:'ช่างสด',area:'หน้ามอมหิดล แถวง้วนลูกชิ้นปลา',tel:'092 541 5389',hours:'ทุกวัน 7.30-19.00',status:'wait'},
+];
+const CARE=[
+ {g:'A',t:'ซักน้ำปกติแต่ต้องถนอม',fab:'Polyester หรือผ้าผสม ไม่มีโครง ไม่มีงานตกแต่งละเอียด',how:'กลับด้าน รูดซิป ติดตะขอ ใส่ถุงซัก · โปรแกรมถนอมผ้า น้ำเย็น รอบปั่นต่ำ',warn:'แยกสีเข้ม-อ่อน + ชุดที่อาจสีตก · ห้ามซักรวมผ้าขนหนู/ผ้ามีขุย'},
+ {g:'B',t:'ซักน้ำแบบละเอียดอ่อน',fab:'ผ้าบาง ลูกไม้ ผ้าพลีต ผ้ายืด หรือชุดที่ระบุให้ซักมือ',how:'ซักมือ หรือ Professional Wet Cleaning · น้ำยาผ้าบอบบาง กดน้ำเบา ๆ รองรับน้ำหนักทั้งตัว',warn:'ห้ามขยี้ บิด ดึง แช่นาน หรือใช้รอบปั่นแรง'},
+ {g:'C',t:'ทำความสะอาดโดยผู้เชี่ยวชาญ',fab:'ผ้าไหม ซาติน กำมะหยี่ ชุดมีโครง ฟองน้ำ ซับในหลายชั้น ลูกปัด เลื่อม คริสตัล งานติดกาว',how:'ส่งร้านที่เชี่ยวชาญ ทำตาม Care Label (Dry Clean Only / Professional Wet Cleaning)',warn:'ทดสอบสี+น้ำยาในจุดซ่อนก่อน · ห้ามเปลี่ยนวิธีซักเองโดยไม่ได้รับอนุมัติ'},
+ {g:'D',t:'พักซ่อมก่อนทำความสะอาด',fab:'ตะเข็บแตก ผ้าขาด/เป็นรู ซิปเสีย สายใกล้ขาด ลูกปัดหลวม โครงโผล่ หรือ RFID Tag หลวม',how:'แยกออกจากงานซัก → ส่งตรวจประเมิน/ซ่อมก่อน หรือยึดส่วนที่หลวมให้ปลอดภัย',warn:'ห้ามนำไปซักทันที แรงหมุน/แรงดึง/ความร้อนอาจทำให้เสียหายเพิ่ม'},
+];
+const BRAND=[
+ {n:'VAPEEN',ig:'vapeen.co',use:'งานแต่ง ดินเนอร์ เพื่อนเจ้าสาว โรงแรม',drop:'2–4 ครั้ง/เดือน',price:'1,890–4,190',star:4,tags:['fast'],note:'สวยตามเทรนด์ หมุนเร็ว แต่ตกเทรนด์ไว'},
+ {n:'Karbiri',ig:'karbiri',use:'งานแต่ง หมั้น พรีเวดดิ้ง ราตรียาว',drop:'1–2 ดรอป/เดือน',price:'1,990–6,885',star:5,tags:['core'],note:'แนะนำเป็นแบรนด์หลัก ชุดดูมีมูลค่า'},
+ {n:'Palette Studio BKK',ig:'palettestudio.bkk',use:'เพื่อนเจ้าสาว งานกลางวัน เดรสสีทีม',drop:'ทุก 1–2 เดือน',price:'1,690–2,190',star:4,tags:[],note:'เหมาะซื้อหลายไซซ์/ทรงในสีเดียว'},
+ {n:'Peace Eveninggown',ig:'peace.eveninggown',use:'งานเย็น พิธี ราตรี Plus Size',drop:'1–3 รุ่น/เดือน',price:'1,890–6,590',star:5,tags:['core'],note:'เหมาะมาก โดยเฉพาะชุดสุภาพ แขนคลุม ไซซ์ใหญ่'},
+ {n:'Trikul',ig:'trikul.official',use:'งานแต่ง เที่ยว ดินเนอร์ ถ่ายรูป',drop:'ทุก 1–2 เดือน',price:'2,990–5,590',star:4,tags:[],note:'ภาพลักษณ์ดี ดีไซน์จำง่าย เป็นชุดเด่น'},
+ {n:'Sister.rrr',ig:'sister.rrr',use:'เที่ยว คาเฟ่ วันเกิด ดินเนอร์น่ารัก',drop:'ทุก 1–2 เดือน + Mini Drop',price:'790–1,190',star:2,tags:[],note:'ซื้อเฉพาะรุ่นไวรัล ราคาต่ำ ลูกค้าซื้อเองได้'},
+ {n:'MESKMUSE',ig:'meskmuse',use:'เที่ยว ดินเนอร์ ปาร์ตี้ แฟชั่นเด่น',drop:'ทุก 1–2 เดือน',price:'2,190–2,690',star:4,tags:[],note:'ชุดถ่ายรูป ช่วยเติมไซซ์ XS–3XL'},
+ {n:'Kloset',ig:'klosetdesign',use:'งานแต่ง ลูกไม้ งานปัก ถ่ายรูป',drop:'ทุก 1–3 เดือน (4–6 คอล/ปี)',price:'4,850–7,755',star:5,tags:['core'],note:'ชุดพรีเมียม / Hero Dress ของร้าน'},
+ {n:'DISAYA',ig:'disayaofficial',use:'งานเย็น ปาร์ตี้ ลูกไม้-คริสตัล',drop:'2 ครั้ง/ปี + Capsule',price:'9,590 ขึ้นไป',star:3,tags:['sale'],note:'ภาพลักษณ์ดีมาก ควรซื้อช่วง Sale ต่ำกว่า 8,000'},
+ {n:'JANESUDA',ig:'janesuda_collection',use:'งานกลางวัน หมั้น โรแมนติก สุภาพ',drop:'2 คอล/ปี (SS/AW)',price:'>8,000 (Sale 7,900–10,000)',star:3,tags:['sale'],note:'เลือกเฉพาะ Sale เป็นชุดพรีเมียมจำนวนน้อย'},
+ {n:'VICKTEERUT',ig:'vickteerutofficial',use:'ทำงาน บริษัท พิธี ดินเนอร์เรียบหรู',drop:'2–4 คอล/ปี',price:'>8,000',star:3,tags:['sale'],note:'ซื้อเฉพาะ Outlet/Sale เติมกลุ่มลูกค้าทำงาน'},
+ {n:'Shaka',ig:'shaka_styles',use:'ทำงาน บริษัท งานแต่งสุภาพ ดินเนอร์',drop:'2 คอล/ปี + New Arrivals',price:'ส่วนใหญ่ ≤ 8,000',star:4,tags:[],note:'ใส่ได้กว้าง วัยทำงาน เลือกทรงที่ดูพิเศษพอ'},
+ {n:'Lyn Around',ig:'lynaroundworld',use:'งานกลางวัน เที่ยว คาเฟ่ ดินเนอร์ ทำงาน',drop:'ทุก 1–2 เดือน (ของใหม่ทุก 1–3 สัปดาห์)',price:'2,790–5,990',star:5,tags:['core'],note:'ใช้ได้หลายโอกาส แบบ/ไซซ์เยอะ เป็นสต็อกหลัก'},
+ {n:"De'FORM",ig:'deform_official',use:'งานเย็น Reception After Party พรีเวดดิ้ง',drop:'ทุก 2–4 เดือน + Mini Drop',price:'3,790–7,500',star:5,tags:['core'],note:'Hero Dress ถ่ายรูปขึ้น คัดรุ่นที่ไม่บอบบางเกิน'},
+ {n:'FABRIQUE.CO',ig:'fabrique.co',use:'งานแต่ง ดินเนอร์ วันเกิด ทะเล โรงแรม',drop:'ทุก 2–4 เดือน + New Drop',price:'1,990–3,590',star:5,tags:['core','fast'],note:'ต้นทุนไม่สูง คืนทุนง่าย ชุดหมุนเร็ว'},
+ {n:'Larobe8',ig:'larobe8',use:'งานแต่ง ดินเนอร์ เที่ยว รีสอร์ต วันเกิด',drop:'ทุก 1–2 เดือน + รีสต็อก',price:'1,190–3,990',star:4,tags:['fast'],note:'หวานแต่ดูโต เลือกเดรสยาว/Best Seller'},
+ {n:'Mitr',ig:'mitr',use:'เที่ยว คาเฟ่ ทำงาน รีสอร์ต ชุดสบาย',drop:'ทุก 1–2 เดือน + Collab',price:'1,090–2,590',star:3,tags:[],note:'เติมหมวดเที่ยว/ทำงาน ไม่ใช่ชุดออกงานหลัก'},
+];
+const TAGCMP=[
+ {h:'ลักษณะ',uf:'RFID ทำเป็นผ้า นิ่ม เย็บรวมกับป้ายเสื้อ',ul:'RFID ออกแบบให้ผ่านกระบวนการซักโดยเฉพาะ',nfc:'รีดติดไปกับเสื้อ หรือแบบเม็ดพลาสติก'},
+ {h:'ใช้งานหลัก',uf:'เช็กสต๊อก ค้นหาชุด รับ-คืน ติดตาม',ul:'ติดตามชุดตลอดการซัก อบ รีด หมุนเวียน',nfc:'ลูกค้าแตะอ่านทีละตัว (รายละเอียด/วิธีดูแล)'},
+ {h:'ความทนซัก',uf:'บางรุ่นซักได้ ต้องเช็กรายรุ่น',ul:'ทนซักซ้ำ อุณหภูมิ แรงกด สารเคมี',nfc:'—'},
+ {h:'วิธีติด',uf:'เย็บในป้ายคอ ป้ายไซซ์ ตะเข็บ',ul:'เย็บซ่อน หรือรีดติดด้วยความร้อน',nfc:'รีดติด / แบบเม็ด'},
+ {h:'รูปลักษณ์',uf:'บาง นิ่ม กลืนกับป้ายเสื้อ',ul:'อาจหนา แข็ง เห็นเป็นชิ้นแท็ก',nfc:'แล้วแต่แบบ'},
+ {h:'ราคา',uf:'ประหยัดกว่า',ul:'สูงกว่า (โครงสร้างแข็งแรงกว่า)',nfc:'—'},
+ {h:'เหมาะกับ',uf:'เสื้อขายปลีก / เสื้อที่ถอดแท็กก่อนซัก',ul:'เสื้อเช่า ยูนิฟอร์ม ผ้าโรงแรม-โรงพยาบาล',nfc:'ให้ลูกค้าแตะดูข้อมูลชุด'},
+];
+const SUPPLIER=[
+ {n:'Smart Identify Ltd.',web:'smartiden',prov:'กรุงเทพฯ',who:'คุณวิโรจน์',tel:'081 844 9197',kind:'RFID',use:'ติดเสื้อผ้า'},
+ {n:'(ยังไม่ระบุบริษัท)',who:'คุณกอล์ฟ',kind:'RFID, NFC',use:'ติดเสื้อผ้า'},
+];
+
+/* ---------- RENDER ---------- */
+const $=id=>document.getElementById(id);
+function stBadge(s){ if(!s||!ST[s]) return ''; const [txt,cls]=ST[s]; return '<span class="st '+cls+'">'+txt+'</span>'; }
+function acts(v){
+  const lh=lineHref(v.line);
+  let h='<div class="acts">';
+  h+='<a class="btn call" href="'+telHref(v.tel)+'">โทร '+esc(v.tel||'')+'</a>';
+  h+= lh ? '<a class="btn line" href="'+esc(lh)+'" target="_blank" rel="noopener">LINE</a>'
+        : '<span class="btn" aria-disabled="true">ไม่มี LINE</span>';
+  if(v.area) h+='<a class="btn map" href="https://www.google.com/maps/search/'+encodeURIComponent(v.n+' '+v.area)+'" target="_blank" rel="noopener">แผนที่</a>';
+  h+='</div>';
+  return h;
+}
+function vendorCard(v){
+  let tags='';
+  if(v.pickup) tags+='<span class="tg pickup">มีรับ-ส่ง</span>';
+  if(v.rush) tags+='<span class="tg rush">งานเร่ง</span>';
+  (v.svc||[]).forEach(s=>tags+='<span class="tg">'+esc(s)+'</span>');
+  return '<div class="v" data-pickup="'+(v.pickup?1:0)+'" data-rush="'+(v.rush?1:0)+'" data-status="'+esc(v.status||'')+'">'+
+    '<div class="head"><div><div class="nm">'+esc(v.n)+'</div>'+
+      (v.who?'<div class="who">ผู้ติดต่อ: '+esc(v.who)+'</div>':'')+
+    '</div>'+stBadge(v.status)+'</div>'+
+    '<div class="meta">'+
+      (v.area?'พื้นที่ '+esc(v.area)+' · ':'')+
+      (v.hours?'เวลา '+esc(v.hours):'')+
+    '</div>'+
+    (tags?'<div class="tags">'+tags+'</div>':'')+
+    (v.price?'<div class="price">'+esc(v.price)+'</div>':'')+
+    (v.note?'<div class="note">'+esc(v.note)+'</div>':'')+
+    acts(v)+
+  '</div>';
+}
+$('list_laundry').innerHTML=LAUNDRY.map(vendorCard).join('');
+$('list_tailor').innerHTML=TAILOR.map(vendorCard).join('');
+
+$('list_care').innerHTML=CARE.map(c=>
+  '<div class="care '+c.g+'"><div class="g">กลุ่ม '+c.g+'</div><div class="t">'+esc(c.t)+'</div>'+
+  '<div class="kv"><b>ลักษณะชุด:</b> '+esc(c.fab)+'</div>'+
+  '<div class="kv"><b>วิธีที่แนะนำ:</b> '+esc(c.how)+'</div>'+
+  '<div class="warn">ข้อควรระวัง: '+esc(c.warn)+'</div></div>').join('');
+
+function stars(n){ return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n); }
+$('tbl_brand').innerHTML=
+ '<thead><tr><th>แบรนด์ / IG</th><th>เหมาะกับ</th><th>ออกใหม่</th><th>ราคา (บาท)</th><th>เหมาะกับร้านเช่า</th></tr></thead><tbody>'+
+ BRAND.map(b=>'<tr data-tags="'+b.tags.join(' ')+'">'+
+   '<td><b>'+esc(b.n)+'</b><br><a href="https://instagram.com/'+esc(b.ig)+'" target="_blank" rel="noopener" style="color:var(--muted);font-size:12px">@'+esc(b.ig)+'</a></td>'+
+   '<td>'+esc(b.use)+'</td><td>'+esc(b.drop)+'</td><td>'+esc(b.price)+'</td>'+
+   '<td><span class="stars">'+stars(b.star)+'</span><br><span style="font-size:11.5px;color:var(--muted)">'+esc(b.note)+'</span></td></tr>').join('')+
+ '</tbody>';
+
+$('tbl_tag').innerHTML=
+ '<thead><tr><th>หัวข้อ</th><th>UHF Fabric Tag</th><th>UHF Laundry Tag</th><th>NFC</th></tr></thead><tbody>'+
+ TAGCMP.map(r=>'<tr><th>'+esc(r.h)+'</th><td>'+esc(r.uf)+'</td><td>'+esc(r.ul)+'</td><td>'+esc(r.nfc)+'</td></tr>').join('')+
+ '</tbody>';
+
+$('list_supplier').innerHTML=SUPPLIER.map(s=>
+  '<div class="v"><div class="head"><div><div class="nm">'+esc(s.n)+'</div>'+
+   '<div class="who">'+(s.who?'ผู้ติดต่อ: '+esc(s.who):'')+(s.prov?' · '+esc(s.prov):'')+'</div></div>'+
+   '<span class="tg">'+esc(s.kind)+'</span></div>'+
+   '<div class="meta">การใช้งาน: '+esc(s.use||'-')+(s.web?' · เว็บ/ช่องทาง: '+esc(s.web):'')+'</div>'+
+   (s.tel?acts(s):'')+'</div>').join('');
+
+/* ---------- KPIs ---------- */
+const readyStatuses=['done','trial'];
+$('k_ready').textContent=[...LAUNDRY,...TAILOR].filter(v=>readyStatuses.includes(v.status)).length;
+$('k_laundry').textContent=LAUNDRY.length;
+$('k_tailor').textContent=TAILOR.length;
+$('k_brand').textContent=BRAND.length;
+
+/* ---------- TABS ---------- */
+$('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-tab]'); if(!b) return;
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  const t=b.dataset.tab;
+  document.querySelectorAll('[data-panel]').forEach(p=>p.classList.toggle('hide',p.dataset.panel!==t));
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* ---------- FILTERS (chip) ---------- */
+document.querySelectorAll('.filters').forEach(bar=>{
+  bar.addEventListener('click',e=>{
+    const c=e.target.closest('.chip'); if(!c) return;
+    bar.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c));
+    const scope=bar.dataset.scope, f=c.dataset.f;
+    if(scope==='brand'){
+      document.querySelectorAll('#tbl_brand tbody tr').forEach(tr=>{
+        tr.style.display=(f==='all'||tr.dataset.tags.split(' ').includes(f))?'':'none';
+      });
+    } else {
+      document.querySelectorAll('#list_'+scope+' .v').forEach(v=>{
+        let show=true;
+        if(f==='pickup') show=v.dataset.pickup==='1';
+        else if(f==='rush') show=v.dataset.rush==='1';
+        else if(f==='done') show=readyStatuses.includes(v.dataset.status);
+        v.style.display=show?'':'none';
+      });
+    }
+  });
+});
+</script>
+</body>
+</html>
