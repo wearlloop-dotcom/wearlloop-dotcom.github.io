@@ -61,6 +61,18 @@
   .pill{font-size:12.5px;color:var(--sage-deep);background:var(--sage-light);border:1px solid #D3E6DF;border-radius:20px;padding:6px 13px}
   .fnote{font-size:12px;color:var(--muted);margin-top:13px;line-height:1.55}
 
+  /* care group A–D */
+  .cgrp .ey{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+  .cgrp h3{font-size:16px;font-weight:600;margin-top:5px}
+  .cgrp .badge{display:inline-flex;align-items:center;gap:8px;margin-top:13px;background:var(--sage-light);
+    border:1px solid #D3E6DF;border-radius:22px;padding:7px 8px 7px 7px;font-size:13px;color:var(--sage-deep);font-weight:600}
+  .cgrp .badge .lt{width:26px;height:26px;border-radius:50%;background:var(--sage-deep);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px}
+  .cgrp .how{margin-top:14px;font-size:13px;color:var(--ink);line-height:1.6}
+  .cgrp .warn{margin-top:11px;font-size:12px;color:var(--muted);line-height:1.55;
+    border-top:1px solid var(--line);padding-top:11px}
+  .cgrp .warn .wk{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;margin-right:6px;color:var(--warm)}
+
   /* community */
   .cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .look{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--cream2);display:block}
@@ -125,6 +137,14 @@
       <div class="fnote" id="fnote" style="display:none"></div>
     </div>
 
+    <div class="card pad cgrp" id="careGroupCard" style="display:none">
+      <div class="ey">The Care</div>
+      <h3>วิธีดูแลชุดตัวนี้</h3>
+      <div class="badge" id="cgBadge"></div>
+      <div class="how" id="cgHow"></div>
+      <div class="warn" id="cgWarn" style="display:none"></div>
+    </div>
+
     <div class="card pad comm" id="commCard" style="display:none">
       <div class="shead">
         <div><div class="ey">Worn by the community</div><h3 id="commCount"></h3></div>
@@ -161,6 +181,43 @@ const thDate = (iso) => { if(!iso) return null; const d=new Date(iso), n=Math.fl
   if(n<=0)return'วันนี้'; if(n===1)return'เมื่อวาน'; if(n<30)return n+' วันก่อน';
   return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}); };
 
+// เกณฑ์กลุ่มดูแลชุด A–D (อ้างอิงตารางกลางของ LLOOP)
+const CARE_GROUPS = {
+  A:{ label:'ซักปกติแบบถนอม',
+      how:'ผ้าโพลีเอสเตอร์หรือผ้าผสมที่ไม่มีโครงและงานตกแต่งละเอียด — กลับด้านชุด รูดซิป ติดตะขอ ใส่ถุงซัก ใช้โปรแกรมถนอมผ้า น้ำเย็น รอบปั่นต่ำ',
+      warn:'แยกสีเข้ม-อ่อน และชุดที่อาจสีตก ห้ามซักรวมกับผ้าขนหนูหรือผ้าที่มีขุย' },
+  B:{ label:'ซักแบบละเอียดอ่อน',
+      how:'ผ้าบาง ลูกไม้ ผ้าพลีต ผ้ายืด หรือชุดที่ระบุให้ซักมือ — ซักมือหรือ Professional Wet Cleaning ใช้น้ำยาสำหรับผ้าบอบบาง กดน้ำเบา ๆ และรองรับน้ำหนักชุดทั้งตัว',
+      warn:'ห้ามขยี้ บิด ดึง แช่นาน หรือใช้รอบปั่นแรง' },
+  C:{ label:'ทำความสะอาดโดยผู้เชี่ยวชาญ',
+      how:'ผ้าไหม ซาติน กำมะหยี่ ชุดมีโครง ฟองน้ำ ซับในหลายชั้น ลูกปัด เลื่อม คริสตัล — ส่งร้านซักแห้ง/มืออาชีพ และทำตาม Care Label (Dry Clean Only หรือ Professional Wet Cleaning)',
+      warn:'ต้องทดสอบสีและน้ำยาในจุดซ่อนก่อน ห้ามเปลี่ยนวิธีซักเอง' },
+  D:{ label:'พักซ่อมก่อนทำความสะอาด',
+      how:'ตะเข็บแตก ผ้าขาด/เป็นรู ซิปเสีย สายใกล้ขาด ลูกปัดหลวม โครงชุดโผล่ หรือแท็กหลวม — แยกออกจากงานซัก ส่งตรวจประเมินและซ่อมก่อน',
+      warn:'ห้ามนำไปซักทันที เพราะแรงหมุน แรงดึง หรือความร้อนอาจทำให้เสียหายเพิ่ม' },
+};
+// เดาเลือกกลุ่มจากเนื้อผ้า/รายละเอียดที่มี ถ้า backend ยังไม่ได้ระบุ g.care_group มาตรง ๆ
+function classifyCareGroup(g){
+  const cg = String(g.care_group||'').trim().toUpperCase();
+  if(CARE_GROUPS[cg]) return cg;
+  const t = [g.fabric, g.care, g.fabric_note, (g.fabric_qualities||[]).join(' ')].join(' ').toLowerCase();
+  if(!t.trim()) return null;
+  if(/ซ่อม|ชำรุด|ตะเข็บแตก|ผ้าขาด|ซิปเสีย|หลวม/.test(t)) return 'D';
+  if(/ไหม|silk|ซาติน|satin|กำมะหยี่|velvet|ลูกปัด|bead|เลื่อม|sequin|คริสตัล|crystal|โครง|ฟองน้ำ|ปัก|embroider/.test(t)) return 'C';
+  if(/ลูกไม้|lace|พลีต|pleat|ชีฟอง|chiffon|organza|ออร์แกน|ผ้าบาง|โปร่ง|ยืด|ซักมือ|hand ?wash|บอบบาง/.test(t)) return 'B';
+  if(/polyester|โพลีเอ|ผ้าผสม|cotton|ฝ้าย|ลินิน|linen|เดนิม|denim|ยีน|jersey|เจอร์ซี/.test(t)) return 'A';
+  return 'A';
+}
+function paintCareGroup(g){
+  const key = classifyCareGroup(g);
+  if(!key) return;
+  const info = CARE_GROUPS[key];
+  $('#cgBadge').innerHTML = '<span class="lt">'+key+'</span>กลุ่ม '+key+' · '+esc(info.label);
+  $('#cgHow').textContent = info.how;
+  if(info.warn){ $('#cgWarn').style.display=''; $('#cgWarn').innerHTML='<span class="wk">ข้อควรระวัง</span>'+esc(info.warn); }
+  $('#careGroupCard').style.display='';
+}
+
 function paint(d){
   const g = d.garment || {};
   if(g.photo){ $('#photo').src=g.photo; $('#photo').style.display=''; }
@@ -193,6 +250,9 @@ function paint(d){
     $('#pills').innerHTML = q.map(x=>'<span class="pill">'+esc(x)+'</span>').join('');
     if(g.fabric_note){ $('#fnote').style.display=''; $('#fnote').textContent=g.fabric_note; }
   }
+
+  // care group A–D (วิธีดูแล + ข้อควรระวัง)
+  paintCareGroup(g);
 
   // charity
   const p = d.latest_post;
