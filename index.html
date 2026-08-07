@@ -925,11 +925,14 @@
   .spot-ek{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--clay)}
   .spot-ttl{font-family:var(--display);font-weight:700;font-size:clamp(22px,5.5vw,34px);letter-spacing:.5px;margin:6px 0 26px;color:var(--ink)}
   .spot-stage{position:relative;max-width:520px;margin:0 auto;aspect-ratio:4/5;overflow:hidden;box-shadow:0 20px 46px rgba(80,64,38,.2)}
-  @media(min-width:768px){.spot-stage{aspect-ratio:16/10;max-width:960px}}
+  @media(min-width:768px){.spot-stage{aspect-ratio:1/1;max-width:700px}}
   .spot-slide{position:absolute;inset:0;width:100%;border:none;cursor:pointer;display:flex;flex-direction:column;
     justify-content:flex-end;align-items:center;text-align:center;padding:34px 24px;gap:4px;opacity:0;transition:opacity 1s ease;pointer-events:none}
   .spot-slide.on{opacity:1;pointer-events:auto}
-  .spot-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.04) 38%,rgba(0,0,0,.52))}
+  /* backdrop เบลอเติมข้าง ๆ (กันหน้าจอกว้างแล้วเห็นขอบว่าง) + รูปจริงโชว์เต็มตัวไม่ crop */
+  .spot-bd{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(28px) brightness(.82);transform:scale(1.14);z-index:0}
+  .spot-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;z-index:1}
+  .spot-slide::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(0,0,0,.04) 38%,rgba(0,0,0,.52))}
   .spot-frame{position:absolute;inset:14px;border:1px solid rgba(247,238,214,.6);pointer-events:none;z-index:3}
   .spot-tag{position:absolute;top:24px;left:50%;transform:translateX(-50%);z-index:4;font-family:var(--display);font-weight:600;
     font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);background:rgba(255,255,255,.92);padding:6px 14px}
@@ -1306,8 +1309,8 @@
       list.map(function(g,i){
         var hex = (g.colors && g.colors[0] && g.colors[0][1]) || g.bg || '#EFEDE9';
         var photo = g.photo || (Array.isArray(g.photos) && g.photos[0]);
-        var bgStyle = photo ? "background-image:url('"+photo+"');background-size:cover;background-position:center top" : 'background:'+hex;
-        return '<button class="spot-slide'+(i===0?' on':'')+'" style="'+bgStyle+'" onclick="openDetail(\''+g.id+'\')">'+
+        return '<button class="spot-slide'+(i===0?' on':'')+'"'+(photo?'':' style="background:'+hex+'"')+' onclick="openDetail(\''+g.id+'\')">'+
+          (photo ? '<span class="spot-bd" style="background-image:url(\''+photo+'\')"></span><img class="spot-img" src="'+photo+'" alt="">' : '')+
           '<span class="spot-tag">รอการค้นพบ</span>'+
           '<span class="spot-name">'+esc(g.name)+'</span>'+
           '<span class="spot-meta"><b>'+esc(g.brand)+'</b> · ฿'+esc(g.price)+' / ครั้ง</span>'+
