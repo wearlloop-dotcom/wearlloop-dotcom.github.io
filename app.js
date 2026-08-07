@@ -189,7 +189,7 @@ function applyStatic() {
   document.documentElement.lang = lang;
   const set = (id, k, html) => { const e = document.getElementById(id); if (e) e[html?'innerHTML':'textContent'] = t(k); };
   set('promo','promo'); set('creditLabel','creditLabel');
-  set('heroKicker','heroKicker'); set('heroTitle','heroTitle', true); set('heroSub','heroSub'); set('heroCta','heroCta');
+  set('heroTitle','heroTitle', true); set('heroSub','heroSub'); set('heroCta','heroCta');
   set('loginLabel','login');
   set('stylistLabel','stylistLabel'); set('stylistBtn','stylistBtn');
   set('collTitle','collTitle'); set('collSub','collSub');
