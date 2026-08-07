@@ -1087,6 +1087,14 @@
   /* บังคับเล่นวิดีโอ intro + hero ให้ชัวร์ (attribute autoplay อย่างเดียวบางเบราว์เซอร์ไม่สตาร์ท)
      + fallback: ถ้าโดนบล็อก ให้เล่นเมื่อผู้ใช้แตะ/คลิก/เลื่อนครั้งแรก */
   (function () {
+    /* มือถือ: iOS เล่นวิดีโอหลายตัว/ไฟล์ใหญ่พร้อมกันไม่ไหว → เหลือคลิปเดียวเต็มจอ (autoplay ได้ชัวร์)
+       desktop คง collage 3 คลิปเหมือนเดิม · พอมีไฟล์เบาค่อยอัปมือถือเป็น 3 collage */
+    try {
+      if (window.matchMedia && window.matchMedia('(max-width:679px)').matches) {
+        var ivs = document.querySelectorAll('#intro .intro-bg .iv');
+        for (var i = 1; i < ivs.length; i++) { ivs[i].removeAttribute('src'); if (ivs[i].load) ivs[i].load(); ivs[i].remove(); }
+      }
+    } catch (e) {}
     function playAll(sel) {
       document.querySelectorAll(sel).forEach(function (v) {
         if (!v) return; v.muted = true; v.playsInline = true;
