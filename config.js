@@ -20,11 +20,11 @@ window.CONFIG = {
   // ใส่ได้หลายคลิป จะเล่นต่อเนื่องวนลูป (montage). เว้นว่าง = ใช้พื้นหลังไล่สีเดิม
   HERO_VIDEO:[
     // คลิป Higgsfield (seedance) โฮสต์บน CloudFront — โหลดตรง ไม่ต้องเก็บไฟล์ในรีโป
-    'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260807_095203_9bccf0ab-911b-4aba-bf19-d209eec1ffa6.mp4',
+    'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260807_102059_d467302f-a6d8-4a4c-857c-3b4f48d752bf.mp4',
     // 'media/lloop-hero-sc1.mp4',                     // คลิปเดิม Sc.1 (สำรอง)
   ],
   HERO_POSTER:'',                // เว้นว่าง = โชว์พื้นหลังไล่สีระหว่างโหลด (คลิปใหม่คนละซีน เลยไม่ใช้ poster เดิม)
-  HERO_RATE:0.5,                 // ความเร็ววิดีโอ hero: 1 = ปกติ, 0.5 = ช้าลงครึ่งนึง (ปรับเลขนี้เพื่อเร่ง/หน่วง)
+  HERO_RATE:0.7,                 // ความเร็ววิดีโอ hero: 1 = ปกติ, 0.7 = ช้าลงเล็กน้อย (ปรับเลขนี้เพื่อเร่ง/หน่วง)
 
   // ===== วิดีโอหน้า About (story) — เว้นว่างไว้ = โชว์ poster placeholder สวย ๆ พร้อมเสียบลิงก์ทีหลัง =====
   // hero = วิดีโอพื้นหลังหัวเรื่อง (ambient, เล่นเงียบวนลูป) · story = คลิปสั้นแทรกในบท "the loop"
