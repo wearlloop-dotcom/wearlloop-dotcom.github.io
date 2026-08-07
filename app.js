@@ -157,13 +157,7 @@ function setupHeroVideo() {
   _heroClips = [].concat(cfg.HERO_VIDEO || []).filter(Boolean);
   if (cfg.HERO_POSTER) v.poster = cfg.HERO_POSTER;
   if (!_heroClips.length) return; // ไม่มีวิดีโอ → คงพื้นหลังไล่สีเดิม
-  // ความเร็วเล่น (CONFIG.HERO_RATE): 1 = ปกติ, 0.5 = ช้าลงครึ่งนึง — เงียบอยู่แล้ว เสียงจึงไม่เพี้ยน
-  const rate = Number(cfg.HERO_RATE) > 0 ? Number(cfg.HERO_RATE) : 1;
-  if (rate !== 1) {
-    v.defaultPlaybackRate = rate;                              // เป็นค่าตั้งต้นที่คงอยู่เมื่อสลับ src
-    v.addEventListener('loadedmetadata', () => { v.playbackRate = rate; }); // กันบางเบราว์เซอร์รีเซ็ตเป็น 1
-  }
-  const playAt = (i) => { _heroIdx = i % _heroClips.length; v.src = _heroClips[_heroIdx]; v.load(); v.play().catch(() => {}); if (rate !== 1) v.playbackRate = rate; };
+  const playAt = (i) => { _heroIdx = i % _heroClips.length; v.src = _heroClips[_heroIdx]; v.load(); v.play().catch(() => {}); };
   // คลิปเดียว = ลูปในตัว; หลายคลิป = ต่อคลิปถัดไปเมื่อจบ (montage)
   if (_heroClips.length === 1) v.loop = true;
   else v.addEventListener('ended', () => playAt(_heroIdx + 1));
@@ -189,7 +183,7 @@ function applyStatic() {
   document.documentElement.lang = lang;
   const set = (id, k, html) => { const e = document.getElementById(id); if (e) e[html?'innerHTML':'textContent'] = t(k); };
   set('promo','promo'); set('creditLabel','creditLabel');
-  set('heroTitle','heroTitle', true); set('heroSub','heroSub'); set('heroCta','heroCta');
+  set('heroKicker','heroKicker'); set('heroTitle','heroTitle', true); set('heroSub','heroSub'); set('heroCta','heroCta');
   set('loginLabel','login');
   set('stylistLabel','stylistLabel'); set('stylistBtn','stylistBtn');
   set('collTitle','collTitle'); set('collSub','collSub');
@@ -200,9 +194,6 @@ function applyStatic() {
   // editorial ท้ายหน้า — eyebrow เล็กๆ คงอังกฤษแบรนด์ไว้ใน HTML, แปลเฉพาะหัวข้อ+เนื้อหา
   ['edEditTitle','maniLead','maniBody','howTitle','step1H','step1P','step2H','step2P','step3H','step3P','step4H','step4P','craftCap','craftBody','teaserBody'].forEach(k => set(k, k));
   const tb = $('#teaserBtn'); if (tb && !tb.disabled) tb.textContent = t('teaserBtn');
-  // รูปทีเซอร์ท้ายหน้า — มีลิงก์ใน CONFIG.TEASER_IMAGE ค่อยโชว์ (ไม่งั้นคงม่านไล่สีเดิม)
-  const ti = $('#teaserImg'), tiSrc = (window.CONFIG || {}).TEASER_IMAGE;
-  if (ti) { if (tiSrc) { ti.src = tiSrc; ti.hidden = false; } else { ti.removeAttribute('src'); ti.hidden = true; } }
 }
 
 function setLang(l) {

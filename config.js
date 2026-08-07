@@ -9,22 +9,14 @@ window.CONFIG = {
   N8N_BASE_URL:'',                 // TODO: ใส่ URL เมื่อ deploy n8n เช่น https://n8n.lloop.app
   GOOGLE_MAPS_KEY:'AIzaSyDOz7Ruts01gnasSpgqhDJcHosO-fXhm9w', // Maps key (wearlloop-maps-web) — ล็อก 3 Maps API + โดเมน github.io/lloop.app
 
-  // ===== ข้อมูลติดต่อแบรนด์ (ค่ากลาง — ใช้ได้ทุกหน้า) =====
-  CONTACT_EMAIL:'wearlloop@gmail.com',
-  CONTACT_PHONE:'0622269897',
-  CONTACT_ADDRESS:'158/19 ต.ศาลายา อ.พุทธมณฑล จ.นครปฐม 73170',
-  LINE_OA_URL:'https://lin.ee/yHAI8pt', // LINE OA @lloop (shop.html/quiz.html อ่านค่านี้อยู่แล้ว)
-
   // ===== วิดีโอ hero แบบ Dior (เปิดด้วย pain point ผู้หญิง → ทางออก LLOOP) =====
   // ใส่ลิงก์ไฟล์วิดีโอที่เรนเดอร์แล้ว (ดูพรอมป์ที่ brand/video-prompts.md — ชุด P1–P6 + คลิป #1 แชร์ตู้)
   // ใส่ได้หลายคลิป จะเล่นต่อเนื่องวนลูป (montage). เว้นว่าง = ใช้พื้นหลังไล่สีเดิม
   HERO_VIDEO:[
-    // คลิป Higgsfield (seedance) โฮสต์บน CloudFront — โหลดตรง ไม่ต้องเก็บไฟล์ในรีโป
-    'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260807_102059_d467302f-a6d8-4a4c-857c-3b4f48d752bf.mp4',
-    // 'media/lloop-hero-sc1.mp4',                     // คลิปเดิม Sc.1 (สำรอง)
+    // 'https://<storage>/lloop-hero-painpoints.mp4',  // ปัญหา P1–P6 ตัดรวม
+    // 'https://<storage>/lloop-hero-share.mp4',        // คลิป #1 แชร์ตู้เสื้อผ้ากัน
   ],
-  HERO_POSTER:'',                // เว้นว่าง = โชว์พื้นหลังไล่สีระหว่างโหลด (คลิปใหม่คนละซีน เลยไม่ใช้ poster เดิม)
-  HERO_RATE:0.7,                 // ความเร็ววิดีโอ hero: 1 = ปกติ, 0.7 = ช้าลงเล็กน้อย (ปรับเลขนี้เพื่อเร่ง/หน่วง)
+  HERO_POSTER:'', // รูป poster ระหว่างวิดีโอโหลด (เว้นว่าง = พื้นหลังไล่สี)
 
   // ===== วิดีโอหน้า About (story) — เว้นว่างไว้ = โชว์ poster placeholder สวย ๆ พร้อมเสียบลิงก์ทีหลัง =====
   // hero = วิดีโอพื้นหลังหัวเรื่อง (ambient, เล่นเงียบวนลูป) · story = คลิปสั้นแทรกในบท "the loop"
@@ -32,9 +24,4 @@ window.CONFIG = {
   ABOUT_HERO_POSTER:'',  // รูปนิ่งคั่นระหว่างโหลด hero
   ABOUT_STORY_VIDEO:'',  // เช่น 'https://<storage>/lloop-the-loop.mp4'   (เว้นว่าง = โชว์การ์ด poster + ปุ่มเล่น)
   ABOUT_STORY_POSTER:'', // รูปนิ่งของคลิป the loop (โชว์เป็น poster ก่อนกดเล่น)
-
-  // ===== รูปทีเซอร์ "The Midnight Edit" (ท้ายหน้าแรก) =====
-  // ใส่ลิงก์/พาธรูปคอลเลกชันที่กำลังจะเข้า loop — จะโชว์หลังม่านเบลอ "unveiling soon"
-  // เว้นว่าง = คงพื้นหลังไล่สีเดิม (ยังไม่มีรูป). เช่น 'media/midnight-edit-teaser.jpg'
-  TEASER_IMAGE:'storyboard-refs/05-old-money.jpg', // รูปชั่วคราว (ชุดดำ draped เปิดไหล่) — เปลี่ยนเป็นรูปคอลเลกชันจริงได้ทีหลัง
 };

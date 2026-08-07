@@ -215,9 +215,7 @@
   // โค้ด sb.rpc('fn',{...}) เดิมไม่ต้องแก้ · gateway ใช้ secret key เรียก RPC ฝั่ง server
   if(window.opsRpc) sb.rpc = window.opsRpc;
   if(window.opsLogin) window.opsLogin().catch(()=>{}); // ให้ staff login ตั้งแต่เปิดหน้า
-  // staff.html ถูก deploy ไปที่ root ของโดเมนลูกค้า (lloop/liff/* → root) จึงลิงก์ /staff.html ตรง ๆ
-  // (เดิมใส่ /liff/staff.html → 404 บน wearlloop-dotcom.github.io เพราะไม่มีโฟลเดอร์ /liff)
-  const STAFF_BASE=(location.origin.includes('http')?location.origin:'https://lloop.app').replace('lloop-ops','lloop')+'/staff.html';
+  const STAFF_BASE=(location.origin.includes('http')?location.origin:'https://lloop.app').replace('lloop-ops','lloop')+'/liff/staff.html';
 
   const $=id=>document.getElementById(id);
   const v=id=>$(id).value.trim();

@@ -122,11 +122,11 @@
       <div class="card"><h2>ไซซ์ที่ดีมานด์เกินชุด — ควรเติม</h2>
       ${sgaps.length?`<table><tr><th>ไซซ์</th><th class="n">เช่า 90 วัน</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
         ${sgaps.map(s=>`<tr><td>${esc(s.size)}</td><td class="n">${s.rented_90d}</td><td class="n">${s.available===0?'<span class="pill low">0!</span>':s.available}</td><td class="n">${s.ratio||'-'}:1</td></tr>`).join('')}</table>`
-        :'<div class="muted">ไซซ์ในระบบเพียงพอกับดีมานด์</div>'}</div>
+        :'<div class="muted">ไซซ์ในระบบเพียงพอกับดีมานด์ ✓</div>'}</div>
       <div class="card"><h2>โทนสีที่ลูกค้าเยอะกว่าชุด — ควรเติม</h2>
       ${gaps.length?`<table><tr><th>โทนสี</th><th class="n">ลูกค้า</th><th class="n">ลูกค้าประจำ</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
         ${gaps.map(g=>`<tr><td>${esc(ST[g.season]||g.season)}</td><td class="n">${g.customers}</td><td class="n">${g.loyal}</td><td class="n">${g.available===0?'<span class="pill low">0 — ไม่มีเลย!</span>':g.available}</td><td class="n">${g.ratio||'-'}:1</td></tr>`).join('')}</table>`
-        :'<div class="muted">ตอนนี้ชุดในระบบเพียงพอกับฐานลูกค้าทุกโทนสี</div>'}</div>
+        :'<div class="muted">ตอนนี้ชุดในระบบเพียงพอกับฐานลูกค้าทุกโทนสี ✓</div>'}</div>
       <div class="card"><h2>ชุดที่ลูกค้าอยากได้ (wishlist) แต่ไม่ว่าง</h2>
       ${wish.length?`<table><tr><th>ชุด</th><th>โทน/ไซซ์</th><th class="n">คนรอ</th></tr>
         ${wish.map(w=>`<tr><td>${esc(w.name||w.code)}</td><td>${esc(ST[w.season]||w.season||'-')} ${esc(w.size||'')}</td><td class="n">${w.wishes}</td></tr>`).join('')}</table>`:'<div class="muted">ไม่มี</div>'}</div>
