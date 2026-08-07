@@ -4,7 +4,7 @@ window.I18N = {
     promo:'love + loop · จัดส่งฟรี · คนใน loop มีลุคใหม่ทุกเดือน',
     login:'เข้าสู่ระบบ',
     creditLabel:'กระเป๋า LLOOP',
-    heroTitle:'ตู้เสื้อผ้า<br>ที่เราแชร์กัน',
+    heroTitle:'The wardrobe<br>we share',
     heroSub:'ความสวยในทุกวัน คือสิ่งที่คุณคู่ควร',
     heroCta:'ค้นพบคอลเลกชัน',
     stylistLabel:'จะไปที่ไหนคะ — ให้เราช่วยแนะนำ',
