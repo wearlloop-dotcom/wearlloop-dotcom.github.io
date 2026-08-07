@@ -903,9 +903,11 @@
   /* hero — editorial */
   .hero{background:radial-gradient(120% 85% at 50% 6%,var(--paper),#EFEDE9 66%);
     height:auto;min-height:auto;max-height:none;padding:62px 22px 58px}
-  .hero-ring{width:46px;height:46px;border:2px solid var(--gold);border-radius:50%;
-    border-top-color:transparent;transform:rotate(38deg);margin:0 auto 22px;position:relative}
-  .hero-ring::after{content:"";position:absolute;top:-3px;right:1px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  /* hero mark = โลโก้ loop เดียวกับหน้า intro (.ring) — track จาง + arc ทอง + bead */
+  .hero-ring{width:46px;height:46px;display:block;margin:0 auto 22px;animation:spin 8s linear infinite}
+  .hero-ring .track{fill:none;stroke:rgba(201,168,106,.24);stroke-width:1}
+  .hero-ring .arc{fill:none;stroke:var(--gold);stroke-width:3.5;stroke-linecap:round;stroke-dasharray:170 450;transform-origin:100px 100px}
+  .hero-ring .bead{fill:var(--gold)}
   .hero .hk{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.3em;
     text-transform:uppercase;color:var(--muted);opacity:1;margin-bottom:14px}
   .hero h2{font-family:var(--display);font-weight:700;font-size:clamp(42px,12vw,76px);
@@ -1039,7 +1041,8 @@
   .hero.has-video .hk{color:rgba(255,255,255,.92)}
   .hero.has-video h2{color:#fff;text-shadow:0 1px 24px rgba(0,0,0,.4)}
   .hero.has-video p{color:rgba(255,255,255,.92);text-shadow:0 1px 14px rgba(0,0,0,.4)}
-  .hero.has-video .hero-ring{border-color:var(--gold)}
+  .hero.has-video .hero-ring .track{stroke:rgba(242,236,221,.20)}
+  .hero.has-video .hero-ring .bead{fill:#F6EAC8}
   .hero.has-video .hbtn{background:#fff;color:#14120E}
   @media(max-width:679px){.hero.has-video{min-height:66vh}}
   /* media controls — bottom-left, like Dior */
@@ -1148,7 +1151,7 @@
   <video id="heroVideo" class="hero-vid" playsinline muted autoplay preload="metadata" aria-hidden="true"></video>
   <div class="hero-scrim" aria-hidden="true"></div>
   <div class="hero-inner">
-    <div class="hero-ring" aria-hidden="true"></div>
+    <svg class="hero-ring" viewBox="0 0 200 200" aria-hidden="true"><circle class="track" cx="100" cy="100" r="92"/><circle class="arc" cx="100" cy="100" r="92"/><circle class="bead" cx="100" cy="8" r="3.6"/></svg>
     <h2 id="heroTitle">The wardrobe<br>we share</h2>
     <p id="heroSub">ความสวยในทุกวัน คือสิ่งที่คุณคู่ควร</p>
     <button class="hbtn" id="heroCta" onclick="scrollToGrid()">ดูคอลเลกชัน</button>
