@@ -934,7 +934,9 @@
   .spot-stage{position:relative;max-width:520px;margin:0 auto;aspect-ratio:4/5;overflow:hidden;box-shadow:0 20px 46px rgba(80,64,38,.2)}
   @media(min-width:768px){.spot-stage{aspect-ratio:16/10;max-width:960px}}
   .spot-slide{position:absolute;inset:0;width:100%;border:none;cursor:pointer;display:flex;flex-direction:column;
-    justify-content:flex-end;align-items:center;text-align:center;padding:34px 24px;gap:4px;opacity:0;transition:opacity 1s ease;pointer-events:none}
+    justify-content:flex-end;align-items:center;text-align:center;padding:34px 24px;gap:4px;opacity:0;transition:opacity 1s ease;pointer-events:none;
+    background-size:cover;background-position:center top}
+  @media(min-width:768px){.spot-slide{background-position:center 28%}}
   .spot-slide.on{opacity:1;pointer-events:auto}
   .spot-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.04) 38%,rgba(0,0,0,.52))}
   .spot-frame{position:absolute;inset:14px;border:1px solid rgba(247,238,214,.6);pointer-events:none;z-index:3}
@@ -1112,7 +1114,7 @@
   })();
 </script>
 
-<div class="promo" id="promo">love + loop · ส่งฟรี · ลุคใหม่ทุกเดือน</div>
+<div class="promo" id="promo">love + loop · ลุคใหม่ทุกเดือน</div>
 <div class="expiry-banner" id="expiryBanner" hidden>
   <span class="eb-msg" id="expiryMsg"></span>
   <button class="eb-cta" onclick="scrollToGrid()">เลือกชุด</button>
@@ -1347,7 +1349,7 @@
       list.map(function(g,i){
         var hex = (g.colors && g.colors[0] && g.colors[0][1]) || g.bg || '#EFEDE9';
         var photo = g.photo || (Array.isArray(g.photos) && g.photos[0]);
-        var bgStyle = photo ? "background-image:url('"+photo+"');background-size:cover;background-position:center top" : 'background:'+hex;
+        var bgStyle = photo ? "background-image:url('"+photo+"')" : 'background:'+hex;
         return '<button class="spot-slide'+(i===0?' on':'')+'" style="'+bgStyle+'" onclick="openDetail(\''+g.id+'\')">'+
           '<span class="spot-tag">รอการค้นพบ</span>'+
           '<span class="spot-name">'+esc(g.name)+'</span>'+

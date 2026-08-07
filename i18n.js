@@ -1,7 +1,7 @@
 // ===== i18n — ไทย / อังกฤษ (เพิ่มภาษาอื่นได้โดยเติม block ใหม่) =====
 window.I18N = {
   th: {
-    promo:'love + loop · จัดส่งฟรี · คนใน loop มีลุคใหม่ทุกเดือน',
+    promo:'love + loop · ลุคใหม่ทุกเดือน',
     login:'เข้าสู่ระบบ',
     creditLabel:'กระเป๋า LLOOP',
     heroTitle:'The wardrobe<br>we share',
@@ -53,7 +53,7 @@ window.I18N = {
     dress: {}, weight: {},
   },
   en: {
-    promo:'love + loop · free delivery · in the loop — a fresh look every month',
+    promo:'love + loop · a fresh look every month',
     login:'Sign in',
     creditLabel:'LLOOP wallet',
     heroTitle:'The wardrobe<br>we share',
