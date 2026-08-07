@@ -19,11 +19,12 @@ window.CONFIG = {
   // ใส่ลิงก์ไฟล์วิดีโอที่เรนเดอร์แล้ว (ดูพรอมป์ที่ brand/video-prompts.md — ชุด P1–P6 + คลิป #1 แชร์ตู้)
   // ใส่ได้หลายคลิป จะเล่นต่อเนื่องวนลูป (montage). เว้นว่าง = ใช้พื้นหลังไล่สีเดิม
   HERO_VIDEO:[
-    'media/lloop-hero-sc1.mp4',                        // Sc.1 hero — ตัดกรีนสกรีนออก + web-optimized (faststart)
-    // 'https://<storage>/lloop-hero-painpoints.mp4',  // ปัญหา P1–P6 ตัดรวม
-    // 'https://<storage>/lloop-hero-share.mp4',        // คลิป #1 แชร์ตู้เสื้อผ้ากัน
+    // คลิป Higgsfield (seedance) โฮสต์บน CloudFront — โหลดตรง ไม่ต้องเก็บไฟล์ในรีโป
+    'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260807_095203_9bccf0ab-911b-4aba-bf19-d209eec1ffa6.mp4',
+    // 'media/lloop-hero-sc1.mp4',                     // คลิปเดิม Sc.1 (สำรอง)
   ],
-  HERO_POSTER:'media/lloop-hero-sc1-poster.jpg', // รูป poster ระหว่างวิดีโอโหลด (เว้นว่าง = พื้นหลังไล่สี)
+  HERO_POSTER:'',                // เว้นว่าง = โชว์พื้นหลังไล่สีระหว่างโหลด (คลิปใหม่คนละซีน เลยไม่ใช้ poster เดิม)
+  HERO_RATE:0.5,                 // ความเร็ววิดีโอ hero: 1 = ปกติ, 0.5 = ช้าลงครึ่งนึง (ปรับเลขนี้เพื่อเร่ง/หน่วง)
 
   // ===== วิดีโอหน้า About (story) — เว้นว่างไว้ = โชว์ poster placeholder สวย ๆ พร้อมเสียบลิงก์ทีหลัง =====
   // hero = วิดีโอพื้นหลังหัวเรื่อง (ambient, เล่นเงียบวนลูป) · story = คลิปสั้นแทรกในบท "the loop"
