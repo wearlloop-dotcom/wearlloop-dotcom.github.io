@@ -157,7 +157,13 @@ function setupHeroVideo() {
   _heroClips = [].concat(cfg.HERO_VIDEO || []).filter(Boolean);
   if (cfg.HERO_POSTER) v.poster = cfg.HERO_POSTER;
   if (!_heroClips.length) return; // ไม่มีวิดีโอ → คงพื้นหลังไล่สีเดิม
-  const playAt = (i) => { _heroIdx = i % _heroClips.length; v.src = _heroClips[_heroIdx]; v.load(); v.play().catch(() => {}); };
+  // ความเร็วเล่น (CONFIG.HERO_RATE): 1 = ปกติ, 0.7 = ช้าลงเล็กน้อย — เงียบอยู่แล้ว เสียงจึงไม่เพี้ยน
+  const rate = Number(cfg.HERO_RATE) > 0 ? Number(cfg.HERO_RATE) : 1;
+  if (rate !== 1) {
+    v.defaultPlaybackRate = rate;
+    v.addEventListener('loadedmetadata', () => { v.playbackRate = rate; });
+  }
+  const playAt = (i) => { _heroIdx = i % _heroClips.length; v.src = _heroClips[_heroIdx]; v.load(); v.play().catch(() => {}); if (rate !== 1) v.playbackRate = rate; };
   // คลิปเดียว = ลูปในตัว; หลายคลิป = ต่อคลิปถัดไปเมื่อจบ (montage)
   if (_heroClips.length === 1) v.loop = true;
   else v.addEventListener('ended', () => playAt(_heroIdx + 1));
