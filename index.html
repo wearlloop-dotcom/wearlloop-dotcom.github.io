@@ -1077,8 +1077,27 @@
      ทำแบบ synchronous ตรงนี้ (ก่อน intro paint) กัน flash */
   try {
     if (sessionStorage.getItem('lloop_entered') === '1') document.getElementById('intro').style.display = 'none';
-    else setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 3000);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — ไม่ต้องบังคับกดปุ่ม
+    else setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 5000);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — ไม่ต้องบังคับกดปุ่ม (5 วิ ให้ดูวิดีโอ collage ทัน)
   } catch (e) {}
+</script>
+<script>
+  /* บังคับเล่นวิดีโอ intro + hero ให้ชัวร์ (attribute autoplay อย่างเดียวบางเบราว์เซอร์ไม่สตาร์ท)
+     + fallback: ถ้าโดนบล็อก ให้เล่นเมื่อผู้ใช้แตะ/คลิก/เลื่อนครั้งแรก */
+  (function () {
+    function playAll(sel) {
+      document.querySelectorAll(sel).forEach(function (v) {
+        if (!v) return; v.muted = true; v.playsInline = true;
+        var p = v.play(); if (p && p.catch) p.catch(function () {});
+      });
+    }
+    function kick() { playAll('#intro .iv'); playAll('#heroVideo'); }
+    kick();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kick);
+    window.addEventListener('load', kick);
+    ['pointerdown', 'touchstart', 'keydown', 'scroll'].forEach(function (ev) {
+      window.addEventListener(ev, kick, { once: true, passive: true });
+    });
+  })();
 </script>
 
 <div class="promo" id="promo">love + loop · ส่งฟรี · ลุคใหม่ทุกเดือน</div>
