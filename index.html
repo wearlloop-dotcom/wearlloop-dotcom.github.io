@@ -1063,9 +1063,10 @@
 <div class="intro" id="intro">
   <!-- พื้นหลัง collage 3 คลิป (เล่นความเร็วปกติ เงียบ วนลูป) — สลับคลิปได้ที่ src ด้านล่าง -->
   <div class="intro-bg" aria-hidden="true">
-    <video class="iv" playsinline muted autoplay loop preload="auto" src="https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260807_095203_9bccf0ab-911b-4aba-bf19-d209eec1ffa6.mp4"></video>
-    <video class="iv" playsinline muted autoplay loop preload="auto" src="https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260807_100420_a8eacf7c-b588-4612-9ad9-026f86f59c1e.mp4"></video>
-    <video class="iv" playsinline muted autoplay loop preload="auto" src="https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260807_100602_1557f52c-7299-4582-ac2a-408fc97b8b35.mp4"></video>
+    <!-- src ใส่โดย JS: desktop=ไฟล์เต็ม 40MB · มือถือ=ไฟล์เบา ~0.5MB (iOS เล่น 3 คลิปพร้อมกันไหว) -->
+    <video class="iv" playsinline muted autoplay loop preload="auto"></video>
+    <video class="iv" playsinline muted autoplay loop preload="auto"></video>
+    <video class="iv" playsinline muted autoplay loop preload="auto"></video>
   </div>
   <div class="intro-scrim" aria-hidden="true"></div>
   <div class="ihouse" id="introHouse">circular fashion house</div>
@@ -1090,13 +1091,22 @@
   /* บังคับเล่นวิดีโอ intro + hero ให้ชัวร์ (attribute autoplay อย่างเดียวบางเบราว์เซอร์ไม่สตาร์ท)
      + fallback: ถ้าโดนบล็อก ให้เล่นเมื่อผู้ใช้แตะ/คลิก/เลื่อนครั้งแรก */
   (function () {
-    /* มือถือ: iOS เล่นวิดีโอหลายตัว/ไฟล์ใหญ่พร้อมกันไม่ไหว → เหลือคลิปเดียวเต็มจอ (autoplay ได้ชัวร์)
-       desktop คง collage 3 คลิปเหมือนเดิม · พอมีไฟล์เบาค่อยอัปมือถือเป็น 3 collage */
+    /* ใส่ src วิดีโอ intro collage ตามอุปกรณ์:
+       - desktop: ไฟล์เต็ม 40MB (CloudFront เดิม)
+       - มือถือ (<=679px): ไฟล์เบา ~0.5MB (720p) — iOS เล่น 3 คลิปพร้อมกันได้ */
+    var HB = 'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/';
+    var HEAVY = [HB + 'hf_20260807_095203_9bccf0ab-911b-4aba-bf19-d209eec1ffa6.mp4',
+                 HB + 'hf_20260807_100420_a8eacf7c-b588-4612-9ad9-026f86f59c1e.mp4',
+                 HB + 'hf_20260807_100602_1557f52c-7299-4582-ac2a-408fc97b8b35.mp4'];
+    var LB = 'https://d2ol7oe51mr4n9.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/';
+    var LIGHT = [LB + 'd206bbb9-1960-44d2-ae92-694e00f964a1.mp4',
+                 LB + '5f94cc28-0b53-42a2-a43d-407dee9d1634.mp4',
+                 LB + '8cb4ab48-7a9b-47b6-9c4d-7727ee38847c.mp4'];
     try {
-      if (window.matchMedia && window.matchMedia('(max-width:679px)').matches) {
-        var ivs = document.querySelectorAll('#intro .intro-bg .iv');
-        for (var i = 1; i < ivs.length; i++) { ivs[i].removeAttribute('src'); if (ivs[i].load) ivs[i].load(); ivs[i].remove(); }
-      }
+      var isMobile = window.matchMedia && window.matchMedia('(max-width:679px)').matches;
+      var srcs = isMobile ? LIGHT : HEAVY;
+      var ivs = document.querySelectorAll('#intro .intro-bg .iv');
+      for (var i = 0; i < ivs.length && i < srcs.length; i++) { ivs[i].src = srcs[i]; if (ivs[i].load) ivs[i].load(); }
     } catch (e) {}
     function playAll(sel) {
       document.querySelectorAll(sel).forEach(function (v) {
