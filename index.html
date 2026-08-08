@@ -28,6 +28,7 @@
   .intro.hide .intro-bg,.intro.hide .intro-scrim,.intro.hide .ihouse,.intro.hide .introtag,.intro.hide .introsub,.intro.hide .enterbtn{opacity:0;transition:opacity .2s ease}
   .intro.hide .loopstage{animation:logoHandoff .85s cubic-bezier(.6,0,.22,1) forwards}
   .intro.hide .cyc{animation:none;opacity:0}  /* คำรอบโลโก้หายทันที ไม่ย่อตาม — เอาแค่โลโก้ */
+  .intro.hide .intrologo{opacity:0;transition:opacity .15s ease}  /* ซ่อนตัว LLOOP ให้ย่อแค่วงแหวน */
   @keyframes logoHandoff{0%{transform:translateY(0) scale(1);opacity:1}62%{opacity:1}100%{transform:translateY(8.3vh) scale(.235);opacity:0}}
   /* ==== วิดีโอ collage เป็นพื้นหลัง intro (desktop=แนวนอน 3 คอลัมน์ · มือถือ=แนวตั้ง 3 แถว) ==== */
   .intro-bg{position:absolute;inset:0;z-index:0;display:flex;flex-direction:row}
@@ -911,7 +912,7 @@
     height:auto;min-height:auto;max-height:none;padding:62px 22px 58px}
   /* hero mark = โลโก้ loop เดียวกับหน้า intro (.ring) — track จาง + arc ทอง + bead */
   .hero-ring{width:54px;height:54px;display:block;margin:0 auto 22px;animation:spin 8s linear infinite;opacity:0}
-  body.entered .hero-ring{opacity:1;transition:opacity .35s ease .55s}  /* hero ring โผล่ตอนโลโก้ intro ย่อลงมาถึง (crossfade กันซ้อน 2 วง) */
+  body.entered .hero-ring{opacity:1;transition:opacity .4s ease .9s}  /* hero ring โผล่หลังโลโก้ intro หายไปแล้ว (ไม่ทับกัน) */
   .hero-ring .track{fill:none;stroke:rgba(201,168,106,.28);stroke-width:3}
   .hero-ring .arc{fill:none;stroke:var(--gold);stroke-width:10;stroke-linecap:round;stroke-dasharray:170 450;transform-origin:100px 100px}
   .hero-ring .bead{fill:var(--gold)}
