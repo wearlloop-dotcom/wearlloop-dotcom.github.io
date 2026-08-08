@@ -1,7 +1,7 @@
 // ===== i18n — ไทย / อังกฤษ (เพิ่มภาษาอื่นได้โดยเติม block ใหม่) =====
 window.I18N = {
   th: {
-    promo:'love + loop · จัดส่งฟรี · คนใน loop มีลุคใหม่ทุกเดือน',
+    promo:'Limitless Looks · จัดส่งฟรี · คนใน loop มีลุคใหม่ทุกเดือน',
     login:'เข้าสู่ระบบ',
     creditLabel:'กระเป๋า LLOOP',
     heroKicker:'',
@@ -34,14 +34,14 @@ window.I18N = {
     vBasis:'ประเมินจากโทนผิวของคุณ + บรรยากาศและ dress code ของสถานที่', vReadMore:'อ่านเพิ่ม', vReadLess:'ย่อ', vWhy:'ทำไมถึงแนะนำ', vPicksLead:'ใส่ตัวนี้สิ',
     vPickDate:'เลือกวันที่ไปงานก่อนนะคะ จะได้แนะนำเฉพาะชุดที่ว่างวันนั้น', vDatePlaceholder:'วันที่ไป',
     empty:'ยังไม่มีชุดที่ตรงเงื่อนไข — ลองปรับตัวกรองดูนะคะ',
-    introHouse:'circular fashion house', introTag:'love + loop', introSub:'แชร์ลุคสวย ช่วยรักษ์โลก · share the look, save the planet', introEnter:'เข้าสู่คอลเลกชัน',
+    introHouse:'the wardrobe we shared', introTag:'Limitless Looks', introSub:'แชร์ลุคสวย ช่วยรักษ์โลก · share the look, save the planet', introEnter:'เข้าสู่คอลเลกชัน',
     cyc: ['เช่า','ใส่','คืน','ส่งต่อ'],
     seasons: ['สปริง','ซัมเมอร์','ออทัมน์','วินเทอร์'],
     occ: { wedding_guest:'งานแต่ง', dinner:'ดินเนอร์', party:'งานเลี้ยง', work:'ทำงาน', cafe:'คาเฟ่', graduation:'รับปริญญา', merit:'งานบุญ', festival:'เทศกาล', trip:'ทริป', content:'คอนเทนต์'},
     dress: {}, weight: {},
   },
   en: {
-    promo:'love + loop · free delivery · in the loop — a fresh look every month',
+    promo:'Limitless Looks · free delivery · in the loop — a fresh look every month',
     login:'Sign in',
     creditLabel:'LLOOP wallet',
     heroKicker:'',
@@ -74,7 +74,7 @@ window.I18N = {
     vBasis:'Based on your colours + the venue’s vibe and dress code', vReadMore:'more', vReadLess:'less', vWhy:'Why these', vPicksLead:'Wear this',
     vPickDate:'Pick your date first — so we only suggest what’s free that day', vDatePlaceholder:'date',
     empty:'No pieces match — try adjusting the filters',
-    introHouse:'circular fashion house', introTag:'love + loop', introSub:'share the look, save the planet', introEnter:'Enter the collection',
+    introHouse:'the wardrobe we shared', introTag:'Limitless Looks', introSub:'share the look, save the planet', introEnter:'Enter the collection',
     cyc: ['rent','wear','return','pass on'],
     seasons: ['Spring','Summer','Autumn','Winter'],
     occ: { wedding_guest:'Wedding', dinner:'Dinner', party:'Party', work:'Work', cafe:'Café', graduation:'Graduation', merit:'Ceremony', festival:'Festival', trip:'Trip', content:'Content'},

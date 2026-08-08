@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LLOOP · love + loop</title>
+<title>LLOOP · Limitless Looks</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
@@ -23,7 +23,9 @@
   /* ===== INTRO — loop ===== */
   .intro{position:fixed;inset:0;background:#0C0B08;color:#F2ECDD;z-index:100;display:flex;flex-direction:column;
     align-items:center;justify-content:center;text-align:center;padding:24px;overflow:hidden;transition:opacity .8s, transform .8s}
-  .intro.hide{opacity:0;transform:scale(1.06);pointer-events:none}
+  .intro.hide{opacity:0;pointer-events:none}
+  /* transition โลโก้: ตอน intro ออก loopstage (ring+LLOOP) ย่อ+เลื่อนขึ้นไปหา hero ring ให้รู้สึกเป็นโลโก้เดียวกันย่อลง (ปรับ scale/translateY ได้) */
+  .intro.hide .loopstage{animation:none;transform:scale(.19) translateY(-11vh);transition:transform .85s cubic-bezier(.65,0,.3,1)}
   /* ==== วิดีโอ collage เป็นพื้นหลัง intro (desktop=แนวนอน 3 คอลัมน์ · มือถือ=แนวตั้ง 3 แถว) ==== */
   .intro-bg{position:absolute;inset:0;z-index:0;display:flex;flex-direction:row}
   .intro-bg .iv{flex:1 1 0;min-width:0;min-height:0;width:100%;height:100%;object-fit:cover;background:#0C0B08}
@@ -1068,13 +1070,13 @@
     <video class="iv" playsinline muted autoplay loop preload="auto"></video>
   </div>
   <div class="intro-scrim" aria-hidden="true"></div>
-  <div class="ihouse" id="introHouse">circular fashion house</div>
+  <div class="ihouse" id="introHouse">the wardrobe we shared</div>
   <div class="loopstage">
     <svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle class="track" cx="100" cy="100" r="92"/><circle class="arc" cx="100" cy="100" r="92"/><circle class="bead" cx="100" cy="8" r="3.6"/></svg>
     <div class="intrologo">LLOOP</div>
     <span class="cyc cyc-t" id="cyc0">เช่า</span><span class="cyc cyc-r" id="cyc1">ใส่</span><span class="cyc cyc-b" id="cyc2">คืน</span><span class="cyc cyc-l" id="cyc3">ส่งต่อ</span>
   </div>
-  <div class="introtag" id="introTag">love + loop</div>
+  <div class="introtag" id="introTag">Limitless Looks</div>
   <div class="introsub" id="introSub">share the look, save the planet</div>
   <button class="enterbtn" id="introEnter" onclick="enterApp()">เปิดคอลเลกชัน</button>
 </div>
@@ -1130,7 +1132,7 @@
   })();
 </script>
 
-<div class="promo" id="promo">love + loop · ส่งฟรี · ลุคใหม่ทุกเดือน</div>
+<div class="promo" id="promo">Limitless Looks · ส่งฟรี · ลุคใหม่ทุกเดือน</div>
 <div class="expiry-banner" id="expiryBanner" hidden>
   <span class="eb-msg" id="expiryMsg"></span>
   <button class="eb-cta" onclick="scrollToGrid()">เลือกชุด</button>
@@ -1339,7 +1341,7 @@
 <script src="config.js?v=46"></script>
 <script src="analytics.js?v=45"></script>
 <script src="pixel.js?v=45"></script>
-<script src="i18n.js?v=54"></script>
+<script src="i18n.js?v=55"></script>
 <script src="data.js?v=45"></script>
 <script src="brands.js?v=5"></script>
 <script src="liffAuth.js?v=55"></script>
@@ -1467,7 +1469,7 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=85"></script>
+<script src="app.js?v=86"></script>
 <script src="help-widget.js"></script>
 </body>
 </html>
