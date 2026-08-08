@@ -28,7 +28,8 @@
   .intro.hide .intro-bg,.intro.hide .intro-scrim,.intro.hide .ihouse,.intro.hide .introtag,.intro.hide .introsub,.intro.hide .enterbtn{opacity:0;transition:opacity .2s ease}
   .intro.hide .loopstage{animation:logoHandoff .85s cubic-bezier(.6,0,.22,1) forwards}
   .intro.hide .cyc{animation:none;opacity:0}  /* คำรอบโลโก้หายทันที ไม่ย่อตาม — เอาแค่โลโก้ */
-  .intro.hide .intrologo{opacity:0;transition:opacity .15s ease}  /* ซ่อนตัว LLOOP ให้ย่อแค่วงแหวน */
+  .intro.hide .intrologo{opacity:0}  /* ซ่อนตัว LLOOP ทันที ให้ย่อแค่วงแหวน */
+  .intro.hide .loopstage::before{opacity:0}  /* ซ่อนแสงเรือง (glow) ไม่ให้ย่อตาม */
   @keyframes logoHandoff{0%{transform:translateY(0) scale(1);opacity:1}62%{opacity:1}100%{transform:translateY(8.3vh) scale(.235);opacity:0}}
   /* ==== วิดีโอ collage เป็นพื้นหลัง intro (desktop=แนวนอน 3 คอลัมน์ · มือถือ=แนวตั้ง 3 แถว) ==== */
   .intro-bg{position:absolute;inset:0;z-index:0;display:flex;flex-direction:row}
