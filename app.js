@@ -2263,7 +2263,7 @@ function openMenu() {
         <button id="langTH" class="${lang === 'th' ? 'on' : ''}" onclick="setLang('th')">TH</button>
         <button id="langEN" class="${lang === 'en' ? 'on' : ''}" onclick="setLang('en')">EN</button>
       </div>
-      <div class="mtag">love + loop</div>
+      <div class="mtag">Limitless Looks</div>
       <div class="mver">${en ? 'share the look, save the planet' : 'แชร์ลุคสวย ช่วยรักษ์โลก'}</div>
     </div>`;
   $('#menuOverlay').classList.add('open');
