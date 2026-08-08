@@ -140,6 +140,16 @@ const stretchLabel = s => s ==='none'? t('noStretch') : s ==='slight'? t('slight
 function enterApp() {
   try { sessionStorage.setItem('lloop_entered', '1'); } catch (e) {}  // จำว่าเข้าแล้ว → กลับหน้าหลักไม่ต้องคั่น intro ซ้ำ
   const el = $('#intro');
+  // วัดตำแหน่ง hero ring จริงตอน runtime → เซ็ตค่าย่อให้ loopstage ลงตรงเป๊ะทุกขนาดจอ
+  try {
+    const ls = el.querySelector('.loopstage'), hr = document.querySelector('#hero .hero-ring');
+    if (ls && hr) {
+      const a = ls.getBoundingClientRect(), b = hr.getBoundingClientRect();
+      ls.style.setProperty('--hx', (((b.left + b.width / 2) - (a.left + a.width / 2))).toFixed(1) + 'px');
+      ls.style.setProperty('--hy', (((b.top + b.height / 2) - (a.top + a.height / 2))).toFixed(1) + 'px');
+      ls.style.setProperty('--hsc', (b.width / a.width).toFixed(3));
+    }
+  } catch (e) {}
   document.body.classList.add('entered');  // โชว์ hero ring (crossfade รับช่วงจากโลโก้ intro)
   el.classList.add('hide');
   setTimeout(() => { el.style.display ='none'; }, 900);
