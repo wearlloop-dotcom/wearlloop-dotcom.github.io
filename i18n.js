@@ -35,7 +35,7 @@ window.I18N = {
     vPickDate:'เลือกวันที่ไปงานก่อนนะคะ จะได้แนะนำเฉพาะชุดที่ว่างวันนั้น', vDatePlaceholder:'วันที่ไป',
     empty:'ยังไม่มีชุดที่ตรงเงื่อนไข — ลองปรับตัวกรองดูนะคะ',
     introHouse:'the wardrobe we shared', introTag:'Limitless Looks', introSub:'แชร์ลุคสวย ช่วยรักษ์โลก · share the look, save the planet', introEnter:'เข้าสู่คอลเลกชัน',
-    cyc: ['เช่า','ใส่','คืน','ส่งต่อ'],
+    cyc: ['rent','wear','return','pass on'],
     seasons: ['สปริง','ซัมเมอร์','ออทัมน์','วินเทอร์'],
     occ: { wedding_guest:'งานแต่ง', dinner:'ดินเนอร์', party:'งานเลี้ยง', work:'ทำงาน', cafe:'คาเฟ่', graduation:'รับปริญญา', merit:'งานบุญ', festival:'เทศกาล', trip:'ทริป', content:'คอนเทนต์'},
     dress: {}, weight: {},

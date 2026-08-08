@@ -1076,7 +1076,7 @@
   <div class="loopstage">
     <svg class="ring" viewBox="0 0 200 200" aria-hidden="true"><circle class="track" cx="100" cy="100" r="92"/><circle class="arc" cx="100" cy="100" r="92"/><circle class="bead" cx="100" cy="8" r="3.6"/></svg>
     <div class="intrologo">LLOOP</div>
-    <span class="cyc cyc-t" id="cyc0">เช่า</span><span class="cyc cyc-r" id="cyc1">ใส่</span><span class="cyc cyc-b" id="cyc2">คืน</span><span class="cyc cyc-l" id="cyc3">ส่งต่อ</span>
+    <span class="cyc cyc-t" id="cyc0">rent</span><span class="cyc cyc-r" id="cyc1">wear</span><span class="cyc cyc-b" id="cyc2">return</span><span class="cyc cyc-l" id="cyc3">pass on</span>
   </div>
   <div class="introtag" id="introTag">Limitless Looks</div>
   <div class="introsub" id="introSub">share the look, save the planet</div>
@@ -1087,7 +1087,7 @@
      ทำแบบ synchronous ตรงนี้ (ก่อน intro paint) กัน flash */
   try {
     if (sessionStorage.getItem('lloop_entered') === '1') document.getElementById('intro').style.display = 'none';
-    else setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 5000);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — ไม่ต้องบังคับกดปุ่ม (5 วิ ให้ดูวิดีโอ collage ทัน)
+    else setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 7000);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — ไม่ต้องบังคับกดปุ่ม (7 วิ ให้ดูวิดีโอ collage ทัน)
   } catch (e) {}
 </script>
 <script>
@@ -1343,7 +1343,7 @@
 <script src="config.js?v=46"></script>
 <script src="analytics.js?v=45"></script>
 <script src="pixel.js?v=45"></script>
-<script src="i18n.js?v=55"></script>
+<script src="i18n.js?v=56"></script>
 <script src="data.js?v=45"></script>
 <script src="brands.js?v=5"></script>
 <script src="liffAuth.js?v=55"></script>
