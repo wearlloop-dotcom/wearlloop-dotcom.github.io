@@ -140,6 +140,7 @@ const stretchLabel = s => s ==='none'? t('noStretch') : s ==='slight'? t('slight
 function enterApp() {
   try { sessionStorage.setItem('lloop_entered', '1'); } catch (e) {}  // จำว่าเข้าแล้ว → กลับหน้าหลักไม่ต้องคั่น intro ซ้ำ
   const el = $('#intro');
+  document.body.classList.add('entered');  // โชว์ hero ring (crossfade รับช่วงจากโลโก้ intro)
   el.classList.add('hide');
   setTimeout(() => { el.style.display ='none'; }, 900);
 }
