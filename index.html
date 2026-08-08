@@ -25,7 +25,7 @@
     align-items:center;justify-content:center;text-align:center;padding:24px;overflow:hidden;transition:opacity .8s, transform .8s}
   /* intro ออก: พื้นหลัง+ข้อความ+วิดีโอเฟดหาย เผยให้เห็น hero · โลโก้ (loopstage) ค่อย ๆ ย่อ+เลื่อนขึ้นไปหา hero ring แล้วจางตอนจบ = โลโก้เดียวกันย่อลงไปแปะ hero */
   .intro.hide{background:transparent;pointer-events:none}
-  .intro.hide .intro-bg,.intro.hide .intro-scrim,.intro.hide .ihouse,.intro.hide .introtag,.intro.hide .introsub,.intro.hide .enterbtn{opacity:0;transition:opacity .2s ease}
+  .intro.hide .intro-bg,.intro.hide .intro-scrim,.intro.hide .ihouse,.intro.hide .introtag,.intro.hide .introsub,.intro.hide .enterbtn{opacity:0;animation:none;transition:opacity .2s ease}  /* animation:none กัน fadeUp forwards override → ข้อความหายจริง */
   .intro.hide .loopstage{animation:logoHandoff .85s cubic-bezier(.6,0,.22,1) forwards}
   .intro.hide .cyc{animation:none;opacity:0}  /* คำรอบโลโก้หายทันที ไม่ย่อตาม — เอาแค่โลโก้ */
   .intro.hide .intrologo{opacity:0}  /* ซ่อนตัว LLOOP ทันที ให้ย่อแค่วงแหวน */
