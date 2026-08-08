@@ -23,9 +23,11 @@
   /* ===== INTRO — loop ===== */
   .intro{position:fixed;inset:0;background:#0C0B08;color:#F2ECDD;z-index:100;display:flex;flex-direction:column;
     align-items:center;justify-content:center;text-align:center;padding:24px;overflow:hidden;transition:opacity .8s, transform .8s}
-  .intro.hide{opacity:0;pointer-events:none}
-  /* transition โลโก้: ตอน intro ออก loopstage (ring+LLOOP) ย่อ+เลื่อนขึ้นไปหา hero ring ให้รู้สึกเป็นโลโก้เดียวกันย่อลง (ปรับ scale/translateY ได้) */
-  .intro.hide .loopstage{animation:none;transform:scale(.19) translateY(-11vh);transition:transform .85s cubic-bezier(.65,0,.3,1)}
+  /* intro ออก: พื้นหลัง+ข้อความ+วิดีโอเฟดหาย เผยให้เห็น hero · โลโก้ (loopstage) ค่อย ๆ ย่อ+เลื่อนขึ้นไปหา hero ring แล้วจางตอนจบ = โลโก้เดียวกันย่อลงไปแปะ hero */
+  .intro.hide{background:transparent;pointer-events:none}
+  .intro.hide .intro-bg,.intro.hide .intro-scrim,.intro.hide .ihouse,.intro.hide .introtag,.intro.hide .introsub,.intro.hide .enterbtn{opacity:0;transition:opacity .45s ease}
+  .intro.hide .loopstage{animation:logoHandoff .85s cubic-bezier(.6,0,.22,1) forwards}
+  @keyframes logoHandoff{0%{transform:translateY(0) scale(1);opacity:1}62%{opacity:1}100%{transform:translateY(-13vh) scale(.2);opacity:0}}
   /* ==== วิดีโอ collage เป็นพื้นหลัง intro (desktop=แนวนอน 3 คอลัมน์ · มือถือ=แนวตั้ง 3 แถว) ==== */
   .intro-bg{position:absolute;inset:0;z-index:0;display:flex;flex-direction:row}
   .intro-bg .iv{flex:1 1 0;min-width:0;min-height:0;width:100%;height:100%;object-fit:cover;background:#0C0B08}
