@@ -52,7 +52,7 @@ window.I18N = {
     dress: {}, weight: {},
   },
   en: {
-    promo:'Limitless Looks · free delivery · in the loop — a fresh look every month',
+    promo:'Limitless Looks · free delivery · new monthly',
     login:'Sign in',
     creditLabel:'LLOOP wallet',
     heroKicker:'',
