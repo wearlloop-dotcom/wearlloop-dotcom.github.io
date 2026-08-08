@@ -58,6 +58,7 @@
 
   /* ===== credit expiry banner ===== */
   .expiry-banner{background:#F5ECD5;border-bottom:1px solid #D4A84B;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px}
+  #expiryBanner{display:none!important}  /* ซ่อนแถบ "เลือกชุด" เหลือง ตามที่ขอ */
   .expiry-banner .eb-msg{color:#5C3D00;line-height:1.4}
   .expiry-banner .eb-msg b{color:#3D2600}
   .expiry-banner .eb-cta{background:#3D2600;color:#F5ECD5;border:none;border-radius:3px;padding:5px 14px;font-size:11px;letter-spacing:.6px;white-space:nowrap;cursor:pointer;flex-shrink:0}
@@ -1224,13 +1225,13 @@
 <div class="contain">
   <div class="event" id="eventBanner" style="display:none"></div>
   <div class="datebar" id="datebar"></div>
-  <div class="discover" id="discover"></div>
   <div class="prails" id="personalRail"></div>
   <div class="ed-eyebrow"><div class="ek">the LLOOP edit</div><div class="et" id="edEditTitle">Now in the loop</div></div>
   <div class="toolbar">
     <div class="searchbar"><svg viewBox="0 0 24 24" class="sicon"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
       <input id="searchInput" type="search" autocomplete="off" oninput="onSearch(this.value)"/></div>
     <div class="chips" id="chips"></div>
+    <div class="discover" id="discover"></div>
     <div class="filters" id="filters"></div>
     <div class="brandrow" id="brandRow"></div>
     <div class="quickrow" id="quickRow"></div>
@@ -1344,7 +1345,7 @@
 <script src="config.js?v=46"></script>
 <script src="analytics.js?v=45"></script>
 <script src="pixel.js?v=45"></script>
-<script src="i18n.js?v=56"></script>
+<script src="i18n.js?v=57"></script>
 <script src="data.js?v=45"></script>
 <script src="brands.js?v=5"></script>
 <script src="liffAuth.js?v=55"></script>

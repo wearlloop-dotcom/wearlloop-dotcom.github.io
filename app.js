@@ -322,11 +322,7 @@ function renderDiscover(){
   const moods = MOOD_ORDER.filter(k => groups.has(k));
   if(!tags.length && !moods.length){ el.innerHTML = ''; return; }
   let html = '';
-  if(tags.length){
-    html += `<div class="disc-q">${TH?'วันนี้ไปไหนคะ':'Where to today?'}</div>`;
-    html += `<div class="disc-s">${TH?'เลือกโอกาส แล้วเราคัดลุคให้':'Pick an occasion — we curate the looks'}</div>`;
-    html += `<div class="occgrid">` + tags.map((tg,i)=>`<button class="oc b${i%3} ${fOccasion===tg?'on':''}" onclick="pickOccasion('${tg}')"><span class="t">${occName(tg)}</span><span class="s">${(OCC_SUB[lang]||OCC_SUB.th)[tg]||''}</span></button>`).join('') + `</div>`;
-  }
+  // occasion picker ("วันนี้ไปไหนคะ") ตัดออก — ซ้ำกับ chips ในทูลบาร์แล้ว · เหลือแค่ mood filter
   if(moods.length){
     html += `<div class="disc-h">${TH?'เลือกตามมู้ด':'By mood'}</div>`;
     html += `<div class="moodrow"><button class="moodc ${!fMood?'on':''}" onclick="setMood('')">${TH?'ทั้งหมด':'All'}</button>` +
