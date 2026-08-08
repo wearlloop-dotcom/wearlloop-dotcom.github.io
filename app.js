@@ -110,12 +110,9 @@ function updateCurNote() {
   const el = $('#curNote'); if (!el) return;
   if (cur === 'THB') { el.hidden = true; return; }
   const th = lang === 'th';
-  const src = fxInfo.live
-    ? (th ? `เรตอ้างอิง ${fxInfo.date || 'ล่าสุด'}` : `rates as of ${fxInfo.date || 'today'}`)
-    : (th ? 'เรตโดยประมาณ' : 'approx rates');
   el.textContent = th
-    ? `บริการเช่าและจัดส่งเฉพาะในประเทศไทย · ราคาต่างสกุลเป็นค่าประมาณ (${src}) · ชำระจริงเป็นเงินบาท`
-    : `Rental & delivery within Thailand only · foreign prices are approximate (${src}) · charged in Thai Baht`;
+    ? 'ราคาโดยประมาณ · ชำระจริงเป็นเงินบาท'
+    : 'Approx prices · you pay in Thai Baht';
   el.hidden = false;
 }
 function setCur(c) {
@@ -125,9 +122,7 @@ function setCur(c) {
   // re-render ทุกจุดที่โชว์ราคา browse
   renderGrid(); renderQuickFilters && renderQuickFilters();
   if ($('#overlay')?.classList.contains('open') && window._detailId) openDetail(window._detailId);
-  updateCurNote();
-  if (c !== 'THB' && typeof toast === 'function')
-    toast(lang === 'th' ? 'ราคาโดยประมาณ · ชำระจริงเป็นเงินบาท (THB)' : 'Approx prices · you pay in Thai Baht (THB)');
+  updateCurNote();  // โน้ตอันเดียว (#curNote) พอ — ไม่ต้อง toast ซ้ำ
 }
 
 // ----- i18n helpers -----
