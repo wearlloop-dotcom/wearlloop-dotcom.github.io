@@ -4060,6 +4060,9 @@ function routeDeepLink() {
       // ?date=YYYY-MM-DD (จากการ์ด waitlist "ถึงคิวคุณ") → เปิด detail พร้อมเติมวันที่ให้เลย
       const wd = qs.get('date') || (ls && ls.get('date'));
       if (wd && /^\d{4}-\d{2}-\d{2}$/.test(wd)) gUseDate = wd;
+      // จากการ์ดเช่าด่วน (&express=1) → ตั้งวันใช้เป็นวันนี้ให้เลย (ชุดพร้อมส่งทันงาน)
+      const exp = qs.get('express') || (ls && ls.get('express'));
+      if (exp === '1' && !gUseDate) gUseDate = todayStr();
       if (g) { setTimeout(() => openDetail(g.id), 80); return; }
     }
     // โค้ดชวนเพื่อนจากลิงก์ (?ref=CODE) เช่น แชร์ผ่านการ์ดเกม → ใช้อัตโนมัติเมื่อ login (เครดิต ฿50 ทั้งคู่ เมื่อเช่าครั้งแรก)
