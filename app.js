@@ -257,8 +257,8 @@ function valueStrip(g) {
   const th = lang === 'th';
   const sv = savingsPct(g);
   const parts = [];
-  if (sv) parts.push(`<span style="background:#EAF3DE;color:#27500A;padding:4px 10px;border-radius:6px;font-size:12px">${th?'มูลค่าชุด':'Worth'} ${money(g.retail)} · ${th?'เช่าประหยัด':'save'} ${sv}%</span>`);
-  if (g.grade) parts.push(`<span style="background:#E1F5EE;color:#085041;padding:4px 10px;border-radius:6px;font-size:12px">${th?'ผ่าน QC เกรด':'QC grade'} ${g.grade} · ${th?'ดูแลอย่างดี':'well kept'}</span>`);
+  if (sv) parts.push(`<span style="background:#EAF3DE;color:#27500A;padding:4px 10px;border-radius:6px;font-size:12px">${th?'มูลค่า':'Worth'} ${money(g.retail)} · ${th?'ประหยัด':'save'} ${sv}%</span>`);
+  if (g.grade) parts.push(`<span style="background:#E1F5EE;color:#085041;padding:4px 10px;border-radius:6px;font-size:12px">${th?'QC เกรด':'QC grade'} ${g.grade}</span>`);
   if (!parts.length) return '';
   return `<div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0">${parts.join('')}</div>`;
 }
@@ -1337,7 +1337,7 @@ async function renderAvailCalendar(garmentId) {
     html += `<div class="calmonth"><div class="calhd">${monthName}</div><div class="calgrid">${cells}</div></div>`;
   }
   html += `<div class="callegend"><span><i class="lfree"></i>${lang === 'th' ? 'ว่าง' : 'free'}</span><span><i class="lbk"></i>${lang === 'th' ? 'ไม่ว่าง' : 'booked'}</span></div>`;
-  html += `<div class="calnote">${lang === 'th' ? 'วันไม่ว่างรวมเวลาส่ง+ซัก+รีดของชุดด้วย เพื่อให้คุณได้ชุดสะอาดตรงวัน' : 'Booked days include shipping + cleaning time so your piece arrives fresh on time'}</div>`;
+  html += `<div class="calnote">${lang === 'th' ? 'วันไม่ว่างรวมเวลาส่งและซักรีดแล้วค่ะ' : 'Booked days include shipping + cleaning time'}</div>`;
   box.innerHTML = html;
 }
 function pickCalDate(garmentId, ds) {
@@ -1412,7 +1412,7 @@ async function checkAvail(id) {
   try { free = await window.API.availableOn(id, date, CUSTOMER && CUSTOMER.id); } catch (e) { console.warn(e); }
   if (free) {
     msg.className ='availmsg ok';
-    msg.textContent = lang ==='th'?`✓ ว่าง ${fmtDate(date)} จองได้เลย`:`✓ Free on ${fmtDate(date)}`;
+    msg.textContent = lang ==='th'?`✓ ว่าง ${fmtDate(date)}`:`✓ Free on ${fmtDate(date)}`;
   } else {
     msg.className ='availmsg busy';
     const lbl = lang ==='th'?`✕ ไม่ว่าง ${fmtDate(date)} ลองวันอื่น`:`✕ Booked on ${fmtDate(date)}`;
@@ -1459,7 +1459,7 @@ async function renderQuote(id, date) {
   try { q = await window.API.quote(g.code || g.id, CUSTOMER, date, to); } catch (e) { /**/ }
   if (!q || q.error) {
     // โหลดสรุปยอดไม่สำเร็จ (เช่น เซสชัน LINE หมดอายุ) — อย่าให้หน้าจอว่างเงียบ ๆ
-    box.innerHTML = `<div class="qdates" style="color:var(--muted,#8C8B86);text-align:center;padding:6px 0">${lang === 'th' ? 'โหลดสรุปยอดไม่สำเร็จ แตะวันที่อีกครั้ง หรือเข้าสู่ระบบใหม่' : "Couldn't load the summary — tap the date again or sign in"}</div>`;
+    box.innerHTML = `<div class="qdates" style="color:var(--muted,#8C8B86);text-align:center;padding:6px 0">${lang === 'th' ? 'โหลดยอดไม่สำเร็จ แตะวันที่อีกครั้งค่ะ' : "Couldn't load the summary — tap the date again or sign in"}</div>`;
     return;
   }
   const TH = lang === 'th';
@@ -3546,7 +3546,7 @@ function _renderResched() {
     <div class="rsd-hint">${th?'เลือกวันรับใหม่จากวันที่ว่าง ระบบเลื่อนวันคืนให้อัตโนมัติ':'Pick a new start date from the free days — return date moves automatically'}</div>
     <div class="rsd-cal">${cal}</div>
     <div class="callegend"><span><i class="lfree"></i>${th?'ว่าง':'free'}</span><span><i class="lbk"></i>${th?'ไม่ว่าง':'booked'}</span></div>
-    <div class="calnote">${th?'วันไม่ว่างรวมเวลาส่ง+ซัก+รีดของชุดด้วย เพื่อให้คุณได้ชุดสะอาดตรงวัน':'Booked days include shipping + cleaning time'}</div>
+    <div class="calnote">${th?'วันไม่ว่างรวมเวลาส่งและซักรีดแล้วค่ะ':'Booked days include shipping + cleaning time'}</div>
     ${summary}
     <button class="rvsubmit" id="rsdGo" ${S.pick?'':'disabled'} onclick="confirmResched()">${th?'ยืนยันเลื่อนวัน':'Confirm reschedule'}</button>`;
 }
