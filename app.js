@@ -1105,7 +1105,14 @@ function setMUnit(u){ gMUnit=u; const g=GARMENTS.find(x=>x.id===window._curDetai
 let gSelSize = 0, gSelSizeFor = null;
 function sizesOf(g){ const raw=String(g.size||'').toUpperCase().trim(); if(!raw) return []; if(raw==='FREE'||raw==='FREESIZE') return ['FREE']; return raw.split('/').map(s=>s.trim()).filter(Boolean); }
 function sizePt(rng, idx, n){ return rng ? (n<=1 ? (rng[0]+rng[1])/2 : rng[0] + (rng[1]-rng[0])*idx/(n-1)) : null; }  // สัดส่วนต่อไซส์ (interpolate ช่วง)
-function bestSizeIdx(g, sizes){ const c=CUSTOMER||{}; if(g.bust && c.bust_in!=null){ let b=0,bd=1e9; for(let i=0;i<sizes.length;i++){ const v=sizePt(g.bust,i,sizes.length); const d=Math.abs(v-c.bust_in); if(d<bd){bd=d;b=i;} } return b; } const us=String(c.size||'').toUpperCase(); const i=sizes.indexOf(us); return i>=0?i:Math.floor((sizes.length-1)/2); }
+function sizeFitsIdx(g,sizes,i){ const c=CUSTOMER||{}; if(c.bust_in==null&&c.waist_in==null) return null;
+  const slack=g.stretch==='stretchy'?2:g.stretch==='slight'?1:0; const n=sizes.length||1;
+  const bv=sizePt(g.bust,i,n), wv=sizePt(g.waist,i,n);
+  const okB=(bv==null||c.bust_in==null)||c.bust_in<=bv+slack+0.5;
+  const okW=(wv==null||c.waist_in==null)||c.waist_in<=wv+slack+0.5;
+  return okB&&okW; }
+// ป้าย "พอดี" ใช้เกณฑ์เดียวกับคำเตือนใต้ตาราง: ไซส์เล็กสุดที่ใส่ได้จริง (ไม่ใช่แค่ใกล้เคียงสุด)
+function bestSizeIdx(g, sizes){ const c=CUSTOMER||{}; if(g.bust && c.bust_in!=null){ for(let i=0;i<sizes.length;i++){ if(sizeFitsIdx(g,sizes,i)) return i; } return sizes.length-1; } const us=String(c.size||'').toUpperCase(); const i=sizes.indexOf(us); return i>=0?i:Math.floor((sizes.length-1)/2); }
 function sizeSection(g){
   const th=lang==='th'; const sizes=sizesOf(g); const hasM=!!(g.bust||g.waist||g.hip||g.length);
   if(!sizes.length && !hasM) return '';
@@ -1114,7 +1121,7 @@ function sizeSection(g){
   const best = free?0:bestSizeIdx(g,sizes);
   const pills = (!sizes.length) ? '' : (free
     ? `<button class="on">${sizes[0]==='FREE'||!sizes[0]?(th?'ฟรีไซส์':'Free size'):sizes[0]}</button>`
-    : sizes.map((s,i)=>`<button class="${i===gSelSize?'on':''}" onclick="setGSize(${i})">${s}${i===best?`<span style="font-size:9px;color:#0F6E56;margin-left:3px">${th?'พอดี':'best'}</span>`:''}</button>`).join(''));
+    : sizes.map((s,i)=>`<button class="${i===gSelSize?'on':''}" onclick="setGSize(${i})">${s}${(i===best&&sizeFitsIdx(g,sizes,best)!==false)?`<span style="font-size:9px;color:#0F6E56;margin-left:3px">${th?'พอดี':'best'}</span>`:''}</button>`).join(''));
   return `${pills?`<div class="sec">${th?'เลือกไซส์':'Select size'}</div><div class="dsizes">${pills}</div>`:''}
     <div id="sizeBody">${sizeBody(g,sizes,free)}</div>`;
 }
