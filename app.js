@@ -242,7 +242,7 @@ function fitConfidence(c, g) {
 // โน้ตฟิตจากลูกค้าจริง (โชว์เมื่อมีรีวิวพอ) — คืน {text,cls} หรือ null
 function fitNote(g) {
   if (!g || (g.fitN||0) < 3 || !g.fitLabel) return null;
-  if (g.fitLabel === 'small') return { text:'ลูกค้าบอกตัวนี้ใส่ค่อนข้างเล็ก — เผื่อไซส์', cls:'small' };
+  if (g.fitLabel === 'small') return { text:'ลูกค้าบอกตัวนี้ใส่ค่อนข้างเล็ก เผื่อไซส์', cls:'small' };
   if (g.fitLabel === 'large') return { text:'ลูกค้าบอกตัวนี้ใส่ค่อนข้างหลวม', cls:'large' };
   return { text:'ลูกค้าส่วนใหญ่บอกว่าใส่พอดี', cls:'true' };
 }
@@ -456,7 +456,7 @@ function openFabricModal(){
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <div style="font-weight:700;font-size:16px">${TH?'ลาย / เนื้อผ้า':'Pattern / Fabric'}</div>
       <button onclick="closeFabricModal()" style="border:0;background:none;font-size:22px;cursor:pointer;line-height:1">×</button></div>
-    <div style="font-size:12px;color:#86857F;margin-bottom:14px">${TH?'เลือกได้หลายอย่าง — ตัวเลข = จำนวนชุด':'Pick any — number = dresses'}</div>
+    <div style="font-size:12px;color:#86857F;margin-bottom:14px">${TH?'เลือกได้หลายอย่าง ตัวเลข = จำนวนชุด':'Pick any — number = dresses'}</div>
     <div id="fabricChips" style="display:flex;flex-wrap:wrap;gap:8px">${present.map(chip).join('')}</div>
     <div style="display:flex;gap:10px;margin-top:18px">
       <button onclick="clearFabric()" style="flex:1;border:1px solid #E0DED9;background:#fff;border-radius:10px;padding:11px;cursor:pointer">${TH?'ล้าง':'Clear'}</button>
@@ -537,7 +537,7 @@ function toggleCountry(){ gGroupByCountry = !gGroupByCountry; openBrandDir(); }
 function pickBrand(b) { closeBrandDir(); setBrand(b); window.scrollTo({ top: 380, behavior: 'smooth' }); }
 function notifyBrand(key, name) {
   window.track?.('brand_demand', key);
-  toast(lang === 'th' ? `บันทึกแล้ว — จะแจ้งเมื่อ ${name} เข้าคลัง` : `Saved — we'll tell you when ${name} arrives`);
+  toast(lang === 'th' ? `บันทึกแล้ว จะแจ้งเมื่อ ${name} เข้าคลัง` : `Saved we'll tell you when ${name} arrives`);
 }
 
 function setOccasion(t2) { fOccasion = t2; renderCatnav(); renderChips(); renderDiscover(); renderGrid(); }
@@ -554,7 +554,7 @@ function openColorModal(){
   m.innerHTML=`<div class="cmsheet">
     <div class="cmhead"><b>${lang==='th'?'เลือกสีที่ชอบ':'Pick a colour'}</b><button class="cmx" onclick="closeColorModal()">×</button></div>
     <div class="cmpal">${pal}</div>
-    <div class="cmor">${lang==='th'?'หรือดูดสีจากรูป — เช่น การ์ดงานแต่ง / ธีมงาน':'or pick from a photo — e.g. a wedding card'}</div>
+    <div class="cmor">${lang==='th'?'หรือดูดสีจากรูป เช่น การ์ดงานแต่ง / ธีมงาน':'or pick from a photo — e.g. a wedding card'}</div>
     <label class="cmupload">${lang==='th'?'＋ อัปโหลดรูป':'＋ Upload image'}<input type="file" accept="image/*" onchange="onCardImage(this)" hidden></label>
     <div id="cmcanvaswrap" style="display:none"><div class="cmhint">${lang==='th'?'แตะที่รูปเพื่อดูดสี หรือเลือกจากสีในการ์ดด้านล่าง 🖌️':'Tap the photo, or pick from card colours below 🖌️'}</div><canvas id="cmcanvas" onclick="onCanvasClick(event)"></canvas><div id="cmsugg" class="cmsugg"></div><div id="cmresult" class="cmresult"></div></div>
     <div class="cmfoot"><button class="cmclear" onclick="clearColors()">${lang==='th'?'ล้างสี':'Clear'}</button><button class="cmdone" onclick="closeColorModal()">${lang==='th'?'ดูชุด':'Show dresses'}</button></div>
@@ -577,7 +577,7 @@ function showCardColors(ctx,cv){ const d=ctx.getImageData(0,0,cv.width,cv.height
   for(let i=0;i<d.length;i+=4*4){ if(d[i+3]<128) continue; const hex=_rgbHex(d[i],d[i+1],d[i+2]); const c=_hexHSL(hex); const f=classifyHex(hex);
     const w=1+(c?c.s*c.s*12:0); const o=b[f]||(b[f]={r:0,g:0,bl:0,n:0}); o.r+=d[i]*w;o.g+=d[i+1]*w;o.bl+=d[i+2]*w;o.n+=w; }
   const fams=Object.entries(b).sort((x,y)=>y[1].n-x[1].n).slice(0,8).map(([f,o])=>({fam:f,hex:_rgbHex(Math.round(o.r/o.n),Math.round(o.g/o.n),Math.round(o.bl/o.n))}));
-  const sg=document.getElementById('cmsugg'); if(sg) sg.innerHTML=`<div class="cmsugglbl">${lang==='th'?'สีในการ์ด — แตะเลือกสีที่อยากได้ (หลายสีได้)':'Colours in your card — tap to choose'}</div>`+fams.map(x=>`<button class="ccol" data-hex="${x.hex}" onclick="toggleCardColor('${x.hex}')"><i style="background:${x.hex}"></i></button>`).join(''); }
+  const sg=document.getElementById('cmsugg'); if(sg) sg.innerHTML=`<div class="cmsugglbl">${lang==='th'?'สีในการ์ด แตะเลือกสีที่อยากได้ (หลายสีได้)':'Colours in your card — tap to choose'}</div>`+fams.map(x=>`<button class="ccol" data-hex="${x.hex}" onclick="toggleCardColor('${x.hex}')"><i style="background:${x.hex}"></i></button>`).join(''); }
 function _famLabel(k){ const F=COLOR_FAMILIES.find(x=>x.key===k); return F?(lang==='th'?F.th:F.en):k; }
 function nearestAvailable(fam,present){ const F=COLOR_FAMILIES.find(x=>x.key===fam); if(!F) return null; const a=_hexHSL(F.hex); let best=null,bd=1e9;
   COLOR_FAMILIES.forEach(g=>{ if(!present.has(g.key)||g.key===fam) return; const c=_hexHSL(g.hex); let dh=Math.abs(c.h-a.h); dh=Math.min(dh,360-dh); const dd=dh+Math.abs(c.l-a.l)*140+Math.abs(c.s-a.s)*70; if(dd<bd){bd=dd;best=g.key;} }); return best; }
@@ -691,7 +691,7 @@ function renderGrid() {
     (!fNewOnly || g.isNew) &&
     priceOk(g) &&
     matchQuery(g));
-  if (fWishOnly && !list.length) { $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา — แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
+  if (fWishOnly && !list.length) { $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
   if (fForYou) {
     // ดันชุดที่ "คนเหมือนคุณเช่า" (collaborative จาก behavior data) ขึ้นบนสุด แล้วตามด้วย personalScore
     const recIdx = g => { const i = gPersonalRecs.indexOf(g.code); return i < 0 ? 999 : i; };
@@ -1027,7 +1027,7 @@ function openDetail(id) {
       <div id="ratingline" class="ratingline"></div>
       <div id="socialproof" class="socialproof"></div>
       ${tips?`<details class="tipwrap"><summary class="sec" style="cursor:pointer">${t('secWear')} <span style="font-weight:400;color:var(--muted,#8C8B86);font-size:12px">${lang==='th'?'· แตะดู':'· tap'}</span></summary><div class="tips">${tips}</div></details>`:''}
-      <div class="sec">${lang ==='th'?'ครบลุค — ทรงผม & เครื่องประดับ':'Complete the look'}</div>
+      <div class="sec">${lang ==='th'?'ครบลุค ทรงผม & เครื่องประดับ':'Complete the look'}</div>
       <div id="lookbox" class="lookbox"><button class="lookbtn" onclick="loadLook('${g.code || g.id}','${(g.occasion_tags||[])[0]||''}')">${lang ==='th'?'ดูทรงผม & เครื่องประดับที่เข้ากับชุดนี้':'See hair & accessories for this look'}</button></div>
       <div id="ugcWrap" style="display:none"><div class="sec">${lang ==='th'?'รูปจริงจากลูกค้า':'Real customer photos'}</div><div id="ugcbox" class="ugcbox"></div></div>
       ${chart ? `<div class="sec">${lang==='th'?'ตารางไซส์ (อ้างอิงจากแบรนด์)':'Size chart (brand reference)'}</div><div class="dsizechart"><img src="${chart}" alt="size chart" loading="lazy"></div>` : ''}
@@ -1059,7 +1059,7 @@ function openDetail(id) {
       <span class="bo-txt">
         <span class="bo-title">${lang==='th'?'เลือกชุดสำรองเผื่อไว้เอง':'Choose your own spare'}</span>
         <span class="bo-why">${lang==='th'
-          ? 'เผื่อชุดหลักมีเหตุไม่พร้อมจริง ๆ เช่น ผู้เช่าก่อนหน้าทำชุดเสียหาย เลือกชุดที่อยากให้สลับให้เองได้เลย — ไม่มีค่าใช้จ่ายเพิ่ม'
+          ? 'เลือกชุดสำรองไว้เผื่อชุดหลักไม่พร้อม สลับให้ฟรีค่ะ'
           : 'If your main piece truly can’t make it (e.g. a prior renter damaged it), pick the spares you’d want us to swap in — no extra charge.'}</span>
       </span>
     </label>
@@ -1133,7 +1133,7 @@ function sizeBody(g,sizes,free){
     const okB=(b==null||c.bust_in==null)||c.bust_in<=b+slack+0.5;
     const okW=(w==null||c.waist_in==null)||c.waist_in<=w+slack+0.5;
     const good=okB&&okW; const col=good?'#0F6E56':'#B4232A';
-    out+=`<div style="margin-top:8px;font-size:13px;font-weight:600;color:${col}">${good?(th?'✓ ไซส์นี้พอดีตัวคุณ':'✓ This size fits you'):(th?'⚠ อาจคับ — ลองเผื่อไซส์':'⚠ May be snug — try sizing up')}</div>`;
+    out+=`<div style="margin-top:8px;font-size:13px;font-weight:600;color:${col}">${good?(th?'✓ ไซส์นี้พอดีตัวคุณ':'✓ This size fits you'):(th?'⚠ อาจคับ ลองเผื่อไซส์':'⚠ May be snug — try sizing up')}</div>`;
   } else {
     out+=`<button onclick="closeDetail();openProfile()" style="margin-top:8px;border:0;background:#04342C;color:#fff;border-radius:9px;padding:8px 14px;font-size:12.5px;cursor:pointer">${th?'ใส่สัดส่วนเพื่อเช็คไซส์ที่พอดี':'Add your measurements to check fit'}</button>`;
   }
@@ -1188,7 +1188,7 @@ function fitMatch(g){
   if (score!=null){
     if (score>=85){ verdict=th?'พอดีตัวคุณ':'Great fit for you'; vcol='#0F6E56'; }
     else if (score>=65){ verdict=th?'ใส่ได้ อาจต้องเผื่อจุดที่ ⚠':'Should work — mind the ⚠'; vcol='#8a6d1f'; }
-    else { verdict=th?'อาจไม่พอดี — ดูจุดที่ ⚠':'May not fit — see ⚠'; vcol='#B4232A'; }
+    else { verdict=th?'อาจไม่พอดี ดูจุดที่ ⚠':'May not fit — see ⚠'; vcol='#B4232A'; }
   }
   return `<div id="fitmatchBox" style="background:#E4F0EC;border:1px solid #cfe6df;border-radius:12px;padding:12px 13px;margin-top:10px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -1236,8 +1236,8 @@ async function loadFit(code) {
   if (tot >= 2) {
     const top = (fit.true>=fit.large && fit.true>=fit.small) ? 'true' : (fit.large>=fit.small ? 'large' : 'small');
     verdict = top==='true' ? (th?'ส่วนใหญ่บอกใส่พอดีตัว':'most say true to size')
-            : top==='large' ? (th?'หลายคนบอกเผื่อ/ใหญ่นิด — แนะนำลดไซส์':'runs large — size down')
-            : (th?'หลายคนบอกฟิต/เล็กนิด — แนะนำเผื่อไซส์':'runs small — size up');
+            : top==='large' ? (th?'หลายคนบอกเผื่อ/ใหญ่นิด แนะนำลดไซส์':'runs large — size down')
+            : (th?'หลายคนบอกฟิต/เล็กนิด แนะนำเผื่อไซส์':'runs small — size up');
   }
   el.innerHTML = `<div style="background:#E4F0EC;border:1px solid #cfe6df;border-radius:12px;padding:12px 13px;margin-top:10px">
     <div style="font-size:13px;font-weight:600;color:#04342C;margin-bottom:8px">${th?'ฟิตจริงจากคนใน loop':'Fit from real renters'} <span style="color:#0F6E56;font-weight:500">· ${f.n} ${th?'ลุค':'looks'}</span></div>
@@ -1358,7 +1358,7 @@ function mockLook(g) {
   const jewelry = formal ? ['ต่างหูระย้า', 'สร้อยเส้นเล็กแนบคอ'] : ['ต่างหูห่วงเล็ก', 'สร้อยข้อมือบาง'];
   const accessories = (cat === 'dress' || cat === 'set') ? ['กระเป๋าคลัตช์', 'เข็มขัดเส้นเล็กเน้นเอว'] : ['กระเป๋าสะพายทรงสวย'];
   const shoes = formal ? 'รองเท้าส้นสูงสีนู้ด ช่วยยืดขา' : 'รองเท้าส้นเตี้ย/รัดส้นโทนเดียวกับชุด';
-  return { hair, jewelry, accessories, shoes, note: 'แนะนำเบื้องต้น — LLOOP Atelier ตัวเต็มจะวิเคราะห์ละเอียดตามรูปหน้า/หุ่นของคุณ' };
+  return { hair, jewelry, accessories, shoes, note: 'คำแนะนำเบื้องต้น ตัวเต็มวิเคราะห์ตามรูปหน้า/หุ่นของคุณค่ะ' };
 }
 async function loadLook(code, occasion) {
   const box = $('#lookbox'); if (!box) return;
@@ -1370,7 +1370,7 @@ async function loadLook(code, occasion) {
   const noQuota = look && look.error === 'no_quota';
   if (!look || !look.hair) look = mockLook(g);
   // โควต้า LLOOP Atelier หมด → ยังโชว์คำแนะนำเบื้องต้นให้ แต่บอกเหตุผล
-  if (noQuota) look = { ...look, note: lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว — นี่คือคำแนะนำเบื้องต้น · เช่าชุดรับเพิ่ม 3 ครั้ง':'LLOOP Atelier quota used up — these are basic suggestions · rent for +3 more' };
+  if (noQuota) look = { ...look, note: lang ==='th'?'โควต้า Atelier หมดแล้ว เช่าชุดรับเพิ่ม 3 ครั้งค่ะ':'LLOOP Atelier quota used up — these are basic suggestions · rent for +3 more' };
   const row = (label, items) => (items && items.length)
     ? `<div class="lookrow"><span class="lk">${label}</span><div class="lv">${(Array.isArray(items) ? items : [items]).map(x => `<i>${x}</i>`).join('')}</div></div>` : '';
   box.innerHTML = `
@@ -1427,7 +1427,7 @@ async function joinQueue(id, date) {
     msg.className = 'availmsg ok';
     msg.textContent = r.already
       ? (lang==='th'?`อยู่ในคิว ${dlabel} แล้ว · คุณคิวที่ ${r.position}/${r.total}`:`Already queued for ${dlabel} · #${r.position}/${r.total}`)
-      : (lang==='th'?`ต่อคิว ${dlabel} แล้ว · คิวที่ ${r.position} — พอวันนี้ว่างเราแจ้งให้เลือกก่อนใครค่ะ`:`Queued for ${dlabel} · #${r.position} — we'll notify you first when this date opens`);
+      : (lang==='th'?`ต่อคิว ${dlabel} แล้ว · คิวที่ ${r.position} พอวันนี้ว่างเราแจ้งให้เลือกก่อนใครค่ะ`:`Queued for ${dlabel} · #${r.position} we'll notify you first when this date opens`);
   }
 }
 
@@ -1450,7 +1450,7 @@ async function renderQuote(id, date) {
   try { q = await window.API.quote(g.code || g.id, CUSTOMER, date, to); } catch (e) { /**/ }
   if (!q || q.error) {
     // โหลดสรุปยอดไม่สำเร็จ (เช่น เซสชัน LINE หมดอายุ) — อย่าให้หน้าจอว่างเงียบ ๆ
-    box.innerHTML = `<div class="qdates" style="color:var(--muted,#8C8B86);text-align:center;padding:6px 0">${lang === 'th' ? 'โหลดสรุปยอดไม่สำเร็จ — แตะวันที่อีกครั้ง หรือเข้าสู่ระบบใหม่' : "Couldn't load the summary — tap the date again or sign in"}</div>`;
+    box.innerHTML = `<div class="qdates" style="color:var(--muted,#8C8B86);text-align:center;padding:6px 0">${lang === 'th' ? 'โหลดสรุปยอดไม่สำเร็จ แตะวันที่อีกครั้ง หรือเข้าสู่ระบบใหม่' : "Couldn't load the summary — tap the date again or sign in"}</div>`;
     return;
   }
   const TH = lang === 'th';
@@ -1530,7 +1530,7 @@ function showPayConfirm({ g, date, total, pay, backups }) {
   ov.innerHTML = `
     <div style="background:#fff;width:100%;max-width:440px;border-radius:18px 18px 0 0;padding:22px 20px 26px;max-height:92vh;overflow:auto">
       <div style="text-align:center">
-        <div style="font-size:15px;font-weight:600;color:#0F6E56">${TH ? 'จองสำเร็จ — อีกขั้นเดียว' : 'Reserved — one step left'}</div>
+        <div style="font-size:15px;font-weight:600;color:#0F6E56">${TH ? 'จองสำเร็จ อีกขั้นเดียว' : 'Reserved — one step left'}</div>
         <div style="font-size:13px;color:var(--muted,#8C8B86);margin-top:3px">${g.name} · ${TH ? 'วันรับ' : 'pickup'} ${fmtDate(date)}${bk ? ` · ${bk}` : ''}</div>
       </div>
       ${hasPay ? `
@@ -1675,7 +1675,7 @@ async function aiRankBackups() {
     const ranked = Array.isArray(resp.ranked) ? resp.ranked : [];
     if (resp.error === 'no_quota') {
       // โควต้า LLOOP Atelier หมด → ใช้การเรียงอัตโนมัติเดิมต่อได้ ไม่เสียอะไร
-      toast(lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว — เช่าชุดเพื่อรับเพิ่ม 3 ครั้ง (ตอนนี้ใช้การเรียงอัตโนมัติให้แล้ว)':'LLOOP Atelier quota used up — rent an outfit for +3 (showing the auto-sorted order)');
+      toast(lang ==='th'?'โควต้า Atelier หมดแล้ว เช่าชุดรับเพิ่ม 3 ครั้งค่ะ':'LLOOP Atelier quota used up — rent an outfit for +3 (showing the auto-sorted order)');
       if (btn) { btn.disabled = true; btn.textContent = lang ==='th'?'โควต้า LLOOP Atelier หมดแล้ว':'LLOOP Atelier quota used up'; }
     } else if (ranked.length) {
       _bpWhy = {};
@@ -1809,13 +1809,13 @@ function openKyc(id) {
     <div class="ksheet">
       <button class="close" onclick="closeKyc()">×</button>
       <div class="khd">${TH ? 'ยืนยันตัวตน' : 'Verify identity'}</div>
-      <div class="ksub">${TH ? 'เพื่อความปลอดภัยของทั้งสองฝ่าย ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว รอบหน้าไม่ต้องทำอีก' : 'One-time verification for new customers'}</div>
+      <div class="ksub">${TH ? 'ยืนยันตัวตนครั้งเดียว รอบหน้าไม่ต้องทำอีกค่ะ' : 'One-time verification for new customers'}</div>
       <label class="klabel">${TH ? 'บัตรประชาชน (ถ่ายชัดเจน)' : 'ID card photo'}</label>
       <input type="file" id="kycId" accept="image/*">
       <label class="klabel">${TH ? 'ลิงก์ IG หรือ Facebook (สาธารณะ)' : 'IG / Facebook link (public)'}</label>
       <input type="url" id="kycSocial" placeholder="https://instagram.com/..." class="kinput">
       <button class="ksubmit" onclick="submitKycForm('${id || ''}')">${TH ? 'ส่งยืนยันตัวตน' : 'Submit'}</button>
-      <div class="knote">${TH ? 'หรือไม่ต้องยืนยันก็ได้ — เพียงวางมัดจำเพิ่มตามที่แจ้งในสรุปยอด' : 'Or skip and keep the higher deposit shown in the summary'}</div>
+      <div class="knote">${TH ? 'หรือไม่ต้องยืนยันก็ได้ เพียงวางมัดจำเพิ่มตามที่แจ้งในสรุปยอด' : 'Or skip and keep the higher deposit shown in the summary'}</div>
     </div>`;
   $('#kycOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
 }
@@ -1904,7 +1904,7 @@ async function openKycRequired() {
   } catch (e) { console.warn('consent_text', e); }
   const ver = String(consent.version || '1');
   const body = (consent.body || (TH
-    ? 'เราเก็บรูปบัตรประชาชนและเซลฟี่เพื่อยืนยันตัวตนผู้เช่าเท่านั้น เก็บอย่างปลอดภัยและไม่เปิดเผยต่อบุคคลภายนอก'
+    ? 'รูปบัตรและเซลฟี่ใช้ยืนยันตัวตนเท่านั้น เก็บปลอดภัย ไม่เปิดเผยต่อบุคคลภายนอกค่ะ'
     : 'We collect your ID card and selfie solely to verify renter identity. Stored securely and not shared.'));
   $('#kycSheet').innerHTML = `
     <div class="ksheet">
@@ -2010,7 +2010,7 @@ async function submitKycRequired() {
       return;
     }
     closeKyc();
-    toast(TH ? 'ส่งยืนยันตัวตนแล้ว — รอทีมงานอนุมัติ (ปกติไม่เกิน 1 วัน) จากนั้นเช่าได้เลยค่ะ'
+    toast(TH ? 'ส่งยืนยันตัวตนแล้ว รออนุมัติไม่เกิน 1 วันค่ะ'
             : 'Submitted — pending approval (usually within 1 day). You can rent once approved.');
     customerCanRent();  // re-check เพื่ออัปเดต UI
   } catch (e) {
@@ -2129,7 +2129,7 @@ async function revalidateCart() {
   }));
   if (book) {
     book.disabled = anyBusy;
-    book.textContent = anyBusy ? (TH ? 'มีชุดไม่ว่าง — นำออกก่อนนะคะ' : 'Remove unavailable items') : (TH ? 'จองทั้งหมด' : 'Book all');
+    book.textContent = anyBusy ? (TH ? 'มีชุดไม่ว่าง นำออกก่อนนะคะ' : 'Remove unavailable items') : (TH ? 'จองทั้งหมด' : 'Book all');
   }
 }
 function closeCart() { $('#cartOverlay').classList.remove('open'); document.body.style.overflow = ''; }
@@ -2232,7 +2232,7 @@ function openMenu() {
       <div class="ml">${en ? 'Discover' : 'ค้นพบ'}</div>
       ${item(I.foryou, en ? 'For you' : 'แนะนำเฉพาะคุณ', 'if(!fForYou)toggleForYou()')}
       ${signedIn ? item(I.foryou, en ? 'What you love' : 'สิ่งที่คุณชอบ', 'openTaste()') : ''}
-      ${item(I.stylist, en ? 'What to wear? — card game' : 'งานนี้ใส่อะไรดี — เพื่อนสาวช่วยเลือก', "location.href='quiz.html'")}
+      ${item(I.stylist, en ? 'What to wear? — card game' : 'งานนี้ใส่อะไรดี เพื่อนสาวช่วยเลือก', "location.href='quiz.html'")}
       ${item(I.stylist, en ? 'LLOOP Atelier by venue' : 'LLOOP Atelier ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
       ${item(I.findwish, en ? 'Wish for a piece — tell us' : 'อยากได้ชุดไหน บอกเราได้', "location.href='wishlist.html'")}
@@ -2280,7 +2280,7 @@ function openProfile(onboard) {
   const avatar = c.picture_url ?`<img class="pavatar" src="${c.picture_url}" alt="" referrerpolicy="no-referrer">`
     :`<div class="pavatar pavatar-x">${(dispName[0]||'L').toUpperCase()}</div>`;
   const head = onboard
-    ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'ยินดีต้อนรับ':'Welcome'}${dispName?' '+dispName:''}</div><div class="onbsub">${lang==='th'?'ใส่ชื่อ เบอร์ และที่อยู่จัดส่ง — แค่นี้ก็เริ่มเช่าได้เลย (ไซส์/สไตล์ค่อยเพิ่มทีหลังได้)':'Name, phone, and address — that’s all you need to start (sizes & style later)'}</div></div></div>`
+    ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'ยินดีต้อนรับ':'Welcome'}${dispName?' '+dispName:''}</div><div class="onbsub">${lang==='th'?'ใส่ชื่อ เบอร์ ที่อยู่จัดส่ง แค่นี้เริ่มเช่าได้เลยค่ะ':'Name, phone, and address — that’s all you need to start (sizes & style later)'}</div></div></div>`
     : (c.line_uid || c.display_name || c.picture_url
       ?`<div class="onbhead">${avatar}<div><div class="onbhi">${lang==='th'?'สวัสดีคุณ':'Hi'} ${dispName||''}</div><div class="onbsub">${lang==='th'?'เข้าสู่ระบบด้วย LINE แล้ว':'Signed in with LINE'}</div></div></div>`
       :'');
@@ -2340,18 +2340,18 @@ function openProfile(onboard) {
         <div class="field"><label>${lang==='th'?'สีที่ชอบ':'Favourite colours'}</label><input id="pFav" value="${pf.fav_colors ||''}" placeholder="${lang==='th'?'เช่น ครีม เอิร์ธโทน':'e.g. cream, earth'}"></div>
         <div class="field"><label>${lang==='th'?'สีที่เลี่ยง':'Colours to avoid'}</label><input id="pAvoid" value="${pf.avoid_colors ||''}" placeholder="${lang==='th'?'เช่น ส้มสด':'e.g. neon'}"></div>
       </div>
-      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง — ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>`}
+      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>`}
       <div class="frow">
         <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
         ${onboard ? '' : `<div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>`}
       </div>
       <div class="field"><label>${lang === 'th' ? 'ที่อยู่จัดส่ง (กรอกครั้งเดียว ใช้พิมพ์ใบส่ง-รับคืนอัตโนมัติ)' : 'Delivery address (once — auto-fills labels)'}</label>
         <textarea id="pAddrDetail" rows="2" autocomplete="shipping street-address" inputmode="text" placeholder="${lang === 'th' ? 'บ้านเลขที่ / หมู่บ้าน-คอนโด / ซอย / ถนน' : 'House no. / building / soi / road'}">${c.address || ''}</textarea>
-        <div class="subhint">${lang === 'th' ? 'พิมพ์รหัสไปรษณีย์ 5 หลัก แล้วเลือกตำบล — อำเภอ/จังหวัดเติมให้อัตโนมัติ' : 'Type the 5-digit postal code, pick a subdistrict — district & province auto-fill'}</div>
+        <div class="subhint">${lang === 'th' ? 'พิมพ์รหัสไปรษณีย์ 5 หลัก แล้วเลือกตำบล อำเภอ/จังหวัดเติมให้อัตโนมัติ' : 'Type the 5-digit postal code, pick a subdistrict — district & province auto-fill'}</div>
       </div>
       <div class="frow">
         <div class="field"><label>${lang === 'th' ? 'รหัสไปรษณีย์' : 'Postal code'}</label><input id="pZip" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="${lang === 'th' ? 'เช่น 10310' : 'e.g. 10310'}" oninput="onZipInput()"></div>
-        <div class="field"><label>${lang === 'th' ? 'ตำบล/แขวง' : 'Subdistrict'}</label><select id="pTambon" onchange="onTambonPick()"><option value="">${lang === 'th' ? '— ใส่รหัสก่อน —' : '— enter code first —'}</option></select></div>
+        <div class="field"><label>${lang === 'th' ? 'ตำบล/แขวง' : 'Subdistrict'}</label><select id="pTambon" onchange="onTambonPick()"><option value="">${lang === 'th' ? '  ใส่รหัสก่อน  ' : '— enter code first —'}</option></select></div>
       </div>
       <div class="frow">
         <div class="field"><label>${lang === 'th' ? 'อำเภอ/เขต' : 'District'}</label><input id="pAmphoe" readonly placeholder="${lang === 'th' ? 'เติมอัตโนมัติ' : 'auto'}"></div>
@@ -2390,7 +2390,7 @@ async function shareQuizInvite() {
   const base = location.origin + location.pathname.replace(/[^/]*$/, '') + 'quiz.html';
   const url = base + (code ? '?ref=' + encodeURIComponent(code) : '');
   const text = lang === 'th'
-    ? 'งานนี้ใส่อะไรดี? ลองเล่นการ์ดสไตลิสต์ของ LLOOP — เช่าผ่านลิงก์นี้ได้เครดิตทั้งคู่'
+    ? 'งานนี้ใส่อะไรดี? ลองการ์ดสไตลิสต์ LLOOP เช่าผ่านลิงก์นี้ได้เครดิตทั้งคู่ค่ะ'
     : 'What to wear? Try LLOOP’s stylist card game — rent via this link and we both get credit';
   try {
     if (navigator.share) { await navigator.share({ title: lang==='th'?'งานนี้ใส่อะไรดี':'What to wear', text, url }); return; }
@@ -2413,7 +2413,7 @@ async function applyPendingReferral() {
   if (!code || !CUSTOMER.id) return;
   let res = 'not_found';
   try { res = await window.API.applyReferral(CUSTOMER, code); } catch (e) { return; }
-  if (res === 'ok') toast(lang === 'th' ? 'บันทึกโค้ดเพื่อนแล้ว · รับเครดิต ฿50 ทั้งคู่เมื่อเช่าครั้งแรก' : 'Friend code saved — ฿50 credit for both on your first rental');
+  if (res === 'ok') toast(lang === 'th' ? 'บันทึกโค้ดเพื่อนแล้ว · รับเครดิต ฿50 ทั้งคู่เมื่อเช่าครั้งแรก' : 'Friend code saved ฿50 credit for both on your first rental');
   if (res !== 'not_found') { try { localStorage.removeItem('lloop_ref'); } catch (_e) {} }
 }
 async function applyReferralCode() {
@@ -2542,7 +2542,7 @@ function renderMeasuredRef(c) {
       ${when ? `<span class="mrwhen">${when}</span>` : ''}
     </div>
     <div class="mrgrid">${cells}</div>
-    <div class="mrnote">${th ? 'แก้ค่าของคุณเองได้ด้านล่าง — ค่าที่สไตลิสต์วัดจะเก็บไว้ให้อ้างอิงเสมอ' : 'Edit your own values below — the stylist’s measurements stay here for reference'}</div>
+    <div class="mrnote">${th ? 'แก้ค่าของคุณเองได้ด้านล่าง ค่าที่สไตลิสต์วัดจะเก็บไว้ให้อ้างอิงเสมอ' : 'Edit your own values below — the stylist’s measurements stay here for reference'}</div>
   </div>`;
 }
 
@@ -2583,7 +2583,7 @@ function renderStyleCard(c) {
     // แถบชุดจริงจากคลังที่แมตช์ (กดเช่าได้) — รูปหลัก
     const picks = topMatches(6);
     const matchHtml = picks.length ? `<div class="styleshop">
-        <div class="ssh">${th?'ชุดที่ใช่กับคุณ — เช่าได้เลย':'Made for you — rent now'}</div>
+        <div class="ssh">${th?'ชุดที่ใช่กับคุณ เช่าได้เลย':'Made for you — rent now'}</div>
         <div class="gstrip">${picks.map(gThumb).join('')}</div>
         <div class="stylerec" style="margin-top:7px"><a onclick="toggleForYou()" style="color:#A75F3A;font-weight:600;cursor:pointer">${th?'ดูชุดที่แมตช์ทั้งหมด →':'See all matches →'}</a></div>
       </div>` : '';
@@ -2619,11 +2619,11 @@ function renderStyleCard(c) {
     ];
     const detailRows = detail.map(([k,v])=>`<div class="pcd-row"><b>${k}</b><span>${v}</span></div>`).join('');
     inner =`<div class="stylehead">${th?'ปลดล็อกสไตล์ที่ใช่ของคุณ':'Unlock your signature style'}</div>
-      <div class="stylerec">${th?'วิเคราะห์ Personal Color + รูปหน้า + หุ่น โดยสไตลิสต์ แล้วรับสรุป + ชุดเช่าที่แมตช์คุณ':'A stylist Personal Color + face + body analysis, then a summary and rental picks made for you'}</div>
+      <div class="stylerec">${th?'สไตลิสต์วิเคราะห์ Personal Color + รูปหน้า + หุ่น พร้อมชุดที่แมตช์คุณ':'A stylist Personal Color + face + body analysis, then a summary and rental picks made for you'}</div>
       <div class="lockgrid">${lockGrid}</div>
       <details class="pcdetail"><summary>${th?'ดูว่าได้อะไรบ้าง':'See exactly what you get'}</summary><div class="pcd-body">${detailRows}</div></details>
       <div id="pcPayFlow">
-        <div class="creditback">${th?'ค่าวิเคราะห์ ฿4,900 กลายเป็นเครดิตเต็มจำนวนไว้เลือกชุด — เหมือนได้วิเคราะห์ฟรี':'Your ฿4,900 becomes ฿4,900 rental credit — the analysis pays for itself'}</div>
+        <div class="creditback">${th?'ค่าวิเคราะห์ ฿4,900 กลายเป็นเครดิตเช่าชุดเต็มจำนวนค่ะ':'Your ฿4,900 becomes ฿4,900 rental credit'}</div>
         <button class="bookbtn" onclick="bookPersonalColor()">${th?'จองคิว Personal Color · ฿4,900':'Book Personal Color · ฿4,900'}<span class="bsub">${th?'ได้เครดิต ฿4,900 คืนเต็มไว้เช่าชุด':'฿4,900 back as rental credit'}</span></button>
       </div>
       <div id="pcBookZone"></div>
@@ -2649,7 +2649,7 @@ async function claimCode() {
   toast(lang === 'th' ? 'กำลังดึงผล…' : 'Claiming…');
   const r = await window.API.claimStyleCode(code);
   if (!r || !r.ok) { toast((r && r.error) || (lang === 'th' ? 'ไม่สำเร็จ' : 'Failed')); return; }
-  toast(lang === 'th' ? 'ดึงผลสำเร็จ — กำลังรีเฟรช' : 'Done — refreshing');
+  toast(lang === 'th' ? 'ดึงผลสำเร็จ กำลังรีเฟรช' : 'Done — refreshing');
   setTimeout(() => location.reload(), 900);
 }
 
@@ -2673,7 +2673,7 @@ async function loadPcBookZone() {
       <button class="acancel" onclick="cancelMyAppointment('${a.id}')">${th ? 'ยกเลิก/เปลี่ยนเวลา' : 'Cancel / reschedule'}</button>
     </div>`;
   } else {
-    zone.innerHTML = `<button class="pcbookcta" onclick="openStylistPicker()">${th ? 'เลือกสไตลิสต์ & จองเวลา' : 'Choose a stylist & book'}<span class="bsub">${th ? 'จ่ายแล้ว — เลือกวันเวลาที่สะดวกได้เลย' : "You've paid — pick a time that suits you"}</span></button>`;
+    zone.innerHTML = `<button class="pcbookcta" onclick="openStylistPicker()">${th ? 'เลือกสไตลิสต์ & จองเวลา' : 'Choose a stylist & book'}<span class="bsub">${th ? 'จ่ายแล้ว เลือกวันเวลาที่สะดวกได้เลย' : "You've paid — pick a time that suits you"}</span></button>`;
   }
 }
 async function openStylistPicker() {
@@ -2687,7 +2687,7 @@ async function openStylistPicker() {
   let list; try { list = await window.API.stylistDirectory(); } catch (e) { list = []; }
   const body = document.getElementById('stbody'); if (!body) return;
   if (!list.length) {
-    body.innerHTML = `<div class="oloading">${th ? 'ยังไม่มีสไตลิสต์เปิดรับช่วงนี้ — ทักแชต LLOOP เพื่อนัดได้ค่ะ' : 'No stylist open right now — message LLOOP to book.'}</div>`;
+    body.innerHTML = `<div class="oloading">${th ? 'ยังไม่มีสไตลิสต์เปิดรับช่วงนี้ ทักแชต LLOOP เพื่อนัดได้ค่ะ' : 'No stylist open right now — message LLOOP to book.'}</div>`;
     return;
   }
   body.innerHTML = `<div class="stlist">${list.map(stylistCardHtml).join('')}</div>`;
@@ -2718,7 +2718,7 @@ async function selectStylist(id) {
   const slots = Array.isArray(p.slots) ? p.slots : [];
   let slotsHtml;
   if (!slots.length) {
-    slotsHtml = `<div class="oloading">${th ? 'สไตลิสต์ยังไม่เปิดเวลาว่าง — ลองเลือกท่านอื่น' : 'No open times yet — try another stylist'}</div>`;
+    slotsHtml = `<div class="oloading">${th ? 'สไตลิสต์ยังไม่เปิดเวลาว่าง ลองเลือกท่านอื่น' : 'No open times yet — try another stylist'}</div>`;
   } else {
     const groups = {};
     slots.forEach(s => { const k = new Date(s.starts_at).toDateString(); (groups[k] = groups[k] || []).push(s); });
@@ -2760,7 +2760,7 @@ async function confirmStylistBooking() {
     return;
   }
   closeStylistPicker();
-  toast(th ? 'จองสำเร็จ — ส่งรายละเอียดให้สไตลิสต์แล้ว' : 'Booked — details sent to your stylist');
+  toast(th ? 'จองสำเร็จ ส่งรายละเอียดให้สไตลิสต์แล้ว' : 'Booked — details sent to your stylist');
   loadPcBookZone();
 }
 function closeStylistPicker() { const el = document.getElementById('stpick'); if (el) el.remove(); }
@@ -2769,7 +2769,7 @@ async function cancelMyAppointment(id) {
   if (!confirm(th ? 'ยกเลิกนัดนี้? คุณจองเวลาใหม่กับสไตลิสต์คนไหนก็ได้' : 'Cancel this booking? You can rebook with any stylist.')) return;
   const r = await window.API.pcCancelAppointment(id);
   if (!r.ok) { toast(th ? 'ยกเลิกไม่สำเร็จ' : 'Could not cancel'); return; }
-  toast(th ? 'ยกเลิกแล้ว — เลือกเวลาใหม่ได้เลย' : 'Cancelled — pick a new time');
+  toast(th ? 'ยกเลิกแล้ว เลือกเวลาใหม่ได้เลย' : 'Cancelled — pick a new time');
   loadPcBookZone();
 }
 
@@ -2869,7 +2869,7 @@ async function openTaste(){
   if (n < 5) {
     body = `<div class="taste-empty">${en
       ? 'We\'re still learning your taste. Browse a few more looks and we\'ll show what you love here.'
-      : 'เรากำลังเรียนรู้สไตล์ของคุณอยู่ — ลองดูชุดเพิ่มอีกสักนิด แล้วเราจะสรุป “สิ่งที่คุณชอบ” ให้ตรงใจ'}</div>`;
+      : 'ดูชุดเพิ่มอีกนิด แล้วเราจะสรุปสไตล์ที่คุณชอบให้ค่ะ'}</div>`;
   } else {
     body = block(en?'Occasions':'โอกาสที่ชอบ', tt.occasions, occName)
          + block(en?'Brands':'แบรนด์ที่ชอบ', tt.brands, k=>k)
@@ -2889,7 +2889,7 @@ async function openTaste(){
     <div class="taste-body">${body}${recentHtml}</div>
     <div class="taste-foot">${en
       ? 'Private to you — used only to sort looks you\'ll love first.'
-      : 'เป็นข้อมูลส่วนตัวของคุณ — ใช้เพื่อจัดชุดที่น่าจะถูกใจขึ้นก่อนเท่านั้น'}</div>`;
+      : 'เป็นข้อมูลส่วนตัวของคุณ ใช้เพื่อจัดชุดที่น่าจะถูกใจขึ้นก่อนเท่านั้น'}</div>`;
   $('#tasteOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -3095,7 +3095,7 @@ function showSubPayModal(d) {
     <div style="font-size:24px;font-weight:700">฿${price.toLocaleString('th-TH')}</div>
     <div style="font-size:12px;color:#86857F;margin-bottom:14px">${en ? 'per' : 'ต่อ'} ${esc(d.period_label || d.period || '')}${d.rentals ? ` · ${en ? 'rentals' : 'เช่าได้'} ${d.rentals}` : ''}</div>
     <div id="subqr" style="display:flex;justify-content:center;margin-bottom:12px"></div>
-    <div style="font-size:13px;color:#1A1A1A;line-height:1.55">${en ? 'Scan PromptPay to pay, then' : 'สแกนพร้อมเพย์เพื่อจ่าย แล้ว'}<br><b>${en ? 'attach the slip in LINE chat' : 'แนบสลิปในแชต LINE'}</b> ${en ? '— membership opens automatically' : '— ระบบเปิดสิทธิ์ให้อัตโนมัติ'}</div>
+    <div style="font-size:13px;color:#1A1A1A;line-height:1.55">${en ? 'Scan PromptPay to pay, then' : 'สแกนพร้อมเพย์เพื่อจ่าย แล้ว'}<br><b>${en ? 'attach the slip in LINE chat' : 'แนบสลิปในแชต LINE'}</b> ${en ? '— membership opens automatically' : '  ระบบเปิดสิทธิ์ให้อัตโนมัติ'}</div>
     ${acct ? `<div style="font-size:11px;color:#86857F;margin-top:8px">${acct}</div>` : ''}
     <button onclick="closeSubPay(true)" style="width:100%;background:#1A1A1A;color:#fff;border:none;padding:12px;border-radius:8px;margin-top:16px;font-size:14px;cursor:pointer">${en ? 'I have transferred / Close' : 'ฉันโอนแล้ว / ปิด'}</button>
   </div>`;
@@ -3180,7 +3180,7 @@ function renderOrders(rentals) {
   _myRentals = rentals || [];
   const body = $('#ordersBody'); if (!body) return;
   if (!rentals.length) {
-    body.innerHTML =`<div class="oempty">${lang ==='th'?'ยังไม่มีออเดอร์ — เลือกชุดที่ถูกใจแล้วเริ่มลุคแรกของคุณได้เลย':'No rentals yet — pick a look you love to begin'}</div>`;
+    body.innerHTML =`<div class="oempty">${lang ==='th'?'ยังไม่มีออเดอร์ เลือกชุดที่ถูกใจแล้วเริ่มลุคแรกของคุณได้เลย':'No rentals yet — pick a look you love to begin'}</div>`;
     return;
   }
   // จับกลุ่ม: ชุดสำรองไปซ้อนใต้ชุดหลักของมัน (ไม่โผล่เป็นออเดอร์แยกให้งง)
@@ -3314,7 +3314,7 @@ function orderCard(r, spareList) {
       <div class="ospares-body" id="${spId}" hidden>
         ${spareList.map(s => `<div class="ospare"><span class="othumb sm" style="${orderThumb(s)}"></span><span class="osp-name">${s.name||'—'}</span></div>`).join('')}
         <div class="ospares-why">${lang==='th'
-          ? 'ถ้าชุดหลักมีเหตุไม่พร้อมจริง ๆ (เช่น ผู้เช่าก่อนหน้าทำเสียหาย) เราสลับตัวสำรองให้ทันที ไม่มีค่าใช้จ่ายเพิ่ม'
+          ? 'ถ้าชุดหลักไม่พร้อม เราสลับตัวสำรองให้ทันที ฟรีค่ะ'
           : 'If your main piece can’t make it (e.g. damaged by a prior renter), we swap in a spare right away at no extra cost.'}</div>
       </div>
     </div>` : '';
@@ -3534,7 +3534,7 @@ function _renderResched() {
     <button class="close" onclick="closeResched()">×</button>
     <div class="rsd-head">${th?'เลื่อนวันเช่า':'Reschedule'}</div>
     <div class="rsd-name">${S.name||''}</div>
-    <div class="rsd-hint">${th?'เลือกวันรับใหม่จากวันที่ว่าง — ระบบเลื่อนวันคืนให้อัตโนมัติ':'Pick a new start date from the free days — return date moves automatically'}</div>
+    <div class="rsd-hint">${th?'เลือกวันรับใหม่จากวันที่ว่าง ระบบเลื่อนวันคืนให้อัตโนมัติ':'Pick a new start date from the free days — return date moves automatically'}</div>
     <div class="rsd-cal">${cal}</div>
     <div class="callegend"><span><i class="lfree"></i>${th?'ว่าง':'free'}</span><span><i class="lbk"></i>${th?'ไม่ว่าง':'booked'}</span></div>
     <div class="calnote">${th?'วันไม่ว่างรวมเวลาส่ง+ซัก+รีดของชุดด้วย เพื่อให้คุณได้ชุดสะอาดตรงวัน':'Booked days include shipping + cleaning time'}</div>
@@ -3599,14 +3599,14 @@ function openReview(rentalId, name) {
     <div class="rvlabel">${lang ==='th'?'อยากเล่าเพิ่ม (ถ้ามี)':'Anything to add (optional)'}</div>
     <textarea id="rvComment" class="rvtext" rows="3" placeholder="${lang ==='th'?'ชอบตรงไหน ใส่ไปงานอะไร…':'What you loved, where you wore it…'}"></textarea>
     <div class="rvphotos">
-      <div class="rvvtitle">${lang ==='th'?'แนบรูปที่ใส่จริง รับเครดิต +฿15':'Add a photo wearing it — earn ฿15'}</div>
+      <div class="rvvtitle">${lang ==='th'?'แนบรูปที่ใส่จริง รับเครดิต +฿15':'Add a photo wearing it earn ฿15'}</div>
       <div class="rvvhint">${lang ==='th'?'รูปจริงของคุณจะไปโชว์ในหน้าชุด ช่วยให้เพื่อน ๆ ตัดสินใจง่ายขึ้น':'Your real photo appears on the dress page to help others'}</div>
       <input type="file" accept="image/*" multiple onchange="reviewPhotoUpload(this)">
       <div class="rvthumbs" id="rvThumbs"></div>
     </div>
     <div class="rvvideo">
-      <div class="rvvtitle">${lang ==='th'?'ทำคลิปรีวิว รับเครดิตเพิ่ม ฿120':'Post a video review — earn ฿120 credit'}</div>
-      <div class="rvvhint">${lang ==='th'?'โพสต์คลิปรีวิวบริการเราในโซเชียล แล้วแปะลิงก์ + พิมพ์สั้น ๆ ว่ารีวิวว่าอะไร — ระบบตรวจให้ ได้เครดิตเมื่อเป็นรีวิวเชิงบวก' : 'Post a clip reviewing us, paste the link + a short summary'}</div>
+      <div class="rvvtitle">${lang ==='th'?'ทำคลิปรีวิว รับเครดิตเพิ่ม ฿120':'Post a video review earn ฿120 credit'}</div>
+      <div class="rvvhint">${lang ==='th'?'โพสต์คลิปรีวิวในโซเชียลแล้วแปะลิงก์ที่นี่ ผ่านการตรวจรับเครดิตเลยค่ะ' : 'Post a clip reviewing us, paste the link + a short summary'}</div>
       <select id="rvPlatform" class="rvtext"><option value="">${lang ==='th'?'เลือกแพลตฟอร์ม':'Platform'}</option><option>TikTok</option><option>Instagram</option><option>YouTube</option><option>Facebook</option><option>${lang ==='th'?'อื่น ๆ':'Other'}</option></select>
       <input id="rvVideo" class="rvtext" placeholder="${lang ==='th'?'ลิงก์คลิปรีวิว https://...':'Video link https://...'}">
       <textarea id="rvVideoText" class="rvtext" rows="2" placeholder="${lang ==='th'?'เล่าสั้น ๆ ว่าในคลิปพูดถึงอะไร':'Summarize what you said in the clip'}"></textarea>
@@ -3646,8 +3646,8 @@ async function submitReview() {
     const photos = _reviewPhotos.length ? _reviewPhotos : null;
     try { await window.API.addReview(_reviewRental, _reviewRating, _reviewFit, comment, photos); } catch (e) { console.warn(e); }
     toast(photos
-      ? (lang ==='th'?'ขอบคุณที่แชร์รูปจริงนะคะ! +฿15 — ทุกครั้งที่ชุดได้ใส่ซ้ำ คือช่วยกันรักษ์โลกค่ะ':'Thank you for sharing! +฿15 — you keep our loop strong')
-      : (lang ==='th'?'ขอบคุณสำหรับรีวิวนะคะ ทุกความเห็นช่วยให้เพื่อน ๆ เลือกชุดที่ใช่ได้ง่ายขึ้นค่ะ':'Thank you — you make our community stronger'));
+      ? (lang ==='th'?'ขอบคุณที่แชร์รูปจริงนะคะ เพิ่มเครดิต ฿15 ให้แล้วค่ะ':'Thank you for sharing! +฿15 credit added')
+      : (lang ==='th'?'ขอบคุณสำหรับรีวิวนะคะ':'Thank you — you make our community stronger'));
   }
 }
 function animateCounts(root) {
@@ -3678,11 +3678,11 @@ async function onZipInput() {
   let z = (zi.value || '').replace(/\D/g, '').slice(0, 5);
   if (zi.value !== z) zi.value = z;
   const sel = $('#pTambon'), am = $('#pAmphoe'), pv = $('#pProvince');
-  if (z.length < 5) { _zipEntries = []; if (sel) sel.innerHTML = `<option value="">${lang==='th'?'— ใส่รหัสก่อน —':'— enter code first —'}</option>`; if (am) am.value=''; if (pv) pv.value=''; return; }
+  if (z.length < 5) { _zipEntries = []; if (sel) sel.innerHTML = `<option value="">${lang==='th'?'  ใส่รหัสก่อน  ':'— enter code first —'}</option>`; if (am) am.value=''; if (pv) pv.value=''; return; }
   const db = await loadThPostal();
   _zipEntries = db[z] || [];   // [[province, amphoe, district], ...]
   if (!_zipEntries.length) {
-    if (sel) sel.innerHTML = `<option value="">${lang==='th'?'ไม่พบรหัสนี้ — พิมพ์ที่อยู่เองได้':'not found — type address above'}</option>`;
+    if (sel) sel.innerHTML = `<option value="">${lang==='th'?'ไม่พบรหัสนี้ พิมพ์ที่อยู่เองได้':'not found — type address above'}</option>`;
     if (am) am.value=''; if (pv) pv.value=''; return;
   }
   const multiAmphoe = new Set(_zipEntries.map(e => e[1])).size > 1;
@@ -3823,7 +3823,7 @@ function maybeOnboard() {
 function renderImpactCard() {
   const im = CUSTOMER._impact;
   if (!im || !im.rentals) {
-    return `<div class="ecocard new">${lang === 'th' ? 'ทุกครั้งที่คุณเลือกเช่าแทนซื้อ คือการเซฟทรัพยากรของโลก — เริ่มลุคแรกของคุณกับเราได้เลย' : 'Every time you rent instead of buy, you save the planet — start your first look with us'}</div>`;
+    return `<div class="ecocard new">${lang === 'th' ? 'เช่าแทนซื้อ ช่วยเซฟทรัพยากรโลก เริ่มลุคแรกกับเราได้เลยค่ะ' : 'Every time you rent instead of buy, you save the planet — start your first look with us'}</div>`;
   }
   const charity = im.charity_thb ? `<div class="ecocharity">${lang === 'th' ? 'และคุณได้สมทบทุน' : 'and you have given'} <b data-to="${im.charity_thb}" data-prefix="฿">฿0</b> ${lang === 'th' ? `ให้${im.charity_name || 'เด็กยากไร้'} ผ่านทุกการเช่าของคุณ` : `to ${im.charity_name || 'children in need'}`}</div>` : '';
   return `<div class="ecocard tappable" onclick="openImpact()">
@@ -3858,8 +3858,8 @@ function notifText(n) {
     due_soon:        [th?'ใกล้ถึงกำหนดคืน':'Return coming up', th?`"${p.garment||p.name||''}" คืนพรุ่งนี้`:`"${p.garment||p.name||''}" due tomorrow`],
     late:            [th?'เลยกำหนดคืนแล้ว':'Overdue', th?'รบกวนส่งคืนโดยเร็วนะคะ':'Please return soon'],
     credit_expiring: [th?'เครดิตใกล้หมดอายุ':'Credit expiring', th?`เครดิต ฿${p.credit||''} ใช้เช่าได้เลย`:`฿${p.credit||''} credit — use it soon`],
-    abandon_checkout:[th?'ชุดรอคุณอยู่':'Your pick is waiting', th?`"${p.name||p.garment||''}" ยังล็อกไว้ให้ — ชำระเพื่อยืนยัน`:`"${p.name||p.garment||''}" still held — pay to confirm`],
-    reengagement:    [th?'มีของขวัญรอ ฿30':'฿30 gift inside', th?'นานไม่เจอกัน — เพิ่มเครดิตให้แล้ว':'We missed you — credit added'],
+    abandon_checkout:[th?'ชุดรอคุณอยู่':'Your pick is waiting', th?`"${p.name||p.garment||''}" ยังล็อกไว้ให้ ชำระเพื่อยืนยัน`:`"${p.name||p.garment||''}" still held — pay to confirm`],
+    reengagement:    [th?'มีของขวัญรอ ฿30':'฿30 gift inside', th?'นานไม่เจอกัน เพิ่มเครดิตให้แล้ว':'We missed you — credit added'],
     winback:         [th?'คิดถึงคุณนะคะ':'We miss you', th?'กลับเข้า loop กับ LLOOP':'Come back to the loop'],
     event_suggest:   [th?'แนะนำชุดก่อนงาน':'Outfit ideas for your event', th?'เลือกชุดให้คุณแล้ว เปิดดูได้เลย':'We picked looks for you'],
     review_request:  [th?'ชุดเป็นยังไงบ้างคะ':'How was it?', th?`รีวิว "${p.name||''}" รับเครดิต`:`Review "${p.name||''}" for credit`],
@@ -3919,7 +3919,7 @@ async function markAllRead() { await window.API.notifMarkRead?.(null); refreshUn
 async function setNotifPref(on) {
   await window.API.notifSetPref?.(on);
   CUSTOMER.marketing_opt_in = on;
-  toast(lang==='th' ? (on?'เปิดรับข่าวสารแล้วค่ะ':'ปิดรับข่าวสารแล้ว — ยังได้รับแจ้งเตือนสำคัญอยู่') : (on?'Marketing on':'Marketing off — you still get important alerts'));
+  toast(lang==='th' ? (on?'เปิดรับข่าวสารแล้วค่ะ':'ปิดรับข่าวสารแล้ว ยังได้รับแจ้งเตือนสำคัญอยู่') : (on?'Marketing on':'Marketing off — you still get important alerts'));
 }
 
 // scroll depth (25/50/75/100%) + dwell time — สัญญาณ engagement แบบ FB/IG
@@ -4099,10 +4099,10 @@ function routeDeepLink() {
             let n = null; try { n = await window.API.stylistQuota?.(); } catch (_e) {}
             const th = lang === 'th';
             const head = th ? 'เลือกจาก “'+occName(window.gQuizOccasion)+'” แล้ว' : 'Picked “'+occName(window.gQuizOccasion)+'”';
-            const body = th ? 'พิมพ์สถานที่ที่จะไป แล้วเลือกวันที่ — สไตลิสต์จะเลือกชุดที่ว่างวันนั้นให้' : 'Type where you’re headed and pick a date — we’ll style you with what’s free that day';
+            const body = th ? 'พิมพ์สถานที่ที่จะไป แล้วเลือกวันที่ สไตลิสต์จะเลือกชุดที่ว่างวันนั้นให้' : 'Type where you’re headed and pick a date — we’ll style you with what’s free that day';
             let quota;
             if (n == null) quota = th ? 'เข้าผ่าน LINE เพื่อใช้สิทธิ์สไตลิสต์' : 'Sign in via LINE to use the stylist';
-            else if (n <= 0) quota = th ? 'สิทธิ์สไตลิสต์รอบนี้หมดแล้ว — ดูชุดในคลังเองได้เลย หรือรอรอบสิทธิ์ถัดไป' : 'No stylist credits left this round — browse freely or wait for the next cycle';
+            else if (n <= 0) quota = th ? 'สิทธิ์สไตลิสต์รอบนี้หมดแล้ว ดูชุดในคลังเองได้เลย หรือรอรอบสิทธิ์ถัดไป' : 'No stylist credits left this round — browse freely or wait for the next cycle';
             else quota = th ? `ขั้นนี้ใช้สิทธิ์สไตลิสต์ 1 ครั้ง · คุณเหลืออีก <b style="color:var(--ok)">${n}</b> ครั้ง` : `This uses 1 stylist credit · you have <b style="color:var(--ok)">${n}</b> left`;
             r.className = 'vresult show';
             r.innerHTML = `<div class="note"><b style="color:var(--ink)">${head}</b><br>${body}<br><span style="color:var(--clay,#A75F3A)">${quota}</span></div>`;
