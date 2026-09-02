@@ -1037,12 +1037,11 @@ function openDetail(id) {
       <div class="fabric">${fabricTags}</div>` : ''}
       ${colorSel}
       <div id="recoWith" class="recowith"></div>
-      <div class="sec">${lang ==='th'?'ปฏิทินว่าง':'Availability'}</div>
+      <div class="sec">${lang ==='th'?'วันใช้ชุด · แตะวันในปฏิทิน':'Pick your date'}</div>
       <div id="availcal" class="availcal"></div>
     </div>
     <div class="datepick">
-      <label>${lang ==='th'?'วันที่ต้องใช้':'Date you need it'}</label>
-      <input type="date" id="useDate" min="${todayStr()}" value="${gUseDate || ''}" onchange="checkAvail('${g.id}')">
+      <input type="hidden" id="useDate" value="${gUseDate || ''}">
       <span id="availMsg" class="availmsg"></span>
     </div>
     ${valueStrip(g)}
@@ -1080,6 +1079,10 @@ function openDetail(id) {
       : `<div class="creditline">${t('creditPre')}${credit}${t('creditMid')}${g.price - credit}</div>`}`;
   $('#overlay').classList.add('open');
   document.body.style.overflow ='hidden';
+  // ปฏิทินเริ่มที่เดือนของวันที่เลือกไว้ (ถ้ามี) ไม่งั้นเดือนนี้
+  gCalSel = gUseDate || null; gCalMo = 0;
+  if (gUseDate) { const t0 = new Date(todayStr() + 'T00:00:00'), sd = new Date(gUseDate + 'T00:00:00');
+    gCalMo = Math.max(0, Math.min(3, (sd.getFullYear() - t0.getFullYear()) * 12 + sd.getMonth() - t0.getMonth())); }
   renderAvailCalendar(g.id);
   renderUGC(g.id);
   loadRating(g.id);  // เรตติ้ง/รีวิวของชุด (async inject)
@@ -1307,7 +1310,8 @@ async function renderPersonalRail() {
   el.innerHTML = html;
 }
 
-// ปฏิทินว่าง/ไม่ว่างของชุด (2 เดือน) — แตะวันว่างเพื่อเลือก
+// ปฏิทินว่าง/ไม่ว่างของชุด — เดือนเดียวแบบโปร่ง มีปุ่มเลื่อนเดือน · แตะวันว่างเพื่อเลือก
+let gCalMo = 0, gCalSel = null;  // เดือนที่โชว์ (0 = เดือนนี้ ดูล่วงหน้าได้ 3 เดือน) + วันที่เลือกในหน้า detail
 async function renderAvailCalendar(garmentId) {
   const box = $('#availcal'); if (!box) return;
   let ranges = []; try { ranges = await window.API.bookedRanges?.(garmentId) || []; } catch (e) { /**/ }
@@ -1317,29 +1321,33 @@ async function renderAvailCalendar(garmentId) {
     for (; d <= end; d.setDate(d.getDate() + 1)) booked.add(ymd(d)); });  // local — กัน toISOString เลื่อนวันในโซน +7
   const today = new Date(todayStr() + 'T00:00:00');
   const dow = lang === 'th' ? ['อา','จ','อ','พ','พฤ','ศ','ส'] : ['S','M','T','W','T','F','S'];
-  let html = '';
-  for (let mo = 0; mo < 2; mo++) {
-    const base = new Date(today.getFullYear(), today.getMonth() + mo, 1);
-    const monthName = base.toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-US', { month: 'long', year: '2-digit' });
-    const first = base.getDay(), days = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
-    let cells = dow.map(d => `<span class="cdow">${d}</span>`).join('');
-    for (let i = 0; i < first; i++) cells += `<span></span>`;
-    for (let dn = 1; dn <= days; dn++) {
-      const ds = `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, '0')}-${String(dn).padStart(2, '0')}`;
-      const past = new Date(ds + 'T00:00:00') < today;
-      const isBooked = booked.has(ds);
-      const sel = ds === gUseDate;
-      const cls = past ? 'past' : isBooked ? 'bk' : 'free';
-      const onclick = (!past && !isBooked) ? ` onclick="pickCalDate('${garmentId}','${ds}')"` : '';
-      cells += `<span class="cday ${cls} ${sel ? 'sel' : ''}"${onclick}>${dn}</span>`;
-    }
-    html += `<div class="calmonth"><div class="calhd">${monthName}</div><div class="calgrid">${cells}</div></div>`;
+  const base = new Date(today.getFullYear(), today.getMonth() + gCalMo, 1);
+  const monthName = base.toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-US', { month: 'long', year: 'numeric' });
+  const first = base.getDay(), days = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+  let cells = dow.map(d => `<span class="cdow">${d}</span>`).join('');
+  for (let i = 0; i < first; i++) cells += `<span></span>`;
+  for (let dn = 1; dn <= days; dn++) {
+    const ds = `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, '0')}-${String(dn).padStart(2, '0')}`;
+    const past = new Date(ds + 'T00:00:00') < today;
+    const isBooked = booked.has(ds);
+    const sel = ds === (gCalSel || gUseDate);
+    const cls = past ? 'past' : isBooked ? 'bk' : 'free';
+    const onclick = (!past && !isBooked) ? ` onclick="pickCalDate('${garmentId}','${ds}')"` : '';
+    cells += `<span class="cday ${cls} ${sel ? 'sel' : ''}"${onclick}>${dn}</span>`;
   }
-  html += `<div class="callegend"><span><i class="lfree"></i>${lang === 'th' ? 'ว่าง' : 'free'}</span><span><i class="lbk"></i>${lang === 'th' ? 'ไม่ว่าง' : 'booked'}</span></div>`;
-  box.innerHTML = html;
+  box.innerHTML = `<div class="calmonth">
+    <div class="calnav">
+      <button class="calarrow" ${gCalMo <= 0 ? 'disabled' : ''} onclick="calNav('${garmentId}',-1)" aria-label="prev">‹</button>
+      <div class="calhd">${monthName}</div>
+      <button class="calarrow" ${gCalMo >= 3 ? 'disabled' : ''} onclick="calNav('${garmentId}',1)" aria-label="next">›</button>
+    </div>
+    <div class="calgrid">${cells}</div></div>
+    <div class="callegend"><span><i class="lsel"></i>${lang === 'th' ? 'เลือกแล้ว' : 'selected'}</span><span><i class="lbk"></i>${lang === 'th' ? 'ไม่ว่าง' : 'booked'}</span></div>`;
 }
+function calNav(garmentId, d) { gCalMo = Math.max(0, Math.min(3, gCalMo + d)); renderAvailCalendar(garmentId); }
 function pickCalDate(garmentId, ds) {
   const inp = $('#useDate'); if (inp) inp.value = ds;
+  gCalSel = ds;
   document.querySelectorAll('#availcal .cday.sel').forEach(e => e.classList.remove('sel'));
   event.currentTarget.classList.add('sel');
   checkAvail(garmentId);
@@ -1719,13 +1727,10 @@ async function reserve(id, useCredit) {
   const date = $('#useDate') && $('#useDate').value;
   if (!date) {
     const msg = $('#availMsg');
-    if (msg) { msg.className ='availmsg busy'; msg.textContent = lang ==='th'?'เลือกวันที่ต้องใช้ก่อนนะคะ':'Pick a date first'; }
-    const di = $('#useDate');
-    if (di) { di.classList.add('need'); di.addEventListener('input', () => di.classList.remove('need'), { once:true }); }
-    // เลื่อน container ของชีตเอง (scrollIntoView ไม่เสถียรใน overlay fixed/LIFF webview)
-    const dp = document.querySelector('.datepick'), cont = dp && (dp.closest('.sheet') || dp.parentElement);
-    if (dp && cont) { const top = dp.getBoundingClientRect().top - cont.getBoundingClientRect().top + cont.scrollTop - 12; cont.scrollTo({ top, behavior:'smooth' }); }
-    if (di) try { di.focus(); } catch (e) { /**/ }
+    if (msg) { msg.className ='availmsg busy'; msg.textContent = lang ==='th'?'แตะเลือกวันในปฏิทินก่อนนะคะ':'Pick a date first'; }
+    // เลื่อนไปที่ปฏิทิน (container ของชีตเอง — scrollIntoView ไม่เสถียรใน overlay fixed/LIFF webview)
+    const dp = document.querySelector('#availcal'), cont = dp && (dp.closest('.sheet') || $('#overlay'));
+    if (dp && cont) { const top = dp.getBoundingClientRect().top - cont.getBoundingClientRect().top + cont.scrollTop - 60; cont.scrollTo({ top, behavior:'smooth' }); }
     return;
   }
   // ต้องมีที่อยู่จัดส่งก่อนจอง — กันจ่ายเงินแล้วไม่มีที่ส่งของ
@@ -2039,8 +2044,9 @@ async function addToCart(id) {
   const date = cartDate || picked;
   const dur = cartDate ? cartDur : gDur;   // ถ้ามีของในตะกร้าแล้ว ล็อกระยะเวลาตามตะกร้า
   if (!date) {
-    toast(TH ? 'เลือกวันที่ต้องใช้ก่อนเพิ่มลงตะกร้านะคะ' : 'Pick your date first');
-    const d = $('#useDate'); if (d) { d.classList.add('need'); d.focus(); try { d.showPicker && d.showPicker(); } catch (e) {} }
+    toast(TH ? 'แตะเลือกวันในปฏิทินก่อนเพิ่มลงตะกร้านะคะ' : 'Pick your date first');
+    const dp = document.querySelector('#availcal'), cont = dp && (dp.closest('.sheet') || $('#overlay'));
+    if (dp && cont) { const top = dp.getBoundingClientRect().top - cont.getBoundingClientRect().top + cont.scrollTop - 60; cont.scrollTo({ top, behavior:'smooth' }); }
     return;
   }
   // เช็กว่าว่างตลอดช่วง [date .. date+dur-1] ก่อนค่อยใส่ตะกร้า (ไม่ใช่แค่วันเดียว)
