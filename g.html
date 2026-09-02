@@ -154,7 +154,7 @@ function rangeBusy(from, to){
   CUSTOMER = state.CUSTOMER || {};
   if (!code) return renderEdge('ไม่พบรหัสชุด', 'สแกน QR ที่ป้ายชุดอีกครั้งนะคะ');
   G = (state.GARMENTS || []).find(x => String(x.code || '').toUpperCase() === code);
-  if (!G) return renderEdge('ชุดนี้ยังไม่เปิดให้เช่า', 'อาจกำลังซัก/เตรียม หรือรหัสไม่ตรง — เลือกชุดอื่นในร้านได้เลยค่ะ');
+  if (!G) return renderEdge('ชุดนี้ยังไม่เปิดให้เช่า', 'เลือกชุดอื่นในร้านได้เลยค่ะ');
   window.track?.('view_item', G.code, { price: G.price });
   try { PAY = await window.API.payInfo(); } catch (e) {}
   try { BOOKED = await window.API.bookedRanges(G.id); } catch (e) { BOOKED = []; }
