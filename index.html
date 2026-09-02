@@ -375,8 +375,8 @@
   .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
   .calgrid .cdow{font-size:11px;color:var(--muted);text-align:center;padding:4px 0}
   .cday{font-size:14px;text-align:center;padding:11px 0;border-radius:10px}
-  .cday.free{color:var(--ink);cursor:pointer}
-  .cday.free:hover{background:var(--soft)}
+  .cday.free{color:#0c3a33;background:var(--sage-bg);cursor:pointer}  /* ว่าง = เขียวอ่อน เห็นทันทีไม่ต้องแตะเช็ก */
+  .cday.free:hover{background:#d3e6de}
   .cday.bk{color:#D6D3CE}
   .cday.past{color:#D6D3CE}
   .cday.sel{background:var(--ink);color:#fff;font-weight:600}
@@ -1482,7 +1482,7 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=98"></script>
+<script src="app.js?v=99"></script>
 <script src="help-widget.js"></script>
 </body>
 </html>

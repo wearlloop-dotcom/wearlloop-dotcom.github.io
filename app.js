@@ -1342,7 +1342,7 @@ async function renderAvailCalendar(garmentId) {
       <button class="calarrow" ${gCalMo >= 3 ? 'disabled' : ''} onclick="calNav('${garmentId}',1)" aria-label="next">›</button>
     </div>
     <div class="calgrid">${cells}</div></div>
-    <div class="callegend"><span><i class="lsel"></i>${lang === 'th' ? 'เลือกแล้ว' : 'selected'}</span><span><i class="lbk"></i>${lang === 'th' ? 'ไม่ว่าง' : 'booked'}</span></div>`;
+    <div class="callegend"><span><i class="lfree"></i>${lang === 'th' ? 'ว่าง' : 'free'}</span><span><i class="lbk"></i>${lang === 'th' ? 'ไม่ว่าง' : 'booked'}</span><span><i class="lsel"></i>${lang === 'th' ? 'เลือกแล้ว' : 'selected'}</span></div>`;
 }
 function calNav(garmentId, d) { gCalMo = Math.max(0, Math.min(3, gCalMo + d)); renderAvailCalendar(garmentId); }
 function pickCalDate(garmentId, ds) {
