@@ -27,8 +27,10 @@ window.LiffAuth = (function () {
       if (!window.liff || !CONFIG.LIFF_ID) { alert('ยังไม่ได้ตั้งค่า LINE Login'); return; }
       await liff.init({ liffId: CONFIG.LIFF_ID });
       sessionStorage.removeItem('liffLoginTried');
-      if (!liff.isLoggedIn()) liff.login();
-      else location.reload();
+      // ล้าง session เก่าก่อนเสมอ — เคสหลักคือ idToken หมดอายุแต่ liff ยังนับว่า login อยู่
+      // (reload เฉย ๆ ได้ token เก่าเดิม → ติดประตูซ้ำ) logout+login ใหม่ได้ token สด
+      try { if (liff.isLoggedIn()) liff.logout(); } catch (_e) {}
+      liff.login({ redirectUri: location.origin + location.pathname });
     } catch (e) {
       console.warn('signIn failed:', e);
       alert('เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้ง');

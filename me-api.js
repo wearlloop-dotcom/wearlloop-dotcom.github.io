@@ -31,11 +31,7 @@
       });
       const out = await r.json().catch(() => ({}));
       if (!r.ok || out.error) {
-        // idToken หมดอายุระหว่างใช้งาน → ต่ออายุเองครั้งเดียว (logout+login ได้ token สด)
-        if (out.error === 'unauthorized' && !sessionStorage.getItem('meAuthRetry')) {
-          sessionStorage.setItem('meAuthRetry', '1');
-          try { liff.logout(); liff.login({ redirectUri: location.origin + location.pathname }); } catch (_e) {}
-        }
+        // ห้าม logout/login อัตโนมัติตรงนี้ (เคยพา loop login) — แจ้ง error ให้ผู้ใช้กดเข้าสู่ระบบเอง
         const map = { unauthorized: 'เซสชันหมดอายุ เข้าสู่ระบบใหม่', no_customer: 'ยังไม่พบบัญชีลูกค้าของคุณ',
           fn_not_allowed: 'คำสั่งนี้ไม่อนุญาต' };
         return { data: null, error: { message: map[out.error] || out.message || ('me-rpc ' + r.status) } };
