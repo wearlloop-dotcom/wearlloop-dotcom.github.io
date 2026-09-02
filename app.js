@@ -3972,6 +3972,12 @@ async function boot() {
   // บังคับล็อกอินทั้งเว็บก่อนใช้งาน (เว้นโหมดเดโม/localhost) — guest เห็นแค่ประตูล็อกอิน ไม่โหลด/ไม่ track ต่อ
   const _isLocalDev = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname);
   if (!loggedIn && !(window.CONFIG && CONFIG.USE_MOCK) && !_isLocalDev) { showLoginGate(); return; }
+  // login ผ่านแต่โปรไฟล์โหลดไม่ได้ (เซสชันหมดอายุ) → อย่าโชว์เครดิต mock ให้เข้าใจผิด — ให้เข้าสู่ระบบใหม่
+  if (loggedIn && s.profileFailed && !(window.CONFIG && CONFIG.USE_MOCK) && !_isLocalDev) {
+    CUSTOMER = {};
+    toast(lang==='th'?'เซสชันหมดอายุ กดเข้าสู่ระบบอีกครั้งค่ะ':'Session expired, please sign in again');
+    showLoginGate(); return;
+  }
   const loginBtn = $('#loginBtn'); const creditEl = document.querySelector('.credit');
   if (loginBtn) loginBtn.hidden = loggedIn;
   if (creditEl) creditEl.hidden =!loggedIn;

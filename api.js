@@ -91,6 +91,15 @@ window.API = (function () {
         }
       } catch (e) { console.warn('LLOOP: profile load skipped — showing catalog anyway', e); }
     }
+    // login ผ่านแต่โหลดโปรไฟล์ไม่ได้ = idToken ในแคชหมดอายุ → ต่ออายุเองครั้งเดียว (logout+login ได้ token สด)
+    if (lineUid && !customer.id) {
+      if (!sessionStorage.getItem('meAuthRetry')) {
+        sessionStorage.setItem('meAuthRetry', '1');
+        try { liff.logout(); liff.login({ redirectUri: location.origin + location.pathname }); } catch (_e) {}
+      }
+    } else if (customer.id) {
+      try { sessionStorage.removeItem('meAuthRetry'); } catch (_e) {}
+    }
 
     // 3) แคตตาล็อก (เฉพาะที่ data_status='ready')
     const { data: rows } = await c.from('garments_public').select('*').eq('data_status','ready');
@@ -118,7 +127,7 @@ window.API = (function () {
       try { const { data: sp } = await window.meRpc('staff_discount_pct', { p_customer: customer.id });
             staff_pct = Number(sp) || 0; } catch (_e) {}
     }
-    return { OCCASIONS: window.MOCK.OCCASIONS, CUSTOMER: customer, EVENT: event, GARMENTS: garments, lineUid, staff_pct };
+    return { OCCASIONS: window.MOCK.OCCASIONS, CUSTOMER: customer, EVENT: event, GARMENTS: garments, lineUid, staff_pct, profileFailed: !!(lineUid && !customer.id) };
   }
 
   async function reserve(garmentId, customer) {
