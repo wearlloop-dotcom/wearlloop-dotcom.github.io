@@ -258,7 +258,6 @@ function valueStrip(g) {
   const sv = savingsPct(g);
   const parts = [];
   if (sv) parts.push(`<span style="background:#EAF3DE;color:#27500A;padding:4px 10px;border-radius:6px;font-size:12px">${th?'มูลค่า':'Worth'} ${money(g.retail)} · ${th?'ประหยัด':'save'} ${sv}%</span>`);
-  if (g.grade) parts.push(`<span style="background:#E1F5EE;color:#085041;padding:4px 10px;border-radius:6px;font-size:12px">${th?'QC เกรด':'QC grade'} ${g.grade}</span>`);
   if (!parts.length) return '';
   return `<div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0">${parts.join('')}</div>`;
 }
@@ -1337,7 +1336,6 @@ async function renderAvailCalendar(garmentId) {
     html += `<div class="calmonth"><div class="calhd">${monthName}</div><div class="calgrid">${cells}</div></div>`;
   }
   html += `<div class="callegend"><span><i class="lfree"></i>${lang === 'th' ? 'ว่าง' : 'free'}</span><span><i class="lbk"></i>${lang === 'th' ? 'ไม่ว่าง' : 'booked'}</span></div>`;
-  html += `<div class="calnote">${lang === 'th' ? 'วันไม่ว่างรวมเวลาส่งและซักรีดแล้วค่ะ' : 'Booked days include shipping + cleaning time'}</div>`;
   box.innerHTML = html;
 }
 function pickCalDate(garmentId, ds) {
@@ -3546,7 +3544,7 @@ function _renderResched() {
     <div class="rsd-hint">${th?'เลือกวันรับใหม่จากวันที่ว่าง ระบบเลื่อนวันคืนให้อัตโนมัติ':'Pick a new start date from the free days — return date moves automatically'}</div>
     <div class="rsd-cal">${cal}</div>
     <div class="callegend"><span><i class="lfree"></i>${th?'ว่าง':'free'}</span><span><i class="lbk"></i>${th?'ไม่ว่าง':'booked'}</span></div>
-    <div class="calnote">${th?'วันไม่ว่างรวมเวลาส่งและซักรีดแล้วค่ะ':'Booked days include shipping + cleaning time'}</div>
+
     ${summary}
     <button class="rvsubmit" id="rsdGo" ${S.pick?'':'disabled'} onclick="confirmResched()">${th?'ยืนยันเลื่อนวัน':'Confirm reschedule'}</button>`;
 }
