@@ -91,15 +91,8 @@ window.API = (function () {
         }
       } catch (e) { console.warn('LLOOP: profile load skipped — showing catalog anyway', e); }
     }
-    // login ผ่านแต่โหลดโปรไฟล์ไม่ได้ = idToken ในแคชหมดอายุ → ต่ออายุเองครั้งเดียว (logout+login ได้ token สด)
-    if (lineUid && !customer.id) {
-      if (!sessionStorage.getItem('meAuthRetry')) {
-        sessionStorage.setItem('meAuthRetry', '1');
-        try { liff.logout(); liff.login({ redirectUri: location.origin + location.pathname }); } catch (_e) {}
-      }
-    } else if (customer.id) {
-      try { sessionStorage.removeItem('meAuthRetry'); } catch (_e) {}
-    }
+    // login ผ่านแต่โหลดโปรไฟล์ไม่ได้ → ไม่ redirect อัตโนมัติเด็ดขาด (เคยพา loop login วนไม่จบ)
+    // app.js จะโชว์ประตูเข้าสู่ระบบ ให้ผู้ใช้กดปุ่มเอง (signIn ล้าง session เก่าให้แล้ว)
 
     // 3) แคตตาล็อก (เฉพาะที่ data_status='ready')
     const { data: rows } = await c.from('garments_public').select('*').eq('data_status','ready');
