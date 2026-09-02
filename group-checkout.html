@@ -212,7 +212,7 @@
   <div class="hero">
     <div class="eyebrow">group booking</div>
     <h1 class="htitle">จองชุดทั้งกลุ่ม</h1>
-    <p class="hsub">เลือกชุดเข้าตีมให้ทุกคนในกลุ่ม แล้วจองพร้อมกันในออเดอร์เดียว — ส่งกล่องเดียว บิลรวมที่หัวหน้ากลุ่ม</p>
+    <p class="hsub">เลือกชุดเข้าตีมแล้วจองพร้อมกันในออเดอร์เดียว บิลรวมที่หัวหน้ากลุ่มค่ะ</p>
   </div>
 
   <!-- step indicator -->
@@ -258,7 +258,7 @@
   <div class="sec hide" id="assignSec">
     <div class="sechead">
       <div><div class="sectitle">เลือกชุดให้แต่ละคน</div>
-      <div class="seccap">แตะเลือก 1 ชุดต่อคน — สไตลิสต์คัด “ตัวที่เข้าตีม + พอดีตัว ที่ว่างจริงในวันนั้น” มาให้</div></div>
+      <div class="seccap">แตะเลือก 1 ชุดต่อคน สไตลิสต์คัด “ตัวที่เข้าตีม + พอดีตัว ที่ว่างจริงในวันนั้น” มาให้</div></div>
     </div>
     <div id="assignBody"></div>
   </div>
@@ -499,7 +499,7 @@ async function boot(){
   const active = (GROUP.members||[]).filter(m => (m.status||'active')==='active');
   if(active.length<2){
     edgeState('กลุ่มนี้ยังมีสมาชิกไม่พอ',
-      'การจองทั้งกลุ่มต้องมีสมาชิกอย่างน้อย 2 คน — กลับไปเพิ่มคนในครอบครัวหรือชวนเพื่อนเข้ากลุ่มก่อนได้เลยค่ะ',
+      'ต้องมีสมาชิกอย่างน้อย 2 คนค่ะ ชวนเพื่อนเข้ากลุ่มก่อนนะคะ',
       'ไปเพิ่มสมาชิก','family.html');
     return;
   }
@@ -647,7 +647,7 @@ async function onSuggest(){
           const s = await window.API.stylist({ venue, place: THEMESRC.place||null, occasion: occ }, 'th');
           if(s && s.error==='no_quota'){
             refreshAIQ(0);
-            alert('โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) — จะใช้พาเลตจากชื่อสถานที่แทนนะคะ');
+            alert('โควต้า AI หมดแล้ว จะใช้พาเลตจากชื่อสถานที่แทนนะคะ');
           } else if(s && typeof s.remaining==='number'){ refreshAIQ(s.remaining); }
           palette = ((s && s.recommended_colors) || []).map(c=>c.hex).filter(Boolean);
           venuePhotoTip = (s && (s.photo_tip || s.aesthetics)) || '';

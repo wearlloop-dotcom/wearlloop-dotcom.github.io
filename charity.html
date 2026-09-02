@@ -101,7 +101,7 @@
     <h2>บันทึกการโอนจริง</h2>
     <div class="sub">หลังประสานมูลนิธิ + โอนเงินแล้ว → ลงบันทึกที่นี่เพื่อตัดยอดคงค้างและอัปเดตตัวเลข "โอนจริง" ที่ลูกค้าเห็น</div>
     <label>มูลนิธิ / โครงการ *</label>
-    <select id="dPartner" onchange="taxHint()"><option value="">— เลือกมูลนิธิ —</option></select>
+    <select id="dPartner" onchange="taxHint()"><option value="">  เลือกมูลนิธิ  </option></select>
     <div class="taxhint" id="dTaxHint" style="display:none"></div>
     <div class="g2">
       <div><label>ยอดที่โอน (฿) *</label><input id="dAmount" type="number" inputmode="decimal" placeholder="เช่น 5000" oninput="taxHint()"></div>
@@ -150,12 +150,12 @@
       <label>โน้ต</label><textarea id="pNote" placeholder="ข้อมูลเพิ่มเติม"></textarea>
       <div class="taxbox">
         <label style="display:flex;align-items:center;gap:8px;margin:0 0 4px"><input id="pTaxDed" type="checkbox" style="width:auto" onchange="toggleTaxFields()"> <b>บริจาคแล้วหักภาษีบริษัทได้</b> (ปลายทางต้องเป็นองค์กรรับรอง)</label>
-        <div class="sub" style="margin:0 0 8px">เลือกให้ตรงประเภท — ระบบจะคำนวณ "ยอดหักได้เสมือน" ให้ (เพดานจริงคิดตอนยื่นภาษี)</div>
+        <div class="sub" style="margin:0 0 8px">เลือกให้ตรงประเภท ระบบจะคำนวณ "ยอดหักได้เสมือน" ให้ (เพดานจริงคิดตอนยื่นภาษี)</div>
         <fieldset id="pTaxFields" style="border:none;padding:0;opacity:.4;pointer-events:none">
           <div class="g2">
             <div><label>สิทธิหัก</label><select id="pTaxMult" onchange="syncTaxCat()">
-              <option value="1">1 เท่า — การกุศลทั่วไป</option>
-              <option value="2">2 เท่า — การศึกษา/รพ.รัฐ/กีฬา</option></select></div>
+              <option value="1">1 เท่า การกุศลทั่วไป</option>
+              <option value="2">2 เท่า การศึกษา/รพ.รัฐ/กีฬา</option></select></div>
             <div><label>ประเภท</label><select id="pTaxCat">
               <option value="general">การกุศลทั่วไป</option>
               <option value="hospital">สถานพยาบาลของรัฐ</option>
@@ -179,7 +179,7 @@
     <h2>โพสต์กิจกรรม (แชร์ให้ลูกค้า)</h2>
     <div class="sub">ภาพ + แคปชัน จะขึ้นในหน้า "ผลกระทบ" ของลูกค้า และแจ้งลูกค้าที่ opt-in</div>
     <label>ผูกกับการโอน (ถ้ามี)</label>
-    <select id="postDisb"><option value="">— ไม่ผูก —</option></select>
+    <select id="postDisb"><option value="">  ไม่ผูก  </option></select>
     <label>แคปชัน</label><textarea id="postCap" placeholder="ส่งมอบเสื้อผ้าให้น้อง ๆ ที่..."></textarea>
     <label>ภาพกิจกรรม</label>
     <input type="file" id="postUp" accept="image/*" multiple onchange="uploadPostPhotos(this)">
