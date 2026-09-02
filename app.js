@@ -988,7 +988,9 @@ function openDetail(id) {
     return `<div class="swatch" ${cur?'':`onclick="openDetail('${s.id}')" style="cursor:pointer"`} title="${String(c[0]).replace(/"/g,'')}"><i style="background:${c[1]};${cur?'outline:2px solid var(--ink,#1a1a1a);outline-offset:2px':''}"></i><span>${c[0]}${(cur&&colorSibs.length>1)?' ✓':''}</span></div>`; }).join('');
   window._cvars = [];
   const colorSel = `<div class="sec">${t('secColor')}${colorSibs.length>1?` (${colorSibs.length})`:''}</div><div class="colors">${swatches}</div>`;
-  const tips = tipList.map(x =>`<div class="trow"><i></i>${x}</div>`).join('');
+  const tipLabels = lang==='th'? ['เหมาะกับ','จับคู่','สไตล์'] : ['Best for','Pair with','Style'];
+  const tipText = x => String(x).replace(/([ก-๙])([A-Za-z])/g,'$1 $2').replace(/([A-Za-z])([ก-๙])/g,'$1 $2');
+  const tips = tipList.map((x,i) =>`<div class="trow">${tipLabels[i]?`<b class="tl">${tipLabels[i]}</b>`:'<i></i>'}${tipText(x)}</div>`).join('');
 
   const galImgs = galleryPhotos(g);
   const chart = sizeChartPhoto(g);
@@ -1059,7 +1061,7 @@ function openDetail(id) {
       <span class="bo-txt">
         <span class="bo-title">${lang==='th'?'เลือกชุดสำรองเผื่อไว้เอง':'Choose your own spare'}</span>
         <span class="bo-why">${lang==='th'
-          ? 'เลือกชุดสำรองไว้เผื่อชุดหลักไม่พร้อม สลับให้ฟรีค่ะ'
+          ? 'เผื่อชุดหลักไม่พร้อม เช่น คนก่อนคืนช้าหรือทำเสียหาย เราสลับชุดสำรองให้ฟรีค่ะ'
           : 'If your main piece truly can’t make it (e.g. a prior renter damaged it), pick the spares you’d want us to swap in — no extra charge.'}</span>
       </span>
     </label>
@@ -3314,7 +3316,7 @@ function orderCard(r, spareList) {
       <div class="ospares-body" id="${spId}" hidden>
         ${spareList.map(s => `<div class="ospare"><span class="othumb sm" style="${orderThumb(s)}"></span><span class="osp-name">${s.name||'—'}</span></div>`).join('')}
         <div class="ospares-why">${lang==='th'
-          ? 'ถ้าชุดหลักไม่พร้อม เราสลับตัวสำรองให้ทันที ฟรีค่ะ'
+          ? 'ถ้าชุดหลักไม่พร้อม เช่น คนก่อนคืนช้าหรือทำเสียหาย เราสลับตัวสำรองให้ฟรีค่ะ'
           : 'If your main piece can’t make it (e.g. damaged by a prior renter), we swap in a spare right away at no extra cost.'}</div>
       </div>
     </div>` : '';
