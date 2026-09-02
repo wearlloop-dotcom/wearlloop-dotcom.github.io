@@ -365,23 +365,27 @@
   .pcard.busy{opacity:.5}
   .bdg.avail{background:var(--ok);color:#fff}
   .bdg.busy{background:#B7B0A6;color:#fff}
-  /* availability calendar (detail) */
-  .availcal{display:flex;flex-wrap:wrap;gap:18px}
-  .calmonth{flex:1;min-width:150px}
-  .calhd{font-size:12px;font-weight:600;text-align:center;margin-bottom:6px;color:var(--ink)}
-  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-  .calgrid .cdow{font-size:10px;color:var(--muted);text-align:center;padding:2px 0}
-  .cday{font-size:12px;text-align:center;padding:6px 0;border-radius:4px}
+  /* availability calendar (detail) — เดือนเดียวแบบโปร่ง มีปุ่มเลื่อนเดือน */
+  .availcal{display:block}
+  .calmonth{width:100%}
+  .calnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .calhd{font-size:14px;font-weight:600;text-align:center;color:var(--ink)}
+  .calarrow{border:none;background:none;font-size:22px;line-height:1;padding:2px 14px;cursor:pointer;color:var(--ink)}
+  .calarrow:disabled{color:#D8D5CF;cursor:default}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .calgrid .cdow{font-size:11px;color:var(--muted);text-align:center;padding:4px 0}
+  .cday{font-size:14px;text-align:center;padding:11px 0;border-radius:10px}
   .cday.free{color:var(--ink);cursor:pointer}
-  .cday.free:hover{background:var(--sage-bg)}
-  .cday.bk{color:#C9433B;background:#FBE3E3}
-  .cday.past{color:#D8D5CF}
-  .cday.sel{background:var(--ink);color:#fff}
+  .cday.free:hover{background:var(--soft)}
+  .cday.bk{color:#D6D3CE}
+  .cday.past{color:#D6D3CE}
+  .cday.sel{background:var(--ink);color:#fff;font-weight:600}
   .calnote{font-size:10.5px;color:var(--muted);width:100%;margin-top:4px;line-height:1.5;font-style:italic}
-  .callegend{display:flex;gap:16px;font-size:11px;color:var(--muted);width:100%;margin-top:2px}
-  .callegend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
-  .callegend .lfree{background:var(--sage-bg);border:1px solid var(--sage)}
-  .callegend .lbk{background:#FBE3E3;border:1px solid #C9433B}
+  .callegend{display:flex;gap:16px;font-size:11px;color:var(--muted);width:100%;margin-top:10px;justify-content:center}
+  .callegend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:0}
+  .callegend .lsel{background:var(--ink)}
+  .callegend .lbk{background:#D6D3CE}
+  .callegend .lfree{background:var(--sage-bg);border:1px solid var(--sage)}  /* ยังใช้ในปฏิทินต่อเวลา/เลื่อนวัน */
 
   /* ===== overlays ===== */
   .overlay{position:fixed;inset:0;background:rgba(20,20,20,.45);display:none;align-items:flex-end;justify-content:center;z-index:40}
@@ -495,14 +499,14 @@
   .colors{display:flex;gap:12px}.swatch{text-align:center}.swatch i{display:block;width:32px;height:32px;border-radius:50%;border:1px solid var(--line)}.swatch span{font-size:10px;color:var(--muted)}
   .cta{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:14px 18px max(14px,calc(14px + env(safe-area-inset-bottom))) 18px;display:flex;gap:10px;align-items:center}
   .cta .price{font-family:var(--display);font-size:19px;font-weight:600}
-  .cta button{flex:1;background:var(--ink);color:#fff;border:none;padding:14px;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:600}
+  .cta button{flex:1;background:var(--ink);color:#fff;border:none;padding:15px 14px;font-size:14px;letter-spacing:1px;text-transform:uppercase;font-weight:600;border-radius:10px}
   .creditline{font-size:11px;color:var(--muted);text-align:center;padding:0 18px 16px}
   /* ตัวเลือกชุดสำรอง (ลูกค้าเลือกเอง) */
-  .backupopt{display:flex;gap:11px;align-items:flex-start;margin:22px 18px 4px;padding:15px 16px;background:#FAF5EA;border:1px solid #E2D6BF;border-radius:8px;cursor:pointer}
-  .backupopt input{flex:0 0 auto;width:18px;height:18px;margin-top:1px;accent-color:#A75F3A}
+  .backupopt{display:flex;gap:12px;align-items:flex-start;margin:20px 18px 4px;padding:15px 16px;background:var(--soft);border:none;border-radius:12px;cursor:pointer}
+  .backupopt input{flex:0 0 auto;width:19px;height:19px;margin-top:1px;accent-color:#C9A86A}
   .backupopt .bo-txt{display:flex;flex-direction:column;gap:3px}
-  .backupopt .bo-title{font-size:13.5px;font-weight:600;color:#3B362C;font-family:var(--display)}
-  .backupopt .bo-why{font-size:11.5px;color:#8A7A5E;line-height:1.5}
+  .backupopt .bo-title{font-size:13.5px;font-weight:600;color:var(--ink);font-family:var(--display)}
+  .backupopt .bo-why{font-size:11.5px;color:var(--muted);line-height:1.5}
   /* ===== picker ชุดสำรอง (ลูกค้าเลือกเอง) ===== */
   .backuppick{margin:12px 18px 4px;padding:14px 15px;background:#FFFDF8;border:1px dashed #E2D6BF;border-radius:8px}
   .backuppick .bp-load,.backuppick .bp-empty{font-size:12px;color:#8A7A5E;font-style:italic;padding:4px 2px}
@@ -527,10 +531,9 @@
   .backuppick .bp-chip.on .bp-nm{color:#A75F3A;font-weight:600}
   .bdaybtn{display:block;width:calc(100% - 36px);margin:10px 18px 0;background:#A75F3A;color:#fff;border:none;padding:13px;font-size:13px;letter-spacing:.5px;font-weight:600;border-radius:2px;cursor:pointer}
   .bdaybtn:active{opacity:.9}
-  .datepick{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px 0}
-  .datepick label{font-size:12px;color:var(--muted);font-weight:500}
-  .datepick input[type=date]{font-family:var(--sans);font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;color:var(--ink);background:#fff}
-  .availmsg{font-size:12px;font-weight:600;flex-basis:100%}
+  .datepick{display:flex;justify-content:center;padding:10px 18px 0}
+  .datepick:has(.availmsg:empty){padding:0}
+  .availmsg{font-size:12.5px;font-weight:600;text-align:center}
   .availmsg.ok{color:var(--ok)}
   .availmsg.busy{color:#A32D2D}
   .availmsg.checking{color:var(--muted);font-weight:500}
@@ -538,16 +541,16 @@
   .queuebtn:hover{background:var(--sage,#6FB3A6);color:#fff}
 
   /* ระยะเวลาเช่า */
-  .durpick{display:flex;align-items:center;gap:10px;padding:12px 18px 0;flex-wrap:wrap}
-  .durlbl{font-size:12px;color:var(--muted);font-weight:500}
+  .durpick{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:20px 18px 0}
+  .durlbl{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);font-weight:500}
   .durchips{display:flex;gap:8px}
-  .durchips button{font-family:var(--sans);font-size:12px;font-weight:600;padding:7px 14px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:20px;cursor:pointer}
-  .durchips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .durchips button{flex:1;font-family:var(--sans);font-size:14px;height:46px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;cursor:pointer}
+  .durchips button.on{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
   /* สรุปยอด */
-  .quotebox{margin:12px 18px 0;border:1px solid var(--line);border-radius:6px;padding:14px 16px;background:#FAFAF9}
+  .quotebox{margin:16px 18px 0;border:none;border-radius:12px;padding:16px 18px;background:var(--soft)}
   .quotebox:empty{display:none}
   .quotebox .qhd{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:8px}
-  .qrow{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);padding:3px 0}
+  .qrow{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;color:var(--muted);padding:4px 0}
   .qrow b{color:var(--ink);font-weight:500}
   .qrow.hl{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-size:15px}
   .qrow.hl span,.qrow.hl b{color:var(--ink);font-weight:700}
@@ -559,7 +562,7 @@
   .kycnote .ks{font-size:11px;color:var(--muted);margin:2px 0 8px}
   .kbtn{font-family:var(--sans);font-size:12px;font-weight:600;padding:8px 16px;border:1px solid var(--ink);background:#fff;color:var(--ink);border-radius:20px;cursor:pointer}
   /* ปุ่มตะกร้าในแถบ cta */
-  .cta .cartbtn{flex:0 0 auto;background:#fff;color:var(--ink);border:1px solid var(--ink);padding:14px 14px;font-size:12px;letter-spacing:.5px;text-transform:none;font-weight:600}
+  .cta .cartbtn{flex:0 0 auto;background:#fff;color:var(--ink);border:1px solid var(--ink);padding:15px 14px;font-size:12px;letter-spacing:.5px;text-transform:none;font-weight:600;border-radius:10px}
   /* FAB ตะกร้า */
   .cartfab{position:fixed;right:16px;bottom:max(80px,calc(80px + env(safe-area-inset-bottom)));z-index:60;display:flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border:none;border-radius:30px;padding:12px 18px;font-family:var(--sans);font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.18);cursor:pointer}
   .cartfab i{background:#fff;color:var(--ink);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:700}
@@ -1479,7 +1482,7 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=97"></script>
+<script src="app.js?v=98"></script>
 <script src="help-widget.js"></script>
 </body>
 </html>
