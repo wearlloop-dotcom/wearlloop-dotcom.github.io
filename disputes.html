@@ -41,6 +41,10 @@
   .snap{white-space:pre-wrap;font-size:11px;background:#fafafa;border:1px solid #eee;border-radius:4px;padding:10px;max-height:260px;overflow:auto}
   .imgs{display:flex;gap:10px;flex-wrap:wrap}.imgs img{max-height:150px;border:1px solid #ccc;border-radius:4px}
   .err{color:var(--red);font-size:13px;margin:6px 0}
+  .results{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #bbb;border-radius:4px;box-shadow:0 4px 14px rgba(0,0,0,.12);z-index:20;max-height:240px;overflow-y:auto}
+  .ritem{padding:8px 10px;cursor:pointer;font-size:13px;border-bottom:1px solid #eee}
+  .ritem:last-child{border-bottom:none}
+  .ritem:hover{background:#f3f6f4}
   @media print{body{background:#fff;padding:0}.wrap>*:not(#printArea){display:none!important}#printArea{display:block!important}.letter{border:none;padding:0}}
 </style>
 </head>
@@ -73,19 +77,13 @@
         </select>
       </div>
       <div>
-        <label>เชื่อมโยงคู่กรณีในระบบ (ดึงชื่อ/บัตร/ที่อยู่อัตโนมัติ)</label>
-        <div style="display:flex;gap:6px">
-          <select id="f_ptype" style="flex:0 0 120px">
-            <option value="">— ไม่เชื่อม —</option>
-            <option value="customer">ลูกค้า</option>
-            <option value="contract">สัญญาพาร์ทเนอร์</option>
-            <option value="seller">ผู้ขายมือสอง</option>
-            <option value="employee">พนักงาน</option>
-            <option value="supplier">ซัพพลายเออร์</option>
-            <option value="other">อื่น ๆ</option>
-          </select>
-          <input id="f_pref" placeholder="วาง ID (uuid)">
+        <label>เชื่อมโยงคู่กรณีในระบบ (พิมพ์ค้นหา — ดึงชื่อ/บัตร/ที่อยู่/แฟ้มหลักฐานอัตโนมัติ)</label>
+        <div style="position:relative">
+          <input id="f_search" placeholder="พิมพ์ชื่อ เบอร์โทร หรือชื่อ LINE" oninput="partySearch()" autocomplete="off">
+          <div id="f_results" class="results hide"></div>
         </div>
+        <div class="muted" id="f_linked" style="font-size:12px;margin-top:4px">— ยังไม่เชื่อม (กรอกชื่อคู่กรณีเองด้านล่างได้) —</div>
+        <input type="hidden" id="f_ptype"><input type="hidden" id="f_pref">
       </div>
     </div>
     <div class="grid3">
@@ -120,7 +118,7 @@
       </select>
       <button class="sm" onclick="loadList()">รีเฟรช</button>
     </div>
-    <div id="listBox"><div class="muted" style="padding:20px;text-align:center">กด "รีเฟรช" เพื่อโหลด</div></div>
+    <div id="listBox"><div class="muted" style="padding:20px;text-align:center">กำลังโหลด…</div></div>
   </div>
 
   <!-- ========== รายละเอียดคดี ========== -->
@@ -157,6 +155,36 @@
     const j=await r.json(); if(j.error) throw new Error(j.error); return j;
   }
 
+  // ค้นหาคู่กรณีด้วยชื่อ/เบอร์/LINE — เลือกแล้วเชื่อม party_type+id ให้เอง (เดิมต้องวาง UUID มือ)
+  let _pt=null,_pr=[];
+  const PLABEL={customer:'ลูกค้า',contract:'สัญญาพาร์ทเนอร์',seller:'ผู้ขายมือสอง',employee:'พนักงาน'};
+  function partySearch(){
+    const q=$('f_search').value.trim(); clearTimeout(_pt);
+    if(q.length<2){$('f_results').classList.add('hide');return;}
+    _pt=setTimeout(async()=>{
+      try{
+        const r=await api('dispute_party_search',{q});
+        _pr=r.rows||[];
+        $('f_results').innerHTML=_pr.length
+          ? _pr.map((o,i)=>`<div class="ritem" onclick="pickParty(${i})"><b>${esc(o.name)}</b> <span class="muted">· ${esc(o.label||PLABEL[o.ptype]||o.ptype)}${o.detail?' · '+esc(o.detail):''}</span></div>`).join('')
+          : '<div class="ritem muted">— ไม่พบ ลองคำอื่น หรือกรอกชื่อเองด้านล่าง —</div>';
+        $('f_results').classList.remove('hide');
+      }catch(e){ $('f_results').classList.add('hide'); }
+    },300);
+  }
+  function pickParty(i){
+    const o=_pr[i]; if(!o) return;
+    $('f_ptype').value=o.ptype; $('f_pref').value=o.id;
+    $('f_name').value=o.name||''; $('f_search').value=o.name||'';
+    $('f_results').classList.add('hide');
+    $('f_linked').innerHTML='เชื่อมแล้ว: <b>'+esc(o.name)+'</b> ('+esc(o.label||o.ptype)+') · แฟ้มหลักฐานจะถูกรวบรวมอัตโนมัติ &nbsp;<a href="#" onclick="clearParty();return false">ยกเลิก</a>';
+  }
+  function clearParty(){
+    $('f_ptype').value=''; $('f_pref').value=''; $('f_search').value='';
+    $('f_linked').textContent='— ยังไม่เชื่อม (กรอกชื่อคู่กรณีเองด้านล่างได้) —';
+  }
+  document.addEventListener('click',e=>{ if(!e.target.closest('#f_results')&&e.target.id!=='f_search') $('f_results')&&$('f_results').classList.add('hide'); });
+
   async function openCase(){
     $('f_err').textContent='';
     const d={dispute_type:$('f_type').value,party_type:$('f_ptype').value||null,party_ref:$('f_pref').value.trim()||null,
@@ -164,7 +192,7 @@
       title:$('f_title').value.trim(),description:$('f_desc').value.trim(),
       damage_amount:Number($('f_amount').value||0),demand_due_days:Number($('f_days').value||7)};
     try{ const r=await api('dispute_open',{dispute:d});
-      ['f_pref','f_name','f_idc','f_addr','f_title','f_desc'].forEach(i=>$(i).value=''); $('f_amount').value=0;
+      ['f_pref','f_ptype','f_search','f_name','f_idc','f_addr','f_title','f_desc'].forEach(i=>$(i).value=''); $('f_amount').value=0; clearParty();
       await loadList(); openDetail(r.id);
     }catch(e){ $('f_err').textContent=e.message; }
   }
@@ -274,6 +302,8 @@
       $('letterBox').textContent=L.body; $('printArea').classList.remove('hide'); $('printArea').scrollIntoView({behavior:'smooth'});
     }catch(e){ alert(e.message); }
   }
+
+  loadList();  // เปิดหน้าแล้วโหลดทะเบียนเลย ไม่ต้องกดรีเฟรช
 </script>
 <script src="ops-menu.js"></script>
 <script>window.opsMenu&&window.opsMenu.mount();</script>
