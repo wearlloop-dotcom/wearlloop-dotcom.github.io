@@ -168,7 +168,7 @@
 
   // ค้นหาคู่กรณีด้วยชื่อ/เบอร์/LINE — เลือกแล้วเชื่อม party_type+id ให้เอง (เดิมต้องวาง UUID มือ)
   let _pt=null,_pr=[];
-  const PLABEL={customer:'ลูกค้า',contract:'สัญญาพาร์ทเนอร์',seller:'ผู้ขายมือสอง',employee:'พนักงาน'};
+  const PLABEL={customer:'ลูกค้า',contract:'สัญญาพาร์ทเนอร์',seller:'ผู้ขายมือสอง',employee:'พนักงาน',supplier:'ซัพพลายเออร์'};
   function partySearch(){
     const q=$('f_search').value.trim(); clearTimeout(_pt);
     if(q.length<2){$('f_results').classList.add('hide');return;}
@@ -304,6 +304,17 @@
       <div class="kv"><b>ผู้ขาย:</b> ${esc(a.seller_name)} · บัตร ${esc(a.seller_id_card)}</div>
       <div class="kv"><b>ใบรับซื้อ:</b> ${esc(a.voucher_no)} · ${esc(a.name)} · ${baht(a.offered_price||a.asking_price)}</div>
       ${imgs(ev.kyc_files)}`;}
+    if(ev.type==='employee'){const id=ev.identity||{};const at=ev.attendance_90d||{};return `
+      <div class="kv"><b>พนักงาน:</b> ${esc(id.name)} (${esc(id.nickname)}) · ${esc(id.role)} ${esc(id.department||'')} · รหัส ${esc(id.emp_no)}</div>
+      <div class="kv"><b>บัตร:</b> ${esc(id.id_card)} · <b style="min-width:auto">เริ่มงาน:</b> ${dt(id.start_date)} · <b style="min-width:auto">สถานะ:</b> ${esc(id.status)}</div>
+      <div style="margin-top:6px"><b class="muted">สัญญาจ้าง (e-sign):</b></div>${tbl(ev.contracts,[['เลขที่',o=>esc(o.contract_no)],['สถานะ',o=>esc(o.status)],['ลงนามเมื่อ',o=>o.signed_at?dt(o.signed_at):'<b>ยังไม่ลงนาม</b>'],['IP',o=>esc(o.signed_ip)],['ลายเซ็น',o=>o.has_signature?'มี':'—']])}
+      <div style="margin-top:6px"><b class="muted">การเข้างาน 90 วัน:</b> ทำงาน ${at.days_worked??0} วัน · สาย ${at.late_days??0} วัน · รวม ${Math.round((at.total_minutes??0)/60)} ชม.</div>
+      <div style="margin-top:6px"><b class="muted">บันทึกเข้างานล่าสุด:</b></div>${tbl(ev.attendance_recent,[['วันที่',o=>dt(o.work_date)],['เข้า',o=>o.check_in?new Date(o.check_in).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—'],['ออก',o=>o.check_out?new Date(o.check_out).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—'],['สาย',o=>o.late?'สาย':''],['IP',o=>esc(o.in_ip)]])}`;}
+    if(ev.type==='supplier'){const id=ev.identity||{};const s=ev.po_summary||{};return `
+      <div class="kv"><b>ซัพพลายเออร์:</b> ${esc(id.name)} · ${esc(id.channel||'')} ${esc(id.contact||'')}</div>
+      <div class="kv"><b>โทร:</b> ${esc(id.phone)} · <b style="min-width:auto">เลขภาษี:</b> ${esc(id.tax_id)}</div>
+      <div style="margin-top:6px"><b class="muted">สรุปการซื้อ:</b> ${s.total_orders??0} ใบสั่งซื้อ · มูลค่ารวม ${baht(s.total_value)} · ค้างจ่าย ${s.unpaid??0} · ยังไม่ได้รับของ ${s.not_received??0}</div>
+      <div style="margin-top:6px"><b class="muted">ใบสั่งซื้อ:</b></div>${tbl(ev.purchase_orders,[['เลขที่',o=>esc(o.po_no)],['สถานะ',o=>esc(o.status)],['มูลค่า',o=>baht(o.total)],['สั่งเมื่อ',o=>dt(o.ordered_at)],['รับของ',o=>o.received_at?dt(o.received_at):'<b>ยังไม่รับ</b>'],['จ่ายแล้ว',o=>o.paid?'จ่ายแล้ว':'ค้าง']])}`;}
     return '<div class="snap">'+esc(JSON.stringify(ev,null,2))+'</div>';
   }
 
@@ -362,20 +373,47 @@
         <div class="kv"><b>ที่อยู่:</b> ${esc(F.party_address)}</div>
         <div class="kv"><b>มูลค่าเรียกร้อง:</b> ${baht(F.damage_amount)} · <b style="min-width:auto">สถานะ:</b> ${esc(STATUS[F.status]||F.status)} · <b style="min-width:auto">เปิดคดี:</b> ${dt(F.created_at)}</div>
         <div class="kv"><b>ข้อเท็จจริง:</b> ${esc(F.description)}</div>`;
-      if(ev.type==='customer') h+=sec('1. ตัวตนคู่กรณี + เอกสารยืนยันตัวตน',
-        `<div class="kv"><b>ชื่อ:</b> ${esc(id.display_name)} · <b style="min-width:auto">บัตร:</b> ${esc(id.id_card)} · <b style="min-width:auto">KYC:</b> ${id.kyc_verified?'ยืนยันแล้ว '+dt(id.kyc_at):'ยังไม่ยืนยัน'}</div>${imgsRow(ev.kyc_files)}`);
-      h+=sec('2. สัญญาเช่าที่คู่กรณีตกลง (ฉบับเต็ม + หลักฐานการยอมรับ)',
-        (F.terms_docs&&F.terms_docs.length)?F.terms_docs.map(t=>
-          tbl(t.accepts,[['ยอมรับเมื่อ',o=>dt(o.accepted_at)],['IP',o=>esc(o.ip)],['การจอง',o=>esc(String(o.rental_id||'').slice(0,8))]])
-          +`<div class="muted" style="font-size:11px;margin:4px 0">ข้อความสัญญาเวอร์ชัน ${esc(t.version)} ฉบับเต็ม:</div><div class="terms">${esc(t.body)}</div>`).join('<br>')
-        :'<div class="muted">— ไม่มีบันทึกการยอมรับสัญญา —</div>');
-      h+=sec('3. หลักฐานการส่งมอบและการติดตามพัสดุ',
-        tbl(F.delivery,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['ขนส่ง/เลขพัสดุ (ขาไป)',o=>esc(o.courier||'-')+' '+esc(o.tracking_no||'')],['นำจ่ายสำเร็จ',o=>o.delivered_at?dt(o.delivered_at):'—'],['กำหนดคืน',o=>dt(o.due_at)],['ขากลับ',o=>o.return_tracking_no?esc(o.return_courier||'')+' '+esc(o.return_tracking_no):'<b>ไม่มีการส่งคืน</b>'],['ร้านรับคืน',o=>o.return_received_at?dt(o.return_received_at):'—']]));
       if(ev.type==='customer'){
+        h+=sec('1. ตัวตนคู่กรณี + เอกสารยืนยันตัวตน',
+          `<div class="kv"><b>ชื่อ:</b> ${esc(id.display_name)} · <b style="min-width:auto">บัตร:</b> ${esc(id.id_card)} · <b style="min-width:auto">KYC:</b> ${id.kyc_verified?'ยืนยันแล้ว '+dt(id.kyc_at):'ยังไม่ยืนยัน'}</div>${imgsRow(ev.kyc_files)}`);
+        h+=sec('2. สัญญาเช่าที่คู่กรณีตกลง (ฉบับเต็ม + หลักฐานการยอมรับ)',
+          (F.terms_docs&&F.terms_docs.length)?F.terms_docs.map(t=>
+            tbl(t.accepts,[['ยอมรับเมื่อ',o=>dt(o.accepted_at)],['IP',o=>esc(o.ip)],['การจอง',o=>esc(String(o.rental_id||'').slice(0,8))]])
+            +`<div class="muted" style="font-size:11px;margin:4px 0">ข้อความสัญญาเวอร์ชัน ${esc(t.version)} ฉบับเต็ม:</div><div class="terms">${esc(t.body)}</div>`).join('<br>')
+          :'<div class="muted">— ไม่มีบันทึกการยอมรับสัญญา —</div>');
+        h+=sec('3. หลักฐานการส่งมอบและการติดตามพัสดุ',
+          tbl(F.delivery,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['ขนส่ง/เลขพัสดุ (ขาไป)',o=>esc(o.courier||'-')+' '+esc(o.tracking_no||'')],['นำจ่ายสำเร็จ',o=>o.delivered_at?dt(o.delivered_at):'—'],['กำหนดคืน',o=>dt(o.due_at)],['ขากลับ',o=>o.return_tracking_no?esc(o.return_courier||'')+' '+esc(o.return_tracking_no):'<b>ไม่มีการส่งคืน</b>'],['ร้านรับคืน',o=>o.return_received_at?dt(o.return_received_at):'—']]));
         h+=sec('4. ประวัติการเช่าและการชำระเงิน',
           tbl(ev.rentals,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['สถานะ',o=>esc(o.status)],['กำหนดคืน',o=>dt(o.due_at)],['คืนเมื่อ',o=>o.returned_at?dt(o.returned_at):'<b>ยังไม่คืน</b>'],['ค่าเช่า',o=>baht(o.price)]])
           +tbl(ev.payments,[['ยอดชำระ',o=>baht(o.amount)],['ประเภท',o=>esc(o.purpose)],['เมื่อ',o=>dt(o.at)]]));
         h+=sec('5. ภาพสภาพทรัพย์ ก่อนส่ง - ตอนรับคืน',qcPhotos(ev.qc_photos));
+      } else if(ev.type==='contract'){
+        const a=ev.esign_audit||{};
+        h+=sec('1. สัญญาและหลักฐานการลงนามอิเล็กทรอนิกส์',
+          `<div class="kv"><b>ผู้ลงนาม:</b> ${esc(a.signer_name)} · บัตร ${esc(a.signer_id_card)} · ลงนามเมื่อ ${dt(a.signed_at)} · IP ${esc(a.signed_ip)} · ลายเซ็น ${a.has_signature?'มี':'—'}</div>
+           <div class="muted" style="font-size:11px;margin:4px 0">ข้อความสัญญา ณ เวลาลงนาม (ฉบับเต็ม):</div><div class="terms">${esc(a.document_snapshot)}</div>`);
+      } else if(ev.type==='employee'){
+        const at=ev.attendance_90d||{};
+        h+=sec('1. ตัวตนพนักงานและการเข้างาน',
+          `<div class="kv"><b>ชื่อ:</b> ${esc(id.name)} (${esc(id.nickname)}) · รหัส ${esc(id.emp_no)} · ${esc(id.role)} · <b style="min-width:auto">บัตร:</b> ${esc(id.id_card)} · เริ่มงาน ${dt(id.start_date)}</div>
+           <div class="kv"><b>เข้างาน 90 วัน:</b> ทำงาน ${at.days_worked??0} วัน · สาย ${at.late_days??0} วัน · รวม ${Math.round((at.total_minutes??0)/60)} ชม.</div>`
+          +tbl(ev.attendance_recent,[['วันที่',o=>dt(o.work_date)],['เข้า',o=>o.check_in?new Date(o.check_in).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—'],['ออก',o=>o.check_out?new Date(o.check_out).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—'],['สาย',o=>o.late?'สาย':''],['IP',o=>esc(o.in_ip)]]));
+        h+=sec('2. สัญญาจ้างงาน (e-sign)',
+          (ev.contracts&&ev.contracts.length)?ev.contracts.map(ct=>
+            `<div class="kv"><b>${esc(ct.contract_no)}</b> · ${esc(ct.title||'สัญญาจ้างงาน')} · สถานะ ${esc(ct.status)} · ${ct.signed_at?'ลงนาม '+dt(ct.signed_at)+' · IP '+esc(ct.signed_ip):'<b>ยังไม่ลงนาม</b>'}</div>`
+            +(ct.document_snapshot?`<div class="muted" style="font-size:11px;margin:4px 0">ข้อความสัญญา ณ เวลาลงนาม:</div><div class="terms">${esc(ct.document_snapshot)}</div>`:'')).join('<br>')
+          :'<div class="muted">— ไม่มีสัญญาจ้างในระบบ —</div>');
+      } else if(ev.type==='supplier'){
+        const s=ev.po_summary||{};
+        h+=sec('1. ตัวตนซัพพลายเออร์และประวัติการซื้อขาย',
+          `<div class="kv"><b>ชื่อ:</b> ${esc(id.name)} · ${esc(id.channel||'')} ${esc(id.contact||'')} · โทร ${esc(id.phone)} · เลขภาษี ${esc(id.tax_id)}</div>
+           <div class="kv"><b>สรุป:</b> ${s.total_orders??0} ใบสั่งซื้อ · มูลค่ารวม ${baht(s.total_value)} · ค้างจ่าย ${s.unpaid??0} · ยังไม่ได้รับของ ${s.not_received??0}</div>`
+          +tbl(ev.purchase_orders,[['เลขที่',o=>esc(o.po_no)],['สถานะ',o=>esc(o.status)],['มูลค่า',o=>baht(o.total)],['สั่งเมื่อ',o=>dt(o.ordered_at)],['รับของ',o=>o.received_at?dt(o.received_at):'<b>ยังไม่รับ</b>'],['จ่ายแล้ว',o=>o.paid?'จ่ายแล้ว':'ค้าง']]));
+      } else if(ev.type==='seller'){
+        const a=ev.acquisition||{};
+        h+=sec('1. ตัวตนผู้ขายและใบรับซื้อ',
+          `<div class="kv"><b>ผู้ขาย:</b> ${esc(a.seller_name)} · บัตร ${esc(a.seller_id_card)}</div>
+           <div class="kv"><b>ใบรับซื้อ:</b> ${esc(a.voucher_no)} · ${esc(a.name)} · ${baht(a.offered_price||a.asking_price)}</div>${imgsRow(ev.kyc_files)}`);
       }
       h+=sec('6. หลักฐานแนบเพิ่มเติม (แชต/เอกสารอื่น)',imgsRow(F.attachments));
       h+=sec('7. ไทม์ไลน์เหตุการณ์',
