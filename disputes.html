@@ -45,6 +45,16 @@
   .ritem{padding:8px 10px;cursor:pointer;font-size:13px;border-bottom:1px solid #eee}
   .ritem:last-child{border-bottom:none}
   .ritem:hover{background:#f3f6f4}
+  /* แฟ้มส่งทนาย (พิมพ์เป็น PDF ชุดเดียว) */
+  .dossier{background:#fff;border:1px solid #ccc;border-radius:4px;padding:34px 38px;font-size:13.5px;line-height:1.8}
+  .dossier h1{font-size:19px;text-align:center;margin-bottom:2px}
+  .dossier .dsub{text-align:center;color:var(--muted);font-size:12px;margin-bottom:18px}
+  .dossier h2{font-size:14.5px;border-left:4px solid var(--navy);padding-left:8px;margin:22px 0 8px;page-break-after:avoid}
+  .dossier table{margin:4px 0}
+  .dossier .terms{white-space:pre-wrap;font-size:11.5px;line-height:1.7;background:#fafafa;border:1px solid #eee;padding:12px 14px;border-radius:4px}
+  .dossier .sec-imgs img{max-height:200px;border:1px solid #ccc;border-radius:3px}
+  .dossier .pgbrk{page-break-before:always}
+  @media print{.dossier{border:none;padding:0}}
   @media print{body{background:#fff;padding:0}.wrap>*:not(#printArea){display:none!important}#printArea{display:block!important}.letter{border:none;padding:0}}
 </style>
 </head>
@@ -135,7 +145,8 @@
 <div class="wrap hide" id="printArea">
   <div style="margin:0 auto;max-width:820px">
     <div class="toolbar" style="margin-bottom:10px"><button class="p sm" onclick="window.print()">พิมพ์ / PDF</button><button class="sm" onclick="$('printArea').classList.add('hide')">ปิด</button></div>
-    <div class="letter" id="letterBox"></div>
+    <div class="letter hide" id="letterBox"></div>
+    <div class="dossier hide" id="dossierBox"></div>
   </div>
 </div>
 
@@ -229,7 +240,19 @@
       <div class="toolbar" style="margin-top:12px">
         <button class="p sm" onclick="genLetter()">สร้างหนังสือทวงถาม</button>
         <button class="sm" onclick="markDemandSent()">บันทึก: ส่งหนังสือแล้ว</button>
+        <button class="p sm" style="background:var(--red);border-color:var(--red)" onclick="openDossier()">รวมแฟ้มส่งทนาย (PDF)</button>
       </div>
+
+      <h2 style="margin-top:14px">ไฟล์แนบของเคส <span class="muted" style="font-weight:400;font-size:12px">· แคปแชต/รูป/PDF ≤ 8MB</span></h2>
+      <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">
+        <input type="file" id="af_file" accept="image/*,application/pdf" style="flex:1;padding:5px">
+        <input id="af_note" placeholder="คำอธิบาย เช่น แชตทวงถาม 1 ก.ย." style="flex:1">
+        <button class="sm" id="af_btn" onclick="uploadFile()">แนบไฟล์</button>
+      </div>
+      <div class="imgs">${(c.attachments||[]).length?(c.attachments||[]).map(f=>`<div style="text-align:center">
+          ${f.url?(/\.pdf($|\?)/i.test(f.storage_path)?`<a href="${f.url}" target="_blank">เปิด PDF</a>`:`<img src="${f.url}">`):'<span class="muted">(ลิงก์หมดอายุ รีเฟรช)</span>'}
+          <div class="muted" style="font-size:11px">${esc(f.note||f.kind)} · ${dt(f.created_at)} <a href="#" onclick="delFile(${f.id});return false" style="color:var(--red)">ลบ</a></div>
+        </div>`).join(''):'<div class="muted">— ยังไม่มีไฟล์แนบ —</div>'}</div>
 
       <h2 style="margin-top:14px">บันทึกความเคลื่อนไหว</h2>
       <div style="display:flex;gap:6px;margin-bottom:8px">
@@ -299,7 +322,69 @@
   async function genLetter(){
     try{ const r=await api('demand_letter',{id:CUR.id}); const L=r.letter;
       if(!L||L.error){alert('สร้างไม่สำเร็จ: '+(L&&L.error));return;}
-      $('letterBox').textContent=L.body; $('printArea').classList.remove('hide'); $('printArea').scrollIntoView({behavior:'smooth'});
+      $('letterBox').textContent=L.body;
+      $('letterBox').classList.remove('hide'); $('dossierBox').classList.add('hide');
+      $('printArea').classList.remove('hide'); $('printArea').scrollIntoView({behavior:'smooth'});
+    }catch(e){ alert(e.message); }
+  }
+
+  // ===== ไฟล์แนบประจำเคส (แคปแชต/รูป/PDF) =====
+  async function uploadFile(){
+    const inp=$('af_file'); const f=inp.files&&inp.files[0];
+    if(!f){alert('เลือกไฟล์ก่อนค่ะ');return;}
+    if(f.size>8*1024*1024){alert('ไฟล์เกิน 8MB');return;}
+    const btn=$('af_btn'); btn.disabled=true; btn.textContent='กำลังอัป…';
+    try{
+      const b64=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(f);});
+      await api('dispute_file_upload',{case_id:CUR.id,name:f.name,mime:f.type,data:b64,note:$('af_note').value.trim()});
+      openDetail(CUR.id);
+    }catch(e){ alert(e.message); }
+    btn.disabled=false; btn.textContent='แนบไฟล์';
+  }
+  async function delFile(id){
+    if(!confirm('ลบไฟล์แนบนี้?'))return;
+    try{ await api('dispute_file_del',{id}); openDetail(CUR.id); }catch(e){ alert(e.message); }
+  }
+
+  // ===== รวมแฟ้มส่งทนาย — เอกสารชุดเดียวพร้อมพิมพ์/PDF =====
+  async function openDossier(){
+    try{
+      const r=await api('lawyer_file',{id:CUR.id}); const F=r.file;
+      if(!F||F.error){alert('รวมแฟ้มไม่สำเร็จ: '+(F&&F.error));return;}
+      const ev=F.evidence||{}; const id=ev.identity||{};
+      const sec=(t,body)=>`<h2>${t}</h2>${body}`;
+      const imgsRow=(files)=>(!files||!files.length)?'<div class="muted">— ไม่มี —</div>'
+        :'<div class="imgs sec-imgs">'+files.map(f=>f.url?`<div><img src="${f.url}"><div class="muted" style="font-size:10.5px">${esc(f.note||f.kind||'')}${f.created_at?' · '+dt(f.created_at):''}</div></div>`:'').join('')+'</div>';
+      let h=`<h1>แฟ้มคดี ${esc(F.case_no)} · ${esc(TYPES[F.dispute_type]||F.dispute_type)}</h1>
+        <div class="dsub">จัดทำโดยระบบ LLOOP · ${dt(F.generated_at)} · เอกสารประกอบการปรึกษาทนายความ</div>
+        <div class="kv"><b>เรื่อง:</b> ${esc(F.title)}</div>
+        <div class="kv"><b>คู่กรณี:</b> ${esc(F.party_name)} ${F.party_id_card?'· เลขบัตร '+esc(F.party_id_card):''}</div>
+        <div class="kv"><b>ที่อยู่:</b> ${esc(F.party_address)}</div>
+        <div class="kv"><b>มูลค่าเรียกร้อง:</b> ${baht(F.damage_amount)} · <b style="min-width:auto">สถานะ:</b> ${esc(STATUS[F.status]||F.status)} · <b style="min-width:auto">เปิดคดี:</b> ${dt(F.created_at)}</div>
+        <div class="kv"><b>ข้อเท็จจริง:</b> ${esc(F.description)}</div>`;
+      if(ev.type==='customer') h+=sec('1. ตัวตนคู่กรณี + เอกสารยืนยันตัวตน',
+        `<div class="kv"><b>ชื่อ:</b> ${esc(id.display_name)} · <b style="min-width:auto">บัตร:</b> ${esc(id.id_card)} · <b style="min-width:auto">KYC:</b> ${id.kyc_verified?'ยืนยันแล้ว '+dt(id.kyc_at):'ยังไม่ยืนยัน'}</div>${imgsRow(ev.kyc_files)}`);
+      h+=sec('2. สัญญาเช่าที่คู่กรณีตกลง (ฉบับเต็ม + หลักฐานการยอมรับ)',
+        (F.terms_docs&&F.terms_docs.length)?F.terms_docs.map(t=>
+          tbl(t.accepts,[['ยอมรับเมื่อ',o=>dt(o.accepted_at)],['IP',o=>esc(o.ip)],['การจอง',o=>esc(String(o.rental_id||'').slice(0,8))]])
+          +`<div class="muted" style="font-size:11px;margin:4px 0">ข้อความสัญญาเวอร์ชัน ${esc(t.version)} ฉบับเต็ม:</div><div class="terms">${esc(t.body)}</div>`).join('<br>')
+        :'<div class="muted">— ไม่มีบันทึกการยอมรับสัญญา —</div>');
+      h+=sec('3. หลักฐานการส่งมอบและการติดตามพัสดุ',
+        tbl(F.delivery,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['ขนส่ง/เลขพัสดุ (ขาไป)',o=>esc(o.courier||'-')+' '+esc(o.tracking_no||'')],['นำจ่ายสำเร็จ',o=>o.delivered_at?dt(o.delivered_at):'—'],['กำหนดคืน',o=>dt(o.due_at)],['ขากลับ',o=>o.return_tracking_no?esc(o.return_courier||'')+' '+esc(o.return_tracking_no):'<b>ไม่มีการส่งคืน</b>'],['ร้านรับคืน',o=>o.return_received_at?dt(o.return_received_at):'—']]));
+      if(ev.type==='customer'){
+        h+=sec('4. ประวัติการเช่าและการชำระเงิน',
+          tbl(ev.rentals,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['สถานะ',o=>esc(o.status)],['กำหนดคืน',o=>dt(o.due_at)],['คืนเมื่อ',o=>o.returned_at?dt(o.returned_at):'<b>ยังไม่คืน</b>'],['ค่าเช่า',o=>baht(o.price)]])
+          +tbl(ev.payments,[['ยอดชำระ',o=>baht(o.amount)],['ประเภท',o=>esc(o.purpose)],['เมื่อ',o=>dt(o.at)]]));
+        h+=sec('5. ภาพสภาพทรัพย์ ก่อนส่ง - ตอนรับคืน',qcPhotos(ev.qc_photos));
+      }
+      h+=sec('6. หลักฐานแนบเพิ่มเติม (แชต/เอกสารอื่น)',imgsRow(F.attachments));
+      h+=sec('7. ไทม์ไลน์เหตุการณ์',
+        (F.events||[]).length?'<div class="tl">'+F.events.map(e=>`<div class="ev"><b>${esc(e.kind)}</b> — ${esc(e.detail)}<div class="t">${dt(e.event_at)}</div></div>`).join('')+'</div>':'<div class="muted">— ไม่มี —</div>');
+      if(F.letter&&F.letter.body) h+=`<div class="pgbrk"></div>`+sec('8. หนังสือทวงถาม (ฉบับร่างจากระบบ)',`<div class="terms" style="font-size:13px">${esc(F.letter.body)}</div>`);
+      h+=`<div class="muted" style="font-size:10.5px;margin-top:20px">หมายเหตุ: รูปหลักฐานเปิดผ่านลิงก์ชั่วคราว 1 ชั่วโมง — สั่งพิมพ์/บันทึก PDF ทันทีเพื่อฝังรูปลงเอกสารถาวร · ข้อมูลจัดทำอัตโนมัติจากฐานข้อมูล LLOOP ควรให้ทนายตรวจทานก่อนใช้ยื่นจริง</div>`;
+      $('dossierBox').innerHTML=h;
+      $('dossierBox').classList.remove('hide'); $('letterBox').classList.add('hide');
+      $('printArea').classList.remove('hide'); $('printArea').scrollIntoView({behavior:'smooth'});
     }catch(e){ alert(e.message); }
   }
 
