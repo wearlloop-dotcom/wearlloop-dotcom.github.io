@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Closet Cash · ลงนามสัญญาซื้อขาย</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1C1B19;--muted:#86857F;--hair:#E7E2DA;--paper:#F2F1EE;--forest:#1E4D3D;--gold:#C9A86A;--sans:'Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--paper);font-size:16px;line-height:1.7}
+  .bar{background:var(--forest);color:#fff;padding:16px 18px;display:flex;align-items:baseline;gap:12px}
+  .bar .brand{font-family:'Poppins',var(--sans);font-weight:700;letter-spacing:2px;font-size:15px;color:var(--gold)}
+  .bar .t{font-size:15px;font-weight:500}
+  .wrap{max-width:640px;margin:16px auto;padding:0 14px 60px;display:flex;flex-direction:column;gap:14px}
+  .card{background:#fff;border:1px solid var(--hair);border-radius:12px;padding:20px}
+  h2{font-size:16px;margin-bottom:10px}
+  .doc{font-size:14.5px;line-height:1.85;white-space:pre-wrap;max-height:60vh;overflow:auto;
+    border:1px solid var(--hair);border-radius:8px;padding:16px;background:#FCFBF9}
+  .doc b{color:var(--forest)}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:500}
+  input[type=text]{width:100%;min-width:0;border:1.5px solid var(--hair);border-radius:9px;padding:11px 12px;font-size:16px;font-family:var(--sans)}
+  .padwrap{border:1.5px dashed var(--hair);border-radius:9px;background:#FCFBF9;margin-top:4px}
+  .padwrap canvas{display:block;width:100%;height:170px;touch-action:none}
+  .padtools{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+  .padtools small{color:var(--muted)}
+  .clr{border:none;background:none;color:var(--forest);font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit}
+  .consent{display:flex;gap:9px;align-items:flex-start;margin-top:14px;font-size:13.5px;color:#444;cursor:pointer}
+  .consent input{margin-top:3px}
+  .btn{border:none;border-radius:9px;padding:15px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--sans);
+    background:var(--forest);color:#fff;width:100%;margin-top:14px}
+  .btn:disabled{opacity:.5}
+  .done{background:#E4F0EC;color:#0F3D30;border-radius:12px;padding:22px;text-align:center;line-height:1.7;display:none}
+  .done.show{display:block}
+  .warn{background:#FBF3E2;border:1px solid #ECDDBD;color:#6b5a2e;border-radius:9px;padding:11px 13px;font-size:13px;margin-bottom:10px}
+  .muted{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="bar"><span class="brand">CLOSET CASH</span><span class="t">สัญญาซื้อขายเสื้อผ้ามือสอง</span></div>
+<div class="wrap">
+  <div class="card" id="loading">กำลังโหลดสัญญา…</div>
+
+  <div class="card" id="main" style="display:none">
+    <h2 id="cno"></h2>
+    <div id="buyerWarn" class="warn" style="display:none">ข้อมูลผู้ซื้อยังไม่ถูกตั้งค่าในระบบ — สัญญานี้จะสมบูรณ์เมื่อทีมงานเติมชื่อผู้ซื้อแล้ว</div>
+    <div class="doc" id="doc"></div>
+
+    <div id="signZone">
+      <label>ชื่อ-นามสกุลผู้ลงนาม (ผู้ขาย)</label><input type="text" id="signer">
+      <label>เลขบัตรประชาชน (ถ้าสะดวกระบุ — ใช้ออกใบรับซื้อ)</label><input type="text" id="idcard" inputmode="numeric">
+      <label>ลายเซ็น (เซ็นในกรอบด้วยนิ้ว)</label>
+      <div class="padwrap"><canvas id="pad"></canvas></div>
+      <div class="padtools"><small>เซ็นให้เหมือนลายเซ็นจริงของคุณ</small><button type="button" class="clr" onclick="clearPad()">ล้างลายเซ็น</button></div>
+      <label class="consent"><input type="checkbox" id="consent">
+        <span>ข้าพเจ้าได้อ่านและเข้าใจข้อความในสัญญาข้างต้นครบถ้วนแล้ว ตกลงผูกพันตามสัญญาทุกประการ และยินยอมให้เก็บข้อมูล
+        ลายเซ็น วันเวลา หมายเลขไอพี และอุปกรณ์ เป็นหลักฐานการลงนามอิเล็กทรอนิกส์ตาม พ.ร.บ.ว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544</span></label>
+      <button class="btn" id="signBtn" onclick="doSign()">ลงนามสัญญา</button>
+    </div>
+  </div>
+
+  <div class="done" id="done"></div>
+  <div class="muted" style="text-align:center">มีข้อสงสัยเกี่ยวกับสัญญา ทักแชต Closet Cash ได้เลยค่ะ</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const sb = window.supabase.createClient('https://rprwilsbjptdnvsibjgi.supabase.co',
+    'sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa');
+  const $ = (id)=>document.getElementById(id);
+  const token = new URLSearchParams(location.search).get('t')||'';
+  let C = null;
+
+  const b = (v,fb)=> (v&&String(v).trim()) ? String(v) : (fb??'—');
+  function contractText(c){
+    const v = c.vars||{};
+    const buyer = b(c.buyer_name,'(ผู้ซื้อ — รอทีมงานเติมข้อมูล)');
+    return `สัญญาซื้อขายเสื้อผ้าและเครื่องแต่งกายมือสอง
+เลขที่ ${c.contract_no} · ทำขึ้นเมื่อวันที่ ${new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})}
+
+ผู้ซื้อ: ${buyer}${b(c.buyer_tax_id,'')!=='—'&&c.buyer_tax_id? ' เลขประจำตัว '+c.buyer_tax_id:''} (ดำเนินธุรกิจรับซื้อภายใต้ชื่อ "Closet Cash")${c.buyer_address? '\nที่อยู่ผู้ซื้อ: '+c.buyer_address:''}
+ผู้ขาย: ${b(c.seller_name)} โทร ${b(c.seller_phone)}${c.seller_id_card? ' เลขบัตร '+c.seller_id_card:''}${c.seller_address? '\nที่อยู่ผู้ขาย: '+c.seller_address:''}
+
+ข้อ 1 ทรัพย์สินที่ซื้อขาย — ผู้ขายตกลงขายและผู้ซื้อตกลงซื้อสินค้ามือสองดังนี้: "${b(v.name)}"${v.brand? ' แบรนด์ '+v.brand:''}${v.size? ' ไซซ์ '+v.size:''}${v.condition? ' สภาพ '+v.condition:''} ตำหนิที่แจ้ง: ${b(v.defects,'ไม่มี/ตามที่แจ้งในระบบ')} พร้อมภาพถ่ายประกอบ ${v.photo_count||0} ภาพในระบบ ซึ่งถือเป็นคำพรรณนาสินค้าของผู้ขายตามสัญญานี้
+
+ข้อ 2 ราคาและการชำระเงิน — ราคาซื้อขายรวม ${v.price? Number(v.price).toLocaleString():'-'} บาท ชำระโดยโอนเข้าบัญชี/พร้อมเพย์ที่ผู้ขายแจ้ง (${b(c.seller_bank)}) ภายใน 3 วันทำการนับแต่ผู้ซื้อรับมอบสินค้าและตรวจสภาพผ่าน หลักฐานการโอนถือเป็นการชำระโดยสมบูรณ์
+
+ข้อ 3 การส่งมอบ — ผู้ขายส่งมอบสินค้าโดยจัดส่งพัสดุหรือนัดรับตามที่ตกลง ภายใน 7 วันนับแต่วันทำสัญญา ผู้ซื้อจะบันทึกภาพ/วิดีโอขณะเปิดพัสดุ และคู่สัญญาตกลงให้ใช้เป็นหลักฐานสภาพสินค้า ณ เวลารับมอบ
+
+ข้อ 4 การตรวจสภาพ — ผู้ซื้อมีสิทธิตรวจสภาพภายใน 3 วันทำการนับแต่รับมอบ หากสภาพต่างจากคำพรรณนาในสาระสำคัญ ผู้ซื้อมีสิทธิ (ก) เสนอราคาใหม่ให้ผู้ขายพิจารณา หรือ (ข) ปฏิเสธการซื้อและส่งคืน โดยผู้ขายรับภาระค่าส่งคืน และให้ถือว่าสัญญาเลิกกันโดยไม่มีฝ่ายใดติดค้าง หากพ้นกำหนดโดยมิได้แจ้ง ให้ถือว่าการตรวจผ่าน
+
+ข้อ 5 คำรับรองของผู้ขาย — ผู้ขายรับรองว่า (1) เป็นเจ้าของกรรมสิทธิ์ที่แท้จริง สินค้าไม่ใช่ทรัพย์ผิดกฎหมาย ไม่ติดจำนำหรือภาระผูกพันใด (2) สินค้าเป็นของแท้ ไม่ละเมิดเครื่องหมายการค้า (3) ได้เปิดเผยตำหนิและการซ่อมแซมที่ทราบครบถ้วนตามจริง (4) ข้อมูลส่วนตัวและบัญชีรับเงินเป็นของผู้ขายเองและถูกต้อง
+
+ข้อ 6 ขายขาดและการโอนกรรมสิทธิ์ — กรรมสิทธิ์โอนแก่ผู้ซื้อเมื่อรับมอบและชำระราคาครบถ้วน การซื้อขายนี้เป็นการขายขาด ผู้ขายไม่มีสิทธิเรียกคืนหรือเรียกส่วนแบ่งเพิ่ม และผู้ซื้อมีสิทธิโดยสมบูรณ์ที่จะใช้สอย ทำความสะอาด ซ่อม ดัดแปลง ถ่ายภาพเพื่อการค้า ให้เช่า ขายต่อ บริจาค หรือจำหน่ายจ่ายโอนตามที่เห็นสมควร โดยไม่ต้องขอความยินยอมจากผู้ขายอีก
+
+ข้อ 7 ผลของการผิดคำรับรอง — หากปรากฏว่าสินค้าเป็นของปลอม ของผิดกฎหมาย หรือผู้ขายมิใช่เจ้าของกรรมสิทธิ์ ผู้ขายตกลงคืนราคาที่รับไปเต็มจำนวนภายใน 7 วันนับแต่ได้รับแจ้ง พร้อมชดใช้ค่าเสียหายที่เกิดขึ้นจริง และผู้ซื้อมีสิทธิส่งมอบสินค้าพร้อมข้อมูลผู้ขายให้พนักงานเจ้าหน้าที่ กรณีปกปิดตำหนิอันเป็นสาระสำคัญ ให้ผู้ซื้อมีสิทธิตามข้อ 4 โดยอนุโลมภายใน 30 วันนับแต่รับมอบ
+
+ข้อ 8 ข้อมูลส่วนบุคคล — ผู้ขายยินยอมให้ผู้ซื้อเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคล (ชื่อ เลขบัตร ที่อยู่ เบอร์โทร บัญชีรับเงิน และบันทึกธุรกรรม) เพื่อปฏิบัติตามสัญญา จัดทำใบรับซื้อ และปฏิบัติตามกฎหมาย ตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
+
+ข้อ 9 ภาษีอากร — เงินได้จากการขาย (ถ้ามีภาระภาษี) เป็นความรับผิดชอบของผู้ขาย ผู้ซื้อจัดทำและเก็บหลักฐานใบรับซื้อตามกฎหมาย
+
+ข้อ 10 ลายมือชื่ออิเล็กทรอนิกส์ — คู่สัญญาตกลงให้การลงลายมือชื่อผ่านระบบนี้ (บันทึกลายเซ็น วันเวลา หมายเลขไอพี ข้อมูลอุปกรณ์ และสำเนาข้อความสัญญา) มีผลสมบูรณ์ตาม พ.ร.บ.ว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544
+
+ข้อ 11 กฎหมายที่ใช้บังคับ — สัญญานี้อยู่ภายใต้กฎหมายไทย ข้อพิพาทให้เจรจาก่อน หากไม่สำเร็จให้เสนอต่อศาลที่มีเขตอำนาจ`;
+  }
+
+  // ===== signature pad =====
+  const pad = $('pad'); const ctx = pad.getContext('2d');
+  let drawing=false, drawn=false;
+  function fitPad(){
+    const r = pad.getBoundingClientRect();
+    const img = drawn ? ctx.getImageData(0,0,pad.width,pad.height) : null;
+    pad.width=r.width*2; pad.height=r.height*2; ctx.scale(2,2);
+    ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#1C1B19';
+    if(img) ctx.putImageData(img,0,0);
+  }
+  function pos(e){ const r=pad.getBoundingClientRect(); const p=e.touches?e.touches[0]:e;
+    return { x:p.clientX-r.left, y:p.clientY-r.top }; }
+  function start(e){ e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+  function move(e){ if(!drawing) return; e.preventDefault(); const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); drawn=true; }
+  function end(){ drawing=false; }
+  pad.addEventListener('mousedown',start); pad.addEventListener('mousemove',move); addEventListener('mouseup',end);
+  pad.addEventListener('touchstart',start,{passive:false}); pad.addEventListener('touchmove',move,{passive:false}); pad.addEventListener('touchend',end);
+  function clearPad(){ ctx.clearRect(0,0,pad.width,pad.height); drawn=false; }
+
+  function showDone(msg){ $('main').style.display='none'; $('loading').style.display='none';
+    $('done').className='done show'; $('done').innerHTML=msg; }
+
+  async function load(){
+    if(!token){ showDone('ลิงก์ไม่ถูกต้องค่ะ — กลับไปที่แชต Closet Cash แล้วพิมพ์ "สัญญา" เพื่อขอลิงก์ใหม่นะคะ'); return; }
+    const { data, error } = await sb.rpc('cc_contract_get',{ p_token: token });
+    if(error || !data || data.error){ showDone('ไม่พบสัญญานี้ค่ะ — พิมพ์ "สัญญา" ในแชต Closet Cash เพื่อขอลิงก์ใหม่นะคะ'); return; }
+    C=data;
+    if(C.status==='signed'){ showDone(`สัญญา ${C.contract_no} ลงนามเรียบร้อยแล้วค่ะ ✓<br>เมื่อวันที่ ${new Date(C.signed_at).toLocaleString('th-TH')}<br>รอทีม Closet Cash โอนเงินได้เลยนะคะ`); return; }
+    $('cno').textContent='สัญญาเลขที่ '+C.contract_no;
+    if(!(C.buyer_name&&C.buyer_name.trim())) $('buyerWarn').style.display='block';
+    $('doc').textContent=contractText(C);
+    $('signer').value=C.seller_name||'';
+    $('idcard').value=C.seller_id_card||'';
+    $('loading').style.display='none'; $('main').style.display='block';
+    fitPad();
+  }
+  addEventListener('resize',fitPad);
+
+  async function doSign(){
+    if(!$('signer').value.trim()){ alert('กรอกชื่อ-นามสกุลผู้ลงนามก่อนนะคะ'); return; }
+    if(!drawn){ alert('เซ็นลายเซ็นในกรอบก่อนนะคะ'); return; }
+    if(!$('consent').checked){ alert('ติ๊กยอมรับเงื่อนไขสัญญาก่อนนะคะ'); return; }
+    $('signBtn').disabled=true; $('signBtn').textContent='กำลังบันทึก…';
+    const { data, error } = await sb.rpc('cc_contract_sign',{ p_token: token, p:{
+      signer_name: $('signer').value.trim(), signer_id_card: $('idcard').value.trim(),
+      signature: pad.toDataURL('image/png'), consent: true,
+      body_snapshot: contractText(C),
+    }});
+    if(error || (data!=='ok' && data!=='already')){
+      alert('บันทึกไม่สำเร็จ ('+(error?.message||data)+') ลองใหม่อีกครั้งนะคะ');
+      $('signBtn').disabled=false; $('signBtn').textContent='ลงนามสัญญา'; return;
+    }
+    showDone(`ลงนามสัญญา ${C.contract_no} เรียบร้อยแล้วค่ะ ✓<br>ระบบแจ้งทีม Closet Cash แล้ว รอรับเงินโอนได้เลยนะคะ<br><span style="font-size:13px;color:#4a6a5e">สำเนาคำยืนยันถูกส่งเข้าแชต LINE ของคุณด้วยค่ะ</span>`);
+  }
+  load();
+</script>
+</body>
+</html>
