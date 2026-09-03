@@ -650,6 +650,12 @@
   .lgbtn:active{opacity:.92}
   .lgbtn svg{width:20px;height:20px;flex:0 0 auto}
   .lgnote{font-size:11px;color:var(--muted);line-height:1.6;margin-top:16px;max-width:290px}
+  /* เปิดจาก in-app browser ของ IG/FB — ล็อกอิน LINE มักไม่ผ่าน แนะนำทางออก */
+  .lginapp{width:100%;margin-top:18px;padding:14px 15px;background:#FBF6E9;border:1px solid #E6D9B8;border-radius:12px;text-align:left}
+  .lginapp .lgiab-note{font-size:12px;color:#7A5C00;line-height:1.55;margin-bottom:10px}
+  .lginapp .lgiab-btn{display:block;text-align:center;background:var(--ink);color:#fff;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:8px}
+  .lginapp .lgiab-btn.alt{background:#fff;color:var(--ink);border:1px solid var(--ink)}
+  .lginapp .lgiab-hint{font-size:11px;color:#8A7A5E;line-height:1.55;text-align:center;margin-top:2px}
   .termsbox{background:#fff;border-radius:6px;max-width:440px;width:100%;max-height:84vh;display:flex;flex-direction:column;overflow:hidden}
   .termshd{font-family:var(--display);font-weight:600;font-size:16px;padding:18px 18px 12px;border-bottom:1px solid var(--line)}
   .termsbody{padding:16px 18px;overflow-y:auto;white-space:pre-wrap;font-size:13px;line-height:1.7;color:#333}
@@ -1328,6 +1334,7 @@
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.64 2 10.13c0 4.02 3.56 7.39 8.37 8.03.33.07.77.22.88.5.1.26.07.66.03.92l-.14.86c-.04.26-.2 1.02.9.56 1.1-.46 5.93-3.49 8.09-5.98C21.6 13.36 22 11.8 22 10.13 22 5.64 17.52 2 12 2z"/></svg>
       <span id="lgBtnLabel">เข้าสู่ระบบด้วย LINE</span>
     </button>
+    <div class="lginapp" id="lgInApp" hidden></div>
     <div class="lgnote" id="lgNote">การเข้าสู่ระบบถือว่ายอมรับข้อตกลงการใช้บริการและนโยบายข้อมูลส่วนบุคคล</div>
   </div>
 </div>
@@ -1482,7 +1489,7 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=99"></script>
+<script src="app.js?v=100"></script>
 <script src="help-widget.js"></script>
 </body>
 </html>
