@@ -4079,7 +4079,10 @@ async function startVenueFromLink(pid, name) {
 function routeDeepLink() {
   try {
     const qs = new URLSearchParams(location.search);
-    const ls = (window.liff && liff.state) ? new URLSearchParams((liff.state || '').replace(/^\?/, '')) : null;
+    // เปิดจาก rich menu/การ์ดใน LINE: ค่า ?go=... ถูกห่อมาในพารามิเตอร์ "liff.state"
+    // (SDK จะแกะให้ก็ต่อเมื่อ liff.init เสร็จ ซึ่งช้ากว่าจุดนี้) → แกะเองตรงนี้เลย ไม่ต้องรอ
+    const lsRaw = qs.get('liff.state') || '';
+    const ls = lsRaw ? new URLSearchParams(lsRaw.replace(/^\?/, '')) : null;
     // deep-link จากการ์ด LINE: ?garment=CODE → เปิด detail ของชุดนั้นทันที
     const gcode = qs.get('garment') || (ls && ls.get('garment'));
     // มาจากฟีดชุมชน (?look=ID) → log attribution ให้ครีเอเตอร์ได้ส่วนแบ่งเมื่อเช่าตาม
