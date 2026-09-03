@@ -83,7 +83,7 @@
     </div>
     <label style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-weight:400;cursor:pointer">
       <input type="checkbox" id="sconsent" style="width:auto;margin-top:3px">
-      <span id="sconsent_txt" style="font-size:13px;color:#555">ยินยอมให้ LLOOP เก็บและใช้ข้อมูลส่วนบุคคล (ชื่อ-เลขบัตร-ที่อยู่) เพื่อออกใบรับซื้อและปฏิบัติตามกฎหมายภาษี ตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</span>
+      <span id="sconsent_txt" style="font-size:13px;color:#555">ยินยอมให้ Closet Cash เก็บและใช้ข้อมูลส่วนบุคคล (ชื่อ-เลขบัตร-ที่อยู่) เพื่อออกใบรับซื้อและปฏิบัติตามกฎหมายภาษี ตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</span>
     </label>
   </div>
 
@@ -155,6 +155,17 @@
   if(window.opsLogin) window.opsLogin().catch(()=>{});
   const $=id=>document.getElementById(id);
   let mode='offer';
+  // LIFF ของ OA ผู้ขาย (Closet Cash @840ibimg) — เก็บ UID ผู้ขายไว้แจ้งสถานะ/โอนเงินกลับทาง LINE
+  // เปิดนอก LINE ก็ยังใช้ฟอร์มได้ (sellerUid ว่างเฉย ๆ ไม่ขัดการส่ง)
+  let sellerUid=null;
+  (async()=>{ try{
+    await liff.init({ liffId:'2011407171-XCpnQOaU' });
+    if(liff.isLoggedIn()){
+      const prof=await liff.getProfile();
+      sellerUid=prof&&prof.userId||null;
+      if(prof&&prof.displayName&&!$('sname').value) $('sname').value=prof.displayName;
+    } else if(liff.isInClient()){ liff.login(); }
+  }catch(e){ /* นอก LINE / init ไม่ผ่าน — ฟอร์มทำงานต่อปกติ */ } })();
   let uploaded=[]; // ลิงก์รูปที่อัปโหลดสำเร็จ
   const toast=m=>{const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2300);};
   // ดึงข้อความยินยอม PDPA ฉบับเต็มจากระบบมาแสดง (ให้ผู้ขายอ่านก่อนติ๊ก)
@@ -216,7 +227,7 @@
   async function submit(){
     const pasted=($('gphotos').value||'').split(',').map(s=>s.trim()).filter(Boolean);
     const photos=[...uploaded, ...pasted];
-    const base={ seller_uid:null, seller_name:$('sname').value, seller_phone:$('sphone').value, seller_bank:$('sbank').value, seller_id_card:$('sidcard')?$('sidcard').value:'', seller_address:$('saddr')?$('saddr').value:'', photos, mode };
+    const base={ seller_uid:sellerUid, seller_name:$('sname').value, seller_phone:$('sphone').value, seller_bank:$('sbank').value, seller_id_card:$('sidcard')?$('sidcard').value:'', seller_address:$('saddr')?$('saddr').value:'', photos, mode };
     let p;
     if(mode==='offer'){
       if(!$('gname').value || !$('gprice').value){ toast('กรอกชื่อชุด + ราคาก่อนค่ะ'); return; }
