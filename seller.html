@@ -52,6 +52,13 @@
   .done{background:var(--sageWash);color:var(--forest)}
   .toast{background:var(--forest)}
   .btn{background:var(--forest)}
+  /* หน้านี้คือแบรนด์ Closet Cash — ทับโลโก้ LLOOP ที่ ops-ui.css ใส่ไว้บนแถบหัว */
+  .bar h1::before{content:"CLOSET CASH"}
+  /* กันล้นจอแคบ: ช่องกรอกใน grid + ปุ่มโหมด (ซับไทยยาวใน webview ที่ตัดคำไทยไม่เก่ง) */
+  .g2>div{min-width:0}
+  input,select,textarea{min-width:0}
+  .modes button{min-width:0}
+  .modes button .s{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -146,13 +153,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js"></script>
-<script src="ops-api.js"></script>
 <script>
   const SUPABASE_URL='https://rprwilsbjptdnvsibjgi.supabase.co';
   const SUPABASE_KEY='sb_publishable_rhIE-GxNxBI-diEwLEJfZg_oAMGxhfa';
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  if(window.opsRpc) sb.rpc=window.opsRpc;            // R-4: RPC ผ่าน gateway (LINE idToken + role)
-  if(window.opsLogin) window.opsLogin().catch(()=>{});
+  // หน้านี้เป็นหน้า "ผู้ขายทั่วไป" (แบรนด์ Closet Cash) — ห้ามใช้ ops gateway/login gate ของหลังบ้าน:
+  // ด่านล็อกอิน LLOOP จะบังฟอร์ม + หลุดแบรนด์ · RPC ที่ใช้ (seller_submit/consent) เปิด anon โดยตั้งใจอยู่แล้ว
   const $=id=>document.getElementById(id);
   let mode='offer';
   // LIFF ของ OA ผู้ขาย (Closet Cash @840ibimg) — เก็บ UID ผู้ขายไว้แจ้งสถานะ/โอนเงินกลับทาง LINE
@@ -256,7 +262,5 @@
       : 'ส่งเรียบร้อยแล้วค่ะ!<br>ทีมจะรีบประเมินราคา ถ้าสนใจซื้อจะตอบกลับทางนี้ค่ะ';
   }
 </script>
-<script src="ops-menu.js"></script>
-<script>window.opsMenu&&window.opsMenu.mount();</script>
 </body>
 </html>
