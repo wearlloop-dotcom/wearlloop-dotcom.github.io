@@ -3778,6 +3778,8 @@ async function acceptTermsClick() {
   try { await window.API.acceptTerms(CUSTOMER, _termsVersion); } catch (e) { console.warn(e); }
   maybeOnboard();
 }
+// เบราว์เซอร์ในแอป IG/Facebook — คุกกี้/สตอเรจไม่เสถียร ล็อกอิน LINE มักจบไม่สำเร็จ (เด้งวนกลับหน้า login)
+function _inAppBrowser() { return /Instagram|FBAN|FBAV|FB_IAB|FBIOS|Messenger/i.test(navigator.userAgent || ''); }
 // ประตูล็อกอินเต็มหน้า — บังคับเข้าสู่ระบบก่อนใช้งานทั้งเว็บ (เรียกตอน boot ถ้าเป็น guest)
 function showLoginGate() {
   const gate = $('#loginGate'); if (!gate) return;
@@ -3787,6 +3789,18 @@ function showLoginGate() {
     set('lgSub', 'Sign in with LINE to browse pieces and use LLOOP Atelier');
     set('lgBtnLabel', 'Sign in with LINE');
     set('lgNote', 'Signing in means you accept the Terms of Service and Privacy Policy');
+  }
+  // เปิดจากแอป IG/FB → ชวนไปเปิดในแอป LINE หรือเบราว์เซอร์จริงแทน (ล็อกอินผ่านชัวร์กว่า)
+  const iab = $('#lgInApp');
+  if (iab && _inAppBrowser()) {
+    const th = lang !== 'en';
+    const android = /Android/i.test(navigator.userAgent || '');
+    iab.hidden = false;
+    iab.innerHTML = `
+      <div class="lgiab-note">${th ? 'ตอนนี้เปิดจากเบราว์เซอร์ในแอป Instagram/Facebook อยู่ ซึ่งมักล็อกอิน LINE ไม่ผ่าน (เด้งวนกลับมาหน้านี้) แนะนำเปิดแบบนี้แทนค่ะ' : 'You are in the Instagram/Facebook in-app browser, where LINE sign-in often fails. Try one of these instead:'}</div>
+      <a class="lgiab-btn" href="https://liff.line.me/2010486714-1g6lDuHo">${th ? 'เปิดผ่านแอป LINE · ล็อกอินอัตโนมัติ' : 'Open in the LINE app'}</a>
+      ${android ? `<a class="lgiab-btn alt" href="intent://wearlloop-dotcom.github.io/#Intent;scheme=https;end">${th ? 'เปิดใน Chrome' : 'Open in Chrome'}</a>` : ''}
+      <div class="lgiab-hint">${th ? 'หรือแตะ ⋯ มุมขวาบน แล้วเลือก "เปิดในเบราว์เซอร์ภายนอก"' : 'Or tap ⋯ (top right) → "Open in external browser"'}</div>`;
   }
   gate.classList.add('open');
   document.body.style.overflow = 'hidden';
