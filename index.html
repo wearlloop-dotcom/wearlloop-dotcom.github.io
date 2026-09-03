@@ -1100,10 +1100,14 @@
   <button class="enterbtn" id="introEnter" onclick="enterApp()">เปิดคอลเลกชัน</button>
 </div>
 <script>
-  /* intro โชว์แค่ครั้งแรกของ session — กลับหน้าหลักจากหน้าอื่นเข้าคอลเลกชันเลย ไม่คั่นซ้ำ
+  /* intro โชว์เฉพาะผู้มาเยือนครั้งแรกที่เปิดหน้าเว็บเอง — เคยเข้าแล้ว (localStorage อยู่ข้ามการเปิดครั้งใหม่)
+     หรือกดมาจากปุ่ม rich menu/การ์ดใน LINE (มี deep-link: liff.state/go/garment/...) → เข้าเป้าหมายทันที ไม่คั่น
      ทำแบบ synchronous ตรงนี้ (ก่อน intro paint) กัน flash */
   try {
-    if (sessionStorage.getItem('lloop_entered') === '1') { document.getElementById('intro').style.display = 'none'; document.body.classList.add('entered'); }
+    var lloopSeen = sessionStorage.getItem('lloop_entered') === '1';
+    try { lloopSeen = lloopSeen || localStorage.getItem('lloop_entered') === '1'; } catch (e) {}
+    var lloopDeep = /[?&](liff\.state|go|garment|look|ref|occasion)=/.test(location.search);
+    if (lloopSeen || lloopDeep) { document.getElementById('intro').style.display = 'none'; document.body.classList.add('entered'); }
     else setTimeout(function () { if (typeof enterApp === 'function' && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') enterApp(); }, 7000);  // เข้าคอลเลกชันเองหลังอนิเมชันวงแหวน — ไม่ต้องบังคับกดปุ่ม (7 วิ ให้ดูวิดีโอ collage ทัน)
   } catch (e) {}
 </script>
@@ -1489,7 +1493,7 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=101"></script>
+<script src="app.js?v=102"></script>
 <script src="help-widget.js"></script>
 </body>
 </html>
