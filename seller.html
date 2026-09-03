@@ -59,6 +59,16 @@
   input,select,textarea{min-width:0}
   .modes button{min-width:0}
   .modes button .s{overflow-wrap:anywhere}
+  /* ปุ่มช่วยกรอกอัตโนมัติ (ลดการพิมพ์) */
+  .autochip{display:inline-block;margin-top:6px;border:1.5px solid var(--forest);background:#fff;color:var(--forest);
+    border-radius:20px;padding:6px 13px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+  .autochip.on{background:var(--forest);color:#fff}
+  .sizechips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .sizechips button{border:1.5px solid var(--hair);background:#fff;border-radius:16px;padding:5px 11px;
+    font-size:13px;cursor:pointer;font-family:inherit}
+  .sizechips button.on{border-color:var(--forest);background:var(--forest);color:#fff}
+  details.kyc summary{font-size:13px;color:var(--muted);cursor:pointer;margin-top:10px;font-weight:500}
+  details.kyc[open] summary{margin-bottom:2px}
 </style>
 </head>
 <body>
@@ -84,10 +94,14 @@
       <div><label>เบอร์โทร</label><input id="sphone" inputmode="tel"></div>
     </div>
     <label>บัญชีรับเงิน (ธนาคาร/เลขบัญชี)</label><input id="sbank" placeholder="เช่น kbank 123-4-56789">
-    <div class="g2">
-      <div><label>เลขบัตรประชาชน (สำหรับใบรับซื้อ/ภาษี)</label><input id="sidcard" inputmode="numeric" placeholder="x-xxxx-xxxxx-xx-x"></div>
-      <div><label>ที่อยู่</label><input id="saddr" placeholder="ที่อยู่ตามบัตร"></div>
-    </div>
+    <button type="button" class="autochip" id="ppBtn" onclick="usePromptPay()">ใช้เบอร์โทรเป็นพร้อมเพย์</button>
+    <details class="kyc">
+      <summary>ข้อมูลสำหรับใบรับซื้อ/ภาษี — ข้ามไปก่อนได้ ทีมจะขอตอนตกลงซื้อ</summary>
+      <div class="g2">
+        <div><label>เลขบัตรประชาชน (สำหรับใบรับซื้อ/ภาษี)</label><input id="sidcard" inputmode="numeric" placeholder="x-xxxx-xxxxx-xx-x"></div>
+        <div><label>ที่อยู่</label><input id="saddr" placeholder="ที่อยู่ตามบัตร"></div>
+      </div>
+    </details>
     <label style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-weight:400;cursor:pointer">
       <input type="checkbox" id="sconsent" style="width:auto;margin-top:3px">
       <span id="sconsent_txt" style="font-size:13px;color:#555">ยินยอมให้ Closet Cash เก็บและใช้ข้อมูลส่วนบุคคล (ชื่อ-เลขบัตร-ที่อยู่) เพื่อออกใบรับซื้อและปฏิบัติตามกฎหมายภาษี ตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562</span>
@@ -103,7 +117,11 @@
       <div><label>ประเภท</label><select id="gcat"><option value="dress">เดรส</option><option value="set">เซ็ต</option><option value="top">เสื้อ</option><option value="skirt">กระโปรง</option><option value="pants">กางเกง</option><option value="jumpsuit">จัมป์สูท</option><option value="outerwear">เสื้อคลุม</option></select></div>
       <div><label>แบรนด์</label><input id="gbrand" list="brandlist" placeholder="เลือกหรือพิมพ์เอง"></div>
       <div><label>สี</label><input id="gcolor" placeholder="เช่น ครีม / กรมท่า"></div>
-      <div><label>ไซซ์</label><input id="gsize" placeholder="S/M/L หรือรอบอก"></div>
+      <div><label>ไซซ์</label><input id="gsize" placeholder="S/M/L หรือรอบอก">
+        <div class="sizechips" id="sizechips">
+          <button type="button">XS</button><button type="button">S</button><button type="button">M</button>
+          <button type="button">L</button><button type="button">XL</button><button type="button">Free</button>
+        </div></div>
       <div><label>เนื้อผ้า</label><input id="gfabric"></div>
       <div><label>สภาพ</label><select id="gcond"><option>ใหม่ป้ายห้อย</option><option>ดีมาก</option><option>ดี</option><option>พอใช้</option></select></div>
     </div>
@@ -136,7 +154,7 @@
 
   <div class="card">
     <h2>รูปถ่าย</h2>
-    <p id="photoHint">ถ่ายรูป หรือเลือกรูปจากเครื่อง (อย่างน้อย 1 รูป)</p>
+    <p id="photoHint">ถ่ายรูป หรือเลือกรูปจากเครื่อง (อย่างน้อย 1 รูป) — แนบแล้ว AI ช่วยกรอกข้อมูลชุดให้อัตโนมัติ</p>
     <input type="file" id="gphotos_file" accept="image/*" multiple onchange="uploadFiles(this)">
     <button type="button" id="aiBtn" onclick="aiFillSeller()" style="margin-top:10px;background:#fff;color:var(--ink);border:1.5px solid var(--ink);border-radius:20px;padding:9px 16px;font-size:14px;cursor:pointer;font-family:inherit">AI ช่วยกรอกจากรูป</button>
     <div class="thumbs" id="thumbs"></div>
@@ -200,7 +218,21 @@
     }
     if(added) toast('อัปโหลดแล้ว '+added+' รูป');
     input.value='';
+    // อัปรูปปุ๊บ AI อ่านรูปกรอกให้เองเลย (เฉพาะโหมดเสนอขาย และช่องชื่อยังว่าง — ไม่ทับที่ผู้ขายพิมพ์เอง)
+    if(added && mode==='offer' && !$('gname').value) aiFillSeller();
   }
+  // ปุ่มลดการพิมพ์: พร้อมเพย์ = เบอร์โทรด้านบน
+  function usePromptPay(){
+    const ph=($('sphone').value||'').trim();
+    if(!ph){ toast('กรอกเบอร์โทรก่อนนะคะ แล้วกดอีกที'); $('sphone').focus(); return; }
+    $('sbank').value='พร้อมเพย์ '+ph; $('ppBtn').classList.add('on'); toast('ใช้พร้อมเพย์เบอร์ '+ph+' ค่ะ');
+  }
+  // ชิปไซซ์ กดเลือกแทนพิมพ์
+  document.getElementById('sizechips').addEventListener('click',(e)=>{
+    if(e.target.tagName!=='BUTTON') return;
+    $('gsize').value=e.target.textContent;
+    [...document.querySelectorAll('#sizechips button')].forEach(b=>b.classList.toggle('on',b===e.target));
+  });
   // AI ช่วยกรอกจากรูป (ใช้ intake-tagger เดียวกับหน้ารับเข้า) — ผู้ขายแค่ตรวจ/แก้
   async function aiFillSeller(){
     const pasted=($('gphotos').value||'').split(',').map(s=>s.trim()).filter(Boolean);
@@ -228,7 +260,7 @@
     $('bulkCard').classList.toggle('hide',m!=='bulk');
     $('photoHint').textContent = m==='bulk'
       ? 'ถ่ายรูปทุกตัวที่จะขายเหมา (ยิ่งครบ ยิ่งประเมินไว) — เลือกหลายรูปพร้อมกันได้'
-      : 'ถ่ายรูป หรือเลือกรูปจากเครื่อง (อย่างน้อย 1 รูป)';
+      : 'ถ่ายรูป หรือเลือกรูปจากเครื่อง (อย่างน้อย 1 รูป) — แนบแล้ว AI ช่วยกรอกข้อมูลชุดให้อัตโนมัติ';
   }
   async function submit(){
     const pasted=($('gphotos').value||'').split(',').map(s=>s.trim()).filter(Boolean);
