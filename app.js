@@ -134,6 +134,7 @@ const stretchLabel = s => s ==='none'? t('noStretch') : s ==='slight'? t('slight
 
 function enterApp() {
   try { sessionStorage.setItem('lloop_entered', '1'); } catch (e) {}  // จำว่าเข้าแล้ว → กลับหน้าหลักไม่ต้องคั่น intro ซ้ำ
+  try { localStorage.setItem('lloop_entered', '1'); } catch (e) {}    // จำถาวร → เปิด LIFF ครั้งหน้า (session ใหม่) ก็ไม่คั่น intro อีก
   const el = $('#intro');
   // วัดตำแหน่ง hero ring จริงตอน runtime → เซ็ตค่าย่อให้ loopstage ลงตรงเป๊ะทุกขนาดจอ
   try {
