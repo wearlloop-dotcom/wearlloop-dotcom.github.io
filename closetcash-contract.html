@@ -133,7 +133,7 @@
     const { data, error } = await sb.rpc('cc_contract_get',{ p_token: token });
     if(error || !data || data.error){ showDone('ไม่พบสัญญานี้ค่ะ — พิมพ์ "สัญญา" ในแชต Closet Cash เพื่อขอลิงก์ใหม่นะคะ'); return; }
     C=data;
-    if(C.status==='signed'){ showDone(`สัญญา ${C.contract_no} ลงนามเรียบร้อยแล้วค่ะ ✓<br>เมื่อวันที่ ${new Date(C.signed_at).toLocaleString('th-TH')}<br>รอทีม Closet Cash โอนเงินได้เลยนะคะ`); return; }
+    if(C.status==='signed'){ showDone(`สัญญา ${C.contract_no} ลงนามเรียบร้อยแล้วค่ะ ✅<br>เมื่อวันที่ ${new Date(C.signed_at).toLocaleString('th-TH')}<br>รอทีม Closet Cash โอนเงินได้เลยนะคะ`); return; }
     $('cno').textContent='สัญญาเลขที่ '+C.contract_no;
     if(!(C.buyer_name&&C.buyer_name.trim())) $('buyerWarn').style.display='block';
     $('doc').textContent=contractText(C);
@@ -158,7 +158,7 @@
       alert('บันทึกไม่สำเร็จ ('+(error?.message||data)+') ลองใหม่อีกครั้งนะคะ');
       $('signBtn').disabled=false; $('signBtn').textContent='ลงนามสัญญา'; return;
     }
-    showDone(`ลงนามสัญญา ${C.contract_no} เรียบร้อยแล้วค่ะ ✓<br>ระบบแจ้งทีม Closet Cash แล้ว รอรับเงินโอนได้เลยนะคะ<br><span style="font-size:13px;color:#4a6a5e">สำเนาคำยืนยันถูกส่งเข้าแชต LINE ของคุณด้วยค่ะ</span>`);
+    showDone(`ลงนามสัญญา ${C.contract_no} เรียบร้อยแล้วค่ะ ✅<br>ระบบแจ้งทีม Closet Cash แล้ว รอรับเงินโอนได้เลยนะคะ<br><span style="font-size:13px;color:#4a6a5e">สำเนาคำยืนยันถูกส่งเข้าแชต LINE ของคุณด้วยค่ะ</span>`);
   }
   load();
 </script>
