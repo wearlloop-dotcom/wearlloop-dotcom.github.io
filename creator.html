@@ -87,14 +87,14 @@
     <div>
       <div class="eyebrow">creator loop</div>
       <h1>ถ่ายชุด ได้เครดิต</h1>
-      <p class="hsub">รับงานถ่ายชุดจากคลัง ส่งรูปสวย ๆ ให้เราตรวจ ผ่านแล้วได้เครดิตเข้ากระเป๋าทันที ไว้ลดค่าเช่าครั้งหน้า</p>
+      <p class="hsub">เช่าชุดที่เปิดรับงานตามปกติ (จ่ายค่าเช่าเอง) ถ่ายรูปตอนใส่ส่งให้เราตรวจ ผ่านแล้วได้เครดิตเข้ากระเป๋าทันที ไว้ลดค่าเช่าครั้งหน้า</p>
     </div>
     <div class="creditbox"><div class="k">เครดิตในกระเป๋า</div><b id="credit">฿…</b></div>
   </div>
   <div class="steps">
-    <div class="step"><div class="k">01</div><div class="t">เลือกงานถ่ายที่เปิดรับ กด "รับงานนี้"</div></div>
-    <div class="step"><div class="k">02</div><div class="t">ถ่ายรูปชุดเต็มตัว ชัด แสงสวย แล้วอัปโหลด</div></div>
-    <div class="step"><div class="k">03</div><div class="t">ระบบตรวจให้ทันที ผ่านแล้วเครดิตเข้ากระเป๋าเลย</div></div>
+    <div class="step"><div class="k">01</div><div class="t">กด "รับงานนี้" แล้วเช่าชุดตัวนั้นตามปกติ ค่าเช่าจ่ายเองเหมือนเช่าทั่วไป</div></div>
+    <div class="step"><div class="k">02</div><div class="t">ถ่ายรูปตอนใส่ชุด เต็มตัว ชัด แสงสวย แล้วอัปโหลด</div></div>
+    <div class="step"><div class="k">03</div><div class="t">ระบบตรวจให้ทันที ผ่านแล้วเครดิตเข้ากระเป๋าเลย (เครดิตไม่ได้แทนค่าเช่าครั้งนี้)</div></div>
   </div>
   <div id="view"><div class="empty">กำลังโหลด…</div></div>
 </div>
@@ -141,6 +141,7 @@ function render(){
         <div class="name">${esc(g.name || g.garment)}</div>
         <div class="meta">ต้องการรูปหุ่นไซส์ ${esc(g.needed_size || 'ไม่ระบุ')}${g.garment?` · รหัส ${esc(g.garment)}`:''}</div>
         <button class="btn" ${BOARD.can_claim?'':'disabled'} onclick="claim('${g.gig_id}','${esc(g.name||g.garment||'').replace(/'/g,'')}')">รับงานนี้</button>
+        <a class="btn ghost" href="index.html?garment=${encodeURIComponent(g.garment||'')}" style="margin-top:8px;display:block;text-align:center;text-decoration:none">เช่าชุดตัวนี้</a>
       </div>
     </div>`).join('') + `</div>` : `<div class="empty">ยังไม่มีงานเปิดรับตอนนี้<br>แวะมาใหม่นะคะ เราเปิดงานถ่ายใหม่ทุกสัปดาห์</div>`;
   if (mine.length){
