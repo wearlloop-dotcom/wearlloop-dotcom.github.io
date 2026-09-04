@@ -17,11 +17,20 @@ window.API = (function () {
     _evBuf.push({ s: _sid, u: lineUid || '', e: event, t: target || '', m: meta || null });
     if (_evBuf.length >= 12) flushEvents();
   }
+  // ล็อกอินแล้ว → ผ่าน me-rpc (gateway ใส่ line_uid จาก idToken ให้ กันสวมรอย)
+  // ยังไม่ล็อกอิน → log_events_anon (สาธารณะ แต่ไม่รับตัวตนจาก client)
+  // หมายเหตุ: log_events เดิมถูก revoke จาก anon ตอน security lockdown → ยิงไม่เข้ามาตั้งแต่ ก.ค.
   async function flushEvents() {
     if (CONFIG.USE_MOCK || !_evBuf.length) return;
     const batch = _evBuf.splice(0, 50);
-    try { await client().rpc('log_events', { p_events: batch }); }
-    catch (_e) { /* เงียบ — analytics ไม่ควรกระทบ UX */ }
+    try {
+      if (lineUid && window.meRpc) {
+        const r = await window.meRpc('log_events_me', { p_events: batch });
+        if (r && r.error) await client().rpc('log_events_anon', { p_events: batch });   // token หมดอายุ → เก็บแบบ guest
+      } else {
+        await client().rpc('log_events_anon', { p_events: batch });
+      }
+    } catch (_e) { /* เงียบ — analytics ไม่ควรกระทบ UX */ }
   }
   // flush เป็นระยะ + ตอนซ่อนหน้า/ปิด (จับ dwell ครบ)
   if (!CONFIG.USE_MOCK) {
