@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · ครอบครัว & กลุ่ม (ตัวอย่างดีไซน์)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="nav.js?v=2"></script>
+<style>
+  :root{--bg:#FBFAF7;--cream2:#F5F4F2;--ink:#1A1A1A;--line:#E7E5E1;--muted:#8C8B86;--gold:#C9A86A;--ok:#0F6E56;--sage-bg:#E4F0EC;--sand:#F2ECDD;
+    --display:'Poppins','Prompt',sans-serif;--sans:'Inter','Prompt',-apple-system,sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-bottom:90px}
+  .contain{max-width:1200px;margin:0 auto;padding:0 20px}
+  .hero{position:relative;height:48vw;max-height:500px;min-height:300px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;background:#E6DCD2}
+  .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.45))}
+  .hero .in{position:relative;z-index:2}
+  .hero .hk{font-family:var(--display);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#E8D5A8;font-weight:600;margin-bottom:10px}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,56px);line-height:1;letter-spacing:.5px}
+  .hero p{margin-top:12px;font-size:15px;opacity:.9}
+  .hbtn{display:inline-block;margin-top:22px;background:#fff;color:var(--ink);padding:14px 34px;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;text-decoration:none;border-radius:2px}
+  /* แถวคนในบ้าน */
+  .people{display:flex;gap:22px;justify-content:center;padding:26px 0 8px;overflow-x:auto;scrollbar-width:none}
+  .people::-webkit-scrollbar{display:none}
+  .p{display:flex;flex-direction:column;align-items:center;gap:7px;flex:0 0 auto;cursor:pointer}
+  .p .av{width:66px;height:66px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:20px;color:#fff;border:2.5px solid transparent}
+  .p.on .av{border-color:var(--ink)}
+  .p span{font-size:12px} .p.on span{font-weight:600}
+  .p .av svg{width:30px;height:30px;stroke:#7a5a2a;fill:none;stroke-width:1.6}
+  .p.add .av{border:1.5px dashed var(--gold);color:var(--gold);font-size:26px;background:transparent}
+  .eyebrow{margin:30px 0 14px;display:flex;justify-content:space-between;align-items:baseline;position:relative;padding-top:16px}
+  .eyebrow::before{content:"";position:absolute;top:0;left:0;width:42px;height:1px;background:var(--gold)}
+  .eyebrow .ek{font-family:var(--display);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .eyebrow .et{font-family:var(--display);font-size:clamp(20px,3vw,28px);font-weight:700;margin-top:2px}
+  .eyebrow a{font-size:12.5px;color:var(--muted);text-decoration:none}
+  /* การ์ดงาน */
+  .ev{background:var(--ink);color:#fff;border-radius:20px;padding:22px 26px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+  .ev h2{font-family:var(--display);font-size:clamp(19px,2.4vw,26px);font-weight:700}
+  .ev .sub{font-size:13px;color:rgba(255,255,255,.65);margin-top:4px}
+  .ev .theme{display:flex;gap:8px;align-items:center;font-size:12px}
+  .ev .theme i{width:26px;height:26px;border-radius:50%;display:inline-block;border:2px solid rgba(255,255,255,.4)}
+  .ev .prog{grid-column:1 / -1;display:flex;gap:4px}.ev .prog span{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.25)}.ev .prog span.on{background:var(--gold)}
+  /* ราวชุด: รูปจริง */
+  .rail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+  .look{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative}
+  .look .ph{aspect-ratio:3/4;background:var(--cream2);overflow:hidden}
+  .look .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .look .who{position:absolute;top:12px;left:12px;background:#fff;border-radius:20px;padding:5px 11px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .look .who i{width:18px;height:18px;border-radius:50%;display:inline-block}
+  .look .fit{position:absolute;top:12px;right:12px;background:var(--ok);color:#fff;font-size:10.5px;padding:4px 9px;border-radius:12px}
+  .look .fit.warn{background:#8a6d1f}
+  .look .cap{padding:10px 13px 13px}
+  .look .nm{font-size:13.5px;font-weight:600;line-height:1.3}
+  .look .mt{font-size:12px;color:var(--muted);margin-top:3px}
+  .look.pet .ph{display:flex;align-items:center;justify-content:center;background:var(--sand);flex-direction:column;gap:8px;color:#7a5a2a;font-size:12px;text-align:center;padding:16px}
+  .look.pet .ph svg{width:44px;height:44px;stroke:#C9A86A;fill:none;stroke-width:1.5}
+  /* CTA ปักหมุดล่าง */
+  .cta{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 20px max(12px,env(safe-area-inset-bottom));z-index:30}
+  .cta .in{max-width:1200px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .cta .sum{font-size:13px}.cta .sum b{font-family:var(--display);font-size:17px}
+  .cta button{background:var(--ink);color:#fff;border:none;font-family:inherit;font-weight:600;font-size:14px;padding:13px 26px;border-radius:12px;cursor:pointer}
+  .cta .ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .note{text-align:center;font-size:11.5px;color:var(--muted);padding:30px 0 10px}
+  @media(max-width:900px){.rail{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}}
+  @media(max-width:600px){.rail{grid-template-columns:repeat(2,minmax(0,1fr))}.people{justify-content:flex-start}.hero{height:60vw}.ev{grid-template-columns:1fr}.cta .ghost{display:none}}
+</style>
+</head>
+<body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
+
+<section class="hero">
+  <video src="media/lloop-hero-sc1.mp4" poster="media/lloop-hero-sc1-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+  <div class="scrim"></div>
+  <div class="in">
+    <div class="hk">together</div>
+    <h1>บ้านเดียวกัน<br>ตีมเดียวกัน</h1>
+    <p>สไตลิสต์จัดชุดให้ทั้งบ้าน จองครั้งเดียว ส่งกล่องเดียว</p>
+    <a class="hbtn" href="#rail">จัดชุดทั้งบ้าน</a>
+  </div>
+</section>
+
+<div class="contain">
+  <div class="people">
+    <div class="p on"><div class="av" style="background:linear-gradient(160deg,#E4D5B7,#C9A86A)">ธ</div><span>ฉัน</span></div>
+    <div class="p"><div class="av" style="background:linear-gradient(160deg,#F1D9D3,#D8A79B)">ม</div><span>คุณแม่</span></div>
+    <div class="p"><div class="av" style="background:linear-gradient(160deg,#D9E6EF,#A9C4D6)">ป</div><span>น้องเป่าเปา</span></div>
+    <div class="p"><div class="av" style="background:linear-gradient(160deg,#E7E1F1,#BFB0D6)">ย</div><span>คุณยาย</span></div>
+    <div class="p"><div class="av" style="background:linear-gradient(160deg,#F3E7D4,#D9B98C)"><svg viewBox="0 0 24 24"><path d="M6 10c-1.5-2-1-5 1-5s2.5 2 2.5 4M18 10c1.5-2 1-5-1-5s-2.5 2-2.5 4"/><path d="M12 8c-4 0-6 3-6 6.5S9 20 12 20s6-2 6-5.5S16 8 12 8z"/></svg></div><span>มอคค่า</span></div>
+    <div class="p add"><div class="av">+</div><span style="color:var(--muted)">เพิ่ม</span></div>
+  </div>
+
+  <div class="ev">
+    <div><h2>งานแต่งมิ้น · 15 ก.ย.</h2><div class="sub">จัดเข้าตีมแล้ว 4 จาก 6 · เหลือคุณยายกับมอคค่า</div></div>
+    <div class="theme"><span>ตีม</span><i style="background:#F3EAD6"></i><i style="background:#C9A86A"></i><i style="background:#D9C29A"></i><i style="background:#E4F0EC"></i></div>
+    <div class="prog"><span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></div>
+  </div>
+
+  <div class="eyebrow" id="rail"><div><div class="ek">the family rail</div><div class="et">ราวชุดของบ้าน</div></div><a href="#">เปลี่ยนตีม ›</a></div>
+  <div class="rail">
+    <div class="look"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-08/2.jpg" alt=""></div><span class="who"><i style="background:#C9A86A"></i>ฉัน</span><span class="fit">พอดี 92%</span><div class="cap"><div class="nm">Jolie Dress</div><div class="mt">Fabrique Co · Cream · ฿391</div></div></div>
+    <div class="look"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/JS-06/0.jpg" alt=""></div><span class="who"><i style="background:#D8A79B"></i>คุณแม่</span><span class="fit">พอดี 88%</span><div class="cap"><div class="nm">Long Cream Lace Dress</div><div class="mt">Janesuda · Cream · ฿1,444</div></div></div>
+    <div class="look"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-07/2.jpg" alt=""></div><span class="who"><i style="background:#A9C4D6"></i>น้องเป่าเปา</span><span class="fit warn">เผื่อโต 1 ไซส์</span><div class="cap"><div class="nm">Poppy Dress</div><div class="mt">4 ปี 2 เดือน · 16 กก. · ฿231</div></div></div>
+    <div class="look"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-05/2.jpg" alt=""></div><span class="who"><i style="background:#BFB0D6"></i>คุณยาย</span><span class="fit">พอดี 85%</span><div class="cap"><div class="nm">Jessie Dress</div><div class="mt">Firr · Beige · ฿413</div></div></div>
+    <div class="look pet"><div class="ph"><svg viewBox="0 0 24 24"><path d="M6 10c-1.5-2-1-5 1-5s2.5 2 2.5 4M18 10c1.5-2 1-5-1-5s-2.5 2-2.5 4"/><path d="M12 8c-4 0-6 3-6 6.5S9 20 12 20s6-2 6-5.5S16 8 12 8z"/></svg>คอลเลกชันชุดน้อง<br>กำลังมา</div><span class="who"><i style="background:#D9B98C"></i>มอคค่า</span><div class="cap"><div class="nm">ปอม · ขนครีม · 4 กก.</div><div class="mt">เก็บไซส์ไว้แล้ว จัดให้ทันทีที่เปิด</div></div></div>
+  </div>
+  <div class="note">หน้าตัวอย่างดีไซน์ · ข้อมูลเป็นตัวอย่างเพื่อดูดีไซน์</div>
+</div>
+
+<div class="cta"><div class="in"><div class="sum">ทั้งบ้าน 4 ชุด · <b>฿2,479</b> · ส่งกล่องเดียว</div><div style="display:flex;gap:10px"><button class="ghost">แชร์ลุคให้ทั้งบ้านดู</button><button>จองทั้งบ้าน</button></div></div></div>
+</body>
+</html>
