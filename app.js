@@ -2785,7 +2785,7 @@ function renderStyleCard(c) {
   return`<div class="stylecard">
     <div class="tierbadge"> ${tierLabel}</div>
     ${inner}
-    ${c.link_code?`<div class="linkcode">${lang ==='th'?'รหัสนัดสไตลิสต์':'Stylist code'} <b>${c.link_code}</b></div>`:''}
+    ${c.link_code?`<div class="linkcode">${lang ==='th'?'รหัสของฉัน (ใช้นัดสไตลิสต์ และให้เพื่อนชวนเข้ากลุ่ม)':'My code (stylist bookings & group invites)'} <b>${c.link_code}</b></div>`:''}
   </div>`;
 }
 // ลูกค้ากรอกรหัสผลวิเคราะห์ (จากสตูดิโอ/พาร์ทเนอร์) → ผูก/รวมผลเข้าบัญชี LINE ตัวเอง แล้วรีเฟรช
