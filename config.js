@@ -13,8 +13,12 @@ window.CONFIG = {
   // ใส่ลิงก์ไฟล์วิดีโอที่เรนเดอร์แล้ว (ดูพรอมป์ที่ brand/video-prompts.md — ชุด P1–P6 + คลิป #1 แชร์ตู้)
   // ใส่ได้หลายคลิป จะเล่นต่อเนื่องวนลูป (montage). เว้นว่าง = ใช้พื้นหลังไล่สีเดิม
   HERO_VIDEO:[
-    // คลิป Higgsfield (seedance) โฮสต์บน CloudFront — โหลดตรง ไม่ต้องเก็บไฟล์ในรีโป
-    'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260807_102059_d467302f-a6d8-4a4c-857c-3b4f48d752bf.mp4',
+    // คลิป Higgsfield (seedance 2.0) โฮสต์บน CloudFront — โหลดตรง ไม่ต้องเก็บไฟล์ในรีโป
+    // ชุดนี้เรนเดอร์ที่ 4K 16:9 ทั้งหมด (ของเดิม 7 ส.ค. ความละเอียดต่ำกว่า จึงเปลี่ยนออก)
+    // ร้อยเป็นเรื่องเดียวกัน: เดินในสวนเขาวงกต → เจอตู้เสื้อผ้า → วิ่งเข้าไปหา
+    'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260822_083025_a923fae6-8d06-40a6-a113-b7a5e680e06c.mp4',  // 4K · 7s · เจอตู้กลางเขาวงกต
+    'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260901_035853_86042dbd-6ff9-4e17-a790-94f38cf72337.mp4',  // 4K · 7s · วิ่งเข้าหาตู้
+    'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260824_105058_b83b4bd4-4896-47b5-a44d-9cbd38019a8b.mp4',  // 4K · 7s · ช็อตค้นพบ
   ],
   HERO_POSTER:'', // รูป poster ระหว่างวิดีโอโหลด (เว้นว่าง = พื้นหลังไล่สี)
   HERO_RATE:0.7,  // ความเร็ววิดีโอ hero: 1 = ปกติ, 0.7 = ช้าลงเล็กน้อย (ปรับเลขนี้เพื่อเร่ง/หน่วง)
