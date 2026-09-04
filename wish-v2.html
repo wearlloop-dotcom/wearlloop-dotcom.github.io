@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · อยากได้ชุดไหน บอกเราได้ (ตัวอย่างดีไซน์)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="nav.js?v=2"></script>
+<style>
+  :root{--bg:#FBFAF7;--cream2:#F5F4F2;--ink:#1A1A1A;--line:#E7E5E1;--muted:#8C8B86;--gold:#C9A86A;--ok:#0F6E56;--sage-bg:#E4F0EC;
+    --display:'Poppins','Prompt',sans-serif;--sans:'Inter','Prompt',-apple-system,sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .contain{max-width:1200px;margin:0 auto;padding:0 20px}
+  /* hero video: แบบเดียวกับหน้าแรก */
+  .hero{position:relative;height:52vw;max-height:520px;min-height:320px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;background:linear-gradient(120deg,#EDE7DF,#E6DCD2)}
+  .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.42))}
+  .hero .in{position:relative;z-index:2}
+  .hero .hk{font-family:var(--display);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#E8D5A8;font-weight:600;margin-bottom:10px}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,56px);line-height:1;letter-spacing:.5px}
+  .hero p{margin-top:12px;font-size:15px;opacity:.9}
+  .hbtn{display:inline-block;margin-top:22px;background:#fff;color:var(--ink);border:none;padding:14px 34px;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;text-decoration:none;border-radius:2px}
+  /* หัวส่วน: eyebrow ทองแบบ the LLOOP edit */
+  .eyebrow{margin:38px 0 14px;display:flex;justify-content:space-between;align-items:baseline;position:relative;padding-top:16px}
+  .eyebrow::before{content:"";position:absolute;top:0;left:0;width:42px;height:1px;background:var(--gold)}
+  .eyebrow .ek{font-family:var(--display);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:600}
+  .eyebrow .et{font-family:var(--display);font-size:clamp(20px,3vw,28px);font-weight:700;margin-top:2px}
+  .eyebrow a{font-size:12.5px;color:var(--muted);text-decoration:none}
+  /* กริดรูปจริง */
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+  .card{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .card .ph{aspect-ratio:3/4;background:var(--cream2);overflow:hidden}
+  .card .ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+  .card:hover .ph img{transform:scale(1.04)}
+  .card .st{position:absolute;top:12px;left:12px;font-size:10.5px;padding:4px 9px;border-radius:12px;background:#fff;color:var(--ink)}
+  .card .st.hot{background:var(--ink);color:#fff}
+  .card .st.in{background:var(--ok);color:#fff}
+  .vote{position:absolute;right:12px;bottom:calc(25% + 60px);background:#fff;border:1px solid var(--line);border-radius:22px;padding:7px 12px;font-size:12.5px;font-weight:600;display:flex;gap:6px;align-items:center;cursor:pointer}
+  .vote svg{width:14px;height:14px}
+  .vote.on{background:var(--sage-bg);border-color:#bcd9cf;color:var(--ok)}
+  .card .cap{padding:10px 13px 13px}
+  .card .nm{font-size:13.5px;font-weight:600;line-height:1.3}
+  .card .mt{font-size:12px;color:var(--muted);margin-top:3px}
+  /* กล่องบอกชุด: มืด เข้าชุดหน้าแรก */
+  .ask{margin:40px 0 0;background:var(--ink);color:#fff;border-radius:20px;padding:28px;display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:center}
+  .ask h2{font-family:var(--display);font-size:clamp(22px,2.6vw,30px);font-weight:700;line-height:1.15}
+  .ask .sub{font-size:13.5px;color:rgba(255,255,255,.65);margin-top:8px}
+  .ask textarea{width:100%;min-height:96px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;border-radius:12px;padding:13px 14px;font-family:inherit;font-size:15px;resize:vertical}
+  .ask textarea::placeholder{color:rgba(255,255,255,.5)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .chips span{font-size:12px;padding:7px 12px;border:1px solid rgba(255,255,255,.3);border-radius:20px;cursor:pointer}
+  .ask .go{margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .ask .go small{font-size:11.5px;color:rgba(255,255,255,.55)}
+  .ask .go button{background:var(--gold);color:var(--ink);border:none;font-family:inherit;font-weight:600;font-size:14px;padding:12px 24px;border-radius:26px;cursor:pointer}
+  /* คำขอของฉัน */
+  .mine{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:60px}
+  .rq{display:flex;gap:14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;align-items:center}
+  .rq img{width:64px;height:80px;object-fit:cover;border-radius:9px;background:var(--cream2)}
+  .rq .nm{font-size:13.5px;font-weight:600}
+  .rq .st{display:flex;align-items:center;gap:6px;font-size:12px;margin-top:5px;color:#8a6d1f}
+  .rq .st i{width:8px;height:8px;border-radius:50%;background:#C0892B;display:inline-block}
+  .rq .st.ok{color:var(--ok)} .rq .st.ok i{background:var(--ok)}
+  .bar{display:flex;gap:3px;margin-top:8px}.bar span{flex:1;height:3px;border-radius:2px;background:var(--line)}.bar span.on{background:var(--ink)}
+  .note{text-align:center;font-size:11.5px;color:var(--muted);padding:0 0 40px}
+  @media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.ask{grid-template-columns:1fr;padding:22px}}
+  @media(max-width:600px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mine{grid-template-columns:1fr}.hero{height:64vw}.vote{bottom:calc(25% + 66px)}}
+</style>
+</head>
+<body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
+
+<section class="hero">
+  <video src="https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260807_102059_d467302f-a6d8-4a4c-857c-3b4f48d752bf.mp4" autoplay muted loop playsinline preload="metadata"></video>
+  <div class="scrim"></div>
+  <div class="in">
+    <div class="hk">wish list</div>
+    <h1>อยากได้ชุดไหน<br>บอกเราได้</h1>
+    <p>ยิ่งคนอยากได้ เรายิ่งหาเข้าคลังก่อน</p>
+    <a class="hbtn" href="#ask">บอกเราเลย</a>
+  </div>
+</section>
+
+<div class="contain">
+  <div class="eyebrow"><div><div class="ek">most wanted</div><div class="et">ที่คนอยากได้มากที่สุด</div></div><a href="#">ดูทั้งหมด ›</a></div>
+  <div class="grid">
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-04/0.jpg" alt=""></div><span class="st hot">กำลังตามหา</span><button class="vote on"><svg viewBox="0 0 24 24" fill="#0F6E56"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>42</button><div class="cap"><div class="nm">Elveria Dress</div><div class="mt">Fabrique Co · Ivory</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/JS-06/0.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>31</button><div class="cap"><div class="nm">Long Cream Lace Dress</div><div class="mt">Janesuda · Cream</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-04/2.jpg" alt=""></div><span class="st in">เข้าคลังแล้ว</span><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg>เช่าเลย</button><div class="cap"><div class="nm">Jamie Dress</div><div class="mt">Firr · Sage Green</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-09/2.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>18</button><div class="cap"><div class="nm">Crush Crystal Mini</div><div class="mt">Fabrique Co · Pink</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/ED-03/0.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>15</button><div class="cap"><div class="nm">Maxi Floral Dress</div><div class="mt">Edition Wear · Purple</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-09/4.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>12</button><div class="cap"><div class="nm">Ploy Dress</div><div class="mt">Firr · Beige</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-07/3.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>9</button><div class="cap"><div class="nm">Seraphim Dress</div><div class="mt">Fabrique Co · White</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/ED-10/0.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>7</button><div class="cap"><div class="nm">Sleeveless Mini Dress</div><div class="mt">Edition Wear · Cream</div></div></div>
+  </div>
+
+  <div class="ask" id="ask">
+    <div><h2>บอกชุดในฝัน<br>แล้วให้เราไปตามหา</h2><div class="sub">ชุดเข้าคลังเมื่อไหร่ เราทักไปทาง LINE ทันที</div></div>
+    <div>
+      <textarea placeholder="เช่น เดรสซาตินสีเขียวมรกต สายเดี่ยว ใส่งานแต่งริมทะเล"></textarea>
+      <div class="chips"><span>+ แบรนด์</span><span>+ ไซส์</span><span>+ รูปตัวอย่าง</span><span>+ งบ</span></div>
+      <div class="go"><small>ไม่โชว์ชื่อคุณให้คนอื่นเห็น</small><button>ส่งคำขอ</button></div>
+    </div>
+  </div>
+
+  <div class="eyebrow"><div><div class="ek">my wishes</div><div class="et">คำขอของฉัน</div></div></div>
+  <div class="mine">
+    <div class="rq"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-04/0.jpg" alt=""><div style="flex:1"><div class="nm">เดรสซาตินมรกต สายเดี่ยว</div><div class="st"><i></i>กำลังตามหาให้ · 42 คนอยากได้ด้วย</div><div class="bar"><span class="on"></span><span class="on"></span><span></span></div></div></div>
+    <div class="rq"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-04/2.jpg" alt=""><div style="flex:1"><div class="nm">เดรสเขียวเซจ คอเหลี่ยม</div><div class="st ok"><i></i>เข้าคลังแล้ว จองได้เลย</div><div class="bar"><span class="on"></span><span class="on"></span><span class="on"></span></div></div></div>
+  </div>
+  <div class="note">หน้าตัวอย่างดีไซน์ · ข้อมูลเป็นตัวอย่างเพื่อดูดีไซน์</div>
+</div>
+</body>
+</html>
