@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · เส้นทางลูกค้า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ops-ui.css">
+<style>
+  :root{--ink:#3B362C;--bg:#F2F1EE;--card:#fff;--line:#E0DED9;--muted:#86857F;--sage:#6E8A6A;--clay:#A75F3A;--soft:#F5F2EC;--gold:#C9A86A;--sans:'Prompt',sans-serif;--display:'Poppins','Prompt',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:15px}
+  .bar{background:var(--card);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .bar h1{font-family:var(--display);font-size:19px;font-weight:700}
+  .bar .sub{font-size:13px;color:var(--muted)}
+  .wrap{max-width:980px;margin:16px auto;padding:0 14px;display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h2{font-family:var(--display);font-size:16px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .card .cap{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .btn{border:none;border-radius:9px;padding:10px 15px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);background:var(--ink);color:#fff}
+  .btn.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+  .btn.on{background:var(--sage);color:#fff;border-color:var(--sage)}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .quick{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .loading{color:var(--muted);text-align:center;padding:24px}
+  .errbox{color:var(--clay);background:#F6EBE4;border:1px solid #E8D3C5;border-radius:9px;padding:12px 14px;font-size:14px}
+  .muted{color:var(--muted)}
+
+  .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .strip .pill{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .strip .pill .k{font-size:12.5px;color:var(--muted)}
+  .strip .pill .v{font-family:var(--display);font-size:22px;margin-top:3px}
+  .strip .pill .s{font-size:12px;color:var(--muted)}
+
+  /* funnel */
+  .funnel{display:flex;flex-direction:column;gap:8px}
+  .fstep{display:grid;grid-template-columns:150px 1fr 90px;align-items:center;gap:12px;font-size:13.5px}
+  .fstep .lbl{color:var(--ink)}
+  .fstep .track{height:26px;background:var(--soft);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+  .fstep .fill{height:100%;background:linear-gradient(90deg,#6E8A6A,#9BB596);border-radius:6px 0 0 6px;min-width:2px;transition:width .5s}
+  .fstep .n{text-align:right;font-family:var(--display);font-size:14px}
+  .fstep .n small{display:block;font-family:var(--sans);font-size:11.5px;color:var(--muted);font-weight:400}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}.fstep{grid-template-columns:110px 1fr 70px}}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}
+  td{padding:8px 8px;border-bottom:1px solid #EFEDE8;vertical-align:top}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .path{font-family:'Inter',monospace;font-size:12.5px;line-height:1.6}
+  .path b{color:var(--sage)}
+  .ev{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px;margin:2px 3px 2px 0}
+  .ev.hot{background:#E8EFE6;border-color:#C9DAC5;color:#2f5a2a}
+  .sessrow{cursor:pointer}
+  .sessrow:hover td{background:#FAF8F3}
+  .sessrow.on td{background:#F1F5EF}
+  .tl{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .tl .t{display:grid;grid-template-columns:64px 1fr;gap:10px;font-size:13px;align-items:baseline}
+  .tl .t .at{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
+  .tl .t .meta{color:var(--muted);font-size:12px;margin-left:6px}
+  .empty{color:var(--muted);font-size:13.5px;padding:8px 0}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div><h1>เส้นทางลูกค้า</h1><div class="sub">ลูกค้าเดินในเว็บอย่างไร กดอะไร หลุดตรงไหน ไว้ใช้พัฒนาหน้าเว็บ</div></div>
+  <div class="quick" id="range">
+    <button class="btn ghost sm" data-d="7">7 วัน</button>
+    <button class="btn ghost sm on" data-d="14">14 วัน</button>
+    <button class="btn ghost sm" data-d="30">30 วัน</button>
+    <button class="btn ghost sm" data-d="90">90 วัน</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="loading" class="loading">กำลังโหลด…</div>
+  <div id="err" class="errbox" style="display:none"></div>
+
+  <div id="panel" style="display:none;flex-direction:column;gap:16px">
+    <div class="card">
+      <div class="strip" id="strip"></div>
+    </div>
+
+    <div class="card">
+      <h2>Funnel</h2>
+      <div class="cap">กี่เซสชันที่ไปถึงแต่ละขั้น (นับเซสชันที่มี event นั้นอย่างน้อย 1 ครั้ง)</div>
+      <div class="funnel" id="funnel"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>จุดที่ลูกค้าหลุด</h2>
+        <div class="cap">event สุดท้ายของเซสชันที่ไม่ได้ไปถึงหน้าจอง</div>
+        <div id="drop"></div>
+      </div>
+      <div class="card">
+        <h2>แท็บด้านบนที่กด</h2>
+        <div class="cap">แนะนำสำหรับคุณ / ทั้งหมด / เข้าโทนฉัน / ที่หมายตา / โอกาส</div>
+        <div id="tabs"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>เส้นทางที่เดินบ่อย</h2>
+      <div class="cap">6 ขั้นแรกของแต่ละเซสชัน (ยุบ event ซ้ำติดกัน)</div>
+      <div id="paths"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>จากขั้นนี้ ไปขั้นไหนต่อ</h2>
+        <div id="trans"></div>
+      </div>
+      <div class="card">
+        <h2>คำค้น & ชุดที่เปิดดูบ่อย</h2>
+        <div id="searches"></div>
+        <div id="items" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>เลื่อนลึกแค่ไหน</h2>
+      <div class="cap">เซสชันที่เลื่อนถึง 25 / 50 / 75 / 100% ของหน้า</div>
+      <div class="funnel" id="scroll"></div>
+    </div>
+
+    <div class="card">
+      <h2>ไล่ดูทีละเซสชัน</h2>
+      <div class="cap">แตะแถวเพื่อดูลำดับ event จริงของเซสชันนั้น (30 วันล่าสุด)</div>
+      <div id="sessions"></div>
+      <div id="timeline"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js"></script>
+<script src="ops-api.js"></script>
+<script>
+  const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  if (window.opsRpc) sb.rpc = window.opsRpc;            // ทุก sb.rpc วิ่งผ่าน gateway (LINE login + owner-only)
+  if (window.opsLogin) window.opsLogin().catch(()=>{});
+  const $ = id => document.getElementById(id);
+  const esc = s => (s==null?'':String(s)).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+  const num = n => (n==null||isNaN(n)) ? '0' : Number(n).toLocaleString('th-TH');
+  const pct = (a,b) => (!b) ? 0 : Math.round(a/b*100);
+  const secs = ms => ms==null ? 'ไม่มีข้อมูล' : (ms >= 60000 ? (ms/60000).toFixed(1)+' นาที' : Math.round(ms/1000)+' วิ');
+
+  // ชื่อไทยของ event (ตรงกับที่หน้าเว็บ track)
+  const EV = {
+    session_start:'เปิดเว็บ', catnav_tab:'กดแท็บด้านบน', search:'ค้นหา', view_item:'เปิดดูชุด',
+    wishlist_add:'หมายตา', stylist_ask:'ถาม Atelier', begin_checkout:'ไปหน้าจอง',
+    brand_demand:'ขอแบรนด์', waitlist_join:'ต่อคิวชุด', wish_submit:'ส่งคำขอชุด',
+    scroll_depth:'เลื่อนหน้า', dwell:'เวลาอยู่ในหน้า',
+  };
+  const TAB = { for_you:'แนะนำสำหรับคุณ', all:'ทั้งหมด', my_tone:'เข้าโทนฉัน', wishlist:'ที่หมายตา' };
+  const evName = e => EV[e] || e;
+  const tabName = t => TAB[t] || (String(t).startsWith('occasion:') ? 'โอกาส: '+t.slice(9) : t);
+
+  let days = 14;
+
+  function bar(label, n, max, sub) {
+    return `<div class="fstep"><div class="lbl">${esc(label)}</div>
+      <div class="track"><div class="fill" style="width:${max?Math.max(1,Math.round(n/max*100)):0}%"></div></div>
+      <div class="n">${num(n)}${sub?`<small>${sub}</small>`:''}</div></div>`;
+  }
+  function table(rows, cols) {
+    if (!rows || !rows.length) return `<div class="empty">ยังไม่มีข้อมูลในช่วงนี้</div>`;
+    return `<table><thead><tr>${cols.map(c=>`<th${c.num?' style="text-align:right"':''}>${c.h}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td class="${c.num?'num':''}">${c.f(r)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  }
+
+  function render(d) {
+    const f = d.funnel || [];
+    const top = f[0] ? f[0].sessions : d.sessions;
+    const reachedCheckout = (f.find(x=>x.step==='begin_checkout')||{}).sessions || 0;
+    $('strip').innerHTML = [
+      ['เซสชัน', num(d.sessions), `${d.days} วันล่าสุด`],
+      ['ล็อกอินแล้ว', num(d.logged_in_sessions), `${pct(d.logged_in_sessions, d.sessions)}% ของเซสชัน`],
+      ['ขั้นเฉลี่ยต่อเซสชัน', d.avg_events_per_session ?? '0', 'event ที่มีความหมาย'],
+      ['ไปถึงหน้าจอง', num(reachedCheckout), `${pct(reachedCheckout, d.sessions)}% ของเซสชัน`],
+      ['ออเดอร์จริง', num(d.orders), 'ในช่วงเดียวกัน'],
+      ['อยู่ในหน้า (มัธยฐาน)', secs(d.dwell_median_ms), 'ต่อการเปิด 1 ครั้ง'],
+    ].map(([k,v,s])=>`<div class="pill"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
+
+    $('funnel').innerHTML = f.length ? f.map((x,i)=>{
+      const prev = i ? f[i-1].sessions : null;
+      return bar(evName(x.step), x.sessions, top, prev ? `${pct(x.sessions, prev)}% จากขั้นก่อน` : '');
+    }).join('') : `<div class="empty">ยังไม่มี event ในช่วงนี้ (หน้าเว็บเพิ่งเริ่มเก็บใหม่หลังท่อขาด)</div>`;
+
+    $('drop').innerHTML = table(d.drop_off, [
+      { h:'event สุดท้าย', f:r=>`<span class="ev">${esc(evName(r.last_event))}</span>` },
+      { h:'เซสชัน', num:true, f:r=>num(r.sessions) },
+    ]);
+    $('tabs').innerHTML = table(d.tabs, [
+      { h:'แท็บ', f:r=>esc(tabName(r.tab)) },
+      { h:'ครั้ง', num:true, f:r=>num(r.clicks) },
+      { h:'เซสชัน', num:true, f:r=>num(r.sessions) },
+    ]);
+    $('paths').innerHTML = table(d.top_paths, [
+      { h:'เส้นทาง', f:r=>`<div class="path">${r.path.split(' > ').map(s=>`<span class="ev ${s==='begin_checkout'?'hot':''}">${esc(evName(s))}</span>`).join('<b>›</b> ')}</div>` },
+      { h:'เซสชัน', num:true, f:r=>num(r.sessions) },
+    ]);
+    $('trans').innerHTML = table(d.transitions, [
+      { h:'จาก', f:r=>esc(evName(r.from)) },
+      { h:'ไป', f:r=>esc(evName(r.to)) },
+      { h:'ครั้ง', num:true, f:r=>num(r.n) },
+    ]);
+    $('searches').innerHTML = `<div class="cap">คำค้น</div>` + table(d.searches, [
+      { h:'คำ', f:r=>esc(r.q) }, { h:'ครั้ง', num:true, f:r=>num(r.n) },
+    ]);
+    $('items').innerHTML = `<div class="cap">ชุดที่เปิดดูบ่อย</div>` + table(d.top_items, [
+      { h:'รหัสชุด', f:r=>`<a href="garment.html?code=${encodeURIComponent(r.code)}" style="color:var(--ink)">${esc(r.code)}</a>` },
+      { h:'ครั้ง', num:true, f:r=>num(r.views) }, { h:'เซสชัน', num:true, f:r=>num(r.sessions) },
+    ]);
+    const sc = d.scroll_depth || [];
+    const scMax = sc.length ? Math.max(...sc.map(x=>x.sessions)) : 0;
+    $('scroll').innerHTML = sc.length ? sc.map(x=>bar(x.depth+'%', x.sessions, scMax)).join('') : `<div class="empty">ยังไม่มีข้อมูล</div>`;
+  }
+
+  async function loadSessions() {
+    const { data, error } = await sb.rpc('ops_recent_sessions', { p_limit: 40 });
+    if (error || !Array.isArray(data)) { $('sessions').innerHTML = `<div class="empty">โหลดรายการเซสชันไม่ได้</div>`; return; }
+    if (!data.length) { $('sessions').innerHTML = `<div class="empty">ยังไม่มีเซสชัน</div>`; return; }
+    $('sessions').innerHTML = `<table><thead><tr><th>เริ่ม</th><th>ลูกค้า</th><th style="text-align:right">ขั้น</th><th style="text-align:right">นาน</th><th>ถึงหน้าจอง</th></tr></thead><tbody>${
+      data.map(s=>`<tr class="sessrow" data-id="${esc(s.session_id)}">
+        <td>${new Date(s.started).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+        <td>${esc(s.name || 'ผู้เยี่ยมชม')}</td>
+        <td class="num">${num(s.steps)}</td>
+        <td class="num">${secs((s.secs||0)*1000)}</td>
+        <td>${s.reached_checkout ? '<span class="ev hot">ใช่</span>' : '<span class="muted">ยัง</span>'}</td></tr>`).join('')}</tbody></table>`;
+    document.querySelectorAll('.sessrow').forEach(tr => tr.addEventListener('click', () => {
+      document.querySelectorAll('.sessrow').forEach(x=>x.classList.remove('on')); tr.classList.add('on');
+      loadTimeline(tr.dataset.id);
+    }));
+  }
+
+  async function loadTimeline(id) {
+    $('timeline').innerHTML = `<div class="loading">กำลังโหลดเซสชัน…</div>`;
+    const { data, error } = await sb.rpc('ops_session_flow', { p_session: id });
+    if (error || !data) { $('timeline').innerHTML = `<div class="empty">โหลดไม่ได้</div>`; return; }
+    const c = data.customer;
+    const evs = data.events || [];
+    $('timeline').innerHTML = `<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)">
+      <div class="cap"><b>${esc(c ? c.name : 'ผู้เยี่ยมชม (ยังไม่ล็อกอิน)')}</b>${c && c.tier ? ` · ${esc(c.tier)}` : ''} · ${evs.length} event</div>
+      <div class="tl">${evs.map(e=>`<div class="t"><span class="at">+${e.secs_from_start}s</span>
+        <span><span class="ev ${e.event==='begin_checkout'?'hot':''}">${esc(evName(e.event))}</span>${e.target?` <b>${esc(e.event==='catnav_tab'?tabName(e.target):e.target)}</b>`:''}${e.meta?`<span class="meta">${esc(JSON.stringify(e.meta))}</span>`:''}</span></div>`).join('')}</div></div>`;
+  }
+
+  async function load() {
+    $('loading').style.display = ''; $('err').style.display = 'none';
+    const { data, error } = await sb.rpc('ops_customer_flow', { p_days: days });
+    $('loading').style.display = 'none';
+    if (error) { $('err').style.display = ''; $('err').textContent = 'โหลดไม่สำเร็จ: ' + (error.message || error); return; }
+    $('panel').style.display = 'flex';
+    render(data || {});
+  }
+
+  document.querySelectorAll('#range button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#range button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    days = Number(b.dataset.d); load();
+  }));
+  load(); loadSessions();
+</script>
+<script src="ops-menu.js"></script>
+</body>
+</html>
