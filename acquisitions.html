@@ -20,6 +20,10 @@
   .offer-row .nm{font-weight:600}
   .offer-row .meta{font-size:12.5px;color:var(--muted,#86857F)}
   .st{font-size:12px;padding:2px 10px;border-radius:99px;white-space:nowrap;align-self:center}
+  .fit{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin:12px 0 2px;padding:10px 13px;border-radius:9px;font-size:14px;line-height:1.5}
+  .fit b{font-weight:600}
+  .fit .sub{color:var(--muted,#86857F);font-size:12.5px}
+  .fit.good{background:#E3F2EC}.fit.warn{background:#FFF3D6}.fit.bad{background:#F7E7E3}
   .st.submitted,.st.new{background:#FFF3D6}.st.priced{background:#E8F0FB}.st.accepted{background:#E3F2EC}.st.paid{background:#DCEFE4;font-weight:600}.st.rejected{background:#F3E9E7;color:#A32D2D}.st.stocked{background:#EEEDE9}
   .photos{display:flex;gap:8px;overflow-x:auto;margin:8px 0}
   .photos img{height:110px;border-radius:10px}
@@ -133,9 +137,12 @@
     const canDecide=['submitted','new','priced'].includes(o.status||'submitted');
     const canPay=o.status==='accepted';
     const canStock=['paid','accepted'].includes(o.status);
+    const fit=d.stock_fit;
+    const fitIcon={good:'🟢',warn:'🟡',bad:'🔴'};
     $('detail').innerHTML=`
       ${photos?`<div class="photos">${photos}</div>`:''}
       <div class="kv">${kv}</div>
+      ${fit&&fit.available?`<div class="fit ${esc(fit.verdict)}">${fitIcon[fit.verdict]||''} <b>${esc(fit.headline)}</b><span class="sub">${esc(fit.detail)}</span></div>`:''}
       ${canDecide?`<div class="price-row">
         <div><label>ราคาเสนอซื้อของเรา (บาท)</label><input id="dPrice" type="number" value="${o.offered_price??''}" placeholder="เช่น 800"></div>
         <button class="btn ghost" style="width:auto;margin:0" onclick="savePrice()">บันทึกราคา</button>
@@ -179,8 +186,9 @@
       }
     }
     const note=decision==='rejected'?(prompt('เหตุผล (แจ้งผู้ขาย — เว้นว่างได้)','')||null):null;
-    const {error}=await sb.rpc('seller_offer_decide',{p_id:o.id,p_decision:decision,p_note:note});
+    const {data:dres,error}=await sb.rpc('seller_offer_decide',{p_id:o.id,p_decision:decision,p_note:note});
     if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }
+    if(dres&&dres.error){ toast('ไม่สำเร็จ: '+dres.error,true); return; }
     toast(decision==='accepted'?'ตกลงซื้อแล้ว — นัดจ่ายเงิน/รับของต่อได้เลย':'บันทึกไม่รับซื้อแล้ว');
     openOffer(o.id); loadList();
   }
@@ -189,6 +197,7 @@
     const ref=prompt('อ้างอิงการโอน (เลขสลิป/เวลาโอน — เว้นว่างได้)','')||null;
     const {data,error}=await sb.rpc('seller_offer_paid',{p_id:o.id,p_ref:ref});
     if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }
+    if(data&&data.error){ toast(data.message||('ไม่สำเร็จ: '+data.error),true); return; }
     toast('บันทึกจ่ายแล้ว · ใบรับซื้อ '+(data?.voucher_no||'ออกแล้ว'));
     openOffer(o.id); loadList();
   }
