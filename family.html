@@ -30,24 +30,35 @@
 
   /* hero */
   .hero{padding:30px 0 18px}
-  /* hero วิดีโอ ชุดเดียวกับหน้าแรก */
-  .vhero{position:relative;height:42vw;max-height:420px;min-height:268px;overflow:hidden;display:flex;
-    align-items:center;justify-content:center;text-align:center;color:#fff;background:linear-gradient(120deg,#EDE7DF,#E6DCD2);
-    margin:0 -18px}
-  .vhero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 32%;opacity:0;transition:opacity .6s}
+  /* ===== hero วิดีโอ: เต็มขอบจอจริง (หลุดกรอบ container) ===== */
+  .vhero{position:relative;width:100%;height:min(64vh,540px);min-height:320px;overflow:hidden;
+    display:flex;align-items:flex-end;justify-content:center;text-align:center;color:#fff;
+    background:linear-gradient(120deg,#EDE7DF,#E6DCD2)}
+  .vhero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 28%;
+    opacity:0;transition:opacity .8s ease}
   .vhero.on video{opacity:1}
-  .vhero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.16),rgba(0,0,0,.44));opacity:0;transition:opacity .6s}
+  /* ไล่เข้ม 2 ชั้น: บนนิดหน่อยกันชนกับแถบเมนู ล่างเข้มขึ้นให้ตัวหนังสืออ่านออกและจางลงพื้นหน้าเว็บ */
+  .vhero .scrim{position:absolute;inset:0;opacity:0;transition:opacity .8s ease;
+    background:linear-gradient(180deg,rgba(20,18,14,.30) 0%,rgba(20,18,14,0) 26%,rgba(20,18,14,.20) 52%,rgba(20,18,14,.72) 100%)}
   .vhero.on .scrim{opacity:1}
-  .vhero .in{position:relative;z-index:2;padding:0 20px}
-  .vhero .hk{font-family:var(--display);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#E8D5A8;font-weight:600;margin-bottom:10px}
-  .vhero h1{font-family:var(--display);font-weight:700;font-size:clamp(27px,5vw,52px);line-height:1.04;letter-spacing:.5px;color:#fff}
-  .vhero p{margin-top:11px;font-size:14.5px;opacity:.92;max-width:44ch;margin-left:auto;margin-right:auto;line-height:1.6}
-  .vhero .hbtn{display:inline-block;margin-top:20px;background:#fff;color:var(--ink);padding:13px 32px;font-size:11.5px;
-    letter-spacing:.18em;text-transform:uppercase;font-weight:600;text-decoration:none;border-radius:2px}
-  /* ยังไม่มีวิดีโอ (โหลดไม่ขึ้น/เน็ตช้า) → ตัวหนังสือต้องอ่านออกบนพื้นครีม */
-  .vhero:not(.on) .hk{color:var(--gold)} .vhero:not(.on) h1{color:var(--ink)}
-  .vhero:not(.on) p{color:#5E5746} .vhero:not(.on) .hbtn{background:var(--ink);color:#fff}
-  @media(min-width:760px){.vhero{margin:0 -20px}}
+  .vhero .in{position:relative;z-index:2;width:100%;max-width:720px;padding:0 24px clamp(38px,6vw,72px)}
+  .vhero .hk{font-family:var(--display);font-size:11px;letter-spacing:.34em;text-transform:uppercase;
+    color:#E8D5A8;font-weight:600;margin-bottom:14px}
+  .vhero h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5.6vw,60px);line-height:1.03;
+    letter-spacing:.4px;color:#fff;text-shadow:0 2px 24px rgba(0,0,0,.28)}
+  .vhero p{margin:14px auto 0;font-size:clamp(14px,1.5vw,16px);line-height:1.62;opacity:.94;
+    max-width:38ch;text-wrap:balance;text-shadow:0 1px 12px rgba(0,0,0,.3)}
+  .vhero .hbtn{display:inline-block;margin-top:22px;background:#fff;color:var(--ink);padding:14px 34px;
+    font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;text-decoration:none;border-radius:2px}
+  /* วิดีโอยังโหลดไม่ขึ้น (เน็ตช้า) → ตัวหนังสือต้องอ่านออกบนพื้นครีม ไม่ใช่ขาวบนขาว */
+  .vhero:not(.on){align-items:center}
+  .vhero:not(.on) .in{padding-bottom:0}
+  .vhero:not(.on) .hk{color:var(--gold)}
+  .vhero:not(.on) h1{color:var(--ink);text-shadow:none}
+  .vhero:not(.on) p{color:#5E5746;text-shadow:none}
+  .vhero:not(.on) .hbtn{background:var(--ink);color:#fff}
+  /* ให้เนื้อหาหลังจาก hero หายใจ ไม่ติดกันเป็นพืด */
+  .afterhero{padding-top:clamp(26px,4vw,44px)}
 
   .eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:600}
   .htitle{font-family:var(--display);font-size:30px;font-weight:600;margin-top:8px;letter-spacing:.5px}
@@ -62,7 +73,7 @@
   .gchip.add{border-style:dashed;color:var(--muted)}
 
   /* section */
-  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
+  .sec{background:#fff;border:1px solid var(--line);border-radius:16px;padding:clamp(20px,3vw,30px);margin-top:clamp(16px,2.4vw,24px)}
   .sechead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
   .sectitle{font-family:var(--display);font-size:16px;font-weight:600}
   .seccap{font-size:12px;color:var(--muted)}
@@ -179,16 +190,17 @@
 <body>
 <header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 
-<div class="contain">
   <section class="vhero">
-    <video src="https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260904_045534_5938bc3e-1513-41c0-acde-2ca1f170d1f1.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
-    <div class="scrim" aria-hidden="true"></div>
-    <div class="in">
-      <div class="hk">together</div>
-      <h1>บ้านเดียวกัน<br>ตีมเดียวกัน</h1>
-      <p>ผูกคนที่รักไว้ในกลุ่มเดียว ให้สไตลิสต์จัดชุดเข้าตีม เช่าพร้อมกันในออเดอร์เดียวค่ะ</p>
-    </div>
-  </section>
+  <video src="https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260904_045534_5938bc3e-1513-41c0-acde-2ca1f170d1f1.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="in">
+    <div class="hk">together</div>
+    <h1>บ้านเดียวกัน<br>ตีมเดียวกัน</h1>
+    <p>ผูกคนที่รักไว้ในกลุ่มเดียว ให้สไตลิสต์จัดชุดเข้าตีม เช่าพร้อมกันในออเดอร์เดียวค่ะ</p>
+  </div>
+</section>
+
+<div class="contain afterhero">
 
   <!-- คำเชิญรอตอบรับ -->
   <div id="invites"></div>
@@ -1029,7 +1041,6 @@ function cleanJoinFromUrl(){
     history.replaceState(null,'',u.pathname+(u.search||'')+u.hash);
   }catch(_e){}
 }
-
 
 // hero วิดีโอ: โชว์ตัวหนังสือบนพื้นครีมไปก่อน วิดีโอค่อยจางเข้ามาเมื่อโหลดได้จริง
 (function(){
