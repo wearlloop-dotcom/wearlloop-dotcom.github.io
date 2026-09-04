@@ -290,6 +290,24 @@ function fitInfo(c, g) {
     return { score: Math.max(0, Math.min(100, Math.round(score))), from: 'measured' };
   }
 
+  // ชั้นที่ 1.5 — ชุดไม่มีรอบอก แต่มีเอว/สะโพกจากตารางไซส์ของร้าน (ตอนนี้ 12 ตัวในคลัง)
+  // เดิมทิ้งข้อมูลนี้ทั้งหมดแล้วตกไปเทียบป้ายไซส์ ทั้งที่ตัวเลขจริงแม่นกว่า
+  if ((c.waist_in != null && g.waist) || (c.hip_in != null && g.hip)) {
+    let slack = g.stretch === 'stretchy' ? 2 : g.stretch === 'slight' ? 1 : 0;
+    if ((g.fitN||0) >= 3 && g.fitAvg != null) {
+      const adj = g.fitAvg * 0.5 * (Math.min(g.fitN,8)/8);
+      slack = Math.max(-1, Math.min(2.5, slack + adj));
+    }
+    // เริ่มที่ 88 ไม่ใช่ 100 เพราะยังไม่รู้รอบอก จะได้ไม่แซงชุดที่วัดครบ
+    let score = 88;
+    if (c.waist_in != null && g.waist) {
+      if (c.waist_in > g.waist[1] + slack)      score -= (c.waist_in - g.waist[1] - slack) * 15;
+      else if (c.waist_in < g.waist[0] - slack) score -= (g.waist[0] - slack - c.waist_in) * 6;  // เอวเล็กกว่าช่วง ใส่ได้แต่หลวม
+    }
+    if (c.hip_in != null && g.hip && c.hip_in > g.hip + slack) score -= (c.hip_in - g.hip - slack) * 12;
+    return { score: Math.max(0, Math.min(100, Math.round(score))), from: 'partial' };
+  }
+
   // ชั้นที่ 2 — ชุดมีแต่ป้ายไซส์ เทียบกับไซส์ของลูกค้า (ยังดีกว่าให้คะแนนกลางเท่ากันหมด)
   const mine = mySizeBand(c);
   if (!mine) return null;
@@ -1318,13 +1336,14 @@ function fitMatch(g){
       <div style="font-size:13px;font-weight:600;color:#04342C">${th?'พอดีตัวคุณไหม?':'Will it fit you?'}</div>${sizeNote}
     </div>
     ${verdict?`<div style="font-size:13px;font-weight:600;color:${vcol};margin-bottom:2px">${verdict}${score!=null?` · ${score}%`:''}</div>`:''}
-    ${fi && fi.from === 'measured' ? rows : ''}
-    ${fi && fi.from !== 'measured' && mine ? `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:4px 0;border-top:1px solid #d7e7e0">
+    ${fi && (fi.from === 'measured' || fi.from === 'partial') ? rows : ''}
+    ${fi && fi.from !== 'measured' && fi.from !== 'partial' && mine ? `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:4px 0;border-top:1px solid #d7e7e0">
       <span style="color:#5b5a55">${th?'ไซส์ของคุณ':'Your size'}</span>
       <span style="color:#04342C"><b>${mine}</b> <span style="color:#8a897f">· ${th?'ชุด':'dress'} ${esc(String(g.size||'').toUpperCase())}</span></span></div>` : ''}
     <div style="font-size:11px;color:#8a897f;margin-top:8px">${
       !fi ? (th?'ยังเทียบไม่ได้ กรอกสัดส่วนหรือไซส์ที่ใส่ประจำในโปรไฟล์ก่อนนะคะ':'Add your measurements or usual size in profile to compare')
       : fi.from === 'measured' ? (th?'เทียบจากตัวเลขวัดจริงของชุด กับสัดส่วนที่คุณบันทึกไว้':'Measured dress vs your saved measurements')
+      : fi.from === 'partial' ? (th?'ชุดตัวนี้ร้านให้ตัวเลขเอว/สะโพกมา แต่ไม่มีรอบอก เทียบเท่าที่มี':'This piece has waist/hip from the shop but no bust, compared on what we have')
       : fi.from === 'free' ? (th?'ชุดฟรีไซส์ เทียบจากไซส์ของคุณ':'Free size, compared with your size')
       : (th?'ชุดตัวนี้ยังไม่มีตัวเลขวัดจริง เทียบจากป้ายไซส์กับไซส์ของคุณ':'This piece is not measured yet, compared by size label')
     } · ${th?'แก้ได้ในโปรไฟล์':'edit in profile'}</div>
