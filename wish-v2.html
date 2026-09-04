@@ -41,6 +41,13 @@
   .vote{position:absolute;right:12px;bottom:calc(25% + 60px);background:#fff;border:1px solid var(--line);border-radius:22px;padding:7px 12px;font-size:12.5px;font-weight:600;display:flex;gap:6px;align-items:center;cursor:pointer}
   .vote svg{width:14px;height:14px}
   .vote.on{background:var(--sage-bg);border-color:#bcd9cf;color:var(--ok)}
+  .card .ph .src{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.55));
+    color:#fff;font-size:10.5px;padding:14px 10px 7px;letter-spacing:.02em}
+  .card .ph .src.ok{background:linear-gradient(180deg,transparent,rgba(15,110,86,.75))}
+  .card .ph{position:relative}
+  .card .ph.nopic{aspect-ratio:3/4;background:var(--sand);display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:9px;color:#8a7550;font-size:11.5px}
+  .card .ph.nopic svg{width:30px;height:30px;stroke:#C9A86A;fill:none;stroke-width:1.4}
   .card .cap{padding:10px 13px 13px}
   .card .nm{font-size:13.5px;font-weight:600;line-height:1.3}
   .card .mt{font-size:12px;color:var(--muted);margin-top:3px}
@@ -52,6 +59,10 @@
   .ask textarea::placeholder{color:rgba(255,255,255,.5)}
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .chips span{font-size:12px;padding:7px 12px;border:1px solid rgba(255,255,255,.3);border-radius:20px;cursor:pointer}
+  .askup{border:1.5px dashed rgba(255,255,255,.32);border-radius:12px;padding:18px 14px;margin-bottom:10px;
+    display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,.72);font-size:12.5px;text-align:center;cursor:pointer}
+  .askup:hover{border-color:var(--gold);color:#fff}
+  .askup svg{width:26px;height:26px;stroke:var(--gold);fill:none;stroke-width:1.5}
   .ask .go{margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
   .ask .go small{font-size:11.5px;color:rgba(255,255,255,.55)}
   .ask .go button{background:var(--gold);color:var(--ink);border:none;font-family:inherit;font-weight:600;font-size:14px;padding:12px 24px;border-radius:26px;cursor:pointer}
@@ -86,21 +97,24 @@
 <div class="contain">
   <div class="eyebrow"><div><div class="ek">most wanted</div><div class="et">ที่คนอยากได้มากที่สุด</div></div><a href="#">ดูทั้งหมด ›</a></div>
   <div class="grid">
-    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-04/0.jpg" alt=""></div><span class="st hot">กำลังตามหา</span><button class="vote on"><svg viewBox="0 0 24 24" fill="#0F6E56"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>42</button><div class="cap"><div class="nm">Elveria Dress</div><div class="mt">Fabrique Co · Ivory</div></div></div>
-    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/JS-06/0.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>31</button><div class="cap"><div class="nm">Long Cream Lace Dress</div><div class="mt">Janesuda · Cream</div></div></div>
-    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-04/2.jpg" alt=""></div><span class="st in">เข้าคลังแล้ว</span><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg>เช่าเลย</button><div class="cap"><div class="nm">Jamie Dress</div><div class="mt">Firr · Sage Green</div></div></div>
-    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-09/2.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>18</button><div class="cap"><div class="nm">Crush Crystal Mini</div><div class="mt">Fabrique Co · Pink</div></div></div>
-    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/ED-03/0.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>15</button><div class="cap"><div class="nm">Maxi Floral Dress</div><div class="mt">Edition Wear · Purple</div></div></div>
-    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-09/4.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>12</button><div class="cap"><div class="nm">Ploy Dress</div><div class="mt">Firr · Beige</div></div></div>
-    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-07/3.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>9</button><div class="cap"><div class="nm">Seraphim Dress</div><div class="mt">Fabrique Co · White</div></div></div>
-    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/ED-10/0.jpg" alt=""></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>7</button><div class="cap"><div class="nm">Sleeveless Mini Dress</div><div class="mt">Edition Wear · Cream</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-04/2.jpg" alt=""><span class="src">รูปจากลูกค้า</span></div><span class="st hot">กำลังตามหา</span><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>42</button><div class="cap"><div class="nm">เดรสซาตินมรกต สายเดี่ยว</div><div class="mt">ลูกค้าแนบรูปมา · ไซส์ S</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/JS-06/0.jpg" alt=""><span class="src">รูปจากลูกค้า</span></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>31</button><div class="cap"><div class="nm">ชุดไทยประยุกต์ โอลด์โรส</div><div class="mt">ลูกค้าแนบรูปมา · ไซส์ M</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FR-07/2.jpg" alt=""><span class="src ok">รูปชุดจริงในคลัง</span></div><span class="st in">เข้าคลังแล้ว</span><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg>เช่าเลย</button><div class="cap"><div class="nm">Poppy Dress</div><div class="mt">Firr · หาเข้าคลังให้แล้ว</div></div></div>
+    <div class="card"><div class="ph nopic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg><span>ไม่ได้แนบรูป</span></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>18</button><div class="cap"><div class="nm">เซ็ตลินินสีทราย ใส่ทำงาน</div><div class="mt">ไม่ได้แนบรูป · บอกเป็นคำอธิบาย</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-04/0.jpg" alt=""><span class="src">รูปจากลูกค้า</span></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>15</button><div class="cap"><div class="nm">เดรสลูกไม้ลาเวนเดอร์ แขนพอง</div><div class="mt">ลูกค้าแนบรูปมา · ไซส์ S</div></div></div>
+    <div class="card"><div class="ph nopic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg><span>ไม่ได้แนบรูป</span></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>12</button><div class="cap"><div class="nm">กระโปรงยาวผ้าไหม สีครีม</div><div class="mt">ไม่ได้แนบรูป · มีลิงก์ร้าน</div></div></div>
+    <div class="card"><div class="ph"><img src="https://rprwilsbjptdnvsibjgi.supabase.co/storage/v1/object/public/garments/FB-09/2.jpg" alt=""><span class="src">รูปจากลูกค้า</span></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>9</button><div class="cap"><div class="nm">เดรสคริสตัล งานเลี้ยงกลางคืน</div><div class="mt">ลูกค้าแนบรูปมา · ไซส์ M</div></div></div>
+    <div class="card"><div class="ph nopic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg><span>ไม่ได้แนบรูป</span></div><button class="vote"><svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 20s-7-4.6-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.4-9 9-9 9z"/></svg>7</button><div class="cap"><div class="nm">เสื้อคลุมตัวยาว สีเบจ</div><div class="mt">ไม่ได้แนบรูป</div></div></div>
   </div>
+
+  <p style="font-size:12px;color:var(--muted);margin:12px 0 0">รูปในหน้านี้มาจากรูปที่ลูกค้าแนบตอนส่งคำขอ ชุดที่เราหาเข้าคลังแล้วจะสลับเป็นรูปชุดจริงของ LLOOP</p>
 
   <div class="ask" id="ask">
     <div><h2>บอกชุดในฝัน<br>แล้วให้เราไปตามหา</h2><div class="sub">ชุดเข้าคลังเมื่อไหร่ เราทักไปทาง LINE ทันที</div></div>
     <div>
-      <textarea placeholder="เช่น เดรสซาตินสีเขียวมรกต สายเดี่ยว ใส่งานแต่งริมทะเล"></textarea>
-      <div class="chips"><span>+ แบรนด์</span><span>+ ไซส์</span><span>+ รูปตัวอย่าง</span><span>+ งบ</span></div>
+      <div class="askup"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg><span>แตะเพื่อแนบรูป แคปจาก Shopee, Lazada หรือ IG มาก็ได้</span></div>
+      <textarea placeholder="อธิบายเพิ่มก็ได้ เช่น อยากได้สีเขียวมรกต ใส่งานแต่งริมทะเล"></textarea>
+      <div class="chips"><span>+ ลิงก์ร้าน</span><span>+ แบรนด์</span><span>+ ไซส์</span><span>+ งบ</span></div>
       <div class="go"><small>ไม่โชว์ชื่อคุณให้คนอื่นเห็น</small><button>ส่งคำขอ</button></div>
     </div>
   </div>
