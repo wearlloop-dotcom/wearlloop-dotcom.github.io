@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLOOP · อยากได้ชุดไหน บอกเราได้</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="nav.js?v=2"></script>
+<style>
+  :root{
+    --bg:#FBFAF7; --cream2:#F5F4F2; --ink:#1A1A1A; --line:#E7E5E1; --muted:#8C8B86;
+    --sage:#6FB3A6; --sage-bg:#E4F0EC; --ok:#0F6E56; --gold:#C9A86A; --sand:#F2ECDD;
+    --display:'Poppins','Prompt',sans-serif; --sans:'Inter','Prompt',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased;padding-bottom:70px}
+  .contain{max-width:820px;margin:0 auto;padding:0 18px}
+
+  /* หัวหน้า: โทนเดียวกับ "the LLOOP edit" ในหน้าแรก */
+  .hero{padding:34px 0 24px;position:relative}
+  .hero::before{content:"";position:absolute;top:22px;left:18px;width:42px;height:1px;background:var(--gold)}
+  .eyebrow{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(23px,5.4vw,31px);letter-spacing:.5px;margin-top:6px;line-height:1.2}
+  .hsub{color:var(--muted);font-size:14px;margin-top:9px;max-width:56ch}
+
+  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 18px;margin-bottom:16px}
+  .sectitle{font-family:var(--display);font-size:15.5px;font-weight:600}
+  .seccap{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .fld{display:flex;flex-direction:column;gap:5px}
+  .fld.wide{grid-column:1 / -1}
+  label{font-size:11.5px;letter-spacing:.4px;color:var(--muted)}
+  input,select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;
+    font-family:inherit;font-size:15px;color:var(--ink);background:var(--bg);outline:none;appearance:none;-webkit-appearance:none}
+  textarea{min-height:82px;resize:vertical;line-height:1.6}
+  input:focus,select:focus,textarea:focus{border-color:var(--sage);background:#fff}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238C8B86' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+  .btn{background:var(--ink);color:#fff;border:none;border-radius:11px;padding:13px 22px;font-family:inherit;
+    font-size:14.5px;font-weight:600;letter-spacing:.02em;cursor:pointer}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.sm{padding:8px 15px;font-size:12.5px;border-radius:20px}
+  .actions{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
+  .note{font-size:12px;color:var(--muted)}
+  .err{color:#9B1C1C;font-size:12.5px;margin-top:9px;min-height:1em}
+
+  /* รายการคำขอ */
+  .rq{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;
+    padding:13px;margin-top:11px;background:#fff}
+  .rq .th{flex:0 0 62px;width:62px;height:78px;border-radius:9px;background:var(--cream2);overflow:hidden;
+    display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--muted);text-align:center;padding:5px}
+  .rq .th img{width:100%;height:100%;object-fit:cover;display:block}
+  .rq .bd{flex:1;min-width:0}
+  .rq .nm{font-family:var(--display);font-size:14.5px;font-weight:600;line-height:1.35}
+  .rq .mt{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .tag{display:inline-block;font-size:10.5px;letter-spacing:.3px;padding:3px 9px;border-radius:20px;background:var(--cream2);color:#555;margin-top:7px}
+  .tag.sage{background:var(--sage-bg);color:var(--ok)}
+  .tag.gold{background:#F6EDD8;color:#8a6d2f}
+  .vote{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;background:#fff;
+    border:1px solid var(--line);border-radius:11px;padding:8px 11px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .vote.on{background:var(--sage-bg);border-color:var(--sage);color:var(--ok)}
+  .vote .n{font-family:var(--display);font-size:16px;font-weight:700;line-height:1}
+  .vote .l{font-size:10px;color:var(--muted)}
+  .vote.on .l{color:var(--ok)}
+  .empty{text-align:center;color:var(--muted);padding:24px 12px;font-size:13.5px;line-height:1.8}
+  .loading{text-align:center;color:var(--muted);padding:26px}
+  .signin{text-align:center;padding:26px 14px}
+  .signin p{color:var(--muted);font-size:13.5px;margin-bottom:14px;line-height:1.8}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+  .step{background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:13px}
+  .step .k{font-family:var(--display);font-size:11px;letter-spacing:.2em;color:var(--gold);font-weight:600}
+  .step .t{font-size:13px;margin-top:5px;line-height:1.6}
+  @media(max-width:560px){ .frow{grid-template-columns:1fr} .steps{grid-template-columns:1fr} }
+
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(14px);background:var(--ink);color:#fff;
+    padding:11px 18px;border-radius:24px;font-size:13px;opacity:0;transition:.22s;pointer-events:none;z-index:90;max-width:88vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
+
+<div class="contain">
+  <div class="hero">
+    <div class="eyebrow">wish list</div>
+    <h1 data-i18n="Tell us the piece you want">อยากได้ชุดไหน บอกเราได้</h1>
+    <p class="hsub" data-i18n="Tell us what you're looking for. We source the pieces the most people ask for, and message you the moment yours lands.">บอกชุดที่ตามหาไว้ เราจะไปหาชุดที่คนอยากได้มากที่สุดเข้าคลังก่อน พอชุดของคุณเข้ามา เราทักไปบอกทันทีค่ะ</p>
+  </div>
+
+  <div class="sec">
+    <div class="sectitle" data-i18n="How it works">ขั้นตอนเป็นแบบนี้</div>
+    <div class="steps">
+      <div class="step"><div class="k">01</div><div class="t" data-i18n="Describe the piece — a photo link helps">บอกชุดที่อยากได้ มีลิงก์รูปยิ่งดี</div></div>
+      <div class="step"><div class="k">02</div><div class="t" data-i18n="Others vote — the most-wanted goes first">คนอื่นโหวตตามได้ ชุดที่คนอยากได้มากสุดเราหาก่อน</div></div>
+      <div class="step"><div class="k">03</div><div class="t" data-i18n="We message you on LINE when it arrives">ชุดเข้าคลังเมื่อไหร่ เราทักไปทาง LINE ทันที</div></div>
+    </div>
+  </div>
+
+  <div id="gate" class="sec signin" hidden>
+    <p data-i18n="Sign in with LINE so we can tell you when your piece arrives">เข้าสู่ระบบด้วย LINE ไว้ เดี๋ยวชุดเข้าคลังเราจะได้ทักไปบอกถูกคนค่ะ</p>
+    <button class="btn" id="signinBtn" data-i18n="Sign in with LINE">เข้าสู่ระบบด้วย LINE</button>
+  </div>
+
+  <div id="app" hidden>
+    <div class="sec">
+      <div class="sectitle" data-i18n="Tell us what you're after">บอกชุดที่อยากได้</div>
+      <div class="seccap" data-i18n="Only the description is required — the rest helps us find the right one">กรอกแค่คำอธิบายก็พอ ที่เหลือใส่เท่าที่รู้ ช่วยให้เราหาได้ตรงขึ้นค่ะ</div>
+      <div class="frow">
+        <div class="fld wide">
+          <label data-i18n="The piece you want">ชุดที่อยากได้</label>
+          <textarea id="f_desc" maxlength="300" placeholder="เช่น เดรสยาวสีเขียวมรกต ผ้าซาติน สายเดี่ยว ใส่ไปงานแต่งริมทะเล"></textarea>
+        </div>
+        <div class="fld"><label data-i18n="Brand (if you know it)">แบรนด์ (ถ้ารู้)</label><input id="f_brand" maxlength="60" placeholder="ไม่รู้ก็เว้นไว้ได้"></div>
+        <div class="fld"><label data-i18n="Size">ไซส์</label><select id="f_size">
+          <option value="" data-i18n="Not sure">ยังไม่แน่ใจ</option>
+          <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+        </select></div>
+        <div class="fld"><label data-i18n="Occasion">โอกาสที่จะใส่</label><select id="f_occ"></select></div>
+        <div class="fld"><label data-i18n="Rental budget (baht)">งบค่าเช่า (บาท)</label><input id="f_budget" type="number" min="0" step="50" placeholder="เช่น 900"></div>
+        <div class="fld wide"><label data-i18n="Link to a photo (optional)">ลิงก์รูปตัวอย่าง (ใส่ก็ได้ ไม่ใส่ก็ได้)</label><input id="f_url" type="url" placeholder="https://…"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="sendBtn" data-i18n="Send this wish">ส่งคำขอ</button>
+        <span class="note" data-i18n="We never share your request publicly with your name">คำขอของคุณจะไม่ถูกโชว์ชื่อให้คนอื่นเห็นค่ะ</span>
+      </div>
+      <div class="err" id="err"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sectitle" data-i18n="My wishes">คำขอของฉัน</div>
+      <div class="seccap" data-i18n="We update the status as we source">สถานะจะขยับตามที่เราตามหาให้</div>
+      <div id="mine"><div class="loading" data-i18n="Loading…">กำลังโหลด…</div></div>
+    </div>
+
+    <div class="sec">
+      <div class="sectitle" data-i18n="Most wanted right now">ที่คนอยากได้มากที่สุดตอนนี้</div>
+      <div class="seccap" data-i18n="Vote for a piece you'd rent too — the top ones come into the wardrobe first">เห็นชุดไหนอยากเช่าด้วย กดโหวตได้เลย ตัวที่คนโหวตเยอะเราจะหาเข้าคลังก่อน</div>
+      <div id="trend"><div class="loading" data-i18n="Loading…">กำลังโหลด…</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="config.js?v=38"></script>
+<script src="data.js?v=38"></script>
+<script src="liffAuth.js?v=56"></script>
+<script src="me-api.js?v=56"></script>
+<script src="api.js?v=64"></script>
+<script>
+const $ = s => document.querySelector(s);
+let ME = null, _tt;
+const TH = () => (window.NAV ? NAV.lang : 'th') !== 'en';
+function t(th, en) { return TH() ? th : en; }
+function toast(m){ const el=$('#toast'); el.textContent=m; el.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),2600); }
+
+const OCC = [
+  ['', 'ยังไม่แน่ใจ', 'Not sure'],
+  ['wedding_guest','ไปงานแต่ง','Wedding guest'],
+  ['dinner','ดินเนอร์','Dinner'],
+  ['party','งานเลี้ยง','Party'],
+  ['cafe','คาเฟ่ / เดินเล่น','Cafe'],
+  ['work','ทำงาน / ประชุม','Work'],
+];
+const STATUS = {
+  pending:  ['รับคำขอแล้ว',      'Received',  ''],
+  sourcing: ['กำลังตามหาให้',     'Sourcing',  'gold'],
+  added:    ['เข้าคลังแล้ว',      'In the wardrobe', 'sage'],
+  rejected: ['ยังหาไม่ได้ตอนนี้',  'Not found yet', ''],
+};
+function esc(x){ return String(x==null?'':x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderOcc(){
+  $('#f_occ').innerHTML = OCC.map(o=>`<option value="${o[0]}">${TH()?o[1]:o[2]}</option>`).join('');
+}
+
+// ----- คำขอของฉัน -----
+function renderMine(rows){
+  const el = $('#mine');
+  if (!rows.length) { el.innerHTML = `<div class="empty">${t('ยังไม่มีคำขอ ลองบอกชุดที่ตามหาไว้ด้านบนได้เลยค่ะ','No wishes yet. Tell us what you are looking for above.')}</div>`; return; }
+  el.innerHTML = rows.map(r=>{
+    const st = STATUS[r.status] || STATUS.pending;
+    return `<div class="rq">
+      <div class="th">${r.reference_image_url?`<img src="${esc(r.reference_image_url)}" alt="" referrerpolicy="no-referrer">`:esc((r.item_description||'').slice(0,26))}</div>
+      <div class="bd">
+        <div class="nm">${esc(r.item_description||'…')}</div>
+        <div class="mt">${[r.brand, r.size, r.budget_max?('งบ ฿'+Math.round(r.budget_max)):''].filter(Boolean).map(esc).join(' · ') || t('ไม่ระบุรายละเอียดเพิ่ม','No extra details')}</div>
+        <span class="tag ${st[2]}">${TH()?st[0]:st[1]}</span>
+        ${r.votes>1?`<span class="tag">${t('มีคนอยากได้ด้วย '+r.votes+' คน','+'+r.votes+' want this')}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ----- ที่คนอยากได้มากที่สุด -----
+function renderTrend(rows){
+  const el = $('#trend');
+  if (!rows.length) { el.innerHTML = `<div class="empty">${t('ยังไม่มีคำขอจากคนอื่นตอนนี้ คุณเป็นคนแรกก็ได้นะคะ','No wishes from others yet. Be the first.')}</div>`; return; }
+  el.innerHTML = rows.map(r=>`<div class="rq">
+    <div class="th">${r.reference_image_url?`<img src="${esc(r.reference_image_url)}" alt="" referrerpolicy="no-referrer">`:esc((r.item_description||'').slice(0,26))}</div>
+    <div class="bd">
+      <div class="nm">${esc(r.item_description||'…')}</div>
+      <div class="mt">${[r.brand, r.size].filter(Boolean).map(esc).join(' · ') || t('ไม่ระบุแบรนด์','Brand not given')}</div>
+      ${r.mine?`<span class="tag gold">${t('คำขอของคุณ','Your wish')}</span>`:''}
+      ${r.status==='sourcing'?`<span class="tag sage">${t('กำลังตามหาให้','Sourcing')}</span>`:''}
+    </div>
+    <button class="vote ${r.voted?'on':''}" onclick="vote('${r.id}',this)" ${r.mine?'disabled':''}>
+      <span class="n">${r.votes||1}</span><span class="l">${t('อยากได้','want')}</span>
+    </button>
+  </div>`).join('');
+}
+
+window.vote = async function(id, btn){
+  try{
+    const r = await window.API.voteRequest(id);
+    if (!r) { toast(t('โหวตไม่สำเร็จ ลองใหม่นะคะ','Could not vote, try again')); return; }
+    btn.classList.toggle('on', !!r.voted);
+    btn.querySelector('.n').textContent = r.votes;
+  }catch(e){ toast(t('โหวตไม่สำเร็จ ลองใหม่นะคะ','Could not vote, try again')); }
+};
+
+async function reload(){
+  const [mine, trend] = await Promise.all([
+    window.API.myWishRequests().catch(()=>[]),
+    window.API.trendingRequests(30).catch(()=>[]),
+  ]);
+  renderMine(mine); renderTrend(trend);
+}
+
+async function send(){
+  const desc = $('#f_desc').value.trim();
+  if (desc.length < 4) { $('#err').textContent = t('ช่วยบอกลักษณะชุดสักหน่อยนะคะ','Please describe the piece'); return; }
+  const btn = $('#sendBtn'); btn.disabled = true; $('#err').textContent = '';
+  const r = await window.API.submitWish({
+    p_description: desc,
+    p_brand: $('#f_brand').value.trim() || null,
+    p_size: $('#f_size').value || null,
+    p_occasion: $('#f_occ').value || null,
+    p_budget: $('#f_budget').value ? Number($('#f_budget').value) : null,
+    p_ref_url: $('#f_url').value.trim() || null,
+  });
+  btn.disabled = false;
+  if (!r || r.error) { $('#err').textContent = (r && r.error) || t('ส่งคำขอไม่สำเร็จ ลองใหม่นะคะ','Could not send, try again'); return; }
+  $('#f_desc').value=''; $('#f_brand').value=''; $('#f_budget').value=''; $('#f_url').value='';
+  toast(t('รับคำขอแล้ว เดี๋ยวเราไปตามหาให้ค่ะ','Got it. We will start looking.'));
+  window.track && window.track('wish_submit', null, { occasion: $('#f_occ').value || null });
+  reload();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  renderOcc();
+  $('#sendBtn').onclick = send;
+  $('#signinBtn').onclick = () => window.LiffAuth.signIn();
+  window.addEventListener('lloop:lang', () => { renderOcc(); reload(); });
+
+  let signedIn = false;
+  try {
+    const s = await window.API.init();
+    signedIn = !!(s && s.CUSTOMER && s.CUSTOMER.id);
+    ME = signedIn ? s.CUSTOMER : null;
+  } catch (e) { console.warn('wish bootstrap failed:', e); }
+
+  // ยังไม่ล็อกอิน = ให้เห็นหน้า + ปุ่มเข้าสู่ระบบ (ไม่บังคับ redirect ซ้ำ)
+  $('#gate').hidden = signedIn;
+  $('#app').hidden = !signedIn;
+  if (signedIn) reload();
+});
+</script>
+</body>
+</html>

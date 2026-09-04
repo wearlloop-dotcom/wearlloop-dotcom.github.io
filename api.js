@@ -17,11 +17,20 @@ window.API = (function () {
     _evBuf.push({ s: _sid, u: lineUid || '', e: event, t: target || '', m: meta || null });
     if (_evBuf.length >= 12) flushEvents();
   }
+  // ล็อกอินแล้ว → ผ่าน me-rpc (gateway ใส่ line_uid จาก idToken ให้ กันสวมรอย)
+  // ยังไม่ล็อกอิน → log_events_anon (สาธารณะ แต่ไม่รับตัวตนจาก client)
+  // หมายเหตุ: log_events เดิมถูก revoke จาก anon ตอน security lockdown → ยิงไม่เข้ามาตั้งแต่ ก.ค.
   async function flushEvents() {
     if (CONFIG.USE_MOCK || !_evBuf.length) return;
     const batch = _evBuf.splice(0, 50);
-    try { await client().rpc('log_events', { p_events: batch }); }
-    catch (_e) { /* เงียบ — analytics ไม่ควรกระทบ UX */ }
+    try {
+      if (lineUid && window.meRpc) {
+        const r = await window.meRpc('log_events_me', { p_events: batch });
+        if (r && r.error) await client().rpc('log_events_anon', { p_events: batch });   // token หมดอายุ → เก็บแบบ guest
+      } else {
+        await client().rpc('log_events_anon', { p_events: batch });
+      }
+    } catch (_e) { /* เงียบ — analytics ไม่ควรกระทบ UX */ }
   }
   // flush เป็นระยะ + ตอนซ่อนหน้า/ปิด (จับ dwell ครบ)
   if (!CONFIG.USE_MOCK) {
@@ -443,6 +452,28 @@ window.API = (function () {
     if (CONFIG.USE_MOCK || !garmentId) return 0;
     try { const { data } = await client().rpc('garment_waitlist_count', { p_garment: garmentId }); return Number(data) || 0; }
     catch (_e) { return 0; }
+  }
+  // สวิตช์ที่หน้าเว็บลูกค้าต้องรู้ (whitelist ฝั่ง SQL) → { key: 'true'|'false'|... }
+  // อ่านสาธารณะได้ ไม่ต้อง login (ใช้ตัดสินว่าจะโชว์เมนู/ตัวเลือกไหน) — ค่าจริงยังเช็คซ้ำฝั่ง server เสมอ
+  let _flags = null;
+  async function siteFlags() {
+    if (_flags) return _flags;
+    if (CONFIG.USE_MOCK) return (_flags = {});
+    try { const { data } = await client().rpc('site_flags'); _flags = data || {}; }
+    catch (_e) { _flags = {}; }
+    return _flags;
+  }
+  // ส่งคำขอ "อยากได้ชุดแบบนี้" (ผ่าน me-rpc — uid มาจาก idToken ไม่ใช่จาก client)
+  async function submitWish(payload) {
+    if (CONFIG.USE_MOCK || !window.meRpc) return null;
+    const { data, error } = await window.meRpc('my_submit_garment_request', payload || {});
+    return error ? { error: error.message } : data;
+  }
+  // คำขอของฉัน + สถานะ → array
+  async function myWishRequests() {
+    if (CONFIG.USE_MOCK || !window.meRpc) return [];
+    const { data } = await window.meRpc('my_garment_requests', {});
+    return Array.isArray(data) ? data : [];
   }
   // คำขอ "มาแรง" ให้โหวตตาม → array {id, brand, item_description, votes, voted, mine, reference_image_url}
   async function trendingRequests(limit) {
@@ -1124,5 +1155,5 @@ window.API = (function () {
     return data || {};
   }
 
-  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, pcStatus, stylistDirectory, stylistPublic, pcBookSlot, myAppointments, pcCancelAppointment, stylist, rankBackups, resolvePlace, stylistQuota, availableOn, availableSetOn, availableRange, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, payWithCredit, myImpact, myWallet, recentCharity, hairStyle, myRentals, setRentalOccasion, toggleWishlist, myWishlist, joinWaitlist, leaveWaitlist, myWaitlist, waitlistCount, trendingRequests, voteRequest, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, bridesmaidQuote, wedShareCreate, wedShareJoin, wedShareSummary, wedSharePick, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, notifInbox, notifUnread, notifMarkRead, notifSetPref, socialProof, recommendWith, recommendPersonal, liveViewers, myStreak, myTaste, myRecentlyViewed, expVariant, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed, reportLook, reactLook, lookReactions, occasionHubs, garmentFit, myCreatorEarnings };
+  return { init, reserve, saveProfile, claimStyleCode, startPersonalColor, pcStatus, stylistDirectory, stylistPublic, pcBookSlot, myAppointments, pcCancelAppointment, stylist, rankBackups, resolvePlace, stylistQuota, availableOn, availableSetOn, availableRange, bookedRanges, reserveDates, getTerms, acceptTerms, bookWithBackups, payWithCredit, myImpact, myWallet, recentCharity, hairStyle, myRentals, setRentalOccasion, toggleWishlist, myWishlist, joinWaitlist, leaveWaitlist, myWaitlist, waitlistCount, trendingRequests, voteRequest, siteFlags, submitWish, myWishRequests, addReview, garmentRating, garmentReviewPhotos, garmentUgcPhotos, uploadPhotos, ensureReferralCode, applyReferral, submitVideoReview, subPlans, mySubscription, subscribe, subSetStatus, quote, customerKyc, submitKyc, uploadIdCard, bookCart, addAlteration, groupInquiry, createGroup, myGroups, groupMembers, addManagedProfile, groupInvite, groupRespond, groupThemeSuggest, bookGroupCart, bridesmaidQuote, wedShareCreate, wedShareJoin, wedShareSummary, wedSharePick, groupLeave, groupRemoveMember, groupTransferOwner, groupDelete, groupUpdateMember, groupRename, claimManagedProfile, mergeCustomers, groupJoinToken, joinGroup, groupRevokeLink, groupDiscountPct, bookGroupSplit, groupOrderSummary, groupPayConfirm, groupEventStatus, setPictureHidden, groupInvitePreview, payInfo, birthdayStatus, birthdayReserve, creditExpiry, notifInbox, notifUnread, notifMarkRead, notifSetPref, socialProof, recommendWith, recommendPersonal, liveViewers, myStreak, myTaste, myRecentlyViewed, expVariant, quoteCancellation, cancelRental, quoteExtension, extendRental, rescheduleRental, communityFeed, lookOccasions, lookTags, creatorProfile, myCreator, setHandle, shareLook, logLookView, logRef, toggleLike, myLikes, addComment, lookComments, toggleFollow, myFollowing, followingFeed, leaderboard, toggleSave, mySaves, savedFeed, reportLook, reactLook, lookReactions, occasionHubs, garmentFit, myCreatorEarnings };
 })();

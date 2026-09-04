@@ -148,14 +148,14 @@
   .pavatar-x{display:flex;align-items:center;justify-content:center;background:var(--soft2);color:var(--ink);
     font-family:var(--display);font-weight:700;font-size:20px}
   .onbhi{font-family:var(--display);font-size:17px;font-weight:600;color:var(--ink);line-height:1.2}
-  .onbsub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+  .onbsub{font-size:13px;color:#6B6A65;margin-top:3px;line-height:1.5}
   .prefsec{margin:14px 0}
-  .preflabel{font-size:12px;color:var(--muted);margin-bottom:8px}
+  .preflabel{font-size:13px;font-weight:500;color:#3F3E3A;margin-bottom:9px}
   .prefchips{display:flex;flex-wrap:wrap;gap:8px}
-  .prefchip{background:#fff;border:1px solid var(--line);color:var(--ink);font-size:13px;padding:7px 14px;border-radius:18px;cursor:pointer;transition:.15s}
+  .prefchip{background:#fff;border:1px solid var(--line);color:var(--ink);font-size:13.5px;padding:8px 15px;border-radius:18px;cursor:pointer;transition:.15s;line-height:1.4}
   .prefchip:hover{border-color:var(--ink)}
   .prefchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .optnote{font-size:11px;color:var(--muted);font-weight:400}
+  .optnote{font-size:12px;color:#6B6A65;font-weight:400}
   /* preference bar — สลับภาษา + สกุลเงิน (อยู่หน้าหลัก ไม่ต้องเข้าเมนู) */
   .prefbar{background:#fff;border-bottom:1px solid var(--line)}
   .prefrow{display:flex;justify-content:flex-end;align-items:center;gap:10px;height:40px}
@@ -167,11 +167,12 @@
   .curbtn{min-width:30px}
   .curnote{font-size:11px;color:var(--muted);text-align:right;padding:0 0 7px;line-height:1.5}
   @media(max-width:679px){.prefrow{justify-content:center;gap:8px}.segpill button{padding:5px 10px}.curnote{text-align:center}}
-  .catnav{border-bottom:1px solid var(--line);background:#fff}
+  .catnav{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:var(--hdr-h,58px);z-index:19}
   .catnav .row{display:flex;gap:26px;justify-content:center;align-items:center;height:42px;overflow-x:auto;scrollbar-width:none}
   .catnav .row::-webkit-scrollbar{display:none}
   .catnav a{font-size:13px;color:var(--ink);text-decoration:none;white-space:nowrap;font-weight:500;cursor:pointer}
   .catnav a:hover{color:var(--muted)}
+  .catnav a.on{font-weight:700;border-bottom:2px solid var(--ink);padding-bottom:2px}
 
   /* ===== hero ===== */
   .hero{position:relative;background:linear-gradient(120deg,#EDE7DF,#E6DCD2);height:64vw;max-height:560px;min-height:340px;
@@ -677,13 +678,13 @@
   .club .cpbar i{display:block;height:100%;background:#4F8A6E;border-radius:6px}
   .club .creward{font-size:12px;color:#7A6F5C;margin-top:7px}
   .stylecard{background:linear-gradient(180deg,#F4EEE1,#EADFCB);color:#3B362C;border:1px solid #E2D6BF;border-radius:4px;padding:18px;margin:6px 0 16px}
-  .stylecard .tierbadge{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:#A75F3A;font-weight:600;margin-bottom:8px}
-  .stylecard .stylehead{font-family:var(--display);font-size:16px;font-weight:600;line-height:1.4;color:#3B362C}
-  .stylecard .styletype{font-size:12px;color:#7C7361;margin-top:3px;letter-spacing:.3px}
+  .stylecard .tierbadge{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#A75F3A;font-weight:600;margin-bottom:8px}
+  .stylecard .stylehead{font-family:var(--display);font-size:17px;font-weight:700;line-height:1.4;color:#3B362C}
+  .stylecard .styletype{font-size:13px;color:#5E5746;margin-top:4px;letter-spacing:.2px}
   .stylecard .stylepal{display:flex;gap:7px;margin:12px 0}
   .stylecard .stylepal i{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(80,64,38,.18)}
-  .stylecard .stylerec{font-size:12px;color:#5E5746;margin-top:4px}
-  .stylecard .linkcode{font-size:12px;margin-top:13px;padding-top:11px;border-top:1px dashed #CDBFA1;letter-spacing:.5px;color:#7C7361}
+  .stylecard .stylerec{font-size:13px;color:#4A4437;margin-top:5px;line-height:1.6}
+  .stylecard .linkcard,.stylecard .linkcode{font-size:13px;margin-top:13px;padding-top:11px;border-top:1px dashed #CDBFA1;letter-spacing:.3px;color:#5E5746}
   .stylecard .linkcode b{font-family:var(--display);letter-spacing:3px;color:#3B362C;font-size:15px}
   /* แถบชุดที่แมตช์ (เช่าได้) + ลุคของคุณ */
   .stylecard .styleshop{margin-top:13px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)}
@@ -707,17 +708,17 @@
   .measref .mrnote{font-size:10px;color:#8C8B86;margin-top:10px;line-height:1.4}
   /* สถานะล็อก + ปุ่มจองคิว 4,900 */
   .stylecard .lockgrid{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 14px}
-  .stylecard .lockpill{font-size:11.5px;color:#7C7361;background:rgba(255,255,255,.45);border:1px solid #E2D6BF;border-radius:16px;padding:5px 11px}
+  .stylecard .lockpill{font-size:12.5px;color:#4A4437;background:rgba(255,255,255,.6);border:1px solid #E2D6BF;border-radius:16px;padding:6px 12px;line-height:1.4}
   .stylecard .pcdetail{margin:0 0 12px}
-  .stylecard .pcdetail summary{list-style:none;cursor:pointer;font-size:12.5px;color:#A75F3A;font-weight:600;display:flex;align-items:center;gap:5px;user-select:none}
+  .stylecard .pcdetail summary{list-style:none;cursor:pointer;font-size:13.5px;color:#A75F3A;font-weight:600;display:flex;align-items:center;gap:5px;user-select:none}
   .stylecard .pcdetail summary::-webkit-details-marker{display:none}
   .stylecard .pcdetail summary::after{content:'⌄';font-size:14px;line-height:1;transition:transform .2s;color:#B7A98C}
   .stylecard .pcdetail[open] summary::after{transform:rotate(180deg)}
   .stylecard .pcd-body{margin-top:10px;display:flex;flex-direction:column;gap:9px}
   .stylecard .pcd-row{display:flex;flex-direction:column;gap:2px;padding-left:11px;border-left:2px solid #E2D6BF}
-  .stylecard .pcd-row b{font-size:12px;color:#3B362C;font-weight:600}
-  .stylecard .pcd-row span{font-size:12px;color:#5E5746;line-height:1.5}
-  .stylecard .creditback{font-size:12.5px;color:#3B362C;background:#EFE6D2;border:1px solid #D8C7A4;border-radius:8px;padding:9px 12px;margin:0 0 10px;line-height:1.5}
+  .stylecard .pcd-row b{font-size:13px;color:#3B362C;font-weight:600}
+  .stylecard .pcd-row span{font-size:13px;color:#4A4437;line-height:1.6}
+  .stylecard .creditback{font-size:13.5px;color:#3B362C;background:#EFE6D2;border:1px solid #D8C7A4;border-radius:8px;padding:10px 13px;margin:0 0 10px;line-height:1.55}
   .stylecard .bookbtn{display:block;width:100%;background:#3B362C;color:#F6EFDD;border:none;border-radius:6px;padding:12px 13px;font-size:14px;font-weight:600;font-family:var(--sans);cursor:pointer}
   .stylecard .bookbtn .bsub{display:block;font-size:11px;font-weight:400;color:#D6C7A0;margin-top:2px}
   /* หน้าจ่าย Personal Color (จ่ายในแอป) */
@@ -898,13 +899,17 @@
   .lookrow .lv{flex:1;display:flex;flex-wrap:wrap;gap:5px}
   .lookrow .lv i{font-style:normal;font-size:13px;background:#fff;border:1px solid #EADFCB;border-radius:20px;padding:4px 11px;color:#4A4438}
   .looknote{font-size:11px;color:#A39472;margin-top:10px;font-style:italic;line-height:1.5}
-  .pform{padding:18px}.pform h3{font-family:var(--display);font-size:22px;font-weight:600;margin-bottom:2px}.pform .hint{font-size:12px;color:var(--muted);margin-bottom:16px}
-  .field{margin-bottom:14px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:2px;padding:10px 12px;font-family:var(--sans);font-size:16px;background:#fff}
-  .field textarea{resize:none;line-height:1.5}.field .subhint{font-size:11px;color:var(--muted);margin-top:4px}
+  .pform{padding:20px 20px 26px;font-size:14.5px;line-height:1.6}.pform h3{font-family:var(--display);font-size:23px;font-weight:700;margin-bottom:4px;letter-spacing:.2px}.pform .hint{font-size:13.5px;color:#6B6A65;margin-bottom:18px;line-height:1.6}
+  .pform .psec{font-family:var(--display);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold,#C9A86A);font-weight:600;margin:26px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+  .pform .psec:first-of-type{margin-top:6px}
+  .field{margin-bottom:15px}.field label{display:block;font-size:13px;font-weight:500;color:#3F3E3A;margin-bottom:6px;line-height:1.45}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:12px 13px;font-family:var(--sans);font-size:16px;color:var(--ink);background:#fff;line-height:1.4}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--ink)}
+  .field input::placeholder,.field textarea::placeholder{color:#A9A8A2}
+  .field textarea{resize:none;line-height:1.55}.field .subhint{font-size:12.5px;color:#6B6A65;margin-top:6px;line-height:1.55}
   .frow{display:flex;gap:10px}.frow .field{flex:1}
   .seasons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.seasonbtn{border:1px solid var(--line);padding:8px 4px;text-align:center;background:#fff}.seasonbtn.active{border-color:var(--ink);background:var(--soft)}
-  .seasonbtn .sw{display:flex;gap:2px;justify-content:center;margin-bottom:5px}.seasonbtn .sw i{width:11px;height:11px;border-radius:50%}.seasonbtn span{font-size:11px}
-  .savebtn{width:100%;background:var(--ink);color:#fff;border:none;padding:14px;font-size:13px;letter-spacing:1px;text-transform:uppercase;font-weight:600;margin-top:6px}
+  .seasonbtn .sw{display:flex;gap:3px;justify-content:center;margin-bottom:6px}.seasonbtn .sw i{width:12px;height:12px;border-radius:50%}.seasonbtn span{font-size:12.5px;color:#3F3E3A}
+  .savebtn{width:100%;background:var(--ink);color:#fff;border:none;border-radius:10px;padding:15px;font-size:14px;letter-spacing:.5px;font-weight:600;margin-top:14px;font-family:var(--sans)}
   .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(60px);background:var(--ink);color:#fff;padding:12px 20px;font-size:13px;opacity:0;transition:.3s;z-index:50}.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
   @media(min-width:680px){.grid{grid-template-columns:repeat(3,1fr);gap:24px}.pphoto{margin-bottom:0}}
@@ -941,6 +946,12 @@
   .ed-eyebrow{margin:30px 0 2px}
   .ed-eyebrow .ek{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted)}
   .ed-eyebrow .et{font-family:var(--display);font-weight:700;font-size:clamp(22px,5vw,30px);letter-spacing:.5px;margin-top:3px}
+  .ed-eyebrow .etnow{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ed-eyebrow .etnow b{color:var(--ink);font-weight:600}
+  .ed-eyebrow .etnow .clr{border:1px solid var(--line);background:#fff;color:var(--muted);font:inherit;
+    font-size:11.5px;padding:2px 9px;border-radius:14px;cursor:pointer}
+  .ed-eyebrow .etnow .clr:hover{border-color:var(--ink);color:var(--ink)}
+  .ed-eyebrow .etnow[hidden]{display:none}
   /* product cards — เหลี่ยมเหมือนเดิม (ไม่โค้งมน) + typography editorial */
   .pphoto{border-radius:0}
   .pcard{transition:transform .25s ease}
@@ -1245,7 +1256,7 @@
   <div class="event" id="eventBanner" style="display:none"></div>
   <div class="datebar" id="datebar"></div>
   <div class="prails" id="personalRail"></div>
-  <div class="ed-eyebrow"><div class="ek">the LLOOP edit</div><div class="et" id="edEditTitle">Now in the loop</div></div>
+  <div class="ed-eyebrow" id="editHead"><div class="ek">the LLOOP edit</div><div class="et" id="edEditTitle">Now in the loop</div><div class="etnow" id="editNow" hidden></div></div>
   <div class="toolbar">
     <div class="searchbar"><svg viewBox="0 0 24 24" class="sicon"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
       <input id="searchInput" type="search" autocomplete="off" oninput="onSearch(this.value)"/></div>

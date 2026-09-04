@@ -150,9 +150,29 @@ function enterApp() {
   el.classList.add('hide');
   setTimeout(() => { el.style.display ='none'; }, 900);
 }
+// ความสูงของแถบที่ปักหมุดไว้ (header + แถบแท็บ) — ใช้หักออกเวลาเลื่อนหา section
+// เพื่อไม่ให้หัวข้อโดนแถบบังหลังเลื่อนจบ
+function stickyTop() {
+  const h = document.querySelector('header'), n = document.querySelector('.catnav');
+  return (h ? h.offsetHeight : 0) + (n ? n.offsetHeight : 0);
+}
+// จำความสูง header ไว้ใน CSS var ให้แถบแท็บปักหมุดใต้ header ได้พอดีทุกขนาดจอ
+function syncStickyOffset() {
+  const h = document.querySelector('header');
+  document.documentElement.style.setProperty('--hdr-h', (h ? h.offsetHeight : 58) + 'px');
+}
+// เลื่อนไปที่ "ส่วนที่เปลี่ยน" — หัวข้อ the LLOOP edit + แถบเครื่องมือ + ตารางชุด
+function scrollToEdit() {
+  const a = document.getElementById('editHead') || document.querySelector('.ed-eyebrow') || $('#grid');
+  if (!a) return;
+  const y = a.getBoundingClientRect().top + window.pageYOffset - stickyTop() - 10;
+  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+}
 function scrollToGrid() {
-  const g = document.querySelector('.collabel') || $('#grid');
-  if (g) g.scrollIntoView({ behavior:'smooth'});
+  const g = document.querySelector('.collabel');
+  if (!g) return scrollToEdit();
+  const y = g.getBoundingClientRect().top + window.pageYOffset - stickyTop() - 10;
+  window.scrollTo({ top: Math.max(0, y), behavior:'smooth'});
 }
 
 // ----- hero video (แบบ Dior): autoplay/muted/loop + เล่นหลายคลิปต่อเนื่อง -----
@@ -223,23 +243,69 @@ function setLang(l) {
   $('#vresult').classList.remove('show');
 }
 
-// Fit confidence — mirror SQL fit_confidence() (+ fit feedback loop)
-function fitConfidence(c, g) {
-  if (c.bust_in == null ||!g.bust) return null;
-  let score = 100;
-  let slack = g.stretch ==='stretchy'? 2 : g.stretch ==='slight'? 1 : 0;
-  // ★ ปรับด้วยฟีดแบ็กจริงจากลูกค้า (loop) — เลื่อน slack ตาม fitAvg ถ่วงด้วยจำนวนรีวิว
-  if ((g.fitN||0) >= 3 && g.fitAvg != null) {
-    const adj = g.fitAvg * 0.5 * (Math.min(g.fitN,8)/8);   // ~ -1..+1
-    slack = Math.max(-1, Math.min(2.5, slack + adj));
-  }
-  if (c.bust_in < g.bust[0] - slack) score -= (g.bust[0] - slack - c.bust_in) * 12;
-  else if (c.bust_in > g.bust[1] + slack) score -= (c.bust_in - g.bust[1] - slack) * 18;
-  if (c.waist_in!= null && g.waist) {
-    if (c.waist_in > g.waist[1] + slack) score -= (c.waist_in - g.waist[1] - slack) * 15;
-  }
-  return Math.max(0, Math.min(100, Math.round(score)));
+// ===== ไซส์ของฉัน =====
+// ชุดในคลังส่วนใหญ่ยังไม่มีตัวเลขวัดจริง (อก/เอว/สะโพก) มีแต่ป้ายไซส์ S/M/L
+// เดิมถ้าชุดไม่มีตัวเลขวัด ระบบจะคืน null แล้วตกไปใช้คะแนนกลาง 55 เท่ากันทุกตัว
+// ผลคือ "แนะนำสำหรับคุณ" ไม่ได้อิงไซส์จริงของลูกค้าเลย จึงเพิ่มการเทียบระดับป้ายไซส์เป็นชั้นสำรอง
+const SIZE_KEYS = ['XS','S','M','L','XL','XXL'];
+// สัดส่วนกลางของแต่ละไซส์ (นิ้ว): อก · เอว · สะโพก
+const SIZE_CHART = { XS:[31,25,34], S:[33,26.5,36], M:[35,28.5,38], L:[37.5,31,40.5], XL:[40,33.5,43], XXL:[43,36.5,46] };
+// ไซส์ของฉัน: ใช้ "ไซส์ที่ใส่ประจำ" ถ้ากรอกไว้ ไม่งั้นคำนวณจากสัดส่วนที่บันทึกไว้
+function mySizeBand(c) {
+  c = c || CUSTOMER || {};
+  const us = String(c.size || '').toUpperCase().trim();
+  if (SIZE_KEYS.includes(us)) return us;
+  if (c.bust_in == null && c.waist_in == null && c.hip_in == null) return null;
+  let best = null, bd = 1e9;
+  SIZE_KEYS.forEach(k => {
+    const m = SIZE_CHART[k]; let d = 0, n = 0;
+    if (c.bust_in  != null) { d += Math.abs(c.bust_in  - m[0]) * 1.2; n++; }
+    if (c.waist_in != null) { d += Math.abs(c.waist_in - m[1]) * 1.0; n++; }
+    if (c.hip_in   != null) { d += Math.abs(c.hip_in   - m[2]) * 0.8; n++; }
+    d /= (n || 1);
+    if (d < bd) { bd = d; best = k; }
+  });
+  return best;
 }
+// Fit confidence — mirror SQL fit_confidence() (+ fit feedback loop)
+// คืน { score, from } · from = 'measured' (วัดจริงทั้งคู่) | 'size' (เทียบป้ายไซส์) | 'free' (ฟรีไซส์)
+function fitInfo(c, g) {
+  c = c || {}; if (!g) return null;
+
+  // ชั้นที่ 1 — ชุดมีตัวเลขวัดจริง + ลูกค้ากรอกสัดส่วนไว้ (แม่นที่สุด)
+  if (c.bust_in != null && g.bust) {
+    let score = 100;
+    let slack = g.stretch ==='stretchy'? 2 : g.stretch ==='slight'? 1 : 0;
+    // ★ ปรับด้วยฟีดแบ็กจริงจากลูกค้า (loop) — เลื่อน slack ตาม fitAvg ถ่วงด้วยจำนวนรีวิว
+    if ((g.fitN||0) >= 3 && g.fitAvg != null) {
+      const adj = g.fitAvg * 0.5 * (Math.min(g.fitN,8)/8);   // ~ -1..+1
+      slack = Math.max(-1, Math.min(2.5, slack + adj));
+    }
+    if (c.bust_in < g.bust[0] - slack) score -= (g.bust[0] - slack - c.bust_in) * 12;
+    else if (c.bust_in > g.bust[1] + slack) score -= (c.bust_in - g.bust[1] - slack) * 18;
+    if (c.waist_in!= null && g.waist) {
+      if (c.waist_in > g.waist[1] + slack) score -= (c.waist_in - g.waist[1] - slack) * 15;
+    }
+    if (c.hip_in != null && g.hip && c.hip_in > g.hip + slack) score -= (c.hip_in - g.hip - slack) * 12;
+    return { score: Math.max(0, Math.min(100, Math.round(score))), from: 'measured' };
+  }
+
+  // ชั้นที่ 2 — ชุดมีแต่ป้ายไซส์ เทียบกับไซส์ของลูกค้า (ยังดีกว่าให้คะแนนกลางเท่ากันหมด)
+  const mine = mySizeBand(c);
+  if (!mine) return null;
+  const gs = String(g.size || '').toUpperCase().trim();
+  if (gs === 'FREE') return { score: 78, from: 'free' };
+  if (!SIZE_KEYS.includes(gs)) return null;
+  const d = SIZE_KEYS.indexOf(gs) - SIZE_KEYS.indexOf(mine);
+  const ad = Math.abs(d);
+  let sc = ad === 0 ? 92 : ad === 1 ? 68 : ad === 2 ? 40 : 15;
+  if (g.stretch === 'stretchy') sc += 10; else if (g.stretch === 'slight') sc += 5;
+  if (d > 0) sc += 6;                      // ชุดใหญ่กว่าไซส์เรา ยังใส่ได้ง่ายกว่าชุดที่เล็กกว่า
+  if ((g.fitN||0) >= 3 && g.fitLabel === 'small' && d <= 0) sc -= 12;   // ลูกค้าบอกว่าใส่เล็ก
+  if ((g.fitN||0) >= 3 && g.fitLabel === 'large' && d >= 0) sc -= 8;    // ลูกค้าบอกว่าใส่หลวม
+  return { score: Math.max(0, Math.min(100, Math.round(sc))), from: 'size' };
+}
+function fitConfidence(c, g) { const r = fitInfo(c, g); return r ? r.score : null; }
 // โน้ตฟิตจากลูกค้าจริง (โชว์เมื่อมีรีวิวพอ) — คืน {text,cls} หรือ null
 function fitNote(g) {
   if (!g || (g.fitN||0) < 3 || !g.fitLabel) return null;
@@ -336,7 +402,7 @@ function renderDiscover(){
   }
   el.innerHTML = html;
 }
-function pickOccasion(tg){ setOccasion(fOccasion===tg?null:tg); const a=document.querySelector('.ed-eyebrow'); window.scrollTo({ top: a? a.offsetTop-16 : 380, behavior:'smooth' }); }
+function pickOccasion(tg){ setOccasion(fOccasion===tg?null:tg); scrollToEdit(); }
 function setMood(k){ fMood = k || null; renderDiscover(); renderGrid(); }
 
 // เฉดสีสำรองตาม personal-color season — ใช้เมื่อชุดยังไม่ได้แท็กสีจริง (color_hex ว่าง)
@@ -599,28 +665,42 @@ function setBrand(b) { fBrand = b; renderBrandChips(); renderGrid(); }
 function toggleTone() { fToneOnly =!fToneOnly; renderCatnav(); renderFilters(); renderGrid(); }
 
 // top text category nav (Pomelo-style)
+// กดแท็บ = เปลี่ยนของที่อยู่ล่างหน้า (หัวข้อ the LLOOP edit + ตารางชุด) — ถ้าไม่พาไปดู
+// ลูกค้าที่ยืนอยู่ตรง hero จะไม่เห็นว่ามีอะไรเปลี่ยน จึงพาเลื่อนลงไปที่ section นั้นให้เลย
+let _catnavItems = [];
 function renderCatnav() {
   const el = document.getElementById('catnav'); if (!el) return;
-  const items = [
-    { label: (lang ==='th'?'แนะนำสำหรับคุณ':'For You'), on: fForYou, act:`toggleForYou()`},
-    { label: t('all'), on:!fForYou &&!fOccasion &&!fToneOnly &&!fWishOnly, act:`setForYouOff();setOccasion(null);setToneOff();setWishOff();renderCatnav();renderGrid()`},
-    { label: t('myTone'), on: fToneOnly, act:`toggleTone()`},
-    { label: (lang ==='th'?'ที่หมายตา':'Saved'), on: fWishOnly, act:`toggleWishOnly()`},
+  _catnavItems = [
+    { key:'for_you', label: (lang ==='th'?'แนะนำสำหรับคุณ':'For You'), on: fForYou, run: toggleForYou },
+    { key:'all',     label: t('all'), on:!fForYou &&!fOccasion &&!fToneOnly &&!fWishOnly,
+      run: () => { setForYouOff(); fOccasion = null; setToneOff(); setWishOff(); renderCatnav(); renderChips(); renderDiscover(); renderGrid(); } },
+    { key:'my_tone', label: t('myTone'), on: fToneOnly, run: toggleTone },
+    { key:'wishlist',label: (lang ==='th'?'ที่หมายตา':'Saved'), on: fWishOnly, run: toggleWishOnly },
 ];
   // โอกาส: data-driven — โชว์เฉพาะที่มีชุดจริง (ไม่โชว์ "งาน/คาเฟ่" ที่ไม่มีชุด → กันกดแล้วว่าง)
   const OCC_ORDER=['wedding_guest','dinner','party','cafe','work'];
   const presentOcc=[...new Set(GARMENTS.flatMap(g=>g.occasion_tags||[]))].sort((a,b)=>{const i=OCC_ORDER.indexOf(a),j=OCC_ORDER.indexOf(b);return (i<0?9:i)-(j<0?9:j);});
-  presentOcc.forEach(tg=>items.push({ label: occName(tg), on: fOccasion===tg, act:`setOccasion('${tg}')` }));
+  presentOcc.forEach(tg=>_catnavItems.push({ key:'occasion:'+tg, label: occName(tg), on: fOccasion===tg, run: () => setOccasion(tg) }));
   // หมายเหตุ: รายการบัญชี/นำทาง (ครอบครัว/ออเดอร์/สมาชิก/impact/โปรไฟล์) ย้ายไปอยู่ใน
   // เมนูรวม (☰ openMenu) แล้ว — catnav เหลือเฉพาะ "ฟิลเตอร์สินค้า" เพื่อไม่ให้ปนหน้าที่กัน
-  el.innerHTML = items.map(i =>`<a onclick="${i.act}" style="${i.on?'border-bottom:2px solid var(--ink);padding-bottom:2px':''}">${i.label}</a>`).join('');
+  el.innerHTML = _catnavItems.map((i, idx) =>`<a class="${i.on?'on':''}" onclick="catnavPick(${idx})">${i.label}</a>`).join('');
+  // จอแคบ: เลื่อนแถบให้เห็นแท็บที่กำลังเลือกอยู่เสมอ
+  const act = el.querySelector('a.on');
+  if (act && el.scrollWidth > el.clientWidth) act.scrollIntoView({ block:'nearest', inline:'center', behavior:'smooth' });
+}
+// กดแท็บ → เปลี่ยนฟิลเตอร์ + เก็บ event + พาไปที่ section ที่เพิ่งเปลี่ยน
+function catnavPick(idx) {
+  const it = _catnavItems[idx]; if (!it) return;
+  if (it.run() === false) return;              // เช่น "ที่หมายตา" ตอนยังไม่ล็อกอิน — ไม่ต้องพาเลื่อน
+  window.track?.('catnav_tab', it.key, { was_on: !!it.on });
+  scrollToEdit();
 }
 function setToneOff() { fToneOnly = false; }
-function toggleForYou() { fForYou =!fForYou; renderCatnav(); renderGrid(); if (fForYou) window.scrollTo({ top: 0, behavior:'smooth'}); }
+function toggleForYou() { fForYou =!fForYou; renderCatnav(); renderGrid(); }
 function setForYouOff() { fForYou = false; }
 function setWishOff() { fWishOnly = false; }
 function toggleWishOnly() {
-  if (!CUSTOMER.id) { toast(lang ==='th'?'เข้าผ่าน LINE เพื่อดูข้อมูลส่วนตัว':'Sign in via LINE to see your saved looks'); return; }
+  if (!CUSTOMER.id) { toast(lang ==='th'?'เข้าผ่าน LINE เพื่อดูข้อมูลส่วนตัว':'Sign in via LINE to see your saved looks'); return false; }
   fWishOnly =!fWishOnly; renderCatnav(); renderGrid();
 }
 // กดหัวใจที่การ์ดสินค้า — บันทึก/ยกเลิก wishlist
@@ -679,6 +759,30 @@ function sizeChartPhoto(g){ return (g.sourceMeta && g.sourceMeta.size_chart_url)
 // แกลเลอรี = รูปทั้งหมด ยกภาพตารางไซส์ออก (โชว์แยกในบล็อกตารางไซส์)
 function galleryPhotos(g){ const p = Array.isArray(g.photos)? g.photos : []; const c = sizeChartPhoto(g); return c ? p.filter(u => u !== c) : p; }
 
+// ชื่อแท็บ/ตัวกรองที่กำลังใช้อยู่ — ใช้เขียนป้าย "ตอนนี้กำลังดู"
+function activeFilterLabel() {
+  const th = lang === 'th';
+  if (fForYou)   return th ? 'แนะนำสำหรับคุณ' : 'For You';
+  if (fToneOnly) return t('myTone');
+  if (fWishOnly) return th ? 'ที่หมายตา' : 'Saved';
+  if (fOccasion) return occName(fOccasion);
+  return t('all');
+}
+function anyCatFilter() { return !!(fForYou || fToneOnly || fWishOnly || fOccasion); }
+// ป้ายใต้หัวข้อ: บอกว่าตอนนี้กรองด้วยอะไร เหลือกี่ชุด และปุ่มกลับไปดูทั้งหมด
+function renderEditNow(n) {
+  const el = document.getElementById('editNow'); if (!el) return;
+  const th = lang === 'th';
+  const cnt = th ? `${n} ชุด` : `${n} ${n === 1 ? 'piece' : 'pieces'}`;
+  el.innerHTML = `<span>${th ? 'ตอนนี้กำลังดู' : 'Now showing'} <b>${activeFilterLabel()}</b> · ${cnt}</span>`
+    + (anyCatFilter() ? `<button class="clr" onclick="clearCatFilter()">${th ? 'ดูทั้งหมด' : 'View all'}</button>` : '');
+  el.hidden = false;
+}
+// ล้างตัวกรองแท็บ แล้วอยู่ที่เดิม (ไม่ต้องเลื่อน เพราะกดจากตรงนี้อยู่แล้ว)
+function clearCatFilter() {
+  setForYouOff(); fOccasion = null; setToneOff(); setWishOff();
+  renderCatnav(); renderChips(); renderDiscover(); renderGrid();
+}
 function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
@@ -691,7 +795,7 @@ function renderGrid() {
     (!fNewOnly || g.isNew) &&
     priceOk(g) &&
     matchQuery(g));
-  if (fWishOnly && !list.length) { $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
+  if (fWishOnly && !list.length) { renderEditNow(0); $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
   if (fForYou) {
     // ดันชุดที่ "คนเหมือนคุณเช่า" (collaborative จาก behavior data) ขึ้นบนสุด แล้วตามด้วย personalScore
     const recIdx = g => { const i = gPersonalRecs.indexOf(g.code); return i < 0 ? 999 : i; };
@@ -699,6 +803,7 @@ function renderGrid() {
   }
   const availOf = g => !gUseDate || !gAvailSet || gAvailSet.has(g.id);  // null set = ว่างหมด (mock)
   if (gUseDate && gOnlyAvail) list = list.filter(availOf);
+  renderEditNow(list.length);
   if (!list.length) {
     $('#gridEnd') && ($('#gridEnd').textContent = '');
     if (gQuery) {
@@ -1115,7 +1220,11 @@ function sizeFitsIdx(g,sizes,i){ const c=CUSTOMER||{}; if(c.bust_in==null&&c.wai
   const okW=(wv==null||c.waist_in==null)||c.waist_in<=wv+slack+0.5;
   return okB&&okW; }
 // ป้าย "พอดี" ใช้เกณฑ์เดียวกับคำเตือนใต้ตาราง: ไซส์เล็กสุดที่ใส่ได้จริง (ไม่ใช่แค่ใกล้เคียงสุด)
-function bestSizeIdx(g, sizes){ const c=CUSTOMER||{}; if(g.bust && c.bust_in!=null){ for(let i=0;i<sizes.length;i++){ if(sizeFitsIdx(g,sizes,i)) return i; } return sizes.length-1; } const us=String(c.size||'').toUpperCase(); const i=sizes.indexOf(us); return i>=0?i:Math.floor((sizes.length-1)/2); }
+function bestSizeIdx(g, sizes){ const c=CUSTOMER||{}; if(g.bust && c.bust_in!=null){ for(let i=0;i<sizes.length;i++){ if(sizeFitsIdx(g,sizes,i)) return i; } return sizes.length-1; }
+  const us=mySizeBand(c)||''; let i=sizes.indexOf(us); if(i>=0) return i;
+  // ไม่มีไซส์เราพอดี → เลือกตัวที่ใกล้ที่สุด (ถ้าเท่ากันเอาตัวที่ใหญ่กว่า)
+  if(us){ let best=-1,bd=99; sizes.forEach((sz,j)=>{ const a=SIZE_KEYS.indexOf(sz),b=SIZE_KEYS.indexOf(us); if(a<0||b<0) return; const d=Math.abs(a-b)-(a>b?0.1:0); if(d<bd){bd=d;best=j;} }); if(best>=0) return best; }
+  return Math.floor((sizes.length-1)/2); }
 function sizeSection(g){
   const th=lang==='th'; const sizes=sizesOf(g); const hasM=!!(g.bust||g.waist||g.hip||g.length);
   if(!sizes.length && !hasM) return '';
@@ -1193,7 +1302,9 @@ function fitMatch(g){
     row(t('waist'), c.waist_in, g.waist, false),
     row(t('hip'),   c.hip_in,   g.hip? [g.hip,g.hip] : null, true),
   ].join('');
-  const score = fitConfidence(c, g);
+  const fi = fitInfo(c, g);
+  const score = fi ? fi.score : null;
+  const mine = mySizeBand(c);
   const sizeNote = (g.size && String(g.size).toUpperCase()!=='FREE')
     ? `<span style="font-size:11.5px;color:#0F6E56;background:#fff;border:1px solid #cfe6da;border-radius:7px;padding:3px 8px">${th?'ไซส์':'Size'} <b>${esc(g.size)}</b></span>` : '';
   let verdict='', vcol='#0F6E56';
@@ -1207,8 +1318,16 @@ function fitMatch(g){
       <div style="font-size:13px;font-weight:600;color:#04342C">${th?'พอดีตัวคุณไหม?':'Will it fit you?'}</div>${sizeNote}
     </div>
     ${verdict?`<div style="font-size:13px;font-weight:600;color:${vcol};margin-bottom:2px">${verdict}${score!=null?` · ${score}%`:''}</div>`:''}
-    ${rows}
-    <div style="font-size:11px;color:#8a897f;margin-top:8px">${th?'อ้างอิงสัดส่วนที่คุณบันทึกไว้ · แก้ได้ในโปรไฟล์':'From your saved measurements · edit in profile'}</div>
+    ${fi && fi.from === 'measured' ? rows : ''}
+    ${fi && fi.from !== 'measured' && mine ? `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:4px 0;border-top:1px solid #d7e7e0">
+      <span style="color:#5b5a55">${th?'ไซส์ของคุณ':'Your size'}</span>
+      <span style="color:#04342C"><b>${mine}</b> <span style="color:#8a897f">· ${th?'ชุด':'dress'} ${esc(String(g.size||'').toUpperCase())}</span></span></div>` : ''}
+    <div style="font-size:11px;color:#8a897f;margin-top:8px">${
+      !fi ? (th?'ยังเทียบไม่ได้ กรอกสัดส่วนหรือไซส์ที่ใส่ประจำในโปรไฟล์ก่อนนะคะ':'Add your measurements or usual size in profile to compare')
+      : fi.from === 'measured' ? (th?'เทียบจากตัวเลขวัดจริงของชุด กับสัดส่วนที่คุณบันทึกไว้':'Measured dress vs your saved measurements')
+      : fi.from === 'free' ? (th?'ชุดฟรีไซส์ เทียบจากไซส์ของคุณ':'Free size, compared with your size')
+      : (th?'ชุดตัวนี้ยังไม่มีตัวเลขวัดจริง เทียบจากป้ายไซส์กับไซส์ของคุณ':'This piece is not measured yet, compared by size label')
+    } · ${th?'แก้ได้ในโปรไฟล์':'edit in profile'}</div>
   </div>`;
 }
 function closeDetail() { $('#overlay').classList.remove('open'); document.body.style.overflow =''; }
@@ -2249,7 +2368,7 @@ function openMenu() {
       ${item(I.stylist, en ? 'What to wear? — card game' : 'งานนี้ใส่อะไรดี เพื่อนสาวช่วยเลือก', "location.href='quiz.html'")}
       ${item(I.stylist, en ? 'LLOOP Atelier by venue' : 'LLOOP Atelier ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
-      ${item(I.findwish, en ? 'Wish for a piece — tell us' : 'อยากได้ชุดไหน บอกเราได้', "location.href='wishlist.html'")}
+      ${item(I.findwish, en ? 'Wish for a piece, tell us' : 'อยากได้ชุดไหน บอกเราได้', "location.href='wish.html'")}
       ${item(I.foryou, en ? 'Community · The Loop Looks' : 'ชุมชน · ลุคจากคนใน loop', "location.href='looks.html'")}
       ${item(I.family, en ? 'Family & groups' : 'ครอบครัว & กลุ่ม', 'openFamily()')}
       ${item(I.gift, en ? 'Shoot & earn credit' : 'ถ่ายชุด · ได้เครดิต', "location.href='creator.html'")}
@@ -2328,8 +2447,9 @@ function openProfile(onboard) {
       </button>
       ${onboard ? '' : `${renderStyleCard(c)}
       ${renderImpactCard()}`}
+      ${onboard ? '' : `<div class="psec">${lang==='th'?'ตัวฉัน':'About me'}</div>`}
       <div class="field"><label>${t('pName')}</label><input id="pName" autocomplete="name" value="${c.name || c.display_name ||''}"></div>
-      ${onboard ? '' : `${renderMeasuredRef(c)}<div class="frow">
+      ${onboard ? '' : `<div class="psec">${lang==='th'?'สัดส่วน (ใช้เทียบไซส์ชุด)':'Measurements (for size match)'}</div>${renderMeasuredRef(c)}<div class="frow">
         <div class="field"><label>${t('pHeight')}</label><input id="pHeight" type="number" value="${c.height_cm ||''}"></div>
         <div class="field"><label>${t('pShoe')}</label><input id="pShoe" value="${c.shoe_size ||''}"></div>
       </div>
@@ -2342,6 +2462,7 @@ function openProfile(onboard) {
         <div class="field"><label>${t('pWaistL')}</label><input id="pWaist" type="number" value="${c.waist_in ||''}"></div>
         <div class="field"><label>${t('pHipL')}</label><input id="pHip" type="number" value="${c.hip_in ||''}"></div>
       </div>
+      <div class="psec">${lang==='th'?'ความชอบ':'Preferences'}</div>
       <div class="prefsec">
         <div class="preflabel">${lang==='th'?'สไตล์ที่ชอบ':'Styles you like'}</div>
         <div class="prefchips">${styleChips}</div>
@@ -2354,7 +2475,8 @@ function openProfile(onboard) {
         <div class="field"><label>${lang==='th'?'สีที่ชอบ':'Favourite colours'}</label><input id="pFav" value="${pf.fav_colors ||''}" placeholder="${lang==='th'?'เช่น ครีม เอิร์ธโทน':'e.g. cream, earth'}"></div>
         <div class="field"><label>${lang==='th'?'สีที่เลี่ยง':'Colours to avoid'}</label><input id="pAvoid" value="${pf.avoid_colors ||''}" placeholder="${lang==='th'?'เช่น ส้มสด':'e.g. neon'}"></div>
       </div>
-      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>`}
+      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง ไม่รู้ข้ามได้)':'(if you know your season, optional)'}</span></label><div class="seasons">${seasons}</div></div>`}
+      <div class="psec">${lang==='th'?'ติดต่อ & จัดส่ง':'Contact & delivery'}</div>
       <div class="frow">
         <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
         ${onboard ? '' : `<div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>`}
@@ -4036,6 +4158,8 @@ async function boot() {
     } catch (e) { if (_eb) _eb.hidden = true; }
   }
   window.track?.('session_start', null, { logged_in: loggedIn, tier: CUSTOMER.crm_tier || 'guest' });
+  syncStickyOffset();
+  window.addEventListener('resize', syncStickyOffset, { passive: true });
   setupScrollTracking();
   setupGridLazyLoad();
   const si = $('#searchInput'); if (si) si.placeholder = lang === 'th' ? 'ค้นหาชุด แบรนด์ หรือโอกาส…' : 'Search dresses, brands, occasions…';
@@ -4121,6 +4245,10 @@ function routeDeepLink() {
       if (go === 'menu') openMenu();
       else if (go === 'foryou') { if (!fForYou) toggleForYou(); }
       else if (go === 'orders') openOrders();
+      else if (go === 'wallet') openWallet();
+      else if (go === 'invite') openWallet(true);
+      else if (go === 'saved') { if (!fWishOnly) toggleWishOnly(); scrollToEdit(); }
+      else if (go === 'family') openFamily();
       else if (go === 'membership') openMembership();
       else if (go === 'impact') openImpact();
       else if (go === 'profile') openProfile();
