@@ -167,11 +167,12 @@
   .curbtn{min-width:30px}
   .curnote{font-size:11px;color:var(--muted);text-align:right;padding:0 0 7px;line-height:1.5}
   @media(max-width:679px){.prefrow{justify-content:center;gap:8px}.segpill button{padding:5px 10px}.curnote{text-align:center}}
-  .catnav{border-bottom:1px solid var(--line);background:#fff}
+  .catnav{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:var(--hdr-h,58px);z-index:19}
   .catnav .row{display:flex;gap:26px;justify-content:center;align-items:center;height:42px;overflow-x:auto;scrollbar-width:none}
   .catnav .row::-webkit-scrollbar{display:none}
   .catnav a{font-size:13px;color:var(--ink);text-decoration:none;white-space:nowrap;font-weight:500;cursor:pointer}
   .catnav a:hover{color:var(--muted)}
+  .catnav a.on{font-weight:700;border-bottom:2px solid var(--ink);padding-bottom:2px}
 
   /* ===== hero ===== */
   .hero{position:relative;background:linear-gradient(120deg,#EDE7DF,#E6DCD2);height:64vw;max-height:560px;min-height:340px;
@@ -941,6 +942,12 @@
   .ed-eyebrow{margin:30px 0 2px}
   .ed-eyebrow .ek{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--muted)}
   .ed-eyebrow .et{font-family:var(--display);font-weight:700;font-size:clamp(22px,5vw,30px);letter-spacing:.5px;margin-top:3px}
+  .ed-eyebrow .etnow{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ed-eyebrow .etnow b{color:var(--ink);font-weight:600}
+  .ed-eyebrow .etnow .clr{border:1px solid var(--line);background:#fff;color:var(--muted);font:inherit;
+    font-size:11.5px;padding:2px 9px;border-radius:14px;cursor:pointer}
+  .ed-eyebrow .etnow .clr:hover{border-color:var(--ink);color:var(--ink)}
+  .ed-eyebrow .etnow[hidden]{display:none}
   /* product cards — เหลี่ยมเหมือนเดิม (ไม่โค้งมน) + typography editorial */
   .pphoto{border-radius:0}
   .pcard{transition:transform .25s ease}
@@ -1245,7 +1252,7 @@
   <div class="event" id="eventBanner" style="display:none"></div>
   <div class="datebar" id="datebar"></div>
   <div class="prails" id="personalRail"></div>
-  <div class="ed-eyebrow"><div class="ek">the LLOOP edit</div><div class="et" id="edEditTitle">Now in the loop</div></div>
+  <div class="ed-eyebrow" id="editHead"><div class="ek">the LLOOP edit</div><div class="et" id="edEditTitle">Now in the loop</div><div class="etnow" id="editNow" hidden></div></div>
   <div class="toolbar">
     <div class="searchbar"><svg viewBox="0 0 24 24" class="sicon"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
       <input id="searchInput" type="search" autocomplete="off" oninput="onSearch(this.value)"/></div>

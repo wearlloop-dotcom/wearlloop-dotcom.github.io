@@ -150,9 +150,29 @@ function enterApp() {
   el.classList.add('hide');
   setTimeout(() => { el.style.display ='none'; }, 900);
 }
+// ความสูงของแถบที่ปักหมุดไว้ (header + แถบแท็บ) — ใช้หักออกเวลาเลื่อนหา section
+// เพื่อไม่ให้หัวข้อโดนแถบบังหลังเลื่อนจบ
+function stickyTop() {
+  const h = document.querySelector('header'), n = document.querySelector('.catnav');
+  return (h ? h.offsetHeight : 0) + (n ? n.offsetHeight : 0);
+}
+// จำความสูง header ไว้ใน CSS var ให้แถบแท็บปักหมุดใต้ header ได้พอดีทุกขนาดจอ
+function syncStickyOffset() {
+  const h = document.querySelector('header');
+  document.documentElement.style.setProperty('--hdr-h', (h ? h.offsetHeight : 58) + 'px');
+}
+// เลื่อนไปที่ "ส่วนที่เปลี่ยน" — หัวข้อ the LLOOP edit + แถบเครื่องมือ + ตารางชุด
+function scrollToEdit() {
+  const a = document.getElementById('editHead') || document.querySelector('.ed-eyebrow') || $('#grid');
+  if (!a) return;
+  const y = a.getBoundingClientRect().top + window.pageYOffset - stickyTop() - 10;
+  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+}
 function scrollToGrid() {
-  const g = document.querySelector('.collabel') || $('#grid');
-  if (g) g.scrollIntoView({ behavior:'smooth'});
+  const g = document.querySelector('.collabel');
+  if (!g) return scrollToEdit();
+  const y = g.getBoundingClientRect().top + window.pageYOffset - stickyTop() - 10;
+  window.scrollTo({ top: Math.max(0, y), behavior:'smooth'});
 }
 
 // ----- hero video (แบบ Dior): autoplay/muted/loop + เล่นหลายคลิปต่อเนื่อง -----
@@ -336,7 +356,7 @@ function renderDiscover(){
   }
   el.innerHTML = html;
 }
-function pickOccasion(tg){ setOccasion(fOccasion===tg?null:tg); const a=document.querySelector('.ed-eyebrow'); window.scrollTo({ top: a? a.offsetTop-16 : 380, behavior:'smooth' }); }
+function pickOccasion(tg){ setOccasion(fOccasion===tg?null:tg); scrollToEdit(); }
 function setMood(k){ fMood = k || null; renderDiscover(); renderGrid(); }
 
 // เฉดสีสำรองตาม personal-color season — ใช้เมื่อชุดยังไม่ได้แท็กสีจริง (color_hex ว่าง)
@@ -599,28 +619,42 @@ function setBrand(b) { fBrand = b; renderBrandChips(); renderGrid(); }
 function toggleTone() { fToneOnly =!fToneOnly; renderCatnav(); renderFilters(); renderGrid(); }
 
 // top text category nav (Pomelo-style)
+// กดแท็บ = เปลี่ยนของที่อยู่ล่างหน้า (หัวข้อ the LLOOP edit + ตารางชุด) — ถ้าไม่พาไปดู
+// ลูกค้าที่ยืนอยู่ตรง hero จะไม่เห็นว่ามีอะไรเปลี่ยน จึงพาเลื่อนลงไปที่ section นั้นให้เลย
+let _catnavItems = [];
 function renderCatnav() {
   const el = document.getElementById('catnav'); if (!el) return;
-  const items = [
-    { label: (lang ==='th'?'แนะนำสำหรับคุณ':'For You'), on: fForYou, act:`toggleForYou()`},
-    { label: t('all'), on:!fForYou &&!fOccasion &&!fToneOnly &&!fWishOnly, act:`setForYouOff();setOccasion(null);setToneOff();setWishOff();renderCatnav();renderGrid()`},
-    { label: t('myTone'), on: fToneOnly, act:`toggleTone()`},
-    { label: (lang ==='th'?'ที่หมายตา':'Saved'), on: fWishOnly, act:`toggleWishOnly()`},
+  _catnavItems = [
+    { key:'for_you', label: (lang ==='th'?'แนะนำสำหรับคุณ':'For You'), on: fForYou, run: toggleForYou },
+    { key:'all',     label: t('all'), on:!fForYou &&!fOccasion &&!fToneOnly &&!fWishOnly,
+      run: () => { setForYouOff(); fOccasion = null; setToneOff(); setWishOff(); renderCatnav(); renderChips(); renderDiscover(); renderGrid(); } },
+    { key:'my_tone', label: t('myTone'), on: fToneOnly, run: toggleTone },
+    { key:'wishlist',label: (lang ==='th'?'ที่หมายตา':'Saved'), on: fWishOnly, run: toggleWishOnly },
 ];
   // โอกาส: data-driven — โชว์เฉพาะที่มีชุดจริง (ไม่โชว์ "งาน/คาเฟ่" ที่ไม่มีชุด → กันกดแล้วว่าง)
   const OCC_ORDER=['wedding_guest','dinner','party','cafe','work'];
   const presentOcc=[...new Set(GARMENTS.flatMap(g=>g.occasion_tags||[]))].sort((a,b)=>{const i=OCC_ORDER.indexOf(a),j=OCC_ORDER.indexOf(b);return (i<0?9:i)-(j<0?9:j);});
-  presentOcc.forEach(tg=>items.push({ label: occName(tg), on: fOccasion===tg, act:`setOccasion('${tg}')` }));
+  presentOcc.forEach(tg=>_catnavItems.push({ key:'occasion:'+tg, label: occName(tg), on: fOccasion===tg, run: () => setOccasion(tg) }));
   // หมายเหตุ: รายการบัญชี/นำทาง (ครอบครัว/ออเดอร์/สมาชิก/impact/โปรไฟล์) ย้ายไปอยู่ใน
   // เมนูรวม (☰ openMenu) แล้ว — catnav เหลือเฉพาะ "ฟิลเตอร์สินค้า" เพื่อไม่ให้ปนหน้าที่กัน
-  el.innerHTML = items.map(i =>`<a onclick="${i.act}" style="${i.on?'border-bottom:2px solid var(--ink);padding-bottom:2px':''}">${i.label}</a>`).join('');
+  el.innerHTML = _catnavItems.map((i, idx) =>`<a class="${i.on?'on':''}" onclick="catnavPick(${idx})">${i.label}</a>`).join('');
+  // จอแคบ: เลื่อนแถบให้เห็นแท็บที่กำลังเลือกอยู่เสมอ
+  const act = el.querySelector('a.on');
+  if (act && el.scrollWidth > el.clientWidth) act.scrollIntoView({ block:'nearest', inline:'center', behavior:'smooth' });
+}
+// กดแท็บ → เปลี่ยนฟิลเตอร์ + เก็บ event + พาไปที่ section ที่เพิ่งเปลี่ยน
+function catnavPick(idx) {
+  const it = _catnavItems[idx]; if (!it) return;
+  if (it.run() === false) return;              // เช่น "ที่หมายตา" ตอนยังไม่ล็อกอิน — ไม่ต้องพาเลื่อน
+  window.track?.('catnav_tab', it.key, { was_on: !!it.on });
+  scrollToEdit();
 }
 function setToneOff() { fToneOnly = false; }
-function toggleForYou() { fForYou =!fForYou; renderCatnav(); renderGrid(); if (fForYou) window.scrollTo({ top: 0, behavior:'smooth'}); }
+function toggleForYou() { fForYou =!fForYou; renderCatnav(); renderGrid(); }
 function setForYouOff() { fForYou = false; }
 function setWishOff() { fWishOnly = false; }
 function toggleWishOnly() {
-  if (!CUSTOMER.id) { toast(lang ==='th'?'เข้าผ่าน LINE เพื่อดูข้อมูลส่วนตัว':'Sign in via LINE to see your saved looks'); return; }
+  if (!CUSTOMER.id) { toast(lang ==='th'?'เข้าผ่าน LINE เพื่อดูข้อมูลส่วนตัว':'Sign in via LINE to see your saved looks'); return false; }
   fWishOnly =!fWishOnly; renderCatnav(); renderGrid();
 }
 // กดหัวใจที่การ์ดสินค้า — บันทึก/ยกเลิก wishlist
@@ -679,6 +713,30 @@ function sizeChartPhoto(g){ return (g.sourceMeta && g.sourceMeta.size_chart_url)
 // แกลเลอรี = รูปทั้งหมด ยกภาพตารางไซส์ออก (โชว์แยกในบล็อกตารางไซส์)
 function galleryPhotos(g){ const p = Array.isArray(g.photos)? g.photos : []; const c = sizeChartPhoto(g); return c ? p.filter(u => u !== c) : p; }
 
+// ชื่อแท็บ/ตัวกรองที่กำลังใช้อยู่ — ใช้เขียนป้าย "ตอนนี้กำลังดู"
+function activeFilterLabel() {
+  const th = lang === 'th';
+  if (fForYou)   return th ? 'แนะนำสำหรับคุณ' : 'For You';
+  if (fToneOnly) return t('myTone');
+  if (fWishOnly) return th ? 'ที่หมายตา' : 'Saved';
+  if (fOccasion) return occName(fOccasion);
+  return t('all');
+}
+function anyCatFilter() { return !!(fForYou || fToneOnly || fWishOnly || fOccasion); }
+// ป้ายใต้หัวข้อ: บอกว่าตอนนี้กรองด้วยอะไร เหลือกี่ชุด และปุ่มกลับไปดูทั้งหมด
+function renderEditNow(n) {
+  const el = document.getElementById('editNow'); if (!el) return;
+  const th = lang === 'th';
+  const cnt = th ? `${n} ชุด` : `${n} ${n === 1 ? 'piece' : 'pieces'}`;
+  el.innerHTML = `<span>${th ? 'ตอนนี้กำลังดู' : 'Now showing'} <b>${activeFilterLabel()}</b> · ${cnt}</span>`
+    + (anyCatFilter() ? `<button class="clr" onclick="clearCatFilter()">${th ? 'ดูทั้งหมด' : 'View all'}</button>` : '');
+  el.hidden = false;
+}
+// ล้างตัวกรองแท็บ แล้วอยู่ที่เดิม (ไม่ต้องเลื่อน เพราะกดจากตรงนี้อยู่แล้ว)
+function clearCatFilter() {
+  setForYouOff(); fOccasion = null; setToneOff(); setWishOff();
+  renderCatnav(); renderChips(); renderDiscover(); renderGrid();
+}
 function renderGrid() {
   let list = GARMENTS.filter(g =>
     (!fOccasion || g.occasion_tags.includes(fOccasion)) &&
@@ -691,7 +749,7 @@ function renderGrid() {
     (!fNewOnly || g.isNew) &&
     priceOk(g) &&
     matchQuery(g));
-  if (fWishOnly && !list.length) { $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
+  if (fWishOnly && !list.length) { renderEditNow(0); $('#grid').innerHTML =`<div class="empty">${lang ==='th'?'ยังไม่มีชุดที่หมายตา แตะรูปหัวใจที่ชุดที่ชอบเพื่อเก็บไว้':'No saved looks yet — tap the heart on a piece you love'}</div>`; return; }
   if (fForYou) {
     // ดันชุดที่ "คนเหมือนคุณเช่า" (collaborative จาก behavior data) ขึ้นบนสุด แล้วตามด้วย personalScore
     const recIdx = g => { const i = gPersonalRecs.indexOf(g.code); return i < 0 ? 999 : i; };
@@ -699,6 +757,7 @@ function renderGrid() {
   }
   const availOf = g => !gUseDate || !gAvailSet || gAvailSet.has(g.id);  // null set = ว่างหมด (mock)
   if (gUseDate && gOnlyAvail) list = list.filter(availOf);
+  renderEditNow(list.length);
   if (!list.length) {
     $('#gridEnd') && ($('#gridEnd').textContent = '');
     if (gQuery) {
@@ -4036,6 +4095,8 @@ async function boot() {
     } catch (e) { if (_eb) _eb.hidden = true; }
   }
   window.track?.('session_start', null, { logged_in: loggedIn, tier: CUSTOMER.crm_tier || 'guest' });
+  syncStickyOffset();
+  window.addEventListener('resize', syncStickyOffset, { passive: true });
   setupScrollTracking();
   setupGridLazyLoad();
   const si = $('#searchInput'); if (si) si.placeholder = lang === 'th' ? 'ค้นหาชุด แบรนด์ หรือโอกาส…' : 'Search dresses, brands, occasions…';
