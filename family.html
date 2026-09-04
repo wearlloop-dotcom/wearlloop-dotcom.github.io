@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="nav.js?v=2"></script>
 <style>
   :root{
     --bg:#FBFAF7; --ink:#1A1A1A; --soft:#F5F4F2; --soft2:#EFEDE9; --line:#E7E5E1;
@@ -85,6 +86,8 @@
   .quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
   .quick button{background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12px;color:#555}
   .quick button.on{background:var(--sage-bg);border-color:var(--sage);color:var(--ok)}
+  .petnote{background:var(--sand);border-radius:10px;padding:10px 13px;font-size:12px;color:#7a6335;line-height:1.65;margin-bottom:12px}
+  .petnote[hidden]{display:none}
 
   /* theme styling */
   .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:12px}
@@ -151,10 +154,7 @@
 </style>
 </head>
 <body>
-<header><div class="contain hbar">
-  <div class="logo">LLOOP</div>
-  <a class="back" href="index.html"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> หน้าหลัก</a>
-</div></header>
+<header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 
 <div class="contain">
   <div class="hero">
@@ -207,20 +207,33 @@
       <div class="quick" id="relQuick"></div>
       <div class="frow">
         <div class="fld"><label>ชื่อเล่น</label><input id="f_name" placeholder="เช่น น้องเป่าเปา"></div>
-        <div class="fld"><label>ช่วงวัย</label><select id="f_age">
+        <div class="fld"><label>ช่วงวัย</label><select id="f_age" onchange="onAgeChange()">
           <option value="kid">เด็ก</option><option value="teen">วัยรุ่น</option>
           <option value="adult" selected>ผู้ใหญ่</option><option value="senior">ผู้ใหญ่ขึ้นวัย</option>
+          <option value="pet" id="f_age_pet" hidden>สัตว์เลี้ยง</option>
         </select></div>
-        <div class="fld"><label>เพศ</label><select id="f_gender">
+        <div class="fld" id="fld_gender"><label>เพศ</label><select id="f_gender">
           <option value="female" selected>หญิง</option><option value="male">ชาย</option><option value="">ไม่ระบุ</option>
         </select></div>
+        <div class="fld" id="fld_species" hidden><label>น้องเป็น</label><select id="f_species">
+          <option value="dog" selected>น้องหมา</option><option value="cat">น้องแมว</option><option value="other">อื่น ๆ</option>
+        </select></div>
       </div>
-      <div class="frow">
+      <div class="frow" id="row_human">
         <div class="fld"><label>อก (นิ้ว)</label><input id="f_bust" type="number" placeholder="32"></div>
         <div class="fld"><label>เอว (นิ้ว)</label><input id="f_waist" type="number" placeholder="26"></div>
         <div class="fld"><label>สะโพก (นิ้ว)</label><input id="f_hip" type="number" placeholder="35"></div>
         <div class="fld"><label>สูง (ซม.)</label><input id="f_height" type="number" placeholder="120"></div>
       </div>
+      <!-- ขนาดตัวของน้อง: วัดคนละแบบกับคน (ไซส์ชุดสัตว์เลี้ยงใช้ รอบอก · รอบคอ · ความยาวหลัง) -->
+      <div class="frow" id="row_pet" hidden>
+        <div class="fld"><label>รอบอก (นิ้ว)</label><input id="p_chest" type="number" placeholder="16"></div>
+        <div class="fld"><label>รอบคอ (นิ้ว)</label><input id="p_neck" type="number" placeholder="10"></div>
+        <div class="fld"><label>ความยาวหลัง (นิ้ว)</label><input id="p_back" type="number" placeholder="14"></div>
+        <div class="fld"><label>น้ำหนัก (กก.)</label><input id="p_weight" type="number" step="0.1" placeholder="5"></div>
+      </div>
+      <div class="petnote" id="petnote" hidden>คอลเลกชันชุดสัตว์เลี้ยงยังอยู่ระหว่างเตรียม เก็บขนาดตัวของน้องไว้ก่อนได้เลย
+        พอเปิดคอลเลกชันเราจะจัดชุดให้น้องเข้าตีมกับทั้งกลุ่มค่ะ</div>
       <div style="display:flex;gap:9px">
         <button class="btn sage" id="saveMember">บันทึกเข้ากลุ่ม</button>
         <button class="btn ghost" id="cancelMember">ยกเลิก</button>
@@ -316,9 +329,13 @@ async function refreshAIQ(preset){
   h.textContent = (AIQ!=null) ? `AI วิเคราะห์สถานที่ · เหลือ ${AIQ} ครั้ง (โควต้าเดียวกับ AI สไตลิสต์หน้าแรก)` : '';
 }
 const AVA = ['#6FB3A6','#C9A86A','#B0857A','#7E8FB0','#A88BB0','#8AA37B'];
-const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู้ใหญ่', senior:'ผู้ใหญ่ขึ้นวัย' };
+const AGE_TH = { kid:'เด็ก', teen:'วัยรุ่น', adult:'ผู้ใหญ่', senior:'ผู้ใหญ่ขึ้นวัย', pet:'สัตว์เลี้ยง' };
 const GEN_TH = { female:'หญิง', male:'ชาย', '':'' };
+const SPECIES_TH = { dog:'น้องหมา', cat:'น้องแมว', other:'สัตว์เลี้ยง' };
 const REL_QUICK = ['คุณแม่','คุณพ่อ','ลูกสาว','ลูกชาย','คุณยาย','คุณย่า','คุณตา','คุณปู่','ป้า','น้า','หลาน','เพื่อน'];
+const REL_QUICK_PET = ['น้องหมา','น้องแมว','ลูกตัวน้อย'];
+// เปิดรับสมาชิกสัตว์เลี้ยงเมื่อเจ้าของเปิดสวิตช์ pet_outfits_enabled (dark launch)
+let PET_ON = false;
 
 // ชุดตัวอย่าง (สต็อก) — มี age_band/gender/สี/ฤดูสี
 const STOCK = [
@@ -384,7 +401,7 @@ function mapGroup(g){
     id: g.group_id, name: g.name||'กลุ่ม', kind: g.kind||'family',
     my_role: g.my_role, my_status: g.my_status,
     members: (g.members||[]).map(m=>({
-      id: m.customer_id, name: m.name||'สมาชิก', rel: m.relation||null,
+      id: m.customer_id, name: m.name||'สมาชิก', rel: m.relation||null, species: m.pet_species||null,
       role: m.role||'member', age: m.age_band||'adult', gen: m.gender||'',
       managed: !!m.managed, season: m.color_season||null,
       bust: m.bust_in||null, waist: m.waist_in||null, hip: m.hip_in||null,
@@ -451,8 +468,9 @@ async function createGroupFlow(){
 }
 
 function memberCard(m){
-  const tags=[`<span class="tag">${AGE_TH[m.age]||m.age}</span>`];
-  if(m.gen) tags.push(`<span class="tag">${GEN_TH[m.gen]}</span>`);
+  const isPet = m.age === 'pet';
+  const tags=[`<span class="tag">${isPet ? (SPECIES_TH[m.species]||AGE_TH.pet) : (AGE_TH[m.age]||m.age)}</span>`];
+  if(m.gen && !isPet) tags.push(`<span class="tag">${GEN_TH[m.gen]}</span>`);
   if(m.season) tags.push(`<span class="tag sage">โทน${({autumn:'ออทัม',winter:'วินเทอร์',spring:'สปริง',summer:'ซัมเมอร์'})[m.season]||m.season}</span>`);
   if(m.managed) tags.push(`<span class="tag gold">ผู้ปกครองดูแล</span>`);
   if(m.pend) tags.unshift(`<span class="pendtag">รอตอบรับ</span>`);
@@ -502,7 +520,7 @@ function renderMembers(){
       <h4>ยังไม่มีสมาชิกในกลุ่มนี้</h4>
       <p>เริ่มจากเพิ่มคนในครอบครัว — คุณลูก คุณยาย หรือชวนเพื่อนที่มีแอคเคานต์ LLOOP อยู่แล้ว แล้วเราจะช่วยจัดชุดเข้าตีมให้</p>
       <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
-        <button class="btn sage" onclick="openForm()">+ เพิ่มสมาชิก (เด็ก/ผู้สูงวัย)</button>
+        <button class="btn sage" onclick="openForm()">+ เพิ่มสมาชิก ${PET_ON?'(เด็ก/ผู้สูงวัย/สัตว์เลี้ยง)':'(เด็ก/ผู้สูงวัย)'}</button>
         <button class="btn ghost" onclick="openInvite()">ชวนเพื่อนด้วยลิงก์/รหัส</button>
       </div></div>`;
   } else {
@@ -511,9 +529,20 @@ function renderMembers(){
   }
 }
 
+function isPetForm(){ return $('#f_age') && $('#f_age').value === 'pet'; }
 function renderRelQuick(){
-  $('#relQuick').innerHTML=REL_QUICK.map(r=>`<button class="${r===selRel?'on':''}" onclick="pickRel('${r}')">${r}</button>`).join('');
+  const list = isPetForm() ? REL_QUICK_PET : REL_QUICK;
+  $('#relQuick').innerHTML=list.map(r=>`<button class="${r===selRel?'on':''}" onclick="pickRel('${r}')">${r}</button>`).join('');
 }
+// เลือก "สัตว์เลี้ยง" → สลับไปช่องวัดตัวของน้อง (รอบอก/รอบคอ/ยาวหลัง/น้ำหนัก)
+window.onAgeChange = function(){
+  const pet = isPetForm();
+  $('#row_human').hidden = pet;  $('#row_pet').hidden = !pet;
+  $('#fld_gender').hidden = pet; $('#fld_species').hidden = !pet;
+  $('#petnote').hidden = !pet;
+  $('#f_name').placeholder = pet ? 'เช่น น้องมอคค่า' : 'เช่น น้องเป่าเปา';
+  selRel = null; renderRelQuick();
+};
 window.pickRel=r=>{selRel=r;renderRelQuick();};
 window.openForm=()=>{ $('#form').classList.add('show'); renderRelQuick(); $('#form').scrollIntoView({behavior:'smooth',block:'center'}); };
 
@@ -522,8 +551,14 @@ function bindForm(){
   $('#cancelMember').onclick=()=>$('#form').classList.remove('show');
   $('#saveMember').onclick=async ()=>{
     const g=curGroup(); if(!g) return;
-    const name=$('#f_name').value||'สมาชิกใหม่';
-    const profile={
+    const pet=isPetForm();
+    const name=$('#f_name').value||(pet?'น้องคนใหม่':'สมาชิกใหม่');
+    const profile = pet ? {
+      name, relation:selRel||'ลูกตัวน้อย', age_band:'pet', gender:null,
+      pet_species:$('#f_species').value||'dog',
+      pet_chest_in:+$('#p_chest').value||null, pet_neck_in:+$('#p_neck').value||null,
+      pet_back_in:+$('#p_back').value||null, pet_weight_kg:+$('#p_weight').value||null,
+    } : {
       name, relation:selRel, age_band:$('#f_age').value, gender:$('#f_gender').value||null,
       bust_in:+$('#f_bust').value||null, waist_in:+$('#f_waist').value||null,
       hip_in:+$('#f_hip').value||null, height_cm:+$('#f_height').value||null,
@@ -537,10 +572,10 @@ function bindForm(){
       }catch(e){ toast('เพิ่มสมาชิกไม่สำเร็จ: '+(e.message||e)); }
     } else {
       const id='c'+Date.now();
-      g.members.push({ id, name, rel:selRel, role:'member',
-        age:$('#f_age').value, gen:$('#f_gender').value, managed:true,
-        bust:+$('#f_bust').value||null, waist:+$('#f_waist').value||null, hip:+$('#f_hip').value||null,
-        season:'autumn' });
+      g.members.push({ id, name, rel:profile.relation, role:'member',
+        age:profile.age_band, gen:pet?null:$('#f_gender').value, species:pet?profile.pet_species:null, managed:true,
+        bust:pet?null:+$('#f_bust').value||null, waist:pet?null:+$('#f_waist').value||null, hip:pet?null:+$('#f_hip').value||null,
+        season:pet?null:'autumn' });
       $('#form').classList.remove('show'); $('#f_name').value=''; selRel=null;
       render();
     }
@@ -923,6 +958,13 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   $('#t_date').value=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
   $('#suggestBtn').onclick=()=>renderTheme(true);
   bindForm(); bindInvite();
+
+  // สวิตช์ "ชุดสัตว์เลี้ยง" (เจ้าของเปิดที่หน้าตั้งค่า) — ปิดอยู่ = ไม่เห็นตัวเลือกนี้เลย
+  try{
+    const f = await (window.API && window.API.siteFlags ? window.API.siteFlags() : null);
+    PET_ON = !!(f && f.pet_outfits_enabled === 'true');
+  }catch(_e){ PET_ON = false; }
+  if(PET_ON){ const o=$('#f_age_pet'); if(o) o.hidden=false; }
 
   // ===== ลอง bootstrap LIVE (Supabase + LINE) — ล้มเหลว/ไม่มี login ก็ตกไป mock =====
   try{

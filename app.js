@@ -2308,7 +2308,7 @@ function openMenu() {
       ${item(I.stylist, en ? 'What to wear? — card game' : 'งานนี้ใส่อะไรดี เพื่อนสาวช่วยเลือก', "location.href='quiz.html'")}
       ${item(I.stylist, en ? 'LLOOP Atelier by venue' : 'LLOOP Atelier ประจำสถานที่', "var el=document.getElementById('venueInput');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}")}
       ${item(I.wish, en ? 'Saved looks' : 'ชุดที่หมายตา', 'if(!fWishOnly)toggleWishOnly()')}
-      ${item(I.findwish, en ? 'Wish for a piece — tell us' : 'อยากได้ชุดไหน บอกเราได้', "location.href='wishlist.html'")}
+      ${item(I.findwish, en ? 'Wish for a piece, tell us' : 'อยากได้ชุดไหน บอกเราได้', "location.href='wish.html'")}
       ${item(I.foryou, en ? 'Community · The Loop Looks' : 'ชุมชน · ลุคจากคนใน loop', "location.href='looks.html'")}
       ${item(I.family, en ? 'Family & groups' : 'ครอบครัว & กลุ่ม', 'openFamily()')}
       ${item(I.gift, en ? 'Shoot & earn credit' : 'ถ่ายชุด · ได้เครดิต', "location.href='creator.html'")}
@@ -4182,6 +4182,10 @@ function routeDeepLink() {
       if (go === 'menu') openMenu();
       else if (go === 'foryou') { if (!fForYou) toggleForYou(); }
       else if (go === 'orders') openOrders();
+      else if (go === 'wallet') openWallet();
+      else if (go === 'invite') openWallet(true);
+      else if (go === 'saved') { if (!fWishOnly) toggleWishOnly(); scrollToEdit(); }
+      else if (go === 'family') openFamily();
       else if (go === 'membership') openMembership();
       else if (go === 'impact') openImpact();
       else if (go === 'profile') openProfile();
