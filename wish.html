@@ -20,31 +20,42 @@
 
   /* หัวหน้า: โทนเดียวกับ "the LLOOP edit" ในหน้าแรก */
   .hero{padding:34px 0 24px;position:relative}
-  /* hero วิดีโอ ชุดเดียวกับหน้าแรก */
-  .vhero{position:relative;height:42vw;max-height:420px;min-height:268px;overflow:hidden;display:flex;
-    align-items:center;justify-content:center;text-align:center;color:#fff;background:linear-gradient(120deg,#EDE7DF,#E6DCD2);
-    margin:0 -18px}
-  .vhero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 32%;opacity:0;transition:opacity .6s}
+  /* ===== hero วิดีโอ: เต็มขอบจอจริง (หลุดกรอบ container) ===== */
+  .vhero{position:relative;width:100%;height:min(70vh,600px);min-height:340px;overflow:hidden;
+    display:flex;align-items:flex-end;justify-content:center;text-align:center;color:#fff;
+    background:linear-gradient(120deg,#EDE7DF,#E6DCD2)}
+  .vhero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 28%;
+    opacity:0;transition:opacity .8s ease}
   .vhero.on video{opacity:1}
-  .vhero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.16),rgba(0,0,0,.44));opacity:0;transition:opacity .6s}
+  /* ไล่เข้ม 2 ชั้น: บนนิดหน่อยกันชนกับแถบเมนู ล่างเข้มขึ้นให้ตัวหนังสืออ่านออกและจางลงพื้นหน้าเว็บ */
+  .vhero .scrim{position:absolute;inset:0;opacity:0;transition:opacity .8s ease;
+    background:linear-gradient(180deg,rgba(20,18,14,.30) 0%,rgba(20,18,14,0) 26%,rgba(20,18,14,.20) 52%,rgba(20,18,14,.72) 100%)}
   .vhero.on .scrim{opacity:1}
-  .vhero .in{position:relative;z-index:2;padding:0 20px}
-  .vhero .hk{font-family:var(--display);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#E8D5A8;font-weight:600;margin-bottom:10px}
-  .vhero h1{font-family:var(--display);font-weight:700;font-size:clamp(27px,5vw,52px);line-height:1.04;letter-spacing:.5px;color:#fff}
-  .vhero p{margin-top:11px;font-size:14.5px;opacity:.92;max-width:44ch;margin-left:auto;margin-right:auto;line-height:1.6}
-  .vhero .hbtn{display:inline-block;margin-top:20px;background:#fff;color:var(--ink);padding:13px 32px;font-size:11.5px;
-    letter-spacing:.18em;text-transform:uppercase;font-weight:600;text-decoration:none;border-radius:2px}
-  /* ยังไม่มีวิดีโอ (โหลดไม่ขึ้น/เน็ตช้า) → ตัวหนังสือต้องอ่านออกบนพื้นครีม */
-  .vhero:not(.on) .hk{color:var(--gold)} .vhero:not(.on) h1{color:var(--ink)}
-  .vhero:not(.on) p{color:#5E5746} .vhero:not(.on) .hbtn{background:var(--ink);color:#fff}
-  @media(min-width:760px){.vhero{margin:0 -20px}}
+  .vhero .in{position:relative;z-index:2;width:100%;max-width:720px;padding:0 24px clamp(38px,6vw,72px)}
+  .vhero .hk{font-family:var(--display);font-size:11px;letter-spacing:.34em;text-transform:uppercase;
+    color:#E8D5A8;font-weight:600;margin-bottom:14px}
+  .vhero h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5.6vw,60px);line-height:1.03;
+    letter-spacing:.4px;color:#fff;text-shadow:0 2px 24px rgba(0,0,0,.28)}
+  .vhero p{margin:14px auto 0;font-size:clamp(14px,1.5vw,16px);line-height:1.62;opacity:.94;
+    max-width:38ch;text-wrap:balance;text-shadow:0 1px 12px rgba(0,0,0,.3)}
+  .vhero .hbtn{display:inline-block;margin-top:22px;background:#fff;color:var(--ink);padding:14px 34px;
+    font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;text-decoration:none;border-radius:2px}
+  /* วิดีโอยังโหลดไม่ขึ้น (เน็ตช้า) → ตัวหนังสือต้องอ่านออกบนพื้นครีม ไม่ใช่ขาวบนขาว */
+  .vhero:not(.on){align-items:center}
+  .vhero:not(.on) .in{padding-bottom:0}
+  .vhero:not(.on) .hk{color:var(--gold)}
+  .vhero:not(.on) h1{color:var(--ink);text-shadow:none}
+  .vhero:not(.on) p{color:#5E5746;text-shadow:none}
+  .vhero:not(.on) .hbtn{background:var(--ink);color:#fff}
+  /* ให้เนื้อหาหลังจาก hero หายใจ ไม่ติดกันเป็นพืด */
+  .afterhero{padding-top:clamp(26px,4vw,44px)}
 
   .hero::before{content:"";position:absolute;top:22px;left:18px;width:42px;height:1px;background:var(--gold)}
   .eyebrow{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
   h1{font-family:var(--display);font-weight:700;font-size:clamp(23px,5.4vw,31px);letter-spacing:.5px;margin-top:6px;line-height:1.2}
   .hsub{color:var(--muted);font-size:14px;margin-top:9px;max-width:56ch}
 
-  .sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 18px;margin-bottom:16px}
+  .sec{background:#fff;border:1px solid var(--line);border-radius:16px;padding:clamp(20px,3vw,30px) clamp(18px,3vw,28px);margin-bottom:clamp(16px,2.4vw,24px)}
   .sectitle{font-family:var(--display);font-size:15.5px;font-weight:600}
   .seccap{font-size:12.5px;color:var(--muted);margin-top:3px}
   .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
@@ -100,10 +111,10 @@
   .signin{text-align:center;padding:26px 14px}
   .signin p{color:var(--muted);font-size:13.5px;margin-bottom:14px;line-height:1.8}
 
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
-  .step{background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:13px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2.4vw,26px);margin-top:18px}
+  .step{padding:0 0 0 14px;border-left:2px solid var(--gold)}
   .step .k{font-family:var(--display);font-size:11px;letter-spacing:.2em;color:var(--gold);font-weight:600}
-  .step .t{font-size:13px;margin-top:5px;line-height:1.6}
+  .step .t{font-size:13.5px;margin-top:7px;line-height:1.7;color:#4A4437}
   @media(max-width:560px){ .frow{grid-template-columns:1fr} .steps{grid-template-columns:1fr} }
 
   .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(14px);background:var(--ink);color:#fff;
@@ -114,16 +125,17 @@
 <body>
 <header class="lloop-topbar" data-back="index.html" data-back-th="หน้าหลัก" data-back-en="Home"></header>
 
-<div class="contain">
   <section class="vhero">
-    <video src="https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260822_101938_81171660-015f-467a-a71f-97aa41ffd42d.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
-    <div class="scrim" aria-hidden="true"></div>
-    <div class="in">
-      <div class="hk">wish list</div>
-      <h1 data-i18n="Tell us the piece you want">อยากได้ชุดไหน<br>บอกเราได้</h1>
-      <p data-i18n="Attach a photo and we go looking. The pieces most people ask for come into the wardrobe first.">แนบรูปชุดที่ตามหาไว้ เราไปหาให้ ชุดที่คนอยากได้มากที่สุดเราหาเข้าคลังก่อน</p>
-    </div>
-  </section>
+  <video src="https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260822_101938_81171660-015f-467a-a71f-97aa41ffd42d.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video>
+  <div class="scrim" aria-hidden="true"></div>
+  <div class="in">
+    <div class="hk">wish list</div>
+    <h1 data-i18n="Tell us the piece you want">อยากได้ชุดไหน<br>บอกเราได้</h1>
+    <p data-i18n="Attach a photo and we go looking. The pieces most people ask for come into the wardrobe first.">แนบรูปชุดที่ตามหาไว้ เราไปหาให้ ชุดที่คนอยากได้มากที่สุดเราหาเข้าคลังก่อน</p>
+  </div>
+</section>
+
+<div class="contain afterhero">
 
   <div class="sec">
     <div class="sectitle" data-i18n="How it works">ขั้นตอนเป็นแบบนี้</div>
@@ -198,7 +210,7 @@
 <script src="data.js?v=38"></script>
 <script src="liffAuth.js?v=56"></script>
 <script src="me-api.js?v=56"></script>
-<script src="api.js?v=65"></script>
+<script src="api.js?v=66"></script>
 <script>
 const $ = s => document.querySelector(s);
 let ME = null, _tt, pickedPhoto = null;
@@ -341,7 +353,6 @@ async function send(){
   window.track && window.track('wish_submit', null, { occasion: $('#f_occ').value || null, has_photo: !!photoUrl });
   reload();
 }
-
 
 // hero วิดีโอ: โชว์ตัวหนังสือบนพื้นครีมไปก่อน วิดีโอค่อยจางเข้ามาเมื่อโหลดได้จริง
 (function(){
