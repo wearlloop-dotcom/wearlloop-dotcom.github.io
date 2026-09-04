@@ -25,8 +25,10 @@ window.CONFIG = {
 
   // ===== วิดีโอหน้า About (story) — เว้นว่างไว้ = โชว์ poster placeholder สวย ๆ พร้อมเสียบลิงก์ทีหลัง =====
   // hero = วิดีโอพื้นหลังหัวเรื่อง (ambient, เล่นเงียบวนลูป) · story = คลิปสั้นแทรกในบท "the loop"
-  ABOUT_HERO_VIDEO:'',   // เช่น 'https://<storage>/lloop-story-hero.mp4'  (เว้นว่าง = ใช้พื้นหลังไล่สีเดิม)
-  ABOUT_HERO_POSTER:'',  // รูปนิ่งคั่นระหว่างโหลด hero
-  ABOUT_STORY_VIDEO:'',  // เช่น 'https://<storage>/lloop-the-loop.mp4'   (เว้นว่าง = โชว์การ์ด poster + ปุ่มเล่น)
+  // เลือกคลิปคนละตัวกับ hero หน้าแรก จะได้ไม่ซ้ำกันเวลาเปิดสองหน้าต่อกัน
+  ABOUT_HERO_VIDEO:'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260901_033011_31c565db-e18b-4619-b42e-ff677a5a555a.mp4',  // 4K · 8s · วิ่งเข้าหาตู้กลางสวน (เล่นเป็น ambient หลังตัวหนังสือ)
+  ABOUT_HERO_POSTER:'',  // รูปนิ่งคั่นระหว่างโหลด hero (เว้นว่าง = ใช้พื้นหลังไล่สีเดิมของหน้า)
+  // บท 03 "the loop" — เดินในตรอกเมือง ไปเจอตู้ที่ปลายทาง เปิดประตู แล้วก้าวเข้าไป
+  ABOUT_STORY_VIDEO:'https://d8j0ntlcm91z4.cloudfront.net/user_36sWU61mPuAHtBBHgSIgEItPECx/hf_20260902_102442_5eb8d920-ba03-40a8-98b7-b26c4cc23e4e.mp4',  // 10s · เล่าครบวงจรในคลิปเดียว
   ABOUT_STORY_POSTER:'', // รูปนิ่งของคลิป the loop (โชว์เป็น poster ก่อนกดเล่น)
 };
