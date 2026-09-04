@@ -46,12 +46,23 @@
   .actions{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
   .note{font-size:12px;color:var(--muted)}
   .err{color:#9B1C1C;font-size:12.5px;margin-top:9px;min-height:1em}
+  /* กล่องแนบรูป: รูปคือตัวหลักของคำขอ ลิงก์เป็นตัวเสริม */
+  .up{border:1.5px dashed var(--line);border-radius:12px;background:var(--bg);min-height:132px;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;position:relative;transition:.15s}
+  .up:hover{border-color:var(--sage);background:#fff}
+  .up img{width:100%;height:100%;max-height:300px;object-fit:contain;display:block}
+  .uph{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:12.5px;text-align:center;padding:20px 16px;line-height:1.6}
+  .uph svg{width:26px;height:26px;stroke:var(--gold);fill:none;stroke-width:1.5}
+  .uprm{background:none;border:none;color:var(--muted);font-family:inherit;font-size:12px;padding:7px 0 0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .uprm[hidden]{display:none}
 
   /* รายการคำขอ */
   .rq{display:flex;gap:13px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;
     padding:13px;margin-top:11px;background:#fff}
   .rq .th{flex:0 0 62px;width:62px;height:78px;border-radius:9px;background:var(--cream2);overflow:hidden;
     display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--muted);text-align:center;padding:5px}
+  .rq .th.nopic{background:var(--sand,#F2ECDD);color:#8a7550}
+  .rq .th.nopic svg{width:22px;height:22px;stroke:#C9A86A;fill:none;stroke-width:1.5}
   .rq .th img{width:100%;height:100%;object-fit:cover;display:block}
   .rq .bd{flex:1;min-width:0}
   .rq .nm{font-family:var(--display);font-size:14.5px;font-weight:600;line-height:1.35}
@@ -121,7 +132,19 @@
         </select></div>
         <div class="fld"><label data-i18n="Occasion">โอกาสที่จะใส่</label><select id="f_occ"></select></div>
         <div class="fld"><label data-i18n="Rental budget (baht)">งบค่าเช่า (บาท)</label><input id="f_budget" type="number" min="0" step="50" placeholder="เช่น 900"></div>
-        <div class="fld wide"><label data-i18n="Link to a photo (optional)">ลิงก์รูปตัวอย่าง (ใส่ก็ได้ ไม่ใส่ก็ได้)</label><input id="f_url" type="url" placeholder="https://…"></div>
+        <div class="fld wide">
+          <label data-i18n="Photo of the piece">รูปชุดที่อยากได้</label>
+          <div class="up" id="upBox" onclick="document.getElementById('f_photo').click()">
+            <input id="f_photo" type="file" accept="image/*" hidden onchange="onPickPhoto(event)">
+            <img id="upPrev" alt="" hidden>
+            <div class="uph" id="upHint">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg>
+              <span data-i18n="Tap to attach a photo — a screenshot from Shopee, Lazada or IG works">แตะเพื่อแนบรูป แคปจาก Shopee, Lazada หรือ IG มาก็ได้</span>
+            </div>
+          </div>
+          <button type="button" class="uprm" id="upRm" hidden onclick="clearPhoto(event)" data-i18n="Remove photo">เอารูปออก</button>
+        </div>
+        <div class="fld wide"><label data-i18n="Link to the shop (optional, helps us order it)">ลิงก์ร้าน (ใส่ก็ได้ ช่วยให้เราไปสั่งต่อได้เร็วขึ้น)</label><input id="f_url" type="url" placeholder="https://shopee.co.th/… หรือ lazada.co.th/…"></div>
       </div>
       <div class="actions">
         <button class="btn" id="sendBtn" data-i18n="Send this wish">ส่งคำขอ</button>
@@ -152,10 +175,37 @@
 <script src="data.js?v=38"></script>
 <script src="liffAuth.js?v=56"></script>
 <script src="me-api.js?v=56"></script>
-<script src="api.js?v=64"></script>
+<script src="api.js?v=65"></script>
 <script>
 const $ = s => document.querySelector(s);
-let ME = null, _tt;
+let ME = null, _tt, pickedPhoto = null;
+// client Supabase ตัวนี้ใช้เฉพาะอัปโหลดรูปขึ้น storage (ส่วนข้อมูลคำขอวิ่งผ่าน me-rpc)
+const sbUp = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+const MAX_PHOTO = 6 * 1024 * 1024;   // 6MB พอสำหรับรูปแคปหน้าจอ
+
+window.onPickPhoto = function(e){
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  if (!/^image\//.test(f.type)) { toast(t('ไฟล์ต้องเป็นรูปภาพนะคะ','Please attach an image')); return; }
+  if (f.size > MAX_PHOTO) { toast(t('รูปใหญ่เกินไป ลองย่อก่อนนะคะ','Image too large, please resize')); return; }
+  pickedPhoto = f;
+  const img = $('#upPrev'); img.src = URL.createObjectURL(f); img.hidden = false;
+  $('#upHint').hidden = true; $('#upRm').hidden = false;
+};
+window.clearPhoto = function(ev){
+  ev.stopPropagation();
+  pickedPhoto = null; $('#f_photo').value = '';
+  const img = $('#upPrev'); img.hidden = true; img.removeAttribute('src');
+  $('#upHint').hidden = false; $('#upRm').hidden = true;
+};
+// อัปรูปขึ้น bucket 'uploads' (ตัวเดียวกับหน้าถ่ายได้เครดิต) แล้วคืน public URL
+async function uploadPhoto(){
+  if (!pickedPhoto) return null;
+  const ext = (pickedPhoto.name || 'p.jpg').split('.').pop().replace(/[^a-z0-9]/gi,'').slice(0,5) || 'jpg';
+  const path = `wish-${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+  const up = await sbUp.storage.from('uploads').upload(path, pickedPhoto, { contentType: pickedPhoto.type });
+  if (up.error) throw new Error(up.error.message);
+  return sbUp.storage.from('uploads').getPublicUrl(path).data.publicUrl;
+}
 const TH = () => (window.NAV ? NAV.lang : 'th') !== 'en';
 function t(th, en) { return TH() ? th : en; }
 function toast(m){ const el=$('#toast'); el.textContent=m; el.classList.add('show');
@@ -188,7 +238,7 @@ function renderMine(rows){
   el.innerHTML = rows.map(r=>{
     const st = STATUS[r.status] || STATUS.pending;
     return `<div class="rq">
-      <div class="th">${r.reference_image_url?`<img src="${esc(r.reference_image_url)}" alt="" referrerpolicy="no-referrer">`:esc((r.item_description||'').slice(0,26))}</div>
+      ${r.reference_image_url?`<div class="th"><img src="${esc(r.reference_image_url)}" alt="" referrerpolicy="no-referrer"></div>`:`<span class="th nopic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg></span>`}
       <div class="bd">
         <div class="nm">${esc(r.item_description||'…')}</div>
         <div class="mt">${[r.brand, r.size, r.budget_max?('งบ ฿'+Math.round(r.budget_max)):''].filter(Boolean).map(esc).join(' · ') || t('ไม่ระบุรายละเอียดเพิ่ม','No extra details')}</div>
@@ -204,7 +254,7 @@ function renderTrend(rows){
   const el = $('#trend');
   if (!rows.length) { el.innerHTML = `<div class="empty">${t('ยังไม่มีคำขอจากคนอื่นตอนนี้ คุณเป็นคนแรกก็ได้นะคะ','No wishes from others yet. Be the first.')}</div>`; return; }
   el.innerHTML = rows.map(r=>`<div class="rq">
-    <div class="th">${r.reference_image_url?`<img src="${esc(r.reference_image_url)}" alt="" referrerpolicy="no-referrer">`:esc((r.item_description||'').slice(0,26))}</div>
+    ${r.reference_image_url?`<div class="th"><img src="${esc(r.reference_image_url)}" alt="" referrerpolicy="no-referrer"></div>`:`<span class="th nopic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4 4 3 3-2 4 3"/></svg></span>`}
     <div class="bd">
       <div class="nm">${esc(r.item_description||'…')}</div>
       <div class="mt">${[r.brand, r.size].filter(Boolean).map(esc).join(' · ') || t('ไม่ระบุแบรนด์','Brand not given')}</div>
@@ -236,8 +286,21 @@ async function reload(){
 
 async function send(){
   const desc = $('#f_desc').value.trim();
-  if (desc.length < 4) { $('#err').textContent = t('ช่วยบอกลักษณะชุดสักหน่อยนะคะ','Please describe the piece'); return; }
+  // แนบรูปมาแล้ว ไม่ต้องบังคับพิมพ์ (รูปบอกแทนคำพูดได้)
+  if (!pickedPhoto && desc.length < 4) {
+    $('#err').textContent = t('แนบรูป หรือบอกลักษณะชุดสักหน่อยนะคะ','Attach a photo or describe the piece'); return;
+  }
   const btn = $('#sendBtn'); btn.disabled = true; $('#err').textContent = '';
+  const label = btn.textContent;
+  let photoUrl = null;
+  try {
+    if (pickedPhoto) { btn.textContent = t('กำลังอัปรูป…','Uploading…'); photoUrl = await uploadPhoto(); }
+  } catch (e) {
+    btn.disabled = false; btn.textContent = label;
+    $('#err').textContent = t('อัปรูปไม่สำเร็จ ลองใหม่ หรือส่งคำขอโดยไม่แนบรูปก็ได้ค่ะ','Upload failed. Try again, or send without a photo.');
+    return;
+  }
+  btn.textContent = label;
   const r = await window.API.submitWish({
     p_description: desc,
     p_brand: $('#f_brand').value.trim() || null,
@@ -245,12 +308,14 @@ async function send(){
     p_occasion: $('#f_occ').value || null,
     p_budget: $('#f_budget').value ? Number($('#f_budget').value) : null,
     p_ref_url: $('#f_url').value.trim() || null,
+    p_image_url: photoUrl,
   });
   btn.disabled = false;
   if (!r || r.error) { $('#err').textContent = (r && r.error) || t('ส่งคำขอไม่สำเร็จ ลองใหม่นะคะ','Could not send, try again'); return; }
   $('#f_desc').value=''; $('#f_brand').value=''; $('#f_budget').value=''; $('#f_url').value='';
+  if (pickedPhoto) clearPhoto({ stopPropagation(){} });
   toast(t('รับคำขอแล้ว เดี๋ยวเราไปตามหาให้ค่ะ','Got it. We will start looking.'));
-  window.track && window.track('wish_submit', null, { occasion: $('#f_occ').value || null });
+  window.track && window.track('wish_submit', null, { occasion: $('#f_occ').value || null, has_photo: !!photoUrl });
   reload();
 }
 
