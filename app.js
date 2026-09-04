@@ -2445,11 +2445,13 @@ function openProfile(onboard) {
       <button type="button" class="walletlink" onclick="closeProfile();openWallet()" style="width:100%;text-align:left;border:1px solid var(--line,#E7E5E1);background:#FBF8F2;border-radius:12px;padding:11px 14px;margin-bottom:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
         <span>${lang==='th'?'กระเป๋า LLOOP · เครดิต ชวนเพื่อน ระดับสมาชิก':'LLOOP wallet · credit, invites, tier'}</span><span style="color:var(--muted,#8C8B86)">${c.credit_balance ? '฿'+Math.round(c.credit_balance)+' ›' : '›'}</span>
       </button>
-      ${onboard ? '' : `${renderStyleCard(c)}
-      ${renderImpactCard()}`}
-      ${onboard ? '' : `<div class="psec">${lang==='th'?'ตัวฉัน':'About me'}</div>`}
+      ${onboard ? '' : `<details class="pdet pc">
+        <summary><span>${c.my_color_season && c.style_profile ? (lang==='th'?'สไตล์ที่ใช่ของคุณ (วิเคราะห์แล้ว)':'Your style profile (analysed)') : (lang==='th'?'ยังไม่รู้โทนสีตัวเอง? ให้สไตลิสต์วิเคราะห์ Personal Color':'Not sure of your season? Book a Personal Color analysis')}</span><em>${lang==='th'?'ดูรายละเอียด':'Details'}</em></summary>
+        <div class="pdetbody">${renderStyleCard(c)}</div>
+      </details>`}
+      ${onboard ? '' : `<div class="psec">${lang==='th'?'ตัวฉัน & ไซส์':'Me & my size'}</div>`}
       <div class="field"><label>${t('pName')}</label><input id="pName" autocomplete="name" value="${c.name || c.display_name ||''}"></div>
-      ${onboard ? '' : `<div class="psec">${lang==='th'?'สัดส่วน (ใช้เทียบไซส์ชุด)':'Measurements (for size match)'}</div>${renderMeasuredRef(c)}<div class="frow">
+      ${onboard ? '' : `${renderMeasuredRef(c)}<div class="frow">
         <div class="field"><label>${t('pHeight')}</label><input id="pHeight" type="number" value="${c.height_cm ||''}"></div>
         <div class="field"><label>${t('pShoe')}</label><input id="pShoe" value="${c.shoe_size ||''}"></div>
       </div>
@@ -2462,7 +2464,9 @@ function openProfile(onboard) {
         <div class="field"><label>${t('pWaistL')}</label><input id="pWaist" type="number" value="${c.waist_in ||''}"></div>
         <div class="field"><label>${t('pHipL')}</label><input id="pHip" type="number" value="${c.hip_in ||''}"></div>
       </div>
-      <div class="psec">${lang==='th'?'ความชอบ':'Preferences'}</div>
+      <details class="pdet" ${(pStyles.size||pOccasions.size||pf.fav_colors||c.my_color_season)?'':'open'}>
+        <summary><span>${lang==='th'?'ความชอบ':'Preferences'}</span><em>${(pStyles.size+pOccasions.size) ? (lang==='th'?`เลือกไว้ ${pStyles.size+pOccasions.size} อย่าง`:`${pStyles.size+pOccasions.size} picked`) : (lang==='th'?'ยังไม่ได้เลือก':'Not set')}</em></summary>
+        <div class="pdetbody">
       <div class="prefsec">
         <div class="preflabel">${lang==='th'?'สไตล์ที่ชอบ':'Styles you like'}</div>
         <div class="prefchips">${styleChips}</div>
@@ -2475,8 +2479,12 @@ function openProfile(onboard) {
         <div class="field"><label>${lang==='th'?'สีที่ชอบ':'Favourite colours'}</label><input id="pFav" value="${pf.fav_colors ||''}" placeholder="${lang==='th'?'เช่น ครีม เอิร์ธโทน':'e.g. cream, earth'}"></div>
         <div class="field"><label>${lang==='th'?'สีที่เลี่ยง':'Colours to avoid'}</label><input id="pAvoid" value="${pf.avoid_colors ||''}" placeholder="${lang==='th'?'เช่น ส้มสด':'e.g. neon'}"></div>
       </div>
-      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง ไม่รู้ข้ามได้)':'(if you know your season, optional)'}</span></label><div class="seasons">${seasons}</div></div>`}
-      <div class="psec">${lang==='th'?'ติดต่อ & จัดส่ง':'Contact & delivery'}</div>
+      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง ไม่รู้ข้ามได้)':'(if you know your season, optional)'}</span></label><div class="seasons">${seasons}</div></div>
+        </div>
+      </details>`}
+      ${onboard ? `<div class="psec">${lang==='th'?'ติดต่อ & จัดส่ง':'Contact & delivery'}</div>` : `<details class="pdet" ${(c.phone && c.address)?'':'open'}>
+        <summary><span>${lang==='th'?'ติดต่อ & จัดส่ง':'Contact & delivery'}</span><em>${c.phone ? esc(c.phone) : (lang==='th'?'ยังไม่ได้กรอก':'Not set')}</em></summary>
+        <div class="pdetbody">`}
       <div class="frow">
         <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
         ${onboard ? '' : `<div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>`}
@@ -2493,7 +2501,10 @@ function openProfile(onboard) {
         <div class="field"><label>${lang === 'th' ? 'อำเภอ/เขต' : 'District'}</label><input id="pAmphoe" readonly placeholder="${lang === 'th' ? 'เติมอัตโนมัติ' : 'auto'}"></div>
         <div class="field"><label>${lang === 'th' ? 'จังหวัด' : 'Province'}</label><input id="pProvince" readonly placeholder="${lang === 'th' ? 'เติมอัตโนมัติ' : 'auto'}"></div>
       </div>
-      ${onboard ? '' : `<div class="field"><label>${t('pNotes')}</label><input id="pNotes" value="${c.notes ||''}"></div>`}
+      ${onboard ? '' : `<div class="field"><label>${t('pNotes')}</label><input id="pNotes" value="${c.notes ||''}"></div>
+        </div>
+      </details>
+      <details class="pdet"><summary><span>${lang==='th'?'ผลกระทบรักษ์โลกของคุณ':'Your impact'}</span><em>${lang==='th'?'ดู':'View'}</em></summary><div class="pdetbody">${renderImpactCard()}</div></details>`}
       <button class="savebtn" onclick="saveProfile()">${onboard ? (lang==='th'?'บันทึก & ไปต่อ':'Save & continue') : t('pSave')}</button>
     </div>`;
   $('#pOverlay').classList.add('open');

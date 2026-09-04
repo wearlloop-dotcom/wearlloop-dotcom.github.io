@@ -220,12 +220,24 @@
         </select></div>
       </div>
       <div class="frow" id="row_human">
+        <div class="fld"><label>วันเกิด <span style="color:var(--muted);font-weight:400">(เด็กโตไว ระบบจะได้เทียบไซส์ตามอายุ)</span></label><input id="f_bday" type="date"></div>
+        <div class="fld"><label>น้ำหนัก (กก.)</label><input id="f_weight" type="number" step="0.1" placeholder="20"></div>
+      </div>
+      <div class="frow" id="row_human2">
         <div class="fld"><label>อก (นิ้ว)</label><input id="f_bust" type="number" placeholder="32"></div>
         <div class="fld"><label>เอว (นิ้ว)</label><input id="f_waist" type="number" placeholder="26"></div>
         <div class="fld"><label>สะโพก (นิ้ว)</label><input id="f_hip" type="number" placeholder="35"></div>
         <div class="fld"><label>สูง (ซม.)</label><input id="f_height" type="number" placeholder="120"></div>
       </div>
       <!-- ขนาดตัวของน้อง: วัดคนละแบบกับคน (ไซส์ชุดสัตว์เลี้ยงใช้ รอบอก · รอบคอ · ความยาวหลัง) -->
+      <div class="frow" id="row_pet_id" hidden>
+        <div class="fld"><label>พันธุ์</label><input id="p_breed" list="breedList" maxlength="60" placeholder="เช่น ปอม ชิวาวา เปอร์เซีย"><datalist id="breedList"></datalist></div>
+        <div class="fld"><label>สีขน</label><select id="p_color">
+          <option value="">ไม่ระบุ</option><option>ขาว</option><option>ครีม</option><option>น้ำตาลอ่อน</option><option>น้ำตาล</option>
+          <option>ดำ</option><option>เทา</option><option>ส้ม</option><option>ลายเสือ</option><option>สองสี</option><option>สามสี</option>
+        </select></div>
+        <div class="fld"><label>วันเกิดน้อง</label><input id="p_bday" type="date"></div>
+      </div>
       <div class="frow" id="row_pet" hidden>
         <div class="fld"><label>รอบอก (นิ้ว)</label><input id="p_chest" type="number" placeholder="16"></div>
         <div class="fld"><label>รอบคอ (นิ้ว)</label><input id="p_neck" type="number" placeholder="10"></div>
@@ -402,6 +414,7 @@ function mapGroup(g){
     my_role: g.my_role, my_status: g.my_status,
     members: (g.members||[]).map(m=>({
       id: m.customer_id, name: m.name||'สมาชิก', rel: m.relation||null, species: m.pet_species||null,
+      breed: m.pet_breed||null, color: m.pet_color||null, bday: m.birthday||null, weight: m.pet_weight_kg||m.weight_kg||null,
       role: m.role||'member', age: m.age_band||'adult', gen: m.gender||'',
       managed: !!m.managed, season: m.color_season||null,
       bust: m.bust_in||null, waist: m.waist_in||null, hip: m.hip_in||null,
@@ -467,10 +480,22 @@ async function createGroupFlow(){
   }
 }
 
+// อายุจากวันเกิด: ต่ำกว่า 2 ปีบอกเป็นเดือน (เด็กเล็ก/ลูกหมาแมวโตไว)
+function ageFromBday(b){
+  if(!b) return '';
+  const d=new Date(b); if(isNaN(d)) return '';
+  const now=new Date(); let m=(now.getFullYear()-d.getFullYear())*12+(now.getMonth()-d.getMonth());
+  if(now.getDate()<d.getDate()) m--; if(m<0) return '';
+  return m<24 ? `${m} เดือน` : `${Math.floor(m/12)} ปี`;
+}
 function memberCard(m){
   const isPet = m.age === 'pet';
   const tags=[`<span class="tag">${isPet ? (SPECIES_TH[m.species]||AGE_TH.pet) : (AGE_TH[m.age]||m.age)}</span>`];
   if(m.gen && !isPet) tags.push(`<span class="tag">${GEN_TH[m.gen]}</span>`);
+  if(isPet && m.breed) tags.push(`<span class="tag">${m.breed}</span>`);
+  if(isPet && m.color) tags.push(`<span class="tag">ขน${m.color}</span>`);
+  const ageTxt = ageFromBday(m.bday); if(ageTxt) tags.push(`<span class="tag">${ageTxt}</span>`);
+  if(m.weight) tags.push(`<span class="tag">${m.weight} กก.</span>`);
   if(m.season) tags.push(`<span class="tag sage">โทน${({autumn:'ออทัม',winter:'วินเทอร์',spring:'สปริง',summer:'ซัมเมอร์'})[m.season]||m.season}</span>`);
   if(m.managed) tags.push(`<span class="tag gold">ผู้ปกครองดูแล</span>`);
   if(m.pend) tags.unshift(`<span class="pendtag">รอตอบรับ</span>`);
@@ -535,12 +560,21 @@ function renderRelQuick(){
   $('#relQuick').innerHTML=list.map(r=>`<button class="${r===selRel?'on':''}" onclick="pickRel('${r}')">${r}</button>`).join('');
 }
 // เลือก "สัตว์เลี้ยง" → สลับไปช่องวัดตัวของน้อง (รอบอก/รอบคอ/ยาวหลัง/น้ำหนัก)
+const BREEDS = {
+  dog:['ปอมเมอเรเนียน','ชิวาวา','พุดเดิ้ล','ชิสุ','ยอร์คเชียร์','บีเกิ้ล','คอร์กี้','เฟรนช์บูลด็อก','ไซบีเรียน','โกลเด้น','ลาบราดอร์','พันทาง'],
+  cat:['เปอร์เซีย','สก็อตติชโฟลด์','บริติชชอร์ตแฮร์','เมนคูน','สยาม','วิเชียรมาศ','เบงกอล','แร็กดอลล์','พันทาง'],
+  other:['กระต่าย','แฮมสเตอร์','อื่น ๆ'],
+};
+function fillBreeds(){ const k=$('#f_species').value||'dog'; $('#breedList').innerHTML=(BREEDS[k]||[]).map(b=>`<option value="${b}">`).join(''); }
 window.onAgeChange = function(){
   const pet = isPetForm();
-  $('#row_human').hidden = pet;  $('#row_pet').hidden = !pet;
+  $('#row_human').hidden = pet; $('#row_human2').hidden = pet;
+  $('#row_pet').hidden = !pet; $('#row_pet_id').hidden = !pet;
+  if (pet) fillBreeds();
   $('#fld_gender').hidden = pet; $('#fld_species').hidden = !pet;
   $('#petnote').hidden = !pet;
   $('#f_name').placeholder = pet ? 'เช่น น้องมอคค่า' : 'เช่น น้องเป่าเปา';
+  $('#f_species').onchange = fillBreeds;
   selRel = null; renderRelQuick();
 };
 window.pickRel=r=>{selRel=r;renderRelQuick();};
@@ -556,10 +590,13 @@ function bindForm(){
     const profile = pet ? {
       name, relation:selRel||'ลูกตัวน้อย', age_band:'pet', gender:null,
       pet_species:$('#f_species').value||'dog',
+      pet_breed:$('#p_breed').value.trim()||null, pet_color:$('#p_color').value||null,
+      birthday:$('#p_bday').value||null,
       pet_chest_in:+$('#p_chest').value||null, pet_neck_in:+$('#p_neck').value||null,
       pet_back_in:+$('#p_back').value||null, pet_weight_kg:+$('#p_weight').value||null,
     } : {
       name, relation:selRel, age_band:$('#f_age').value, gender:$('#f_gender').value||null,
+      birthday:$('#f_bday').value||null, weight_kg:+$('#f_weight').value||null,
       bust_in:+$('#f_bust').value||null, waist_in:+$('#f_waist').value||null,
       hip_in:+$('#f_hip').value||null, height_cm:+$('#f_height').value||null,
     };
@@ -574,6 +611,7 @@ function bindForm(){
       const id='c'+Date.now();
       g.members.push({ id, name, rel:profile.relation, role:'member',
         age:profile.age_band, gen:pet?null:$('#f_gender').value, species:pet?profile.pet_species:null, managed:true,
+        breed:pet?profile.pet_breed:null, color:pet?profile.pet_color:null, bday:profile.birthday||null, weight:pet?profile.pet_weight_kg:profile.weight_kg,
         bust:pet?null:+$('#f_bust').value||null, waist:pet?null:+$('#f_waist').value||null, hip:pet?null:+$('#f_hip').value||null,
         season:pet?null:'autumn' });
       $('#form').classList.remove('show'); $('#f_name').value=''; selRel=null;

@@ -901,6 +901,17 @@
   .looknote{font-size:11px;color:#A39472;margin-top:10px;font-style:italic;line-height:1.5}
   .pform{padding:20px 20px 26px;font-size:14.5px;line-height:1.6}.pform h3{font-family:var(--display);font-size:23px;font-weight:700;margin-bottom:4px;letter-spacing:.2px}.pform .hint{font-size:13.5px;color:#6B6A65;margin-bottom:18px;line-height:1.6}
   .pform .psec{font-family:var(--display);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold,#C9A86A);font-weight:600;margin:26px 0 10px;padding-top:16px;border-top:1px solid var(--line)}
+  /* ส่วนที่ยุบได้ในกล่องข้อมูลของฉัน: เปิดทีละชั้น ไม่ให้ข้อมูลถาโถม */
+  .pform .pdet{border:1px solid var(--line);border-radius:12px;margin:14px 0;background:#fff}
+  .pform .pdet.pc{background:#FBF8F2;border-color:#EADFC8}
+  .pform .pdet summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;font-size:14px;font-weight:600;color:var(--ink)}
+  .pform .pdet summary::-webkit-details-marker{display:none}
+  .pform .pdet summary em{font-style:normal;font-size:12.5px;font-weight:500;color:var(--muted);white-space:nowrap}
+  .pform .pdet summary em::after{content:"▾";margin-left:6px;display:inline-block;transition:.2s}
+  .pform .pdet[open] summary em::after{transform:rotate(180deg)}
+  .pform .pdet[open] summary{border-bottom:1px solid var(--line)}
+  .pform .pdet .pdetbody{padding:4px 15px 14px}
+  .pform .pdet .pdetbody .psec{margin-top:14px;padding-top:0;border-top:0}
   .pform .psec:first-of-type{margin-top:6px}
   .field{margin-bottom:15px}.field label{display:block;font-size:13px;font-weight:500;color:#3F3E3A;margin-bottom:6px;line-height:1.45}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:12px 13px;font-family:var(--sans);font-size:16px;color:var(--ink);background:#fff;line-height:1.4}
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--ink)}
@@ -1504,7 +1515,7 @@
     s.async = true; document.head.appendChild(s);
   })();
 </script>
-<script src="app.js?v=103"></script>
+<script src="app.js?v=104"></script>
 <script src="help-widget.js"></script>
 </body>
 </html>
