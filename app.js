@@ -243,23 +243,69 @@ function setLang(l) {
   $('#vresult').classList.remove('show');
 }
 
-// Fit confidence — mirror SQL fit_confidence() (+ fit feedback loop)
-function fitConfidence(c, g) {
-  if (c.bust_in == null ||!g.bust) return null;
-  let score = 100;
-  let slack = g.stretch ==='stretchy'? 2 : g.stretch ==='slight'? 1 : 0;
-  // ★ ปรับด้วยฟีดแบ็กจริงจากลูกค้า (loop) — เลื่อน slack ตาม fitAvg ถ่วงด้วยจำนวนรีวิว
-  if ((g.fitN||0) >= 3 && g.fitAvg != null) {
-    const adj = g.fitAvg * 0.5 * (Math.min(g.fitN,8)/8);   // ~ -1..+1
-    slack = Math.max(-1, Math.min(2.5, slack + adj));
-  }
-  if (c.bust_in < g.bust[0] - slack) score -= (g.bust[0] - slack - c.bust_in) * 12;
-  else if (c.bust_in > g.bust[1] + slack) score -= (c.bust_in - g.bust[1] - slack) * 18;
-  if (c.waist_in!= null && g.waist) {
-    if (c.waist_in > g.waist[1] + slack) score -= (c.waist_in - g.waist[1] - slack) * 15;
-  }
-  return Math.max(0, Math.min(100, Math.round(score)));
+// ===== ไซส์ของฉัน =====
+// ชุดในคลังส่วนใหญ่ยังไม่มีตัวเลขวัดจริง (อก/เอว/สะโพก) มีแต่ป้ายไซส์ S/M/L
+// เดิมถ้าชุดไม่มีตัวเลขวัด ระบบจะคืน null แล้วตกไปใช้คะแนนกลาง 55 เท่ากันทุกตัว
+// ผลคือ "แนะนำสำหรับคุณ" ไม่ได้อิงไซส์จริงของลูกค้าเลย จึงเพิ่มการเทียบระดับป้ายไซส์เป็นชั้นสำรอง
+const SIZE_KEYS = ['XS','S','M','L','XL','XXL'];
+// สัดส่วนกลางของแต่ละไซส์ (นิ้ว): อก · เอว · สะโพก
+const SIZE_CHART = { XS:[31,25,34], S:[33,26.5,36], M:[35,28.5,38], L:[37.5,31,40.5], XL:[40,33.5,43], XXL:[43,36.5,46] };
+// ไซส์ของฉัน: ใช้ "ไซส์ที่ใส่ประจำ" ถ้ากรอกไว้ ไม่งั้นคำนวณจากสัดส่วนที่บันทึกไว้
+function mySizeBand(c) {
+  c = c || CUSTOMER || {};
+  const us = String(c.size || '').toUpperCase().trim();
+  if (SIZE_KEYS.includes(us)) return us;
+  if (c.bust_in == null && c.waist_in == null && c.hip_in == null) return null;
+  let best = null, bd = 1e9;
+  SIZE_KEYS.forEach(k => {
+    const m = SIZE_CHART[k]; let d = 0, n = 0;
+    if (c.bust_in  != null) { d += Math.abs(c.bust_in  - m[0]) * 1.2; n++; }
+    if (c.waist_in != null) { d += Math.abs(c.waist_in - m[1]) * 1.0; n++; }
+    if (c.hip_in   != null) { d += Math.abs(c.hip_in   - m[2]) * 0.8; n++; }
+    d /= (n || 1);
+    if (d < bd) { bd = d; best = k; }
+  });
+  return best;
 }
+// Fit confidence — mirror SQL fit_confidence() (+ fit feedback loop)
+// คืน { score, from } · from = 'measured' (วัดจริงทั้งคู่) | 'size' (เทียบป้ายไซส์) | 'free' (ฟรีไซส์)
+function fitInfo(c, g) {
+  c = c || {}; if (!g) return null;
+
+  // ชั้นที่ 1 — ชุดมีตัวเลขวัดจริง + ลูกค้ากรอกสัดส่วนไว้ (แม่นที่สุด)
+  if (c.bust_in != null && g.bust) {
+    let score = 100;
+    let slack = g.stretch ==='stretchy'? 2 : g.stretch ==='slight'? 1 : 0;
+    // ★ ปรับด้วยฟีดแบ็กจริงจากลูกค้า (loop) — เลื่อน slack ตาม fitAvg ถ่วงด้วยจำนวนรีวิว
+    if ((g.fitN||0) >= 3 && g.fitAvg != null) {
+      const adj = g.fitAvg * 0.5 * (Math.min(g.fitN,8)/8);   // ~ -1..+1
+      slack = Math.max(-1, Math.min(2.5, slack + adj));
+    }
+    if (c.bust_in < g.bust[0] - slack) score -= (g.bust[0] - slack - c.bust_in) * 12;
+    else if (c.bust_in > g.bust[1] + slack) score -= (c.bust_in - g.bust[1] - slack) * 18;
+    if (c.waist_in!= null && g.waist) {
+      if (c.waist_in > g.waist[1] + slack) score -= (c.waist_in - g.waist[1] - slack) * 15;
+    }
+    if (c.hip_in != null && g.hip && c.hip_in > g.hip + slack) score -= (c.hip_in - g.hip - slack) * 12;
+    return { score: Math.max(0, Math.min(100, Math.round(score))), from: 'measured' };
+  }
+
+  // ชั้นที่ 2 — ชุดมีแต่ป้ายไซส์ เทียบกับไซส์ของลูกค้า (ยังดีกว่าให้คะแนนกลางเท่ากันหมด)
+  const mine = mySizeBand(c);
+  if (!mine) return null;
+  const gs = String(g.size || '').toUpperCase().trim();
+  if (gs === 'FREE') return { score: 78, from: 'free' };
+  if (!SIZE_KEYS.includes(gs)) return null;
+  const d = SIZE_KEYS.indexOf(gs) - SIZE_KEYS.indexOf(mine);
+  const ad = Math.abs(d);
+  let sc = ad === 0 ? 92 : ad === 1 ? 68 : ad === 2 ? 40 : 15;
+  if (g.stretch === 'stretchy') sc += 10; else if (g.stretch === 'slight') sc += 5;
+  if (d > 0) sc += 6;                      // ชุดใหญ่กว่าไซส์เรา ยังใส่ได้ง่ายกว่าชุดที่เล็กกว่า
+  if ((g.fitN||0) >= 3 && g.fitLabel === 'small' && d <= 0) sc -= 12;   // ลูกค้าบอกว่าใส่เล็ก
+  if ((g.fitN||0) >= 3 && g.fitLabel === 'large' && d >= 0) sc -= 8;    // ลูกค้าบอกว่าใส่หลวม
+  return { score: Math.max(0, Math.min(100, Math.round(sc))), from: 'size' };
+}
+function fitConfidence(c, g) { const r = fitInfo(c, g); return r ? r.score : null; }
 // โน้ตฟิตจากลูกค้าจริง (โชว์เมื่อมีรีวิวพอ) — คืน {text,cls} หรือ null
 function fitNote(g) {
   if (!g || (g.fitN||0) < 3 || !g.fitLabel) return null;
@@ -1174,7 +1220,11 @@ function sizeFitsIdx(g,sizes,i){ const c=CUSTOMER||{}; if(c.bust_in==null&&c.wai
   const okW=(wv==null||c.waist_in==null)||c.waist_in<=wv+slack+0.5;
   return okB&&okW; }
 // ป้าย "พอดี" ใช้เกณฑ์เดียวกับคำเตือนใต้ตาราง: ไซส์เล็กสุดที่ใส่ได้จริง (ไม่ใช่แค่ใกล้เคียงสุด)
-function bestSizeIdx(g, sizes){ const c=CUSTOMER||{}; if(g.bust && c.bust_in!=null){ for(let i=0;i<sizes.length;i++){ if(sizeFitsIdx(g,sizes,i)) return i; } return sizes.length-1; } const us=String(c.size||'').toUpperCase(); const i=sizes.indexOf(us); return i>=0?i:Math.floor((sizes.length-1)/2); }
+function bestSizeIdx(g, sizes){ const c=CUSTOMER||{}; if(g.bust && c.bust_in!=null){ for(let i=0;i<sizes.length;i++){ if(sizeFitsIdx(g,sizes,i)) return i; } return sizes.length-1; }
+  const us=mySizeBand(c)||''; let i=sizes.indexOf(us); if(i>=0) return i;
+  // ไม่มีไซส์เราพอดี → เลือกตัวที่ใกล้ที่สุด (ถ้าเท่ากันเอาตัวที่ใหญ่กว่า)
+  if(us){ let best=-1,bd=99; sizes.forEach((sz,j)=>{ const a=SIZE_KEYS.indexOf(sz),b=SIZE_KEYS.indexOf(us); if(a<0||b<0) return; const d=Math.abs(a-b)-(a>b?0.1:0); if(d<bd){bd=d;best=j;} }); if(best>=0) return best; }
+  return Math.floor((sizes.length-1)/2); }
 function sizeSection(g){
   const th=lang==='th'; const sizes=sizesOf(g); const hasM=!!(g.bust||g.waist||g.hip||g.length);
   if(!sizes.length && !hasM) return '';
@@ -1252,7 +1302,9 @@ function fitMatch(g){
     row(t('waist'), c.waist_in, g.waist, false),
     row(t('hip'),   c.hip_in,   g.hip? [g.hip,g.hip] : null, true),
   ].join('');
-  const score = fitConfidence(c, g);
+  const fi = fitInfo(c, g);
+  const score = fi ? fi.score : null;
+  const mine = mySizeBand(c);
   const sizeNote = (g.size && String(g.size).toUpperCase()!=='FREE')
     ? `<span style="font-size:11.5px;color:#0F6E56;background:#fff;border:1px solid #cfe6da;border-radius:7px;padding:3px 8px">${th?'ไซส์':'Size'} <b>${esc(g.size)}</b></span>` : '';
   let verdict='', vcol='#0F6E56';
@@ -1266,8 +1318,16 @@ function fitMatch(g){
       <div style="font-size:13px;font-weight:600;color:#04342C">${th?'พอดีตัวคุณไหม?':'Will it fit you?'}</div>${sizeNote}
     </div>
     ${verdict?`<div style="font-size:13px;font-weight:600;color:${vcol};margin-bottom:2px">${verdict}${score!=null?` · ${score}%`:''}</div>`:''}
-    ${rows}
-    <div style="font-size:11px;color:#8a897f;margin-top:8px">${th?'อ้างอิงสัดส่วนที่คุณบันทึกไว้ · แก้ได้ในโปรไฟล์':'From your saved measurements · edit in profile'}</div>
+    ${fi && fi.from === 'measured' ? rows : ''}
+    ${fi && fi.from !== 'measured' && mine ? `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:4px 0;border-top:1px solid #d7e7e0">
+      <span style="color:#5b5a55">${th?'ไซส์ของคุณ':'Your size'}</span>
+      <span style="color:#04342C"><b>${mine}</b> <span style="color:#8a897f">· ${th?'ชุด':'dress'} ${esc(String(g.size||'').toUpperCase())}</span></span></div>` : ''}
+    <div style="font-size:11px;color:#8a897f;margin-top:8px">${
+      !fi ? (th?'ยังเทียบไม่ได้ กรอกสัดส่วนหรือไซส์ที่ใส่ประจำในโปรไฟล์ก่อนนะคะ':'Add your measurements or usual size in profile to compare')
+      : fi.from === 'measured' ? (th?'เทียบจากตัวเลขวัดจริงของชุด กับสัดส่วนที่คุณบันทึกไว้':'Measured dress vs your saved measurements')
+      : fi.from === 'free' ? (th?'ชุดฟรีไซส์ เทียบจากไซส์ของคุณ':'Free size, compared with your size')
+      : (th?'ชุดตัวนี้ยังไม่มีตัวเลขวัดจริง เทียบจากป้ายไซส์กับไซส์ของคุณ':'This piece is not measured yet, compared by size label')
+    } · ${th?'แก้ได้ในโปรไฟล์':'edit in profile'}</div>
   </div>`;
 }
 function closeDetail() { $('#overlay').classList.remove('open'); document.body.style.overflow =''; }
@@ -2387,8 +2447,9 @@ function openProfile(onboard) {
       </button>
       ${onboard ? '' : `${renderStyleCard(c)}
       ${renderImpactCard()}`}
+      ${onboard ? '' : `<div class="psec">${lang==='th'?'ตัวฉัน':'About me'}</div>`}
       <div class="field"><label>${t('pName')}</label><input id="pName" autocomplete="name" value="${c.name || c.display_name ||''}"></div>
-      ${onboard ? '' : `${renderMeasuredRef(c)}<div class="frow">
+      ${onboard ? '' : `<div class="psec">${lang==='th'?'สัดส่วน (ใช้เทียบไซส์ชุด)':'Measurements (for size match)'}</div>${renderMeasuredRef(c)}<div class="frow">
         <div class="field"><label>${t('pHeight')}</label><input id="pHeight" type="number" value="${c.height_cm ||''}"></div>
         <div class="field"><label>${t('pShoe')}</label><input id="pShoe" value="${c.shoe_size ||''}"></div>
       </div>
@@ -2401,6 +2462,7 @@ function openProfile(onboard) {
         <div class="field"><label>${t('pWaistL')}</label><input id="pWaist" type="number" value="${c.waist_in ||''}"></div>
         <div class="field"><label>${t('pHipL')}</label><input id="pHip" type="number" value="${c.hip_in ||''}"></div>
       </div>
+      <div class="psec">${lang==='th'?'ความชอบ':'Preferences'}</div>
       <div class="prefsec">
         <div class="preflabel">${lang==='th'?'สไตล์ที่ชอบ':'Styles you like'}</div>
         <div class="prefchips">${styleChips}</div>
@@ -2413,7 +2475,8 @@ function openProfile(onboard) {
         <div class="field"><label>${lang==='th'?'สีที่ชอบ':'Favourite colours'}</label><input id="pFav" value="${pf.fav_colors ||''}" placeholder="${lang==='th'?'เช่น ครีม เอิร์ธโทน':'e.g. cream, earth'}"></div>
         <div class="field"><label>${lang==='th'?'สีที่เลี่ยง':'Colours to avoid'}</label><input id="pAvoid" value="${pf.avoid_colors ||''}" placeholder="${lang==='th'?'เช่น ส้มสด':'e.g. neon'}"></div>
       </div>
-      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง ไม่รู้ข้ามได้)':'(if you know your season — optional)'}</span></label><div class="seasons">${seasons}</div></div>`}
+      <div class="field"><label>${t('pColor')} <span class="optnote">${lang==='th'?'(ถ้ารู้โทนสีตัวเอง ไม่รู้ข้ามได้)':'(if you know your season, optional)'}</span></label><div class="seasons">${seasons}</div></div>`}
+      <div class="psec">${lang==='th'?'ติดต่อ & จัดส่ง':'Contact & delivery'}</div>
       <div class="frow">
         <div class="field"><label>${lang === 'th' ? 'เบอร์โทร (ไว้พิมพ์ใบส่ง)' : 'Phone (for shipping)'}</label><input id="pPhone" inputmode="tel" autocomplete="tel" value="${c.phone || ''}"></div>
         ${onboard ? '' : `<div class="field"><label>${lang === 'th' ? 'วันเกิด (รับของขวัญเช่าฟรี)' : 'Birthday (free birthday rental)'}</label><input id="pBirthday" type="date" value="${c.birthday || ''}"></div>`}
