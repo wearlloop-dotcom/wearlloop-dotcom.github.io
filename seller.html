@@ -96,7 +96,7 @@
     <label>บัญชีรับเงิน (ธนาคาร/เลขบัญชี)</label><input id="sbank" placeholder="เช่น kbank 123-4-56789">
     <button type="button" class="autochip" id="ppBtn" onclick="usePromptPay()">ใช้เบอร์โทรเป็นพร้อมเพย์</button>
     <details class="kyc">
-      <summary>ข้อมูลสำหรับใบรับซื้อ/ภาษี — ข้ามไปก่อนได้ ทีมจะขอตอนตกลงซื้อ</summary>
+      <summary>ข้อมูลสำหรับใบรับซื้อ/ภาษี (ข้ามไปก่อนได้ ทีมจะขอตอนตกลงซื้อ)</summary>
       <div class="g2">
         <div><label>เลขบัตรประชาชน (สำหรับใบรับซื้อ/ภาษี)</label><input id="sidcard" inputmode="numeric" placeholder="x-xxxx-xxxxx-xx-x"></div>
         <div><label>ที่อยู่</label><input id="saddr" placeholder="ที่อยู่ตามบัตร"></div>
@@ -154,7 +154,7 @@
 
   <div class="card">
     <h2>รูปถ่าย</h2>
-    <p id="photoHint">ถ่ายรูป หรือเลือกรูปจากเครื่อง (อย่างน้อย 1 รูป) — แนบแล้ว AI ช่วยกรอกข้อมูลชุดให้อัตโนมัติ</p>
+    <p id="photoHint">ถ่ายรูป หรือเลือกรูปจากเครื่อง (อย่างน้อย 1 รูป) แนบแล้ว AI จะช่วยกรอกข้อมูลชุดให้อัตโนมัติค่ะ</p>
     <input type="file" id="gphotos_file" accept="image/*" multiple onchange="uploadFiles(this)">
     <button type="button" id="aiBtn" onclick="aiFillSeller()" style="margin-top:10px;background:#fff;color:var(--ink);border:1.5px solid var(--ink);border-radius:20px;padding:9px 16px;font-size:14px;cursor:pointer;font-family:inherit">AI ช่วยกรอกจากรูป</button>
     <div class="thumbs" id="thumbs"></div>
@@ -259,8 +259,8 @@
     $('offerCard').classList.toggle('hide',m!=='offer');
     $('bulkCard').classList.toggle('hide',m!=='bulk');
     $('photoHint').textContent = m==='bulk'
-      ? 'ถ่ายรูปทุกตัวที่จะขายเหมา (ยิ่งครบ ยิ่งประเมินไว) — เลือกหลายรูปพร้อมกันได้'
-      : 'ถ่ายรูป หรือเลือกรูปจากเครื่อง (อย่างน้อย 1 รูป) — แนบแล้ว AI ช่วยกรอกข้อมูลชุดให้อัตโนมัติ';
+      ? 'ถ่ายรูปทุกตัวที่จะขายเหมา (ยิ่งครบ ยิ่งประเมินไว) เลือกหลายรูปพร้อมกันได้'
+      : 'ถ่ายรูป หรือเลือกรูปจากเครื่อง (อย่างน้อย 1 รูป) แนบแล้ว AI จะช่วยกรอกข้อมูลชุดให้อัตโนมัติค่ะ';
   }
   async function submit(){
     const pasted=($('gphotos').value||'').split(',').map(s=>s.trim()).filter(Boolean);
@@ -278,7 +278,7 @@
       const n=Number($('bcount').value)||0;
       if(!n){ toast('ใส่จำนวนตัวก่อนค่ะ'); return; }
       if(!photos.length){ toast('ขายเหมารบกวนแนบรูปทุกตัวด้วยค่ะ (อย่างน้อย 1 รูป)'); return; }
-      if(photos.length < n && !confirm(`คุณใส่ ${n} ตัว แต่แนบรูป ${photos.length} รูป — แนบรูปให้ครบทุกตัวจะประเมินไวกว่า ส่งเลยไหมคะ?`)) return;
+      if(photos.length < n && !confirm(`คุณใส่ ${n} ตัว แต่แนบรูป ${photos.length} รูป แนบรูปให้ครบทุกตัวจะประเมินไวกว่าค่ะ ส่งเลยไหมคะ?`)) return;
       p={ ...base, item_count:n, lot_note:$('bnote').value,
         asking_price: $('bprice').value?Number($('bprice').value):null };
     }

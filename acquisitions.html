@@ -46,17 +46,17 @@
     <section class="phead">
       <div class="eyebrow">closet cash</div>
       <h1>ข้อเสนอขายตู้เสื้อผ้า</h1>
-      <div class="sub">ตีราคา → ตกลงซื้อ → จ่ายเงิน → ส่งเข้าคลัง — จบในหน้าเดียว ทุกดีลมีร่องรอย</div>
+      <div class="sub">ตีราคา → ตกลงซื้อ → จ่ายเงิน → ส่งเข้าคลัง จบในหน้าเดียว ทุกดีลมีร่องรอย</div>
       <div class="kpis">
-        <div class="kpi"><div class="n" id="k_pending">—</div><div class="l">รอจัดการ</div></div>
-        <div class="kpi"><div class="n" id="k_accepted">—</div><div class="l">ตกลงแล้ว รอจ่าย</div></div>
-        <div class="kpi ok"><div class="n" id="k_paid">—</div><div class="l">จ่ายแล้ว รอเข้าคลัง</div></div>
+        <div class="kpi"><div class="n" id="k_pending">…</div><div class="l">รอจัดการ</div></div>
+        <div class="kpi"><div class="n" id="k_accepted">…</div><div class="l">ตกลงแล้ว รอจ่าย</div></div>
+        <div class="kpi ok"><div class="n" id="k_paid">…</div><div class="l">จ่ายแล้ว รอเข้าคลัง</div></div>
       </div>
     </section>
 
     <div class="warnbox" id="rpcWarn" style="display:none">
       หน้านี้ต้องติดตั้ง RPC ชุดรับซื้อก่อน (seller_offers_list / seller_offer_get / seller_offer_price / seller_offer_decide / seller_offer_paid)
-      — รันไฟล์ <b>supabase-p0-moats.sql</b> ใน Supabase SQL Editor แล้วรีเฟรชหน้านี้ค่ะ
+      รันไฟล์ <b>supabase-p0-moats.sql</b> ใน Supabase SQL Editor แล้วรีเฟรชหน้านี้ค่ะ
     </div>
 
     <div class="card">
@@ -85,7 +85,7 @@
   if(window.opsLogin) window.opsLogin().catch(()=>{});
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
-  const baht=n=>n==null?'—':'฿'+Number(n).toLocaleString();
+  const baht=n=>n==null?'ไม่ระบุ':'฿'+Number(n).toLocaleString();
   let T=null; function toast(m,bad){const t=$('toast');t.textContent=m;t.className='toast show'+(bad?' bad':' ok');clearTimeout(T);T=setTimeout(()=>t.className='toast',2600);}
   // RPC ยังไม่ติดตั้ง (ก่อนรัน supabase-p0-moats.sql) → โชว์แบนเนอร์แทนพัง
   const missingRpc=e=>/function|not.*found|does not exist|404/i.test(e?.message||'');
@@ -98,12 +98,12 @@
 
   async function loadList(){
     const {data,error}=await sb.rpc('seller_offers_list',{p_status:TAB});
-    if(error){ if(missingRpc(error)){ $('rpcWarn').style.display='block'; $('list').innerHTML='<div class="muted">ยังเรียกข้อมูลไม่ได้ — ติดตั้ง RPC ก่อนค่ะ</div>'; return; }
+    if(error){ if(missingRpc(error)){ $('rpcWarn').style.display='block'; $('list').innerHTML='<div class="muted">ยังเรียกข้อมูลไม่ได้ ติดตั้ง RPC ก่อนค่ะ</div>'; return; }
       $('list').innerHTML='<div class="muted" style="color:var(--clay)">ผิดพลาด: '+esc(error.message)+'</div>'; return; }
     const rows=data?.offers||data||[];
-    $('k_pending').textContent=data?.kpi?.pending??'—';
-    $('k_accepted').textContent=data?.kpi?.accepted??'—';
-    $('k_paid').textContent=data?.kpi?.paid??'—';
+    $('k_pending').textContent=data?.kpi?.pending??'…';
+    $('k_accepted').textContent=data?.kpi?.accepted??'…';
+    $('k_paid').textContent=data?.kpi?.paid??'…';
     if(!rows.length){ $('list').innerHTML='<div class="muted">ไม่มีรายการในแท็บนี้</div>'; return; }
     $('list').innerHTML=rows.map(o=>{
       const label=o.mode==='bulk'?('ขายเหมา '+(o.item_count||0)+' ตัว'):(o.name||'เสนอขาย');
@@ -129,9 +129,9 @@
     const photos=(d.photos||o.photos||[]).map(u=>`<img src="${esc(u)}" referrerpolicy="no-referrer">`).join('');
     const kv=[
       ['ผู้ขาย',[s.name,s.phone].filter(Boolean).join(' · ')],
-      ['บัญชีโอน',[s.bank_name,s.bank_account].filter(Boolean).join(' ')||'—'],
+      ['บัญชีโอน',[s.bank_name,s.bank_account].filter(Boolean).join(' ')||'ไม่ระบุ'],
       ['แบรนด์',o.brand],['ไซซ์',o.size],['สภาพ',o.condition],['ตำหนิ',o.defects],
-      ['ราคาที่ผู้ขายขอ',o.asking_price!=null?baht(o.asking_price):'—'],
+      ['ราคาที่ผู้ขายขอ',o.asking_price!=null?baht(o.asking_price):'ไม่ระบุ'],
       ['ใบรับซื้อ',o.voucher_no||'ยังไม่ออก'],['หมายเหตุ',o.note],
     ].filter(([,v])=>v!=null&&v!=='').map(([k,v])=>`<div class="k">${k}</div><div>${esc(v)}</div>`).join('');
     const canDecide=['submitted','new','priced'].includes(o.status||'submitted');
@@ -185,16 +185,16 @@
         if(pe){ toast('บันทึกราคาไม่สำเร็จ: '+pe.message,true); return; }
       }
     }
-    const note=decision==='rejected'?(prompt('เหตุผล (แจ้งผู้ขาย — เว้นว่างได้)','')||null):null;
+    const note=decision==='rejected'?(prompt('เหตุผล (แจ้งผู้ขาย เว้นว่างได้)','')||null):null;
     const {data:dres,error}=await sb.rpc('seller_offer_decide',{p_id:o.id,p_decision:decision,p_note:note});
     if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }
     if(dres&&dres.error){ toast('ไม่สำเร็จ: '+dres.error,true); return; }
-    toast(decision==='accepted'?'ตกลงซื้อแล้ว — นัดจ่ายเงิน/รับของต่อได้เลย':'บันทึกไม่รับซื้อแล้ว');
+    toast(decision==='accepted'?'ตกลงซื้อแล้ว นัดจ่ายเงินและรับของต่อได้เลยค่ะ':'บันทึกไม่รับซื้อแล้ว');
     openOffer(o.id); loadList();
   }
   async function markPaid(){
     const o=CUR.offer||CUR;
-    const ref=prompt('อ้างอิงการโอน (เลขสลิป/เวลาโอน — เว้นว่างได้)','')||null;
+    const ref=prompt('อ้างอิงการโอน (เลขสลิป/เวลาโอน เว้นว่างได้)','')||null;
     const {data,error}=await sb.rpc('seller_offer_paid',{p_id:o.id,p_ref:ref});
     if(error){ toast('ไม่สำเร็จ: '+error.message,true); return; }
     if(data&&data.error){ toast(data.message||('ไม่สำเร็จ: '+data.error),true); return; }
