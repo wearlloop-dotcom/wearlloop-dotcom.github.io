@@ -51,7 +51,7 @@
 <div class="bar"><h1>จัดซื้อ</h1><span class="tag">จัดซื้อ</span><span class="lock" onclick="logout()" id="lockBtn"></span></div>
 
 <div id="gate" class="gate">
-  <h2>เข้าระบบจัดซื้อ</h2><p>ยืนยันตัวตนด้วย LINE — เฉพาะเจ้าของ/ผู้จัดการ</p>
+  <h2>เข้าระบบจัดซื้อ</h2><p>ยืนยันตัวตนด้วย LINE · เฉพาะเจ้าของ/ผู้จัดการ</p>
   <button class="btn" style="width:100%" onclick="boot()">เข้าสู่ระบบด้วย LINE</button>
 </div>
 
@@ -59,7 +59,7 @@
   <section class="phead">
     <div class="eyebrow">purchasing · supply</div>
     <h1>เติมชุดให้ทันใจลูกค้า</h1>
-    <div class="sub">ดูว่าโทนสี ไซซ์ และวัสดุไหนกำลังขาด แล้วสั่งซื้อให้ครบ — เพื่อให้ทุกชุดหมุนเวียนกลับมาพร้อมเสมอ</div>
+    <div class="sub">ดูว่าโทนสี ไซซ์ และวัสดุไหนกำลังขาด แล้วสั่งซื้อให้ครบ · เพื่อให้ทุกชุดหมุนเวียนกลับมาพร้อมเสมอ</div>
   </section>
   <div class="tabs">
     <span class="tab on" data-t="restock" onclick="go(this)">ควรเติมชุด</span>
@@ -119,11 +119,11 @@
           ${(f.by_season||[]).length?`<tr><td>โทนสีขายดี (90 วัน)</td><td class="n">${f.by_season.map(x=>(ST[x.season]||x.season).split(' ')[0]+':'+x.rented).join(' · ')}</td></tr>`:''}
           ${(f.peak_months||[]).length?`<tr><td>เดือนพีคในรอบปี</td><td class="n">${f.peak_months.map(x=>'เดือน'+x.month_no).join(', ')}</td></tr>`:''}
         </table>`:'<div class="muted">ยังไม่มีประวัติเช่าพอจะพยากรณ์ — ระบบจะคำนวณเองเมื่อมีข้อมูลเช่าจริง</div>'}</div>
-      <div class="card"><h2>ไซซ์ที่ดีมานด์เกินชุด — ควรเติม</h2>
+      <div class="card"><h2>ไซซ์ที่ดีมานด์เกินชุด · ควรเติม</h2>
       ${sgaps.length?`<table><tr><th>ไซซ์</th><th class="n">เช่า 90 วัน</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
         ${sgaps.map(s=>`<tr><td>${esc(s.size)}</td><td class="n">${s.rented_90d}</td><td class="n">${s.available===0?'<span class="pill low">0!</span>':s.available}</td><td class="n">${s.ratio||'-'}:1</td></tr>`).join('')}</table>`
         :'<div class="muted">ไซซ์ในระบบเพียงพอกับดีมานด์ ✓</div>'}</div>
-      <div class="card"><h2>โทนสีที่ลูกค้าเยอะกว่าชุด — ควรเติม</h2>
+      <div class="card"><h2>โทนสีที่ลูกค้าเยอะกว่าชุด · ควรเติม</h2>
       ${gaps.length?`<table><tr><th>โทนสี</th><th class="n">ลูกค้า</th><th class="n">ลูกค้าประจำ</th><th class="n">ชุดว่าง</th><th class="n">สัดส่วน</th></tr>
         ${gaps.map(g=>`<tr><td>${esc(ST[g.season]||g.season)}</td><td class="n">${g.customers}</td><td class="n">${g.loyal}</td><td class="n">${g.available===0?'<span class="pill low">0 — ไม่มีเลย!</span>':g.available}</td><td class="n">${g.ratio||'-'}:1</td></tr>`).join('')}</table>`
         :'<div class="muted">ตอนนี้ชุดในระบบเพียงพอกับฐานลูกค้าทุกโทนสี ✓</div>'}</div>
@@ -136,7 +136,7 @@
       <div class="muted" style="margin-top:8px">ระบบเตือนเจ้าของทาง LINE อัตโนมัติทุกสัปดาห์เมื่อมีโทนสีที่ขาด</div></div>`;
   }
   function renderLow(v,rows){
-    v.innerHTML=`<div class="card"><h2>ของใกล้หมด — ควรสั่งซื้อ</h2><table><tr><th>วัสดุ</th><th class="n">คงเหลือ</th><th class="n">จุดสั่ง</th><th class="n">ควรสั่ง</th><th></th></tr>
+    v.innerHTML=`<div class="card"><h2>ของใกล้หมด · ควรสั่งซื้อ</h2><table><tr><th>วัสดุ</th><th class="n">คงเหลือ</th><th class="n">จุดสั่ง</th><th class="n">ควรสั่ง</th><th></th></tr>
       ${rows.length?rows.map(r=>`<tr><td>${esc(r.name)} <span class="pill low">ใกล้หมด</span></td><td class="n">${r.qty_on_hand} ${esc(r.unit)}</td><td class="n">${r.min_qty}</td><td class="n">${r.reorder_qty>0?r.reorder_qty:0}</td><td><button class="mini" onclick='quickPo(${JSON.stringify(r)})'>สั่งซื้อ</button></td></tr>`).join(''):'<tr><td class="muted" colspan="5">ของครบ ไม่มีที่ใกล้หมด</td></tr>'}</table></div>`;
   }
   function quickPo(r){ tab='create'; document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.t==='create')); renderCreate($('view'),r); }
@@ -162,7 +162,7 @@
     ITEMS = seed ? [{supply_id:seed.id,description:seed.name,qty:(seed.reorder_qty>0?seed.reorder_qty:1),unit_cost:seed.last_cost||0}] : [{description:'',qty:1,unit_cost:0}];
     const supOpts=SUPPLIERS.map(s=>`<option value="${s.id}">${esc(s.name||'(ไม่มีชื่อ)')}</option>`).join('');
     v.innerHTML=`<div class="card"><h2>สร้างใบสั่งซื้อ</h2>
-      <div class="g2"><div><label>ซัพพลายเออร์</label><select id="po_sup"><option value="">— เลือก —</option>${supOpts}</select></div>
+      <div class="g2"><div><label>ซัพพลายเออร์</label><select id="po_sup"><option value="">(เลือก)</option>${supOpts}</select></div>
       <div><label>ประเภท</label><select id="po_kind"><option value="supply">วัสดุ/ของใช้</option><option value="asset">ชุดให้เช่า (สินทรัพย์)</option><option value="inventory">สินค้าเพื่อขาย</option></select></div></div>
       <label>หมายเหตุ</label><input id="po_note" placeholder="เช่น สั่งถุงผ้ารอบ มิ.ย.">
       <label>รายการ</label><div id="poItems"></div>

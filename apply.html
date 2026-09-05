@@ -282,7 +282,7 @@ var BKK_DISTRICTS = ["พระนคร","ดุสิต","หนองจอ�
   provSel.addEventListener('change', function(){
     var p = provSel.value;
     if(p === 'กรุงเทพมหานคร'){
-      var sel = '<select id="district"><option value="">— เลือกเขต —</option>';
+      var sel = '<select id="district"><option value="">(เลือกเขต)</option>';
       BKK_DISTRICTS.forEach(function(d){ sel += '<option value="'+d+'">'+d+'</option>'; });
       dWrap.innerHTML = sel + '</select>';
     } else if(p){
@@ -336,7 +336,7 @@ var BKK_DISTRICTS = ["พระนคร","ดุสิต","หนองจอ�
       source: val('source')||null, notes: val('intro')||null
     };
 
-    if(!sb){ showErr('ระบบยังไม่พร้อมรับใบสมัคร — กรุณาลองใหม่ภายหลัง'); return; }
+    if(!sb){ showErr('ระบบยังไม่พร้อมรับใบสมัคร · กรุณาลองใหม่ภายหลัง'); return; }
 
     btn.disabled = true; btn.textContent = 'กำลังส่ง…';
     try{
@@ -344,7 +344,7 @@ var BKK_DISTRICTS = ["พระนคร","ดุสิต","หนองจอ�
       if(res.error){
         var m = res.error.message || '';
         if(/hr_apply_public|does not exist|404|schema cache/i.test(m)){
-          showErr('ระบบรับสมัครออนไลน์กำลังเปิดใช้งาน — ระหว่างนี้ทักแชต LINE ของ LLOOP เพื่อสมัครได้เลยค่ะ');
+          showErr('ระบบรับสมัครออนไลน์กำลังเปิดใช้งาน · ระหว่างนี้ทักแชต LINE ของ LLOOP เพื่อสมัครได้เลยค่ะ');
         } else { showErr('ส่งไม่สำเร็จ: ' + m); }
         btn.disabled=false; btn.textContent='ส่งใบสมัคร'; return;
       }

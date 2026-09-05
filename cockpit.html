@@ -54,7 +54,7 @@
   <section class="phead">
     <div class="eyebrow">owner cockpit</div>
     <h1>ภาพรวมร้าน ในจอเดียว</h1>
-    <div class="sub">เงินเข้า-ออกวันนี้/เดือนนี้ · อัตราหมุนของคลัง · ของค้าง · สมาชิก — ดูครบ ตัดสินใจไว</div>
+    <div class="sub">เงินเข้า-ออกวันนี้/เดือนนี้ · อัตราหมุนของคลัง · ของค้าง · สมาชิก · ดูครบ ตัดสินใจไว</div>
   </section>
   <div class="toolrow">
     <div class="when" id="when"></div>
@@ -76,7 +76,7 @@
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
   const baht=n=>'฿'+Math.round(Number(n)||0).toLocaleString('th-TH');
-  const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'—';
+  const dt=s=>s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short'}):'…';
 
   let ROI=[];          // เก็บ fleet_roi ไว้สลับมุมมอง
   let roiView='idle';  // idle = ทุนยังไม่คืน/ชุดนิ่ง · top = ทำเงินสูงสุด
@@ -153,7 +153,7 @@
       $('when').textContent='อัปเดต '+new Date().toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       $('out').innerHTML = moneyCard(c)+fleetCard(c)+bizCard(c)+`<div id="roi">${roiCard()}</div>`;
     }catch(err){
-      $('out').innerHTML=`<div class="card"><div class="empty">โหลดไม่ได้: ${esc(err.message||err)}<br>เข้าได้เฉพาะเจ้าของ (owner) — ลองล็อกอินใหม่ผ่าน LINE</div></div>`;
+      $('out').innerHTML=`<div class="card"><div class="empty">โหลดไม่ได้: ${esc(err.message||err)}<br>เข้าได้เฉพาะเจ้าของ (owner) · ลองล็อกอินใหม่ผ่าน LINE</div></div>`;
     }
   }
   load();

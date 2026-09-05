@@ -191,7 +191,7 @@
       <div class="subhint">เลือกจากแผนที่เพื่อปักพิกัด หรือกรอกรหัสไปรษณีย์ด้านล่างก็ได้</div>
       <div class="frow">
         <div class="field"><label>รหัสไปรษณีย์</label><input id="pZip" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="เช่น 10310" oninput="onZipInput()"></div>
-        <div class="field"><label>ตำบล/แขวง</label><select id="pTambon" onchange="onTambonPick()"><option value="">— ใส่รหัสก่อน —</option></select></div>
+        <div class="field"><label>ตำบล/แขวง</label><select id="pTambon" onchange="onTambonPick()"><option value="">(ใส่รหัสก่อน)</option></select></div>
       </div>
       <div class="frow">
         <div class="field"><label>อำเภอ/เขต</label><input id="pAmphoe" readonly placeholder="เติมอัตโนมัติ"></div>
@@ -210,11 +210,11 @@
       <input id="rSpecOther" placeholder="ความเชี่ยวชาญอื่น ๆ (คั่นด้วย , )">
 
       <label>โซเชียล (ไม่บังคับ)</label>
-      <input id="rIG" placeholder="Instagram — @ชื่อ หรือ ลิงก์" autocomplete="off">
-      <input id="rTikTok" placeholder="TikTok — @ชื่อ หรือ ลิงก์" autocomplete="off" style="margin-top:8px">
+      <input id="rIG" placeholder="Instagram · @ชื่อ หรือ ลิงก์" autocomplete="off">
+      <input id="rTikTok" placeholder="TikTok · @ชื่อ หรือ ลิงก์" autocomplete="off" style="margin-top:8px">
 
       <button class="btn dark" id="rSubmit" onclick="submitReg()" style="margin-top:14px;width:100%">ยืนยันสมัคร + เข้าพอร์ทัล</button>
-      <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5">การกดสมัครถือว่ายอมรับเงื่อนไขการเป็นพาร์ทเนอร์สไตลิสต์ของ LLOOP — บัญชี LINE ที่เปิดหน้านี้จะถูกผูกเป็นพาร์ทเนอร์ทันที</p>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5">การกดสมัครถือว่ายอมรับเงื่อนไขการเป็นพาร์ทเนอร์สไตลิสต์ของ LLOOP · บัญชี LINE ที่เปิดหน้านี้จะถูกผูกเป็นพาร์ทเนอร์ทันที</p>
     </div>
   </div>
 </div>
@@ -223,7 +223,7 @@
   <section class="phead">
     <div class="eyebrow">stylist partner</div>
     <h1>บันทึกตัวตนของลูกค้าทุกคน</h1>
-    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดที่วนต่อใช่กับเขาที่สุด</div>
+    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ · เพื่อให้ทุกชุดที่วนต่อใช่กับเขาที่สุด</div>
     <div class="hello" id="hello"></div>
   </section>
 
@@ -237,12 +237,12 @@
   <div class="view on" id="view-clients">
   <div class="card" id="myclientsCard">
     <h2>ลูกค้าของฉัน</h2>
-    <div class="sub">ลูกค้าที่เคยบันทึกไว้ — แตะเพื่อเปิดแก้ไขต่อ (ไม่ต้องจำรหัส)</div>
+    <div class="sub">ลูกค้าที่เคยบันทึกไว้ · แตะเพื่อเปิดแก้ไขต่อ (ไม่ต้องจำรหัส)</div>
     <div class="clients" id="myclients"><div class="empty">ยังไม่มีลูกค้าที่บันทึก</div></div>
   </div>
 
   <div class="card">
-    <h2>ค้นหาลูกค้า — รหัสจากแอป LLOOP</h2>
+    <h2>ค้นหาลูกค้า · รหัสจากแอป LLOOP</h2>
     <div class="scan">
       <input id="code" placeholder="เช่น BA4145" autocomplete="off">
       <button class="btn dark" onclick="lookup()">ค้นหา</button>
@@ -265,11 +265,11 @@
   </div>
   <div class="card" id="sec-service">
     <h2>ข้อมูลการให้บริการ</h2>
-    <div class="sub">บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ</div>
+    <div class="sub">บันทึกว่าให้บริการอะไร เมื่อไหร่ · ใช้ติดตามและออกใบเสร็จ</div>
     <div class="g3">
       <div><label>วันที่ให้บริการ</label><input id="service_date" type="date"></div>
       <div><label>บริการที่ใช้</label><select id="service_type">
-        <option value="">—</option>
+        <option value="">…</option>
         <option>Personal Color 12 Types</option>
         <option>Face &amp; Body Styling</option>
         <option>Healthy Wardrobe</option>
@@ -280,16 +280,16 @@
     <div class="g2">
       <div><label>นัดติดตาม/ครั้งถัดไป</label><input id="next_appt" type="date"></div>
       <div><label>ยินยอมให้ใช้ภาพ/รีวิว</label><select id="photo_consent">
-        <option value="">—</option><option value="yes">ยินยอม</option>
+        <option value="">…</option><option value="yes">ยินยอม</option>
         <option value="internal">ใช้ภายในเท่านั้น</option><option value="no">ไม่ยินยอม</option></select></div>
     </div>
   </div>
   <div class="card" id="sec-color">
-    <h2>Personal Color — 12 Seasons</h2>
+    <h2>Personal Color · 12 Seasons</h2>
     <div class="sub">ผลวิเคราะห์สีจากคอร์ส (เลือก type 12 ฤดู)</div>
     <div class="g2">
       <div><label>12-Season Type</label><select id="type12" onchange="onType12()">
-        <option value="">—</option>
+        <option value="">…</option>
         <option>Light Spring</option><option>Warm Spring</option><option>Bright Spring</option>
         <option>Bright Winter</option><option>Cool Winter</option><option>Deep Winter</option>
         <option>Deep Autumn</option><option>Warm Autumn</option><option>Soft Autumn</option>
@@ -324,7 +324,7 @@
     </div>
     <div class="g2">
       <div><label>ระบบสีที่ใช้</label><input id="system" placeholder="Korean 12-tone / AIM 12-season"></div>
-      <div><label>ระดับผู้วิเคราะห์</label><select id="tier"><option value="">—</option><option>Senior</option><option>Master</option><option>Certified</option></select></div>
+      <div><label>ระดับผู้วิเคราะห์</label><select id="tier"><option value="">…</option><option>Senior</option><option>Master</option><option>Certified</option></select></div>
     </div>
     <label>ไฟล์งาน Personal Color (PDF/รูป/เอกสาร)</label>
     <input type="file" id="pc_file_up" accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.key,.heic" multiple onchange="uploadDocs(this,'pc_file','pc_file_chips')">
@@ -335,11 +335,11 @@
   <div class="card" id="sec-face">
     <h2>Face Analysis</h2>
     <div class="g2">
-      <div><label>รูปหน้า</label><select id="face_shape"><option value="">—</option><option>รูปไข่</option><option>กลม</option><option>เหลี่ยม</option><option>หัวใจ</option><option>ยาว</option><option>เพชร</option></select></div>
+      <div><label>รูปหน้า</label><select id="face_shape"><option value="">…</option><option>รูปไข่</option><option>กลม</option><option>เหลี่ยม</option><option>หัวใจ</option><option>ยาว</option><option>เพชร</option></select></div>
       <div><label>แว่นตาที่เข้า</label><input id="eyewear" placeholder="ทรงเหลี่ยม/มน"></div>
     </div>
     <label>ทรงผมที่แนะนำ (คั่นด้วย ,)</label><textarea id="hairstyles" placeholder="ผมยาวลอนใหญ่, รวบครึ่งหัว, บ๊อบยาว"></textarea>
-    <label>เมคอัพ — สีปาก / แก้ม / ตา</label>
+    <label>เมคอัพ · สีปาก / แก้ม / ตา</label>
     <div class="g3"><input id="lip" placeholder="สีปาก"><input id="cheek" placeholder="สีแก้ม"><input id="eye" placeholder="สีตา"></div>
     <label>เทคนิค/ทิศทางเมคอัพ (Self Korea ฯลฯ)</label><input id="makeup_dir" placeholder="โทนอุ่น เน้นตา วางเบสบาง ฯลฯ">
     <label>โน้ตเพิ่มเติม (หน้า/ผม)</label><input id="hair_notes" placeholder="เลี่ยงหน้าม้าหนา ฯลฯ">
@@ -349,7 +349,7 @@
     <h2>Body Analysis</h2>
     <div class="g2">
       <div><label>ประเภทหุ่น</label><select id="body_type">
-        <option value="">—</option><option>นาฬิกาทราย</option><option>สามเหลี่ยม (ล่างใหญ่)</option>
+        <option value="">…</option><option>นาฬิกาทราย</option><option>สามเหลี่ยม (ล่างใหญ่)</option>
         <option>สามเหลี่ยมกลับ (บนใหญ่)</option><option>สี่เหลี่ยม</option><option>แอปเปิล</option><option>โอวัล</option></select></div>
       <div><label>สัดส่วน</label><input id="body_proportion" placeholder="ช่วงตัวสั้น/ขายาว"></div>
     </div>
@@ -443,7 +443,7 @@
     <div class="thumbs" id="photos_thumbs"></div>
     <label>หรือวางลิงก์รูป (คั่นด้วย ,)</label><textarea id="photos" placeholder="https://...jpg"></textarea>
     <div class="upnote" id="upnote" style="display:none"></div>
-    <label>ประโยคสรุป (แสดงให้ลูกค้า — เว้นว่าง=ใช้ 12-season type อัตโนมัติ)</label><input id="headline" placeholder="คุณคือ Warm Autumn โทนอุ่นละมุน">
+    <label>ประโยคสรุป (แสดงให้ลูกค้า · เว้นว่าง=ใช้ 12-season type อัตโนมัติ)</label><input id="headline" placeholder="คุณคือ Warm Autumn โทนอุ่นละมุน">
     <div class="g2">
       <div><label>ชื่อสไตลิสต์</label><input id="analyst"></div>
       <div><label>ทีม/พาร์ทเนอร์</label><input id="partner" placeholder="Classis Studio / Colorsayyoo Studio"></div>
@@ -458,7 +458,7 @@
   <div class="view" id="view-profile">
     <div class="card">
       <h2>โปรไฟล์สไตลิสต์ของฉัน</h2>
-      <div class="sub">ข้อมูลนี้จะแสดงให้ลูกค้าเห็นบนแอป LLOOP เมื่อเปิด "เผยแพร่" — เป็นหน้าที่ลูกค้าใช้เลือกคุณตอนจอง Personal Color</div>
+      <div class="sub">ข้อมูลนี้จะแสดงให้ลูกค้าเห็นบนแอป LLOOP เมื่อเปิด "เผยแพร่" · เป็นหน้าที่ลูกค้าใช้เลือกคุณตอนจอง Personal Color</div>
       <div class="g2">
         <div><label>ชื่อที่แสดง</label><input id="pf_display" placeholder="ชื่อ-เล่น/ชื่อมืออาชีพ"></div>
         <div><label>ชื่อสตูดิโอ</label><input id="pf_studio" placeholder="ถ้ามี"></div>
@@ -508,12 +508,12 @@
   <div class="view" id="view-bookings">
     <div class="card" id="earnCard" style="display:none">
       <h2>ค่าตอบแทนของฉัน</h2>
-      <div class="sub">฿1,000 ต่อการวิเคราะห์ 1 ครั้ง — บันทึกเมื่อกด “เสร็จงาน”</div>
+      <div class="sub">฿1,000 ต่อการวิเคราะห์ 1 ครั้ง · บันทึกเมื่อกด “เสร็จงาน”</div>
       <div class="earn" id="earn"></div>
     </div>
     <div class="card">
       <h2>คิวที่ถูกจอง</h2>
-      <div class="sub">ลูกค้าที่จองเข้ามา — เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ</div>
+      <div class="sub">ลูกค้าที่จองเข้ามา · เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ</div>
       <div class="bookings" id="bookList"><div class="empty">ยังไม่มีคิว</div></div>
     </div>
   </div>
@@ -570,11 +570,11 @@
         $('gateMsg').textContent='กรุณาเปิดลิงก์พอร์ทัลจากแชต LINE ของ LLOOP เพื่อยืนยันตัวตนค่ะ';
       }else if(data && data.can_self_register){
         $('gateTitle').textContent='เริ่มเป็นพาร์ทเนอร์สไตลิสต์';
-        $('gateMsg').textContent='ลงทะเบียนสั้น ๆ แล้วเข้าใช้พอร์ทัลได้เลย — บันทึกผลวิเคราะห์ลูกค้า เปิดเวลาว่าง และรับคิวจอง';
+        $('gateMsg').textContent='ลงทะเบียนสั้น ๆ แล้วเข้าใช้พอร์ทัลได้เลย · บันทึกผลวิเคราะห์ลูกค้า เปิดเวลาว่าง และรับคิวจอง';
         $('regCta').style.display='block';
       }else{
         $('gateTitle').textContent='ยังไม่พบสัญญาที่ลงนาม';
-        $('gateMsg').textContent='พอร์ทัลนี้เปิดให้พาร์ทเนอร์ที่ลงนามสัญญากับ LLOOP แล้วเท่านั้น — หากลงนามแล้วแต่ยังเข้าไม่ได้ ติดต่อทีม LLOOP ได้เลยค่ะ';
+        $('gateMsg').textContent='พอร์ทัลนี้เปิดให้พาร์ทเนอร์ที่ลงนามสัญญากับ LLOOP แล้วเท่านั้น · หากลงนามแล้วแต่ยังเข้าไม่ได้ ติดต่อทีม LLOOP ได้เลยค่ะ';
       }
       return;
     }
@@ -595,9 +595,9 @@
     const zi=$('pZip'); if(!zi)return;
     let z=(zi.value||'').replace(/\D/g,'').slice(0,5); if(zi.value!==z) zi.value=z;
     const sel=$('pTambon'),am=$('pAmphoe'),pv=$('pProvince');
-    if(z.length<5){ _zipEntries=[]; if(sel)sel.innerHTML='<option value="">— ใส่รหัสก่อน —</option>'; if(am)am.value=''; if(pv)pv.value=''; return; }
+    if(z.length<5){ _zipEntries=[]; if(sel)sel.innerHTML='<option value="">(ใส่รหัสก่อน)</option>'; if(am)am.value=''; if(pv)pv.value=''; return; }
     const db=await loadThPostal(); _zipEntries=db[z]||[];
-    if(!_zipEntries.length){ if(sel)sel.innerHTML='<option value="">ไม่พบรหัสนี้ — พิมพ์ที่อยู่จากแผนที่ได้</option>'; if(am)am.value=''; if(pv)pv.value=''; return; }
+    if(!_zipEntries.length){ if(sel)sel.innerHTML='<option value="">ไม่พบรหัสนี้ · พิมพ์ที่อยู่จากแผนที่ได้</option>'; if(am)am.value=''; if(pv)pv.value=''; return; }
     const multi=new Set(_zipEntries.map(e=>e[1])).size>1;
     if(sel) sel.innerHTML='<option value="">เลือกตำบล/แขวง</option>'+_zipEntries.map((e,i)=>'<option value="'+i+'">'+e[2]+(multi?(' · '+e[1]):'')+'</option>').join('');
     if(_zipEntries.length===1){ sel.value='0'; onTambonPick(); }
@@ -689,7 +689,7 @@
     try{
       const { data } = await window.meRpc('partner_portal_clients', {});
       const box=$('myclients'); const arr=Array.isArray(data)?data:[];
-      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีลูกค้าที่บันทึก — ค้นหาด้วยรหัสด้านล่างเพื่อเริ่ม</div>'; return; }
+      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีลูกค้าที่บันทึก · ค้นหาด้วยรหัสด้านล่างเพื่อเริ่ม</div>'; return; }
       box.innerHTML='';
       arr.forEach(c=>{
         const row=document.createElement('div'); row.className='clientrow';
@@ -748,7 +748,7 @@
       if(upErr) throw upErr;
       const { data:pub } = sb.storage.from('uploads').getPublicUrl(path);
       $('pf_photo').value = (pub&&pub.publicUrl)||''; renderProfilePhoto(); toast('อัปโหลดรูปแล้ว');
-    }catch(e){ toast('อัปโหลดไม่ได้ — วางลิงก์รูปแทนได้'); }
+    }catch(e){ toast('อัปโหลดไม่ได้ · วางลิงก์รูปแทนได้'); }
     input.value='';
   }
   async function saveProfile(){
@@ -784,7 +784,7 @@
     try{
       const { data } = await window.meRpc('partner_calendar_self', {});
       const arr=Array.isArray(data)?data:[];
-      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีช่องเวลา — เพิ่มด้านบนได้เลย</div>'; return; }
+      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีช่องเวลา · เพิ่มด้านบนได้เลย</div>'; return; }
       const groups={};
       arr.forEach(s=>{ const k=new Date(s.starts_at).toDateString(); (groups[k]=groups[k]||[]).push(s); });
       box.innerHTML='';
@@ -829,7 +829,7 @@
     try{
       const { data } = await window.meRpc('partner_bookings_self', {});
       const arr=Array.isArray(data)?data:[];
-      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีคิว — เปิดเวลาว่างไว้ ลูกค้าจะจองเข้ามาเอง</div>'; return; }
+      if(!arr.length){ box.innerHTML='<div class="empty">ยังไม่มีคิว · เปิดเวลาว่างไว้ ลูกค้าจะจองเข้ามาเอง</div>'; return; }
       box.innerHTML='';
       arr.forEach(b=>{
         const div=document.createElement('div'); div.className='bkrow'+(b.status==='done'?' is-done':'');
@@ -882,7 +882,7 @@
     if(p.neutrals && !$('neutrals').value) $('neutrals').value=p.neutrals;
     if(p.metals   && !$('metals').value)   $('metals').value=p.metals;
     if(!$('undertone').value) $('undertone').value=(baseSeason==='spring'||baseSeason==='autumn')?'warm':'cool';
-    toast('เติมพาเลตตาม '+key+' ให้แล้ว — ปรับได้');
+    toast('เติมพาเลตตาม '+key+' ให้แล้ว · ปรับได้');
     saveDraft();
   }
   // เลือกฤดูเอง (จากมือ partner) → set base season + เติม preset · ตอน fillForm เรียกแค่ autoSeason() ไม่ทับของเดิม
@@ -1092,7 +1092,7 @@
     input.value='';
   }
 
-  // แนบไฟล์งาน (PDF/เอกสาร/รูป) — อัปขึ้น bucket uploads แล้วเติมลิงก์ลงช่องเป้าหมาย + แสดง chip
+  // แนบไฟล์งาน (PDF/เอกสาร/รูป) · อัปขึ้น bucket uploads แล้วเติมลิงก์ลงช่องเป้าหมาย + แสดง chip
   // graceful fallback: ถ้า Storage ยังไม่เปิด ให้วางลิงก์เองได้ตามเดิม
   async function uploadDocs(input, targetId, chipsId){
     const files=[...input.files]; if(!files.length) return;
@@ -1120,7 +1120,7 @@
     }
     input.value='';
   }
-  // วาด chip ลิงก์ไฟล์จากค่าในช่อง (คั่นด้วย ,) — ชื่อไฟล์ย่อจาก path
+  // วาด chip ลิงก์ไฟล์จากค่าในช่อง (คั่นด้วย ,) · ชื่อไฟล์ย่อจาก path
   function renderFileChips(targetId, chipsId){
     const box=$(chipsId); if(!box) return; box.innerHTML='';
     const clip='<svg viewBox="0 0 24 24"><path d="M21 11.5l-8.5 8.5a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.6 1.6 0 0 1-2.3-2.3l7.8-7.8"/></svg>';
@@ -1132,23 +1132,23 @@
     });
   }
 
-  // ===== i18n — ไทย / อังกฤษ (สไตลิสต์พาร์ทเนอร์เอาแค่ 2 ภาษา) =====
+  // ===== i18n · ไทย / อังกฤษ (สไตลิสต์พาร์ทเนอร์เอาแค่ 2 ภาษา) =====
   // map คีย์เป็นข้อความไทยต้นฉบับ → คำแปลอังกฤษ (คีย์ที่ไม่มีในนี้จะคงภาษาไทยไว้)
   const PARTNER_EN={
     'พอร์ทัลสไตลิสต์':'Stylist portal',
     'พาร์ทเนอร์ LLOOP':'LLOOP partner',
     'บันทึกตัวตนของลูกค้าทุกคน':"Record every client's profile",
-    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดที่วนต่อใช่กับเขาที่สุด':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis — so every rotating piece suits them best.',
+    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ · เพื่อให้ทุกชุดที่วนต่อใช่กับเขาที่สุด':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis · so every rotating piece suits them best.',
     'ลูกค้าของฉัน':'My clients',
-    'ลูกค้าที่เคยบันทึกไว้ — แตะเพื่อเปิดแก้ไขต่อ (ไม่ต้องจำรหัส)':'Clients you have saved — tap to continue editing (no code needed)',
+    'ลูกค้าที่เคยบันทึกไว้ · แตะเพื่อเปิดแก้ไขต่อ (ไม่ต้องจำรหัส)':'Clients you have saved · tap to continue editing (no code needed)',
     'ยังไม่มีลูกค้าที่บันทึก':'No saved clients yet',
-    'ยังไม่มีลูกค้าที่บันทึก — ค้นหาด้วยรหัสด้านล่างเพื่อเริ่ม':'No saved clients yet — search by code below to start',
-    'ค้นหาลูกค้า — รหัสจากแอป LLOOP':'Find client — code from the LLOOP app',
+    'ยังไม่มีลูกค้าที่บันทึก · ค้นหาด้วยรหัสด้านล่างเพื่อเริ่ม':'No saved clients yet · search by code below to start',
+    'ค้นหาลูกค้า · รหัสจากแอป LLOOP':'Find client · code from the LLOOP app',
     'ค้นหา':'Search',
     'รหัส':'Code', 'มีผลวิเคราะห์เดิม (บันทึกทับได้)':'has a previous analysis (you can overwrite)', 'ลูกค้าใหม่':'new client',
     'บริการ':'Service', 'สี':'Colour', 'หน้า':'Face', 'หุ่น':'Body', 'วัดตัว':'Measure', 'สไตล์':'Style', 'รูป/สรุป':'Photos',
     'ข้อมูลการให้บริการ':'Service details',
-    'บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ':'Record what service and when — used for follow-up and receipts',
+    'บันทึกว่าให้บริการอะไร เมื่อไหร่ · ใช้ติดตามและออกใบเสร็จ':'Record what service and when · used for follow-up and receipts',
     'วันที่ให้บริการ':'Service date', 'บริการที่ใช้':'Service used', 'มูลค่าบริการ (฿)':'Service value (฿)',
     'นัดติดตาม/ครั้งถัดไป':'Follow-up / next appointment', 'ยินยอมให้ใช้ภาพ/รีวิว':'Consent to use photos/reviews',
     'ยินยอม':'Consent', 'ใช้ภายในเท่านั้น':'Internal use only', 'ไม่ยินยอม':'No consent', 'อื่น ๆ':'Other',
@@ -1166,7 +1166,7 @@
     'แว่นตาที่เข้า':'Suitable eyewear', 'ทรงเหลี่ยม/มน':'angular/round',
     'ทรงผมที่แนะนำ (คั่นด้วย ,)':'Recommended hairstyles (comma-separated)',
     'ผมยาวลอนใหญ่, รวบครึ่งหัว, บ๊อบยาว':'long loose waves, half-up, long bob',
-    'เมคอัพ — สีปาก / แก้ม / ตา':'Makeup — lip / cheek / eye', 'สีปาก':'lip', 'สีแก้ม':'cheek', 'สีตา':'eye',
+    'เมคอัพ · สีปาก / แก้ม / ตา':'Makeup · lip / cheek / eye', 'สีปาก':'lip', 'สีแก้ม':'cheek', 'สีตา':'eye',
     'เทคนิค/ทิศทางเมคอัพ (Self Korea ฯลฯ)':'Makeup technique/direction (Self Korea etc.)',
     'โทนอุ่น เน้นตา วางเบสบาง ฯลฯ':'warm tone, eye focus, light base, etc.',
     'โน้ตเพิ่มเติม (หน้า/ผม)':'Extra notes (face/hair)', 'เลี่ยงหน้าม้าหนา ฯลฯ':'avoid heavy bangs, etc.',
@@ -1200,14 +1200,14 @@
     'หรือวางลิงก์ Mood Board (คั่นด้วย ,)':'Or paste mood board links (comma-separated)',
     'Lookbook & รูปลูกค้า':'Lookbook & client photos', 'หรือวางลิงก์ Lookbook (คั่นด้วย ,)':'Or paste lookbook links (comma-separated)',
     'รูปลูกค้า (เต็มตัว/ดราพสี)':'Client photos (full body/colour drape)', 'หรือวางลิงก์รูป (คั่นด้วย ,)':'Or paste photo links (comma-separated)',
-    'ประโยคสรุป (แสดงให้ลูกค้า — เว้นว่าง=ใช้ 12-season type อัตโนมัติ)':'Summary line (shown to client — blank = auto 12-season type)',
+    'ประโยคสรุป (แสดงให้ลูกค้า · เว้นว่าง=ใช้ 12-season type อัตโนมัติ)':'Summary line (shown to client · blank = auto 12-season type)',
     'คุณคือ Warm Autumn โทนอุ่นละมุน':'You are a soft, warm Warm Autumn',
     'ชื่อสไตลิสต์':'Stylist name', 'ทีม/พาร์ทเนอร์':'Team/partner', 'บันทึกโปรไฟล์ลูกค้า':'Save client profile',
     // แท็บพอร์ทัล
     'ลูกค้า':'Clients', 'โปรไฟล์':'Profile', 'เวลาว่าง':'Availability', 'คิวจอง':'Bookings',
     // โปรไฟล์สไตลิสต์
     'โปรไฟล์สไตลิสต์ของฉัน':'My stylist profile',
-    'ข้อมูลนี้จะแสดงให้ลูกค้าเห็นบนแอป LLOOP เมื่อเปิด "เผยแพร่" — เป็นหน้าที่ลูกค้าใช้เลือกคุณตอนจอง Personal Color':'This appears to clients in the LLOOP app once "Published" — the page they use to choose you when booking Personal Color.',
+    'ข้อมูลนี้จะแสดงให้ลูกค้าเห็นบนแอป LLOOP เมื่อเปิด "เผยแพร่" · เป็นหน้าที่ลูกค้าใช้เลือกคุณตอนจอง Personal Color':'This appears to clients in the LLOOP app once "Published" · the page they use to choose you when booking Personal Color.',
     'ชื่อที่แสดง':'Display name', 'ชื่อสตูดิโอ':'Studio name', 'พาดหัวสั้น ๆ':'Short headline', 'แนะนำตัว':'About you',
     'พื้นที่ให้บริการ':'Service area', 'ความเชี่ยวชาญ (คั่นด้วย ,)':'Specialties (comma-separated)',
     'รายละเอียดบริการ / สิ่งที่ลูกค้าจะได้':'Session details / what the client gets',
@@ -1220,13 +1220,13 @@
     'ช่องที่ว่าง = ลูกค้ายังจองได้ · ลบได้เฉพาะช่องที่ยังไม่มีคนจอง':'Open slots can still be booked · only unbooked slots can be removed',
     'ยังไม่มีช่องเวลา':'No slots yet',
     // คิวจอง
-    'ค่าตอบแทนของฉัน':'My earnings', '฿1,000 ต่อการวิเคราะห์ 1 ครั้ง — บันทึกเมื่อกด “เสร็จงาน”':'฿1,000 per analysis — recorded when you tap "Done"',
+    'ค่าตอบแทนของฉัน':'My earnings', '฿1,000 ต่อการวิเคราะห์ 1 ครั้ง · บันทึกเมื่อกด “เสร็จงาน”':'฿1,000 per analysis · recorded when you tap "Done"',
     'คิวที่ถูกจอง':'Booked queue',
-    'ลูกค้าที่จองเข้ามา — เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ':'Clients who booked — open the note, search the code to record the analysis, then tap Done when finished.',
+    'ลูกค้าที่จองเข้ามา · เปิดดูโน้ต ค้นรหัสเพื่อกรอกผลวิเคราะห์ แล้วกดเสร็จงานเมื่อจบ':'Clients who booked · open the note, search the code to record the analysis, then tap Done when finished.',
     'ยังไม่มีคิว':'No bookings yet',
   };
   const I18N_SEL='.bar h1,.bar .tag,.phead h1,.phead .sub,.pnav button,.card h2,.card .sub,.jump button,.empty,label,button.btn,option';
-  // ภาษาให้ตรงกับแถบ topbar ร่วม (nav.js เก็บใน lloop_lang) — ใช้เป็นแหล่งความจริงเดียว
+  // ภาษาให้ตรงกับแถบ topbar ร่วม (nav.js เก็บใน lloop_lang) · ใช้เป็นแหล่งความจริงเดียว
   let plang=localStorage.getItem('lloop_lang')||localStorage.getItem('partnerLang')||'th', collected=false, _syncingLang=false;
   function collectI18n(){
     if(collected)return; collected=true;

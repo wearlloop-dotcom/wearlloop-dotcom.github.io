@@ -211,7 +211,7 @@
   <div class="sec" id="memberSec">
     <div class="sechead">
       <div>
-        <div class="sectitle" id="grpName">—</div>
+        <div class="sectitle" id="grpName">…</div>
         <div class="seccap" id="grpCap"></div>
       </div>
       <div style="display:flex;gap:7px">
@@ -328,10 +328,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=38"></script>
-<script src="data.js?v=38"></script>
+<script src="data.js?v=39"></script>
 <script src="liffAuth.js?v=56"></script>
 <script src="me-api.js?v=56"></script>
-<script src="api.js?v=64"></script>
+<script src="api.js?v=65"></script>
 <script>
 // ===== MOCK DATA (แทน Supabase ระหว่างพรีวิว) =====
 const PALETTE = { autumn:'#B07D4F', winter:'#3B4A6B', spring:'#E6A57E', summer:'#9AA7B0' };
@@ -572,7 +572,7 @@ function renderMembers(){
     $('#memberBody').innerHTML=`<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
       <h4>ยังไม่มีกลุ่มของคุณ</h4>
-      <p>เริ่มจากสร้างกลุ่มครอบครัวหรือแก๊งเพื่อน แล้วเพิ่มสมาชิก — เราจะช่วยจัดชุดเข้าตีมให้</p>
+      <p>เริ่มจากสร้างกลุ่มครอบครัวหรือแก๊งเพื่อน แล้วเพิ่มสมาชิก · เราจะช่วยจัดชุดเข้าตีมให้</p>
       <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
         <button class="btn sage" onclick="createGroupFlow()">+ สร้างกลุ่มใหม่</button>
       </div></div>`;
@@ -588,7 +588,7 @@ function renderMembers(){
     body.innerHTML=`<div class="empty">
       <div class="ei"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M17 8v6M14 11h6"/></svg></div>
       <h4>ยังไม่มีสมาชิกในกลุ่มนี้</h4>
-      <p>เริ่มจากเพิ่มคนในครอบครัว — คุณลูก คุณยาย หรือชวนเพื่อนที่มีแอคเคานต์ LLOOP อยู่แล้ว แล้วเราจะช่วยจัดชุดเข้าตีมให้</p>
+      <p>เริ่มจากเพิ่มคนในครอบครัว · คุณลูก คุณยาย หรือชวนเพื่อนที่มีแอคเคานต์ LLOOP อยู่แล้ว แล้วเราจะช่วยจัดชุดเข้าตีมให้</p>
       <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
         <button class="btn sage" onclick="openForm()">+ เพิ่มสมาชิก ${PET_ON?'(เด็ก/ผู้สูงวัย/สัตว์เลี้ยง)':'(เด็ก/ผู้สูงวัย)'}</button>
         <button class="btn ghost" onclick="openInvite()">ชวนเพื่อนด้วยลิงก์/รหัส</button>
@@ -673,7 +673,7 @@ function suggestFor(m, occ, mode){
   const cand = STOCK
     .filter(s => (s.age===m.age || s.age==='all') && (!m.gen || s.gen===m.gen || s.gen==='unisex'));
   if(mode && mode.palette && mode.palette.length){
-    // จับคู่ด้วยระยะสี (RGB euclidean) — ยิ่งใกล้พาเลต ยิ่ง on-theme
+    // จับคู่ด้วยระยะสี (RGB euclidean) · ยิ่งใกล้พาเลต ยิ่ง on-theme
     return cand
       .map(s => { const d=nearestDist(s.hex, mode.palette); return {...s, dist:d, on:d<=70}; })
       .sort((a,b)=> (a.dist-b.dist) || (b.fit-a.fit))
@@ -758,7 +758,7 @@ function paintTheme(g, season, members, modeInfo){
     const picks = m.picks||[];
     if(m.needs_sourcing || picks.length===0){
       html+=`<div class="sourcing"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>
-        ยังไม่มีชุด${ageTh}ที่ว่างในวันนี้ — ทีมจะช่วย <b>จัดหาเพิ่ม (sourcing)</b> ให้เข้าตีมเดียวกัน</div>`;
+        ยังไม่มีชุด${ageTh}ที่ว่างในวันนี้ · ทีมจะช่วย <b>จัดหาเพิ่ม (sourcing)</b> ให้เข้าตีมเดียวกัน</div>`;
     } else {
       html+=`<div class="picks">${picks.map(p=>`<div class="pick">
         <div class="swatch" style="background:${p.color_hex||'#E7E2DA'}">
@@ -803,7 +803,7 @@ async function renderTheme(show){
         const st=await window.API.stylist({ venue: THEMESRC.venue.trim(), place: THEMESRC.place||null, occasion: occ }, 'th');
         if(st && st.error==='no_quota'){
           refreshAIQ(0);
-          box.innerHTML=`<div class="phototip" style="background:#FBF3E9;border-color:var(--gold);color:#8a6d2f"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) — เลือก “เลือกโทนเอง / เฉดสี” แทนได้เลยนะคะ</span></div>`;
+          box.innerHTML=`<div class="phototip" style="background:#FBF3E9;border-color:var(--gold);color:#8a6d2f"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span>โควต้า AI วิเคราะห์สถานที่หมดแล้ว (รวมกับ AI สไตลิสต์หน้าแรก) · เลือก “เลือกโทนเอง / เฉดสี” แทนได้เลยนะคะ</span></div>`;
           return;
         }
         if(st && typeof st.remaining==='number'){ refreshAIQ(st.remaining); }
@@ -858,7 +858,7 @@ function renderThemeSrc(){
     const inp=$('#t_venue');
     if(inp){
       inp.oninput=e=>{ THEMESRC.venue=e.target.value; if(THEMESRC.place && THEMESRC.place.name!==e.target.value) THEMESRC.place=null; };
-      // ต่อ Google Places Autocomplete (ถ้าโหลดได้) — ไม่ได้ก็ใช้ free-text + mock เดิม
+      // ต่อ Google Places Autocomplete (ถ้าโหลดได้) · ไม่ได้ก็ใช้ free-text + mock เดิม
       loadGooglePlaces().then(ok=>{
         if(!ok || !inp || inp._acDone) return;
         try{
@@ -1055,14 +1055,14 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   $('#suggestBtn').onclick=()=>renderTheme(true);
   bindForm(); bindInvite();
 
-  // สวิตช์ "ชุดสัตว์เลี้ยง" (เจ้าของเปิดที่หน้าตั้งค่า) — ปิดอยู่ = ไม่เห็นตัวเลือกนี้เลย
+  // สวิตช์ "ชุดสัตว์เลี้ยง" (เจ้าของเปิดที่หน้าตั้งค่า) · ปิดอยู่ = ไม่เห็นตัวเลือกนี้เลย
   try{
     const f = await (window.API && window.API.siteFlags ? window.API.siteFlags() : null);
     PET_ON = !!(f && f.pet_outfits_enabled === 'true');
   }catch(_e){ PET_ON = false; }
   if(PET_ON){ const o=$('#f_age_pet'); if(o) o.hidden=false; }
 
-  // ===== ลอง bootstrap LIVE (Supabase + LINE) — ล้มเหลว/ไม่มี login ก็ตกไป mock =====
+  // ===== ลอง bootstrap LIVE (Supabase + LINE) · ล้มเหลว/ไม่มี login ก็ตกไป mock =====
   try{
     if(window.API && window.CONFIG && !window.CONFIG.USE_MOCK){
       const s=await window.API.init();

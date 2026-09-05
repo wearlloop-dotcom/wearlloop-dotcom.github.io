@@ -56,10 +56,10 @@
   <section class="phead">
     <div class="eyebrow">stylist partner</div>
     <h1>บันทึกตัวตนของลูกค้าทุกคน</h1>
-    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดใน loop ใช่กับเขาที่สุด</div>
+    <div class="sub">ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ · เพื่อให้ทุกชุดใน loop ใช่กับเขาที่สุด</div>
   </section>
   <div class="card">
-    <h2>ค้นหาลูกค้า — รหัสจากแอป LLOOP</h2>
+    <h2>ค้นหาลูกค้า · รหัสจากแอป LLOOP</h2>
     <div class="scan">
       <input id="code" placeholder="เช่น BA4145" autocomplete="off">
       <button class="btn dark" onclick="lookup()">ค้นหา</button>
@@ -70,11 +70,11 @@
   <fieldset id="form">
   <div class="card">
     <h2>ข้อมูลการให้บริการ</h2>
-    <div class="sub">บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ</div>
+    <div class="sub">บันทึกว่าให้บริการอะไร เมื่อไหร่ · ใช้ติดตามและออกใบเสร็จ</div>
     <div class="g3">
       <div><label>วันที่ให้บริการ</label><input id="service_date" type="date"></div>
       <div><label>บริการที่ใช้</label><select id="service_type">
-        <option value="">—</option>
+        <option value="">…</option>
         <option>Personal Color 12 Types</option>
         <option>Face &amp; Body Styling</option>
         <option>Healthy Wardrobe</option>
@@ -85,16 +85,16 @@
     <div class="g2">
       <div><label>นัดติดตาม/ครั้งถัดไป</label><input id="next_appt" type="date"></div>
       <div><label>ยินยอมให้ใช้ภาพ/รีวิว</label><select id="photo_consent">
-        <option value="">—</option><option value="yes">ยินยอม</option>
+        <option value="">…</option><option value="yes">ยินยอม</option>
         <option value="internal">ใช้ภายในเท่านั้น</option><option value="no">ไม่ยินยอม</option></select></div>
     </div>
   </div>
   <div class="card">
-    <h2>Personal Color — 12 Seasons</h2>
+    <h2>Personal Color · 12 Seasons</h2>
     <div class="sub">ผลวิเคราะห์สีจากคอร์ส (เลือก type 12 ฤดู)</div>
     <div class="g2">
       <div><label>12-Season Type</label><select id="type12" onchange="autoSeason()">
-        <option value="">—</option>
+        <option value="">…</option>
         <option>Light Spring</option><option>Warm Spring</option><option>Bright Spring</option>
         <option>Bright Winter</option><option>Cool Winter</option><option>Deep Winter</option>
         <option>Deep Autumn</option><option>Warm Autumn</option><option>Soft Autumn</option>
@@ -125,7 +125,7 @@
     </div>
     <div class="g2">
       <div><label>ระบบสีที่ใช้</label><input id="system" placeholder="Korean 12-tone / AIM 12-season"></div>
-      <div><label>ระดับผู้วิเคราะห์</label><select id="tier"><option value="">—</option><option>Senior</option><option>Master</option><option>Certified</option></select></div>
+      <div><label>ระดับผู้วิเคราะห์</label><select id="tier"><option value="">…</option><option>Senior</option><option>Master</option><option>Certified</option></select></div>
     </div>
     <label>ไฟล์งาน Personal Color (PDF/รูป/เอกสาร)</label>
     <input type="file" id="pc_file_up" accept=".pdf,image/*,.doc,.docx,.ppt,.pptx,.key,.heic" multiple onchange="uploadDocs(this,'pc_file','pc_file_chips')">
@@ -136,11 +136,11 @@
   <div class="card">
     <h2>Face Analysis</h2>
     <div class="g2">
-      <div><label>รูปหน้า</label><select id="face_shape"><option value="">—</option><option>รูปไข่</option><option>กลม</option><option>เหลี่ยม</option><option>หัวใจ</option><option>ยาว</option><option>เพชร</option></select></div>
+      <div><label>รูปหน้า</label><select id="face_shape"><option value="">…</option><option>รูปไข่</option><option>กลม</option><option>เหลี่ยม</option><option>หัวใจ</option><option>ยาว</option><option>เพชร</option></select></div>
       <div><label>แว่นตาที่เข้า</label><input id="eyewear" placeholder="ทรงเหลี่ยม/มน"></div>
     </div>
     <label>ทรงผมที่แนะนำ (คั่นด้วย ,)</label><textarea id="hairstyles" placeholder="ผมยาวลอนใหญ่, รวบครึ่งหัว, บ๊อบยาว"></textarea>
-    <label>เมคอัพ — สีปาก / แก้ม / ตา</label>
+    <label>เมคอัพ · สีปาก / แก้ม / ตา</label>
     <div class="g3"><input id="lip" placeholder="สีปาก"><input id="cheek" placeholder="สีแก้ม"><input id="eye" placeholder="สีตา"></div>
     <label>เทคนิค/ทิศทางเมคอัพ (Self Korea ฯลฯ)</label><input id="makeup_dir" placeholder="โทนอุ่น เน้นตา วางเบสบาง ฯลฯ">
     <label>โน้ตเพิ่มเติม (หน้า/ผม)</label><input id="hair_notes" placeholder="เลี่ยงหน้าม้าหนา ฯลฯ">
@@ -150,7 +150,7 @@
     <h2>Body Analysis</h2>
     <div class="g2">
       <div><label>ประเภทหุ่น</label><select id="body_type">
-        <option value="">—</option><option>นาฬิกาทราย</option><option>สามเหลี่ยม (ล่างใหญ่)</option>
+        <option value="">…</option><option>นาฬิกาทราย</option><option>สามเหลี่ยม (ล่างใหญ่)</option>
         <option>สามเหลี่ยมกลับ (บนใหญ่)</option><option>สี่เหลี่ยม</option><option>แอปเปิล</option><option>โอวัล</option></select></div>
       <div><label>สัดส่วน</label><input id="body_proportion" placeholder="ช่วงตัวสั้น/ขายาว"></div>
     </div>
@@ -234,7 +234,7 @@
     <div class="thumbs" id="photos_thumbs"></div>
     <label>หรือวางลิงก์รูป (คั่นด้วย ,)</label><textarea id="photos" placeholder="https://...jpg"></textarea>
     <div class="upnote" id="upnote" style="display:none"></div>
-    <label>ประโยคสรุป (แสดงให้ลูกค้า — เว้นว่าง=ใช้ 12-season type อัตโนมัติ)</label><input id="headline" placeholder="คุณคือ Warm Autumn โทนอุ่นละมุน">
+    <label>ประโยคสรุป (แสดงให้ลูกค้า · เว้นว่าง=ใช้ 12-season type อัตโนมัติ)</label><input id="headline" placeholder="คุณคือ Warm Autumn โทนอุ่นละมุน">
     <div class="g2">
       <div><label>ชื่อสไตลิสต์</label><input id="analyst"></div>
       <div><label>ทีม/พาร์ทเนอร์</label><input id="partner" placeholder="Classis Studio / Colorsayyoo Studio"></div>
@@ -273,7 +273,7 @@
     const { data } = await sb.rpc('partner_lookup',{ p_code: c });
     if(!data||!data.found){ $('found').className='found show'; $('found').style.color='var(--danger)'; $('found').textContent='ไม่พบรหัส '+c; $('form').className=''; return; }
     code=c; $('found').className='found show'; $('found').style.color='';
-    $('found').textContent='พบลูกค้า: '+data.name+(data.has_profile?' (มีผลเดิม — บันทึกทับได้)':''); $('form').className='on';
+    $('found').textContent='พบลูกค้า: '+data.name+(data.has_profile?' (มีผลเดิม · บันทึกทับได้)':''); $('form').className='on';
     // ดึงข้อมูลเดิมมาเติมในฟอร์ม (ถ้ามี) เพื่อไม่ต้องพิมพ์ใหม่
     resetForm();
     try{
@@ -359,7 +359,7 @@
     const { data:res, error } = await sb.rpc('partner_save',{ p_code:code, p_data:data });
     if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
     if(res==='not_found'){ toast('ไม่พบลูกค้า'); return; }
-    toast('บันทึกแล้ว — ลูกค้าได้สรุปสไตล์ในแอป'); $('form').className=''; $('code').value=''; $('found').className='found'; code=null;
+    toast('บันทึกแล้ว · ลูกค้าได้สรุปสไตล์ในแอป'); $('form').className=''; $('code').value=''; $('found').className='found'; code=null;
   }
   $('code').addEventListener('keydown',e=>{ if(e.key==='Enter') lookup(); });
 
@@ -441,11 +441,11 @@
     'พอร์ทัลสไตลิสต์':'Stylist portal',
     'พาร์ทเนอร์ LLOOP · ข้อมูลภายใน':'LLOOP partner · internal',
     'บันทึกตัวตนของลูกค้าทุกคน':"Record every client's profile",
-    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ — เพื่อให้ทุกชุดใน loop ใช่กับเขาที่สุด':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis — so every rotating piece suits them best.',
-    'ค้นหาลูกค้า — รหัสจากแอป LLOOP':'Find client — code from the LLOOP app',
+    'ค้นหาด้วยรหัสจากแอป LLOOP แล้วบันทึกผลวิเคราะห์สี หน้า หุ่น และสไตล์ · เพื่อให้ทุกชุดใน loop ใช่กับเขาที่สุด':'Search by the code from the LLOOP app, then record the colour, face, body and style analysis · so every rotating piece suits them best.',
+    'ค้นหาลูกค้า · รหัสจากแอป LLOOP':'Find client · code from the LLOOP app',
     'ค้นหา':'Search',
     'ข้อมูลการให้บริการ':'Service details',
-    'บันทึกว่าให้บริการอะไร เมื่อไหร่ — ใช้ติดตามและออกใบเสร็จ':'Record what service and when — used for follow-up and receipts',
+    'บันทึกว่าให้บริการอะไร เมื่อไหร่ · ใช้ติดตามและออกใบเสร็จ':'Record what service and when · used for follow-up and receipts',
     'วันที่ให้บริการ':'Service date', 'บริการที่ใช้':'Service used', 'มูลค่าบริการ (฿)':'Service value (฿)',
     'นัดติดตาม/ครั้งถัดไป':'Follow-up / next appointment', 'ยินยอมให้ใช้ภาพ/รีวิว':'Consent to use photos/reviews',
     'ยินยอม':'Consent', 'ใช้ภายในเท่านั้น':'Internal use only', 'ไม่ยินยอม':'No consent', 'อื่น ๆ':'Other',
@@ -463,7 +463,7 @@
     'แว่นตาที่เข้า':'Suitable eyewear', 'ทรงเหลี่ยม/มน':'angular/round',
     'ทรงผมที่แนะนำ (คั่นด้วย ,)':'Recommended hairstyles (comma-separated)',
     'ผมยาวลอนใหญ่, รวบครึ่งหัว, บ๊อบยาว':'long loose waves, half-up, long bob',
-    'เมคอัพ — สีปาก / แก้ม / ตา':'Makeup — lip / cheek / eye', 'สีปาก':'lip', 'สีแก้ม':'cheek', 'สีตา':'eye',
+    'เมคอัพ · สีปาก / แก้ม / ตา':'Makeup · lip / cheek / eye', 'สีปาก':'lip', 'สีแก้ม':'cheek', 'สีตา':'eye',
     'เทคนิค/ทิศทางเมคอัพ (Self Korea ฯลฯ)':'Makeup technique/direction (Self Korea etc.)',
     'โทนอุ่น เน้นตา วางเบสบาง ฯลฯ':'warm tone, eye focus, light base, etc.',
     'โน้ตเพิ่มเติม (หน้า/ผม)':'Extra notes (face/hair)', 'เลี่ยงหน้าม้าหนา ฯลฯ':'avoid heavy bangs, etc.',
@@ -497,7 +497,7 @@
     'หรือวางลิงก์ Mood Board (คั่นด้วย ,)':'Or paste mood board links (comma-separated)',
     'Lookbook & รูปลูกค้า':'Lookbook & client photos', 'หรือวางลิงก์ Lookbook (คั่นด้วย ,)':'Or paste lookbook links (comma-separated)',
     'รูปลูกค้า (เต็มตัว/ดราพสี)':'Client photos (full body/colour drape)', 'หรือวางลิงก์รูป (คั่นด้วย ,)':'Or paste photo links (comma-separated)',
-    'ประโยคสรุป (แสดงให้ลูกค้า — เว้นว่าง=ใช้ 12-season type อัตโนมัติ)':'Summary line (shown to client — blank = auto 12-season type)',
+    'ประโยคสรุป (แสดงให้ลูกค้า · เว้นว่าง=ใช้ 12-season type อัตโนมัติ)':'Summary line (shown to client · blank = auto 12-season type)',
     'คุณคือ Warm Autumn โทนอุ่นละมุน':'You are a soft, warm Warm Autumn',
     'ชื่อสไตลิสต์':'Stylist name', 'ทีม/พาร์ทเนอร์':'Team/partner', 'บันทึกโปรไฟล์ลูกค้า':'Save client profile',
   };

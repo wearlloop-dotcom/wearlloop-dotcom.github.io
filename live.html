@@ -98,12 +98,12 @@
     <section class="phead">
       <div class="eyebrow">live selling</div>
       <h1>เปิดไลฟ์ ส่งชุดถึงทุกจอ</h1>
-      <div class="sub">ตั้งไลฟ์ครั้งเดียว แล้วกระจายประกาศไปทุกช่อง — ให้ทุกชุดได้ออกไปเจอบ้านใหม่พร้อมกัน</div>
+      <div class="sub">ตั้งไลฟ์ครั้งเดียว แล้วกระจายประกาศไปทุกช่อง · ให้ทุกชุดได้ออกไปเจอบ้านใหม่พร้อมกัน</div>
     </section>
 
     <!-- สร้าง/แก้ไขไลฟ์ -->
     <div class="card">
-      <h2>ตั้งไลฟ์ <span class="hint">สร้างที่เดียว — กระจายทุกช่องตอนกดประกาศ</span></h2>
+      <h2>ตั้งไลฟ์ <span class="hint">สร้างที่เดียว · กระจายทุกช่องตอนกดประกาศ</span></h2>
       <input type="hidden" id="fId">
       <div class="field"><label>ชื่อไลฟ์</label><input type="text" id="fTitle" placeholder="เช่น ไลฟ์ชุดออกงาน รอบค่ำ"></div>
       <div class="field"><label>แคปชันประกาศ (ใช้ได้ทุกช่อง)</label><textarea id="fCaption" placeholder="คืนนี้สามทุ่ม! ไลฟ์ปล่อยชุดออกงานตัวเด็ด พิมพ์โค้ดจองได้เลย..."></textarea></div>
@@ -290,10 +290,10 @@
     if(!r||!Object.keys(r).length) return '';
     const rows=Object.entries(r).map(([p,v])=>{
       const name=PLAT_TH[p]||p;
-      if(v&&v.ok) return '<span class="ok">'+esc(name)+' — กระจายแล้ว'+(v.post_id?' (โพสต์ '+esc(v.post_id)+')':'')+'</span>';
-      if(v&&v.skipped==='manual') return '<span class="man">'+esc(name)+' — เตรียมแคปชันให้แล้ว (กดแปะมือ)</span>';
-      if(v&&v.skipped==='no_token') return '<span class="man">'+esc(name)+' — ยังไม่ได้ตั้ง token (ข้ามไปก่อน)</span>';
-      return '<span class="no">'+esc(name)+' — ไม่สำเร็จ'+(v&&v.error?': '+esc(v.error):'')+'</span>';
+      if(v&&v.ok) return '<span class="ok">'+esc(name)+' · กระจายแล้ว'+(v.post_id?' (โพสต์ '+esc(v.post_id)+')':'')+'</span>';
+      if(v&&v.skipped==='manual') return '<span class="man">'+esc(name)+' · เตรียมแคปชันให้แล้ว (กดแปะมือ)</span>';
+      if(v&&v.skipped==='no_token') return '<span class="man">'+esc(name)+' · ยังไม่ได้ตั้ง token (ข้ามไปก่อน)</span>';
+      return '<span class="no">'+esc(name)+' · ไม่สำเร็จ'+(v&&v.error?': '+esc(v.error):'')+'</span>';
     });
     return '<div class="res">'+rows.join('')+'</div>';
   }
@@ -303,7 +303,7 @@
     const {data,error}=await sb.rpc('live_list',{p_status:null});
     if(error){ $('liveList').innerHTML='<div class="empty err">โหลดไม่สำเร็จ: '+esc(error.message)+'</div>'; return; }
     const ls=data||[];
-    if(!ls.length){ $('liveList').innerHTML='<div class="empty">ยังไม่มีไลฟ์ — สร้างไลฟ์แรกด้านบนได้เลย</div>'; return; }
+    if(!ls.length){ $('liveList').innerHTML='<div class="empty">ยังไม่มีไลฟ์ · สร้างไลฟ์แรกด้านบนได้เลย</div>'; return; }
     $('liveList').innerHTML=ls.map(l=>{
       const platTags=(l.platforms||[]).map(p=>'<span class="tag '+p+'">'+esc(PLAT_TH[p]||p)+'</span>').join(' ');
       const ht=(l.hashtags||[]).map(h=>'<span class="ht">#'+esc(h)+'</span>').join(' ');

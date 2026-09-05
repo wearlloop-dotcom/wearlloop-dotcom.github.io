@@ -36,15 +36,15 @@
   <section class="phead">
     <div class="eyebrow">bulk data · csv</div>
     <h1>ชุดทั้งคลังในไฟล์เดียว</h1>
-    <div class="sub">ส่งออกทั้งคลังไปแก้ในชีต แล้วนำกลับเข้าระบบทีละเยอะ — ดูแลข้อมูลทุกชุดให้ครบถ้วนพร้อมหมุนเวียนต่อ</div>
+    <div class="sub">ส่งออกทั้งคลังไปแก้ในชีต แล้วนำกลับเข้าระบบทีละเยอะ · ดูแลข้อมูลทุกชุดให้ครบถ้วนพร้อมหมุนเวียนต่อ</div>
   </section>
   <div class="card">
-    <h2> Export — ดึงชุดทั้งหมดออกเป็น CSV</h2>
-    <p>ได้ไฟล์ <code>lloop_garments.csv</code> เปิดด้วย Excel/Google Sheets ได้ (รองรับภาษาไทย) — แก้ในชีตแล้วเอากลับมา import ได้</p>
+    <h2> Export · ดึงชุดทั้งหมดออกเป็น CSV</h2>
+    <p>ได้ไฟล์ <code>lloop_garments.csv</code> เปิดด้วย Excel/Google Sheets ได้ (รองรับภาษาไทย) · แก้ในชีตแล้วเอากลับมา import ได้</p>
     <button class="btn" onclick="exportCSV()">ดาวน์โหลด CSV ทั้งหมด</button>
   </div>
   <div class="card">
-    <h2> Import — เพิ่ม/แก้ชุดทีละเยอะจาก CSV</h2>
+    <h2> Import · เพิ่ม/แก้ชุดทีละเยอะจาก CSV</h2>
     <p>หัวคอลัมน์ต้องตรง (โหลด template ด้านล่าง) · ฟิลด์หลายค่า (occasion_tags, styling_tips, photos) คั่นด้วย <code>;</code><br>โค้ดเดิม = อัปเดต · โค้ดใหม่/เว้นว่าง = เพิ่มใหม่ (สถานะ needs_review)</p>
     <div class="row">
       <input type="file" id="file" accept=".csv">
@@ -85,7 +85,7 @@
     $('log').textContent=''; $('log').style.color='';
     Papa.parse(f,{header:true,skipEmptyLines:true,complete:async(res)=>{
       let ok=0,fail=0;
-      log(`พบ ${res.data.length} แถว — กำลังนำเข้า…`);
+      log(`พบ ${res.data.length} แถว · กำลังนำเข้า…`);
       for(const r of res.data){
         const p={...r};
         MULTI.forEach(c=> p[c]= (r[c]||'').split(';').map(s=>s.trim()).filter(Boolean));
@@ -93,7 +93,7 @@
         if(error){ fail++; log(`✗ ${r.code||r.name||'(แถว)'} : ${error.message}`,'#A32D2D'); }
         else { ok++; log(`✓ ${data} · ${r.name||''}`); }
       }
-      log(`\nเสร็จ — สำเร็จ ${ok} · ผิดพลาด ${fail}`, ok&&!fail?'#0F6E56':'');
+      log(`\nเสร็จ · สำเร็จ ${ok} · ผิดพลาด ${fail}`, ok&&!fail?'#0F6E56':'');
     }});
   }
 </script>

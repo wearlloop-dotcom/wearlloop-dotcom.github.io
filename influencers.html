@@ -114,7 +114,7 @@
   <section class="phead">
     <div class="eyebrow">influencer collab</div>
     <h1>เสียงที่ช่วยชุดได้หมุนต่อ</h1>
-    <div class="sub">ทะเบียนอินฟลูเอนเซอร์และดีลความร่วมมือ ตั้งแต่ทาบทามจนถึงโพสต์ — ทุกคนที่ช่วยเล่าเรื่องชุดเช่าให้เดินทางไปไกลขึ้น</div>
+    <div class="sub">ทะเบียนอินฟลูเอนเซอร์และดีลความร่วมมือ ตั้งแต่ทาบทามจนถึงโพสต์ · ทุกคนที่ช่วยเล่าเรื่องชุดเช่าให้เดินทางไปไกลขึ้น</div>
   </section>
   <div class="toolrow">
     <div class="when" id="when"></div>
@@ -272,7 +272,7 @@
         <button class="btn sm" id="cp-${esc(id)}">คัดลอกข้อความ</button>`;
       const b=$('cp-'+id); if(b)b.onclick=()=>copyText(msg,b);
     }catch(e){
-      zone.innerHTML=`<div class="notice err">ยังร่างด้วย AI ไม่ได้ตอนนี้ (${esc(e.message)}) — พิมพ์ข้อความเองได้ตามปกติ</div>`;
+      zone.innerHTML=`<div class="notice err">ยังร่างด้วย AI ไม่ได้ตอนนี้ (${esc(e.message)}) · พิมพ์ข้อความเองได้ตามปกติ</div>`;
     }
   }
 
@@ -414,7 +414,7 @@
         <button class="btn sm" id="cpb-${esc(id)}">คัดลอกบรีฟ</button>`;
       const b=$('cpb-'+id); if(b)b.onclick=()=>copyText(txt,b);
     }catch(e){
-      zone.innerHTML=`<div class="notice err">ยังร่างด้วย AI ไม่ได้ตอนนี้ (${esc(e.message)}) — เขียนบรีฟเองในช่องบรีฟของดีลได้</div>`;
+      zone.innerHTML=`<div class="notice err">ยังร่างด้วย AI ไม่ได้ตอนนี้ (${esc(e.message)}) · เขียนบรีฟเองในช่องบรีฟของดีลได้</div>`;
     }
   }
 
@@ -432,7 +432,7 @@
       <h3>${id!=null?'แก้ไขดีล':'สร้างดีล'}</h3>
       <input type="hidden" id="d_id" value="${d.id!=null?esc(d.id):''}">
       <label>อินฟลูเอนเซอร์</label>
-      <select id="d_inf"><option value="">— เลือก —</option>${infOpt}</select>
+      <select id="d_inf"><option value="">(เลือก)</option>${infOpt}</select>
       <label>ชุดที่แนบ</label>
       <input id="g_search" placeholder="ค้นหาชุด แล้วกดเลือก" oninput="searchGarments(this.value)">
       <div class="gpick" id="g_pick"><div class="notice">กำลังโหลดชุด…</div></div>

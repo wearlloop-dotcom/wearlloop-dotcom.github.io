@@ -52,13 +52,13 @@
   <section class="phead">
     <div class="eyebrow">hub feature flags</div>
     <h1>เปิดไฟทีละดวงให้ฮับ</h1>
-    <div class="sub">สวิตช์เล็ก ๆ ที่ค่อย ๆ เปิดบริการรับเอง ล็อกเกอร์ และบูธสไตลิสต์ให้ลูกค้า — เปิดเมื่อพร้อม ปิดได้ทันที โดยไม่ต้อง deploy ใหม่</div>
+    <div class="sub">เปิดบริการทีละอย่างเมื่อพร้อม ปิดได้ทันที ไม่ต้องรอ deploy</div>
   </section>
   <div id="status" class="status"></div>
 
   <div class="card" id="panel" style="display:none">
     <h2>เปิด/ปิดฟีเจอร์</h2>
-    <div class="desc">สวิตช์นี้คุมว่าฟีเจอร์จะแสดงให้ลูกค้าเห็นไหม — เปิดได้เมื่อ “ส่วนที่ต้องสร้างก่อน” พร้อมแล้วเท่านั้น มีผลทันที ไม่ต้อง deploy ใหม่</div>
+    <div class="desc">เปิดได้เมื่อบรรทัด “ต้องมี” ครบแล้ว มีผลกับลูกค้าทันที</div>
 
     <div class="feat">
       <div class="info">
@@ -90,7 +90,7 @@
     <div class="feat">
       <div>
         <div class="name">ชุดสัตว์เลี้ยง (เผื่ออนาคต)</div>
-        <div class="note">ให้ลูกค้าเพิ่ม “น้องหมา / น้องแมว” เป็นสมาชิกกลุ่มในหน้าครอบครัว &amp; กลุ่ม พร้อมเก็บขนาดตัว (รอบอก · รอบคอ · ความยาวหลัง · น้ำหนัก) ไว้ก่อน</div>
+        <div class="note">เพิ่มน้องหมาน้องแมวเป็นสมาชิกกลุ่มได้ พร้อมเก็บขนาดตัวไว้ก่อน</div>
         <div class="need" data-need="pet">ต้องมี: คอลเลกชันชุดสัตว์เลี้ยงในคลัง จึงค่อยจัดชุดเข้าตีมให้น้องได้</div>
       </div>
       <label class="sw" data-key="pet_outfits_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
@@ -110,7 +110,7 @@
 
   <div class="card" id="stylistCard" style="display:none">
     <h2>AI สไตลิสต์ประจำสถานที่</h2>
-    <div class="desc">คุมโควต้าการใช้ AI สไตลิสต์ของลูกค้าแต่ละคน — มีผลกับลูกค้า/การเช่า “ครั้งถัดไป” (ไม่ย้อนแก้สิทธิ์ที่แจกไปแล้ว)</div>
+    <div class="desc">คุมโควต้าการใช้ AI สไตลิสต์ของลูกค้าแต่ละคน · มีผลกับลูกค้า/การเช่า “ครั้งถัดไป” (ไม่ย้อนแก้สิทธิ์ที่แจกไปแล้ว)</div>
     <div class="disc">
       <label>เริ่มต้นให้ฟรีกี่ครั้ง<div class="sub">โควต้าตั้งต้นต่อลูกค้า 1 คน เมื่อเริ่มใช้งาน</div></label>
       <input id="quotaBase" type="number" min="0" max="999" step="1" inputmode="numeric">
@@ -125,24 +125,24 @@
 
   <div class="card" id="partnerCard" style="display:none">
     <h2>พาร์ทเนอร์สไตลิสต์ลงทะเบียนเอง</h2>
-    <div class="desc">เปิด = ใครก็ตามที่เปิดหน้าพอร์ทัลสไตลิสต์ผ่าน LINE จะเห็นปุ่ม “สมัครเป็นพาร์ทเนอร์” กรอกชื่อแล้วเข้าใช้พอร์ทัลได้ทันที (ผูกบัญชี LINE เป็นพาร์ทเนอร์) · ปิด = รับเฉพาะคนที่ออกสัญญาให้จากหลังบ้านเท่านั้น</div>
+    <div class="desc">เปิด = สมัครเองผ่าน LINE ได้ทันที · ปิด = รับเฉพาะคนที่ออกสัญญาให้</div>
     <div class="feat">
       <div class="info">
         <div class="name">เปิดรับสมัครพาร์ทเนอร์ด้วยตนเอง</div>
-        <div class="note">เหมาะตอนเปิดรับสไตลิสต์ใหม่จำนวนมาก · ปิดสวิตช์ไม่ถอนสิทธิ์คนที่สมัครไปแล้ว (เพิกถอนรายตัวที่หน้าสัญญา)</div>
-        <div class="need">ผู้สมัครจะถูกบันทึกเป็นสัญญา self-register — ตรวจ/เพิกถอนได้ที่ ops/contracts.html</div>
+        <div class="note">ปิดสวิตช์ไม่ถอนสิทธิ์คนที่สมัครไปแล้ว</div>
+        <div class="need">ตรวจ/เพิกถอนรายตัวได้ที่ contracts.html</div>
       </div>
       <label class="sw" data-key="partner_self_register_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
     </div>
   </div>
 
   <div class="card" id="quizCard" style="display:none">
-    <h2>เกมการ์ดสไตลิสต์ — ฝากวันงาน (เก็บ lead)</h2>
-    <div class="desc">เปิด = หน้าเกม quiz โชว์ฟอร์ม “ฝากวันงานให้เช็คชุดว่าง” หลังเล่นจบ — คนที่ยังไม่กล้าทัก LINE จะทิ้งวันงาน+ไซซ์+งบ+ช่องทางติดต่อไว้ให้เราทักกลับ · lead ใหม่แจ้งเตือนเจ้าของอัตโนมัติ · ปิด = เกมเล่นได้ปกติ ไม่มีฟอร์ม</div>
+    <h2>เกมการ์ดสไตลิสต์ · ฝากวันงาน (เก็บ lead)</h2>
+    <div class="desc">เปิด = จบเกมแล้วมีฟอร์มฝากวันงาน lead ใหม่เตือนเจ้าของเอง · ปิด = เล่นเกมได้ตามปกติ</div>
     <div class="feat">
       <div class="info">
         <div class="name">ฟอร์มฝากวันงานหลังเล่นเกม</div>
-        <div class="note">เหมาะตอนเริ่มยิงโฆษณาเข้าหน้า quiz — วัดผลได้ว่าโฆษณาเปลี่ยนเป็น lead กี่คน</div>
+        <div class="note">ใช้ตอนยิงโฆษณาเข้าหน้า quiz จะวัดได้ว่าได้ lead กี่คน</div>
         <div class="need">ต้องมี: รัน supabase/quiz_funnel.sql ก่อน (ตาราง quiz_leads + RPC)</div>
       </div>
       <label class="sw" data-key="quiz_lead_capture_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
@@ -151,24 +151,24 @@
 
   <div class="card" id="premiumCard" style="display:none">
     <h2>ระบบคุ้มครองชุดออกงาน (ชุดแพง)</h2>
-    <div class="desc">เปิดเมื่อพร้อมเริ่มปล่อยเช่าชุดราคาแพง — พอเปิด ระบบจะ “เตือนเจ้าของอัตโนมัติ” ทุกครั้งที่ชุดแพงถูกจอง ให้ทำขั้นตอนคุ้มครอง (วิดีโอก่อนแพค/ตอนแกะของ ฯลฯ) ลดความผิดพลาดของคน · ปิดอยู่ = ไม่มีผลกับการเช่าชุดถูก</div>
+    <div class="desc">เปิดแล้วระบบเตือนเจ้าของเองทุกครั้งที่ชุดแพงถูกจอง พร้อมขั้นตอนคุ้มครอง · ไม่มีผลกับชุดราคาปกติ</div>
 
     <div class="feat">
       <div class="info">
         <div class="name">เปิดระบบคุ้มครองชุดแพง</div>
-        <div class="note">สวิตช์หลัก — เปิดทั้งโมดูล เตือนเจ้าของ + บังคับขั้นตอนคุ้มครองสำหรับชุดที่เข้าข่ายแพง</div>
-        <div class="need">ต้องมี: หน้าเก็บวิดีโอแกะของ / มัดจำ pre-auth / ประกันความเสียหาย ก่อนเปิดใช้จริง</div>
+        <div class="note">สวิตช์หลักของทั้งโมดูล</div>
+        <div class="need">ต้องมี: หน้าเก็บวิดีโอแกะของ · มัดจำ pre-auth · ประกันความเสียหาย</div>
       </div>
       <label class="sw" data-key="premium_protection_enabled"><input type="checkbox"><span class="track"></span><span class="knob"></span></label>
     </div>
 
     <div class="disc">
-      <label>ถือเป็น “ชุดแพง” เมื่อค่าเช่า ≥<div class="sub">ชุดที่ค่าเช่าถึงเกณฑ์นี้ จะถูกคุ้มครองอัตโนมัติ</div></label>
+      <label>ถือเป็น “ชุดแพง” เมื่อค่าเช่า ≥<div class="sub">ถึงเกณฑ์นี้ คุ้มครองอัตโนมัติ</div></label>
       <input id="premVal" type="number" min="0" step="100" inputmode="numeric">
       <span class="unit">บาท</span>
     </div>
     <div class="disc">
-      <label>หรือราคาเต็ม (retail) ≥<div class="sub">ราคาป้าย “Shop” ของชุด — เก็บที่ garments.retail_value</div></label>
+      <label>หรือราคาเต็ม (retail) ≥<div class="sub">ราคาป้าย “Shop” ของชุด</div></label>
       <input id="premRetail" type="number" min="0" step="500" inputmode="numeric">
       <span class="unit">บาท</span>
     </div>
@@ -180,7 +180,7 @@
 
   <div class="card" id="financeCard" style="display:none">
     <h2>กองทุนซื้อชุดใหม่ &amp; กำไรต่อชุด</h2>
-    <div class="desc">ทุกการเช่ากันเงินส่วนหนึ่งไว้ “ซื้อชุดใหม่” อัตโนมัติ (restock) — คลังโตเองไม่ต้องเติมทุน · เช็กกำไรสุทธิต่อชุดได้รายตัว (หักค่าซักตามคลาสผ้า + ค่าคน/ส่ง/แพ็ก/กันสำรอง/restock)</div>
+    <div class="desc">ทุกการเช่ากันเงินไว้ซื้อชุดใหม่อัตโนมัติ คลังโตเองไม่ต้องเติมทุน</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 14px">
       <div style="text-align:center"><div id="rsBal" style="font-size:20px;font-weight:700">–</div><div class="sub">คงเหลือในกอง</div></div>
       <div style="text-align:center"><div id="rsProv" style="font-size:20px;font-weight:700">–</div><div class="sub">กันสะสมทั้งหมด</div></div>
@@ -188,7 +188,7 @@
       <div style="text-align:center"><div id="rsPct" style="font-size:20px;font-weight:700">–</div><div class="sub">% กันต่อครั้ง</div></div>
     </div>
     <div class="disc">
-      <label>เช็กกำไรต่อชุด<div class="sub">ใส่รหัสชุด + จำนวนวัน → ดูรายได้/ค่าซัก/ต้นทุน/กำไรสุทธิ</div></label>
+      <label>เช็กกำไรต่อชุด<div class="sub">ใส่รหัสชุด + จำนวนวัน แล้วดูกำไรสุทธิ</div></label>
       <input id="mgCode" type="text" placeholder="เช่น g2" style="width:110px;text-align:left">
       <input id="mgDays" type="number" min="1" max="14" value="3" style="width:56px">
       <button id="mgBtn" type="button" style="padding:7px 14px;border:0;border-radius:8px;background:#2f6f4f;color:#fff;font-weight:600;cursor:pointer">เช็ก</button>
@@ -197,8 +197,7 @@
   </div>
 
   <div class="hint" id="hint" style="display:none">
-    หมายเหตุ: สวิตช์เป็นแค่ “สวิตช์เปิดไฟ” — โค้ดหน้าจอ/edge function/ฮาร์ดแวร์ที่อ่านค่านี้ต้องสร้างก่อนถึงจะเห็นผลจริง
-    ค่าทั้งหมดเก็บใน app_settings และอ่านในระบบผ่าน get_setting() · แก้ไขได้เฉพาะเจ้าของ
+    สวิตช์เป็นแค่ปุ่มเปิดไฟ ส่วนที่อยู่ในบรรทัด “ต้องมี” ต้องสร้างเสร็จก่อนถึงจะเห็นผลจริง · แก้ได้เฉพาะเจ้าของ
   </div>
 
   <div id="loading" class="loading">กำลังโหลด…</div>
@@ -258,7 +257,7 @@ $('#mgBtn').addEventListener('click', async () => {
   const { data, error } = await window.opsRpc('margin_estimate', { p_code: code, p_days: days });
   if (error) { $('#mgOut').textContent = 'ผิดพลาด: ' + error.message; return; }
   if (!data || data.error) { $('#mgOut').textContent = (data && data.error === 'not_found') ? 'ไม่พบชุดรหัสนี้' : 'คำนวณไม่ได้'; return; }
-  $('#mgOut').innerHTML = `เช่า ${data.days} วัน · ผ้าคลาส ${data.care_class} — รายได้ ${baht(data.revenue)} · ค่าซัก ${baht(data.clean)} · ต้นทุนคงที่ ${baht(data.fixed_cost)} · กัน restock ${baht(data.restock_set_aside)} · <b style="color:#2f6f4f">กำไรสุทธิ ${baht(data.net)} (${data.net_pct}%)</b>`;
+  $('#mgOut').innerHTML = `เช่า ${data.days} วัน · ผ้าคลาส ${data.care_class} · รายได้ ${baht(data.revenue)} · ค่าซัก ${baht(data.clean)} · ต้นทุนคงที่ ${baht(data.fixed_cost)} · กัน restock ${baht(data.restock_set_aside)} · <b style="color:#2f6f4f">กำไรสุทธิ ${baht(data.net)} (${data.net_pct}%)</b>`;
 });
 
 async function save(key, value, sw){

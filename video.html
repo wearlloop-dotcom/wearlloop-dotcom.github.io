@@ -99,14 +99,13 @@
 
 
   <div class="notice" style="background:#EEF2EC;border-color:#CFE0C7;color:#3F5B39">
-    ทำ <b>คลิปสั้น 4–8 วิ</b> จากรูปชุด (image-to-video) — ลง IG Reels / TikTok / เว็บ ·
-    เลือก <b>นางแบบ</b> ได้ → ระบบประกอบ "หน้านางแบบเราใส่ชุดนี้" ก่อน แล้วค่อยขยับ ·
-    ทุกการเจนเข้าระบบออดิท + <b>ลงบัญชีอัตโนมัติ</b> (5180 ค่า AI)
+    ทำ <b>คลิปสั้น 4–8 วิ</b> จากรูปชุด ลง IG Reels · TikTok · เว็บ
+    <span class="meta">ทุกการเจนลงบัญชีให้อัตโนมัติ (5180 ค่า AI)</span>
   </div>
 
   <div class="card">
-    <h2>1 · รูปตั้งต้น <span class="hint">เลือกชุดจากคลังจริง หรืออัปโหลดรูปเอง — คลิปจะถูกสร้างจากรูปนี้</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
-    <div class="fieldhelp">รูปเริ่มต้นที่คลิปจะขยับออกมา — เลือกชุดจากคลังจริง หรืออัปรูปเอง<span class="rec">แนะนำ: ใช้รูปที่ชัด เห็นชุดเต็มตัว แสงดี · รูปเบลอ/มืดจะทำให้คลิปเพี้ยน</span></div>
+    <h2>1 · รูปตั้งต้น <span class="hint">ชุดจากคลัง หรืออัปรูปเอง</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">รูปเริ่มต้นที่คลิปจะขยับออกมา · เลือกชุดจากคลังจริง หรืออัปรูปเอง<span class="rec">แนะนำ: ใช้รูปที่ชัด เห็นชุดเต็มตัว แสงดี · รูปเบลอ/มืดจะทำให้คลิปเพี้ยน</span></div>
     <div class="tabs">
       <div class="tab on" data-src="catalog">ชุดจากคลัง</div>
       <div class="tab" data-src="upload">อัปโหลดรูปเอง</div>
@@ -114,14 +113,14 @@
     <div id="catalogPane">
       <label>ค้นหาชุด (ชื่อ / รหัส / แบรนด์)</label>
       <div style="display:flex;gap:8px">
-        <input type="text" id="skuInput" placeholder="พิมพ์กรองสด — ว่างไว้ = ชุดยอดนิยม">
+        <input type="text" id="skuInput" placeholder="พิมพ์กรองสด · ว่างไว้ = ชุดยอดนิยม">
         <button class="btn ghost" id="skuSearch">ค้นหา</button>
       </div>
       <div class="refrow" id="skuGrid" style="margin-top:9px"></div>
     </div>
     <div id="uploadPane" style="display:none">
       <button class="btn ghost sm" id="uploadBtn">เลือกรูปจากเครื่อง</button>
-      <div class="meta" style="margin-top:6px">รองรับ JPG/PNG — แนะนำรูปแนวตั้ง 3:4 เห็นชุดเต็มตัว</div>
+      <div class="meta" style="margin-top:6px">รองรับ JPG/PNG · แนะนำรูปแนวตั้ง 3:4 เห็นชุดเต็มตัว</div>
     </div>
     <div class="srcprev" id="srcPrev" style="display:none">
       <img id="srcImg" alt="">
@@ -130,22 +129,22 @@
   </div>
 
   <div class="card" id="charCard">
-    <h2>2 · นางแบบ (ไม่บังคับ) <span class="hint">เลือก = ประกอบรูป "หน้านางแบบเรา ใส่ชุดนี้" ก่อน แล้วค่อยขยับ (เฉพาะชุดจากคลัง)</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <h2>2 · นางแบบ (ไม่บังคับ) <span class="hint">ใส่หน้านางแบบประจำร้าน</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
     <div class="fieldhelp">ถ้าเลือก ระบบจะประกอบรูป "หน้านางแบบเรา ใส่ชุดนี้" ก่อน แล้วค่อยขยับเป็นคลิป (เฉพาะชุดจากคลัง)<span class="rec">แนะนำ: อยากได้คลิปที่มีหน้านางแบบประจำร้านให้เลือก · ถ้าโชว์แค่ชุดข้ามได้</span></div>
     <div class="refrow" id="charRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <button class="btn ghost sm" id="charAdd">+ เพิ่มนางแบบ (อัปรูปหน้า ได้หลายมุม)</button>
+      <span class="meta">สเปกรูปหน้า<span class="qh" onclick="qhToggle(this)">?</span></span>
       <span class="meta" id="charStatus"></span>
     </div>
-    <div class="meta" style="margin-top:8px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px 12px;line-height:1.6">
-      <b>สเปกรูปหน้านางแบบ (ให้ล็อกหน้าแม่น):</b> ส่ง <b>3 รูป</b> — หน้าตรง / เอียง ¾ / เต็มตัว ·
-      ≥1024px · พื้นหลังเรียบ · แสงสม่ำเสมอ · คนเดียวในรูป · <b>ชุด/ทรงผมเหมือนกันทั้ง 3 รูป</b> ·
-      สีหน้าเป็นกลาง (อย่ายิ้มกว้างหรือหลับตา จะล็อกยาก)
+    <div class="fieldhelp" style="margin-top:8px">
+      ส่ง <b>3 รูป</b> ต่อนางแบบ 1 คน คือ หน้าตรง · เอียง ¾ · เต็มตัว
+      <span class="rec">ขนาด ≥1024px · พื้นหลังเรียบ · แสงสม่ำเสมอ · คนเดียวในรูป · ชุดและทรงผมเหมือนกันทั้ง 3 รูป · สีหน้าเป็นกลาง (ยิ้มกว้างหรือหลับตาจะล็อกหน้ายาก)</span>
     </div>
   </div>
 
   <div class="card">
-    <h2>3 · การเคลื่อนไหว <span class="hint">เลือกท่ากล้อง/การขยับ — คลิปสั้นเพี้ยนน้อยกว่า</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <h2>3 · การเคลื่อนไหว <span class="hint">ท่ากล้องและการขยับ</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
     <div class="fieldhelp">เลือกว่ากล้อง/ตัวแบบจะขยับแบบไหน (ซูม แพน หมุนเบา ๆ)<span class="rec">แนะนำ: เลือกการขยับน้อย ๆ นุ่ม ๆ คลิปจะเนียนกว่า · ขยับเยอะชุด/หน้าอาจเพี้ยน</span></div>
     <label>โมชันสำเร็จรูป (กดเลือก 1 แบบ)</label>
     <div class="chips" id="motionChips" style="margin-bottom:12px"></div>
@@ -153,7 +152,7 @@
     <div class="chips" id="aspectChips" style="margin-bottom:12px"></div>
     <label>ความยาวคลิป <span class="meta">(ยิ่งสั้นยิ่งเพี้ยนน้อย + ถูกกว่า)</span></label>
     <div class="chips" id="durChips" style="margin-bottom:12px"></div>
-    <label>โน้ตเพิ่มเติม (ภาษาไทย/อังกฤษ) — บอกการเคลื่อนไหวที่อยากได้</label>
+    <label>โน้ตเพิ่มเติม (ภาษาไทย/อังกฤษ) · บอกการเคลื่อนไหวที่อยากได้</label>
     <textarea id="note" placeholder="เช่น นางแบบหมุนตัวช้า ๆ ชายกระโปรงพลิ้วตามลม แสงทองอุ่น กล้องดันเข้าเบา ๆ"></textarea>
     <div style="margin-top:12px">
       <button class="btn ghost sm" id="editPromptBtn">ดู & แก้ prompt เต็ม</button>
@@ -172,9 +171,9 @@
       <button class="btn clay" id="genBtn">เจนคลิปวิดีโอ</button>
       <span class="meta" id="genStatus"></span>
     </div>
-    <div class="meta" style="margin-top:8px">วิดีโอใช้เวลา ~30–120 วินาที กรุณาอย่าปิดหน้านี้ · กติกา: ตัดสิน "ผ่าน/ไม่ผ่าน" คลิปก่อนหน้าของตัวเองก่อนถึงจะเจนใหม่ได้</div>
+    <div class="meta" style="margin-top:8px">ใช้เวลา 30–120 วินาที อย่าปิดหน้านี้ · ต้องตัดสินคลิปก่อนหน้าให้ครบก่อนเจนใหม่</div>
     <div class="notice" id="pendWrap" style="display:none;margin-top:10px">
-      <div style="margin-bottom:8px"><b>ยังมีคลิปที่ยังไม่ได้ตัดสิน</b> — กดผ่าน/ไม่ผ่านก่อน แล้วค่อยเจนใหม่ค่ะ</div>
+      <div style="margin-bottom:8px"><b>ยังมีคลิปที่ยังไม่ได้ตัดสิน</b> กดผ่าน/ไม่ผ่านก่อน แล้วค่อยเจนใหม่ค่ะ</div>
       <video id="pendVid" controls playsinline style="width:100%;border-radius:9px;display:block;margin-bottom:8px;background:#000"></video>
       <div class="fbrow" style="margin-top:0">
         <button class="btn sage sm" id="pendPass">ผ่าน</button>
@@ -186,7 +185,7 @@
 
   <div class="card" id="resultCard" style="display:none">
     <h2 id="resultTitle">ผลการเจน</h2>
-    <div class="meta" style="margin-bottom:10px">กด "ผ่าน/ไม่ผ่าน" ก่อนเจนรอบถัดไป — ความเห็นเข้าระบบออดิทให้เจ้าของ</div>
+    <div class="meta" style="margin-bottom:10px">กดผ่าน/ไม่ผ่าน ความเห็นส่งเข้าระบบออดิทให้เจ้าของ</div>
     <div id="resultBox"></div>
   </div>
 
@@ -238,10 +237,13 @@ function openOptModal(title, items, note){
   document.getElementById('optModal').classList.add('on');
 }
 function closeOptModal(){ document.getElementById('optModal').classList.remove('on'); }
-// "?" รายช่อง: กดสลับเปิด/ปิดกล่องช่วยเหลือที่อยู่ถัดจาก h2
+// "?" รายช่อง: กดสลับเปิด/ปิดกล่องช่วยเหลือที่อยู่ถัดไป
+// เดิมมองหาแค่ h2 ทำให้ปุ่ม ? ที่วางไว้ตรงอื่น (เช่น ข้างปุ่มเพิ่มนางแบบ) กดแล้วเงียบ
 function qhToggle(el){
-  var h = el.closest('h2'); if(!h) return;
-  var box = h.nextElementSibling;
+  var a = el.closest('h2');
+  if(!a){ a = el.parentElement; while(a && !(a.nextElementSibling && a.nextElementSibling.classList
+          && a.nextElementSibling.classList.contains('fieldhelp'))) a = a.parentElement; }
+  var box = a && a.nextElementSibling;
   if(box && box.classList.contains('fieldhelp')){ box.classList.toggle('on'); el.classList.toggle('on'); }
 }
 const $ = (s) => document.querySelector(s);
@@ -267,8 +269,8 @@ async function sgb2(task, args) {
   clearTimeout(tmo);
   const out = await r.json().catch(() => ({}));
   if (!r.ok || out.error) {
-    const map = { feature_disabled: 'ฟีเจอร์ยังปิด — ให้เจ้าของเปิด Video Studio ที่ Settings', no_sku: 'ต้องเลือกชุดจากคลังก่อน',
-      no_garment_photo: 'ชุดนี้ไม่มีรูปในคลัง', safety_blocked: 'ตัวกรองบล็อกรูปนี้ — ลองเปลี่ยนชุด/นางแบบ', compose_failed: out.message || 'ประกอบรูปไม่สำเร็จ' };
+    const map = { feature_disabled: 'ฟีเจอร์ยังปิด · ให้เจ้าของเปิด Video Studio ที่ Settings', no_sku: 'ต้องเลือกชุดจากคลังก่อน',
+      no_garment_photo: 'ชุดนี้ไม่มีรูปในคลัง', safety_blocked: 'ตัวกรองบล็อกรูปนี้ · ลองเปลี่ยนชุด/นางแบบ', compose_failed: out.message || 'ประกอบรูปไม่สำเร็จ' };
     return { error: { code: out.error, message: map[out.error] || out.message || 'storyboard-gen error' } };
   }
   return { data: out.data };
@@ -295,19 +297,19 @@ async function vgb(task, args) {
     clearTimeout(tmo);
     const to = e && e.name === 'AbortError';
     return { error: { code: to ? 'timeout' : 'network', message: to
-      ? 'ใช้เวลานานเกินไป — ลองลดความยาวคลิป (4 วิ) แล้วลองใหม่' : 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง' } };
+      ? 'ใช้เวลานานเกินไป · ลองลดความยาวคลิป (4 วิ) แล้วลองใหม่' : 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง' } };
   }
   clearTimeout(tmo);
   const out = await r.json().catch(() => ({}));
   if (!r.ok || out.error) {
     const map = { unauthorized: 'เซสชันหมดอายุ รีเฟรชหน้าแล้วล็อกอินใหม่', no_access: 'ไม่มีสิทธิ์ใช้งานหลังบ้าน',
       role_denied: 'สิทธิ์ไม่พอ (ต้องเป็นทีมการตลาด/ผู้จัดการ/เจ้าของ)',
-      feature_disabled: 'ฟีเจอร์ยังปิดอยู่ — ให้เจ้าของเปิดที่หน้า Settings',
+      feature_disabled: 'ฟีเจอร์ยังปิดอยู่ · ให้เจ้าของเปิดที่หน้า Settings',
       no_api_key: 'ยังไม่ได้ตั้งคีย์ผู้ให้บริการวิดีโอฝั่งเซิร์ฟเวอร์', no_source: 'ยังไม่ได้เลือกรูปตั้งต้น',
       gen_failed: out.message || 'เจนไม่สำเร็จ' };
     let msg = map[out.error] || out.message || out.error || ('http ' + r.status);
     if (/SAFETY|PROHIBITED|BLOCK/i.test(String(out.message || out.error || ''))) {
-      msg = 'ตัวกรองของผู้ให้บริการบล็อกคลิปนี้ — ลองเจนใหม่ หรือเปลี่ยนชุด/ท่าโพส/โน้ต';
+      msg = 'ตัวกรองของผู้ให้บริการบล็อกคลิปนี้ · ลองเจนใหม่ หรือเปลี่ยนชุด/ท่าโพส/โน้ต';
     }
     return { error: { code: out.error, message: msg }, data: out };
   }
@@ -331,7 +333,7 @@ async function searchSku() {
   const g = $('#skuGrid'); g.innerHTML = '<div class="loading">กำลังค้นหา…</div>';
   const { data, error } = await window.opsRpc('garments_pick', { p_q: q || null, p_limit: 12 });
   if (error) { g.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
-  if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด — ลองคำอื่น</div>'; return; }
+  if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด · ลองคำอื่น</div>'; return; }
   g.innerHTML = '';
   for (const it of data) {
     const d = document.createElement('div');
@@ -341,7 +343,7 @@ async function searchSku() {
     d.innerHTML = (it.photo ? `<img src="${it.photo}">` : `<div class="ph">ไม่มีรูป</div>`) +
       `<div class="nm">${it.name || it.code}${on ? ' (เลือกอยู่)' : ''}</div><div class="meta">${it.code} · ${it.brand || '-'}</div>`;
     d.onclick = () => {
-      if (!it.photo) { alert('ชุดนี้ยังไม่มีรูป — เลือกชุดที่มีรูป หรืออัปโหลดเอง'); return; }
+      if (!it.photo) { alert('ชุดนี้ยังไม่มีรูป · เลือกชุดที่มีรูป หรืออัปโหลดเอง'); return; }
       SRC = { sku: it.code };
       setSrcPreview(it.photo, it.name || it.code, it.code + ' · ' + (it.brand || '-'));
       searchSku();
@@ -432,11 +434,11 @@ function makeChips(sel, items, single, def) {
   return () => { const on = [...el.querySelectorAll('.chip.on')].map((c) => c.dataset.key); return single ? (on[0] || def) : on; };
 }
 const MOTION_ITEMS = [
-  { key: 'spin', label: 'หมุนตัว 360°', desc: 'นางแบบยืนกลางเฟรมแล้วหมุนตัวช้า ๆ รอบเดียว โชว์ชุดครบทุกด้าน (หน้า-ข้าง-หลัง) — เหมาะโชว์ทรงชุด/กระโปรงบาน · ชุดลายเยอะอาจเพี้ยนตอนหมุน' },
-  { key: 'catwalk', label: 'เดินแคทวอล์ค', desc: 'นางแบบเดินเข้าหากล้องแบบรันเวย์ ชายชุด/ผมพลิ้วตามจังหวะ ดูมีพลังหรู — เหมาะชุดราตรี/ชุดยาว' },
-  { key: 'fabric', label: 'ผ้าพลิ้วตามลม', desc: 'นางแบบยืนนิ่ง มีแค่ชายกระโปรง/ผ้าพลิ้วไหวเบา ๆ เหมือนมีลมอ่อน ดูพรีเมียมนุ่มนวล เพี้ยนน้อย — เหมาะเกือบทุกชุด' },
-  { key: 'pushin', label: 'กล้องดันเข้า', desc: 'กล้องค่อย ๆ เคลื่อนเข้าหาชุดช้า ๆ (ซูมเข้า) เน้นเก็บดีเทลผ้า/งานปัก — เหมาะโชว์รายละเอียดชุด' },
-  { key: 'subtle', label: 'ขยับเล็กน้อย (นิ่งสุด)', desc: 'ขยับน้อยที่สุด (ไหวเบา ๆ) ภาพเกือบนิ่งเหมือนรูป เพี้ยนน้อยสุด ปลอดภัยสุด — เหมาะชุดดีเทล/ลายละเอียดเยอะ' },
+  { key: 'spin', label: 'หมุนตัว 360°', desc: 'นางแบบยืนกลางเฟรมแล้วหมุนตัวช้า ๆ รอบเดียว โชว์ชุดครบทุกด้าน (หน้า-ข้าง-หลัง) · เหมาะโชว์ทรงชุด/กระโปรงบาน · ชุดลายเยอะอาจเพี้ยนตอนหมุน' },
+  { key: 'catwalk', label: 'เดินแคทวอล์ค', desc: 'นางแบบเดินเข้าหากล้องแบบรันเวย์ ชายชุด/ผมพลิ้วตามจังหวะ ดูมีพลังหรู · เหมาะชุดราตรี/ชุดยาว' },
+  { key: 'fabric', label: 'ผ้าพลิ้วตามลม', desc: 'นางแบบยืนนิ่ง มีแค่ชายกระโปรง/ผ้าพลิ้วไหวเบา ๆ เหมือนมีลมอ่อน ดูพรีเมียมนุ่มนวล เพี้ยนน้อย · เหมาะเกือบทุกชุด' },
+  { key: 'pushin', label: 'กล้องดันเข้า', desc: 'กล้องค่อย ๆ เคลื่อนเข้าหาชุดช้า ๆ (ซูมเข้า) เน้นเก็บดีเทลผ้า/งานปัก · เหมาะโชว์รายละเอียดชุด' },
+  { key: 'subtle', label: 'ขยับเล็กน้อย (นิ่งสุด)', desc: 'ขยับน้อยที่สุด (ไหวเบา ๆ) ภาพเกือบนิ่งเหมือนรูป เพี้ยนน้อยสุด ปลอดภัยสุด · เหมาะชุดดีเทล/ลายละเอียดเยอะ' },
 ];
 const getMotion = makeChips('#motionChips', MOTION_ITEMS, true, 'spin');
 const getAspect = makeChips('#aspectChips', [
@@ -444,7 +446,7 @@ const getAspect = makeChips('#aspectChips', [
   { key: '16:9', label: '16:9 แนวนอน (เว็บ/YouTube)', desc: 'จอแนวนอน เหมาะเว็บไซต์ / YouTube / จอคอม' },
 ], true, '9:16');
 const getDur = makeChips('#durChips', [
-  { key: '4', label: '4 วินาที', desc: 'สั้นกระชับ เพี้ยนน้อยสุด + ค่าใช้จ่ายถูกสุด — เหมาะทดลอง/ลงโซเชียล' },
+  { key: '4', label: '4 วินาที', desc: 'สั้นกระชับ เพี้ยนน้อยสุด + ค่าใช้จ่ายถูกสุด · เหมาะทดลอง/ลงโซเชียล' },
   { key: '6', label: '6 วินาที', desc: 'ปานกลาง เล่าการเคลื่อนไหวได้มากขึ้นนิดหน่อย' },
   { key: '8', label: '8 วินาที', desc: 'ยาวสุด เล่าเรื่องได้มากขึ้น แต่โอกาสเพี้ยน + ค่าใช้จ่ายสูงขึ้น' },
 ], true, '4');
@@ -523,7 +525,7 @@ async function pollJob(meta, btn) {
   const tick = async () => {
     if (Date.now() - started > 360000) {   // 6 นาที = ยอมแพ้ (งานยังอาจเสร็จใน LINE)
       btn.disabled = false;
-      $('#genStatus').innerHTML = '<span class="err">รอนานเกินไป — คลิปอาจยังสร้างอยู่ ดูในประวัติด้านล่างอีกครั้งใน 1–2 นาที หรือเช็คใน LINE</span>';
+      $('#genStatus').innerHTML = '<span class="err">รอนานเกินไป · คลิปอาจยังสร้างอยู่ ดูในประวัติด้านล่างอีกครั้งใน 1–2 นาที หรือเช็คใน LINE</span>';
       loadHistory(); return;
     }
     const { data, error } = await vgb('job_status', { gen_id: meta.gen_id });
@@ -536,8 +538,8 @@ async function pollJob(meta, btn) {
     }
     if (data.status === 'error') {
       btn.disabled = false;
-      const m = { safety_blocked: 'ติดตัวกรองความปลอดภัยของ Veo — ลองปรับโน้ต/เปลี่ยนชุดแล้วเจนใหม่ (ถูกบล็อกไม่คิดเงิน)',
-        timeout: 'Veo ใช้เวลานานเกินไป ลองใหม่อีกครั้ง' }[data.raw] || 'สร้างคลิปไม่สำเร็จ — ดูรายละเอียดในประวัติ';
+      const m = { safety_blocked: 'ติดตัวกรองความปลอดภัยของ Veo · ลองปรับโน้ต/เปลี่ยนชุดแล้วเจนใหม่ (ถูกบล็อกไม่คิดเงิน)',
+        timeout: 'Veo ใช้เวลานานเกินไป ลองใหม่อีกครั้ง' }[data.raw] || 'สร้างคลิปไม่สำเร็จ · ดูรายละเอียดในประวัติ';
       $('#genStatus').innerHTML = '<span class="err">' + m + '</span>'; loadHistory(); return;
     }
     setTimeout(tick, 6000);   // ยังสร้างอยู่ → เช็คอีกใน 6 วิ
@@ -567,7 +569,7 @@ function showResult(data) {
   promptB.onclick = () => { pb.style.display = (pb.style.display === 'none' || !pb.style.display) ? 'block' : 'none'; };
   const judge = async (rating) => {
     const { error } = await vgb('feedback', { gen_id: data.gen_id, rating, note: noteI.value.trim() || undefined });
-    st.textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : (rating === 'pass' ? 'ผ่าน — บันทึกแล้ว' : 'ไม่ผ่าน — บันทึกแล้ว');
+    st.textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : (rating === 'pass' ? 'ผ่าน · บันทึกแล้ว' : 'ไม่ผ่าน · บันทึกแล้ว');
     if (!error) { passB.disabled = true; failB.disabled = true; noteI.disabled = true; loadHistory(); }
   };
   passB.onclick = () => judge('pass');
@@ -597,7 +599,7 @@ async function judgePending(rating) {
   const { error } = await vgb('feedback', { gen_id: PEND.gen_id, rating, note: $('#pendNote').value.trim() || undefined });
   if (error) { alert('บันทึกไม่สำเร็จ: ' + error.message); return; }
   PEND = null; $('#pendWrap').style.display = 'none'; $('#pendNote').value = '';
-  $('#genStatus').textContent = 'ตัดสินแล้ว — กดเจนได้เลยค่ะ';
+  $('#genStatus').textContent = 'ตัดสินแล้ว · กดเจนได้เลยค่ะ';
   loadHistory();
 }
 $('#pendPass').onclick = () => judgePending('pass');
@@ -624,7 +626,7 @@ async function loadHistory() {
     d.className = 'hrow';
     const when = new Date(r.created_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
     const fb = r.feedback_rating ? `<span class="tag ${r.feedback_rating}">${r.feedback_rating === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</span>` : '';
-    const note = r.feedback_note ? `<div class="meta">“${r.feedback_note}” — ${r.feedback_by || ''}</div>` : (r.note ? `<div class="meta">โน้ต: ${r.note.slice(0, 90)}</div>` : '');
+    const note = r.feedback_note ? `<div class="meta">“${r.feedback_note}” · ${r.feedback_by || ''}</div>` : (r.note ? `<div class="meta">โน้ต: ${r.note.slice(0, 90)}</div>` : '');
     const what = `${r.sku || 'อัปโหลด'} · ${r.duration || '?'}วิ ${r.aspect || ''}`;
     const stTag = r.status === 'ok' ? '<span class="tag ok">สำเร็จ</span>'
       : r.status === 'pending' ? '<span class="tag" style="background:#F0ECE2;color:#7A6516">กำลังสร้าง…</span>'
@@ -649,8 +651,8 @@ async function loadHistory() {
       if (!cfg.data.enabled) {
         const n = $('#flagNote'); n.style.display = '';
         n.textContent = IS_OWNER
-          ? 'สวิตช์ Video Studio ยังปิดอยู่ — เจ้าของทดสอบได้ แต่ทีมยังใช้ไม่ได้ (เปิดที่หน้า Settings)'
-          : 'ฟีเจอร์ยังปิดอยู่ — แจ้งเจ้าของให้เปิดสวิตช์ที่หน้า Settings ก่อนนะคะ';
+          ? 'สวิตช์ Video Studio ยังปิดอยู่ · เจ้าของทดสอบได้ แต่ทีมยังใช้ไม่ได้ (เปิดที่หน้า Settings)'
+          : 'ฟีเจอร์ยังปิดอยู่ · แจ้งเจ้าของให้เปิดสวิตช์ที่หน้า Settings ก่อนนะคะ';
       }
     } else if (cfg.error) {
       const n = $('#flagNote'); n.style.display = ''; n.textContent = cfg.error.message;

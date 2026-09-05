@@ -169,12 +169,12 @@
     <section class="phead">
       <div class="eyebrow">customer wishlist</div>
       <h1>ความต้องการของลูกค้า</h1>
-      <div class="sub">ดูว่าลูกค้าอยากได้ชุดแบบไหน — เรียงตามดีมานด์สูงสุด ปรับสถานะ และแจ้งลูกค้าเมื่อมีชุดพร้อม</div>
+      <div class="sub">ดูว่าลูกค้าอยากได้ชุดแบบไหน · เรียงตามดีมานด์สูงสุด ปรับสถานะ และแจ้งลูกค้าเมื่อมีชุดพร้อม</div>
       <div class="kpis">
-        <div class="kpi"><div class="n" id="k_total">—</div><div class="l">คำขอทั้งหมด</div></div>
-        <div class="kpi ok"><div class="n" id="k_pending">—</div><div class="l">รอดำเนินการ</div></div>
-        <div class="kpi"><div class="n" id="k_sourcing">—</div><div class="l">กำลังหา</div></div>
-        <div class="kpi ok"><div class="n" id="k_added">—</div><div class="l">หามาได้แล้ว</div></div>
+        <div class="kpi"><div class="n" id="k_total">…</div><div class="l">คำขอทั้งหมด</div></div>
+        <div class="kpi ok"><div class="n" id="k_pending">…</div><div class="l">รอดำเนินการ</div></div>
+        <div class="kpi"><div class="n" id="k_sourcing">…</div><div class="l">กำลังหา</div></div>
+        <div class="kpi ok"><div class="n" id="k_added">…</div><div class="l">หามาได้แล้ว</div></div>
       </div>
     </section>
 
@@ -264,7 +264,7 @@ let allRows = [];
 async function loadData() {
   $('wishBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:32px;">กำลังโหลด…</td></tr>';
 
-  // R-4: ผ่าน gateway (LINE idToken + role) แทน .from() ด้วย anon — garment_requests มี customer_uid (PII)
+  // R-4: ผ่าน gateway (LINE idToken + role) แทน .from() ด้วย anon · garment_requests มี customer_uid (PII)
   const { data, error } = await sb.rpc('wishlist_ops_list', {});
 
   if (error) {

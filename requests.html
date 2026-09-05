@@ -169,12 +169,12 @@
     <section class="phead">
       <div class="eyebrow">customer wishlist</div>
       <h1>ความต้องการของลูกค้า</h1>
-      <div class="sub">ดูว่าลูกค้าอยากได้ชุดแบบไหน — เรียงตามดีมานด์สูงสุด ปรับสถานะ และแจ้งลูกค้าเมื่อมีชุดพร้อม</div>
+      <div class="sub">ดูว่าลูกค้าอยากได้ชุดแบบไหน · เรียงตามดีมานด์สูงสุด ปรับสถานะ และแจ้งลูกค้าเมื่อมีชุดพร้อม</div>
       <div class="kpis">
-        <div class="kpi"><div class="n" id="k_total">—</div><div class="l">คำขอทั้งหมด</div></div>
-        <div class="kpi ok"><div class="n" id="k_pending">—</div><div class="l">รอดำเนินการ</div></div>
-        <div class="kpi"><div class="n" id="k_sourcing">—</div><div class="l">กำลังหา</div></div>
-        <div class="kpi ok"><div class="n" id="k_added">—</div><div class="l">หามาได้แล้ว</div></div>
+        <div class="kpi"><div class="n" id="k_total">…</div><div class="l">คำขอทั้งหมด</div></div>
+        <div class="kpi ok"><div class="n" id="k_pending">…</div><div class="l">รอดำเนินการ</div></div>
+        <div class="kpi"><div class="n" id="k_sourcing">…</div><div class="l">กำลังหา</div></div>
+        <div class="kpi ok"><div class="n" id="k_added">…</div><div class="l">หามาได้แล้ว</div></div>
       </div>
     </section>
 
@@ -239,7 +239,7 @@
         <h2>คิวรอชุด · waitlist</h2>
         <button class="btn ghost" onclick="loadQueue()">รีเฟรช</button>
       </div>
-      <div class="sub" style="margin-bottom:16px;color:#888;font-size:13px;">ชุดที่ลูกค้าต่อคิวรออยู่ — คนรอเยอะ = ควรเติมสต๊อก/ซื้อเพิ่ม · ของกลับมาว่างระบบแจ้งคิวแรกให้เลือกวันก่อนอัตโนมัติ</div>
+      <div class="sub" style="margin-bottom:16px;color:#888;font-size:13px;">ชุดที่ลูกค้าต่อคิวรออยู่ · คนรอเยอะ = ควรเติมสต๊อก/ซื้อเพิ่ม · ของกลับมาว่างระบบแจ้งคิวแรกให้เลือกวันก่อนอัตโนมัติ</div>
       <div class="scroll-x">
         <table class="wish-table">
           <thead>
@@ -280,7 +280,7 @@ let allRows = [];
 async function loadData() {
   $('wishBody').innerHTML = '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:32px;">กำลังโหลด…</td></tr>';
 
-  // R-4: ผ่าน gateway (LINE idToken + role) แทน .from() ด้วย anon — garment_requests มี customer_uid (PII)
+  // R-4: ผ่าน gateway (LINE idToken + role) แทน .from() ด้วย anon · garment_requests มี customer_uid (PII)
   const { data, error } = await sb.rpc('wishlist_ops_list', {});
 
   if (error) {
@@ -506,11 +506,11 @@ async function loadQueue() {
     const thumb = r.photo
       ? `<img class="wish-thumb" src="${esc(r.photo)}" style="display:inline-block;vertical-align:middle;margin-right:8px;" loading="lazy">`
       : '';
-    const oldest = r.oldest ? new Date(r.oldest).toLocaleDateString('th-TH', { month:'short', day:'numeric' }) : '—';
+    const oldest = r.oldest ? new Date(r.oldest).toLocaleDateString('th-TH', { month:'short', day:'numeric' }) : '…';
     return `<tr>
       <td>${thumb}<span class="desc-text">${esc(r.name || r.code || '')}</span></td>
-      <td style="color:#888;">${esc(r.brand || '—')}</td>
-      <td>${esc(ST_TH[r.status] || r.status || '—')}</td>
+      <td style="color:#888;">${esc(r.brand || '…')}</td>
+      <td>${esc(ST_TH[r.status] || r.status || '…')}</td>
       <td><span class="demand-num">${r.waiting || 0}</span></td>
       <td style="color:#3A8A7D;">${r.notified || 0}</td>
       <td style="white-space:nowrap;font-size:12px;color:#888;">${oldest}</td>

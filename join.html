@@ -123,7 +123,7 @@
         <div class="gava" id="grpAva">L</div>
         <div>
           <span class="kindtag" id="grpKind">ครอบครัว</span>
-          <div class="gname" id="grpName">—</div>
+          <div class="gname" id="grpName">…</div>
           <div class="gmeta" id="grpCount"></div>
         </div>
       </div>
@@ -176,7 +176,7 @@
 <script src="config.js?v=38"></script>
 <script src="liffAuth.js?v=56"></script>
 <script src="me-api.js?v=56"></script>
-<script src="api.js?v=64"></script>
+<script src="api.js?v=65"></script>
 <script>
 // ===== state =====
 let LIVE = false;            // LIVE=true → Supabase จริง (CUSTOMER จาก LINE login) · false → mock พรีวิว
@@ -238,7 +238,7 @@ function renderWelcome(p){
   const inviter=(p.inviter_name||'').trim() || (p.owner_name||'').trim();
   const ava=$('#invAva');
   if(p.inviter_picture){
-    // รูปโปรไฟล์ LINE — ถ้าโหลดไม่ขึ้น (privacy/หมดอายุ) fallback เป็นวงกลมอักษรย่อ
+    // รูปโปรไฟล์ LINE · ถ้าโหลดไม่ขึ้น (privacy/หมดอายุ) fallback เป็นวงกลมอักษรย่อ
     const img=document.createElement('img');
     img.className='invava';
     img.alt=inviter||'inviter';
@@ -286,7 +286,7 @@ function applyLoginSignal(){
   const loggedIn = LIVE && CUSTOMER && CUSTOMER.id;
   const note=$('#joinNote');
   if(loggedIn){
-    // ล็อกอินแล้ว — แตะแล้วเข้ากลุ่มทันที ไม่ต้องยืนยันซ้ำ
+    // ล็อกอินแล้ว · แตะแล้วเข้ากลุ่มทันที ไม่ต้องยืนยันซ้ำ
     note.innerHTML='';
     const step=$('#stepLogin'); if(step) step.style.display='none';
   } else {
@@ -298,7 +298,7 @@ function applyLoginSignal(){
 // ===== join action =====
 async function doJoin(){
   const btn=$('#joinBtn');
-  // บังคับยืนยันด้วย LINE เสมอ — ยังไม่ล็อกอิน → พาไป LINE login (ไม่มีโหมดเดโมข้าม)
+  // บังคับยืนยันด้วย LINE เสมอ · ยังไม่ล็อกอิน → พาไป LINE login (ไม่มีโหมดเดโมข้าม)
   if(!CUSTOMER || !CUSTOMER.id){
     btn.disabled=true; btn.innerHTML='<span class="spin"></span>กำลังพาไปยืนยันด้วย LINE…';
     try{ await window.LiffAuth.signIn(); }
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   $('#joinBtn').onclick=doJoin;
   TOKEN=readToken();
 
-  // ===== ลอง bootstrap LIVE (Supabase + LINE) — ล้มเหลว/ไม่ login ก็ตกไป mock =====
+  // ===== ลอง bootstrap LIVE (Supabase + LINE) · ล้มเหลว/ไม่ login ก็ตกไป mock =====
   try{
     if(window.API && window.CONFIG && !window.CONFIG.USE_MOCK){
       const s=await window.API.init();
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       showEdge('เปิดคำเชิญไม่สำเร็จ','ลองใหม่อีกครั้ง หรือขอลิงก์ใหม่จากเพื่อนที่ชวนนะคะ');
     }
   } else {
-    // mock — โชว์ welcome ให้ reviewer เห็นดีไซน์
+    // mock · โชว์ welcome ให้ reviewer เห็นดีไซน์
     PREVIEW=MOCK_PREVIEW; renderWelcome(MOCK_PREVIEW);
   }
 });

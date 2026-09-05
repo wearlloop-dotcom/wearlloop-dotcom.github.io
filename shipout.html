@@ -78,7 +78,7 @@
   if(window.opsLogin) window.opsLogin().catch(()=>{});  // ให้ staff ล็อกอิน LINE ตั้งแต่เปิดหน้า
   const $=id=>document.getElementById(id);
   const esc=s=>(s==null?'':String(s)).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
-  function thdate(s){ return s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'—'; }
+  function thdate(s){ return s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'…'; }
 
   async function load(){
     const code=$('code').value.trim().toLowerCase(); if(!code){ $('hint').textContent='ใส่โค้ดก่อนค่ะ'; return; }
@@ -107,14 +107,14 @@
           <ul>
             <li> ห้ามโยน / กดทับ / พับแรง</li>
             <li> กันน้ำ / กันเปื้อน</li>
-            ${delicate?'<li> ผ้าบอบบางพิเศษ — ถนอมมาก</li>':''}
+            ${delicate?'<li> ผ้าบอบบางพิเศษ · ถนอมมาก</li>':''}
             <li> ${esc(g.wash)}</li>
           </ul>
         </div>
       </div>
 
       <div class="sticker full">
-        <div class="k">ใบปะหน้าถุง — สำหรับส่งกลับ</div>
+        <div class="k">ใบปะหน้าถุง · สำหรับส่งกลับ</div>
         <div class="addr">
           <div class="box">
             <div class="lab"> ผู้รับ (ส่งกลับมาที่)</div>
@@ -131,11 +131,11 @@
             <div style="font-size:11px;color:var(--muted)">โค้ด ${esc(g.code)}</div>
           </div>
         </div>
-        <div class="ret-note"> ถุงนี้สำหรับ <b>ส่งชุดกลับ LLOOP</b> — ใส่ชุดในถุงเดิม แปะใบนี้หน้าถุง แล้วส่งกลับภายในกำหนด ${d.due?'('+thdate(d.due)+')':''} · มีปัญหาแจ้งในแชต LINE ได้เลยค่ะ</div>
+        <div class="ret-note"> ถุงนี้สำหรับ <b>ส่งชุดกลับ LLOOP</b> · ใส่ชุดในถุงเดิม แปะใบนี้หน้าถุง แล้วส่งกลับภายในกำหนด ${d.due?'('+thdate(d.due)+')':''} · มีปัญหาแจ้งในแชต LINE ได้เลยค่ะ</div>
       </div>`;
     new QRCode($('qrG'),{text:'https://lloop.app/g/'+g.code,width:96,height:96});
     new QRCode($('qrR'),{text:'https://lloop.app/g/'+g.code,width:84,height:84});
-    $('hint').textContent='พร้อมปริ้น — กด';
+    $('hint').textContent='พร้อมปริ้น · กด';
     qcCode=g.code; qcShotCount=0; const qb=$('qcBtn'); if(qb){ qb.style.display=''; $('qcShotN').textContent=''; }
   }
   let qcCode=null, qcShotCount=0;

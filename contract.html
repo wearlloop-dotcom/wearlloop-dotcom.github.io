@@ -107,25 +107,25 @@
 <div class="top"><div class="mark">LLOOP</div><div class="tl">love · loop</div></div>
 
 <div id="loading" class="skel" data-i18n="Opening the contract…">กำลังเปิดสัญญา…</div>
-<div id="error" class="state hide"><div class="em" data-i18n="Contract not found">ไม่พบสัญญา</div><p data-i18n="The link may have expired or be invalid — please contact the LLOOP team for a new link.">ลิงก์อาจหมดอายุหรือไม่ถูกต้อง — กรุณาติดต่อทีม LLOOP เพื่อขอลิงก์ใหม่ค่ะ</p></div>
+<div id="error" class="state hide"><div class="em" data-i18n="Contract not found">ไม่พบสัญญา</div><p data-i18n="The link may have expired or be invalid · please contact the LLOOP team for a new link.">ลิงก์อาจหมดอายุหรือไม่ถูกต้อง · กรุณาติดต่อทีม LLOOP เพื่อขอลิงก์ใหม่ค่ะ</p></div>
 
 <div id="main" class="wrap hide">
   <!-- เอกสารสัญญา -->
   <div class="doc">
     <div class="klabel" data-i18n="CONTRACT">หนังสือสัญญา</div>
     <h1 id="docTitle">สัญญาความร่วมมือพาร์ทเนอร์</h1>
-    <div class="meta"><span data-i18n="No.">เลขที่</span> <b id="cNo">—</b> · <span data-i18n="Status">สถานะ</span> <span id="cStatusTxt">—</span></div>
+    <div class="meta"><span data-i18n="No.">เลขที่</span> <b id="cNo">…</b> · <span data-i18n="Status">สถานะ</span> <span id="cStatusTxt">…</span></div>
 
     <div class="parties">
       <div class="party">
-        <div class="role" data-i18n="Party 1 — Principal">ฝ่ายที่ 1 — ผู้ว่าจ้าง</div>
+        <div class="role" data-i18n="Party 1 · Principal">ฝ่ายที่ 1 · ผู้ว่าจ้าง</div>
         <div class="nm">LLOOP (แอลลูป)</div>
         <div class="dt" data-i18n="Dress rental &amp; AI stylist platform<br>&ldquo;the Company&rdquo; / &ldquo;LLOOP&rdquo;">แพลตฟอร์มเช่าชุด &amp; AI สไตลิสต์<br>“บริษัท” / “LLOOP”</div>
       </div>
       <div class="party">
-        <div class="role" data-i18n="Party 2 — Partner">ฝ่ายที่ 2 — พาร์ทเนอร์</div>
-        <div class="nm" id="pName">—</div>
-        <div class="dt" id="pDetail">—</div>
+        <div class="role" data-i18n="Party 2 · Partner">ฝ่ายที่ 2 · พาร์ทเนอร์</div>
+        <div class="nm" id="pName">…</div>
+        <div class="dt" id="pDetail">…</div>
       </div>
     </div>
 
@@ -151,7 +151,7 @@
     <label data-i18n="ID card / Taxpayer number">เลขบัตรประชาชน / เลขผู้เสียภาษี</label>
     <input type="text" id="signerId" inputmode="numeric" placeholder="x-xxxx-xxxxx-xx-x">
 
-    <label data-i18n="Signature — sign with your finger or mouse in the box below">ลายเซ็น — เซ็นด้วยนิ้วหรือเมาส์ในกรอบด้านล่าง</label>
+    <label data-i18n="Signature · sign with your finger or mouse in the box below">ลายเซ็น · เซ็นด้วยนิ้วหรือเมาส์ในกรอบด้านล่าง</label>
     <div class="padwrap">
       <canvas id="pad"></canvas>
       <div class="ph" id="padPh" data-i18n="Sign here">เซ็นที่นี่</div>
@@ -180,7 +180,7 @@
     <p style="font-size:13px;color:var(--stone)" id="doneMeta"></p>
     <!-- สะพานต่อ: เปิดพอร์ทัลสไตลิสต์ (เฉพาะสัญญาสไตลิสต์) -->
     <div id="donePortal" class="hide" style="margin:18px auto 0;max-width:340px;padding-top:16px;border-top:1px solid var(--hair)">
-      <p style="font-size:14px;color:var(--ink);margin-bottom:10px" data-i18n="Next step — start recording analyses for your customers">ก้าวต่อไป — เริ่มบันทึกผลวิเคราะห์ให้ลูกค้าได้เลย</p>
+      <p style="font-size:14px;color:var(--ink);margin-bottom:10px" data-i18n="Next step · start recording analyses for your customers">ก้าวต่อไป · เริ่มบันทึกผลวิเคราะห์ให้ลูกค้าได้เลย</p>
       <a class="btn" id="portalBtn" href="#" style="display:block;background:var(--navy);color:#fff;text-decoration:none;padding:14px;border-radius:2px;font-weight:600" data-i18n="Open the stylist portal">เข้าพอร์ทัลสไตลิสต์</a>
       <p style="font-size:12px;color:var(--stone);margin-top:8px" data-i18n="Record each customer's colour / face / body / style, using the code from the LLOOP app">บันทึกสี/หน้า/หุ่น/สไตล์ของลูกค้าแต่ละคน ด้วยรหัสจากแอป LLOOP</p>
     </div>
@@ -462,7 +462,7 @@
   function renderSigBlock(c){
     const cs=c.company_signer||{name:'LLOOP',title:'ผู้มีอำนาจลงนามแทนบริษัท'};
     const signed=c.status==='signed';
-    // ฝ่ายผู้ว่าจ้าง (LLOOP) — ถือว่าลงนามรับรองเมื่อออกสัญญา
+    // ฝ่ายผู้ว่าจ้าง (LLOOP) · ถือว่าลงนามรับรองเมื่อออกสัญญา
     const lloop=`<div class="sg">
       <div class="role">ฝ่ายผู้ว่าจ้าง</div>
       <div class="ln"><span class="typed">${esc(cs.name)}</span></div>
@@ -477,7 +477,7 @@
       const when=c.signed_at?new Date(c.signed_at).toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'}):'';
       pInner=`<div class="ln">${sig}</div><div class="nm">${esc(c.signer_name||c.partner_name)}</div><div class="ti">ลงนาม ${when}</div>`;
     }else{
-      pInner=`<div class="ln"><span class="wait">— รอลงนามด้านล่าง —</span></div><div class="nm">${esc(c.partner_name)}</div><div class="ti">ฝ่ายพาร์ทเนอร์</div>`;
+      pInner=`<div class="ln"><span class="wait">(รอลงนามด้านล่าง)</span></div><div class="nm">${esc(c.partner_name)}</div><div class="ti">ฝ่ายพาร์ทเนอร์</div>`;
     }
     $('sigblock').innerHTML=lloop+`<div class="sg"><div class="role">ฝ่ายพาร์ทเนอร์</div>${pInner}</div>`;
   }
@@ -559,7 +559,7 @@
     const merged=Object.assign({},C,{status:'signed',signer_name:$('signerName').value.trim(),signature:sig,signed_at:new Date().toISOString()});
     showSigned(merged);
     window.scrollTo({top:0,behavior:'smooth'});
-    toast('ลงนามเรียบร้อย — ขอบคุณค่ะ');
+    toast('ลงนามเรียบร้อย · ขอบคุณค่ะ');
   }
 
   async function openDecline(){

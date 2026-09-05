@@ -227,7 +227,7 @@
   <!-- STEP 1: occasion / date -->
   <div class="sec" id="setupSec">
     <div class="sechead">
-      <div><div class="sectitle" id="grpName">—</div>
+      <div><div class="sectitle" id="grpName">…</div>
       <div class="seccap" id="grpCap"></div></div>
     </div>
     <div class="toolbar">
@@ -278,12 +278,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=38"></script>
-<script src="data.js?v=38"></script>
+<script src="data.js?v=39"></script>
 <script src="liffAuth.js?v=56"></script>
 <script src="me-api.js?v=56"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=38"></script>
-<script src="api.js?v=64"></script>
+<script src="api.js?v=65"></script>
 <script>
 // ============================================================
 //  group-checkout.html — จองชุดทั้งกลุ่มในออเดอร์เดียว
@@ -359,7 +359,7 @@ function boxMembers(n){ return Object.entries(SHIP).filter(([w,s])=>SEL[w]&&s&&s
 const GROUP_ID = qparam('group');
 
 // ============================================================
-//  MOCK (พรีวิวได้โดยไม่ต้องล็อกอิน LINE) — mirror family.html
+//  MOCK (พรีวิวได้โดยไม่ต้องล็อกอิน LINE) · mirror family.html
 // ============================================================
 const MOCK_GROUP = {
   group_id:'g1', name:'ครอบครัวของฉัน', kind:'family', my_role:'owner', my_status:'active',
@@ -396,7 +396,7 @@ function mockSuggestFor(m, season, palette){
     .sort((a,b)=> (b.on_theme-a.on_theme) || (b.fit-a.fit))
     .slice(0,3);
 }
-// opts: { season, palette, mode, venue } — mock honors the chosen theme source
+// opts: { season, palette, mode, venue } · mock honors the chosen theme source
 function mockTheme(opts){
   const o = opts || {};
   const season = o.season || 'autumn';
@@ -715,7 +715,7 @@ function renderAssign(){
   if(!anyPicks){
     body.innerHTML = `<div class="empty" style="padding:26px">
       <h4>ยังไม่มีชุดที่ว่างในวันนี้</h4>
-      <p>ยังไม่มีชุดเข้าตีมที่ว่างในวันที่เลือก — ลองเปลี่ยนวัน หรือทีมจะช่วยจัดหาเพิ่มให้</p></div>`;
+      <p>ยังไม่มีชุดเข้าตีมที่ว่างในวันที่เลือก · ลองเปลี่ยนวัน หรือทีมจะช่วยจัดหาเพิ่มให้</p></div>`;
     $('#summary').classList.remove('show');
     return;
   }
@@ -738,7 +738,7 @@ function renderAssign(){
     const picks = m.picks || [];
     if(m.needs_sourcing || picks.length===0){
       html += `<div class="sourcing"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>
-        ยังไม่มีชุด${AGE_TH[m.age_band]||''}ที่ว่างในวันนี้ — ทีมจะช่วย <b>จัดหาเพิ่ม</b>ให้เข้าตีมเดียวกัน (ไม่รวมในออเดอร์นี้)</div>`;
+        ยังไม่มีชุด${AGE_TH[m.age_band]||''}ที่ว่างในวันนี้ · ทีมจะช่วย <b>จัดหาเพิ่ม</b>ให้เข้าตีมเดียวกัน (ไม่รวมในออเดอร์นี้)</div>`;
     } else {
       html += `<div class="picks">${picks.map(p=>`
         <div class="pick" data-w="${esc(id)}" data-code="${esc(p.code)}" onclick="pickOne('${esc(id)}','${esc(p.code)}')">
@@ -920,25 +920,25 @@ async function renderResult(res, from, to){
   if(res.error==='kyc_required'){
     box.innerHTML = `<div class="kycbox">
       <h4>ยืนยันตัวตนก่อนจองนะคะ</h4>
-      <p>การจองทั้งกลุ่มจะบิลรวมที่หัวหน้ากลุ่ม (ผู้จ่าย) — ระบบขอให้ผู้จ่ายยืนยันตัวตน (บัตรประชาชน + โซเชียลสาธารณะ) ครั้งเดียวเพื่อความปลอดภัยก่อนค่ะ</p>
+      <p>การจองทั้งกลุ่มจะบิลรวมที่หัวหน้ากลุ่ม (ผู้จ่าย) · ระบบขอให้ผู้จ่ายยืนยันตัวตน (บัตรประชาชน + โซเชียลสาธารณะ) ครั้งเดียวเพื่อความปลอดภัยก่อนค่ะ</p>
       <a class="btn" href="index.html">ไปยืนยันตัวตน</a></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
   if(res.error==='no_payer'){
     box.innerHTML = `<div class="kycbox"><h4>ยังไม่มีผู้ชำระ</h4>
-      <p>ต้องให้หัวหน้ากลุ่มเป็นผู้ชำระเงิน — ขอให้หัวหน้ากลุ่มเป็นคนกดจอง หรือโอนสิทธิ์ให้คุณก่อนค่ะ</p>
+      <p>ต้องให้หัวหน้ากลุ่มเป็นผู้ชำระเงิน · ขอให้หัวหน้ากลุ่มเป็นคนกดจอง หรือโอนสิทธิ์ให้คุณก่อนค่ะ</p>
       <a class="btn ghost" href="family.html">กลับหน้ากลุ่ม</a></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
   if(res.error==='all_unavailable'){
     box.innerHTML = `<div class="empty" style="padding:24px"><h4>ชุดที่เลือกเต็มแล้ว</h4>
-      <p>ชุดทั้งหมดที่เลือกไว้ไม่ว่างในวันนี้ — กลับไปเลือกใหม่ หรือลองเปลี่ยนวันใช้งานนะคะ</p>
+      <p>ชุดทั้งหมดที่เลือกไว้ไม่ว่างในวันนี้ · กลับไปเลือกใหม่ หรือลองเปลี่ยนวันใช้งานนะคะ</p>
       <button class="btn ghost" onclick="backToAssign()">เลือกชุดใหม่</button></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
   if(res.error){
     box.innerHTML = `<div class="empty" style="padding:24px"><h4>จองไม่สำเร็จ</h4>
-      <p>เกิดข้อผิดพลาด (${esc(res.error)}) — ลองใหม่อีกครั้ง หรือกลับไปเลือกชุดใหม่ค่ะ</p>
+      <p>เกิดข้อผิดพลาด (${esc(res.error)}) · ลองใหม่อีกครั้ง หรือกลับไปเลือกชุดใหม่ค่ะ</p>
       <button class="btn ghost" onclick="backToAssign()">กลับไปเลือกชุด</button></div>`;
     sec.scrollIntoView({behavior:'smooth',block:'start'}); return;
   }
@@ -948,7 +948,7 @@ async function renderResult(res, from, to){
     const ms = res.members || [];
     const rows = ms.map(m=>{
       if(m.status==='kyc_required') return `<div class="splrow warn"><div class="st">${esc(m.name)}</div>
-        <div class="sm">ต้องยืนยันตัวตนก่อนจอง — ส่งลิงก์ให้ยืนยันแล้ว</div></div>`;
+        <div class="sm">ต้องยืนยันตัวตนก่อนจอง · ส่งลิงก์ให้ยืนยันแล้ว</div></div>`;
       if(m.status==='unavailable') return `<div class="splrow warn"><div class="st">${esc(m.name)}</div>
         <div class="sm">ชุดที่เลือกไม่ว่างในวันนี้</div></div>`;
       return `<div class="splrow"><div class="st">${esc(m.name)} <span class="ok">จองแล้ว</span></div>
@@ -961,7 +961,7 @@ async function renderResult(res, from, to){
       <div style="margin-top:12px">${rows}</div>
       <div class="totbox"><div class="trow hl"><span>ยอดรวมทั้งกลุ่ม</span><span>${baht(res.grand_total)}</span></div></div>
       <div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        เรากันชุดให้ทุกคน 30 นาที — เพื่อนแต่ละคนเปิด LINE ของตัวเองเพื่อโอนและแนบสลิปยืนยันส่วนของตนค่ะ</div>
+        เรากันชุดให้ทุกคน 30 นาที · เพื่อนแต่ละคนเปิด LINE ของตัวเองเพื่อโอนและแนบสลิปยืนยันส่วนของตนค่ะ</div>
       <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
         <a class="btn" href="event.html?event=${esc(res.event_group||'')}">ดูสถานะการจ่าย</a>
         <a class="btn ghost" href="family.html">กลับหน้ากลุ่ม</a></div>`;
@@ -983,7 +983,7 @@ async function renderResult(res, from, to){
   }).join('');
 
   const unavailHtml = (res.unavailable && res.unavailable.length)
-    ? `<div class="unavail"><b>เต็มแล้ว:</b> ${res.unavailable.map(u=>esc(u.code||u)).join(', ')} — ชุดเหล่านี้ไม่ว่างในวันนี้ จึงไม่รวมในออเดอร์</div>` : '';
+    ? `<div class="unavail"><b>เต็มแล้ว:</b> ${res.unavailable.map(u=>esc(u.code||u)).join(', ')} · ชุดเหล่านี้ไม่ว่างในวันนี้ จึงไม่รวมในออเดอร์</div>` : '';
 
   // ช่องทางชำระ
   let pay = null;
@@ -1027,7 +1027,7 @@ async function renderResult(res, from, to){
       <div class="trow hl"><span>รวมโอน</span><span>${baht(res.total)}</span></div>
     </div>
     <div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      เรากันชุดให้แล้ว 30 นาที — โอนและแนบสลิปภายในเวลานี้เพื่อยืนยันการจองค่ะ</div>
+      เรากันชุดให้แล้ว 30 นาที · โอนและแนบสลิปภายในเวลานี้เพื่อยืนยันการจองค่ะ</div>
     ${payBlock}
     <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
       <a class="btn ghost" href="family.html">กลับหน้ากลุ่ม</a>

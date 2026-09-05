@@ -46,10 +46,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=51"></script>
-<script src="data.js?v=51"></script>
+<script src="data.js?v=52"></script>
 <script src="liffAuth.js?v=56"></script>
 <script src="me-api.js?v=56"></script>
-<script src="api.js?v=64"></script>
+<script src="api.js?v=65"></script>
 <script src="nav.js?v=2"></script>
 <script>
 const $app = document.getElementById('app');
@@ -83,7 +83,7 @@ function renderCreate(){
   $app.innerHTML = `
     <div class="hero"><div class="eyebrow">The Loop · งานแต่ง</div>
       <h1>ชวนเพื่อนเช่าชุดเข้างานเดียวกัน</h1>
-      <div class="sub">สร้างลิงก์งาน แชร์ให้เพื่อนแขก — ทุกคนเห็นชุดที่ว่างวันงาน และไม่ใส่ชนกัน</div></div>
+      <div class="sub">สร้างลิงก์งาน แชร์ให้เพื่อนแขก · ทุกคนเห็นชุดที่ว่างวันงาน และไม่ใส่ชนกัน</div></div>
     <div class="form">
       <label>ชื่องาน</label>
       <input id="wt" placeholder="เช่น งานแต่งมิ้น & โต้ง">
@@ -149,7 +149,7 @@ function renderEvent(){
       </div>
     </div>
     <button class="share" id="sh">ชวนเพื่อนคนอื่นในงาน</button>
-    <div class="note">เลือกชุดที่ <b>ว่างวันงาน</b> ด้านล่าง — ตัวที่เพื่อนจองแล้วจะขึ้นป้าย เพื่อไม่ให้ใส่ซ้ำกัน · ชวนเพื่อนใหม่รับเครดิต <b>฿50</b> ทั้งคู่</div>
+    <div class="note">เลือกชุดที่ <b>ว่างวันงาน</b> ด้านล่าง · ตัวที่เพื่อนจองแล้วจะขึ้นป้าย เพื่อไม่ให้ใส่ซ้ำกัน · ชวนเพื่อนใหม่รับเครดิต <b>฿50</b> ทั้งคู่</div>
     <div class="seclabel">ชุดที่ว่างวันงาน</div>
     <div class="grid">${cards || '<div class="center">ยังไม่มีชุดว่างในวันนี้ — ทีมจะช่วยจัดหาเพิ่ม</div>'}</div>`;
 

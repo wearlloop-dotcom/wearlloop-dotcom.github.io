@@ -127,12 +127,12 @@
     <section class="phead">
       <div class="eyebrow">stock health</div>
       <h1>สต๊อกที่หมุนได้จริง</h1>
-      <div class="sub">ทั้งคลังในหน้าเดียว — ค้นหา กรอง แก้ไขได้ทันที และเห็นเลยว่าชุดไหนมีคิวจอง ชุดไหนต้องตามกลับ</div>
+      <div class="sub">ทั้งคลังในหน้าเดียว · ค้นหา กรอง แก้ไขได้ทันที และเห็นเลยว่าชุดไหนมีคิวจอง ชุดไหนต้องตามกลับ</div>
       <div class="kpis">
-        <div class="kpi"><div class="n" id="k_total">—</div><div class="l">ชุดทั้งหมด</div></div>
-        <div class="kpi ok"><div class="n" id="k_rentable">—</div><div class="l">ปล่อยเช่าได้</div></div>
-        <div class="kpi warn"><div class="n" id="k_busy">—</div><div class="l">ติดจอง/ออกไป</div></div>
-        <div class="kpi bad"><div class="n" id="k_leak">—</div><div class="l">จุดรอยรั่ว</div></div>
+        <div class="kpi"><div class="n" id="k_total">…</div><div class="l">ชุดทั้งหมด</div></div>
+        <div class="kpi ok"><div class="n" id="k_rentable">…</div><div class="l">ปล่อยเช่าได้</div></div>
+        <div class="kpi warn"><div class="n" id="k_busy">…</div><div class="l">ติดจอง/ออกไป</div></div>
+        <div class="kpi bad"><div class="n" id="k_leak">…</div><div class="l">จุดรอยรั่ว</div></div>
       </div>
     </section>
 
@@ -185,7 +185,7 @@
       <div id="leaks"><div class="loading">กำลังตรวจ…</div></div>
       <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn" onclick="reconcile()" id="fixBtn">อุดรอยรั่วที่ปลอดภัย (1 คลิก)</button>
-        <span class="when">ยกเลิกจองค้าง · ปรับสถานะให้ตรง · ปล่อยชุดที่ค้างไม่ว่าง — เคสวิกฤตยังให้คนจัดการเอง</span>
+        <span class="when">ยกเลิกจองค้าง · ปรับสถานะให้ตรง · ปล่อยชุดที่ค้างไม่ว่าง · เคสวิกฤตยังให้คนจัดการเอง</span>
       </div>
     </div>
   </div>
@@ -425,7 +425,7 @@
       <div class="row"><div><label>เนื้อผ้า</label><input id="e_fabric" value="${esc(r.fabric_composition||'')}"></div></div>
       <div class="row"><div><label>โอกาสที่ใส่ได้</label><div class="occ" id="e_occ">${occChips}</div></div></div>
       <div class="row"><div><label>วิธีใส่ให้สวย (คั่นด้วย ,)</label><textarea id="e_tips" rows="2">${esc((r.styling_tips||[]).join(', '))}</textarea></div></div>
-      <div class="row"><div><label>ลิงก์รูป (บรรทัดละ 1 รูป — รูปแรกใช้เป็นรูปหลัก)</label><textarea id="e_photos" rows="3">${esc((r.photos||[]).join('\n'))}</textarea></div></div>
+      <div class="row"><div><label>ลิงก์รูป (บรรทัดละ 1 รูป · รูปแรกใช้เป็นรูปหลัก)</label><textarea id="e_photos" rows="3">${esc((r.photos||[]).join('\n'))}</textarea></div></div>
       <button class="btn" id="dSave" style="width:100%">บันทึกการแก้ไข</button>
     </div>`;
   }
@@ -435,7 +435,7 @@
     // เปลี่ยนสถานะ
     document.querySelectorAll('#dTrans .tbtn').forEach(b=>b.onclick=async()=>{
       const to=b.dataset.to;
-      if(to==='retired'&&!confirm(`ปลดระวาง ${code} — ชุดจะไม่ถูกปล่อยเช่าอีก ยืนยัน?`)) return;
+      if(to==='retired'&&!confirm(`ปลดระวาง ${code} · ชุดจะไม่ถูกปล่อยเช่าอีก ยืนยัน?`)) return;
       b.disabled=true;
       const {data,error}=await sb.rpc('garment_transition',{p_code:code,p_to:to});
       b.disabled=false;
@@ -562,7 +562,7 @@
       if((data.cancelled_ghost||[]).length) parts.push('ยกเลิกจองค้าง '+data.cancelled_ghost.length);
       if((data.synced_over||[]).length) parts.push('ปรับสถานะ '+data.synced_over.length);
       if((data.freed_stuck||[]).length) parts.push('ปล่อยว่าง '+data.freed_stuck.length);
-      toast('อุดแล้ว '+n+' จุด — '+parts.join(' · '));
+      toast('อุดแล้ว '+n+' จุด · '+parts.join(' · '));
     }
     loadAll();
   }

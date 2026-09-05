@@ -66,11 +66,11 @@
   <section class="phead">
     <div class="eyebrow">partner contracts</div>
     <h1>ข้อตกลงที่ชัดเจน</h1>
-    <div class="sub">ออกและติดตามสัญญาพาร์ทเนอร์ครบในที่เดียว — เซ็นออนไลน์ผ่าน LIFF ได้เลย</div>
+    <div class="sub">ออกและติดตามสัญญาพาร์ทเนอร์ครบในที่เดียว · เซ็นออนไลน์ผ่าน LIFF ได้เลย</div>
     <div class="kpis">
-      <div class="kpi"><span class="n" id="kpiTotal">—</span><span class="l">สัญญาทั้งหมด</span></div>
-      <div class="kpi warn"><span class="n" id="kpiPending">—</span><span class="l">รอลงนาม</span></div>
-      <div class="kpi ok"><span class="n" id="kpiSigned">—</span><span class="l">ลงนามแล้ว</span></div>
+      <div class="kpi"><span class="n" id="kpiTotal">…</span><span class="l">สัญญาทั้งหมด</span></div>
+      <div class="kpi warn"><span class="n" id="kpiPending">…</span><span class="l">รอลงนาม</span></div>
+      <div class="kpi ok"><span class="n" id="kpiSigned">…</span><span class="l">ลงนามแล้ว</span></div>
     </div>
   </section>
 
@@ -109,7 +109,7 @@
     </div>
     <div class="g2">
       <div><label>อีเมล</label><input id="partner_email" placeholder=""></div>
-      <div><label>LINE userID (ถ้ามี — ส่งสัญญาเข้า LINE ได้ทันที)</label><input id="partner_line_uid" placeholder="Uxxxxxxxx"></div>
+      <div><label>LINE userID (ถ้ามี · ส่งสัญญาเข้า LINE ได้ทันที)</label><input id="partner_line_uid" placeholder="Uxxxxxxxx"></div>
     </div>
     <label>ที่อยู่</label><input id="partner_address" placeholder="">
 
@@ -157,7 +157,7 @@
     <button class="btn dark" style="margin-top:18px" onclick="save()">สร้างสัญญา + ออกลิงก์</button>
 
     <div class="link-out" id="linkOut">
-      <b id="loNo"></b> สร้างแล้ว — ส่งลิงก์นี้ให้พาร์ทเนอร์เซ็น
+      <b id="loNo"></b> สร้างแล้ว · ส่งลิงก์นี้ให้พาร์ทเนอร์เซ็น
       <div class="u" id="loUrl"></div>
       <div class="row-btns">
         <button class="btn ghost sm" onclick="copyLink()">คัดลอกลิงก์</button>
@@ -166,7 +166,7 @@
         <a class="btn ghost sm" id="loOpen" target="_blank" style="text-decoration:none;text-align:center">เปิดดูสัญญา</a>
       </div>
       <div id="custOut" style="display:none;margin-top:10px;font-size:13px">
-        สร้างลูกค้าแล้ว — รหัสให้พาร์ทเนอร์กรอก Personal Color: <b id="custCode" style="font-size:16px;color:var(--navy)"></b>
+        สร้างลูกค้าแล้ว · รหัสให้พาร์ทเนอร์กรอก Personal Color: <b id="custCode" style="font-size:16px;color:var(--navy)"></b>
       </div>
     </div>
   </div>
@@ -272,7 +272,7 @@
     const { data, error } = await sb.rpc('contract_send',{ p_id:lastId });
     if(error){ toast('ส่งไม่สำเร็จ: '+error.message); return; }
     if(data && data.error){ toast('ส่งไม่ได้: '+data.error); return; }
-    toast('ทำเครื่องหมายส่งแล้ว — ถ้ามี LINE userID ระบบจะ push ให้พาร์ทเนอร์');
+    toast('ทำเครื่องหมายส่งแล้ว · ถ้ามี LINE userID ระบบจะ push ให้พาร์ทเนอร์');
     load();
   }
 
@@ -284,14 +284,14 @@
     if(error){ toast('สร้างลูกค้าไม่สำเร็จ: '+error.message); return; }
     $('custCode').textContent=data.link_code;
     $('custOut').style.display='block';
-    toast('สร้างเป็นลูกค้าแล้ว — รหัส '+data.link_code);
+    toast('สร้างเป็นลูกค้าแล้ว · รหัส '+data.link_code);
   }
 
   function setTab(el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); el.classList.add('on'); curStatus=el.dataset.s; load(); }
 
   function pill(s){ const th={draft:'ฉบับร่าง',sent:'รอลงนาม',viewed:'เปิดอ่าน',signed:'ลงนามแล้ว',declined:'ขอแก้ไข',void:'ยกเลิก'}[s]||s;
     return `<span class="pill ${s}">${th}</span>`; }
-  function dt(s){ return s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'—'; }
+  function dt(s){ return s?new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}):'…'; }
 
   async function load(){
     const { data, error } = await sb.rpc('contract_list',{ p_status:curStatus||null });
@@ -309,8 +309,8 @@
       const url=SIGN_BASE+'?token='+c.token;
       const when = c.signed_at||c.sent_at||c.created_at;
       return `<tr>
-        <td><b>${c.contract_no||'—'}</b></td>
-        <td>${c.partner_name||'—'}${c.partner_org?`<br><span style="color:var(--stone);font-size:11px">${c.partner_org}</span>`:''}</td>
+        <td><b>${c.contract_no||'…'}</b></td>
+        <td>${c.partner_name||'…'}${c.partner_org?`<br><span style="color:var(--stone);font-size:11px">${c.partner_org}</span>`:''}</td>
         <td>${pill(c.status)}</td>
         <td>${dt(when)}</td>
         <td style="white-space:nowrap">
@@ -346,7 +346,7 @@
     // ข้อตกลงเพิ่มเติม
     $('extraClauses').innerHTML='';
     (c.extra_clauses||[]).forEach(x=>addClause(x.h||'',x.body||''));
-    window.scrollTo({top:0,behavior:'smooth'}); toast('แก้ไขสัญญา '+(c.contract_no||'')+' — กดสร้างเพื่อบันทึก');
+    window.scrollTo({top:0,behavior:'smooth'}); toast('แก้ไขสัญญา '+(c.contract_no||'')+' · กดสร้างเพื่อบันทึก');
   }
 
   // ---------- พรีเซ็ตดีลที่ใช้บ่อย ----------

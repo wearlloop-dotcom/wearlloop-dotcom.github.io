@@ -52,7 +52,7 @@
   <section class="phead">
     <div class="eyebrow">garment lifecycle</div>
     <h1>ทุกชุดมีเรื่องราว</h1>
-    <div class="sub">สแกนโค้ดชุด แล้วย้อนดูทุกรอบการดูแล สภาพ รูปถ่าย และการเดินทาง — เพราะชุดที่หมุนเวียนดี คือชุดที่เราใส่ใจทุกครั้ง</div>
+    <div class="sub">สแกนโค้ดชุด แล้วย้อนดูทุกรอบการดูแล สภาพ รูปถ่าย และการเดินทาง · เพราะชุดที่หมุนเวียนดี คือชุดที่เราใส่ใจทุกครั้ง</div>
   </section>
   <div class="scan">
     <input id="code" placeholder="ใส่/สแกนโค้ดชุด เช่น g1" autocomplete="off">
@@ -88,7 +88,7 @@
     const g=d.garment;
     const cycles=(d.cycles||[]).map(j=>{
       const cond=COND[j.condition]||['',''];
-      const ph=(j.photos&&j.photos.length)?`<div class="photos">${j.photos.map(u=>`<img src="${esc(u)}" alt="">`).join('')}</div>`:'<div class="nophoto">— ไม่มีรูปรอบนี้ —</div>';
+      const ph=(j.photos&&j.photos.length)?`<div class="photos">${j.photos.map(u=>`<img src="${esc(u)}" alt="">`).join('')}</div>`:'<div class="nophoto">(ไม่มีรูปรอบนี้)</div>';
       return`<div class="ev ${cond[1]}">
         <div class="when">${dt(j.opened_at)}${j.handler?' · '+esc(j.handler):''}</div>
         <div class="what">${cond[0]||esc(j.stage)}${j.complete===false?' · ของไม่ครบ':''}${j.damage_fee>0?` · ค่าเสียหาย ฿${j.damage_fee}`:''}</div>
