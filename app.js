@@ -2010,8 +2010,10 @@ function kycSb() {
 async function customerCanRent() {
   if (!CUSTOMER || !CUSTOMER.id) return true;  // ยังไม่ล็อกอิน · ปล่อยให้ flow เดิมจัดการ
   try {
-    const sb = kycSb(); if (!sb) return true;  // เรียก client ไม่ได้ · อย่าบล็อก (non-breaking)
-    const { data, error } = await sb.rpc('customer_can_rent', { p_customer: CUSTOMER.id });
+    // 2026-09-05: ย้ายมาผ่าน me-rpc (เดิมเรียกด้วย anon key ซึ่ง DB ไม่อนุญาต จึงพังเงียบมาตลอด
+    //   และถ้าเปิดให้ anon จะเดา uuid อ่านสถานะ KYC ของลูกค้าคนอื่นได้) · gateway ฉีด p_customer เอง
+    if (!window.meRpc) return true;            // เรียก gateway ไม่ได้ · อย่าบล็อก (non-breaking)
+    const { data, error } = await window.meRpc('customer_can_rent', {});
     if (error) { console.warn('customer_can_rent', error); return true; }
     const g = data || {};
     return g.ok !== false;  // ok:true หรือไม่มีข้อมูล = ผ่าน
