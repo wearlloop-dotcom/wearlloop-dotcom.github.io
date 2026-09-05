@@ -110,7 +110,7 @@
       </div>
       <span class="meta" id="viewDescStatus"></span>
       <div id="viewTestWrap" style="display:none;margin-top:8px">
-        <div class="meta">ซ้าย = รูปจริง · ขวา = รูปที่ AI เจนจากคำบรรยาย (ถ้าตรงกัน = คำบรรยายนิ่งดี)</div>
+        <div class="meta">ซ้าย = รูปจริง · ขวา = รูปที่ AI เจน ถ้าตรงกันแปลว่าคำบรรยายนิ่งดี</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
           <img id="viewTestReal" style="width:100%;border-radius:8px;border:1px solid var(--line)">
           <img id="viewTestGen" style="width:100%;border-radius:8px;border:1px solid var(--line)">
@@ -129,7 +129,7 @@
 
   <div class="card">
     <h2>วันนี้จะทำงานแบบไหนคะ?<span class="qh" onclick="qhToggle(this)">?</span></h2>
-    <div class="fieldhelp">เลือกว่าจะทำงานแบบไหน — <b>Storyboard</b> ทำภาพประกอบวิดีโอ Hero ทีละช็อต (ต่อเนื่องเป็นเรื่อง) · <b>Lookbook</b> ทำรูปนางแบบใส่ชุดจริงไปโพสต์เว็บ/โซเชียล<span class="rec">แนะนำ: จะทำคลิปโปรโมตเลือก Storyboard · อยากได้รูปโพสต์ขายของเลือก Lookbook</span></div>
+    <div class="fieldhelp">เลือกว่าจะทำงานแบบไหน · <b>Storyboard</b> ทำภาพประกอบวิดีโอ Hero ทีละช็อต (ต่อเนื่องเป็นเรื่อง) · <b>Lookbook</b> ทำรูปนางแบบใส่ชุดจริงไปโพสต์เว็บ/โซเชียล<span class="rec">แนะนำ: จะทำคลิปโปรโมตเลือก Storyboard · อยากได้รูปโพสต์ขายของเลือก Lookbook</span></div>
     <div class="tabs" style="margin-bottom:0">
       <div class="tab on" data-mode="sb" style="padding:14px">Storyboard<br><span style="font-size:12px;font-weight:400">ทำภาพประกอบวิดีโอ Hero Video ทีละช็อต</span></div>
       <div class="tab" data-mode="lb" style="padding:14px">Lookbook<br><span style="font-size:12px;font-weight:400">ทำรูปนางแบบ+ชุดจริง ไปโพสต์เว็บ/โซเชียล</span></div>
@@ -137,7 +137,7 @@
   </div>
 
   <div class="card" id="refCard">
-    <h2>รูป Reference <span class="hint">อัปโหลดครั้งเดียว ใช้ทุกการเจน — ระบบเลือกแนบให้ตามช็อตอัตโนมัติ</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <h2>รูป Reference <span class="hint">อัปครั้งเดียว ระบบแนบให้เองทุกช็อต</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
     <div class="fieldhelp">รูปตัวอย่างโทน/สไตล์ที่อยากได้ (แสง สี อารมณ์) อัปครั้งเดียว ระบบแนบให้ทุกครั้งที่เจน เพื่อคุมโทนให้เหมือนกันทั้งชุด<span class="rec">แนะนำ: ใส่รูปที่มีแสง/โทนสีที่ต้องการ 1–3 รูปพอ ไม่ต้องเยอะ</span></div>
     <div class="refrow" id="refRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -147,14 +147,14 @@
   </div>
 
   <div class="card" id="charCard">
-    <h2>ตัวละคร / นางแบบ <span class="hint">กดเลือกว่าจะเจนด้วยหน้าใคร — อัปได้หลายมุม (หน้าตรง/ข้าง/เต็มตัว) ล็อกหน้าแม่นขึ้น · ปุ่ม "+ มุม" เพิ่มมุมให้ตัวเดิม</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
-    <div class="fieldhelp">รูปหน้าคนที่อยากให้ AI เจนออกมาเป็นคนเดิมทุกช็อต — ยิ่งอัปหลายมุม AI ยิ่งจำหน้าแม่น<span class="rec">แนะนำ: อัปหน้าตรงชัด ๆ อย่างน้อย 1 รูป + มุมข้าง/เต็มตัวถ้ามี · หน้าเบลอ/มืดจะทำให้หน้าเพี้ยน</span></div>
+    <h2>ตัวละคร / นางแบบ <span class="hint">เลือกว่าจะเจนด้วยหน้าใคร</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <div class="fieldhelp">รูปหน้าคนที่อยากให้ AI เจนออกมาเป็นคนเดิมทุกช็อต · ยิ่งอัปหลายมุม AI ยิ่งจำหน้าแม่น<span class="rec">แนะนำ: อัปหน้าตรงชัด ๆ อย่างน้อย 1 รูป + มุมข้าง/เต็มตัวถ้ามี · หน้าเบลอ/มืดจะทำให้หน้าเพี้ยน</span></div>
     <div class="refrow" id="charRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px"><button class="btn ghost sm" id="charAdd">+ เพิ่มตัวละครเข้าคลัง</button></div>
   </div>
 
   <div class="card" id="locCard">
-    <h2>สถานที่ / ฉาก <span class="hint">อัปได้หลายมุม/หลายด้านของฉากเดียว (คาเฟ่ อีเวนต์ ร้านจริง) → ฉากนิ่งไม่เปลี่ยนทุกครั้งที่เจน · มีคำบรรยาย+ทดสอบได้เหมือนตัวละคร · เพิ่มฉากใหม่ได้เรื่อย ๆ</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <h2>สถานที่ / ฉาก <span class="hint">ล็อกให้ทุกช็อตอยู่ที่เดียวกัน</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
     <div class="fieldhelp">รูปฉากจริง (คาเฟ่/อีเวนต์/ร้าน) เพื่อให้ฉากในทุกช็อตเป็นที่เดียวกัน ไม่เปลี่ยนไปมา<span class="rec">แนะนำ: ถ่ายฉากหลายมุมของที่เดียวกัน แล้วอัปรวมเป็นฉากเดียว จะได้ต่อช็อตเนียน</span></div>
     <div class="refrow" id="locRow"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:10px"><button class="btn ghost sm" id="locAdd">+ เพิ่มสถานที่เข้าคลัง</button></div>
@@ -162,7 +162,7 @@
 
   <div class="card" id="shotCard">
     <h2>เลือกช็อต <span class="hint">LLOOP Hero Video · 29 ช็อต · 2 ซีน</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
-    <div class="fieldhelp">เลือกช็อตจากสตอรี่บอร์ด Hero Video ที่วางไว้แล้ว — กดช็อตที่อยากเจน<span class="rec">แนะนำ: เริ่มจากช็อตเปิด (ซีนแรก) แล้วไล่ทีละช็อตให้ครบ จะได้คลิปที่ต่อกันเป็นเรื่อง</span></div>
+    <div class="fieldhelp">เลือกช็อตจากสตอรี่บอร์ด Hero Video ที่วางไว้แล้ว · กดช็อตที่อยากเจน<span class="rec">แนะนำ: เริ่มจากช็อตเปิด (ซีนแรก) แล้วไล่ทีละช็อตให้ครบ จะได้คลิปที่ต่อกันเป็นเรื่อง</span></div>
     <div class="tabs">
       <div class="tab on" data-scene="1">ซีน 1 · องก์ปัญหา (1–14)</div>
       <div class="tab" data-scene="2">ซีน 2 · Endless Wardrobe (15–29)</div>
@@ -176,16 +176,16 @@
     <div class="fields" id="shotFields"></div>
     <label>Preset แก้งานด่วน (กดเลือกได้ ไม่ต้องพิมพ์)</label>
     <div class="chips" id="presetChips" style="margin-bottom:10px"></div>
-    <label>Preset กล้อง / แสง / เลนส์ (ใช้ซ้ำได้ — ถ้าเลือก จะทับค่ากล้องในบทช็อต)</label>
+    <label>Preset กล้อง / แสง / เลนส์ (ใช้ซ้ำได้ · ถ้าเลือก จะทับค่ากล้องในบทช็อต)</label>
     <div class="chips" id="camChips" style="margin-bottom:10px"></div>
-    <label>ธีมหนัง (Movie Vibe) — ใส่สูตรสี/แสง/มู้ดของหนัง (เลือกได้ 1 หรือไม่เลือก)</label>
+    <label>ธีมหนัง (Movie Vibe) · ใส่สูตรสี/แสง/มู้ดของหนัง (เลือกได้ 1 หรือไม่เลือก)</label>
     <div class="chips" id="movieChips" style="margin-bottom:10px"></div>
-    <label>โน้ตเพิ่มเติม (ถ้ามี) — บอกสิ่งที่อยากแก้เป็นภาษาไทยหรืออังกฤษ</label>
+    <label>โน้ตเพิ่มเติม (ถ้ามี) · บอกสิ่งที่อยากแก้เป็นภาษาไทยหรืออังกฤษ</label>
     <textarea id="fixNote" placeholder="เช่น ตู้ต้องเปิดอยู่ มีผ้ากำลังร่วง / แสงอุ่นขึ้นอีก"></textarea>
     <div id="skuWrap" style="display:none;margin-top:10px">
-      <label>ชุดพระเอก — ช็อตนี้ต้องใช้รูปชุดจริงจากคลัง (ค้นหาแล้วกดเลือก)</label>
+      <label>ชุดพระเอก · ช็อตนี้ต้องใช้รูปชุดจริงจากคลัง (ค้นหาแล้วกดเลือก)</label>
       <div style="display:flex;gap:8px">
-        <input type="text" id="skuInput" placeholder="พิมพ์กรองสด — ชื่อชุด / รหัส / แบรนด์ (ว่างไว้ = ชุดยอดนิยม)">
+        <input type="text" id="skuInput" placeholder="พิมพ์กรองสด · ชื่อชุด / รหัส / แบรนด์ (ว่างไว้ = ชุดยอดนิยม)">
         <button class="btn ghost" id="skuSearch">ค้นหา</button>
       </div>
       <div class="refrow" id="skuGrid" style="margin-top:9px"></div>
@@ -194,9 +194,9 @@
     <div style="margin-top:12px">
       <button class="btn ghost sm" id="editPromptBtn">ดู & แก้ prompt เต็ม (ขยาย/เขียนเพิ่มเองได้)</button>
       <div id="editPromptWrap" style="display:none;margin-top:8px">
-        <label>Prompt เต็ม — แก้ได้เต็มที่ (ล้างช่องนี้ = กลับไปใช้ prompt ที่ระบบสร้าง)</label>
+        <label>Prompt เต็ม · แก้ได้เต็มที่ (ล้างช่องนี้ = กลับไปใช้ prompt ที่ระบบสร้าง)</label>
         <textarea id="editPrompt" style="min-height:180px;font-size:12px;line-height:1.5"></textarea>
-        <div class="meta" style="margin-top:4px">ถ้ามีข้อความในช่องนี้ตอนกดเจน ระบบจะใช้ prompt นี้แทน (รูป reference ยังแนบให้เหมือนเดิม)</div>
+        <div class="meta" style="margin-top:4px">มีข้อความในช่องนี้ ระบบจะใช้แทน prompt เดิม</div>
       </div>
     </div>
     <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px;color:var(--ink);cursor:pointer">
@@ -208,9 +208,9 @@
       <button class="btn clay" id="genBtn">เจนภาพช็อตนี้</button>
       <span class="meta" id="genStatus"></span>
     </div>
-    <div class="meta" style="margin-top:8px">กติกา: ต้องกด "ผ่าน/ไม่ผ่าน" รูปก่อนหน้าของตัวเอง ก่อนถึงจะเจนรูปใหม่ได้ — ความเห็นทุกอันเข้าระบบออดิท</div>
+    <div class="meta" style="margin-top:8px">ต้องตัดสินรูปก่อนหน้าให้ครบก่อนเจนใหม่ · ความเห็นเข้าระบบออดิท</div>
     <div class="notice" id="pendWrap" style="display:none;margin-top:10px">
-      <div style="margin-bottom:8px"><b>ยังมีรูปที่ยังไม่ได้ตัดสิน</b> (SHOT <span id="pendShot"></span>) — กดผ่าน/ไม่ผ่านก่อน แล้วค่อยเจนใหม่ค่ะ</div>
+      <div style="margin-bottom:8px"><b>ยังมีรูปที่ยังไม่ได้ตัดสิน</b> (SHOT <span id="pendShot"></span>) · กดผ่าน/ไม่ผ่านก่อน แล้วค่อยเจนใหม่ค่ะ</div>
       <img id="pendImg" style="width:100%;border-radius:9px;display:block;margin-bottom:8px">
       <div class="fbrow" style="margin-top:0">
         <button class="btn sage sm" id="pendPass">ผ่าน</button>
@@ -221,13 +221,13 @@
   </div>
 
   <div class="card" id="newSceneCard" style="display:none">
-    <h2>สร้าง scene ใหม่เอง <span class="hint">เขียน prompt เองสำหรับ scene ที่ยังไม่มีในลิสต์ — ใช้นางแบบ/ชุด/สถานที่ที่เลือกด้านบน</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <h2>สร้าง scene ใหม่เอง <span class="hint">สำหรับ scene ที่ยังไม่มีในลิสต์</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
     <div class="fieldhelp">เขียนบรรยายเองสำหรับซีนที่ยังไม่มีในลิสต์ ระบบจะใช้ตัวละคร/ชุด/สถานที่ที่เลือกไว้<span class="rec">แนะนำ: เขียนสั้น ชัด บอกมุมกล้อง+อารมณ์ เช่น "โคลสอัพใบหน้ายิ้ม แสงอุ่นตอนเย็น"</span></div>
-    <label>Prompt scene ใหม่ (ภาษาอังกฤษได้ผลดีกว่า — บรรยายฉาก ตัวละคร การกระทำ มุมกล้อง แสง องค์ประกอบให้ครบ)</label>
+    <label>Prompt scene ใหม่ (ภาษาอังกฤษได้ผลดีกว่า · บรรยายฉาก ตัวละคร การกระทำ มุมกล้อง แสง องค์ประกอบให้ครบ)</label>
     <textarea id="newScenePrompt" style="min-height:150px" placeholder="เช่น: Cinematic wide shot of Meili standing by a sunlit window in a warm cream bedroom, holding a LLOOP dress, soft golden morning light, 35mm, complete balanced composition, all elements in frame..."></textarea>
-    <div class="meta" style="margin-top:6px">เลือกชุดพระเอกให้ scene นี้ (ถ้าต้องการ) — ค้นหาแล้วกดเลือก</div>
+    <div class="meta" style="margin-top:6px">เลือกชุดพระเอกให้ scene นี้ (ถ้าต้องการ)</div>
     <div style="display:flex;gap:8px;margin-top:6px">
-      <input type="text" id="nsSkuInput" placeholder="พิมพ์กรองสด — ชื่อชุด / รหัส / แบรนด์">
+      <input type="text" id="nsSkuInput" placeholder="พิมพ์กรองสด · ชื่อชุด / รหัส / แบรนด์">
       <button class="btn ghost" id="nsSkuSearch">ค้นหา</button>
     </div>
     <div class="refrow" id="nsSkuGrid" style="margin-top:9px"></div>
@@ -239,21 +239,21 @@
   </div>
 
   <div class="card" id="lbCard">
-    <h2>Lookbook Studio <span class="hint">ภาพถ่ายสตูดิโอ นางแบบ + ชุดจริงจากคลัง — ไม่ต้องอิง storyboard · แนวตั้ง 3:4</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
+    <h2>Lookbook Studio <span class="hint">ภาพสตูดิโอ 3:4 ไม่ต้องอิง storyboard</span><span class="qh" onclick="qhToggle(this)">?</span></h2>
     <div class="fieldhelp">โหมดถ่ายรูปสตูดิโอ นางแบบใส่ชุดจริงจากคลัง ไม่ต้องอิงสตอรี่บอร์ด ได้รูปแนวตั้ง 3:4 ไปโพสต์ได้เลย<span class="rec">แนะนำ: เลือกชุดจากคลัง + นางแบบ แล้วกดเจน เหมาะทำรูปโพสต์ไอจี/ขายของ</span></div>
     <div class="meta" style="margin-bottom:10px">นางแบบ = ตัวละครที่เลือกในการ์ด "ตัวละคร/นางแบบ" ด้านบน</div>
     <label>ชุดที่จะใส่ (ค้นหาจากคลังจริง แล้วกดเลือก)</label>
     <div style="display:flex;gap:8px">
-      <input type="text" id="lbSkuInput" placeholder="พิมพ์กรองสด — ชื่อชุด / รหัส / แบรนด์ (ว่างไว้ = ชุดยอดนิยม)">
+      <input type="text" id="lbSkuInput" placeholder="พิมพ์กรองสด · ชื่อชุด / รหัส / แบรนด์ (ว่างไว้ = ชุดยอดนิยม)">
       <button class="btn ghost" id="lbSkuSearch">ค้นหา</button>
     </div>
     <div class="refrow" id="lbSkuGrid" style="margin-top:9px"></div>
     <div class="meta" id="lbSkuSel" style="margin:6px 0 10px"></div>
     <label>สไตล์ภาพ</label>
     <div class="chips" id="lbStyleChips" style="margin-bottom:10px"></div>
-    <label>ธีมหนัง (Movie Vibe) — ใส่สูตรสี/แสง/มู้ดของหนัง (เลือกได้ 1 หรือไม่เลือก)</label>
+    <label>ธีมหนัง (Movie Vibe) · ใส่สูตรสี/แสง/มู้ดของหนัง (เลือกได้ 1 หรือไม่เลือก)</label>
     <div class="chips" id="lbMovieChips" style="margin-bottom:10px"></div>
-    <label>ท่าโพส — เลือกได้หลายท่า (สูงสุด 4) จะได้รูปหลายมุมจาก setup เดียวเหมือนถ่าย lookbook จริง</label>
+    <label>ท่าโพส · เลือกได้หลายท่า (สูงสุด 4) จะได้รูปหลายมุมจาก setup เดียวเหมือนถ่าย lookbook จริง</label>
     <div class="chips" id="lbPoseChips" style="margin-bottom:10px"></div>
     <label>ฉากหลังสตูดิโอ</label>
     <div class="chips" id="lbBgChips" style="margin-bottom:10px"></div>
@@ -270,7 +270,7 @@
   <div class="card" id="resultCard" style="display:none">
     <h2 id="resultTitle">ผลการเจน</h2>
     <div class="meta" id="resultRef" style="margin-bottom:4px;color:var(--sage)"></div>
-    <div class="meta" style="margin-bottom:10px">กด "ผ่าน/ไม่ผ่าน" ให้ครบทุกรูปก่อนเจนรอบถัดไป — ความเห็นเข้าระบบออดิทให้เจ้าของ</div>
+    <div class="meta" style="margin-bottom:10px">กดผ่าน/ไม่ผ่าน ความเห็นส่งเข้าระบบออดิทให้เจ้าของ</div>
     <div id="resultGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px"></div>
   </div>
 
@@ -294,7 +294,7 @@
 <script>
 // ── modal อธิบายทุกตัวเลือกในกลุ่ม (กด "?" ข้าง label) + รูปประกอบ SVG ──
 function escH(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-// สี/มู้ด/ผัง เป็น SVG (ไม่ต้อง gen รูป) — สีฉากเป็นสีจริง · มู้ดหนังเป็นไล่เฉดสี · ท่าโพส/มุมกล้องเป็นผัง
+// สี/มู้ด/ผัง เป็น SVG (ไม่ต้อง gen รูป) · สีฉากเป็นสีจริง · มู้ดหนังเป็นไล่เฉดสี · ท่าโพส/มุมกล้องเป็นผัง
 var VIZ_SOLID = { cream:'#ECE6DA', white:'#F6F4F0', greige:'#D6CDBF', terracotta:'#B5734B' };
 var VIZ_GRAD = {
   film:['#EDE3D2','#D3BE9C'], studio:['#F3F3F1','#D9D9D6'],
@@ -349,10 +349,13 @@ function qhInfo(title, body, rec){
   document.getElementById('optModal').classList.add('on');
 }
 function closeOptModal(){ document.getElementById('optModal').classList.remove('on'); }
-// "?" รายช่อง: กดสลับเปิด/ปิดกล่องช่วยเหลือที่อยู่ถัดจาก h2
+// "?" รายช่อง: กดสลับเปิด/ปิดกล่องช่วยเหลือที่อยู่ถัดไป
+// เดิมมองหาแค่ h2 ทำให้ปุ่ม ? ที่วางไว้ตรงอื่น (เช่น ข้างปุ่มเพิ่มนางแบบ) กดแล้วเงียบ
 function qhToggle(el){
-  var h = el.closest('h2'); if(!h) return;
-  var box = h.nextElementSibling;
+  var a = el.closest('h2');
+  if(!a){ a = el.parentElement; while(a && !(a.nextElementSibling && a.nextElementSibling.classList
+          && a.nextElementSibling.classList.contains('fieldhelp'))) a = a.parentElement; }
+  var box = a && a.nextElementSibling;
   if(box && box.classList.contains('fieldhelp')){ box.classList.toggle('on'); el.classList.toggle('on'); }
 }
 const $ = (s) => document.querySelector(s);
@@ -360,11 +363,11 @@ const CONF = window.CONFIG || {};
 const FN = (CONF.SUPABASE_URL || 'https://rprwilsbjptdnvsibjgi.supabase.co') + '/functions/v1/storyboard-gen';
 
 const PRESETS = [
-  { label: 'แก้ตู้/ฉากหลังให้ต่อเนื่อง', note: 'Fix continuity: the wardrobe must be OPEN with clothes mid-collapse where the story requires; the background behind Meili must be the same condo bedroom (linen-curtained window, wooden wardrobe, bed) — never a second wardrobe or a different room.' },
+  { label: 'แก้ตู้/ฉากหลังให้ต่อเนื่อง', note: 'Fix continuity: the wardrobe must be OPEN with clothes mid-collapse where the story requires; the background behind Meili must be the same condo bedroom (linen-curtained window, wooden wardrobe, bed) · never a second wardrobe or a different room.' },
   { label: 'หน้าตรง reference เป๊ะ', note: 'Match Meili\'s face to the character reference EXACTLY: same face shape, freckles across nose and cheeks, single beauty mark below the outer corner of her LEFT eye, same hairstyle and age (early twenties). No age drift, no different person.' },
   { label: 'คุมโทนทองอบอุ่น', note: 'Grade the light warmer: soft golden 3200K-3600K practical glow motivated by the phone screen; premium and gentle, never neon, never cold blue.' },
-  { label: 'ลดความรก ดูแพงขึ้น', note: 'Reduce clutter slightly: clothing piles stay soft, elegant and stylish — fashion-editorial mess, not dirty or chaotic.' },
-  { label: 'จอมือถือแบบหน้าเว็บจริง', note: 'The phone screen must look like a real minimal e-commerce web page showing one hero dress photo with a subtle golden circular LLOOP ring motif — clean UI, no readable text, no fake app icons.' },
+  { label: 'ลดความรก ดูแพงขึ้น', note: 'Reduce clutter slightly: clothing piles stay soft, elegant and stylish · fashion-editorial mess, not dirty or chaotic.' },
+  { label: 'จอมือถือแบบหน้าเว็บจริง', note: 'The phone screen must look like a real minimal e-commerce web page showing one hero dress photo with a subtle golden circular LLOOP ring motif · clean UI, no readable text, no fake app icons.' },
 ];
 const REF_TH = { meili: 'หน้า Meili', outfit: 'ชุดอยู่บ้าน', room: 'ห้องปกติ', room_messy: 'ห้องรก', logo: 'โลโก้ LLOOP', hero_dress: 'ชุดพระเอก',
   woman_a: 'Woman A (30-35 ผมรวบ)', woman_b: 'Woman B (22-25 ผมยาว)', woman_c: 'Woman C (25-30 ผมยาวสีทอง หน้าม้า)' };
@@ -385,17 +388,17 @@ async function sgb(task, args) {
     clearTimeout(tmo);
     const to = e && e.name === 'AbortError';
     return { error: { code: to ? 'timeout' : 'network', message: to
-      ? 'ใช้เวลานานเกินไป — ลองลดจำนวนท่าโพส (เจนทีละ 1-2 ท่า) แล้วลองใหม่' : 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง' } };
+      ? 'ใช้เวลานานเกินไป · ลองลดจำนวนท่าโพส (เจนทีละ 1-2 ท่า) แล้วลองใหม่' : 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง' } };
   }
   clearTimeout(tmo);
   const out = await r.json().catch(() => ({}));
   if (!r.ok || out.error) {
     const map = { unauthorized: 'เซสชันหมดอายุ รีเฟรชหน้าแล้วล็อกอินใหม่', no_access: 'ไม่มีสิทธิ์ใช้งานหลังบ้าน',
-      role_denied: 'สิทธิ์ไม่พอ (ต้องเป็นทีมการตลาด/ผู้จัดการ/เจ้าของ)', feature_disabled: 'ฟีเจอร์ยังปิดอยู่ — ให้เจ้าของเปิดที่หน้า Settings',
+      role_denied: 'สิทธิ์ไม่พอ (ต้องเป็นทีมการตลาด/ผู้จัดการ/เจ้าของ)', feature_disabled: 'ฟีเจอร์ยังปิดอยู่ · ให้เจ้าของเปิดที่หน้า Settings',
       no_api_key: 'ยังไม่ได้ตั้ง GOOGLE_AI_API_KEY ฝั่งเซิร์ฟเวอร์', gen_failed: out.message || 'เจนไม่สำเร็จ' };
     let msg = map[out.error] || out.message || out.error || ('http ' + r.status);
     if (/IMAGE_SAFETY|SAFETY|PROHIBITED/i.test(String(out.message || out.error || ''))) {
-      msg = 'ตัวกรองของ Gemini บล็อกรูปนี้ — ลองกดเจนใหม่อีกครั้ง (บางทีผ่าน) หรือเปลี่ยนชุด/นางแบบ/ท่าโพส หรือเลี่ยงชุดที่เปิดเผยมาก';
+      msg = 'ตัวกรองของ Gemini บล็อกรูปนี้ · ลองกดเจนใหม่อีกครั้ง (บางทีผ่าน) หรือเปลี่ยนชุด/นางแบบ/ท่าโพส หรือเลี่ยงชุดที่เปิดเผยมาก';
     }
     return { error: { code: out.error, message: msg }, data: out };
   }
@@ -451,7 +454,7 @@ function openView(url, label, editCfg) {
   const wrap = $('#viewDescWrap');
   if (VIEW_EDIT) {
     wrap.style.display = ''; $('#viewDesc').value = VIEW_EDIT.desc || '';
-    $('#viewDescStatus').textContent = VIEW_EDIT.desc ? '' : 'ยังไม่มีคำบรรยาย — กด "สร้างใหม่จากรูป"';
+    $('#viewDescStatus').textContent = VIEW_EDIT.desc ? '' : 'ยังไม่มีคำบรรยาย · กด "สร้างใหม่จากรูป"';
   } else { wrap.style.display = 'none'; }
   $('#viewModal').classList.add('show');
 }
@@ -464,7 +467,7 @@ $('#viewRegenDesc').onclick = async () => {
     ? await sgb('garment_desc', { sku: VIEW_EDIT.sku, regen: true })
     : await sgb('set_desc', { kind: VIEW_EDIT.kind, key: VIEW_EDIT.key, desc: '' });
   if (error) { $('#viewDescStatus').textContent = 'ไม่สำเร็จ: ' + error.message; return; }
-  $('#viewDesc').value = data.desc || ''; $('#viewDescStatus').textContent = 'สร้างใหม่แล้ว — กดบันทึกถ้าโอเค';
+  $('#viewDesc').value = data.desc || ''; $('#viewDescStatus').textContent = 'สร้างใหม่แล้ว · กดบันทึกถ้าโอเค';
 };
 $('#viewSaveDesc').onclick = async () => {
   if (!VIEW_EDIT) return;
@@ -487,7 +490,7 @@ $('#viewTestDesc').onclick = async () => {
   $('#viewTestWrap').style.display = '';
   $('#viewTestReal').src = $('#viewImg').src;
   $('#viewTestGen').src = data.url;
-  $('#viewDescStatus').textContent = 'เทียบดูว่าตรงไหม — ถ้าไม่ตรง แก้คำบรรยายแล้วกดทดสอบใหม่';
+  $('#viewDescStatus').textContent = 'เทียบดูว่าตรงไหม · ถ้าไม่ตรง แก้คำบรรยายแล้วกดทดสอบใหม่';
 };
 
 function makeLib(cfg) {
@@ -557,7 +560,7 @@ function makeSkuPicker(cfg) {
     const g = $(cfg.grid); g.innerHTML = '<div class="loading">กำลังค้นหา…</div>';
     const { data, error } = await window.opsRpc('garments_pick', { p_q: q || null, p_limit: 12 });
     if (error) { g.innerHTML = '<div class="err">' + error.message + '</div>'; return; }
-    if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด — ลองคำอื่น</div>'; return; }
+    if (!data || !data.length) { g.innerHTML = '<div class="loading">ไม่พบชุด · ลองคำอื่น</div>'; return; }
     g.innerHTML = '';
     for (const it of data) {
       const d = document.createElement('div');
@@ -573,7 +576,7 @@ function makeSkuPicker(cfg) {
         openView(it.photo, (it.name || it.code), { sku: it.code, desc: '' });
         $('#viewDescStatus').textContent = 'กำลังโหลดคำบรรยาย…';
         const { data } = await sgb('garment_desc', { sku: it.code });
-        if (data) { $('#viewDesc').value = data.desc || ''; VIEW_EDIT && (VIEW_EDIT.desc = data.desc || ''); $('#viewDescStatus').textContent = data.desc ? '' : 'ยังไม่มีคำบรรยาย — กด "สร้างใหม่จากรูป"'; }
+        if (data) { $('#viewDesc').value = data.desc || ''; VIEW_EDIT && (VIEW_EDIT.desc = data.desc || ''); $('#viewDescStatus').textContent = data.desc ? '' : 'ยังไม่มีคำบรรยาย · กด "สร้างใหม่จากรูป"'; }
       };
       g.appendChild(d);
     }
@@ -666,16 +669,16 @@ const getLbMovie = makeChips('#lbMovieChips', MOVIES, true);
 const getLbCam = makeChips('#lbCamChips', CAMS, false);
 const getLbBg = makeChips('#lbBgChips', BGS, true);
 const getLbStyle = makeChips('#lbStyleChips', [
-  { key: 'film', label: 'ฟิล์ม lookbook (สูตรวิจัย Portra 400)', desc: 'สูตรลุคแบบเพจ @lookbooklookbook — โทนครีมอุ่น ฟิล์ม Portra 400 เกรนนุ่ม ผิวดูเป็นธรรมชาติจริง ไม่เนียนเกิน เหมาะสายมินิมอล/วินเทจ' },
+  { key: 'film', label: 'ฟิล์ม lookbook (สูตรวิจัย Portra 400)', desc: 'สูตรลุคแบบเพจ @lookbooklookbook · โทนครีมอุ่น ฟิล์ม Portra 400 เกรนนุ่ม ผิวดูเป็นธรรมชาติจริง ไม่เนียนเกิน เหมาะสายมินิมอล/วินเทจ' },
   { key: 'studio', label: 'สตูดิโอคลีน', desc: 'ภาพสตูดิโอคมชัด แสงเรียบ พื้นหลังสะอาด ดูพรีเมียมเหมือนแคตตาล็อกแบรนด์ เหมาะรูปขายของ/หน้าเว็บ' },
 ], true);
 const getLbPoses = makeChips('#lbPoseChips', [
-  { key: 'front', label: 'หน้าตรงเต็มตัว', desc: 'ยืนหน้าตรง มองกล้อง เห็นชุดเต็มตัวชัดสุด — ท่ามาตรฐานโชว์ทั้งลุค เหมาะเป็นรูปหลักหน้าเว็บ' },
-  { key: 'side34', label: 'หันข้าง 3/4', desc: 'หันตัวเฉียง 3/4 เห็นทรงชุดด้านข้าง ดูมีมิติ เพรียว — เหมาะโชว์เอว/ทรงกระโปรง' },
-  { key: 'back', label: 'ด้านหลังชุด', desc: 'หันหลัง โชว์ดีเทลด้านหลังชุด (ซิป/โบว์/หลังเปิด) — เหมาะชุดที่จุดเด่นอยู่ข้างหลัง' },
-  { key: 'walk', label: 'เดินแบบ', desc: 'ท่าเดินธรรมชาติ ชายชุด/ผ้าพลิ้ว ดูมีชีวิต — เหมาะชุดยาว/กระโปรงบาน' },
-  { key: 'detail', label: 'โคลสอัพดีเทลชุด', desc: 'ระยะใกล้เก็บเนื้อผ้า งานปัก ลูกไม้ ดีเทลชุด — เหมาะโชว์คุณภาพงาน' },
-  { key: 'sit', label: 'ท่านั่ง', desc: 'ท่านั่งสง่า ชุดทิ้งตัวเป็นทรงสวย — เหมาะชุดราตรี/ภาพมู้ดหรู' },
+  { key: 'front', label: 'หน้าตรงเต็มตัว', desc: 'ยืนหน้าตรง มองกล้อง เห็นชุดเต็มตัวชัดสุด · ท่ามาตรฐานโชว์ทั้งลุค เหมาะเป็นรูปหลักหน้าเว็บ' },
+  { key: 'side34', label: 'หันข้าง 3/4', desc: 'หันตัวเฉียง 3/4 เห็นทรงชุดด้านข้าง ดูมีมิติ เพรียว · เหมาะโชว์เอว/ทรงกระโปรง' },
+  { key: 'back', label: 'ด้านหลังชุด', desc: 'หันหลัง โชว์ดีเทลด้านหลังชุด (ซิป/โบว์/หลังเปิด) · เหมาะชุดที่จุดเด่นอยู่ข้างหลัง' },
+  { key: 'walk', label: 'เดินแบบ', desc: 'ท่าเดินธรรมชาติ ชายชุด/ผ้าพลิ้ว ดูมีชีวิต · เหมาะชุดยาว/กระโปรงบาน' },
+  { key: 'detail', label: 'โคลสอัพดีเทลชุด', desc: 'ระยะใกล้เก็บเนื้อผ้า งานปัก ลูกไม้ ดีเทลชุด · เหมาะโชว์คุณภาพงาน' },
+  { key: 'sit', label: 'ท่านั่ง', desc: 'ท่านั่งสง่า ชุดทิ้งตัวเป็นทรงสวย · เหมาะชุดราตรี/ภาพมู้ดหรู' },
 ], false);
 // ค่าเริ่มต้น: สไตล์ฟิล์ม (สูตรวิจัย) + ท่าหน้าตรง
 document.querySelector('#lbStyleChips .chip[data-key="film"]').classList.add('on');
@@ -689,8 +692,8 @@ async function loadShots() {
   if (!data.enabled) {
     const n = $('#flagNote'); n.style.display = '';
     n.textContent = data.is_owner
-      ? 'สวิตช์ Storyboard Studio ยังปิดอยู่ — เจ้าของทดสอบได้ แต่ทีมยังใช้ไม่ได้ (เปิดที่หน้า Settings)'
-      : 'ฟีเจอร์ยังปิดอยู่ — แจ้งเจ้าของให้เปิดสวิตช์ที่หน้า Settings ก่อนนะคะ';
+      ? 'สวิตช์ Storyboard Studio ยังปิดอยู่ · เจ้าของทดสอบได้ แต่ทีมยังใช้ไม่ได้ (เปิดที่หน้า Settings)'
+      : 'ฟีเจอร์ยังปิดอยู่ · แจ้งเจ้าของให้เปิดสวิตช์ที่หน้า Settings ก่อนนะคะ';
   }
   renderShots();
 }
@@ -708,7 +711,7 @@ function selectShot(no) {
   SEL = SHOTS.find((x) => x.shot === no);
   renderShots();
   $('#genCard').style.display = '';
-  $('#genTitle').textContent = `เจนภาพ · SHOT ${SEL.shot} — ${SEL.title}`;
+  $('#genTitle').textContent = `เจนภาพ · SHOT ${SEL.shot} · ${SEL.title}`;
   $('#shotFields').innerHTML = `<b>หน้าที่ในเรื่อง:</b> ${SEL.story_function || '-'}<br><b>อารมณ์:</b> ${SEL.emotion || '-'}<br><b>Reference ที่จะแนบ:</b> ${(SEL.refs_needed || []).map((r) => REF_TH[r] || r).join(' · ')}`;
   const needDress = (SEL.refs_needed || []).includes('hero_dress');
   $('#skuWrap').style.display = needDress ? '' : 'none';
@@ -768,7 +771,7 @@ $('#genBtn').onclick = async () => {
     $('#genStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return;
   }
   $('#genStatus').textContent = (data.refs_missing || []).length ? 'สำเร็จ (แต่ขาด ref: ' + data.refs_missing.map((r) => REF_TH[r] || r).join(', ') + ')' : 'สำเร็จ';
-  showResult(data, `ผลการเจน · SHOT ${SEL.shot} — ${SEL.title}`);
+  showResult(data, `ผลการเจน · SHOT ${SEL.shot} · ${SEL.title}`);
 };
 
 function showResult(data, title) {
@@ -801,7 +804,7 @@ function showResult(data, title) {
     promptB.onclick = () => { pb.style.display = pb.style.display === 'none' || !pb.style.display ? 'block' : 'none'; };
     const judge = async (rating) => {
       const { error } = await sgb('feedback', { gen_id: it.gen_id, rating, note: noteI.value.trim() || undefined });
-      st.textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : (rating === 'pass' ? 'ผ่าน — บันทึกแล้ว' : 'ไม่ผ่าน — บันทึกแล้ว');
+      st.textContent = error ? 'บันทึกไม่สำเร็จ: ' + error.message : (rating === 'pass' ? 'ผ่าน · บันทึกแล้ว' : 'ไม่ผ่าน · บันทึกแล้ว');
       if (!error) { passB.disabled = true; failB.disabled = true; noteI.disabled = true; loadHistory(); }
     };
     passB.onclick = () => judge('pass');
@@ -833,7 +836,7 @@ $('#lbGenBtn').onclick = async () => {
     $('#lbStatus').innerHTML = '<span class="err">' + error.message + '</span>'; loadHistory(); return;
   }
   $('#lbStatus').textContent = 'สำเร็จ';
-  showResult(data, 'ผลการเจน · Lookbook — ' + LB_SKU);
+  showResult(data, 'ผลการเจน · Lookbook · ' + LB_SKU);
 };
 // ── กติกาบังคับตัดสินรูปค้าง: โชว์รูปที่ยังไม่ได้ตัดสิน ให้กดก่อนเจนใหม่ ──
 let PEND = null;
@@ -845,7 +848,7 @@ function showPending(p) {
   if (wrap && pw.parentElement !== wrap) wrap.insertBefore(pw, wrap.firstChild);
   pw.style.display = '';
   const gs = $('#genStatus'); if (gs) gs.innerHTML = '<span class="err">ต้องตัดสินรูปก่อนหน้าก่อนค่ะ</span>';
-  const lb = $('#lbStatus'); if (lb) lb.innerHTML = '<span class="err">มีรูปค้างรอตัดสิน — เลื่อนขึ้นไปกดผ่าน/ไม่ผ่านก่อนค่ะ</span>';
+  const lb = $('#lbStatus'); if (lb) lb.innerHTML = '<span class="err">มีรูปค้างรอตัดสิน · เลื่อนขึ้นไปกดผ่าน/ไม่ผ่านก่อนค่ะ</span>';
   $('#pendShot').textContent = p.shot || '(Lookbook)';
   $('#pendImg').src = p.url || '';
   pw.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -855,7 +858,7 @@ async function judgePending(rating) {
   const { error } = await sgb('feedback', { gen_id: PEND.gen_id, rating, note: $('#pendNote').value.trim() || undefined });
   if (error) { alert('บันทึกไม่สำเร็จ: ' + error.message); return; }
   PEND = null; $('#pendWrap').style.display = 'none'; $('#pendNote').value = '';
-  $('#genStatus').textContent = 'ตัดสินแล้ว — กดเจนได้เลยค่ะ';
+  $('#genStatus').textContent = 'ตัดสินแล้ว · กดเจนได้เลยค่ะ';
   loadHistory();
 }
 $('#pendPass').onclick = () => judgePending('pass');
@@ -882,7 +885,7 @@ async function loadHistory() {
     d.className = 'hrow';
     const when = new Date(r.created_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' });
     const fb = r.feedback_rating ? `<span class="tag ${r.feedback_rating}">${r.feedback_rating === 'pass' ? 'ผ่าน' : 'ไม่ผ่าน'}</span>` : '';
-    const note = r.feedback_note ? `<div class="meta">“${r.feedback_note}” — ${r.feedback_by || ''}</div>` : (r.fix_note ? `<div class="meta">โน้ต: ${r.fix_note.slice(0, 90)}</div>` : '');
+    const note = r.feedback_note ? `<div class="meta">“${r.feedback_note}” · ${r.feedback_by || ''}</div>` : (r.fix_note ? `<div class="meta">โน้ต: ${r.fix_note.slice(0, 90)}</div>` : '');
     const what = r.mode === 'lookbook' ? `Lookbook · ${r.sku || ''}` : `SHOT ${r.shot}`;
     d.innerHTML = `<div><b>${what}</b> · ${r.employee_name || '-'} <span class="meta">· ${when} · ${r.preset || 'มาตรฐาน'}</span>${note}</div>
       <div><span class="tag ${r.status}">${r.status === 'ok' ? 'สำเร็จ' : 'พัง'}</span> ${fb}</div>`;

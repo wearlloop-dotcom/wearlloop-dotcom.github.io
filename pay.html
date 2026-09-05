@@ -124,7 +124,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=38"></script>
 <script src="me-api.js?v=56"></script>
-<script src="api.js?v=64"></script>
+<script src="api.js?v=65"></script>
 <script>
 // ============================================================
 //  pay.html — บิลรายคนของ split-pay group rental
@@ -154,7 +154,7 @@ function readOrder(){
 const ORDER = readOrder();
 
 // ============================================================
-//  MOCK (พรีวิวได้โดยไม่ต้องล็อกอิน LINE) — mirror group-checkout.html
+//  MOCK (พรีวิวได้โดยไม่ต้องล็อกอิน LINE) · mirror group-checkout.html
 // ============================================================
 const MOCK_SUMMARY = {
   order_group:'OG-7A21', theme:'autumn',
@@ -259,7 +259,7 @@ function billHtml(s){
     </div>` : '';
 
   const holdNote = !s.paid ? `<div class="holdnote"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      เรากันชุดให้ 30 นาที — โอนก่อนหมดเวลานะคะ</div>` : '';
+      เรากันชุดให้ 30 นาที · โอนก่อนหมดเวลานะคะ</div>` : '';
 
   return `<div class="sec">
     <div class="sechead"><div><div class="sectitle">บิลของคุณ · จองตีมกับเพื่อน</div>
@@ -280,7 +280,7 @@ function billHtml(s){
 function payHtml(s, pay){
   const hasPay = pay && (pay.pay_account_no || pay.pay_promptpay_qr || pay.pay_promptpay_id);
   const payInner = !hasPay
-    ? `<div class="seccap" style="text-align:left">ช่องทางชำระจะแสดงในแชต LINE — โอนแล้วแนบสลิปได้เลยค่ะ</div>`
+    ? `<div class="seccap" style="text-align:left">ช่องทางชำระจะแสดงในแชต LINE · โอนแล้วแนบสลิปได้เลยค่ะ</div>`
     : `<div class="qhd">ช่องทางชำระ</div>
       ${pay.pay_account_no?`<div class="qrow"><span>${esc(pay.pay_bank_name||'โอนเข้าบัญชี')}</span><b>${esc(pay.pay_account_no)}</b></div>
         ${pay.pay_account_name?`<div style="font-size:12px;color:var(--muted);text-align:right">${esc(pay.pay_account_name)}</div>`:''}`:''}
@@ -341,7 +341,7 @@ function renderPaid(){
       <div class="done">
         <div class="di"><span class="ck"></span></div>
         <h4>จ่ายแล้ว</h4>
-        <p>ขอบคุณค่ะ — เราเห็นการโอนแล้ว เดี๋ยวตรวจสลิปและส่งยืนยันให้ทาง LINE ค่ะ</p>
+        <p>ขอบคุณค่ะ · เราเห็นการโอนแล้ว เดี๋ยวตรวจสลิปและส่งยืนยันให้ทาง LINE ค่ะ</p>
       </div>
       <div class="totbox" style="border-top:1px dashed var(--line)">
         <div class="trow hl" style="border-top:none;margin-top:0;padding-top:0"><span>ยอดที่โอน</span><span>${baht(s.total)}</span></div>

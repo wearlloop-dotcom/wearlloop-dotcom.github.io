@@ -160,7 +160,7 @@
     const photo=(d.photos||o.photos||[])[0]||'';
     const q=new URLSearchParams({acq:o.id||'',name:o.name||'',brand:o.brand||'',size:o.size||'',
       condition:COND_MAP[o.condition]||'',cost:o.offered_price??'',color:o.color_name||'',fabric:o.fabric||'',photo});
-      // cost = ราคาที่เราตกลงซื้อเท่านั้น — ห้าม fallback ไป asking_price (ราคาขอของผู้ขาย) เดี๋ยวทุนเพี้ยน
+      // cost = ราคาที่เราตกลงซื้อเท่านั้น · ห้าม fallback ไป asking_price (ราคาขอของผู้ขาย) เดี๋ยวทุนเพี้ยน
     return 'intake.html?'+q.toString();
   }
 

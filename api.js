@@ -59,7 +59,7 @@ window.API = (function () {
       waist: (r.waist_min_in!= null)? [r.waist_min_in, r.waist_max_in] : null,
       hip: r.hip_in, length: r.length_cm,
       fitAvg: r.fit_avg!= null? Number(r.fit_avg) : null, fitN: r.fit_n || 0, fitLabel: r.fit_label || null,
-      colors: r.color_hex? [[r.color_name ||'สี', r.color_hex]] : [['—','#E7E2DA']],
+      colors: r.color_hex? [[r.color_name ||'สี', r.color_hex]] : [['…','#E7E2DA']],
       season: r.color_season, occasion_tags: r.occasion_tags || [],
       tags: Array.isArray(r.tags) ? r.tags : [],   // ลาย/เนื้อผ้า (lace/floral/satin…) ไว้ค้นหา
       colorFamily: r.color_family || null,          // กลุ่มสีที่ operator ตั้งเอง (คุมตัวกรองสีตรง ๆ)
@@ -75,7 +75,7 @@ window.API = (function () {
     const c = client();
     // 1) LINE login — ต้องไม่ทำให้แคตตาล็อกพัง (ถ้า LIFF/redirect error ก็โหลดชุดแบบ anon)
     let profile = null;
-    try { profile = await window.LiffAuth.login(); } catch (e) { console.warn('LLOOP: LIFF login failed — catalog only', e); }
+    try { profile = await window.LiffAuth.login(); } catch (e) { console.warn('LLOOP: LIFF login failed · catalog only', e); }
     lineUid = profile && profile.userId;
 
     // 2) upsert ลูกค้าจาก UID + log touchpoint (remarketing audience)
@@ -98,7 +98,7 @@ window.API = (function () {
           const { data: code } = await window.meRpc('ensure_link_code', { p_customer: customer.id });
           if (code) customer.link_code = code;
         }
-      } catch (e) { console.warn('LLOOP: profile load skipped — showing catalog anyway', e); }
+      } catch (e) { console.warn('LLOOP: profile load skipped · showing catalog anyway', e); }
     }
     // login ผ่านแต่โหลดโปรไฟล์ไม่ได้ → ไม่ redirect อัตโนมัติเด็ดขาด (เคยพา loop login วนไม่จบ)
     // app.js จะโชว์ประตูเข้าสู่ระบบ ให้ผู้ใช้กดปุ่มเอง (signIn ล้าง session เก่าให้แล้ว)
@@ -151,7 +151,7 @@ window.API = (function () {
     if (!window.meRpc) return { ok: false, error: 'ต้องเข้าสู่ระบบด้วย LINE ก่อน' };
     const { data, error } = await window.meRpc('customer_claim_code', { p_code: code });
     if (error) return { ok: false, error: error.message };
-    const map = { not_found: 'ไม่พบรหัสนี้ — เช็กกับสตูดิโออีกครั้งนะคะ', taken: 'รหัสนี้ถูกผูกกับบัญชีอื่นแล้ว',
+    const map = { not_found: 'ไม่พบรหัสนี้ · เช็กกับสตูดิโออีกครั้งนะคะ', taken: 'รหัสนี้ถูกผูกกับบัญชีอื่นแล้ว',
       no_line: 'ต้องเข้าสู่ระบบด้วย LINE ก่อน', already: 'รหัสนี้อยู่ในบัญชีคุณอยู่แล้ว' };
     if (data === 'ok' || data === 'already') return { ok: true, result: data };
     return { ok: false, error: map[data] || ('ไม่สำเร็จ: ' + data) };

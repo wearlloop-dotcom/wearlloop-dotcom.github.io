@@ -38,7 +38,7 @@
 </head>
 <body>
 <div class="bar">
-  <div><h1>แก้สีชุด</h1><div class="sub">กดเลือกกลุ่มสีที่ถูกต้องของแต่ละชุด — มีผลกับตัวกรองสีหน้าลูกค้าทันที · <a href="/labels.html" style="color:#A75F3A">ป้าย QR ></a></div></div>
+  <div><h1>แก้สีชุด</h1><div class="sub">กดเลือกกลุ่มสีที่ถูกต้องของแต่ละชุด · มีผลกับตัวกรองสีหน้าลูกค้าทันที · <a href="/labels.html" style="color:#A75F3A">ป้าย QR ></a></div></div>
 </div>
 <div class="wrap">
   <input class="search" id="q" placeholder="ค้นหาชื่อ / รหัส / แบรนด์…" oninput="render()">
@@ -98,7 +98,7 @@
         <div class="body">
           <div class="br">${g.brand||''} · ${g.code}</div>
           <div class="nm">${g.name||g.code}</div>
-          <div class="cur"><i style="background:${g.color_hex||'#EDEAE4'}"></i>${g.color_name||'—'}${g.color_family?` · ${g.color_family}`:' · ยังไม่ตั้งกลุ่มสี'}<span class="saved" id="sv_${g.code}">บันทึกแล้ว ✓</span></div>
+          <div class="cur"><i style="background:${g.color_hex||'#EDEAE4'}"></i>${g.color_name||'…'}${g.color_family?` · ${g.color_family}`:' · ยังไม่ตั้งกลุ่มสี'}<span class="saved" id="sv_${g.code}">บันทึกแล้ว ✓</span></div>
           <div class="fams">${fams}</div>
           <div class="nmrow"><input id="nm_${g.code}" value="${(g.color_name||'').replace(/"/g,'&quot;')}" placeholder="ชื่อสี (เช่น French Rose)"><button onclick="saveName('${g.code}')">บันทึกชื่อ</button></div>
         </div>

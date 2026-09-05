@@ -69,7 +69,7 @@
   <section class="phead">
     <div class="eyebrow">repair · mending</div>
     <h1>ชุบชีวิตให้ทุกชุด</h1>
-    <div class="sub">ซ่อมแซมอย่างใส่ใจ ยืดอายุผ้า ลดขยะแฟชั่น — ทุกตะเข็บมีความหมาย</div>
+    <div class="sub">ซ่อมแซมอย่างใส่ใจ ยืดอายุผ้า ลดขยะแฟชั่น · ทุกตะเข็บมีความหมาย</div>
     <div class="kpis">
       <div class="kpi"><span class="n" id="kpiQueue">–</span><span class="l">งานในคิว</span></div>
       <div class="kpi"><span class="n" id="kpiSent">–</span><span class="l">ส่งช่างแล้ว</span></div>
@@ -78,7 +78,7 @@
   </section>
 
   <div class="card">
-    <h2>1) ชุดที่ต้องซ่อม — ใส่โค้ด</h2>
+    <h2>1) ชุดที่ต้องซ่อม · ใส่โค้ด</h2>
     <div class="scan">
       <input id="code" placeholder="เช่น g5" autocomplete="off" enterkeyhint="go">
       <button class="btn dark" onclick="load()">เปิด</button>
@@ -140,7 +140,7 @@
 
   function renderPanel(ex){
     const note = ex && ex.instructions ? ex.instructions : '';
-    const dmg  = ex ? `<div class="hint">บันทึก QC: ${ex.repair_type?(ex.type_label||ex.repair_type):'—'} · สถานะ ${ex.repair_status||'ใหม่'}</div>` : '';
+    const dmg  = ex ? `<div class="hint">บันทึก QC: ${ex.repair_type?(ex.type_label||ex.repair_type):'…'} · สถานะ ${ex.repair_status||'ใหม่'}</div>` : '';
     $('panel').innerHTML=`
       <div style="margin-top:14px">
         <div class="name">${current}</div>
@@ -158,11 +158,11 @@
   }
 
   async function aiAdvise(){
-    const note=prompt('อาการเสียหาย (พิมพ์สั้น ๆ) — ถ้ามีรูปวางลิงก์ต่อท้ายด้วย URL ก็ได้','ซิปหลังขาด'); if(note===null) return;
+    const note=prompt('อาการเสียหาย (พิมพ์สั้น ๆ) · ถ้ามีรูปวางลิงก์ต่อท้ายด้วย URL ก็ได้','ซิปหลังขาด'); if(note===null) return;
     const m=note.match(/https?:\/\/\S+/); const photo=m?m[0]:null; const dmg=m?note.replace(m[0],'').trim():note;
     toast('AI กำลังประเมิน…');
     const { data, error } = await sb.functions.invoke('repair-advise',{ body:{ garment_code:current, photo_url:photo, damage_note:dmg } });
-    if(error||!data||data.error){ toast('AI ยังไม่พร้อม (ยังไม่ deploy) — กรอกเองได้ค่ะ'); return; }
+    if(error||!data||data.error){ toast('AI ยังไม่พร้อม (ยังไม่ deploy) · กรอกเองได้ค่ะ'); return; }
     pickRepairable(!!data.repairable);
     if(data.repairable){
       if(data.repair_type){ pickType(data.repair_type); }
@@ -198,7 +198,7 @@
         <div><label>กำหนดเสร็จ (ถ้ามี)</label><input class="f" id="eta" type="date"></div>
       </div>
       <label>5) ส่งช่างในเครือ</label>
-      <select id="vendor"><option value="">— เลือกช่าง —</option>${vop}</select>
+      <select id="vendor"><option value="">(เลือกช่าง)</option>${vop}</select>
       <button class="btn dark" style="margin-top:12px;width:100%" onclick="sendRepair()">ส่งซ่อม</button>`;
     if(sel.type) pickType(sel.type);
   }
@@ -271,7 +271,7 @@
   }
 
   function renderVendors(){
-    if(!VENDORS.length){ $('vendors').innerHTML='<div class="empty">ยังไม่มีช่าง — เพิ่มด้านล่าง</div>'; return; }
+    if(!VENDORS.length){ $('vendors').innerHTML='<div class="empty">ยังไม่มีช่าง · เพิ่มด้านล่าง</div>'; return; }
     $('vendors').innerHTML=VENDORS.map(v=>`
       <div class="qrow">
         <div><div style="font-weight:600">${v.name}</div>

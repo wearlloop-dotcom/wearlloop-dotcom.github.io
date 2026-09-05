@@ -87,12 +87,12 @@
         </select>
       </div>
       <div>
-        <label>เชื่อมโยงคู่กรณีในระบบ (พิมพ์ค้นหา — ดึงชื่อ/บัตร/ที่อยู่/แฟ้มหลักฐานอัตโนมัติ)</label>
+        <label>เชื่อมโยงคู่กรณีในระบบ (พิมพ์ค้นหา · ดึงชื่อ/บัตร/ที่อยู่/แฟ้มหลักฐานอัตโนมัติ)</label>
         <div style="position:relative">
           <input id="f_search" placeholder="พิมพ์ชื่อ เบอร์โทร หรือชื่อ LINE" oninput="partySearch()" autocomplete="off">
           <div id="f_results" class="results hide"></div>
         </div>
-        <div class="muted" id="f_linked" style="font-size:12px;margin-top:4px">— ยังไม่เชื่อม (กรอกชื่อคู่กรณีเองด้านล่างได้) —</div>
+        <div class="muted" id="f_linked" style="font-size:12px;margin-top:4px">(ยังไม่เชื่อม (กรอกชื่อคู่กรณีเองด้านล่างได้))</div>
         <input type="hidden" id="f_ptype"><input type="hidden" id="f_pref">
       </div>
     </div>
@@ -153,9 +153,9 @@
 <script>
   const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
-  const esc=s=>(s==null||s==='')?'—':String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  const dt=s=>s?new Date(s).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'—';
-  const baht=n=>n==null?'—':'฿'+Number(n).toLocaleString('th-TH');
+  const esc=s=>(s==null||s==='')?'…':String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const dt=s=>s?new Date(s).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'…';
+  const baht=n=>n==null?'…':'฿'+Number(n).toLocaleString('th-TH');
   const TYPES={customer_no_return:'ลูกค้าไม่คืนชุด',customer_damage:'ลูกค้าทำชุดเสียหาย',customer_unpaid:'ลูกค้าค้างชำระ',customer_fraud:'ลูกค้าฉ้อโกง',customer_claim:'ลูกค้าเรียกร้อง',influencer_no_return:'อินฟลูไม่คืนชุด',partner_breach:'พาร์ทเนอร์ผิดสัญญา',partner_solicit:'พาร์ทเนอร์ดึงลูกค้า',seller_fake:'ผู้ขายของปลอม',employee_fraud:'พนักงานทุจริต',labor_dispute:'ข้อพิพาทแรงงาน',supplier_breach:'ซัพพลายเออร์ผิดสัญญา',ip_violation:'ละเมิด IP',other:'อื่น ๆ'};
   const STATUS={open:'เปิด',notice_sent:'ส่งหนังสือแล้ว',negotiating:'เจรจา',police:'แจ้งความ',court:'ฟ้องศาล',settled:'ตกลงได้',closed:'ปิดคดี'};
 
@@ -178,7 +178,7 @@
         _pr=r.rows||[];
         $('f_results').innerHTML=_pr.length
           ? _pr.map((o,i)=>`<div class="ritem" onclick="pickParty(${i})"><b>${esc(o.name)}</b> <span class="muted">· ${esc(o.label||PLABEL[o.ptype]||o.ptype)}${o.detail?' · '+esc(o.detail):''}</span></div>`).join('')
-          : '<div class="ritem muted">— ไม่พบ ลองคำอื่น หรือกรอกชื่อเองด้านล่าง —</div>';
+          : '<div class="ritem muted">(ไม่พบ ลองคำอื่น หรือกรอกชื่อเองด้านล่าง)</div>';
         $('f_results').classList.remove('hide');
       }catch(e){ $('f_results').classList.add('hide'); }
     },300);
@@ -192,7 +192,7 @@
   }
   function clearParty(){
     $('f_ptype').value=''; $('f_pref').value=''; $('f_search').value='';
-    $('f_linked').textContent='— ยังไม่เชื่อม (กรอกชื่อคู่กรณีเองด้านล่างได้) —';
+    $('f_linked').textContent=' · ยังไม่เชื่อม (กรอกชื่อคู่กรณีเองด้านล่างได้) · ';
   }
   document.addEventListener('click',e=>{ if(!e.target.closest('#f_results')&&e.target.id!=='f_search') $('f_results')&&$('f_results').classList.add('hide'); });
 
@@ -214,7 +214,7 @@
     catch(e){ $('listBox').innerHTML='<div class="err">'+esc(e.message)+'</div>'; }
   }
   function renderList(rows){
-    if(!rows.length){$('listBox').innerHTML='<div class="muted" style="padding:16px;text-align:center">— ไม่มีคดี —</div>';return;}
+    if(!rows.length){$('listBox').innerHTML='<div class="muted" style="padding:16px;text-align:center">(ไม่มีคดี)</div>';return;}
     $('listBox').innerHTML='<table><tr><th>เลขคดี</th><th>ชนิด</th><th>คู่กรณี</th><th>มูลค่า</th><th>สถานะ</th><th>เปิดเมื่อ</th></tr>'+
       rows.map(o=>`<tr class="click" onclick="openDetail('${o.id}')"><td>${esc(o.case_no)}</td><td>${esc(TYPES[o.dispute_type]||o.dispute_type)}</td><td>${esc(o.party_name)}</td><td>${baht(o.damage_amount)}</td><td><span class="badge ${['police','court'].includes(o.status)?'red':''}">${esc(STATUS[o.status]||o.status)}</span></td><td>${dt(o.created_at)}</td></tr>`).join('')+'</table>';
   }
@@ -252,39 +252,39 @@
       <div class="imgs">${(c.attachments||[]).length?(c.attachments||[]).map(f=>`<div style="text-align:center">
           ${f.url?(/\.pdf($|\?)/i.test(f.storage_path)?`<a href="${f.url}" target="_blank">เปิด PDF</a>`:`<img src="${f.url}">`):'<span class="muted">(ลิงก์หมดอายุ รีเฟรช)</span>'}
           <div class="muted" style="font-size:11px">${esc(f.note||f.kind)} · ${dt(f.created_at)} <a href="#" onclick="delFile(${f.id});return false" style="color:var(--red)">ลบ</a></div>
-        </div>`).join(''):'<div class="muted">— ยังไม่มีไฟล์แนบ —</div>'}</div>
+        </div>`).join(''):'<div class="muted">(ยังไม่มีไฟล์แนบ)</div>'}</div>
 
       <h2 style="margin-top:14px">บันทึกความเคลื่อนไหว</h2>
       <div style="display:flex;gap:6px;margin-bottom:8px">
         <select id="ev_kind" style="flex:0 0 150px"><option value="note">บันทึก</option><option value="reply">คู่กรณีตอบกลับ</option><option value="demand_sent">ส่งหนังสือทวงถาม</option><option value="police">แจ้งความ</option><option value="court">ยื่นฟ้อง</option><option value="settled">ตกลงได้</option></select>
         <input id="ev_detail" placeholder="รายละเอียด"><button class="sm" onclick="addEvent()">เพิ่ม</button>
       </div>
-      <div class="tl">${(c.events||[]).length?c.events.map(e=>`<div class="ev"><b>${esc(e.kind)}</b> — ${esc(e.detail)}<div class="t">${dt(e.event_at)}</div></div>`).join(''):'<div class="muted">— ยังไม่มี —</div>'}</div>
+      <div class="tl">${(c.events||[]).length?c.events.map(e=>`<div class="ev"><b>${esc(e.kind)}</b> · ${esc(e.detail)}<div class="t">${dt(e.event_at)}</div></div>`).join(''):'<div class="muted">(ยังไม่มี)</div>'}</div>
 
       <h2 style="margin-top:14px">อัปเดตสถานะ / เลขคดี</h2>
       <div class="grid3">
         <div><label>สถานะ</label><select id="u_status">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===c.status?'selected':''}>${v}</option>`).join('')}</select></div>
-        <div><label>เลขรับแจ้งความ</label><input id="u_police" value="${esc(c.police_report_no)==='—'?'':esc(c.police_report_no)}"></div>
-        <div><label>เลขคดีศาล</label><input id="u_court" value="${esc(c.court_case_no)==='—'?'':esc(c.court_case_no)}"></div>
+        <div><label>เลขรับแจ้งความ</label><input id="u_police" value="${esc(c.police_report_no)==='…'?'':esc(c.police_report_no)}"></div>
+        <div><label>เลขคดีศาล</label><input id="u_court" value="${esc(c.court_case_no)==='…'?'':esc(c.court_case_no)}"></div>
       </div>
       <div style="margin-top:8px"><button class="sm" onclick="saveUpdate()">บันทึกสถานะ</button></div>
 
       <h2 style="margin-top:16px">หลักฐานที่ระบบรวบรวม (แฟ้มคดี)</h2>
-      ${ev?renderEvidence(ev):'<div class="muted">— ไม่มีคู่กรณีเชื่อมโยง หรือไม่มีหลักฐานอัตโนมัติ —</div>'}
+      ${ev?renderEvidence(ev):'<div class="muted"> · ไม่มีคู่กรณีเชื่อมโยง หรือไม่มีหลักฐานอัตโนมัติ · </div>'}
     `;
   }
 
   function imgs(files){return !files||!files.length?'':'<div class="imgs">'+files.map(f=>f.url?`<div><img src="${f.url}"><div class="muted" style="font-size:11px">${esc(f.kind)}</div></div>`:`<div class="muted">${esc(f.kind)} (ลิงก์หมดอายุ)</div>`).join('')+'</div>';}
   function qcPhotos(ph){
-    if(!ph||!ph.length) return '<div class="muted">— ยังไม่มีรูป QC ก่อน/หลัง —</div>';
+    if(!ph||!ph.length) return '<div class="muted">(ยังไม่มีรูป QC ก่อน/หลัง)</div>';
     const grp={}; ph.forEach(p=>{const k=esc(p.garment)+' · เช่า '+String(p.rental_id||'').slice(0,8); (grp[k]=grp[k]||[]).push(p);});
     return Object.entries(grp).map(([k,arr])=>{
       const col=(label,list)=>`<div style="flex:1"><div class="muted" style="font-size:12px;margin-bottom:3px">${label}</div>`+
-        (list.length?'<div class="imgs">'+list.map(p=>`<div><img src="${p.url||''}"><div class="muted" style="font-size:11px">${esc(p.note)} · ${dt(p.created_at)}</div></div>`).join('')+'</div>':'<div class="muted">— ไม่มี —</div>')+'</div>';
+        (list.length?'<div class="imgs">'+list.map(p=>`<div><img src="${p.url||''}"><div class="muted" style="font-size:11px">${esc(p.note)} · ${dt(p.created_at)}</div></div>`).join('')+'</div>':'<div class="muted">(ไม่มี)</div>')+'</div>';
       return `<div style="margin-bottom:10px"><div style="font-weight:700;font-size:12.5px">${k}</div><div style="display:flex;gap:14px">${col('ก่อนส่ง',arr.filter(p=>p.phase==='before'))}${col('ตอนรับคืน',arr.filter(p=>p.phase==='after'))}</div></div>`;
     }).join('');
   }
-  function tbl(arr,cols){return !arr||!arr.length?'<div class="muted">— ไม่มี —</div>':`<table><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr>${arr.map(o=>`<tr>${cols.map(c=>`<td>${c[1](o)}</td>`).join('')}</tr>`).join('')}</table>`;}
+  function tbl(arr,cols){return !arr||!arr.length?'<div class="muted">(ไม่มี)</div>':`<table><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr>${arr.map(o=>`<tr>${cols.map(c=>`<td>${c[1](o)}</td>`).join('')}</tr>`).join('')}</table>`;}
   function renderEvidence(ev){
     if(ev.error) return '<div class="muted">หลักฐาน: '+esc(ev.error)+'</div>';
     if(ev.type==='customer'){const id=ev.identity||{};return `
@@ -298,7 +298,7 @@
     if(ev.type==='contract'){const a=ev.esign_audit||{};return `
       <div class="kv"><b>ผู้ลงนาม:</b> ${esc(a.signer_name)} · บัตร ${esc(a.signer_id_card)}</div>
       <div class="kv"><b>ลงนามเมื่อ:</b> ${dt(a.signed_at)} · IP ${esc(a.signed_ip)}</div>
-      <div class="kv"><b>ลายเซ็น:</b> ${a.has_signature?'มี':'—'}</div>
+      <div class="kv"><b>ลายเซ็น:</b> ${a.has_signature?'มี':'…'}</div>
       <div style="margin-top:6px"><b class="muted">ข้อความสัญญา ณ เวลาลงนาม:</b></div><div class="snap">${esc(a.document_snapshot)}</div>`;}
     if(ev.type==='seller'){const a=ev.acquisition||{};return `
       <div class="kv"><b>ผู้ขาย:</b> ${esc(a.seller_name)} · บัตร ${esc(a.seller_id_card)}</div>
@@ -307,9 +307,9 @@
     if(ev.type==='employee'){const id=ev.identity||{};const at=ev.attendance_90d||{};return `
       <div class="kv"><b>พนักงาน:</b> ${esc(id.name)} (${esc(id.nickname)}) · ${esc(id.role)} ${esc(id.department||'')} · รหัส ${esc(id.emp_no)}</div>
       <div class="kv"><b>บัตร:</b> ${esc(id.id_card)} · <b style="min-width:auto">เริ่มงาน:</b> ${dt(id.start_date)} · <b style="min-width:auto">สถานะ:</b> ${esc(id.status)}</div>
-      <div style="margin-top:6px"><b class="muted">สัญญาจ้าง (e-sign):</b></div>${tbl(ev.contracts,[['เลขที่',o=>esc(o.contract_no)],['สถานะ',o=>esc(o.status)],['ลงนามเมื่อ',o=>o.signed_at?dt(o.signed_at):'<b>ยังไม่ลงนาม</b>'],['IP',o=>esc(o.signed_ip)],['ลายเซ็น',o=>o.has_signature?'มี':'—']])}
+      <div style="margin-top:6px"><b class="muted">สัญญาจ้าง (e-sign):</b></div>${tbl(ev.contracts,[['เลขที่',o=>esc(o.contract_no)],['สถานะ',o=>esc(o.status)],['ลงนามเมื่อ',o=>o.signed_at?dt(o.signed_at):'<b>ยังไม่ลงนาม</b>'],['IP',o=>esc(o.signed_ip)],['ลายเซ็น',o=>o.has_signature?'มี':'…']])}
       <div style="margin-top:6px"><b class="muted">การเข้างาน 90 วัน:</b> ทำงาน ${at.days_worked??0} วัน · สาย ${at.late_days??0} วัน · รวม ${Math.round((at.total_minutes??0)/60)} ชม.</div>
-      <div style="margin-top:6px"><b class="muted">บันทึกเข้างานล่าสุด:</b></div>${tbl(ev.attendance_recent,[['วันที่',o=>dt(o.work_date)],['เข้า',o=>o.check_in?new Date(o.check_in).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—'],['ออก',o=>o.check_out?new Date(o.check_out).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—'],['สาย',o=>o.late?'สาย':''],['IP',o=>esc(o.in_ip)]])}`;}
+      <div style="margin-top:6px"><b class="muted">บันทึกเข้างานล่าสุด:</b></div>${tbl(ev.attendance_recent,[['วันที่',o=>dt(o.work_date)],['เข้า',o=>o.check_in?new Date(o.check_in).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'…'],['ออก',o=>o.check_out?new Date(o.check_out).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'…'],['สาย',o=>o.late?'สาย':''],['IP',o=>esc(o.in_ip)]])}`;}
     if(ev.type==='supplier'){const id=ev.identity||{};const s=ev.po_summary||{};return `
       <div class="kv"><b>ซัพพลายเออร์:</b> ${esc(id.name)} · ${esc(id.channel||'')} ${esc(id.contact||'')}</div>
       <div class="kv"><b>โทร:</b> ${esc(id.phone)} · <b style="min-width:auto">เลขภาษี:</b> ${esc(id.tax_id)}</div>
@@ -364,7 +364,7 @@
       if(!F||F.error){alert('รวมแฟ้มไม่สำเร็จ: '+(F&&F.error));return;}
       const ev=F.evidence||{}; const id=ev.identity||{};
       const sec=(t,body)=>`<h2>${t}</h2>${body}`;
-      const imgsRow=(files)=>(!files||!files.length)?'<div class="muted">— ไม่มี —</div>'
+      const imgsRow=(files)=>(!files||!files.length)?'<div class="muted">(ไม่มี)</div>'
         :'<div class="imgs sec-imgs">'+files.map(f=>f.url?`<div><img src="${f.url}"><div class="muted" style="font-size:10.5px">${esc(f.note||f.kind||'')}${f.created_at?' · '+dt(f.created_at):''}</div></div>`:'').join('')+'</div>';
       let h=`<h1>แฟ้มคดี ${esc(F.case_no)} · ${esc(TYPES[F.dispute_type]||F.dispute_type)}</h1>
         <div class="dsub">จัดทำโดยระบบ LLOOP · ${dt(F.generated_at)} · เอกสารประกอบการปรึกษาทนายความ</div>
@@ -380,9 +380,9 @@
           (F.terms_docs&&F.terms_docs.length)?F.terms_docs.map(t=>
             tbl(t.accepts,[['ยอมรับเมื่อ',o=>dt(o.accepted_at)],['IP',o=>esc(o.ip)],['การจอง',o=>esc(String(o.rental_id||'').slice(0,8))]])
             +`<div class="muted" style="font-size:11px;margin:4px 0">ข้อความสัญญาเวอร์ชัน ${esc(t.version)} ฉบับเต็ม:</div><div class="terms">${esc(t.body)}</div>`).join('<br>')
-          :'<div class="muted">— ไม่มีบันทึกการยอมรับสัญญา —</div>');
+          :'<div class="muted">(ไม่มีบันทึกการยอมรับสัญญา)</div>');
         h+=sec('3. หลักฐานการส่งมอบและการติดตามพัสดุ',
-          tbl(F.delivery,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['ขนส่ง/เลขพัสดุ (ขาไป)',o=>esc(o.courier||'-')+' '+esc(o.tracking_no||'')],['นำจ่ายสำเร็จ',o=>o.delivered_at?dt(o.delivered_at):'—'],['กำหนดคืน',o=>dt(o.due_at)],['ขากลับ',o=>o.return_tracking_no?esc(o.return_courier||'')+' '+esc(o.return_tracking_no):'<b>ไม่มีการส่งคืน</b>'],['ร้านรับคืน',o=>o.return_received_at?dt(o.return_received_at):'—']]));
+          tbl(F.delivery,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['ขนส่ง/เลขพัสดุ (ขาไป)',o=>esc(o.courier||'-')+' '+esc(o.tracking_no||'')],['นำจ่ายสำเร็จ',o=>o.delivered_at?dt(o.delivered_at):'…'],['กำหนดคืน',o=>dt(o.due_at)],['ขากลับ',o=>o.return_tracking_no?esc(o.return_courier||'')+' '+esc(o.return_tracking_no):'<b>ไม่มีการส่งคืน</b>'],['ร้านรับคืน',o=>o.return_received_at?dt(o.return_received_at):'…']]));
         h+=sec('4. ประวัติการเช่าและการชำระเงิน',
           tbl(ev.rentals,[['ชุด',o=>esc(o.garment)+' '+esc(o.name)],['สถานะ',o=>esc(o.status)],['กำหนดคืน',o=>dt(o.due_at)],['คืนเมื่อ',o=>o.returned_at?dt(o.returned_at):'<b>ยังไม่คืน</b>'],['ค่าเช่า',o=>baht(o.price)]])
           +tbl(ev.payments,[['ยอดชำระ',o=>baht(o.amount)],['ประเภท',o=>esc(o.purpose)],['เมื่อ',o=>dt(o.at)]]));
@@ -390,19 +390,19 @@
       } else if(ev.type==='contract'){
         const a=ev.esign_audit||{};
         h+=sec('1. สัญญาและหลักฐานการลงนามอิเล็กทรอนิกส์',
-          `<div class="kv"><b>ผู้ลงนาม:</b> ${esc(a.signer_name)} · บัตร ${esc(a.signer_id_card)} · ลงนามเมื่อ ${dt(a.signed_at)} · IP ${esc(a.signed_ip)} · ลายเซ็น ${a.has_signature?'มี':'—'}</div>
+          `<div class="kv"><b>ผู้ลงนาม:</b> ${esc(a.signer_name)} · บัตร ${esc(a.signer_id_card)} · ลงนามเมื่อ ${dt(a.signed_at)} · IP ${esc(a.signed_ip)} · ลายเซ็น ${a.has_signature?'มี':'…'}</div>
            <div class="muted" style="font-size:11px;margin:4px 0">ข้อความสัญญา ณ เวลาลงนาม (ฉบับเต็ม):</div><div class="terms">${esc(a.document_snapshot)}</div>`);
       } else if(ev.type==='employee'){
         const at=ev.attendance_90d||{};
         h+=sec('1. ตัวตนพนักงานและการเข้างาน',
           `<div class="kv"><b>ชื่อ:</b> ${esc(id.name)} (${esc(id.nickname)}) · รหัส ${esc(id.emp_no)} · ${esc(id.role)} · <b style="min-width:auto">บัตร:</b> ${esc(id.id_card)} · เริ่มงาน ${dt(id.start_date)}</div>
            <div class="kv"><b>เข้างาน 90 วัน:</b> ทำงาน ${at.days_worked??0} วัน · สาย ${at.late_days??0} วัน · รวม ${Math.round((at.total_minutes??0)/60)} ชม.</div>`
-          +tbl(ev.attendance_recent,[['วันที่',o=>dt(o.work_date)],['เข้า',o=>o.check_in?new Date(o.check_in).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—'],['ออก',o=>o.check_out?new Date(o.check_out).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'—'],['สาย',o=>o.late?'สาย':''],['IP',o=>esc(o.in_ip)]]));
+          +tbl(ev.attendance_recent,[['วันที่',o=>dt(o.work_date)],['เข้า',o=>o.check_in?new Date(o.check_in).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'…'],['ออก',o=>o.check_out?new Date(o.check_out).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}):'…'],['สาย',o=>o.late?'สาย':''],['IP',o=>esc(o.in_ip)]]));
         h+=sec('2. สัญญาจ้างงาน (e-sign)',
           (ev.contracts&&ev.contracts.length)?ev.contracts.map(ct=>
             `<div class="kv"><b>${esc(ct.contract_no)}</b> · ${esc(ct.title||'สัญญาจ้างงาน')} · สถานะ ${esc(ct.status)} · ${ct.signed_at?'ลงนาม '+dt(ct.signed_at)+' · IP '+esc(ct.signed_ip):'<b>ยังไม่ลงนาม</b>'}</div>`
             +(ct.document_snapshot?`<div class="muted" style="font-size:11px;margin:4px 0">ข้อความสัญญา ณ เวลาลงนาม:</div><div class="terms">${esc(ct.document_snapshot)}</div>`:'')).join('<br>')
-          :'<div class="muted">— ไม่มีสัญญาจ้างในระบบ —</div>');
+          :'<div class="muted">(ไม่มีสัญญาจ้างในระบบ)</div>');
       } else if(ev.type==='supplier'){
         const s=ev.po_summary||{};
         h+=sec('1. ตัวตนซัพพลายเออร์และประวัติการซื้อขาย',
@@ -417,9 +417,9 @@
       }
       h+=sec('6. หลักฐานแนบเพิ่มเติม (แชต/เอกสารอื่น)',imgsRow(F.attachments));
       h+=sec('7. ไทม์ไลน์เหตุการณ์',
-        (F.events||[]).length?'<div class="tl">'+F.events.map(e=>`<div class="ev"><b>${esc(e.kind)}</b> — ${esc(e.detail)}<div class="t">${dt(e.event_at)}</div></div>`).join('')+'</div>':'<div class="muted">— ไม่มี —</div>');
+        (F.events||[]).length?'<div class="tl">'+F.events.map(e=>`<div class="ev"><b>${esc(e.kind)}</b> · ${esc(e.detail)}<div class="t">${dt(e.event_at)}</div></div>`).join('')+'</div>':'<div class="muted">(ไม่มี)</div>');
       if(F.letter&&F.letter.body) h+=`<div class="pgbrk"></div>`+sec('8. หนังสือทวงถาม (ฉบับร่างจากระบบ)',`<div class="terms" style="font-size:13px">${esc(F.letter.body)}</div>`);
-      h+=`<div class="muted" style="font-size:10.5px;margin-top:20px">หมายเหตุ: รูปหลักฐานเปิดผ่านลิงก์ชั่วคราว 1 ชั่วโมง — สั่งพิมพ์/บันทึก PDF ทันทีเพื่อฝังรูปลงเอกสารถาวร · ข้อมูลจัดทำอัตโนมัติจากฐานข้อมูล LLOOP ควรให้ทนายตรวจทานก่อนใช้ยื่นจริง</div>`;
+      h+=`<div class="muted" style="font-size:10.5px;margin-top:20px">หมายเหตุ: รูปหลักฐานเปิดผ่านลิงก์ชั่วคราว 1 ชั่วโมง · สั่งพิมพ์/บันทึก PDF ทันทีเพื่อฝังรูปลงเอกสารถาวร · ข้อมูลจัดทำอัตโนมัติจากฐานข้อมูล LLOOP ควรให้ทนายตรวจทานก่อนใช้ยื่นจริง</div>`;
       $('dossierBox').innerHTML=h;
       $('dossierBox').classList.remove('hide'); $('letterBox').classList.add('hide');
       $('printArea').classList.remove('hide'); $('printArea').scrollIntoView({behavior:'smooth'});

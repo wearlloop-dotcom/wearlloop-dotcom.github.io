@@ -85,7 +85,7 @@
 
   <div id="main" style="display:none">
     <div class="hd">
-      <div class="g"><span id="greet">สวัสดีค่ะ</span> <b id="nm">—</b><span class="rl" id="rl">—</span></div>
+      <div class="g"><span id="greet">สวัสดีค่ะ</span> <b id="nm">…</b><span class="rl" id="rl">…</span></div>
       <div class="d" id="dt"></div>
       <div class="tenure" id="tenure"></div>
     </div>
@@ -95,9 +95,9 @@
       <span class="arw">→</span></a>
 
     <div class="impact" id="impact" style="display:none">
-      <div class="st"><div class="n" id="s_garments">—</div><div class="l">ชุดในระบบ</div></div>
-      <div class="st"><div class="n" id="s_loops">—</div><div class="l">หมุนเวียน</div></div>
-      <div class="st"><div class="n" id="s_water">—</div><div class="l">น้ำที่ประหยัด</div></div>
+      <div class="st"><div class="n" id="s_garments">…</div><div class="l">ชุดในระบบ</div></div>
+      <div class="st"><div class="n" id="s_loops">…</div><div class="l">หมุนเวียน</div></div>
+      <div class="st"><div class="n" id="s_water">…</div><div class="l">น้ำที่ประหยัด</div></div>
     </div>
 
     <div id="sections"></div>
@@ -108,7 +108,7 @@
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh_title">
   <div class="grip"></div>
-  <div class="sh-head"><span class="ic" id="sh_ic">?</span><span class="t" id="sh_title">—<small>วิธีใช้ · สอนงาน</small></span><button class="x" id="sh_close" aria-label="ปิด">×</button></div>
+  <div class="sh-head"><span class="ic" id="sh_ic">?</span><span class="t" id="sh_title">…<small>วิธีใช้ · สอนงาน</small></span><button class="x" id="sh_close" aria-label="ปิด">×</button></div>
   <div class="sh-body" id="sh_body"></div>
 </div>
 
@@ -183,7 +183,7 @@ async function init(){
     if(!data || data.tenure_days==null) return;
     const el=$('#tenure'); el.style.display='block';
     el.textContent = (data.is_anniversary && data.anniversary_years>0)
-      ? `วันนี้ครบ ${data.anniversary_years} ปีที่ร่วมเดินทางกับ LLOOP — ขอบคุณนะคะ`
+      ? `วันนี้ครบ ${data.anniversary_years} ปีที่ร่วมเดินทางกับ LLOOP · ขอบคุณนะคะ`
       : `ร่วมเดินทางกับ LLOOP มาแล้ว ${Number(data.tenure_days).toLocaleString('en-US')} วัน`;
   }).catch(()=>{});
 

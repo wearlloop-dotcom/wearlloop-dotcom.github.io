@@ -157,11 +157,11 @@
   <section class="phead">
     <div class="eyebrow">business analytics</div>
     <h1>ตัวเลขที่บอกทิศทาง</h1>
-    <div class="sub">ดูภาพรวมธุรกิจในที่เดียว — รายได้ การส่งต่อของชุด และสัญญาณที่ต้องรีบลงมือ</div>
+    <div class="sub">ดูภาพรวมธุรกิจในที่เดียว · รายได้ การส่งต่อของชุด และสัญญาณที่ต้องรีบลงมือ</div>
     <div class="kpis">
-      <div class="kpi" id="hero_spend"><div class="n">—</div><div class="l">ยอดใช้จ่าย 30 วัน</div></div>
-      <div class="kpi" id="hero_rev"><div class="n">—</div><div class="l">รายได้ 30 วัน</div></div>
-      <div class="kpi" id="hero_roas"><div class="n">—</div><div class="l">ROAS 30 วัน</div></div>
+      <div class="kpi" id="hero_spend"><div class="n">…</div><div class="l">ยอดใช้จ่าย 30 วัน</div></div>
+      <div class="kpi" id="hero_rev"><div class="n">…</div><div class="l">รายได้ 30 วัน</div></div>
+      <div class="kpi" id="hero_roas"><div class="n">…</div><div class="l">ROAS 30 วัน</div></div>
     </div>
   </section>
 
@@ -249,7 +249,7 @@
   <!-- setup guide -->
   <div class="card">
     <h2>รสนิยมลูกค้า · จากพฤติกรรมจริง</h2>
-    <p class="muted" style="font-size:14px;margin-bottom:10px">ลูกค้ากำลังสนใจอะไร (60 วัน) — ใช้วางแผนซื้อเข้า/จัดหน้าร้าน · ค้นหาลูกค้าเพื่อดู “คนนี้ชอบอะไร” ก่อนปิดการขาย</p>
+    <p class="muted" style="font-size:14px;margin-bottom:10px">ลูกค้ากำลังสนใจอะไร (60 วัน) · ใช้วางแผนซื้อเข้า/จัดหน้าร้าน · ค้นหาลูกค้าเพื่อดู “คนนี้ชอบอะไร” ก่อนปิดการขาย</p>
     <div id="tasteTrends"><div class="loading">กำลังโหลด…</div></div>
     <div style="margin-top:16px">
       <div class="field"><label for="cq">ค้นหาลูกค้า (ชื่อ / LINE UID / รหัสลิงก์)</label>
@@ -460,7 +460,7 @@
     const lastAuto = rows.find(r => r.source && r.source !== 'manual');
     $('syncNote').textContent = lastAuto
       ? 'ซิงค์ล่าสุด: ' + dt(lastAuto.metric_date) + ' (' + (lastAuto.source||'') + ')'
-      : 'ยังไม่มีข้อมูล auto-sync — กด "ซิงค์ตอนนี้" หลังตั้งค่า META_ADS_ACCESS_TOKEN';
+      : 'ยังไม่มีข้อมูล auto-sync · กด "ซิงค์ตอนนี้" หลังตั้งค่า META_ADS_ACCESS_TOKEN';
     $('rowsbody').innerHTML=rows.map(r=>{
       const sp=Number(r.spend)||0, rv=Number(r.revenue)||0;
       const roas = sp>0 ? rv/sp : null;
@@ -588,8 +588,8 @@
     if(error||!data){ el.innerHTML='<div class="muted">โหลดโปรไฟล์ไม่สำเร็จ</div>'; return; }
     const p=data.profile||{}, tt=data.taste||{};
     const top=(dict,lblFn,n)=>Object.entries(dict||{}).sort((a,b)=>b[1]-a[1]).slice(0,n||4)
-      .map(([k])=>esc(lblFn?lblFn(k):k)).join(' · ')||'—';
-    const recent=(data.recent||[]).map(r=>esc(r.code)).slice(0,8).join(' · ')||'—';
+      .map(([k])=>esc(lblFn?lblFn(k):k)).join(' · ')||'…';
+    const recent=(data.recent||[]).map(r=>esc(r.code)).slice(0,8).join(' · ')||'…';
     el.innerHTML=`<div class="ct">
       <div class="ct-h">${esc(p.name||'ลูกค้า')} <span class="muted">· ${esc(p.tier||'')} · เช่า ${p.rentals||0} ครั้ง · ดู 30 วัน ${data.views_30d||0} ครั้ง</span></div>
       <div class="ct-r"><b>โอกาส</b> ${top(tt.occasions,occLbl)}</div>

@@ -54,7 +54,7 @@
     { key:'sawynnii',    name:'Sawynnii',     group:'feminine', tier:'mid',    hot:false, aliases:['sawynni'],               types:['เดรส','ชุดออกงาน'],            note:'หวานพรีเมียม เดรสออกงาน' },
 
     // — ป้ายแซ่บ / statement / celeb-evening —
-    { key:'mayadress',   name:'Maya Dress',   group:'statement',tier:'premium',hot:true,  aliases:['maya','มายาเดรส','maya dress celeb'], types:['ชุดราตรี','ชุดออกงาน'], note:'ชุดออกงาน/ราตรี สายเซเลบ เด่นบนพรม — เหมาะเช่าราคาสูง' },
+    { key:'mayadress',   name:'Maya Dress',   group:'statement',tier:'premium',hot:true,  aliases:['maya','มายาเดรส','maya dress celeb'], types:['ชุดราตรี','ชุดออกงาน'], note:'ชุดออกงาน/ราตรี สายเซเลบ เด่นบนพรม · เหมาะเช่าราคาสูง' },
     { key:'mywynn',      name:'Mywynn',       group:'statement',tier:'mid',    hot:false, aliases:['mywyn'],                 types:['เดรส','ชุดออกงาน'],            note:'ป้ายแซ่บ เดรสเซ็กซี่ออกงานกลางคืน' },
     { key:'secret',      name:'Secret',       group:'statement',tier:'mid',    hot:false, aliases:[],                        types:['เดรส'],                        note:'ป้ายแซ่บ ลุคเปรี้ยวมั่นใจ' },
     { key:'lism',        name:'Lism',         group:'statement',tier:'mid',    hot:false, aliases:[],                        types:['เดรส'],                        note:'ป้ายแซ่บมินิมอล-เซ็กซี่ ทรงเข้ารูป' },

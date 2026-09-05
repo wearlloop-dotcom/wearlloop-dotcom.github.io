@@ -78,7 +78,7 @@
   <div id="loading" class="loading">กำลังเข้าสู่ระบบ…</div>
   <div id="main" style="display:none">
     <h1>คลังสอนงาน</h1>
-    <div class="lead">เขียนวิธีใช้ + แนบรูปจริง — สลับได้ระหว่างคู่มือพนักงาน (หลังบ้าน) กับวิธีใช้สำหรับลูกค้า (หน้าบ้าน)</div>
+    <div class="lead">เขียนวิธีใช้ + แนบรูปจริง · สลับได้ระหว่างคู่มือพนักงาน (หลังบ้าน) กับวิธีใช้สำหรับลูกค้า (หน้าบ้าน)</div>
     <div class="aud">
       <button id="aud_staff" class="on">พนักงาน (หลังบ้าน)</button>
       <button id="aud_customer">ลูกค้า (หน้าบ้าน)</button>
@@ -99,7 +99,7 @@
 const $=(s)=>document.querySelector(s);
 const esc=(s)=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-// หน้าลูกค้า (liff) ที่ฝังปุ่ม "?" ไว้ — key = ชื่อไฟล์หน้า
+// หน้าลูกค้า (liff) ที่ฝังปุ่ม "?" ไว้ · key = ชื่อไฟล์หน้า
 const CUSTOMER_PAGES=[
   {section:'หน้าลูกค้า',href:'index.html',label:'หน้าแรก',icon:'⌂'},
   {section:'หน้าลูกค้า',href:'shop.html',label:'เช่าชุด / ร้านค้า',icon:'▦'},
@@ -109,7 +109,7 @@ const CUSTOMER_PAGES=[
   {section:'หน้าลูกค้า',href:'quiz.html',label:'AI สไตลิสต์',icon:'✦'},
   {section:'หน้าลูกค้า',href:'looks.html',label:'Loop Looks',icon:'❤'},
 ];
-// นิยามของแต่ละโหมด — RPC + ชื่อคีย์ที่ต่างกัน (tool vs page)
+// นิยามของแต่ละโหมด · RPC + ชื่อคีย์ที่ต่างกัน (tool vs page)
 const MODES={
   staff:   {key:'tool', listFn:'sop_list',  upsertFn:'sop_upsert',  deleteFn:'sop_delete',  uploadFn:'sop_media_upload',  delArg:'p_tool'},
   customer:{key:'page', listFn:'help_list', upsertFn:'help_upsert', deleteFn:'help_delete', uploadFn:'help_media_upload', delArg:'p_page'},

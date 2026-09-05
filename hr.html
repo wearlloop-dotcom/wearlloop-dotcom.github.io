@@ -116,7 +116,7 @@
       </div>
       <div class="g3">
         <div><label>ตำแหน่ง</label><select id="role">
-          <option value="">— เลือก —</option>
+          <option value="">(เลือก)</option>
           <option value="admin">แอดมิน</option><option value="stylist">สไตลิสต์</option>
           <option value="laundry">ซัก/ดูแลชุด</option><option value="repair">ช่างซ่อม</option>
           <option value="shipping">จัดส่ง</option><option value="sales">ขาย</option>
@@ -147,7 +147,7 @@
       </div>
       <label>หมายเหตุ / บันทึกสัมภาษณ์</label><textarea id="notes" placeholder=""></textarea>
       <button class="btn dark" style="margin-top:14px" onclick="saveEmp()">บันทึก</button>
-      <div class="hint">ผู้สมัครใหม่จะอยู่สถานะ "ผู้สมัคร" — กด "จ้าง" ในรายการเพื่อออกรหัสพนักงาน + ส่งลิงก์ยืนยัน UID</div>
+      <div class="hint">ผู้สมัครใหม่จะอยู่สถานะ "ผู้สมัคร" · กด "จ้าง" ในรายการเพื่อออกรหัสพนักงาน + ส่งลิงก์ยืนยัน UID</div>
     </details>
   </div>
 
@@ -261,10 +261,10 @@
     if(!list.length){tb.innerHTML='<tr><td colspan="5" style="color:var(--stone);padding:20px">ยังไม่มีรายชื่อ</td></tr>';return;}
     tb.innerHTML=list.map(e=>{
       const working=['hired','probation','active'].includes(e.status);
-      const vb=working?(e.verified?'<span class="vbadge y">ยืนยันแล้ว</span>':'<span class="vbadge n">ยังไม่ยืนยัน</span>'):'<span style="color:var(--stone)">—</span>';
+      const vb=working?(e.verified?'<span class="vbadge y">ยืนยันแล้ว</span>':'<span class="vbadge n">ยังไม่ยืนยัน</span>'):'<span style="color:var(--stone)">…</span>';
       return `<tr class="click" onclick="openEmp('${e.id}')">
         <td><b>${e.name}</b>${e.nickname?` <span style="color:var(--stone)">(${e.nickname})</span>`:''}${e.emp_no?`<br><span style="color:var(--stone);font-size:11px">${e.emp_no}</span>`:''}</td>
-        <td>${ROLE_TH[e.role]||e.role||'—'}</td>
+        <td>${ROLE_TH[e.role]||e.role||'…'}</td>
         <td>${pill(e.status)}</td>
         <td>${vb}</td>
         <td style="white-space:nowrap"><span class="mini">จัดการ ›</span></td>
@@ -323,8 +323,8 @@
         </div>
         ${e.notes?`<p class="hint" style="margin-top:8px">${e.notes}</p>`:''}
         <div class="g2">
-          <div><label>กะประจำ</label><select id="empShift" onchange="assignShift()"><option value="">— ไม่กำหนด —</option></select></div>
-          <div><label>สังกัดสาขา (เฟส 2)</label><select id="empBranch" onchange="assignBranch()"><option value="">— ไม่กำหนด —</option></select></div>
+          <div><label>กะประจำ</label><select id="empShift" onchange="assignShift()"><option value="">(ไม่กำหนด)</option></select></div>
+          <div><label>สังกัดสาขา (เฟส 2)</label><select id="empBranch" onchange="assignBranch()"><option value="">(ไม่กำหนด)</option></select></div>
         </div>
         <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-top:8px"><input type="checkbox" id="empMgr" ${e.is_manager?'checked':''} style="width:auto" onchange="toggleMgr(this.checked)"> หัวหน้าสาขา (อนุมัติลา/เบิกของพนักงานสาขาเดียวกันได้)</label>
         <label style="margin-top:14px">เปลี่ยนสถานะ</label>
@@ -332,11 +332,11 @@
           <button class="btn ghost sm" onclick="editEmp()">แก้ไขข้อมูล</button></div>
         ${working?`
         <div class="link-out">
-          <b>ลิงก์ยืนยันตัวตน (UID)</b> — ส่งให้พนักงานเปิดครั้งแรกเพื่อผูก LINE UID
+          <b>ลิงก์ยืนยันตัวตน (UID)</b> · ส่งให้พนักงานเปิดครั้งแรกเพื่อผูก LINE UID
           <div class="u">${verifyUrl}</div>
           <div class="row-btns">
             <button class="btn ghost sm" onclick="cp('${verifyUrl}')">คัดลอกลิงก์</button>
-            <span class="hint" style="align-self:center">${e.verified?'✓ ยืนยันแล้ว — เข้าทำงานได้':'⚠ ยังไม่ยืนยัน — ยังเข้าทำงานไม่ได้'}</span>
+            <span class="hint" style="align-self:center">${e.verified?'✓ ยืนยันแล้ว · เข้าทำงานได้':'⚠ ยังไม่ยืนยัน · ยังเข้าทำงานไม่ได้'}</span>
           </div>
         </div>`:''}`;
       fillShiftBranch();
@@ -407,7 +407,7 @@
     curKpiPeriod=$('kperiod').value.trim()||curKpiPeriod;
     const {data,error}=await sb.rpc('hr_kpi_auto',{p_employee:curEmp.id,p_period:curKpiPeriod});
     if(error||!data||data.error){toast('ดึงไม่สำเร็จ');return;}
-    toast('ดึง KPI จริงแล้ว — เข้างาน '+data.work_days+' วัน · ตรงเวลา '+data.ontime_pct+'%');
+    toast('ดึง KPI จริงแล้ว · เข้างาน '+data.work_days+' วัน · ตรงเวลา '+data.ontime_pct+'%');
     loadKpi();
   }
   // ---------- กะ + สาขา (info tab) ----------
@@ -416,8 +416,8 @@
     if(!shiftCache){const {data}=await sb.rpc('hr_shift_list');shiftCache=data||[];}
     if(!branchCache){const {data}=await sb.rpc('branch_list',{p_kind:null,p_include_inactive:true});branchCache=data||[];}
     const ss=$('empShift'),bs=$('empBranch');if(!ss)return;
-    ss.innerHTML='<option value="">— ไม่กำหนด —</option>'+shiftCache.map(s=>`<option value="${s.id}" ${curEmp.default_shift_id===s.id?'selected':''}>${s.name} ${String(s.start_time).slice(0,5)}-${String(s.end_time).slice(0,5)}</option>`).join('');
-    bs.innerHTML='<option value="">— ไม่กำหนด —</option>'+branchCache.map(b=>`<option value="${b.id}" ${curEmp.branch_id===b.id?'selected':''}>${b.code} ${b.name}</option>`).join('');
+    ss.innerHTML='<option value="">(ไม่กำหนด)</option>'+shiftCache.map(s=>`<option value="${s.id}" ${curEmp.default_shift_id===s.id?'selected':''}>${s.name} ${String(s.start_time).slice(0,5)}-${String(s.end_time).slice(0,5)}</option>`).join('');
+    bs.innerHTML='<option value="">(ไม่กำหนด)</option>'+branchCache.map(b=>`<option value="${b.id}" ${curEmp.branch_id===b.id?'selected':''}>${b.code} ${b.name}</option>`).join('');
   }
   async function assignShift(){const v=$('empShift').value||null;await sb.rpc('hr_set_default_shift',{p_employee:curEmp.id,p_shift:v});curEmp.default_shift_id=v;toast('ตั้งกะประจำแล้ว');}
   async function assignBranch(){const v=$('empBranch').value||null;await sb.rpc('hr_set_branch',{p_employee:curEmp.id,p_branch:v});curEmp.branch_id=v;toast('ตั้งสังกัดสาขาแล้ว');}
@@ -439,7 +439,7 @@
       <h2 style="font-size:15px;margin-top:14px">ออกสลิปงวด ${curKpiPeriod}</h2>
       <div class="g2"><div><label>โบนัส/เบี้ย (฿)</label><input id="payAdd" type="number" placeholder="0"></div>
         <div><label>หักอื่น ๆ (฿)</label><input id="payDed" type="number" placeholder="0"></div></div>
-      <div class="hint">ประกันสังคม 5% (สูงสุด 750) หักให้อัตโนมัติในสลิป — ช่อง "หักอื่น ๆ" สำหรับรายการอื่น</div>
+      <div class="hint">ประกันสังคม 5% (สูงสุด 750) หักให้อัตโนมัติในสลิป · ช่อง "หักอื่น ๆ" สำหรับรายการอื่น</div>
       <button class="btn sage sm" style="margin-top:10px" onclick="makeSlip()">ออก/อัปเดตสลิป (ร่าง)</button>
       ${rows?`<table style="margin-top:14px"><thead><tr><th>งวด</th><th>สุทธิ</th><th>สถานะ</th><th></th></tr></thead><tbody>${rows}</tbody></table>`:'<p class="hint" style="margin-top:10px">ยังไม่มีสลิป</p>'}
       <div style="margin-top:16px;border-top:1px solid var(--hair);padding-top:12px">
@@ -450,7 +450,7 @@
   async function calcSeverance(){
     const {data}=await sb.rpc('hr_severance_calc',{p_employee:curEmp.id,p_end_date:null});
     const el=$('sevResult');
-    if(!data||data.error){el.textContent=data&&data.error==='no_start_date'?'ยังไม่มีวันเริ่มงาน — กรอกก่อนค่ะ':'คำนวณไม่ได้';return;}
+    if(!data||data.error){el.textContent=data&&data.error==='no_start_date'?'ยังไม่มีวันเริ่มงาน · กรอกก่อนค่ะ':'คำนวณไม่ได้';return;}
     el.innerHTML=`อายุงาน <b>${data.years} ปี</b> (${data.bracket}) → ค่าจ้าง <b>${data.days} วัน</b><br>
       ค่าจ้างรายวัน ฿${Number(data.daily_wage).toLocaleString()} × ${data.days} = <b style="color:var(--sageDeep)">฿${Number(data.severance).toLocaleString()}</b><br>
       <span style="font-size:11px">${data.note}</span>`;
@@ -526,7 +526,7 @@
   async function loadAtt(){
     const {data}=await sb.rpc('hr_attendance_list',{p_employee:curEmp.id,p_from:null,p_to:null});
     const list=data||[]; const b=$('dbody');
-    if(!list.length){b.innerHTML='<p class="hint">ยังไม่มีบันทึกการลงเวลาค่ะ — พนักงานพิมพ์ "เข้างาน" ใน LINE OA หรือกดในพอร์ทัลพนักงาน</p>';return;}
+    if(!list.length){b.innerHTML='<p class="hint">ยังไม่มีบันทึกการลงเวลาค่ะ · พนักงานพิมพ์ "เข้างาน" ใน LINE OA หรือกดในพอร์ทัลพนักงาน</p>';return;}
     const total=list.reduce((s,a)=>s+(a.work_minutes||0),0);
     b.innerHTML=`<div class="hint">รวม ${list.length} วัน · ${hmin(total)}</div>
       <table style="margin-top:8px"><thead><tr><th>วันที่</th><th>เข้า</th><th>ออก</th><th>รวม</th></tr></thead><tbody>
@@ -642,7 +642,7 @@
     if(error){toast('ไม่สำเร็จ: '+error.message);return;}
     if(data&&data.error){toast('ไม่สำเร็จ: '+data.error);return;}
     const url=STAFF_BASE+'?ec='+data.token;
-    $('ecOut').innerHTML=`<div class="link-out"><b>${data.contract_no}</b> สร้างแล้ว — ส่งให้พนักงานเซ็น
+    $('ecOut').innerHTML=`<div class="link-out"><b>${data.contract_no}</b> สร้างแล้ว · ส่งให้พนักงานเซ็น
       <div class="u">${url}</div>
       <div class="row-btns"><button class="btn ghost sm" onclick="cp('${url}')">คัดลอก</button>
       <button class="btn sage sm" onclick="sendEC('${data.id}')">ส่งเข้า LINE</button></div></div>`;
@@ -652,7 +652,7 @@
     const {data,error}=await sb.rpc('emp_contract_send',{p_id:id});
     if(error){toast('ส่งไม่สำเร็จ: '+error.message);return;}
     if(data&&data.error){toast('ส่งไม่ได้: '+data.error);return;}
-    toast('ส่งแล้ว — ถ้ามี LINE UID พนักงานจะได้การ์ดให้เซ็นทันที'); renderContract(); loadStats();
+    toast('ส่งแล้ว · ถ้ามี LINE UID พนักงานจะได้การ์ดให้เซ็นทันที'); renderContract(); loadStats();
   }
 
   function cp(u){navigator.clipboard.writeText(u).then(()=>toast('คัดลอกลิงก์แล้ว'));}
@@ -660,7 +660,7 @@
   // ---------- กะ + ประกาศ (เครื่องมือ HR) ----------
   async function loadShifts(){
     const {data}=await sb.rpc('hr_shift_list');shiftCache=data||[];
-    $('shiftList').innerHTML=shiftCache.length?shiftCache.map(s=>`• ${s.name} ${String(s.start_time).slice(0,5)}-${String(s.end_time).slice(0,5)} (สายหลัง ${s.grace_minutes} นาที)`).join('<br>'):'ยังไม่มีกะ — เพิ่มด้านล่าง';
+    $('shiftList').innerHTML=shiftCache.length?shiftCache.map(s=>`• ${s.name} ${String(s.start_time).slice(0,5)}-${String(s.end_time).slice(0,5)} (สายหลัง ${s.grace_minutes} นาที)`).join('<br>'):'ยังไม่มีกะ · เพิ่มด้านล่าง';
   }
   async function addShift(){
     if(!v('sh_name')){toast('ตั้งชื่อกะก่อนค่ะ');return;}
@@ -685,7 +685,7 @@
     const {data}=await sb.rpc('hr_announcement_list',{p_limit:10});
     const list=data||[];const el=$('annList');if(!el)return;
     if(!list.length){el.innerHTML='<div class="hint">ยังไม่มีประกาศ</div>';return;}
-    el.innerHTML='<div class="hint" style="margin-bottom:4px">ประกาศล่าสุด — กดดูว่าใครยังไม่รับทราบ</div>'+list.map(a=>`
+    el.innerHTML='<div class="hint" style="margin-bottom:4px">ประกาศล่าสุด · กดดูว่าใครยังไม่รับทราบ</div>'+list.map(a=>`
       <div style="border-bottom:1px solid var(--hair);padding:8px 0;cursor:pointer" onclick="annPending('${a.id}',this)">
         <div style="display:flex;justify-content:space-between"><b>${a.title}</b>
           <span style="font-size:12px;color:var(--stone)">รับทราบ ${a.acked}/${a.sent}${a.require_ack?'':' · ไม่ต้อง ack'}</span></div>
@@ -741,7 +741,7 @@
     if(!list.length){$('leaveInbox').style.display='none';return;}
     $('leaveInbox').style.display='block';
     $('leaveRows').innerHTML=list.map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hair);padding:10px 0;gap:8px">
-      <div><b>${l.name}</b> — ${LT[l.type]||l.type} ${l.from}${l.to!==l.from?` ถึง ${l.to}`:''} (${l.days} วัน)${l.reason?`<br><span style="color:var(--stone);font-size:12px">${l.reason}</span>`:''}</div>
+      <div><b>${l.name}</b> · ${LT[l.type]||l.type} ${l.from}${l.to!==l.from?` ถึง ${l.to}`:''} (${l.days} วัน)${l.reason?`<br><span style="color:var(--stone);font-size:12px">${l.reason}</span>`:''}</div>
       <div style="white-space:nowrap"><button class="btn sage sm" onclick="decideLeave('${l.id}',true)">อนุมัติ</button>
         <button class="btn ghost sm" onclick="decideLeave('${l.id}',false)">ปฏิเสธ</button></div></div>`).join('');
   }
@@ -756,7 +756,7 @@
     if(!list.length){$('claimInbox').style.display='none';return;}
     $('claimInbox').style.display='block';
     $('claimRows').innerHTML=list.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hair);padding:10px 0;gap:8px">
-      <div><b>${c.name}</b> — ${c.kind==='advance'?'เบิกล่วงหน้า':'ค่าใช้จ่าย'} ฿${Number(c.amount).toLocaleString()}${c.reason?`<br><span style="color:var(--stone);font-size:12px">${c.reason}</span>`:''}${c.receipt_url?`<br><a href="${c.receipt_url}" target="_blank" style="font-size:12px">ใบเสร็จ</a>`:''}</div>
+      <div><b>${c.name}</b> · ${c.kind==='advance'?'เบิกล่วงหน้า':'ค่าใช้จ่าย'} ฿${Number(c.amount).toLocaleString()}${c.reason?`<br><span style="color:var(--stone);font-size:12px">${c.reason}</span>`:''}${c.receipt_url?`<br><a href="${c.receipt_url}" target="_blank" style="font-size:12px">ใบเสร็จ</a>`:''}</div>
       <div style="white-space:nowrap"><button class="btn sage sm" onclick="decideClaim('${c.id}',true)">อนุมัติ</button>
         <button class="btn ghost sm" onclick="decideClaim('${c.id}',false)">ปฏิเสธ</button></div></div>`).join('');
   }

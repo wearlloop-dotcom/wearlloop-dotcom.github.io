@@ -65,7 +65,7 @@
 <!-- ประตู LINE login (เฉพาะเจ้าของ/ผู้จัดการ) -->
 <div id="gate" class="gate">
   <h2>เข้าดูสลิป</h2>
-  <p>ยืนยันตัวตนด้วย LINE — เฉพาะเจ้าของ/ผู้จัดการ</p>
+  <p>ยืนยันตัวตนด้วย LINE · เฉพาะเจ้าของ/ผู้จัดการ</p>
   <button class="btn" style="width:100%" onclick="boot()">เข้าสู่ระบบด้วย LINE</button>
   <div class="muted" style="margin-top:10px">สลิปมีข้อมูลบัญชีธนาคาร เข้าถึงเฉพาะผู้มีสิทธิ์ · เปิดรูปผ่านลิงก์ชั่วคราว 10 นาที</div>
 </div>
@@ -74,7 +74,7 @@
   <section class="phead">
     <div class="eyebrow">payment slips</div>
     <h1>สลิปโอนเข้า ครบทุกใบ</h1>
-    <div class="sub">ทุกสลิปที่ลูกค้าส่งเข้ามาถูกเก็บไว้ที่นี่ — ตรวจผ่าน/ไม่ผ่าน/รอยืนยันมือ มีหลักฐานครบ เปิดดูรูปย้อนหลังได้</div>
+    <div class="sub">ทุกสลิปที่ลูกค้าส่งเข้ามาถูกเก็บไว้ที่นี่ · ตรวจผ่าน/ไม่ผ่าน/รอยืนยันมือ มีหลักฐานครบ เปิดดูรูปย้อนหลังได้</div>
   </section>
   <div class="tabs">
     <span class="tab on" data-f="all" onclick="go(this)">ทั้งหมด</span>
@@ -91,7 +91,7 @@
   const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
   function toast(m){const t=$('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.className='toast',2600);}
-  const baht=n=>n==null?'—':'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const baht=n=>n==null?'…':'฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
   const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   function fmtDate(s){ if(!s)return'—'; const d=new Date(s); return d.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}); }
 

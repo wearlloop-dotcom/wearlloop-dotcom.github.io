@@ -63,7 +63,7 @@
     <div class="sub">ตรวจสภาพ ซัก และคืนความสวยให้ทุกชุด ก่อนส่งต่อสู่ลูกค้าคนถัดไป</div>
   </section>
   <div class="card">
-    <h2>1) ชุดกลับถึงร้าน — สแกน หรือใส่โค้ด</h2>
+    <h2>1) ชุดกลับถึงร้าน · สแกน หรือใส่โค้ด</h2>
     <div class="scan">
       <input id="code" placeholder="เช่น g1" autocomplete="off" enterkeyhint="go">
       <button class="btn dark" onclick="checkin()">รับเข้า</button>
@@ -72,7 +72,7 @@
       <button class="btn ghost" type="button" onclick="scanInto('code', checkin)">สแกน QR ป้ายชุด</button>
       <button class="btn ghost" type="button" onclick="nfcCheckin()">แตะ NFC</button>
     </div>
-    <div class="muted2">สแกน QR หรือแตะแท็ก NFC ที่ป้ายชุด — รับเข้าคิวตรวจให้อัตโนมัติ ไม่ต้องพิมพ์</div>
+    <div class="muted2">สแกน QR หรือแตะแท็ก NFC ที่ป้ายชุด · รับเข้าคิวตรวจให้อัตโนมัติ ไม่ต้องพิมพ์</div>
     <div id="panel"></div>
   </div>
 
@@ -108,13 +108,13 @@
   }
   // แตะ NFC ที่ป้ายชุด → หาโค้ดจากแท็ก → รับเข้าอัตโนมัติ (Android Chrome รองรับ Web NFC)
   async function nfcCheckin(){
-    if(!('NDEFReader' in window)){ toast('มือถือนี้ไม่รองรับ NFC — ใช้สแกน QR หรือพิมพ์โค้ดได้ค่ะ'); return; }
+    if(!('NDEFReader' in window)){ toast('มือถือนี้ไม่รองรับ NFC · ใช้สแกน QR หรือพิมพ์โค้ดได้ค่ะ'); return; }
     try{
       const r=new NDEFReader(); await r.scan(); toast('แตะแท็กที่ป้ายชุด…');
       r.onreading=async (e)=>{
         const uid=e.serialNumber||'';
         const { data } = await sb.rpc('tag_lookup',{ p_tag_uid: uid });
-        if(!data||!data.found){ toast('แท็กนี้ยังไม่ผูกกับชุด — ผูกที่หน้า NFC ก่อนค่ะ'); return; }
+        if(!data||!data.found){ toast('แท็กนี้ยังไม่ผูกกับชุด · ผูกที่หน้า NFC ก่อนค่ะ'); return; }
         sb.rpc('tag_scan',{ p_tag_uid: uid, p_action:'checkin', p_source:'nfc', p_location:null });
         $('code').value=data.code; checkin();
       };
@@ -127,7 +127,7 @@
         <div class="name">${d.name||current}</div>
         <div class="sub">โค้ด ${current} · ซักมาแล้ว ${d.wash_count} ครั้ง</div>
         <div class="hint"> วิธีซัก: <b>${d.wash}</b></div>
-        <div style="font-weight:600;margin:6px 0">2) ตรวจสภาพ — ของกลับมาเป็นยังไง?</div>
+        <div style="font-weight:600;margin:6px 0">2) ตรวจสภาพ · ของกลับมาเป็นยังไง?</div>
         <div style="margin:4px 0 8px"><button class="btn" style="background:var(--soft);padding:9px 13px;font-size:14px" onclick="qcShot()">ถ่ายรูปสภาพ (ตอนรับคืน) <span id="qcShotN" style="color:var(--muted)"></span></button></div>
         <div class="big">
           <button class="good" onclick="qc('good',true,0)"> ดี ครบ</button>
@@ -163,7 +163,7 @@
   async function loadQueue(){
     const { data } = await sb.rpc('care_queue');
     const list=data||[];
-    if(!list.length){ $('queue').innerHTML='<div class="empty">ไม่มีชุดค้าง — เคลียร์หมดแล้ว </div>'; return; }
+    if(!list.length){ $('queue').innerHTML='<div class="empty">ไม่มีชุดค้าง · เคลียร์หมดแล้ว </div>'; return; }
     const STAGE={qc:['รอตรวจ','qc'],washing:['รอซัก','washing'],repair:['รอซ่อม','repair'],checkin:['รับเข้า','qc']};
     $('queue').innerHTML=list.map(j=>{ const s=STAGE[j.stage]||[j.stage,'']; return`
       <div class="qrow">

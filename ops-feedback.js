@@ -85,7 +85,7 @@
   }
   async function captureScreen() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-      toast('เบราว์เซอร์นี้แคปหน้าจอไม่ได้ — ใช้ปุ่มแนบรูป หรือวางรูป (Ctrl+V) แทนได้', false); return;
+      toast('เบราว์เซอร์นี้แคปหน้าจอไม่ได้ · ใช้ปุ่มแนบรูป หรือวางรูป (Ctrl+V) แทนได้', false); return;
     }
     let stream;
     try { stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }); }
@@ -172,7 +172,7 @@
         <div class="fbk-lbl">ลิงก์ที่เกี่ยวข้อง (ถ้ามี)</div>
         <div class="fbk-links"></div>
         <button class="fbk-addlink">+ เพิ่มลิงก์</button>
-        <div class="fbk-hint">แนบได้หลายรูป/ไฟล์ (สูงสุด ${MAX_ATTACH} ไฟล์ · ไฟล์ละไม่เกิน 6MB) — ข้อมูลนี้เก็บเป็นความลับภายใน ไม่ขึ้นเว็บลูกค้า</div>
+        <div class="fbk-hint">แนบได้หลายรูป/ไฟล์ (สูงสุด ${MAX_ATTACH} ไฟล์ · ไฟล์ละไม่เกิน 6MB) · ข้อมูลนี้เก็บเป็นความลับภายใน ไม่ขึ้นเว็บลูกค้า</div>
         <button class="fbk-send">ส่ง feedback</button>
         <div class="fbk-msg"></div>
       </div>`;

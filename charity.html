@@ -112,7 +112,7 @@
       <div><label>เลขอ้างอิง / ใบเสร็จ</label><input id="dRef" placeholder="เลขที่โอน/ใบอนุโมทนา"></div>
     </div>
     <label>เลขอ้างอิง e-Donation (ถ้าบริจาคผ่านระบบสรรพากร)</label>
-    <input id="dEdon" placeholder="เลข e-Donation — จำเป็นสำหรับสิทธิหัก 2 เท่าหลายโครงการ">
+    <input id="dEdon" placeholder="เลข e-Donation · จำเป็นสำหรับสิทธิหัก 2 เท่าหลายโครงการ">
     <label>หลักฐาน (สลิป / ใบเสร็จ / ภาพส่งมอบ)</label>
     <input type="file" id="dProofUp" accept="image/*" multiple onchange="uploadProof(this)">
     <div class="thumbs" id="dProofThumbs"></div>
@@ -126,14 +126,14 @@
   <div class="card">
     <h2>ประวัติการโอน</h2>
     <div class="sub">ทุกแถวคือเงินที่ออกจริงไปมูลนิธิ</div>
-    <div id="disbList"><div class="empty">—</div></div>
+    <div id="disbList"><div class="empty">…</div></div>
   </div>
 
   <!-- มูลนิธิ / โครงการ -->
   <div class="card">
     <h2>มูลนิธิ / โครงการ</h2>
     <div class="sub">องค์กรที่ LLOOP ประสานงานส่งมอบ</div>
-    <div id="partnerList"><div class="empty">—</div></div>
+    <div id="partnerList"><div class="empty">…</div></div>
     <button class="btn ghost sm" style="margin-top:12px" onclick="editPartner()">+ เพิ่มมูลนิธิ</button>
 
     <fieldset id="pForm" style="border:none;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);display:none">
@@ -224,7 +224,7 @@
     $('fBar').style.width = (pledged>0 ? Math.min(100, Math.round(disb/pledged*100)) : 0) + '%';
     $('fNote').textContent = pledged>0
       ? ('โอนแล้ว '+Math.round(disb/pledged*100)+'% ของคำมั่นสะสม' + (fund.last_donated_on?(' · โอนล่าสุด '+thDate(fund.last_donated_on)):''))
-      : 'ยังไม่มีค่าเช่าที่จบ — กองบุญเริ่มสะสมเมื่อมีการเช่าคืนแล้ว';
+      : 'ยังไม่มีค่าเช่าที่จบ · กองบุญเริ่มสะสมเมื่อมีการเช่าคืนแล้ว';
 
     const tax = data.tax || {};
     $('tBase').textContent = baht(tax.deductible_base_ytd);
@@ -232,7 +232,7 @@
     const bonus = Number(tax.deductible_weighted_ytd||0) - Number(tax.deductible_base_ytd||0);
     $('tNote').textContent = Number(tax.deductible_base_ytd||0) > 0
       ? ('ปี '+(tax.year||'')+' บริจาคที่หักได้ '+baht(tax.deductible_base_ytd)+' → ใช้สิทธิหักเสมือน '+baht(tax.deductible_weighted_ytd)+(bonus>0?(' (ได้เพิ่มจากสิทธิหลายเท่า '+baht(bonus)+')'):''))
-      : 'ยังไม่มีการโอนที่หักภาษีได้ปีนี้ — ตั้งค่ามูลนิธิให้ "หักภาษีได้" แล้วบันทึกการโอนพร้อมใบเสร็จ/e-Donation';
+      : 'ยังไม่มีการโอนที่หักภาษีได้ปีนี้ · ตั้งค่ามูลนิธิให้ "หักภาษีได้" แล้วบันทึกการโอนพร้อมใบเสร็จ/e-Donation';
 
     PARTNERS = data.partners || [];
     DISB = data.disbursements || [];
@@ -248,17 +248,17 @@
   }
 
   function renderPartnerOptions(){
-    const opts='<option value="">— เลือกมูลนิธิ —</option>'+PARTNERS.filter(p=>p.active).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+    const opts='<option value="">(เลือกมูลนิธิ)</option>'+PARTNERS.filter(p=>p.active).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
     $('dPartner').innerHTML=opts;
-    const dopts='<option value="">— ไม่ผูก —</option>'+DISB.map(d=>`<option value="${esc(d.id)}">${esc(d.partner_name||'—')} · ${baht(d.amount_thb)} · ${thDate(d.donated_on)}</option>`).join('');
+    const dopts='<option value="">(ไม่ผูก)</option>'+DISB.map(d=>`<option value="${esc(d.id)}">${esc(d.partner_name||' · ')} · ${baht(d.amount_thb)} · ${thDate(d.donated_on)}</option>`).join('');
     $('postDisb').innerHTML=dopts;
   }
   function renderPartners(){
     const box=$('partnerList');
-    if(!PARTNERS.length){ box.innerHTML='<div class="empty">ยังไม่มีมูลนิธิ — เพิ่มได้ด้านล่าง</div>'; return; }
+    if(!PARTNERS.length){ box.innerHTML='<div class="empty">ยังไม่มีมูลนิธิ · เพิ่มได้ด้านล่าง</div>'; return; }
     box.innerHTML=PARTNERS.map(p=>`<div class="row"><div class="rmain">
         <div class="rt">${esc(p.name)}${p.active?'':'<span class="pill off">ปิด</span>'}${taxPill(p)}${p.org_type?'<span class="pill">'+esc(p.org_type)+'</span>':''}</div>
-        <div class="rs">${[p.contact_name,p.phone].filter(Boolean).map(esc).join(' · ')||'—'}${p.tax_ref?' · เลขรับรอง '+esc(p.tax_ref):''}${p.note?'<br>'+esc(p.note):''}</div>
+        <div class="rs">${[p.contact_name,p.phone].filter(Boolean).map(esc).join(' · ')||' · '}${p.tax_ref?' · เลขรับรอง '+esc(p.tax_ref):''}${p.note?'<br>'+esc(p.note):''}</div>
       </div><button class="link" onclick='editPartner(${JSON.stringify(p.id)})'>แก้ไข</button></div>`).join('');
   }
   function renderDisb(){
@@ -270,7 +270,7 @@
       const taxTag = mult>=2 ? '<span class="pill tax2">หัก 2 เท่า</span>' : mult>0 ? '<span class="pill tax">หักได้</span>' : '';
       const ded = mult>0 ? ' · หักเสมือน '+baht(d.deductible_thb) : '';
       return `<div class="row"><div class="rmain">
-        <div class="rt">${esc(d.partner_name||'—')}${taxTag}${d.kids_helped?'<span class="pill">น้อง '+esc(d.kids_helped)+' คน</span>':''}</div>
+        <div class="rt">${esc(d.partner_name||' · ')}${taxTag}${d.kids_helped?'<span class="pill">น้อง '+esc(d.kids_helped)+' คน</span>':''}</div>
         <div class="rs">${thDate(d.donated_on)}${d.reference?' · อ้างอิง '+esc(d.reference):''}${d.edonation_ref?' · e-Donation '+esc(d.edonation_ref):''}${ded}${d.recorded_by?' · โดย '+esc(d.recorded_by):''}${d.note?'<br>'+esc(d.note):''}</div>
         ${proof?'<div class="thumbs">'+proof+'</div>':''}
       </div><div class="ramt">${baht(d.amount_thb)}</div></div>`;
@@ -291,7 +291,7 @@
     const box=$('dTaxHint');
     if(!p){ box.style.display='none'; return; }
     box.style.display='block';
-    if(!p.tax_deductible){ box.className='taxhint no'; box.textContent='มูลนิธินี้ตั้งไว้ว่า "หักภาษีไม่ได้" — โอนได้แต่จะไม่นับเป็นสิทธิลดหย่อน'; return; }
+    if(!p.tax_deductible){ box.className='taxhint no'; box.textContent='มูลนิธินี้ตั้งไว้ว่า "หักภาษีไม่ได้" · โอนได้แต่จะไม่นับเป็นสิทธิลดหย่อน'; return; }
     const mult=Number(p.tax_multiplier)||1;
     const amt=Number($('dAmount').value)||0;
     box.className='taxhint';
@@ -317,7 +317,7 @@
     const { data, error } = await sb.rpc('charity_disburse', { p_data });
     if(error){ toast('บันทึกไม่สำเร็จ: '+error.message); return; }
     if(data && data.error){ toast('ผิดพลาด: '+data.error); return; }
-    toast('บันทึกการโอนแล้ว — ยอด "โอนจริง" อัปเดตให้ลูกค้าแล้ว');
+    toast('บันทึกการโอนแล้ว · ยอด "โอนจริง" อัปเดตให้ลูกค้าแล้ว');
     ['dAmount','dKids','dRef','dEdon','dProof','dNote'].forEach(id=>$(id).value=''); $('dProofThumbs').innerHTML=''; $('dTaxHint').style.display='none';
     load();
   }
@@ -369,7 +369,7 @@
     const { data, error } = await sb.rpc('charity_post_upsert', { p_data });
     if(error){ toast('โพสต์ไม่สำเร็จ: '+error.message); return; }
     if(data && data.error){ toast('ผิดพลาด: '+data.error); return; }
-    toast('โพสต์แล้ว — ลูกค้าเห็นในหน้าผลกระทบ');
+    toast('โพสต์แล้ว · ลูกค้าเห็นในหน้าผลกระทบ');
     $('postCap').value=''; $('postPhotos').value=''; $('postThumbs').innerHTML=''; $('postDisb').value='';
     load();
   }

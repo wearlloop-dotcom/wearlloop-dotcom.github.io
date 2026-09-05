@@ -57,7 +57,7 @@
     <div class="sub">วางสาขา ฮับ และจุดรับ-ส่งทั่วเมือง ให้การหมุนเวียนชุดใกล้มือคนเช่าขึ้นทุกย่าน</div>
   </section>
 
-  <div class="banner">เฟส 2 (เผื่อขยาย) — สร้าง/เตรียมไว้ได้เลย ค่าเริ่มต้น "ปิด" จะยังไม่แสดงให้ลูกค้าจนกว่าจะกดเปิด</div>
+  <div class="banner">เฟส 2 (เผื่อขยาย) · สร้าง/เตรียมไว้ได้เลย ค่าเริ่มต้น "ปิด" จะยังไม่แสดงให้ลูกค้าจนกว่าจะกดเปิด</div>
 
   <div class="tabs">
     <span class="tab on" data-t="branch" onclick="setTab(this)">สาขา / ฮับ</span>
@@ -86,7 +86,7 @@
           <div><label>เบอร์โทร</label><input id="br_phone"></div>
           <div><label>เวลาเปิด</label><input id="br_hours" placeholder="10:00-20:00"></div>
         </div>
-        <label>ผู้จัดการสาขา</label><select id="br_manager"><option value="">— เลือกพนักงาน —</option></select>
+        <label>ผู้จัดการสาขา</label><select id="br_manager"><option value="">(เลือกพนักงาน)</option></select>
         <button class="btn dark" style="margin-top:14px" onclick="saveBranch()">บันทึกสาขา</button>
       </details>
     </div>
@@ -107,7 +107,7 @@
           <div><label>ประเภทผู้ดูแล</label><select id="pp_host"><option value="branch">สาขาของเรา</option><option value="partner">พาร์ทเนอร์ (ร้านฝาก)</option><option value="locker">ตู้ล็อกเกอร์</option></select></div>
         </div>
         <div class="g2">
-          <div><label>สาขาที่สังกัด</label><select id="pp_branch"><option value="">— ไม่ผูกสาขา —</option></select></div>
+          <div><label>สาขาที่สังกัด</label><select id="pp_branch"><option value="">(ไม่ผูกสาขา)</option></select></div>
           <div><label>ชื่อร้าน/พาร์ทเนอร์</label><input id="pp_hostname" placeholder="เช่น Café Loop"></div>
         </div>
         <div class="g3">
@@ -122,7 +122,7 @@
           <span class="chip on" data-v="dropoff">คืนชุด</span>
           <span class="chip" data-v="fitting">ลองชุด</span>
         </div>
-        <label>พนักงานประจำจุด</label><select id="pp_staff"><option value="">— เลือกพนักงาน —</option></select>
+        <label>พนักงานประจำจุด</label><select id="pp_staff"><option value="">(เลือกพนักงาน)</option></select>
         <button class="btn dark" style="margin-top:14px" onclick="savePickup()">บันทึกจุด</button>
       </details>
     </div>
@@ -157,12 +157,12 @@
   async function loadStaffOptions(){
     const {data}=await sb.rpc('hr_employee_list',{p_status:'staff'});
     staffOpts=(data||[]).map(e=>`<option value="${e.id}">${e.name}${e.nickname?' ('+e.nickname+')':''}</option>`).join('');
-    $('br_manager').innerHTML='<option value="">— เลือกพนักงาน —</option>'+staffOpts;
-    $('pp_staff').innerHTML='<option value="">— เลือกพนักงาน —</option>'+staffOpts;
+    $('br_manager').innerHTML='<option value="">(เลือกพนักงาน)</option>'+staffOpts;
+    $('pp_staff').innerHTML='<option value="">(เลือกพนักงาน)</option>'+staffOpts;
   }
   async function loadBranchOptions(){
     const {data}=await sb.rpc('branch_list',{p_kind:null,p_include_inactive:true});
-    $('pp_branch').innerHTML='<option value="">— ไม่ผูกสาขา —</option>'+(data||[]).map(b=>`<option value="${b.id}">${b.code} ${b.name}</option>`).join('');
+    $('pp_branch').innerHTML='<option value="">(ไม่ผูกสาขา)</option>'+(data||[]).map(b=>`<option value="${b.id}">${b.code} ${b.name}</option>`).join('');
   }
 
   // ----- สาขา -----

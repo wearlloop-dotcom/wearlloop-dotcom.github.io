@@ -54,7 +54,7 @@
   <section class="phead">
     <div class="eyebrow">garment intake</div>
     <h1>ต้อนรับทุกชุดเข้าระบบ</h1>
-    <div class="sub">สแกน ถ่ายรูป ตั้งราคา แล้วเก็บเข้าช่อง — เริ่มต้นชีวิตการหมุนเวียนของชุดใหม่</div>
+    <div class="sub">สแกน ถ่ายรูป ตั้งราคา แล้วเก็บเข้าช่อง · เริ่มต้นชีวิตการหมุนเวียนของชุดใหม่</div>
   </section>
   <div class="card">
     <h2>ข้อมูลชุด</h2>
@@ -64,7 +64,7 @@
       <div class="field"><label>โค้ด (เว้นว่าง = สร้างอัตโนมัติ)</label><input id="f_code" oninput="syncPreview()" placeholder="เช่น g7"></div>
       <div class="field"><label>แบรนด์</label><input id="f_brand" oninput="syncPreview()"></div>
     </div>
-    <div class="field"><label>เก็บเข้าช่อง (เก็บที่ไหน — เว้นว่างได้ ค่อยเก็บทีหลัง)</label><input id="f_bin" placeholder="เช่น A-03"></div>
+    <div class="field"><label>เก็บเข้าช่อง (เก็บที่ไหน · เว้นว่างได้ ค่อยเก็บทีหลัง)</label><input id="f_bin" placeholder="เช่น A-03"></div>
     <div class="field"><label>ชื่อชุด</label><input id="f_name" oninput="syncPreview()"></div>
     <div class="row2">
       <div class="field"><label>หมวด</label><select id="f_category"><option value="dress">เดรส</option><option value="set">เซ็ต</option><option value="top">เสื้อ</option><option value="skirt">กระโปรง</option><option value="pants">กางเกง</option><option value="jumpsuit">จัมพ์สูท</option><option value="outerwear">เอาเตอร์</option></select></div>
@@ -76,14 +76,14 @@
       <div class="field"><label>ราคาที่ซื้อมา/ทุน (มือสอง · ไม่โชว์ลูกค้า)</label><input id="f_acq" type="number" min="0" placeholder="เช่น 800"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>ไซส์ (size)</label><select id="f_size"><option value="">— ไม่ระบุ —</option><option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option><option value="FREE">FREE SIZE</option></select></div>
+      <div class="field"><label>ไซส์ (size)</label><select id="f_size"><option value="">(ไม่ระบุ)</option><option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option><option value="FREE">FREE SIZE</option></select></div>
       <div class="field"><label>สภาพชุด (condition)</label><select id="f_condition"><option value="new">ใหม่มาก</option><option value="good">ดี</option><option value="fair">พอใช้</option><option value="poor">ต้องซ่อม</option></select></div>
     </div>
     <div class="field"><label>โอกาสที่ใส่ได้ (เลือกได้หลายอัน)</label><div class="chips" id="occ"></div></div>
     <div class="row2">
       <div class="field"><label>สี (ชื่อ)</label><input id="f_colorname" placeholder="navy"></div>
       <div class="field"><label>โค้ดสี</label><input id="f_colorhex" type="color" value="#15233F" oninput="syncPreview()"></div>
-      <div class="field"><label>โทนสี</label><select id="f_season"><option value="">—</option><option value="spring">สปริง</option><option value="summer">ซัมเมอร์</option><option value="autumn">ออทัมน์</option><option value="winter">วินเทอร์</option></select></div>
+      <div class="field"><label>โทนสี</label><select id="f_season"><option value="">…</option><option value="spring">สปริง</option><option value="summer">ซัมเมอร์</option><option value="autumn">ออทัมน์</option><option value="winter">วินเทอร์</option></select></div>
     </div>
     <div class="row2">
       <div class="field"><label>อก (นิ้ว) min–max</label><div class="row2"><input id="f_bmin" type="number"><input id="f_bmax" type="number"></div></div>
@@ -93,7 +93,7 @@
     <div class="field"><label>วิธีใส่ให้สวย (คั่นด้วย,)</label><textarea id="f_tips" rows="2" placeholder="ใส่บราเกาะอก, ซ่อนสายในได้, แนะนำแผ่นปิดจุก"></textarea></div>
     <button class="savebtn" onclick="save()">บันทึกเข้าระบบ + สร้าง QR</button>
     <div class="ok" id="ok"></div>
-    <div class="note">บันทึกแล้วชุดจะอยู่สถานะ <b>needs_review</b> (ยังไม่ขึ้นหน้าลูกค้า จนกว่าจะตรวจ) — ป้าย QR ปริ้นได้เลยที่หน้า"ปริ้นป้าย QR"</div>
+    <div class="note">บันทึกแล้วชุดจะอยู่สถานะ <b>needs_review</b> (ยังไม่ขึ้นหน้าลูกค้า จนกว่าจะตรวจ) · ป้าย QR ปริ้นได้เลยที่หน้า"ปริ้นป้าย QR"</div>
   </div>
 
   <div>
@@ -101,7 +101,7 @@
       <div class="pic" id="p_pic">รูปชุด</div>
       <div class="info">
         <div class="br" id="p_brand"></div>
-        <div class="code" id="p_code">—</div>
+        <div class="code" id="p_code">…</div>
         <div class="nm" id="p_name">ชื่อชุด</div>
         <div class="qr"><div id="p_qr"></div><span class="hint">สแกนดูชุด</span></div>
       </div>
@@ -156,7 +156,7 @@
       $('f_season').value=t.color_season||''; $('f_fabric').value=t.fabric_guess||'';
       (t.occasion_tags||[]).forEach(k=>{const el=document.querySelector(`.chip[data-k="${k}"]`); if(el&&!sel.has(k)){sel.add(k);el.classList.add('on')}});
       syncPreview();
-    }catch(e){ toast('AI ช่วยกรอกยังไม่พร้อม — กรอกมือไปก่อนได้เลยค่ะ',true); }
+    }catch(e){ toast('AI ช่วยกรอกยังไม่พร้อม · กรอกมือไปก่อนได้เลยค่ะ',true); }
   }
 
   async function save(){
@@ -182,7 +182,7 @@
     const bin=($('f_bin').value||'').trim();
     if(bin){ const r=await sb.rpc('put_away',{p_code:data,p_bin:bin}); if(!r.error&&!r.data?.error) binMsg=` · เก็บเข้าช่อง <b>${bin}</b> แล้ว`; }
     const ok=$('ok'); ok.style.display='block';
-    ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> (needs_review)${binMsg} — <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
+    ok.innerHTML=`✓ บันทึกแล้ว โค้ด <b>${data}</b> (needs_review)${binMsg} · <a href="/labels.html" target="_blank">ปริ้นป้าย QR</a>`;
   }
 </script>
 <script src="ops-menu.js"></script>

@@ -53,7 +53,7 @@
   <section class="phead">
     <div class="eyebrow">today at the studio</div>
     <h1>งานวันนี้ ที่รอมือเรา</h1>
-    <div class="sub">รวมทุกชุดที่ต้องส่ง คืน ซัก ตรวจ และดูแล วันนี้ — ให้ทุกตัวหมุนเวียนต่อได้อย่างไม่ตกหล่น</div>
+    <div class="sub">รวมทุกชุดที่ต้องส่ง คืน ซัก ตรวจ และดูแล วันนี้ · ให้ทุกตัวหมุนเวียนต่อได้อย่างไม่ตกหล่น</div>
   </section>
   <div class="toolrow">
     <div class="when" id="when"></div>
@@ -135,7 +135,7 @@
 
     $('out').innerHTML =
       kpis +
-      ((d.overdue||[]).length ? section('เลยกำหนดคืน — ตามด่วน', (d.overdue||[]).length, true, overdue, 'over') : '') +
+      ((d.overdue||[]).length ? section('เลยกำหนดคืน · ตามด่วน', (d.overdue||[]).length, true, overdue, 'over') : '') +
       section('ต้องส่งวันนี้/พรุ่งนี้', (d.to_ship||[]).length, true, toShip, 'ship') +
       section('ครบกำหนดคืนวันนี้', (d.due_today||[]).length, true, due, 'due') +
       section('คิวซัก/ดูแล', (d.wash||[]).length, false, wash, 'wash') +

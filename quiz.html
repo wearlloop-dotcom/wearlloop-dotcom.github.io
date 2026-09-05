@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LLOOP · งานนี้ใส่อะไรดี การ์ดสไตลิสต์</title>
-<meta property="og:title" content="งานนี้ใส่อะไรดี? — การ์ดสไตลิสต์ LLOOP">
-<meta property="og:description" content="หยิบการ์ด บอกงานที่จะไป แล้วให้สไตลิสต์ช่วยเลือกชุดที่ใช่ — เช่าได้จริง ใส่ครั้งเดียวก็คุ้ม">
+<meta property="og:title" content="งานนี้ใส่อะไรดี? · การ์ดสไตลิสต์ LLOOP">
+<meta property="og:description" content="หยิบการ์ด บอกงานที่จะไป แล้วให้สไตลิสต์ช่วยเลือกชุดที่ใช่ · เช่าได้จริง ใส่ครั้งเดียวก็คุ้ม">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
@@ -189,12 +189,12 @@
         <div class="face back">
           <div class="head">
             <div class="k">งานนี้ใส่อะไรดี</div>
-            <div class="t" id="rTitle">—</div>
+            <div class="t" id="rTitle">…</div>
             <div class="wax" id="wax">SEALED</div>
           </div>
           <div class="body">
-            <div class="row"><span>โอกาส</span><b id="rOcc">—</b></div>
-            <div class="row"><span>สไตล์ที่อยากได้</span><b id="rMood">—</b></div>
+            <div class="row"><span>โอกาส</span><b id="rOcc">…</b></div>
+            <div class="row"><span>สไตล์ที่อยากได้</span><b id="rMood">…</b></div>
             <div class="row"><span>ขั้นต่อไป</span><b>สไตลิสต์เลือกชุดจริงให้</b></div>
           </div>
         </div>
@@ -372,7 +372,7 @@ function resetGame(){ pick={occasion:null,occName:'',mood:null,moodName:''}; go(
 function shareGame(){
   var url = location.origin + location.pathname + (REF ? '?ref='+encodeURIComponent(REF) : '');
   track('share');
-  var text = 'งานนี้ใส่อะไรดี? ลองเล่นการ์ดสไตลิสต์ของ LLOOP สิ — มันเลือกชุดให้เลย';
+  var text = 'งานนี้ใส่อะไรดี? ลองเล่นการ์ดสไตลิสต์ของ LLOOP สิ · มันเลือกชุดให้เลย';
   if (navigator.share){ navigator.share({title:'งานนี้ใส่อะไรดี', text:text, url:url}).catch(function(){}); }
   else if (navigator.clipboard){ navigator.clipboard.writeText(text+' '+url); var b=event.target; var o=b.textContent; b.textContent='คัดลอกลิงก์แล้ว'; setTimeout(function(){b.textContent=o;},1600); }
 }

@@ -106,12 +106,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="config.js?v=51"></script>
-<script src="data.js?v=51"></script>
+<script src="data.js?v=52"></script>
 <script src="liffAuth.js?v=56"></script>
 <script src="me-api.js?v=56"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="promptpay.js?v=51"></script>
-<script src="api.js?v=64"></script>
+<script src="api.js?v=65"></script>
 <script>
 // ============================================================
 //  g.html — สแกน QR ที่ป้ายชุด/บูธ → ดูชุด+ราคา → เลือกวัน → จองในระบบ
@@ -193,7 +193,7 @@ function renderItem(){
 
     <div class="sec">
       <div class="sectitle">เลือกวันที่จะใช้</div>
-      <div class="seccap">วันแรกคือวันรับ/วันใช้งาน — เราเช็กให้ทันทีว่าว่างไหม</div>
+      <div class="seccap">วันแรกคือวันรับ/วันใช้งาน · เราเช็กให้ทันทีว่าว่างไหม</div>
       <label class="fl">วันที่ใช้งาน</label>
       <input type="date" id="useDate" min="${todayStr()}" onchange="onPick()">
       <label class="fl">เช่ากี่วัน</label>
@@ -222,12 +222,12 @@ async function onPick(){
   if (rangeBusy(from, to)){
     sum.innerHTML = '';
     msg.className = 'availmsg busy';
-    msg.textContent = 'ช่วงวันนี้มีคนจองอยู่ — ลองเลื่อนวัน หรือดูชุดคล้ายกันในร้านนะคะ';
+    msg.textContent = 'ช่วงวันนี้มีคนจองอยู่ · ลองเลื่อนวัน หรือดูชุดคล้ายกันในร้านนะคะ';
     if (btn){ btn.disabled = true; btn.textContent = 'ช่วงนี้ไม่ว่าง'; }
     return;
   }
   msg.className = 'availmsg free';
-  msg.textContent = 'ว่างช่วงวันนี้ — จองได้เลย';
+  msg.textContent = 'ว่างช่วงวันนี้ · จองได้เลย';
   let q = null;
   try { q = await window.API.quote(G.code, CUSTOMER, from, to); } catch (e) {}
   lastQuote = q;
@@ -250,7 +250,7 @@ async function onPick(){
       ${row('รวมโอน', baht(q.total), true)}
       <div class="qdates">วันแรก (วันรับ/ใช้งาน): <b>${fmtDate(q.use_date)}</b> · เช่า ${q.days} วัน</div>
       <div class="qdates">จัดส่งราว ${fmtDate(q.ship_date)} · กำหนดคืน <b>${fmtDate(q.return_date)}</b></div>
-      ${q.kyc_required ? `<div class="qdates">ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว (แนบบัตร + IG/FB) ช่วยลดมัดจำได้ — ทำในแชตหลังจองได้เลย</div>` : ''}
+      ${q.kyc_required ? `<div class="qdates">ลูกค้าใหม่ยืนยันตัวตนครั้งเดียว (แนบบัตร + IG/FB) ช่วยลดมัดจำได้ · ทำในแชตหลังจองได้เลย</div>` : ''}
       ${payBlock}`;
     if (PAY && PAY.pay_promptpay_id && window.promptpayBrandedQR){
       const el = document.getElementById('ppqr');
@@ -297,14 +297,14 @@ function renderDone(from, to, total, covered){
   const hasPP = PAY && (PAY.pay_promptpay_id || PAY.pay_promptpay_qr);
   // สมาชิกที่แพ็กคลุมชุดนี้ → ไม่ต้องจ่าย (จองสำเร็จเลย)
   const payBlock = covered
-    ? `<div class="paybox"><div class="paynote" style="text-align:center">ชุดนี้รวมอยู่ในแพ็กสมาชิกของคุณแล้ว — ไม่ต้องโอนเพิ่ม จัดส่งตามวันที่เลือกค่ะ</div></div>`
+    ? `<div class="paybox"><div class="paynote" style="text-align:center">ชุดนี้รวมอยู่ในแพ็กสมาชิกของคุณแล้ว · ไม่ต้องโอนเพิ่ม จัดส่งตามวันที่เลือกค่ะ</div></div>`
     : !(hasPP && total) ? '' : `
     <div class="paybox">
       <div class="qhd">โอนเพื่อยืนยัน</div>
       ${PAY.pay_promptpay_id ? `<div id="ppqr2"></div>`
         : `<img src="${PAY.pay_promptpay_qr}" alt="PromptPay QR" style="width:200px;max-width:64%;border:1px solid var(--line);border-radius:10px">`}
       <div class="payamt">สแกนแล้วโอน <b>${baht(total)}</b></div>
-      <div class="paynote">โอนแล้วแนบสลิปในแชต LLOOP — ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ</div>
+      <div class="paynote">โอนแล้วแนบสลิปในแชต LLOOP · ทีมยืนยันแล้วชุดเป็นของคุณ จัดส่งตามวันที่เลือกค่ะ</div>
     </div>`;
   $('#root').innerHTML = `
     <div class="sec">

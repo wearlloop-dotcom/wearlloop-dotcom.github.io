@@ -46,16 +46,16 @@
 <script>
   const FN='https://rprwilsbjptdnvsibjgi.supabase.co/functions/v1/acct';
   const $=id=>document.getElementById(id);
-  const esc=s=>(s==null||s==='')?'—':String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-  const dt=s=>s?new Date(s).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'—';
-  const baht=n=>n==null?'—':'฿'+Number(n).toLocaleString('th-TH');
+  const esc=s=>(s==null||s==='')?'…':String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const dt=s=>s?new Date(s).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'…';
+  const baht=n=>n==null?'…':'฿'+Number(n).toLocaleString('th-TH');
   async function api(action,extra){
     if(!(await window.opsLogin())) throw new Error('redirecting');
     const r=await fetch(FN,{method:'POST',headers:{'Authorization':'Bearer '+liff.getIDToken(),'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action},extra))});
     if(r.status===401||r.status===403){throw new Error('ไม่มีสิทธิ์ (เฉพาะเจ้าของ/ผู้จัดการ)');}
     return r.json();
   }
-  const rows=(arr,cols)=>!arr||!arr.length?'<div class="muted">— ไม่มี —</div>':
+  const rows=(arr,cols)=>!arr||!arr.length?'<div class="muted">(ไม่มี)</div>':
     `<table><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr>${arr.map(o=>`<tr>${cols.map(c=>`<td>${c[1](o)}</td>`).join('')}</tr>`).join('')}</table>`;
 
   async function loadCase(){
@@ -73,21 +73,21 @@
       <div class="foot">เอกสารนี้รวบรวมจากระบบ LLOOP โดยอัตโนมัติ บันทึกพร้อมวันเวลาและที่อยู่ IP เป็นหลักฐานอิเล็กทรอนิกส์ตาม พ.ร.บ.ว่าด้วยธุรกรรมทางอิเล็กทรอนิกส์ พ.ศ. 2544 · ใช้ประกอบกับสำเนาบัตร/หลักฐานอื่นเพื่อยื่นต่อพนักงานสอบสวนหรือศาล</div>`;
   }
   function qcPhotos(ph){
-    if(!ph||!ph.length) return '<div class="muted">— ยังไม่มีรูป QC ก่อน/หลัง — (ถ่ายตอนแพ็กส่ง = ก่อน, ตอน QC รับคืน = หลัง)</div>';
+    if(!ph||!ph.length) return '<div class="muted"> · ยังไม่มีรูป QC ก่อน/หลัง · (ถ่ายตอนแพ็กส่ง = ก่อน, ตอน QC รับคืน = หลัง)</div>';
     const grp={}; ph.forEach(p=>{const k=esc(p.garment)+' · เช่า '+String(p.rental_id||'').slice(0,8); (grp[k]=grp[k]||[]).push(p);});
     return Object.entries(grp).map(([k,arr])=>{
       const before=arr.filter(p=>p.phase==='before'), after=arr.filter(p=>p.phase==='after');
       const col=(label,list)=>`<div style="flex:1"><div class="muted" style="font-size:12px;margin-bottom:3px">${label}</div>`+
-        (list.length?'<div class="imgs">'+list.map(p=>`<div><img src="${p.url||''}" alt="${label}"><div class="muted" style="font-size:11px">${esc(p.note)} · ${dt(p.created_at)}</div></div>`).join('')+'</div>':'<div class="muted">— ไม่มี —</div>')+'</div>';
+        (list.length?'<div class="imgs">'+list.map(p=>`<div><img src="${p.url||''}" alt="${label}"><div class="muted" style="font-size:11px">${esc(p.note)} · ${dt(p.created_at)}</div></div>`).join('')+'</div>':'<div class="muted">(ไม่มี)</div>')+'</div>';
       return `<div style="margin-bottom:12px"><div style="font-weight:700;font-size:12.5px;margin-bottom:4px">${k}</div><div style="display:flex;gap:14px">${col('ก่อนส่ง',before)}${col('ตอนรับคืน',after)}</div></div>`;
     }).join('');
   }
-  function imgs(files){ return !files||!files.length?'<div class="muted">— ไม่มีไฟล์ KYC —</div>':
+  function imgs(files){ return !files||!files.length?'<div class="muted">(ไม่มีไฟล์ KYC)</div>':
     '<div class="imgs">'+files.map(f=>f.url?`<div><img src="${f.url}" alt="${esc(f.kind)}"><div class="muted" style="font-size:11px">${esc(f.kind)}</div></div>`:`<div class="muted">${esc(f.kind)} (ลิงก์หมดอายุ)</div>`).join('')+'</div>'; }
 
   function renderCustomer(cf){
     const id=cf.identity||{};
-    return shell('แฟ้มหลักฐาน — ลูกค้า', `
+    return shell('แฟ้มหลักฐาน · ลูกค้า', `
       <h3>1. ตัวตนลูกค้า (KYC)</h3>
       <div class="kv"><b>ชื่อ:</b> ${esc(id.display_name)} ${id.kyc_verified?'<span class="badge">ยืนยันตัวตนแล้ว</span>':'<span class="badge">ยังไม่ยืนยัน</span>'}</div>
       <div class="kv"><b>เลขบัตรประชาชน:</b> ${esc(id.id_card)}</div>
@@ -110,7 +110,7 @@
   }
   function renderContract(cf){
     const c=cf.contract||{}, a=cf.esign_audit||{};
-    return shell('แฟ้มหลักฐาน — สัญญาพาร์ทเนอร์', `
+    return shell('แฟ้มหลักฐาน · สัญญาพาร์ทเนอร์', `
       <h3>1. สัญญา</h3>
       <div class="kv"><b>เลขที่:</b> ${esc(c.contract_no)} · <b style="min-width:auto">สถานะ:</b> ${esc(c.status)}</div>
       <div class="kv"><b>พาร์ทเนอร์:</b> ${esc(c.partner_name)} ${c.partner_org?'('+esc(c.partner_org)+')':''}</div>
@@ -119,16 +119,16 @@
       <div class="kv"><b>เลขบัตร:</b> ${esc(a.signer_id_card)}</div>
       <div class="kv"><b>ลงนามเมื่อ:</b> ${dt(a.signed_at)}</div>
       <div class="kv"><b>IP / อุปกรณ์:</b> ${esc(a.signed_ip)} · ${esc(a.signed_ua)}</div>
-      <div class="kv"><b>มีลายเซ็น:</b> ${a.has_signature?'มี (เก็บในระบบ)':'—'}</div>
+      <div class="kv"><b>มีลายเซ็น:</b> ${a.has_signature?'มี (เก็บในระบบ)':'…'}</div>
       <h3>3. ข้อความสัญญา ณ เวลาลงนาม (snapshot)</h3>
-      <div class="snap">${esc(a.document_snapshot)||'—'}</div>
+      <div class="snap">${esc(a.document_snapshot)||'…'}</div>
       <h3>4. ความยินยอม (PDPA)</h3>
       ${rows(cf.consents,[['วัตถุประสงค์',o=>esc(o.purpose)],['ยินยอมเมื่อ',o=>dt(o.granted_at)]])}
     `);
   }
   function renderSeller(cf){
     const a=cf.acquisition||{};
-    return shell('แฟ้มหลักฐาน — ผู้ขายมือสอง', `
+    return shell('แฟ้มหลักฐาน · ผู้ขายมือสอง', `
       <h3>1. ผู้ขาย</h3>
       <div class="kv"><b>ชื่อ:</b> ${esc(a.seller_name)}</div>
       <div class="kv"><b>เลขบัตร:</b> ${esc(a.seller_id_card)} · <b style="min-width:auto">โทร:</b> ${esc(a.seller_phone)}</div>

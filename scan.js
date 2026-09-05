@@ -43,11 +43,11 @@
           stop();
           if (typeof cb === 'function') cb();
         }, () => {});
-    } catch (e) { stop(); alert('เปิดกล้องไม่ได้ — อนุญาตสิทธิ์กล้อง หรือพิมพ์รหัสเองได้ค่ะ'); }
+    } catch (e) { stop(); alert('เปิดกล้องไม่ได้ · อนุญาตสิทธิ์กล้อง หรือพิมพ์รหัสเองได้ค่ะ'); }
   }
   // แตะ NFC (Android Chrome รองรับ Web NFC) → เติมรหัสจาก tag (ถ้าเขียนรหัสไว้ใน tag)
   async function nfcInto(inputId, cb) {
-    if (!('NDEFReader' in window)) { alert('มือถือนี้ไม่รองรับแตะ NFC — ใช้สแกน QR หรือพิมพ์แทนได้ค่ะ'); return; }
+    if (!('NDEFReader' in window)) { alert('มือถือนี้ไม่รองรับแตะ NFC · ใช้สแกน QR หรือพิมพ์แทนได้ค่ะ'); return; }
     try {
       const r = new NDEFReader(); await r.scan();
       r.onreading = (e) => {
