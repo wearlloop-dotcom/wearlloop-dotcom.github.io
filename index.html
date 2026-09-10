@@ -4,6 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LLOOP · Limitless Looks</title>
+
+<!-- ประตูหน้าเว็บ: ครั้งแรกพาไปดู intro ตู้เสื้อผ้าที่ /intro/ ก่อน ครั้งต่อไปเข้าตรง
+     ต้องอยู่บนสุดของ head และรันก่อนอย่างอื่น จะได้ไม่เห็นหน้าเก่าแวบขึ้นมาก่อนเด้ง
+
+     กันพัง 3 จุด
+       1) ห้ามเด้งถ้า URL มีพารามิเตอร์ล็อกอิน LINE (code · state · liff.state ฯลฯ)
+          ไม่งั้นจะทำ callback ของ LINE Login หายทั้งดุ้น ลูกค้าล็อกอินไม่ได้
+       2) ห้ามเด้งถ้าเปิดมาจาก intro อยู่แล้ว (?from=intro) กันวนซ้ำ
+       3) localStorage อ่านไม่ได้ (โหมดส่วนตัว) ก็แค่ได้เห็น intro อีกรอบ ไม่พัง -->
+<script>
+(function () {
+  var KEY = 'lloop_intro_seen', qs = location.search || '';
+  var fromIntro = /[?&]from=intro(&|$)/.test(qs);
+  // พารามิเตอร์ของ LINE Login / LIFF ถ้ามีตัวใดตัวหนึ่ง ห้ามแตะ URL เด็ดขาด
+  var authFlow = /[?&](code|state|liff\.state|liffClientId|liffRedirectUri|error)=/.test(qs);
+  var seen = false;
+  try { seen = localStorage.getItem(KEY) === '1'; } catch (e) {}
+  if (fromIntro) { try { localStorage.setItem(KEY, '1'); } catch (e) {} }
+  if (fromIntro || seen || authFlow) {
+    document.documentElement.className += ' skip-ring-intro';   // ซ่อน intro วงแหวนเดิม
+    return;
+  }
+  location.replace('intro/');
+})();
+</script>
+<style>html.skip-ring-intro .intro{display:none!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
