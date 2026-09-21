@@ -945,7 +945,7 @@ function esc(s){ return String(s==null?'':s).replace(/[<>&"]/g,function(c){retur
 async function refreshStylistQuota() {
   const chip = $('#stylistQuota'); if (!chip) return;
   let n = null;
-  try { n = await window.API.stylistQuota?.(); } catch (_e) {}
+  try { if (_isLoggedIn()) n = await window.API.stylistQuota?.(); } catch (_e) {}
   if (n == null) { chip.hidden = false; chip.innerHTML = `<span class="atelier-info" tabindex="0" role="button" aria-label="LLOOP Atelier คืออะไร" onclick="event.stopPropagation();this.classList.toggle('show')"><b>${t('vLoginNeed')}</b><i class="ai-ic" aria-hidden="true">i</i><span class="atelier-tip">${t('vAtelierTip')}</span></span>`; return; }
   chip.hidden = false;
   chip.innerHTML = `${t('vQuotaLeft')} <b>${n}</b> ${t('vQuotaTimes')}`;
@@ -1596,6 +1596,10 @@ function setDur(id, d) {
 // สรุปยอดเต็ม: ค่าเช่า + มัดจำ + ค่าส่ง + วันส่ง/คืน (เรียก quote_rental)
 async function renderQuote(id, date) {
   const box = $('#quotebox'); if (!box) return;
+  if (!_isLoggedIn()) {
+    box.textContent = lang === 'th' ? 'ดูยอดรวมและสิทธิ์ส่วนตัวเมื่อเข้าสู่ระบบเพื่อเช่า' : 'Sign in when renting to see your total and benefits';
+    return;
+  }
   const g = GARMENTS.find(x => x.id === id); if (!g) return;
   if (subCovers(g)) { box.innerHTML = ''; return; }
   if (!date) { box.innerHTML = ''; return; }
@@ -1862,6 +1866,7 @@ function pickBackup(code) {
   document.querySelectorAll('#backupPicker .bp-chip').forEach(b => b.classList.toggle('on', _backupPicks.includes(b.dataset.code)));
 }
 async function reserve(id, useCredit) {
+  if (!requireCustomer('rent', id)) return;
   const g = GARMENTS.find(x => x.id === id);
   const date = $('#useDate') && $('#useDate').value;
   if (!date) {
@@ -1928,6 +1933,7 @@ async function reserve(id, useCredit) {
 
 // จองด้วยสิทธิ์วันเกิด (ฟรีถึงเพดาน · เกินจ่ายส่วนต่าง · มัดจำตามปกติ)
 async function bdayBook(id) {
+  if (!requireCustomer('rent', id)) return;
   const g = GARMENTS.find(x => x.id === id);
   const date = $('#useDate') && $('#useDate').value;
   if (!date) {
@@ -1955,6 +1961,7 @@ async function bdayBook(id) {
 
 // ===== ยืนยันตัวตน (KYC) =====
 function openKyc(id) {
+  if (!requireCustomer('kyc')) return;
   const TH = lang === 'th';
   $('#kycSheet').innerHTML = `
     <div class="ksheet">
@@ -2022,7 +2029,7 @@ async function customerCanRent() {
 // ด่านก่อนจอง: ผ่าน→true · ไม่ผ่าน→เปิดหน้า KYC + แจ้งเตือน แล้วคืน false
 // ต้องมีที่อยู่จัดส่งก่อนจอง · ถ้ายังไม่มี เปิดฟอร์มสั้นให้กรอก แล้วค่อยกดจองอีกครั้ง
 function requireAddress() {
-  if (!CUSTOMER || !CUSTOMER.id) return true;        // ยังไม่ล็อกอิน · flow เดิมจัดการ
+  if (!requireCustomer('rent')) return false;
   if (CUSTOMER.address && CUSTOMER.address.trim()) return true;
   toast(lang === 'th' ? 'ใส่ที่อยู่จัดส่งก่อนนะคะ แล้วกดจองอีกครั้ง' : 'Add your delivery address first, then book again');
   openProfile(true);
@@ -2046,6 +2053,7 @@ async function kycGate(tier) {
 
 // เปิดหน้าจับภาพ KYC (บัตร + เซลฟี่ถือบัตร) · ใช้ overlay เดียวกับ KYC เดิม
 async function openKycRequired() {
+  if (!requireCustomer('kyc')) return;
   const TH = lang === 'th';
   let consent = { body: '', version: '1' };
   try {
@@ -2290,6 +2298,7 @@ function closeCart() { $('#cartOverlay').classList.remove('open'); document.body
 // กดชุดในตะกร้า → กลับไปดูรายละเอียดชุดเต็ม (ปิดตะกร้าก่อน แล้วเปิด detail)
 function cartOpenDetail(id) { closeCart(); openDetail(id); }
 async function bookCartNow() {
+  if (!requireCustomer('cart')) return;
   const TH = lang === 'th';
   const date = $('#cartDate') && $('#cartDate').value;
   if (!date) { toast(TH ? 'เลือกวันที่ก่อนนะคะ' : 'Pick a date'); return; }
@@ -2428,6 +2437,7 @@ function openMenu() {
 function closeMenu() { $('#menuOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 
 function openProfile(onboard) {
+  if (!requireCustomer('profile')) return;
   const c = CUSTOMER;
   pSeason = c.my_color_season ||'winter';
   const dispName = c.name || c.display_name ||'';
@@ -2652,6 +2662,7 @@ function gThumb(g) {
 // จองคิว Personal Color · จ่ายในแอป (สร้าง topup 4,900 → เปิดหน้าจ่าย PromptPay + แนบสลิป)
 //   ยืนยันแล้ว confirm_payment ออกเครดิตเต็มจำนวน อายุ 90 วัน เข้ากระเป๋า LLOOP อัตโนมัติ
 async function bookPersonalColor() {
+  if (!requireCustomer('profile')) return;
   const th = lang === 'th';
   toast(th ? 'กำลังเปิดรายการ…' : 'Opening…');
   const r = await window.API.startPersonalColor();
@@ -2947,6 +2958,7 @@ function openFamily() { location.href = 'family.html'; }
 // กระเป๋า LLOOP — เครดิต + ระดับสมาชิก + ชวนเพื่อน รวมไว้ที่เดียว (ไม่ต้องมุดเข้าฟอร์มแก้โปรไฟล์)
 function closeWallet() { $('#walletOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 function openWallet(focusRef) {
+  if (!requireCustomer('wallet')) return;
   const c = CUSTOMER;
   const en = lang === 'en';
   // ยังไม่ล็อกอิน → โชว์ปุ่มเข้าระบบ LINE เด่น ๆ ด้านบน (กดแล้วเด้งเข้า LINE) แทนข้อความเฉย ๆ ที่กดไม่ได้
@@ -2975,6 +2987,7 @@ function openWallet(focusRef) {
 }
 
 async function openImpact() {
+  if (!requireCustomer('impact')) return;
   const im = CUSTOMER._impact || { rentals: 0, water_l: 0, co2_kg: 0, charity_thb: 0, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   let posts = []; try { posts = await window.API.recentCharity?.() || []; } catch (e) { /**/ }
   const en = lang === 'en';
@@ -3026,6 +3039,7 @@ function tasteBars(dict, labelFn, topN){
   }).join('');
 }
 async function openTaste(){
+  if (!requireCustomer('profile')) return;
   const en = lang==='en';
   const tt = CUSTOMER._taste || {};
   const n = tt.n || 0;
@@ -3234,6 +3248,7 @@ function renderMembership(sub, plans) {
   body.innerHTML = html;
 }
 async function subscribeClick(code, name) {
+  if (!requireCustomer('wallet')) return;
   const en = lang === 'en';
   try {
     // เริ่มสมัคร → ระบบจดแพ็กที่เลือก + คืน QR ให้จ่าย (เปิดสิทธิ์จริงเมื่อสลิปผ่าน)
@@ -3321,6 +3336,7 @@ function orderThumb(r) {
   return photo ? `background-image:url('${photo}')` : `background:${(g && g.bg) || '#E7E2DA'}`;
 }
 async function openOrders() {
+  if (!requireCustomer('orders')) return;
   $('#ordersOverlay').classList.add('open');
   document.body.style.overflow ='hidden';
   const sh = $('#ordersSheet');
@@ -3881,6 +3897,7 @@ function composeAddress() {
 }
 function closeProfile() { $('#pOverlay').classList.remove('open'); document.body.style.overflow =''; }
 async function saveProfile() {
+  if (!requireCustomer('profile')) return;
   // null-safe ทุกช่อง — ฟอร์มสั้น (onboard) ไม่ได้ render ทุกฟิลด์
   if ($('#pName')) CUSTOMER.name = $('#pName').value;
   if ($('#pHeight')) CUSTOMER.height_cm = +$('#pHeight').value || null;
@@ -3940,8 +3957,9 @@ function showLoginGate() {
   const gate = $('#loginGate'); if (!gate) return;
   if (lang === 'en') {
     const set = (id, tx) => { const e = $('#' + id); if (e) e.textContent = tx; };
-    set('lgTitle', 'Welcome');
-    set('lgSub', 'Sign in with LINE to browse pieces and use LLOOP Atelier');
+    set('lgTitle', 'Continue with LINE');
+    set('lgSub', 'Sign in to rent or access your account');
+    set('lgBack', 'Continue browsing');
     set('lgBtnLabel', 'Sign in with LINE');
     set('lgNote', 'Signing in means you accept the Terms of Service and Privacy Policy');
   }
@@ -3957,16 +3975,72 @@ function showLoginGate() {
       ${android ? `<a class="lgiab-btn alt" href="intent://wearlloop-dotcom.github.io/#Intent;scheme=https;end">${th ? 'เปิดใน Chrome' : 'Open in Chrome'}</a>` : ''}
       <div class="lgiab-hint">${th ? 'หรือแตะ ⋯ มุมขวาบน แล้วเลือก "เปิดในเบราว์เซอร์ภายนอก"' : 'Or tap ⋯ (top right) → "Open in external browser"'}</div>`;
   }
+  if (!gate.classList.contains('open')) {
+    loginGateFocus = document.activeElement;
+    loginGateOverflow = document.body.style.overflow;
+    loginGateInert = [...document.body.children].filter(el => el !== gate && !['SCRIPT', 'STYLE', 'LINK'].includes(el.tagName)).map(el => [el, el.inert]);
+    for (const [el] of loginGateInert) el.inert = true;
+  }
   gate.classList.add('open');
   document.body.style.overflow = 'hidden';
+  gate.querySelector('.lgbtn')?.focus();
 }
 // ===== ประตู LLOOP Atelier — บังคับล็อกอิน LINE + ยอมรับข้อตกลง ก่อนใช้ฟีเจอร์ AI =====
 function _isLoggedIn() {
-  if (CUSTOMER && CUSTOMER.id) return true;
-  // ใช้ isLoggedIn() แทน getIDToken() เพราะ token อาจหมดอายุแต่ getIDToken ยังคืนค่า
-  try { if (window.liff && liff.isLoggedIn && liff.isLoggedIn()) return true; } catch (_e) {}
+  if (window.CONFIG && CONFIG.USE_MOCK) return true;
+  if (!CUSTOMER || !CUSTOMER.id) return false;
+  try { return !!(window.liff && liff.isLoggedIn && liff.isLoggedIn()); }
+  catch (_e) { return false; }
+}
+// Login only on an intentional private action. Never replay a purchase automatically.
+function requireCustomer(go, garmentId) {
+  if (_isLoggedIn()) return true;
+  const garment = GARMENTS.find(g => g.id === garmentId);
+  const date = (go === 'cart' ? $('#cartDate') : $('#useDate'))?.value || gUseDate || '';
+  try {
+    sessionStorage.setItem('lloop_login_return', JSON.stringify({
+      at: Date.now(), go, code: garment?.code || '', date, duration: gDur
+    }));
+    sessionStorage.setItem('lloop_entered', '1');
+  } catch (_e) {}
+  saveCart();
+  showLoginGate();
   return false;
 }
+function restoreRentalChoice() {
+  if (!_isLoggedIn()) return;
+  try {
+    const intent = JSON.parse(sessionStorage.getItem('lloop_login_return') || 'null');
+    sessionStorage.removeItem('lloop_login_return');
+    if (!intent || Date.now() - intent.at < 0 || Date.now() - intent.at >= 1800000) return;
+    if ([1, 3, 5].includes(intent.duration)) gDur = intent.duration;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(intent.date || '')) gUseDate = intent.date;
+    // URL routing restores the sheet; the customer must confirm the booking themselves.
+  } catch (_e) {}
+}
+let loginGateFocus = null;
+let loginGateOverflow = '';
+let loginGateInert = [];
+function closeLoginGate() {
+  const gate = $('#loginGate');
+  if (!gate || !gate.classList.contains('open')) return;
+  gate.classList.remove('open');
+  document.body.style.overflow = loginGateOverflow;
+  for (const [el, inert] of loginGateInert) el.inert = inert;
+  loginGateInert = [];
+  try { sessionStorage.removeItem('lloop_login_return'); } catch (_e) {}
+  if (loginGateFocus && loginGateFocus.isConnected) loginGateFocus.focus();
+}
+document.addEventListener('keydown', event => {
+  const gate = $('#loginGate');
+  if (!gate || !gate.classList.contains('open')) return;
+  if (event.key === 'Escape') { event.preventDefault(); closeLoginGate(); return; }
+  if (event.key !== 'Tab') return;
+  const items = [...gate.querySelectorAll('button, a[href]')].filter(el => !el.disabled && el.getClientRects().length);
+  const first = items[0], last = items[items.length - 1];
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+});
 // ต้องยอมรับข้อตกลงเวอร์ชันล่าสุดก่อน → ถ้ายังไม่ยอมรับ เปิดให้กดยอมรับแล้วคืน false
 async function ensureTermsAccepted() {
   let terms; try { terms = await window.API.getTerms?.(); } catch (_e) { return true; } // ดึงไม่ได้ → ไม่บล็อกการใช้งาน
@@ -4071,6 +4145,7 @@ async function refreshUnread() {
   if (badge) { badge.hidden = n <= 0; badge.textContent = n > 9 ? '9+' : String(n); }
 }
 async function openInbox() {
+  if (!requireCustomer('profile')) return;
   const mask = $('#inboxMask'); if (!mask) return;
   mask.classList.add('open');
   const list = $('#inboxList');
@@ -4131,7 +4206,11 @@ async function boot() {
   setupHeroVideo();
   let s;
   try { s = await window.API.init(); }
-  catch (e) { console.warn('init failed, fallback to mock', e); s = window.MOCK; }
+  catch (e) {
+    console.warn('init failed', e);
+    s = CONFIG.USE_MOCK ? window.MOCK : { OCCASIONS: window.MOCK.OCCASIONS, CUSTOMER: {}, EVENT: null, GARMENTS: [], lineUid: null };
+    if (!CONFIG.USE_MOCK) toast(lang === 'th' ? 'โหลดชุดไม่สำเร็จ กรุณาลองใหม่' : 'Could not load the collection · please try again');
+  }
   OCCASIONS = s.OCCASIONS; CUSTOMER = s.CUSTOMER; EVENT = s.EVENT; GARMENTS = s.GARMENTS;
   normalizeGarmentColors();   // เติมเฉดสีให้ชุดที่ยังไม่ได้แท็กสี → แถบกรองสีเลือกได้จริง
   // "มาใหม่": ถ้าเกือบทั้งคลังเพิ่งลงพร้อมกัน (เปิดตัว/bulk import) → ยังไม่ถือว่ามีของใหม่ (กัน badge/ฟิลเตอร์ NEW ขึ้นทั้งคลัง)
@@ -4141,16 +4220,9 @@ async function boot() {
   // มีโปรไฟล์ (ไซส์/โทนสี/สไตล์จากพาร์ทเนอร์) เปิด"แนะนำสำหรับคุณ"เป็นค่าเริ่มต้น
   fForYou =!!(CUSTOMER.bust_in!= null || CUSTOMER.my_color_season || (CUSTOMER.style_profile && Object.keys(CUSTOMER.style_profile).length));
   // สถานะล็อกอิน: มี lineUid = ล็อกอินผ่าน LINE แล้ว → โชว์เครดิตจริง; ไม่มี = guest → โชว์ปุ่มเข้าสู่ระบบ
-  const loggedIn =!!s.lineUid;
-  // บังคับล็อกอินทั้งเว็บก่อนใช้งาน (เว้นโหมดเดโม/localhost) — guest เห็นแค่ประตูล็อกอิน ไม่โหลด/ไม่ track ต่อ
-  const _isLocalDev = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname);
-  if (!loggedIn && !(window.CONFIG && CONFIG.USE_MOCK) && !_isLocalDev) { showLoginGate(); return; }
-  // login ผ่านแต่โปรไฟล์โหลดไม่ได้ (เซสชันหมดอายุ) → อย่าโชว์เครดิต mock ให้เข้าใจผิด — ให้เข้าสู่ระบบใหม่
-  if (loggedIn && s.profileFailed && !(window.CONFIG && CONFIG.USE_MOCK) && !_isLocalDev) {
-    CUSTOMER = {};
-    toast(lang==='th'?'เซสชันหมดอายุ กดเข้าสู่ระบบอีกครั้งค่ะ':'Session expired, please sign in again');
-    showLoginGate(); return;
-  }
+  const loggedIn = !!(s.lineUid && CUSTOMER.id && !s.profileFailed);
+  // Browsing is public. A missing/expired customer profile is a guest, never a demo.
+  if (!loggedIn && !CONFIG.USE_MOCK) CUSTOMER = {};
   const loginBtn = $('#loginBtn'); const creditEl = document.querySelector('.credit');
   if (loginBtn) loginBtn.hidden = loggedIn;
   if (creditEl) creditEl.hidden =!loggedIn;
@@ -4169,7 +4241,7 @@ async function boot() {
       setTimeout(() => toast(lang === 'th' ? `ของขวัญวันเกิด: เช่าฟรี 1 ชุด (ถึง ฿${window.BDAY.voucher.value_cap}) เลือกชุดได้เลย` : `Birthday gift: 1 free rental · pick a dress`), 1200);
   } catch (e) { window.BDAY = null; }
   // เดโม: ยังไม่ได้ล็อกอินผ่าน LINE (เปิดบน localhost) ใส่ตัวอย่างให้หน้าผลกระทบดูมีชีวิต
-  if (!CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
+  if (CONFIG.USE_MOCK && !CUSTOMER._impact) CUSTOMER._impact = { rentals: 6, water_l: 16200, co2_kg: 36, charity_thb: 126, charity_name: 'โครงการเสื้อผ้าเพื่อน้อง' };
   // เครดิตใกล้หมดอายุ: โชว์ banner กระตุ้นให้กลับมาใช้
   // กันเหนียว: รีเซ็ตซ่อน+ล้างข้อความก่อนเสมอ แล้วโชว์เฉพาะเมื่อมีเครดิตจริง + ข้อความไม่ว่าง
   const _eb = $('#expiryBanner'), _em = $('#expiryMsg');
@@ -4209,8 +4281,8 @@ async function boot() {
   if (window.renderSpotlight) window.renderSpotlight(GARMENTS);
   const vd = $('#venueDate'); if (vd) { vd.min = todayStr(); vd.value = gUseDate || ''; }
   refreshStylistQuota();
-  await maybeShowTerms();
-  maybeOnboard();
+  if (loggedIn || CONFIG.USE_MOCK) { await maybeShowTerms(); maybeOnboard(); }
+  restoreRentalChoice();
   routeDeepLink();
   applyPendingReferral();
 }
