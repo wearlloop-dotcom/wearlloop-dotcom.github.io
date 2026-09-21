@@ -75,11 +75,12 @@ window.API = (function () {
     const c = client();
     // 1) LINE login — ต้องไม่ทำให้แคตตาล็อกพัง (ถ้า LIFF/redirect error ก็โหลดชุดแบบ anon)
     let profile = null;
-    try { profile = await window.LiffAuth.login(); } catch (e) { console.warn('LLOOP: LIFF login failed · catalog only', e); }
+    try { profile = await window.LiffAuth.login({ allowRedirect: false }); } catch (e) { console.warn('LLOOP: LIFF login failed · catalog only', e); }
     lineUid = profile && profile.userId;
 
     // 2) upsert ลูกค้าจาก UID + log touchpoint (remarketing audience)
-    let customer = window.MOCK.CUSTOMER;
+    // Production guests must never inherit the demo identity, credit or preferences.
+    let customer = {};
     // ทุกขั้นตอน login/โปรไฟล์ "ต้องไม่ทำให้แคตตาล็อกพัง" — แยก try/catch ต่อขั้น (เช่น anon write โดนบล็อก me_profile ยังทำงาน)
     if (lineUid) {
       try { await c.from('customers').upsert(
@@ -92,7 +93,7 @@ window.API = (function () {
         const { data } = window.meRpc
           ? await window.meRpc('me_profile', {})
           : await c.from('customers').select('*').eq('line_uid', lineUid).single();
-        if (data) customer = data;
+        if (data && data.id) customer = data;
         // สร้าง/ดึงรหัสนัดสไตลิสต์ (ให้พาร์ทเนอร์ค้นเจอ)
         if (customer.id &&!customer.link_code) {
           const { data: code } = await window.meRpc('ensure_link_code', { p_customer: customer.id });
